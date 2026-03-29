@@ -1,13 +1,7 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Consumables') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12" x-data="{
-        raidDays: 3,
-        numRaiders: 20,
+    <div x-data="{
+        raidDays: {{ count($static?->raid_days ?? [1, 2, 3]) }},
+        numRaiders: {{ $total_member_slots }},
         individualPotionPrice: {{ $individualPotionPrice }},
         individualFlaskPrice: {{ $individualFlaskPrice }},
         recipes: {{ $recipes->map(fn($r) => ['name' => $r->name, 'cost' => $r->crafting_cost, 'quantity' => $r->default_quantity, 'icon' => $r->icon])->toJson() }},
@@ -15,114 +9,115 @@
             return this.recipes.reduce((sum, r) => sum + (r.cost * r.quantity * this.raidDays), 0);
         },
         get guildTaxPerRaider() {
-            return this.totalCost / (this.numRaiders || 1);
+            return Math.ceil(this.totalCost / (this.numRaiders || 1));
         },
         get individualCostPerRaider() {
-            const potionsPerWeek = 20 * this.raidDays;
-            const flasksPerWeek = 2 * this.raidDays;
-            return (potionsPerWeek * this.individualPotionPrice) + (flasksPerWeek * this.individualFlaskPrice);
+            // AH Cost logic:
+            // Voidlight Potion Cauldron (ID: 435133) provides 20 potions per person
+            // Cauldron of Sin'dorei Flasks (ID: 435132) provides 2 flasks per person
+            // Hearty Harandar Celebration (ID: 411831) provides 1 food buff
+
+            const potionRecipe = this.recipes.find(r => r.name.includes('Potion Cauldron'));
+            const flaskRecipe = this.recipes.find(r => r.name.includes('Sin\'dorei Flasks'));
+            const foodRecipe = this.recipes.find(r => r.name.includes('Hearty Harandar'));
+
+            const potionsPerCauldron = 20;
+            const flasksPerCauldron = 2;
+            const foodPerFeast = 1; // Assuming 1 feast used per food buff needed (standard)
+
+            const potionsNeeded = (potionRecipe ? potionRecipe.quantity : 1) * potionsPerCauldron;
+            const flasksNeeded = (flaskRecipe ? flaskRecipe.quantity : 1) * flasksPerCauldron;
+            const foodNeeded = (foodRecipe ? foodRecipe.quantity : 4) * foodPerFeast;
+
+            const weeklyPotions = potionsNeeded * this.raidDays;
+            const weeklyFlasks = flasksNeeded * this.raidDays;
+            const weeklyFood = foodNeeded * this.raidDays;
+
+            const foodPrice = 500 * 10000; // 500g per food estimate
+
+            return (weeklyPotions * this.individualPotionPrice) +
+                   (weeklyFlasks * this.individualFlaskPrice) +
+                   (weeklyFood * foodPrice);
         },
         get savings() {
             return this.individualCostPerRaider - this.guildTaxPerRaider;
         },
         formatGold(copper) {
-            return Math.floor(copper / 10000);
-        },
-        formatSilver(copper) {
-            return Math.floor((copper % 10000) / 100);
-        },
-        formatCopper(copper) {
-            return Math.floor(copper % 100);
+            return Math.floor(copper / 10000).toLocaleString();
         }
     }">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="mb-8">
-                    <h3 class="text-2xl font-bold mb-4">Weekly Raid Settings</h3>
-                    <div class="flex flex-wrap items-center gap-6">
-                        <div class="flex items-center space-x-4">
-                            <label for="raidDays" class="font-medium">Raid Days per Week:</label>
-                            <input type="number" id="raidDays" x-model.number="raidDays" min="1" max="7" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-20">
+        <header class="mb-6 flex items-end justify-between">
+            <div>
+                <span class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">Treasury</span>
+                <h1 class="font-headline text-3xl font-extrabold tracking-tight">Consumables <span class="text-primary font-normal text-lg ml-2">/ Weekly Planning</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                @if(session('success'))
+                    <span class="text-success-neon text-xs font-bold animate-fade-out">{{ session('success') }}</span>
+                @endif
+                <button type="submit" form="consumables-form" class="bg-primary hover:bg-primary-dim text-on-primary px-6 py-2 rounded-lg font-headline font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Save Configuration
+                </button>
+            </div>
+        </header>
+
+        <form id="consumables-form" action="{{ route('consumables.store') }}" method="POST">
+            @csrf
+            <div class="bg-surface-container-low p-6 rounded-xl border border-white/5">
+                <!-- Static Info (Read Only from Settings) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-surface-container-lowest/50 p-4 rounded-lg border border-white/5">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Raid Days (from Settings)</div>
+                        <div class="text-xl font-headline font-black text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm">calendar_month</span>
+                            {{ count($static?->raid_days ?? []) }} Days / Week
+                            <a href="{{ route('statics.settings.schedule', $static) }}" class="ml-auto text-[10px] text-primary hover:underline uppercase tracking-widest">Edit</a>
                         </div>
-                        <div class="flex items-center space-x-4">
-                            <label for="numRaiders" class="font-medium">Number of Raiders:</label>
-                            <input type="number" id="numRaiders" x-model.number="numRaiders" min="1" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-24">
+                    </div>
+                    <div class="bg-surface-container-lowest/50 p-4 rounded-lg border border-white/5">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Members</div>
+                        <div class="text-xl font-headline font-black text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm">groups</span>
+                            {{ $active_member_count }} / {{ $total_member_slots }} Active Raiders
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <h3 class="text-xl font-bold mb-4">Consumables</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <template x-for="(recipe, index) in recipes" :key="index">
-                            <div class="border rounded-lg p-4 bg-gray-50">
-                                <div class="flex items-center mb-4">
-                                    <img :src="recipe.icon" :alt="recipe.name" class="w-10 h-10 mr-3 rounded" x-show="recipe.icon">
-                                    <span class="font-bold text-lg" x-text="recipe.name"></span>
-                                </div>
-                                <div class="mb-4">
-                                    <span class="text-sm text-gray-600 block">Crafting Cost (per unit):</span>
-                                    <span class="text-yellow-600 font-bold" x-text="formatGold(recipe.cost) + 'g'"></span>
-                                    <span class="text-gray-400 font-bold" x-text="formatSilver(recipe.cost) + 's'"></span>
-                                    <span class="text-orange-400 font-bold" x-text="formatCopper(recipe.cost) + 'c'"></span>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity per Raid Day:</label>
-                                    <input type="number" x-model.number="recipe.quantity" min="0" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full">
-                                </div>
-                            </div>
-                        </template>
-                    </div>
+                <!-- Recipe Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    @foreach($recipes as $index => $recipe)
+                        <x-consumable-card
+                            :recipe="$recipe"
+                            :icon="$recipe->display_icon"
+                            :icon_url="$recipe->display_icon_url"
+                            :color="$recipe->display_color"
+                            x-model.number="recipes[{{ $index }}].quantity"
+                            name="quantities[{{ $recipe->name }}]"
+                        />
+                    @endforeach
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <div class="flex flex-col items-center mb-8">
-                        <h3 class="text-xl font-bold mb-2">Grand Total Weekly Cost</h3>
-                        <div class="text-3xl font-black">
-                            <span class="text-yellow-600" x-text="formatGold(totalCost) + 'g'"></span>
-                            <span class="text-gray-400" x-text="formatSilver(totalCost) + 's'"></span>
-                            <span class="text-orange-400" x-text="formatCopper(totalCost) + 'c'"></span>
-                        </div>
+                <!-- Calculations -->
+                <div class="mt-8 pt-8 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Grand Total Weekly Cost</div>
+                        <div class="text-2xl font-headline font-black text-white mt-1"><span x-text="formatGold(totalCost)"></span> <span class="text-tertiary-dim text-sm uppercase">Gold</span></div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div class="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-200">
-                            <h4 class="text-lg font-bold mb-4 text-center">Guild Tax (Per Player)</h4>
-                            <div class="text-2xl font-bold text-center">
-                                <span class="text-yellow-600" x-text="formatGold(guildTaxPerRaider) + 'g'"></span>
-                                <span class="text-gray-400" x-text="formatSilver(guildTaxPerRaider) + 's'"></span>
-                                <span class="text-orange-400" x-text="formatCopper(guildTaxPerRaider) + 'c'"></span>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-200">
-                            <h4 class="text-lg font-bold mb-1 text-center">AH Cost (Per Player)</h4>
-                            <p class="text-xs text-gray-500 text-center mb-4">(Assumes 2 flasks & 20 pots per raid day)</p>
-                            <div class="text-2xl font-bold text-center">
-                                <span class="text-yellow-600" x-text="formatGold(individualCostPerRaider) + 'g'"></span>
-                                <span class="text-gray-400" x-text="formatSilver(individualCostPerRaider) + 's'"></span>
-                                <span class="text-orange-400" x-text="formatCopper(individualCostPerRaider) + 'c'"></span>
-                            </div>
-                        </div>
+                    <div class="md:border-x border-white/5 md:px-6">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Guild Tax (Per Player)</div>
+                        <div class="text-xl font-headline font-bold text-white mt-1"><span x-text="formatGold(guildTaxPerRaider)"></span> <span class="text-tertiary-dim text-xs">G</span></div>
                     </div>
-
-                    <div class="mt-8 text-center">
-                        <template x-if="savings > 0">
-                            <div class="inline-block bg-green-100 text-green-800 px-6 py-3 rounded-full font-bold text-xl border-2 border-green-200">
-                                You save
-                                <span x-text="formatGold(savings) + 'g ' + formatSilver(savings) + 's ' + formatCopper(savings) + 'c'"></span>
-                                by raiding with the Guild!
-                            </div>
-                        </template>
-                        <template x-if="savings <= 0">
-                            <div class="inline-block bg-orange-100 text-orange-800 px-6 py-3 rounded-full font-bold text-xl border-2 border-orange-200">
-                                AH is currently cheaper by
-                                <span x-text="formatGold(Math.abs(savings)) + 'g ' + formatSilver(Math.abs(savings)) + 's ' + formatCopper(Math.abs(savings)) + 'c'"></span>
-                            </div>
-                        </template>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">AH Cost (Per Player)</div>
+                        <div class="text-xl font-headline font-bold text-error-dim mt-1"><span x-text="formatGold(individualCostPerRaider)"></span> <span class="text-tertiary-dim text-xs">G</span></div>
+                        <div class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded bg-success-neon/10 text-success-neon text-[9px] font-bold uppercase tracking-widest" x-show="savings > 0">
+                            <span class="material-symbols-outlined text-[12px]">trending_down</span>
+                            You save <span x-text="formatGold(savings)"></span> gold/week
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </x-app-layout>

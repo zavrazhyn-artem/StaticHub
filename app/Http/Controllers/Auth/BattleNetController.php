@@ -32,7 +32,9 @@ class BattleNetController extends Controller
      */
     public function redirect()
     {
-        return Socialite::driver('battlenet')->redirect();
+        return Socialite::driver('battlenet')
+            ->scopes(['wow.profile'])
+            ->redirect();
     }
 
     /**

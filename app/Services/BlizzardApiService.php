@@ -113,6 +113,96 @@ class BlizzardApiService
     }
 
     /**
+     * Get the authenticated user's WoW characters.
+     */
+    public function getUserCharacters(string $userAccessToken): array
+    {
+        $response = Http::withToken($userAccessToken)
+            ->get("https://{$this->region}.api.blizzard.com/profile/user/wow?namespace=profile-{$this->region}&locale=en_US");
+
+        if ($response->failed()) {
+            return [];
+        }
+
+        $accounts = $response->json('wow_accounts', []);
+        $allCharacters = [];
+
+        foreach ($accounts as $account) {
+            $characters = $account['characters'] ?? [];
+            foreach ($characters as $character) {
+                // Filter only level 80 characters (Midnight max level).
+                if (($character['level'] ?? 0) >= 80) {
+                    $allCharacters[] = [
+                        'id' => $character['id'],
+                        'name' => $character['name'],
+                        'realm' => $character['realm']['name'],
+                        'realm_slug' => $character['realm']['slug'],
+                        'playable_class' => $character['playable_class']['name'],
+                        'playable_race' => $character['playable_race']['name'],
+                        'level' => $character['level'],
+                        // Item level and avatar might require additional profile calls per character if not in this summary,
+                        // but let's see if they are available.
+                    ];
+                }
+            }
+        }
+
+        return $allCharacters;
+    }
+
+    /**
+     * Get the profile summary for a character.
+     */
+    public function getCharacterProfileSummary(string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}?namespace=profile-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)
+            ->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return [
+            'equipped_item_level' => $response->json('equipped_item_level'),
+            'average_item_level' => $response->json('average_item_level'),
+            'active_spec' => $response->json('active_spec.name'),
+            'faction' => $response->json('faction.type'),
+        ];
+    }
+
+    /**
+     * Fetch character avatar from Blizzard API.
+     */
+    public function getCharacterAvatar(string $realmSlug, string $characterName): ?string
+    {
+        $token = $this->getAccessToken();
+        $characterNameLower = strtolower($characterName);
+
+        $response = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "profile-{$this->region}"])
+            ->get("https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterNameLower}/character-media");
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        $assets = $response->json('assets', []);
+        foreach ($assets as $asset) {
+            if ($asset['key'] === 'avatar') {
+                return $asset['value'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Fetch all realms for the current region.
      */
     public function getRealms(): array

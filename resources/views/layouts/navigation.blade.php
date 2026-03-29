@@ -12,9 +12,14 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                    @if(Auth::user()->statics->isNotEmpty())
+                        <x-nav-link :href="route('statics.dashboard', Auth::user()->statics->first()->id)" :active="request()->routeIs('statics.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('statics.roster', Auth::user()->statics->first()->id)" :active="request()->routeIs('statics.roster')">
+                            {{ __('Roster') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('consumables.index')" :active="request()->routeIs('consumables.*')">
                         {{ __('Consumables') }}
                     </x-nav-link>
@@ -39,6 +44,10 @@
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('characters.index')">
+                            {{ __('Characters') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -73,6 +82,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->statics->isNotEmpty())
+                <x-responsive-nav-link :href="route('statics.roster', Auth::user()->statics->first()->id)" :active="request()->routeIs('statics.roster')">
+                    {{ __('Roster') }}
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('consumables.index')" :active="request()->routeIs('consumables.*')">
                 {{ __('Consumables') }}
             </x-responsive-nav-link>
@@ -88,6 +102,10 @@
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('characters.index')">
+                    {{ __('Characters') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

@@ -1,50 +1,77 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>StaticHub - Manage your WoW Raid Static</title>
+        <title>StaticHub - Ethereal Command</title>
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
-        <!-- Styles / Scripts -->
-        @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @endif
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-gray-900 text-white font-sans antialiased">
-        <div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-            <div class="text-center max-w-2xl">
-                <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-4">
-                    Welcome to <span class="text-blue-500">StaticHub</span>
-                </h1>
+    <body class="bg-background text-on-background min-h-screen arcane-bg antialiased flex flex-col items-center justify-center p-6 overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]"></div>
+        </div>
 
-                <p class="text-xl text-gray-400 mb-10">
-                    Manage your WoW raid static, guild taxes, and roster all in one place.
-                </p>
-
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="inline-flex items-center px-8 py-3 bg-blue-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-lg shadow-blue-500/20">
-                            Go to Dashboard
-                        </a>
-                    @else
-                        <a href="{{ url('/auth/battlenet/redirect') }}" class="inline-flex items-center gap-3 px-8 py-3 bg-[#00aeff] border border-transparent rounded-md font-bold text-sm text-white uppercase tracking-widest hover:bg-[#008ccf] focus:outline-none focus:ring-2 focus:ring-[#00aeff] focus:ring-offset-2 transition ease-in-out duration-150 shadow-lg shadow-[#00aeff]/20">
-                            <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M11.996 0C5.371 0 0 5.371 0 11.996s5.371 11.996 11.996 11.996 11.996-5.371 11.996-11.996S18.621 0 11.996 0zm3.877 15.223h-2.183l-1.354-2.825-1.354 2.825H7.798l2.257-4.148L7.798 6.927h2.183l1.354 2.825 1.354-2.825h2.183l-2.257 4.148 2.257 4.148z"/>
-                            </svg>
-                            Login with Battle.net
-                        </a>
-                    @endauth
+        <div class="relative z-10 text-center max-w-4xl w-full space-y-12">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-4">
+                    <span class="w-2 h-2 bg-success-neon rounded-full animate-pulse"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">System Online: Midnight S1</span>
                 </div>
+                <h1 class="text-6xl md:text-8xl font-black text-white uppercase tracking-tighter italic leading-none">
+                    Static <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">Hub</span>
+                </h1>
+                <p class="text-on-surface-variant font-medium text-lg max-w-xl mx-auto uppercase tracking-widest text-[12px]">
+                    Tactical Command Interface for Azeroth's Elite Raid Groups
+                </p>
             </div>
 
-            <footer class="mt-20 text-gray-500 text-sm">
-                &copy; {{ date('Y') }} StaticHub. Built for Azeroth.
-            </footer>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="group relative px-12 py-4 bg-primary text-on-primary font-headline font-black text-sm uppercase tracking-[0.2em] rounded-sm transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.1)]">
+                        <span class="relative z-10 flex items-center gap-3">
+                            Enter Command Center
+                            <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+                        </span>
+                    </a>
+                @else
+                    <a href="{{ url('/auth/battlenet/redirect') }}" class="group relative px-12 py-4 bg-[#00aeff] text-white font-headline font-black text-sm uppercase tracking-[0.2em] rounded-sm transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(0,174,255,0.3)]">
+                        <span class="relative z-10 flex items-center gap-3">
+                            <span class="material-symbols-outlined text-xl">login</span>
+                            Authorize Battle.net
+                        </span>
+                    </a>
+                @endauth
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-24 px-4">
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 backdrop-blur-md">
+                    <span class="material-symbols-outlined text-primary text-3xl mb-4">groups</span>
+                    <h3 class="font-headline font-bold text-white uppercase tracking-widest text-xs mb-2">Roster Tactical</h3>
+                    <p class="text-[10px] text-on-surface-variant leading-relaxed uppercase tracking-wider">Complete visibility of your raid force, mains and alts synchronized via API.</p>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 backdrop-blur-md">
+                    <span class="material-symbols-outlined text-cyan-400 text-3xl mb-4">inventory_2</span>
+                    <h3 class="font-headline font-bold text-white uppercase tracking-widest text-xs mb-2">Logistics Hub</h3>
+                    <p class="text-[10px] text-on-surface-variant leading-relaxed uppercase tracking-wider">Live AH price tracking for raid consumables and cost-efficiency calculators.</p>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 backdrop-blur-md">
+                    <span class="material-symbols-outlined text-success-neon text-3xl mb-4">payments</span>
+                    <h3 class="font-headline font-bold text-white uppercase tracking-widest text-xs mb-2">Guild Ledger</h3>
+                    <p class="text-[10px] text-on-surface-variant leading-relaxed uppercase tracking-wider">Transparent treasury management and automated guild tax calculation systems.</p>
+                </div>
+            </div>
         </div>
+
+        <footer class="fixed bottom-8 left-0 w-full text-center z-10">
+            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ date('Y') }} SHUB_SYSTEMS // PROTOCOL_V1</p>
+        </footer>
     </body>
 </html>
