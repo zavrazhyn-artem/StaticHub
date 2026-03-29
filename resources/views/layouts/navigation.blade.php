@@ -23,6 +23,9 @@
                     <x-nav-link :href="route('consumables.index')" :active="request()->routeIs('consumables.*')">
                         {{ __('Consumables') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('personal-reports')" :active="request()->routeIs('personal-reports')">
+                        {{ __('Personal Intelligence') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -48,6 +51,10 @@
 
                         <x-dropdown-link :href="route('characters.index')">
                             {{ __('Characters') }}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('personal-reports')">
+                            {{ __('Personal Intelligence') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->

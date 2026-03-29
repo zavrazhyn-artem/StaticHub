@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -85,8 +86,27 @@ export default {
                 "label": ["Space Grotesk"]
             },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            typography: (theme) => ({
+                tactical: {
+                    css: {
+                        '--tw-prose-body': theme('colors.gray[300]'),
+                        '--tw-prose-headings': theme('colors.amber[500]'),
+                        '--tw-prose-links': theme('colors.amber[400]'),
+                        '--tw-prose-bold': theme('colors.gray[100]'),
+                        '--tw-prose-counters': theme('colors.amber[500]'),
+                        '--tw-prose-bullets': theme('colors.amber[500]'),
+                        '--tw-prose-hr': theme('colors.gray[700]'),
+                        '--tw-prose-quotes': theme('colors.gray[400]'),
+                        '--tw-prose-quote-borders': theme('colors.amber[500]'),
+                        h1: { textTransform: 'uppercase', letterSpacing: '0.05em' },
+                        h2: { textTransform: 'uppercase', letterSpacing: '0.05em' },
+                        h3: { textTransform: 'uppercase', letterSpacing: '0.05em' },
+                        a: { textDecoration: 'none', '&:hover': { color: theme('colors.amber[300]') } },
+                    },
+                },
+            }),
         },
     },
 
-    plugins: [forms],
+    plugins: [forms, typography],
 };

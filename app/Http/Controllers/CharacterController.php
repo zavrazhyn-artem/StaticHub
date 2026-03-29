@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Character;
 use App\Models\User;
+use App\Models\PersonalTacticalReport;
 use App\Services\CharacterSyncService;
 use App\Services\RosterService;
 use Illuminate\Http\Request;
@@ -49,6 +50,19 @@ class CharacterController extends Controller
         $characters = $query->get();
 
         return view('characters.index', compact('characters', 'statics', 'static'));
+    }
+
+    public function personalReports()
+    {
+        $user = Auth::user();
+        $characterIds = $user->characters()->pluck('id');
+
+        $reports = PersonalTacticalReport::whereIn('character_id', $characterIds)
+            ->with(['tacticalReport.raidEvent', 'character'])
+            ->latest()
+            ->get();
+
+        return view('characters.personal_reports', compact('reports'));
     }
 
     /**

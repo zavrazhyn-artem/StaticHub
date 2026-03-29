@@ -49,4 +49,13 @@ return [
         'client_secret' => env('DISCORD_CLIENT_SECRET'),
         'redirect' => env('DISCORD_REDIRECT_URI'),
     ],
+
+    'wcl' => [
+        'public_key' => env('WCL_CLIENT_ID'),
+        'private_key' => env('WCL_CLIENT_SECRET'),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
 ];

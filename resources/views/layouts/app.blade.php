@@ -22,13 +22,48 @@
         <header class="fixed top-0 z-50 w-full flex justify-between items-center px-6 py-4 bg-[#0e0e10]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
             <div class="flex items-center gap-8">
                 <div class="text-xl font-black text-cyan-400 uppercase tracking-widest font-headline">Static Hub</div>
-                <nav class="hidden md:flex gap-6 items-center">
-                    <a class="font-headline font-bold tracking-tight {{ request()->routeIs('statics.dashboard') ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white transition-colors' }}" href="{{ $static ? route('statics.dashboard', $static->id) : '#' }}">Dashboard</a>
-                    <a class="font-headline font-bold tracking-tight {{ request()->routeIs('statics.roster') ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white transition-colors' }}" href="{{ $static ? route('statics.roster', $static->id) : '#' }}">Roster</a>
-                    <a class="font-headline font-bold tracking-tight {{ request()->routeIs('consumables.*') ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white transition-colors' }}" href="{{ route('consumables.index') }}">Consumables</a>
-                    <a class="font-headline font-bold tracking-tight {{ request()->routeIs('schedule.*') ? 'text-cyan-400 border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white transition-colors' }}" href="{{ route('schedule.index') }}">Schedule</a>
-                    <a class="font-headline font-bold tracking-tight text-gray-400 hover:text-white transition-colors" href="#">Loot</a>
-                </nav>
+                @if($static)
+                    <div class="hidden md:flex items-center gap-4 ml-4">
+                        <button onclick="handleInviteClick({{ $static->id }})"
+                                class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
+                            <span class="material-symbols-outlined text-sm">person_add</span>
+                            <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Invite to Static</span>
+                        </button>
+                        <div id="invite-toast" class="hidden fixed bottom-6 right-6 bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce font-headline text-xs font-bold uppercase tracking-widest z-[100]">
+                            Invite Link Copied!
+                        </div>
+                    </div>
+
+                    <script>
+                        async function handleInviteClick(staticId) {
+                            try {
+                                const response = await fetch(`/statics/${staticId}/invite`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                    }
+                                });
+                                const data = await response.json();
+                                if (data.link) {
+                                    copyToClipboard(data.link);
+                                }
+                            } catch (error) {
+                                console.error('Error generating invite link:', error);
+                            }
+                        }
+
+                        function copyToClipboard(link) {
+                            navigator.clipboard.writeText(link).then(() => {
+                                const toast = document.getElementById('invite-toast');
+                                toast.classList.remove('hidden');
+                                setTimeout(() => {
+                                    toast.classList.add('hidden');
+                                }, 3000);
+                            });
+                        }
+                    </script>
+                @endif
             </div>
             <div class="flex items-center gap-4">
                 <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
@@ -120,6 +155,22 @@
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">payments</span>
                         <span class="font-headline text-xs font-bold uppercase tracking-widest">Treasury</span>
+                    </a>
+
+                    <a href="{{ route('statics.logs.index', $static->id) }}"
+                       class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-amber-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                        <span class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-amber-500' : 'group-hover:text-amber-500 transition-colors' }}">terminal</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Intelligence</span>
+                    </a>
+
+                    <div class="pt-4 pb-2 px-4">
+                        <div class="h-px bg-white/5 w-full"></div>
+                    </div>
+
+                    <a href="{{ route('statics.settings.schedule', $static->id) }}"
+                       class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                        <span class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Settings</span>
                     </a>
                 </div>
             @else

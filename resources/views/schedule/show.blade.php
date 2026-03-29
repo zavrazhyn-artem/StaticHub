@@ -86,82 +86,148 @@
             </div>
         @endif
 
-        <!-- Roster Breakdown (The Wowaudit Grid) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            @php
-                $roles = [
-                    'tank' => ['label' => 'Tanks', 'icon' => 'shield', 'color' => 'text-blue-400', 'bg' => 'bg-blue-400/5'],
-                    'heal' => ['label' => 'Healers', 'icon' => 'medical_services', 'color' => 'text-success-neon', 'bg' => 'bg-success-neon/5'],
-                    'mdps' => ['label' => 'Melee DPS', 'icon' => 'swords', 'color' => 'text-error-dim', 'bg' => 'bg-error-dim/5'],
-                    'rdps' => ['label' => 'Ranged DPS', 'icon' => 'magic_button', 'color' => 'text-purple-400', 'bg' => 'bg-purple-400/5'],
-                ];
-            @endphp
+        <!-- Analysis Tabs -->
+        <div x-data="{ tab: 'roster' }" class="space-y-6">
+            <div class="flex items-center gap-4 border-b border-white/10">
+                <button @click="tab = 'roster'" :class="tab === 'roster' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-white'" class="pb-4 px-2 border-b-2 font-headline text-[10px] font-black uppercase tracking-[0.2em] transition-all">
+                    Roster Breakdown
+                </button>
+                @if($event->ai_analysis)
+                    <button @click="tab = 'analysis'" :class="tab === 'analysis' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-white'" class="pb-4 px-2 border-b-2 font-headline text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">psychology</span>
+                        Tactical Analysis
+                    </button>
+                @endif
+                @if($event->wcl_report_id)
+                    <a href="https://www.warcraftlogs.com/reports/{{ $event->wcl_report_id }}" target="_blank" class="pb-4 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-[#ff7d0a] font-headline text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">analytics</span>
+                        Warcraft Logs
+                    </a>
+                @endif
+            </div>
 
-            @foreach($roles as $roleKey => $roleData)
-                <div class="bg-surface-container border border-white/5 rounded-xl overflow-hidden flex flex-col min-h-[400px]">
-                    <div class="px-5 py-3 {{ $roleData['bg'] }} border-b border-white/5 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined {{ $roleData['color'] }} text-lg">{{ $roleData['icon'] }}</span>
-                            <span class="font-headline text-xs font-black uppercase tracking-widest text-white">{{ $roleData['label'] }}</span>
-                        </div>
-                        <span class="bg-white/10 px-2 py-0.5 rounded text-[10px] font-black text-white">{{ $mainRoster[$roleKey]->count() }}</span>
-                    </div>
+            <div x-show="tab === 'roster'" class="space-y-8">
+                <!-- Roster Breakdown (The Wowaudit Grid) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @php
+                        $roles = [
+                            'tank' => ['label' => 'Tanks', 'icon' => 'shield', 'color' => 'text-blue-400', 'bg' => 'bg-blue-400/5'],
+                            'heal' => ['label' => 'Healers', 'icon' => 'medical_services', 'color' => 'text-success-neon', 'bg' => 'bg-success-neon/5'],
+                            'mdps' => ['label' => 'Melee DPS', 'icon' => 'swords', 'color' => 'text-error-dim', 'bg' => 'bg-error-dim/5'],
+                            'rdps' => ['label' => 'Ranged DPS', 'icon' => 'magic_button', 'color' => 'text-purple-400', 'bg' => 'bg-purple-400/5'],
+                        ];
+                    @endphp
 
-                    <div class="p-2 space-y-1 flex-1 overflow-y-auto">
-                        @forelse($mainRoster[$roleKey] as $character)
-                            @php
-                                $status = $character->pivot->status;
-                                $isPending = $status === 'pending';
-                                $isLate = $status === 'late';
-                                $isPresent = $status === 'present';
-                            @endphp
-                            <div class="flex items-center justify-between p-2 rounded hover:bg-white/5 transition-colors group {{ $isPending ? 'opacity-40' : '' }}">
-                                <div class="flex items-center gap-3">
-                                    <div class="relative">
-                                        <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded object-cover border border-white/10 {{ $isPending ? 'grayscale' : '' }}">
-                                        @if($isLate)
-                                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-surface-container flex items-center justify-center" title="Late">
-                                                <span class="material-symbols-outlined text-[8px] text-black font-bold">schedule</span>
+                    @foreach($roles as $roleKey => $roleData)
+                        <div class="bg-surface-container border border-white/5 rounded-xl overflow-hidden flex flex-col min-h-[400px]">
+                            <div class="px-5 py-3 {{ $roleData['bg'] }} border-b border-white/5 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined {{ $roleData['color'] }} text-lg">{{ $roleData['icon'] }}</span>
+                                    <span class="font-headline text-xs font-black uppercase tracking-widest text-white">{{ $roleData['label'] }}</span>
+                                </div>
+                                <span class="bg-white/10 px-2 py-0.5 rounded text-[10px] font-black text-white">{{ $mainRoster[$roleKey]->count() }}</span>
+                            </div>
+
+                            <div class="p-2 space-y-1 flex-1 overflow-y-auto">
+                                @forelse($mainRoster[$roleKey] as $character)
+                                    @php
+                                        $status = $character->pivot->status;
+                                        $isPending = $status === 'pending';
+                                        $isLate = $status === 'late';
+                                        $isPresent = $status === 'present';
+                                    @endphp
+                                    <div class="flex items-center justify-between p-2 rounded hover:bg-white/5 transition-colors group {{ $isPending ? 'opacity-40' : '' }}">
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative">
+                                                <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded object-cover border border-white/10 {{ $isPending ? 'grayscale' : '' }}">
+                                                @if($isLate)
+                                                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-surface-container flex items-center justify-center" title="Late">
+                                                        <span class="material-symbols-outlined text-[8px] text-black font-bold">schedule</span>
+                                                    </div>
+                                                @endif
+                                                @if($isPresent)
+                                                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-success-neon rounded-full border-2 border-surface-container flex items-center justify-center" title="Present">
+                                                        <span class="material-symbols-outlined text-[8px] text-black font-bold">check</span>
+                                                    </div>
+                                                @endif
+                                                @if($isPending)
+                                                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-white/20 rounded-full border-2 border-surface-container flex items-center justify-center" title="Pending">
+                                                        <span class="material-symbols-outlined text-[8px] text-white/50 font-bold">question_mark</span>
+                                                    </div>
+                                                @endif
                                             </div>
-                                        @endif
-                                        @if($isPresent)
-                                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-success-neon rounded-full border-2 border-surface-container flex items-center justify-center" title="Present">
-                                                <span class="material-symbols-outlined text-[8px] text-black font-bold">check</span>
+                                            <div>
+                                                <div class="text-xs font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }}">
+                                                    {{ $character->name }}
+                                                </div>
+                                                <div class="text-[10px] text-on-surface-variant font-medium flex items-center gap-1">
+                                                    {{ $character->active_spec ?? $character->playable_class }}
+                                                    @if($isPending)
+                                                        <span class="text-[8px] font-black uppercase tracking-tighter opacity-50">(Pending)</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        @endif
-                                        @if($isPending)
-                                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-white/20 rounded-full border-2 border-surface-container flex items-center justify-center" title="Pending">
-                                                <span class="material-symbols-outlined text-[8px] text-white/50 font-bold">question_mark</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <div class="text-xs font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }}">
-                                            {{ $character->name }}
                                         </div>
-                                        <div class="text-[10px] text-on-surface-variant font-medium flex items-center gap-1">
-                                            {{ $character->active_spec ?? $character->playable_class }}
-                                            @if($isPending)
-                                                <span class="text-[8px] font-black uppercase tracking-tighter opacity-50">(Pending)</span>
+                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            @if($character->pivot->comment)
+                                                <span class="material-symbols-outlined text-on-surface-variant text-sm cursor-help" title="{{ $character->pivot->comment }}">chat_bubble</span>
                                             @endif
                                         </div>
                                     </div>
-                                </div>
-                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    @if($character->pivot->comment)
-                                        <span class="material-symbols-outlined text-on-surface-variant text-sm cursor-help" title="{{ $character->pivot->comment }}">chat_bubble</span>
-                                    @endif
+                                @empty
+                                    <div class="flex flex-col items-center justify-center py-12 text-center opacity-20">
+                                        <span class="material-symbols-outlined text-4xl mb-2">{{ $roleData['icon'] }}</span>
+                                        <span class="text-[10px] uppercase font-bold tracking-widest">Empty</span>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            @if($event->ai_analysis)
+                <div x-show="tab === 'analysis'" class="space-y-6" x-cloak>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Overall Strategy -->
+                            <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
+                                <h3 class="text-primary font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="material-symbols-outlined">strategy</span>
+                                    Overall Strategy & Execution
+                                </h3>
+                                <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant">
+                                    {!! Str::markdown($event->ai_analysis['strategy'] ?? $event->ai_analysis['Overall Strategy & Execution'] ?? 'No strategy data available.') !!}
                                 </div>
                             </div>
-                        @empty
-                            <div class="flex flex-col items-center justify-center py-12 text-center opacity-20">
-                                <span class="material-symbols-outlined text-4xl mb-2">{{ $roleData['icon'] }}</span>
-                                <span class="text-[10px] uppercase font-bold tracking-widest">Empty</span>
+
+                            <!-- Wipe Reasons -->
+                            <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
+                                <h3 class="text-error font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="material-symbols-outlined">dangerous</span>
+                                    Critical Failures & Wipe Reasons
+                                </h3>
+                                <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant">
+                                    {!! Str::markdown($event->ai_analysis['wipes'] ?? $event->ai_analysis['Major Wipe Reasons'] ?? 'No wipe data available.') !!}
+                                </div>
                             </div>
-                        @endforelse
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Individual Highlights -->
+                            <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
+                                <h3 class="text-success-neon font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="material-symbols-outlined">person</span>
+                                    Performance Highlights
+                                </h3>
+                                <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant">
+                                    {!! Str::markdown($event->ai_analysis['individual'] ?? $event->ai_analysis['Individual Highlights/Issues'] ?? 'No individual data available.') !!}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            @endforeach
+            @endif
         </div>
 
         <!-- Declined / Tentative Section -->

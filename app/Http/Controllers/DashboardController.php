@@ -32,7 +32,7 @@ class DashboardController extends Controller
     {
         $static = User::firstStaticForUser(Auth::id());
         if (!$static) {
-            return redirect()->route('statics.setup');
+            return redirect()->route('onboarding.index');
         }
         return redirect()->route('statics.dashboard', $static->id);
     }

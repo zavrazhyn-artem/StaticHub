@@ -47,6 +47,32 @@ class StaticSettingsController extends Controller
         return view('statics.settings.schedule', compact('static', 'timezones', 'discordChannels', 'discordRoles', 'botGuilds', 'discordGuildId'));
     }
 
+    public function logs(StaticGroup $static)
+    {
+        if ($static->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('statics.settings.logs', compact('static'));
+    }
+
+    public function updateLogs(Request $request, StaticGroup $static)
+    {
+        if ($static->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'wcl_guild_id' => 'nullable|string|max:50',
+            'wcl_region' => 'nullable|string|max:10',
+            'wcl_realm' => 'nullable|string|max:100',
+        ]);
+
+        $static->update($validated);
+
+        return redirect()->back()->with('success', 'Warcraft Logs settings updated!');
+    }
+
     public function updateSchedule(Request $request, StaticGroup $static)
     {
         if ($static->owner_id !== Auth::id()) {

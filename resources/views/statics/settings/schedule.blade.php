@@ -1,9 +1,11 @@
 <x-app-layout>
-    <div class="max-w-4xl mx-auto space-y-8">
-        <div>
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
             <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">Static Settings</h1>
-            <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ $static->name }} • Schedule Configuration</p>
+            <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ $static->name }}</p>
         </div>
+
+        @include('statics.settings._tabs')
 
         <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
             <form action="{{ route('statics.settings.schedule.update', $static) }}" method="POST" class="space-y-8">

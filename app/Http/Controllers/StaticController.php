@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Services\StaticService;
+use App\Models\StaticGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class StaticController extends Controller
 {
@@ -13,6 +15,27 @@ class StaticController extends Controller
     public function __construct(StaticService $staticService)
     {
         $this->staticService = $staticService;
+    }
+
+    public function generateInvite(StaticGroup $static)
+    {
+        // Перевірка прав (тільки власник або адмін може генерувати лінку)
+        // Для спрощення зараз дозволимо всім членам, але краще перевірити роль
+
+        if ($static->invite_token && $static->invite_until && $static->invite_until->isFuture()) {
+            return response()->json([
+                'link' => route('statics.join', $static->invite_token)
+            ]);
+        }
+
+        $static->update([
+            'invite_token' => Str::random(12),
+            'invite_until' => now()->addDay(), // Дійсна 24 години
+        ]);
+
+        return response()->json([
+            'link' => route('statics.join', $static->invite_token)
+        ]);
     }
 
     /**

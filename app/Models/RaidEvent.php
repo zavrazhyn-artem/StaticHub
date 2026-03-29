@@ -54,4 +54,9 @@ class RaidEvent extends Model
     {
         return $this->hasMany(RaidAttendance::class);
     }
+
+    public function tacticalReport()
+    {
+        return $this->hasOne(TacticalReport::class);
+    }
 }

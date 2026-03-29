@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\Auth\BattleNetAuthService;
+use App\Services\CharacterSyncService;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -15,14 +16,23 @@ class BattleNetController extends Controller
     protected $authService;
 
     /**
+     * @var CharacterSyncService
+     */
+    protected $characterSyncService;
+
+    /**
      * Create a new controller instance.
      *
      * @param  BattleNetAuthService  $authService
+     * @param  CharacterSyncService  $characterSyncService
      * @return void
      */
-    public function __construct(BattleNetAuthService $authService)
-    {
+    public function __construct(
+        BattleNetAuthService $authService,
+        CharacterSyncService $characterSyncService
+    ) {
         $this->authService = $authService;
+        $this->characterSyncService = $characterSyncService;
     }
 
     /**
@@ -53,6 +63,15 @@ class BattleNetController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        // Sync characters automatically after login
+        try {
+            $this->characterSyncService->syncUserCharacters($socialUser->token, $user->id);
+        } catch (\Exception $e) {
+            // Log error but continue to redirect
+            \Log::error('Failed to sync characters on login: ' . $e->getMessage());
+        }
+
+        // Redirect to characters list as requested
+        return redirect()->route('characters.index');
     }
 }

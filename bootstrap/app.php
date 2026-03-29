@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
 use App\Http\Middleware\HasStatic;
+use App\Http\Middleware\EnsureUserHasStatic;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,7 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'has_static' => HasStatic::class,
+            'ensure_has_static' => EnsureUserHasStatic::class,
         ]);
+
+        $middleware->redirectGuestsTo(fn () => route('battlenet.redirect'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

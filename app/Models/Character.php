@@ -67,4 +67,9 @@ class Character extends Model
             ->withPivot('status', 'comment')
             ->withTimestamps();
     }
+
+    public function personalTacticalReports()
+    {
+        return $this->hasMany(PersonalTacticalReport::class);
+    }
 }

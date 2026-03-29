@@ -17,9 +17,14 @@ class StaticGroup extends Model
 
     protected $fillable = [
         'name',
+        'invite_token',
+        'invite_until',
         'slug',
         'region',
         'server',
+        'wcl_guild_id',
+        'wcl_region',
+        'wcl_realm',
         'owner_id',
         'raid_days',
         'raid_start_time',
@@ -33,6 +38,7 @@ class StaticGroup extends Model
     ];
 
     protected $casts = [
+        'invite_until' => 'datetime',
         'raid_days' => 'array',
         'automation_settings' => 'array',
         'consumable_settings' => 'array',
@@ -87,5 +93,10 @@ class StaticGroup extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'static_id');
+    }
+
+    public function tacticalReports()
+    {
+        return $this->hasMany(TacticalReport::class, 'static_id');
     }
 }

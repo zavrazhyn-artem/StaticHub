@@ -158,11 +158,16 @@ class DiscordMessageService
         // Чистий опис без зайвих пробілів
         $descriptionText = $event->description ? "*" . trim($event->description) . "*\n\n" : "";
 
+        $analysisText = "";
+        if ($event->tacticalReport && $event->tacticalReport->ai_analysis) {
+            $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', [$event->static->id, $event->tacticalReport->id]) . ")";
+        }
+
         $embed = [
             'title' => "📣 Raid Call: " . $event->title,
             'description' => "🗓️ **Start:** <t:{$unixStart}:F>\n⏳ **Status:** <t:{$unixStart}:R>\n\n" .
                 $descriptionText .
-                "**Combat Roster:**\n──────────────────────────",
+                "**Combat Roster:**" . $analysisText . "\n──────────────────────────",
             'color' => 0x00A3FF,
             'fields' => [
                 [
