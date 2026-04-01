@@ -15,7 +15,7 @@ class HasStatic
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->statics()->count() === 0) {
+        if (auth()->check() && !\App\Models\User::query()->hasAnyStatic(auth()->id())) {
             if (!$request->is('statics/setup*')) {
                 return redirect()->route('statics.setup');
             }

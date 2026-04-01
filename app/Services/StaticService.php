@@ -35,6 +35,23 @@ class StaticService
     }
 
     /**
+     * Generate an invite link for a static group.
+     */
+    public function generateInvite(StaticGroup $static): string
+    {
+        if ($static->invite_token && $static->invite_until && $static->invite_until->isFuture()) {
+            return route('statics.join', $static->invite_token);
+        }
+
+        $static->update([
+            'invite_token' => Str::random(12),
+            'invite_until' => now()->addDay(),
+        ]);
+
+        return route('statics.join', $static->invite_token);
+    }
+
+    /**
      * Create a new static group.
      */
     public function createStatic(array $data, int $userId): StaticGroup

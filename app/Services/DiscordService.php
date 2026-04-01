@@ -83,6 +83,31 @@ class DiscordService
     }
 
     /**
+     * Verify the signature of an incoming Discord interaction.
+     */
+    public function verifySignature(string $signature, string $timestamp, string $body): bool
+    {
+        $publicKey = config('services.discord.public_key');
+
+        if (!$publicKey) {
+            Log::error('Discord public key not configured');
+            return false;
+        }
+
+        try {
+            $binarySignature = hex2bin($signature);
+            $binaryPublicKey = hex2bin($publicKey);
+
+            $msg = $timestamp . $body;
+
+            return sodium_crypto_sign_verify_detached($binarySignature, $msg, $binaryPublicKey);
+        } catch (\Exception $e) {
+            Log::error('Discord signature verification exception', ['message' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
      * Internal helper to POST payload to Discord.
      */
     protected function postToWebhook(array $payload): bool

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\TransactionBuilder;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
@@ -23,6 +24,16 @@ class Transaction extends Model
         'week_number' => 'integer',
         'created_at' => 'datetime',
     ];
+
+    public function newEloquentBuilder($query): TransactionBuilder
+    {
+        return new TransactionBuilder($query);
+    }
+
+    public static function query(): TransactionBuilder
+    {
+        return parent::query();
+    }
 
     public function user()
     {

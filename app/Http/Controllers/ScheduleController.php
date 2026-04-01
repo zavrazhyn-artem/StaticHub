@@ -2,64 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RaidEvent;
-use App\Models\StaticGroup;
-use App\Services\CalendarService;
+use App\Http\Requests\StoreScheduleRequest;
+use App\Services\ScheduleService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    protected CalendarService $calendarService;
+    private ScheduleService $scheduleService;
 
-    public function __construct(CalendarService $calendarService)
+    public function __construct(ScheduleService $scheduleService)
     {
-        $this->calendarService = $calendarService;
+        $this->scheduleService = $scheduleService;
     }
 
-    public function index(Request $request)
+    /**
+     * Display the schedule.
+     */
+    public function index(Request $request): View
     {
         $year = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
 
-        $static = Auth::user()->statics()->first();
+        $scheduleData = $this->scheduleService->getScheduleData($year, $month, Auth::id());
 
-        if (!$static) {
-            abort(404, 'No static group found.');
-        }
-
-        $calendarData = $this->calendarService->buildMonthGrid($year, $month, $static->id);
-
-        return view('schedule.index', array_merge($calendarData, [
-            'static' => $static,
-        ]));
+        return view('schedule.index', $scheduleData);
     }
 
-    public function store(Request $request)
+    /**
+     * Store a new event in the schedule.
+     */
+    public function store(StoreScheduleRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'static_id' => 'required|exists:statics,id',
-            'title' => 'required|string|max:255',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
-            'description' => 'nullable|string',
-        ]);
-
-        // Check authorization (user must belong to the static)
-        $static = StaticGroup::findOrFail($validated['static_id']);
-        if (!$static->members()->where('user_id', Auth::id())->exists()) {
-            abort(403);
-        }
-
-        $startTime = Carbon::parse($validated['date'] . ' ' . $validated['time']);
-
-        RaidEvent::create([
-            'static_id' => $validated['static_id'],
-            'title' => $validated['title'],
-            'start_time' => $startTime,
-            'description' => $validated['description'],
-        ]);
+        $this->scheduleService->createEvent($request->validated(), Auth::id());
 
         return redirect()->back()->with('success', 'Event created successfully!');
     }

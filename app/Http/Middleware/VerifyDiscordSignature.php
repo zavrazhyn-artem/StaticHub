@@ -2,12 +2,17 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\DiscordService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class VerifyDiscordSignature
 {
+    public function __construct(
+        protected DiscordService $discordService
+    ) {}
+
     /**
      * Handle an incoming request.
      *
@@ -23,23 +28,8 @@ class VerifyDiscordSignature
             return response('Unauthorized', 401);
         }
 
-        $publicKey = config('services.discord.public_key');
-
-        if (!$publicKey) {
-            return response('Discord public key not configured', 500);
-        }
-
-        try {
-            $binarySignature = hex2bin($signature);
-            $binaryPublicKey = hex2bin($publicKey);
-
-            $msg = $timestamp . $body;
-
-            if (!sodium_crypto_sign_verify_detached($binarySignature, $msg, $binaryPublicKey)) {
-                return response('Invalid signature', 401);
-            }
-        } catch (\Exception $e) {
-            return response('Invalid signature data', 401);
+        if (!$this->discordService->verifySignature($signature, $timestamp, $body)) {
+            return response('Invalid signature', 401);
         }
 
         return $next($request);

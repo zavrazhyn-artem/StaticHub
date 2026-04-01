@@ -2,46 +2,51 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateConsumablesRequest;
+use App\Models\StaticGroup;
 use App\Services\ConsumableService;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class ConsumablesController extends Controller
 {
-    protected ConsumableService $consumableService;
+    /**
+     * @param ConsumableService $consumableService
+     */
+    public function __construct(
+        protected ConsumableService $consumableService
+    ) {}
 
-    public function __construct(ConsumableService $consumableService)
+    /**
+     * Display a listing of the raid consumables.
+     *
+     * @return View
+     */
+    public function index(): View
     {
-        $this->consumableService = $consumableService;
-    }
-
-    public function index(Request $request)
-    {
-        // Try to get current user's static if available
-        $static = \App\Models\User::firstStaticForUser(\Illuminate\Support\Facades\Auth::id());
+        $static = StaticGroup::query()->firstForUser(Auth::id());
 
         $data = $this->consumableService->getRaidConsumablesData($static);
 
         return view('consumables.index', array_merge($data, ['static' => $static]));
     }
 
-    public function store(Request $request)
+    /**
+     * Store consumable settings for a static group.
+     *
+     * @param UpdateConsumablesRequest $request
+     * @return RedirectResponse
+     */
+    public function store(UpdateConsumablesRequest $request): RedirectResponse
     {
-        $static = \App\Models\User::firstStaticForUser(\Illuminate\Support\Facades\Auth::id());
+        $static = StaticGroup::query()->firstForUser(Auth::id());
 
         if (!$static) {
             return back()->with('error', 'No static group found.');
         }
 
-        $validated = $request->validate([
-            'quantities' => 'required|array',
-            'quantities.*' => 'required|integer|min:0',
-        ]);
-
-        $static->update([
-            'consumable_settings' => [
-                'quantities' => $validated['quantities'],
-            ]
-        ]);
+        $this->consumableService->updateSettings($static, $request->validated('quantities'));
 
         return back()->with('success', 'Consumables configuration saved.');
     }

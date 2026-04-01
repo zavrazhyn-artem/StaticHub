@@ -2,36 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessRaidAnalysisJob;
-use App\Models\TacticalReport;
+use App\Http\Requests\LogAnalysisRequest;
 use App\Models\StaticGroup;
-use Illuminate\Http\Request;
+use App\Services\LogAnalysisService;
+use Illuminate\Http\RedirectResponse;
 
 class LogAnalysisController extends Controller
 {
-    public function storeManual(Request $request, StaticGroup $static)
+    public function __construct(
+        protected LogAnalysisService $logAnalysisService
+    ) {}
+
+    /**
+     * Store manual log analysis request.
+     *
+     * @param LogAnalysisRequest $request
+     * @param StaticGroup $static
+     * @return RedirectResponse
+     */
+    public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
-        $request->validate([
-            'wcl_url' => ['required', 'url', 'regex:/warcraftlogs\.com\/reports\/([a-zA-Z0-9]{16})/']
-        ]);
+        $report = $this->logAnalysisService->submitManualLog(
+            $request->input('wcl_url'),
+            $static
+        );
 
-        // Regex Extraction: Extract the 16-character Report ID from the URL
-        preg_match('/reports\/([a-zA-Z0-9]{16})/', $request->wcl_url, $matches);
-        $reportId = $matches[1] ?? null;
-
-        if (!$reportId) {
+        if (!$report) {
             return back()->with('error', 'Invalid Warcraft Logs URL. Could not extract Report ID.');
         }
-
-        // Create a new TacticalReport record linked to the current Static
-        $report = TacticalReport::create([
-            'static_id' => $static->id,
-            'wcl_report_id' => $reportId,
-            'title' => 'Manual Log Analysis', // Default title, will be updated by Job
-        ]);
-
-        // Dispatch an asynchronous Job, passing the new TacticalReport model
-        ProcessRaidAnalysisJob::dispatch($report);
 
         return redirect()->route('statics.logs.index', $static)
             ->with('success', 'Log submitted for analysis. It will appear here shortly.');

@@ -90,6 +90,22 @@ class ConsumableService
     }
 
     /**
+     * Update consumable settings for a static group.
+     *
+     * @param StaticGroup $static
+     * @param array $quantities
+     * @return void
+     */
+    public function updateSettings(StaticGroup $static, array $quantities): void
+    {
+        $static->update([
+            'consumable_settings' => [
+                'quantities' => $quantities,
+            ]
+        ]);
+    }
+
+    /**
      * Calculate the total weekly cost for all raid consumables.
      */
     protected function calculateGrandTotalWeeklyCost(Collection $recipes, StaticGroup $static = null): int

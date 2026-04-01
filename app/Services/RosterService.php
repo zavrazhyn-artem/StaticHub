@@ -52,6 +52,35 @@ class RosterService
     }
 
     /**
+     * Get role counts for a static roster.
+     *
+     * @param int $staticId
+     * @return array
+     */
+    public function getRoleCounts(int $staticId): array
+    {
+        $users = $this->getStaticMembers($staticId);
+
+        $roleCounts = [
+            'tank' => 0,
+            'heal' => 0,
+            'mdps' => 0,
+            'rdps' => 0,
+        ];
+
+        foreach ($users as $user) {
+            if ($user->mainCharacter) {
+                $role = $user->mainCharacter->statics->firstWhere('id', $staticId)->pivot->combat_role;
+                if (isset($roleCounts[$role])) {
+                    $roleCounts[$role]++;
+                }
+            }
+        }
+
+        return $roleCounts;
+    }
+
+    /**
      * Assign a character to a static with a specific role and handle auto-downgrade.
      */
     public function assignCharacterToStatic(int $characterId, int $staticId, string $role, string $combatRole, int $userId): void
@@ -84,6 +113,26 @@ class RosterService
                 'combat_role' => $combatRole,
             ]
         ]);
+    }
+
+    /**
+     * Get the overview data for a static roster (mains with their alts).
+     */
+    public function getRosterOverview(StaticGroup $static): Collection
+    {
+        $allCharacters = $static->characters()->get();
+
+        $mains = $allCharacters->where(function ($char) {
+            return strtolower($char->pivot->role) === 'main';
+        })->values();
+
+        foreach ($mains as $main) {
+            $main->alts = $allCharacters->where('user_id', $main->user_id)
+                ->where('id', '!=', $main->id)
+                ->values();
+        }
+
+        return $mains;
     }
 
     /**

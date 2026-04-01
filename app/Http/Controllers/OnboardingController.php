@@ -2,53 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StaticGroup;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Http\Requests\OnboardingRequest;
+use App\Services\OnboardingService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class OnboardingController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected OnboardingService $onboardingService
+    ) {}
+
+    /**
+     * Show the onboarding index page.
+     *
+     * @return View
+     */
+    public function index(): View
     {
-        $user = auth()->user();
-        $userCharacters = $user->characters;
+        $data = $this->onboardingService->getOnboardingData(Auth::user());
 
-        $isGuildMaster = false;
-        $guildName = null;
-
-        $gmCharacter = $userCharacters->first(function ($character) {
-             return property_exists($character, 'guild_rank') && $character->guild_rank === 0;
-        });
-
-        if ($gmCharacter) {
-            $isGuildMaster = true;
-            $guildName = $gmCharacter->guild_name ?? 'Unknown Guild';
-        }
-
-        return view('onboarding.index', [
-            'isGuildMaster' => $isGuildMaster,
-            'guildName' => $guildName,
-            'userCharacters' => $userCharacters,
-        ]);
+        return view('onboarding.index', $data);
     }
 
-    public function createStatic(Request $request)
+    /**
+     * Create a new static group.
+     *
+     * @param OnboardingRequest $request
+     * @return RedirectResponse
+     */
+    public function createStatic(OnboardingRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'region' => 'required|string',
-        ]);
-
-        $static = StaticGroup::create([
-            'name' => $validated['name'],
-            'region' => $validated['region'],
-            'owner_id' => auth()->id(),
-            'invite_token' => Str::random(12),
-            'slug' => Str::slug($validated['name']),
-        ]);
-
-        // Attach user to static as owner
-        $static->members()->attach(auth()->id(), ['role' => 'owner']);
+        $this->onboardingService->createStatic($request->validated(), Auth::id());
 
         return redirect()->route('characters.index');
     }

@@ -19,7 +19,10 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
+    /**
+     * @param $query
+     * @return UserBuilder
+     */
     public function newEloquentBuilder($query): UserBuilder
     {
         return new UserBuilder($query);

@@ -2,43 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateRosterRequest;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Services\ConsumableService;
 use App\Services\RosterService;
 use App\Services\TreasuryService;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class RosterController extends Controller
 {
-    protected RosterService $rosterService;
-    protected ConsumableService $consumableService;
-    protected TreasuryService $treasuryService;
-
     public function __construct(
-        RosterService $rosterService,
-        ConsumableService $consumableService,
-        TreasuryService $treasuryService
-    ) {
-        $this->rosterService = $rosterService;
-        $this->consumableService = $consumableService;
-        $this->treasuryService = $treasuryService;
-    }
+        protected RosterService $rosterService,
+        protected ConsumableService $consumableService,
+        protected TreasuryService $treasuryService
+    ) {}
 
-    public function showFirst()
+    public function showFirst(): RedirectResponse
     {
-        $static = User::firstStaticForUser(Auth::id());
+        $static = User::query()->firstStaticForUser(Auth::id());
+
         if (!$static) {
             return redirect()->route('statics.setup');
         }
+
         return redirect()->route('statics.roster', $static->id);
     }
 
-    public function index(StaticGroup $static)
+    public function index(StaticGroup $static): View
     {
         $consumablesData = $this->consumableService->getRaidConsumablesData($static);
-        $weeklyCost = $consumablesData['grand_total_weekly_cost'] ?? 0;
         $targetTax = $consumablesData['guild_tax_per_raider'] ?? 0;
 
         $groupedRoster = $this->rosterService->getGroupedRoster($static->id);
@@ -52,34 +47,19 @@ class RosterController extends Controller
         ]);
     }
 
-    public function overview(StaticGroup $static)
+    public function overview(StaticGroup $static): View
     {
-        $allCharacters = $static->characters()->get();
-
-        $mains = $allCharacters->where(function ($char) {
-            return strtolower($char->pivot->role) === 'main';
-        })->values();
-
-        foreach ($mains as $main) {
-            $main->alts = $allCharacters->where('user_id', $main->user_id)
-                ->where('id', '!=', $main->id)
-                ->values();
-        }
+        $mains = $this->rosterService->getRosterOverview($static);
 
         return view('roster.overview', [
             'static' => $static,
-            'characters' => $mains, // Передаємо мейнів, всередині яких тепер є масив ->alts
+            'characters' => $mains,
         ]);
     }
 
-    public function updateParticipation(Request $request, StaticGroup $static)
+    public function updateParticipation(UpdateRosterRequest $request, StaticGroup $static): RedirectResponse
     {
-        $validated = $request->validate([
-            'main_character_id' => 'nullable|integer|exists:characters,id',
-            'raiding_characters' => 'nullable|array',
-            'raiding_characters.*' => 'integer|exists:characters,id',
-            'combat_roles' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
         $this->rosterService->updateUserParticipation(
             Auth::user(),

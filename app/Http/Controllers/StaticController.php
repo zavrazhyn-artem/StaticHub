@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImportGuildRequest;
+use App\Http\Requests\StoreStaticRequest;
 use App\Services\StaticService;
 use App\Models\StaticGroup;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class StaticController extends Controller
 {
@@ -17,35 +20,26 @@ class StaticController extends Controller
         $this->staticService = $staticService;
     }
 
-    public function generateInvite(StaticGroup $static)
+    public function generateInvite(StaticGroup $static): JsonResponse
     {
-        // Перевірка прав (тільки власник або адмін може генерувати лінку)
-        // Для спрощення зараз дозволимо всім членам, але краще перевірити роль
+        // Permission check (only owner or admin can generate link)
+        // For simplicity, we allow all members for now, but role check is better
 
-        if ($static->invite_token && $static->invite_until && $static->invite_until->isFuture()) {
-            return response()->json([
-                'link' => route('statics.join', $static->invite_token)
-            ]);
-        }
-
-        $static->update([
-            'invite_token' => Str::random(12),
-            'invite_until' => now()->addDay(), // Дійсна 24 години
-        ]);
+        $link = $this->staticService->generateInvite($static);
 
         return response()->json([
-            'link' => route('statics.join', $static->invite_token)
+            'link' => $link
         ]);
     }
 
     /**
      * Show the view to choose or create a static.
      */
-    public function index()
+    public function index(): View
     {
         $data = $this->staticService->getSetupData(
             Auth::id(),
-            session('battlenet_token')
+            (string) session('battlenet_token')
         );
 
         return view('statics.setup', $data);
@@ -54,15 +48,9 @@ class StaticController extends Controller
     /**
      * Store a newly created static in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStaticRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'realm_slug' => 'required|string|exists:realms,slug',
-            'region' => 'required|string|in:eu,us,kr,tw',
-        ]);
-
-        $this->staticService->createStatic($validated, Auth::id());
+        $this->staticService->createStatic($request->validated(), Auth::id());
 
         return redirect()->route('dashboard')->with('success', 'Static created successfully!');
     }
@@ -70,20 +58,14 @@ class StaticController extends Controller
     /**
      * Import a guild as a static.
      */
-    public function importGuild(Request $request)
+    public function importGuild(ImportGuildRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'realm_slug' => 'required|string',
-            'realm' => 'required|string',
-        ]);
-
         $token = session('battlenet_token');
         if (!$token) {
             return back()->with('error', 'Session expired. Please log in again.');
         }
 
-        $this->staticService->importGuild($validated, Auth::id());
+        $this->staticService->importGuild($request->validated(), Auth::id());
 
         return redirect()->route('dashboard')->with('success', 'Guild imported as Static!');
     }

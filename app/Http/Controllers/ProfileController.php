@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
@@ -13,12 +14,9 @@ use Laravel\Socialite\Facades\Socialite;
 
 class ProfileController extends Controller
 {
-    protected UserService $userService;
-
-    public function __construct(UserService $userService)
-    {
-        $this->userService = $userService;
-    }
+    public function __construct(
+        protected UserService $userService
+    ) {}
 
     /**
      * Display the user's profile form.
@@ -43,12 +41,8 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(DeleteAccountRequest $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
 
         Auth::logout();
@@ -77,10 +71,7 @@ class ProfileController extends Controller
         try {
             $discordUser = Socialite::driver('discord')->user();
 
-            Auth::user()->update([
-                'discord_id' => $discordUser->id,
-                'discord_username' => $discordUser->nickname ?? $discordUser->name,
-            ]);
+            $this->userService->linkDiscord(Auth::user(), $discordUser);
 
             return Redirect::route('profile.edit')->with('status', 'discord-linked');
         } catch (\Exception $e) {
@@ -93,10 +84,7 @@ class ProfileController extends Controller
      */
     public function unlinkDiscord(): RedirectResponse
     {
-        Auth::user()->update([
-            'discord_id' => null,
-            'discord_username' => null,
-        ]);
+        $this->userService->unlinkDiscord(Auth::user());
 
         return Redirect::route('profile.edit')->with('status', 'discord-unlinked');
     }

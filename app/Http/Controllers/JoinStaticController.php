@@ -2,33 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StaticGroup;
+use App\Services\JoinStaticService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class JoinStaticController extends Controller
 {
-    public function showJoinPage($token)
-    {
-        $static = StaticGroup::withoutGlobalScope('member')
-            ->where('invite_token', $token)
-            ->where('invite_until', '>', now())
-            ->firstOrFail();
-        $userCharacters = auth()->user()->characters;
+    public function __construct(
+        protected JoinStaticService $joinStaticService
+    ) {}
 
-        return view('statics.join', compact('static', 'userCharacters'));
+    /**
+     * Show the join page for a static group.
+     *
+     * @param string $token
+     * @return View
+     */
+    public function showJoinPage(string $token): View
+    {
+        $data = $this->joinStaticService->getJoinPageData($token, Auth::id());
+
+        return view('statics.join', $data);
     }
 
-    public function processJoin(Request $request, $token)
+    /**
+     * Process a user joining a static group.
+     *
+     * @param Request $request
+     * @param string $token
+     * @return RedirectResponse
+     */
+    public function processJoin(Request $request, string $token): RedirectResponse
     {
-        $static = StaticGroup::withoutGlobalScope('member')
-            ->where('invite_token', $token)
-            ->where('invite_until', '>', now())
-            ->firstOrFail();
-
-        // Attach user to static
-        if (!$static->members()->where('user_id', auth()->id())->exists()) {
-            $static->members()->attach(auth()->id(), ['role' => 'member']);
-        }
+        $this->joinStaticService->join($token, Auth::id());
 
         return redirect()->route('characters.index');
     }

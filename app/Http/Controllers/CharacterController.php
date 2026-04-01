@@ -2,73 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Character;
-use App\Models\User;
-use App\Models\PersonalTacticalReport;
+use App\Http\Requests\AssignCharacterRequest;
+use App\Services\CharacterService;
 use App\Services\CharacterSyncService;
 use App\Services\RosterService;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class CharacterController extends Controller
 {
-    protected CharacterSyncService $characterSyncService;
-    protected RosterService $rosterService;
-
-    public function __construct(CharacterSyncService $characterSyncService, RosterService $rosterService)
-    {
-        $this->characterSyncService = $characterSyncService;
-        $this->rosterService = $rosterService;
-    }
+    public function __construct(
+        protected CharacterSyncService $characterSyncService,
+        protected RosterService        $rosterService,
+        protected CharacterService     $characterService
+    ) {}
 
     /**
      * Display a listing of the user's characters and the sync button.
+     *
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
-        $userId = Auth::id();
-        $user = User::where('id', $userId)->withStatics()->first();
-        $statics = $user->statics;
-        $static = $statics->first(); // Default to first static if exists
+        $data = $this->characterService->getIndexData(Auth::id());
 
-        $query = Character::belongingTo($userId)->withStatics();
-
-        if ($static) {
-            $query->leftJoin('character_static', function ($join) use ($static) {
-                $join->on('characters.id', '=', 'character_static.character_id')
-                    ->where('character_static.static_id', '=', $static->id);
-            })
-            ->select('characters.*', 'character_static.role as static_role')
-            ->orderByRaw("CASE WHEN character_static.role = 'main' THEN 0 ELSE 1 END")
-            ->orderBy('level', 'desc')
-            ->orderBy('equipped_item_level', 'desc');
-        } else {
-            $query->orderBy('level', 'desc')
-                ->orderBy('equipped_item_level', 'desc');
-        }
-
-        $characters = $query->get();
-
-        return view('characters.index', compact('characters', 'statics', 'static'));
+        return view('characters.index', $data);
     }
 
-    public function personalReports()
+    /**
+     * Display personal tactical reports.
+     *
+     * @return View
+     */
+    public function personalReports(): View
     {
-        $user = Auth::user();
-        $characterIds = $user->characters()->pluck('id');
-
-        $reports = PersonalTacticalReport::whereIn('character_id', $characterIds)
-            ->with(['tacticalReport.raidEvent', 'character'])
-            ->latest()
-            ->get();
+        $reports = $this->characterService->getPersonalReports(Auth::user());
 
         return view('characters.personal_reports', compact('reports'));
     }
 
     /**
      * Import characters from Blizzard API.
+     *
+     * @return RedirectResponse
      */
-    public function import()
+    public function import(): RedirectResponse
     {
         $token = session('battlenet_token');
 
@@ -87,22 +66,18 @@ class CharacterController extends Controller
 
     /**
      * Assign a character to a static with a specific role.
+     *
+     * @param AssignCharacterRequest $request
+     * @return RedirectResponse
      */
-    public function assignToStatic(Request $request)
+    public function assignToStatic(AssignCharacterRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'character_id' => 'required|exists:characters,id',
-            'static_id' => 'required|exists:statics,id',
-            'role' => 'required|in:main,alt',
-            'combat_role' => 'required|in:tank,heal,mdps,rdps',
-        ]);
-
         try {
             $this->rosterService->assignCharacterToStatic(
-                $validated['character_id'],
-                $validated['static_id'],
-                $validated['role'],
-                $validated['combat_role'],
+                $request->integer('character_id'),
+                $request->integer('static_id'),
+                $request->input('role'),
+                $request->input('combat_role'),
                 Auth::id()
             );
 

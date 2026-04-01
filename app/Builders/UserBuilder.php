@@ -28,4 +28,32 @@ class UserBuilder extends Builder
         $user = $this->where('id', $userId)->with('statics')->first();
         return $user ? $user->statics->first() : null;
     }
+
+    public function hasMainCharacter(int $userId): bool
+    {
+        return \App\Models\Character::where('user_id', $userId)
+            ->whereHas('statics', function ($query) {
+                $query->where('role', 'main');
+            })->exists();
+    }
+
+    public function hasAnyStatic(int $userId): bool
+    {
+        return \DB::table('static_group_user')
+            ->where('user_id', $userId)
+            ->exists();
+    }
+
+    public function hasCharacterInAnyStatic(int $userId): bool
+    {
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        return \DB::table('character_static')
+            ->whereIn('static_id', $user->statics()->pluck('statics.id'))
+            ->whereIn('character_id', $user->characters()->pluck('id'))
+            ->exists();
+    }
 }

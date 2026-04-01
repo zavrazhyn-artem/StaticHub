@@ -2,10 +2,20 @@
 
 namespace App\Models;
 
+use App\Builders\TacticalReportBuilder;
 use Illuminate\Database\Eloquent\Model;
 
 class TacticalReport extends Model
 {
+    /**
+     * @param $query
+     * @return TacticalReportBuilder
+     */
+    public function newEloquentBuilder($query): TacticalReportBuilder
+    {
+        return new TacticalReportBuilder($query);
+    }
+
     protected $fillable = [
         'static_id',
         'raid_event_id',

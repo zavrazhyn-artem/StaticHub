@@ -47,6 +47,28 @@ class UserService
     }
 
     /**
+     * Link Discord account.
+     */
+    public function linkDiscord(User $user, object $discordUser): void
+    {
+        $user->update([
+            'discord_id' => $discordUser->id,
+            'discord_username' => $discordUser->nickname ?? $discordUser->name,
+        ]);
+    }
+
+    /**
+     * Unlink Discord account.
+     */
+    public function unlinkDiscord(User $user): void
+    {
+        $user->update([
+            'discord_id' => null,
+            'discord_username' => null,
+        ]);
+    }
+
+    /**
      * Update user password.
      */
     public function updatePassword(User $user, string $password): void
