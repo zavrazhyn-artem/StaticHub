@@ -172,8 +172,75 @@
                             </div>
                             <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">The Discord channel where raid announcements will be posted.</p>
                         </div>
+
+                        <!-- Webhook URL (Global) -->
+                        <div class="space-y-2 md:col-span-2">
+                            <label for="discord_webhook_url" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Discord Webhook URL (Global)</label>
+                            <div class="flex gap-4">
+                                <div class="relative group flex-1">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#5865F2] transition-colors text-lg">link</span>
+                                    </span>
+                                    <input type="text" id="discord_webhook_url"
+                                        value="{{ config('services.discord.webhook_url') }}"
+                                        readonly
+                                        class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/60 tracking-widest outline-none cursor-not-allowed"
+                                        placeholder="Configure in .env">
+                                </div>
+                                <button type="button"
+                                    onclick="testDiscordWebhook()"
+                                    class="px-6 py-3 bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 text-[#5865F2] rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap">
+                                    <span class="material-symbols-outlined text-lg">experimental_ship_it</span>
+                                    Test Connection
+                                </button>
+                            </div>
+                            <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">Webhooks are used for rich sync reports. This value is managed by the server administrator.</p>
+                        </div>
                     </div>
                 </div>
+
+                <script>
+                    function testDiscordWebhook() {
+                        const btn = event.currentTarget;
+                        const originalContent = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">sync</span> Testing...';
+
+                        fetch("{{ route('statics.settings.discord.test', $static) }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                btn.classList.remove('text-[#5865F2]', 'border-[#5865F2]/30', 'bg-[#5865F2]/10');
+                                btn.classList.add('text-success-neon', 'border-success-neon/30', 'bg-success-neon/10');
+                                btn.innerHTML = '<span class="material-symbols-outlined text-lg">check_circle</span> Sent!';
+                            } else {
+                                btn.classList.remove('text-[#5865F2]', 'border-[#5865F2]/30', 'bg-[#5865F2]/10');
+                                btn.classList.add('text-error-neon', 'border-error-neon/30', 'bg-error-neon/10');
+                                btn.innerHTML = '<span class="material-symbols-outlined text-lg">error</span> Failed';
+                            }
+                            setTimeout(() => {
+                                btn.disabled = false;
+                                btn.innerHTML = originalContent;
+                                btn.classList.remove('text-success-neon', 'border-success-neon/30', 'bg-success-neon/10', 'text-error-neon', 'border-error-neon/30', 'bg-error-neon/10');
+                                btn.classList.add('text-[#5865F2]', 'border-[#5865F2]/30', 'bg-[#5865F2]/10');
+                            }, 3000);
+                        })
+                        .catch(error => {
+                            btn.innerHTML = '<span class="material-symbols-outlined text-lg">error</span> Error';
+                            setTimeout(() => {
+                                btn.disabled = false;
+                                btn.innerHTML = originalContent;
+                            }, 3000);
+                        });
+                    }
+                </script>
 
                 <!-- Automation Rules -->
                 <div class="space-y-4 pt-4 border-t border-white/5">

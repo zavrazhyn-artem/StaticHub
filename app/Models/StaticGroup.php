@@ -21,7 +21,6 @@ class StaticGroup extends Model
         'invite_until',
         'slug',
         'region',
-        'server',
         'wcl_guild_id',
         'wcl_region',
         'wcl_realm',
@@ -35,6 +34,9 @@ class StaticGroup extends Model
         'automation_settings',
         'consumable_settings',
         'guild_tax_per_player',
+        'bnet_last_synced_at',
+        'rio_last_synced_at',
+        'wcl_last_synced_at',
     ];
 
     protected $casts = [
@@ -42,6 +44,9 @@ class StaticGroup extends Model
         'raid_days' => 'array',
         'automation_settings' => 'array',
         'consumable_settings' => 'array',
+        'bnet_last_synced_at' => 'datetime',
+        'rio_last_synced_at' => 'datetime',
+        'wcl_last_synced_at' => 'datetime',
     ];
 
     public function newEloquentBuilder($query): StaticGroupBuilder

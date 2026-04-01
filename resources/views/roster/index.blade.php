@@ -11,6 +11,9 @@
                 <button class="bg-surface-container-high text-on-surface-variant hover:text-primary px-4 py-2 rounded text-xs font-label uppercase tracking-widest transition-colors border border-white/5">
                     Add Member
                 </button>
+                <a href="{{ route('statics.roster.overview', $static->id) }}" class="bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 hover:bg-cyan-400/20 px-4 py-2 rounded text-xs font-label uppercase tracking-widest transition-colors">
+                    Roster Overview
+                </a>
                 <button class="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-4 py-2 rounded text-xs font-label uppercase tracking-widest transition-colors">
                     Edit Roles
                 </button>

@@ -84,8 +84,15 @@ class DashboardController extends Controller
         $targetTax = $consumables['guild_tax_per_raider'] ?? 0;
         $weeklyStatus = $this->treasuryService->getWeeklyStatus($static, $targetTax);
 
+        // 6. Sync Data
+        $syncData = [
+            'bnet' => $static->bnet_last_synced_at ? $static->bnet_last_synced_at->toIso8601String() : null,
+            'rio' => $static->rio_last_synced_at ? $static->rio_last_synced_at->toIso8601String() : null,
+            'wcl' => $static->wcl_last_synced_at ? $static->wcl_last_synced_at->toIso8601String() : null,
+        ];
+
         return view('dashboard.show', array_merge(
-            compact('static', 'nextRaid', 'roleCounts', 'weeklySchedule', 'reserves', 'autonomy', 'weeklyCost', 'targetTax', 'weeklyStatus'),
+            compact('static', 'nextRaid', 'roleCounts', 'weeklySchedule', 'reserves', 'autonomy', 'weeklyCost', 'targetTax', 'weeklyStatus', 'syncData'),
             $consumables
         ));
     }

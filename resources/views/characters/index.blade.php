@@ -52,6 +52,13 @@
                 @csrf
 
                 <div class="bg-surface-container-high rounded-xl border border-white/5 overflow-hidden">
+                    @if(session('warning'))
+                        <div class="bg-warning/10 border-b border-white/5 p-4 flex items-center gap-3">
+                            <span class="material-symbols-outlined text-warning">info</span>
+                            <span class="text-warning text-xs font-bold uppercase tracking-widest">{{ session('warning') }}</span>
+                            <input type="hidden" name="onboarding" value="1">
+                        </div>
+                    @endif
                     <!-- Table Header -->
                     <div class="bg-black/40 px-8 py-5 border-b border-white/5 grid grid-cols-12 items-center">
                         <div class="col-span-4 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Character</div>

@@ -1,0 +1,743 @@
+{
+    "gear": {
+        "items": {
+            "back": {
+                "gems": [],
+                "icon": "inv_leather_dragondungeon_c_01_cape",
+                "name": "Potion-Stained Cloak",
+                "bonuses": [
+                    13440,
+                    6652,
+                    13577,
+                    12699,
+                    12796
+                ],
+                "item_id": 193712,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 269,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "feet": {
+                "gems": [],
+                "icon": "inv_boot_leather_raiddemonhuntermidnight_d_01",
+                "name": "Void-Claimed Shinkickers",
+                "bonuses": [
+                    42,
+                    13577,
+                    13334,
+                    12794
+                ],
+                "enchant": 8019,
+                "item_id": 249334,
+                "enchants": [
+                    8019
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 263,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [
+                    {
+                        "id": 244009,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
+                        "name": "Enchant Boots - Farstrider's Hunt"
+                    }
+                ],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "head": {
+                "gems": [],
+                "icon": "inv_helm_leather_raiddruidmidnight_d_01",
+                "name": "Branches of the Luminous Bloom",
+                "tier": "35",
+                "bonuses": [
+                    12794,
+                    13334,
+                    6652,
+                    12667,
+                    13338,
+                    13575,
+                    3148
+                ],
+                "enchant": 7959,
+                "item_id": 250024,
+                "enchants": [
+                    7959
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 263,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [
+                    null,
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    null
+                ],
+                "enchants_detail": [
+                    {
+                        "id": 243949,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_green",
+                        "name": "Enchant Helm - Hex of Leeching"
+                    }
+                ],
+                "is_azerite_armor": true,
+                "domination_shards": []
+            },
+            "legs": {
+                "gems": [],
+                "icon": "inv_pants_leather_30a",
+                "name": "Shaggy Wyrmleather Leggings",
+                "bonuses": [
+                    12795,
+                    13440,
+                    6652,
+                    13577,
+                    12699
+                ],
+                "item_id": 49817,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "neck": {
+                "gems": [
+                    240971
+                ],
+                "icon": "inv_7_0raid_necklace_06d",
+                "name": "Necklace of the Twisting Void",
+                "bonuses": [
+                    12795,
+                    13440,
+                    6652,
+                    13668,
+                    12699
+                ],
+                "item_id": 151309,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [
+                    {
+                        "id": 240971,
+                        "icon": "inv_12_profession_jewelcrafting_epic_gem_cut_pink",
+                        "name": "23 Primary / 13 Armor"
+                    }
+                ],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "chest": {
+                "gems": [],
+                "icon": "inv_chest_leather_raiddruidmidnight_d_01",
+                "name": "Trunk of the Luminous Bloom",
+                "tier": "35",
+                "bonuses": [
+                    13336,
+                    12801,
+                    13440,
+                    6652,
+                    13575
+                ],
+                "item_id": 250027,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 272,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "hands": {
+                "gems": [],
+                "icon": "inv_glove_leather_raiddruidmidnight_d_01",
+                "name": "Arbortenders of the Luminous Bloom",
+                "tier": "35",
+                "bonuses": [
+                    6652,
+                    12795,
+                    13440,
+                    13337,
+                    13574,
+                    3151
+                ],
+                "item_id": 250025,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "shirt": {
+                "gems": [],
+                "icon": "inv_chest_chain_13",
+                "name": "Ooze-Soaked Shirt",
+                "bonuses": [],
+                "item_id": 98084,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 1,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 3,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "waist": {
+                "gems": [],
+                "icon": "inv_belt_leather_dungeonharronir_c_01",
+                "name": "Osseoclad Waistbone",
+                "bonuses": [
+                    43,
+                    12667,
+                    13577,
+                    12790
+                ],
+                "item_id": 249643,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 263,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "wrist": {
+                "gems": [],
+                "icon": "inv_leather_dragondungeon_c_01_bracer",
+                "name": "Frenzyroot Cuffs",
+                "bonuses": [
+                    12795,
+                    13440,
+                    6652,
+                    12667,
+                    13577,
+                    12699
+                ],
+                "item_id": 193714,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "finger1": {
+                "gems": [
+                    240916
+                ],
+                "icon": "inv_12_trinket_devouring_host_currency1_silver",
+                "name": "Omission of Light",
+                "bonuses": [
+                    12795,
+                    13440,
+                    6652,
+                    13668,
+                    12699
+                ],
+                "enchant": 8027,
+                "item_id": 251093,
+                "enchants": [
+                    8027
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [
+                    {
+                        "id": 240916,
+                        "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_nature_blue",
+                        "name": "16 Vers & 7 Haste"
+                    }
+                ],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [
+                    {
+                        "id": 244017,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
+                        "name": "Enchant Ring - Silvermoon's Tenacity"
+                    }
+                ],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "finger2": {
+                "gems": [
+                    240916
+                ],
+                "icon": "inv_70_dungeon_ring2b",
+                "name": "Band of the Triumvirate",
+                "bonuses": [
+                    13440,
+                    6652,
+                    13668,
+                    12699,
+                    12798
+                ],
+                "enchant": 8027,
+                "item_id": 151311,
+                "enchants": [
+                    8027
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 276,
+                "gems_detail": [
+                    {
+                        "id": 240916,
+                        "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_nature_blue",
+                        "name": "16 Vers & 7 Haste"
+                    }
+                ],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [
+                    {
+                        "id": 244017,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
+                        "name": "Enchant Ring - Silvermoon's Tenacity"
+                    }
+                ],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "mainhand": {
+                "gems": [],
+                "icon": "mace_2h_blacksmithing_d_04_icon",
+                "name": "Blood Knight's Mercy",
+                "bonuses": [
+                    12214,
+                    12497,
+                    12066,
+                    13640,
+                    8960,
+                    8792,
+                    13622,
+                    13667
+                ],
+                "enchant": 8009,
+                "item_id": 237848,
+                "enchants": [
+                    8009,
+                    8051
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 285,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [
+                    {
+                        "id": 243999,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_purple",
+                        "name": "Enchant Weapon - Worldsoul Aegis"
+                    }
+                ],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "shoulder": {
+                "gems": [],
+                "icon": "inv_shoulder_leather_raiddruidmidnight_d_01",
+                "name": "Seedpods of the Luminous Bloom",
+                "tier": "35",
+                "bonuses": [
+                    6652,
+                    12795,
+                    13440,
+                    13340,
+                    13574,
+                    3151
+                ],
+                "enchant": 8031,
+                "item_id": 250022,
+                "enchants": [
+                    8031
+                ],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 266,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    {
+                        "id": 580,
+                        "tier": 999,
+                        "spell": {
+                            "id": 0,
+                            "icon": "inv_misc_questionmark",
+                            "name": "Unknown",
+                            "rank": null,
+                            "school": 0
+                        }
+                    },
+                    null
+                ],
+                "enchants_detail": [
+                    {
+                        "id": 244021,
+                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
+                        "name": "Enchant Shoulders - Silvermoon's Mending"
+                    }
+                ],
+                "is_azerite_armor": true,
+                "domination_shards": []
+            },
+            "trinket1": {
+                "gems": [],
+                "icon": "inv_archaeology_70_highborne_vialofpoison",
+                "name": "Ampoule of Pure Void",
+                "bonuses": [
+                    13440,
+                    6652,
+                    12699,
+                    12798
+                ],
+                "item_id": 151312,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 276,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            },
+            "trinket2": {
+                "gems": [],
+                "icon": "inv_10_jewelcrafting3_soulcage_air",
+                "name": "Heart of Wind",
+                "bonuses": [
+                    13440,
+                    6652,
+                    12699,
+                    12798
+                ],
+                "item_id": 250256,
+                "enchants": [],
+                "corruption": {
+                    "added": 0,
+                    "total": 0,
+                    "resisted": 0
+                },
+                "item_level": 276,
+                "gems_detail": [],
+                "is_legendary": false,
+                "item_quality": 4,
+                "azerite_powers": [],
+                "enchants_detail": [],
+                "is_azerite_armor": false,
+                "domination_shards": []
+            }
+        },
+        "source": "db",
+        "corruption": {
+            "added": 0,
+            "total": 0,
+            "spells": [],
+            "resisted": 0,
+            "cloakRank": 0
+        },
+        "created_at": "2026-04-01T08:43:01.000Z",
+        "updated_at": "2026-04-01T08:43:01.000Z",
+        "artifact_traits": 0,
+        "item_level_total": 0,
+        "item_level_equipped": 270.25
+    },
+    "name": "Zavrikk",
+    "race": "Troll",
+    "class": "Druid",
+    "realm": "Tarren Mill",
+    "gender": "male",
+    "region": "eu",
+    "faction": "horde",
+    "profile_url": "https://raider.io/characters/eu/tarren-mill/Zavrikk",
+    "thumbnail_url": "https://render.worldofwarcraft.com/eu/character/tarren-mill/123/177564539-avatar.jpg?alt=/wow/static/images/2d/avatar/8-0.jpg",
+    "profile_banner": "hordebanner1",
+    "last_crawled_at": "2026-04-01T05:34:57.000Z",
+    "active_spec_name": "Guardian",
+    "active_spec_role": "TANK",
+    "raid_progression": {
+        "tier-mn-1": {
+            "summary": "6/9 H",
+            "expansion_id": 11,
+            "total_bosses": 9,
+            "heroic_bosses_killed": 6,
+            "mythic_bosses_killed": 0,
+            "normal_bosses_killed": 7
+        }
+    },
+    "achievement_points": 36580,
+    "mythic_plus_scores_by_season": [
+        {
+            "scores": {
+                "all": 2632.1,
+                "dps": 0,
+                "tank": 2632.1,
+                "healer": 0,
+                "spec_0": 0,
+                "spec_1": 0,
+                "spec_2": 2632.1,
+                "spec_3": 0
+            },
+            "season": "season-mn-1",
+            "segments": {
+                "all": {
+                    "color": "#884ee9",
+                    "score": 2632.1
+                },
+                "dps": {
+                    "color": "#ffffff",
+                    "score": 0
+                },
+                "tank": {
+                    "color": "#884ee9",
+                    "score": 2632.1
+                },
+                "healer": {
+                    "color": "#ffffff",
+                    "score": 0
+                },
+                "spec_0": {
+                    "color": "#ffffff",
+                    "score": 0
+                },
+                "spec_1": {
+                    "color": "#ffffff",
+                    "score": 0
+                },
+                "spec_2": {
+                    "color": "#884ee9",
+                    "score": 2632.1
+                },
+                "spec_3": {
+                    "color": "#ffffff",
+                    "score": 0
+                }
+            }
+        }
+    ],
+    "mythic_plus_weekly_highest_level_runs": [
+        {
+            "url": "https://raider.io/mythic-plus-runs/season-mn-1/5169116-10-seat-of-the-triumvirate",
+            "role": "tank",
+            "spec": {
+                "id": 104,
+                "name": "Guardian",
+                "role": "tank",
+                "slug": "guardian",
+                "patch": "1.0.0",
+                "ordinal": 2,
+                "class_id": 11,
+                "is_melee": true
+            },
+            "score": 332,
+            "affixes": [
+                {
+                    "id": 158,
+                    "icon": "inv_cosmicvoid_buff",
+                    "name": "Xal'atath's Bargain: Voidbound",
+                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_buff.jpg",
+                    "description": "While in combat, Xal'atath summons a Voidbound Emissary that empowers nearby enemies.",
+                    "wowhead_url": "https://wowhead.com/affix=158"
+                },
+                {
+                    "id": 9,
+                    "icon": "achievement_boss_archaedas",
+                    "name": "Tyrannical",
+                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg",
+                    "description": "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage.",
+                    "wowhead_url": "https://wowhead.com/affix=9"
+                },
+                {
+                    "id": 10,
+                    "icon": "ability_toughness",
+                    "name": "Fortified",
+                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg",
+                    "description": "Non-boss enemies have 20% more health and inflict up to 20% increased damage.",
+                    "wowhead_url": "https://wowhead.com/affix=10"
+                }
+            ],
+            "dungeon": "Seat of the Triumvirate",
+            "zone_id": 8910,
+            "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg",
+            "short_name": "SEAT",
+            "par_time_ms": 2040999,
+            "completed_at": "2026-04-01T09:05:10.000Z",
+            "mythic_level": 10,
+            "clear_time_ms": 1387364,
+            "keystone_run_id": 5169116,
+            "zone_expansion_id": 6,
+            "background_image_url": "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg",
+            "map_challenge_mode_id": 239,
+            "num_keystone_upgrades": 2
+        }
+    ]
+}

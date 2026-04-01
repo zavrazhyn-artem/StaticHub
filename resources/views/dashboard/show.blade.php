@@ -26,6 +26,11 @@
         <!-- LEFT COLUMN: Critical Intel -->
         <div class="lg:col-span-2 space-y-6">
 
+            <!-- Widget: Sync Status -->
+            <div id="app">
+                <sync-status-widget :sync-data="{{ json_encode($syncData) }}"></sync-status-widget>
+            </div>
+
             <!-- Widget: Next Raid -->
             <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors"></div>

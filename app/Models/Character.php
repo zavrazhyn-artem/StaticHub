@@ -24,6 +24,18 @@ class Character extends Model
         'equipped_item_level',
         'active_spec',
         'avatar_url',
+        'ilvl',
+        'mythic_rating',
+        'raw_bnet_data',
+        'raw_raiderio_data',
+        'raw_wcl_data',
+    ];
+
+    protected $casts = [
+        'raw_bnet_data' => 'array',
+        'raw_raiderio_data' => 'array',
+        'raw_wcl_data' => 'array',
+        'mythic_rating' => 'float',
     ];
 
     public function newEloquentBuilder($query): CharacterBuilder

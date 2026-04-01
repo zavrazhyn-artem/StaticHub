@@ -71,7 +71,15 @@ class BattleNetController extends Controller
             \Log::error('Failed to sync characters on login: ' . $e->getMessage());
         }
 
-        // Redirect to characters list as requested
+        // Check if user has a main character in any static
+        $hasMainCharacter = $user->characters()->whereHas('statics', function ($query) {
+            $query->where('role', 'main');
+        })->exists();
+
+        if ($hasMainCharacter) {
+            return redirect()->route('dashboard');
+        }
+
         return redirect()->route('characters.index');
     }
 }

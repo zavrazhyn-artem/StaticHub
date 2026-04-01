@@ -48,6 +48,7 @@ return [
         'client_id' => env('DISCORD_CLIENT_ID'),
         'client_secret' => env('DISCORD_CLIENT_SECRET'),
         'redirect' => env('DISCORD_REDIRECT_URI'),
+        'webhook_url' => env('DISCORD_WEBHOOK_URL'),
     ],
 
     'wcl' => [
@@ -56,6 +57,7 @@ return [
     ],
 
     'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
         'api_key' => env('GEMINI_API_KEY'),
     ],
 ];

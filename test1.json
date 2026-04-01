@@ -1,0 +1,560 @@
+{
+    "item": {
+        "id": 193714,
+        "key": {
+            "href": "https://eu.api.blizzard.com/data/wow/item/193714?namespace=static-12.0.1_65617-eu"
+        }
+    },
+    "name": {
+        "de_DE": "Wutwurzelmanschetten",
+        "en_GB": "Frenzyroot Cuffs",
+        "en_US": "Frenzyroot Cuffs",
+        "es_ES": "Puños de raíz frenética",
+        "es_MX": "Puños furirraíces",
+        "fr_FR": "Crispins de turboracine",
+        "it_IT": "Polsiere della Radice Frenetica",
+        "ko_KR": "광란뿌리 소매장식",
+        "pt_BR": "Manilhas da Raiz Frenética",
+        "ru_RU": "Манжеты бешеного корня",
+        "zh_CN": "狂根腕扣",
+        "zh_TW": "狂根腕輪"
+    },
+    "slot": {
+        "name": {
+            "de_DE": "Handgelenk",
+            "en_GB": "Wrist",
+            "en_US": "Wrist",
+            "es_ES": "Muñecas",
+            "es_MX": "Muñecas",
+            "fr_FR": "Poignets",
+            "it_IT": "Polsi",
+            "ko_KR": "손목",
+            "pt_BR": "Pulsos",
+            "ru_RU": "Запястья",
+            "zh_CN": "腕部",
+            "zh_TW": "手腕"
+        },
+        "type": "WRIST"
+    },
+    "armor": {
+        "value": 64,
+        "display": {
+            "color": {
+                "a": 1,
+                "b": 255,
+                "g": 255,
+                "r": 255
+            },
+            "display_string": {
+                "de_DE": "64 Rüstung",
+                "en_GB": "64 Armor",
+                "en_US": "64 Armor",
+                "es_ES": "64 p. de armadura",
+                "es_MX": "64 p. de armadura",
+                "fr_FR": "Armure : 64",
+                "it_IT": "64 Armatura",
+                "ko_KR": "방어도 64",
+                "pt_BR": "64 de Armadura",
+                "ru_RU": "Броня: 64",
+                "zh_CN": "64点护甲",
+                "zh_TW": "64點護甲"
+            }
+        }
+    },
+    "level": {
+        "value": 266,
+        "display_string": {
+            "de_DE": "Gegenstandsstufe 266",
+            "en_GB": "Item Level 266",
+            "en_US": "Item Level 266",
+            "es_ES": "Nivel de objeto 266",
+            "es_MX": "Nivel de objeto 266",
+            "fr_FR": "Niveau d'objet 266",
+            "it_IT": "Livello oggetto: 266",
+            "ko_KR": "아이템 레벨: 266",
+            "pt_BR": "Nível do Item: 266",
+            "ru_RU": "Уровень предмета: 266",
+            "zh_CN": "物品等级266",
+            "zh_TW": "物品等級266"
+        }
+    },
+    "media": {
+        "id": 193714,
+        "key": {
+            "href": "https://eu.api.blizzard.com/data/wow/media/item/193714?namespace=static-12.0.1_65617-eu"
+        }
+    },
+    "stats": [
+        {
+            "type": {
+                "name": {
+                    "de_DE": "Beweglichkeit",
+                    "en_GB": "Agility",
+                    "en_US": "Agility",
+                    "es_ES": "agilidad",
+                    "es_MX": "agilidad",
+                    "fr_FR": "Agilité",
+                    "it_IT": "Agilità",
+                    "ko_KR": "민첩성",
+                    "pt_BR": "Agilidade",
+                    "ru_RU": "к ловкости",
+                    "zh_CN": "敏捷",
+                    "zh_TW": "敏捷"
+                },
+                "type": "AGILITY"
+            },
+            "value": 56,
+            "display": {
+                "color": {
+                    "a": 1,
+                    "b": 255,
+                    "g": 255,
+                    "r": 255
+                },
+                "display_string": {
+                    "de_DE": "+56 Beweglichkeit",
+                    "en_GB": "+56 Agility",
+                    "en_US": "+56 Agility",
+                    "es_ES": "+56 agilidad",
+                    "es_MX": "+56 agilidad",
+                    "fr_FR": "+56 Agilité",
+                    "it_IT": "+56 Agilità",
+                    "ko_KR": "민첩성 +56",
+                    "pt_BR": "+56 Agilidade",
+                    "ru_RU": "+56 к ловкости",
+                    "zh_CN": "+56 敏捷",
+                    "zh_TW": "+56敏捷"
+                }
+            }
+        },
+        {
+            "type": {
+                "name": {
+                    "de_DE": "Intelligenz",
+                    "en_GB": "Intellect",
+                    "en_US": "Intellect",
+                    "es_ES": "intelecto",
+                    "es_MX": "intelecto",
+                    "fr_FR": "Intelligence",
+                    "it_IT": "Intelletto",
+                    "ko_KR": "지능",
+                    "pt_BR": "Intelecto",
+                    "ru_RU": "к интеллекту",
+                    "zh_CN": "智力",
+                    "zh_TW": "智力"
+                },
+                "type": "INTELLECT"
+            },
+            "value": 56,
+            "display": {
+                "color": {
+                    "a": 1,
+                    "b": 128,
+                    "g": 128,
+                    "r": 128
+                },
+                "display_string": {
+                    "de_DE": "+56 Intelligenz",
+                    "en_GB": "+56 Intellect",
+                    "en_US": "+56 Intellect",
+                    "es_ES": "+56 intelecto",
+                    "es_MX": "+56 intelecto",
+                    "fr_FR": "+56 Intelligence",
+                    "it_IT": "+56 Intelletto",
+                    "ko_KR": "지능 +56",
+                    "pt_BR": "+56 Intelecto",
+                    "ru_RU": "+56 к интеллекту",
+                    "zh_CN": "+56 智力",
+                    "zh_TW": "+56智力"
+                }
+            },
+            "is_negated": true
+        },
+        {
+            "type": {
+                "name": {
+                    "de_DE": "Ausdauer",
+                    "en_GB": "Stamina",
+                    "en_US": "Stamina",
+                    "es_ES": "aguante",
+                    "es_MX": "aguante",
+                    "fr_FR": "Endurance",
+                    "it_IT": "Tempra",
+                    "ko_KR": "체력",
+                    "pt_BR": "Vigor",
+                    "ru_RU": "к выносливости",
+                    "zh_CN": "耐力",
+                    "zh_TW": "耐力"
+                },
+                "type": "STAMINA"
+            },
+            "value": 749,
+            "display": {
+                "color": {
+                    "a": 1,
+                    "b": 255,
+                    "g": 255,
+                    "r": 255
+                },
+                "display_string": {
+                    "de_DE": "+749 Ausdauer",
+                    "en_GB": "+749 Stamina",
+                    "en_US": "+749 Stamina",
+                    "es_ES": "+749 aguante",
+                    "es_MX": "+749 aguante",
+                    "fr_FR": "+749 Endurance",
+                    "it_IT": "+749 Tempra",
+                    "ko_KR": "체력 +749",
+                    "pt_BR": "+749 Vigor",
+                    "ru_RU": "+749 к выносливости",
+                    "zh_CN": "+749 耐力",
+                    "zh_TW": "+749耐力"
+                }
+            }
+        },
+        {
+            "type": {
+                "name": {
+                    "de_DE": "Tempo",
+                    "en_GB": "Haste",
+                    "en_US": "Haste",
+                    "es_ES": "celeridad",
+                    "es_MX": "celeridad",
+                    "fr_FR": "Hâte",
+                    "it_IT": "Indice di celerità",
+                    "ko_KR": "가속",
+                    "pt_BR": "Aceleração",
+                    "ru_RU": "к скорости",
+                    "zh_CN": "急速",
+                    "zh_TW": "加速"
+                },
+                "type": "HASTE_RATING"
+            },
+            "value": 48,
+            "display": {
+                "color": {
+                    "a": 1,
+                    "b": 0,
+                    "g": 255,
+                    "r": 0
+                },
+                "display_string": {
+                    "de_DE": "+48 Tempo",
+                    "en_GB": "+48 Haste",
+                    "en_US": "+48 Haste",
+                    "es_ES": "+48 celeridad",
+                    "es_MX": "+48 celeridad",
+                    "fr_FR": "+48 Hâte",
+                    "it_IT": "+48 Indice di celerità",
+                    "ko_KR": "가속 +48",
+                    "pt_BR": "+48 Aceleração",
+                    "ru_RU": "+48 к скорости",
+                    "zh_CN": "+48 急速",
+                    "zh_TW": "+48加速"
+                }
+            },
+            "is_equip_bonus": true
+        },
+        {
+            "type": {
+                "name": {
+                    "de_DE": "Meisterschaft",
+                    "en_GB": "Mastery",
+                    "en_US": "Mastery",
+                    "es_ES": "maestría",
+                    "es_MX": "maestría",
+                    "fr_FR": "Maîtrise",
+                    "it_IT": "Indice di maestria",
+                    "ko_KR": "특화",
+                    "pt_BR": "Maestria",
+                    "ru_RU": "к искусности",
+                    "zh_CN": "精通",
+                    "zh_TW": "精通"
+                },
+                "type": "MASTERY_RATING"
+            },
+            "value": 34,
+            "display": {
+                "color": {
+                    "a": 1,
+                    "b": 0,
+                    "g": 255,
+                    "r": 0
+                },
+                "display_string": {
+                    "de_DE": "+34 Meisterschaft",
+                    "en_GB": "+34 Mastery",
+                    "en_US": "+34 Mastery",
+                    "es_ES": "+34 maestría",
+                    "es_MX": "+34 maestría",
+                    "fr_FR": "+34 Maîtrise",
+                    "it_IT": "+34 Indice di maestria",
+                    "ko_KR": "특화 +34",
+                    "pt_BR": "+34 Maestria",
+                    "ru_RU": "+34 к искусности",
+                    "zh_CN": "+34 精通",
+                    "zh_TW": "+34精通"
+                }
+            },
+            "is_equip_bonus": true
+        }
+    ],
+    "binding": {
+        "name": {
+            "de_DE": "Wird beim Aufheben gebunden",
+            "en_GB": "Binds when picked up",
+            "en_US": "Binds when picked up",
+            "es_ES": "Se liga al recogerlo",
+            "es_MX": "Se liga al recogerlo",
+            "fr_FR": "Lié quand ramassé",
+            "it_IT": "Si vincola alla raccolta",
+            "ko_KR": "획득 시 귀속",
+            "pt_BR": "Vincula-se ao ser recolhido",
+            "ru_RU": "Становится персональным при получении",
+            "zh_CN": "拾取后绑定",
+            "zh_TW": "拾取後綁定"
+        },
+        "type": "ON_ACQUIRE"
+    },
+    "context": 33,
+    "quality": {
+        "name": {
+            "de_DE": "Episch",
+            "en_GB": "Epic",
+            "en_US": "Epic",
+            "es_ES": "Épico",
+            "es_MX": "Épico",
+            "fr_FR": "Épique",
+            "it_IT": "Epico",
+            "ko_KR": "영웅",
+            "pt_BR": "Épico",
+            "ru_RU": "Эпическое",
+            "zh_CN": "史诗",
+            "zh_TW": "史詩"
+        },
+        "type": "EPIC"
+    },
+    "quantity": 1,
+    "transmog": {
+        "item": {
+            "id": 255895,
+            "key": {
+                "href": "https://eu.api.blizzard.com/data/wow/item/255895?namespace=static-12.0.1_65617-eu"
+            },
+            "name": {
+                "de_DE": "Wickel des galaktischen Kriegstreibers",
+                "en_GB": "Galactic Warmonger's Wraps",
+                "en_US": "Galactic Warmonger's Wraps",
+                "es_ES": "Envolturas de belicista galáctico",
+                "es_MX": "Sobrevestes de Belicista galáctico",
+                "fr_FR": "Couvre-bras de belliciste galactique",
+                "it_IT": "Nastri del Guerrafondaio Galattico",
+                "ko_KR": "우주를 호령하는 전투사의 손목싸개",
+                "pt_BR": "Munhequeiras do Fomentador da Guerra Galáctico",
+                "ru_RU": "Напульсники галактического завоевателя",
+                "zh_CN": "星河好战者的裹腕",
+                "zh_TW": "銀河好戰者裹布"
+            }
+        },
+        "display_string": {
+            "de_DE": "Transmogrifiziert zu:\nWickel des galaktischen Kriegstreibers",
+            "en_GB": "Transmogrified to:\nGalactic Warmonger's Wraps",
+            "en_US": "Transmogrified to:\nGalactic Warmonger's Wraps",
+            "es_ES": "Transfigurado a:\nEnvolturas de belicista galáctico",
+            "es_MX": "Transfigurado a:\nSobrevestes de Belicista galáctico",
+            "fr_FR": "Transmogrifié en :\nCouvre-bras de belliciste galactique",
+            "it_IT": "Trasmogrificato in:\nNastri del Guerrafondaio Galattico",
+            "ko_KR": "다음으로 형상변환:\n우주를 호령하는 전투사의 손목싸개",
+            "pt_BR": "Transmogrificado para:\nMunhequeiras do Fomentador da Guerra Galáctico",
+            "ru_RU": "Трансмогрификация:\nНапульсники галактического завоевателя",
+            "zh_CN": "幻化为：\n星河好战者的裹腕",
+            "zh_TW": "已塑形為：\n銀河好戰者裹布"
+        },
+        "item_modified_appearance_id": 300617
+    },
+    "bonus_list": [
+        12795,
+        13440,
+        6652,
+        12667,
+        13577,
+        12699
+    ],
+    "durability": {
+        "value": 25,
+        "display_string": {
+            "de_DE": "Haltbarkeit 25 / 55",
+            "en_GB": "Durability 25 / 55",
+            "en_US": "Durability 25 / 55",
+            "es_ES": "Durabilidad 25 / 55",
+            "es_MX": "Durabilidad 25 / 55",
+            "fr_FR": "Durabilité : 25 / 55",
+            "it_IT": "Integrità 25/55",
+            "ko_KR": "내구도 25 / 55",
+            "pt_BR": "Durabilidade 25 / 55",
+            "ru_RU": "Прочность: 25 / 55",
+            "zh_CN": "耐久度 25 / 55",
+            "zh_TW": "耐久度 25 / 55"
+        }
+    },
+    "item_class": {
+        "id": 4,
+        "key": {
+            "href": "https://eu.api.blizzard.com/data/wow/item-class/4?namespace=static-12.0.1_65617-eu"
+        },
+        "name": {
+            "de_DE": "Rüstung",
+            "en_GB": "Armor",
+            "en_US": "Armor",
+            "es_ES": "Armadura",
+            "es_MX": "Armadura",
+            "fr_FR": "Armure",
+            "it_IT": "Armature",
+            "ko_KR": "방어구",
+            "pt_BR": "Armadura",
+            "ru_RU": "Доспехи",
+            "zh_CN": "护甲",
+            "zh_TW": "護甲"
+        }
+    },
+    "sell_price": {
+        "value": 291691,
+        "display_strings": {
+            "gold": {
+                "de_DE": "29",
+                "en_GB": "29",
+                "en_US": "29",
+                "es_ES": "29",
+                "es_MX": "29",
+                "fr_FR": "29",
+                "it_IT": "29",
+                "ko_KR": "29",
+                "pt_BR": "29",
+                "ru_RU": "29",
+                "zh_CN": "29",
+                "zh_TW": "29"
+            },
+            "copper": {
+                "de_DE": "91",
+                "en_GB": "91",
+                "en_US": "91",
+                "es_ES": "91",
+                "es_MX": "91",
+                "fr_FR": "91",
+                "it_IT": "91",
+                "ko_KR": "91",
+                "pt_BR": "91",
+                "ru_RU": "91",
+                "zh_CN": "91",
+                "zh_TW": "91"
+            },
+            "header": {
+                "de_DE": "Verkaufspreis:",
+                "en_GB": "Sell Price:",
+                "en_US": "Sell Price:",
+                "es_ES": "Precio de venta:",
+                "es_MX": "Precio de venta:",
+                "fr_FR": "Prix de vente :",
+                "it_IT": "Prezzo di vendita:",
+                "ko_KR": "판매 가격:",
+                "pt_BR": "Preço de Venda:",
+                "ru_RU": "Цена продажи:",
+                "zh_CN": "卖价:",
+                "zh_TW": "售價:"
+            },
+            "silver": {
+                "de_DE": "16",
+                "en_GB": "16",
+                "en_US": "16",
+                "es_ES": "16",
+                "es_MX": "16",
+                "fr_FR": "16",
+                "it_IT": "16",
+                "ko_KR": "16",
+                "pt_BR": "16",
+                "ru_RU": "16",
+                "zh_CN": "16",
+                "zh_TW": "16"
+            }
+        }
+    },
+    "requirements": {
+        "level": {
+            "value": 90,
+            "display_string": {
+                "de_DE": "Benötigt Stufe 90",
+                "en_GB": "Requires Level 90",
+                "en_US": "Requires Level 90",
+                "es_ES": "Necesitas ser de nivel 90",
+                "es_MX": "Necesitas ser de nivel 90",
+                "fr_FR": "Niveau 90 requis",
+                "it_IT": "Richiede il livello 90",
+                "ko_KR": "최소 요구 레벨: 90",
+                "pt_BR": "Requer o Nível 90",
+                "ru_RU": "Требуется 90-й уровень",
+                "zh_CN": "需要等级 90",
+                "zh_TW": "需要等級90"
+            }
+        }
+    },
+    "item_subclass": {
+        "id": 2,
+        "key": {
+            "href": "https://eu.api.blizzard.com/data/wow/item-class/4/item-subclass/2?namespace=static-12.0.1_65617-eu"
+        },
+        "name": {
+            "de_DE": "Leder",
+            "en_GB": "Leather",
+            "en_US": "Leather",
+            "es_ES": "Cuero",
+            "es_MX": "Cuero",
+            "fr_FR": "Cuir",
+            "it_IT": "Cuoio",
+            "ko_KR": "가죽",
+            "pt_BR": "Couro",
+            "ru_RU": "Кожа",
+            "zh_CN": "皮甲",
+            "zh_TW": "皮甲"
+        }
+    },
+    "inventory_type": {
+        "name": {
+            "de_DE": "Handgelenk",
+            "en_GB": "Wrist",
+            "en_US": "Wrist",
+            "es_ES": "Muñecas",
+            "es_MX": "Muñecas",
+            "fr_FR": "Poignets",
+            "it_IT": "Polsi",
+            "ko_KR": "손목",
+            "pt_BR": "Pulsos",
+            "ru_RU": "Запястья",
+            "zh_CN": "腕部",
+            "zh_TW": "手腕"
+        },
+        "type": "WRIST"
+    },
+    "name_description": {
+        "color": {
+            "a": 1,
+            "b": 0,
+            "g": 255,
+            "r": 0
+        },
+        "display_string": {
+            "de_DE": "Mythisch+",
+            "en_GB": "Mythic+",
+            "en_US": "Mythic+",
+            "es_ES": "Mítica+",
+            "es_MX": "Mítico+",
+            "fr_FR": "Mythique +",
+            "it_IT": "Mitica+",
+            "ko_KR": "신화+",
+            "pt_BR": "Mítico+",
+            "ru_RU": "Эпохальный+",
+            "zh_CN": "史诗钥石",
+            "zh_TW": "傳奇難度+"
+        }
+    },
+    "modified_appearance_id": 180829
+}

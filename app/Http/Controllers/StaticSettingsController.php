@@ -5,17 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\StaticGroup;
 use App\Services\RaidScheduleService;
 use App\Services\DiscordMessageService;
+use App\Services\DiscordService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StaticSettingsController extends Controller
 {
     protected RaidScheduleService $raidScheduleService;
-    protected DiscordMessageService $discordService;
+    protected DiscordMessageService $discordMessageService;
+    protected DiscordService $discordService;
 
-    public function __construct(RaidScheduleService $raidScheduleService, DiscordMessageService $discordService)
-    {
+    public function __construct(
+        RaidScheduleService $raidScheduleService,
+        DiscordMessageService $discordMessageService,
+        DiscordService $discordService
+    ) {
         $this->raidScheduleService = $raidScheduleService;
+        $this->discordMessageService = $discordMessageService;
         $this->discordService = $discordService;
     }
 
@@ -28,7 +34,7 @@ class StaticSettingsController extends Controller
 
         $timezones = timezone_identifiers_list();
 
-        $botGuilds = $this->discordService->getGuildsTheBotIsIn();
+        $botGuilds = $this->discordMessageService->getGuildsTheBotIsIn();
         $discordGuildId = $static->discord_guild_id;
 
         // Auto-discovery: If bot is in exactly one guild and guild_id is not set, set it automatically for the view logic
@@ -40,8 +46,8 @@ class StaticSettingsController extends Controller
         $discordRoles = [];
 
         if ($discordGuildId) {
-            $discordChannels = $this->discordService->getGuildChannels($discordGuildId);
-            $discordRoles = $this->discordService->getGuildRoles($discordGuildId);
+            $discordChannels = $this->discordMessageService->getGuildChannels($discordGuildId);
+            $discordRoles = $this->discordMessageService->getGuildRoles($discordGuildId);
         }
 
         return view('statics.settings.schedule', compact('static', 'timezones', 'discordChannels', 'discordRoles', 'botGuilds', 'discordGuildId'));
@@ -104,5 +110,16 @@ class StaticSettingsController extends Controller
         $this->raidScheduleService->generateUpcomingEvents($static);
 
         return redirect()->back()->with('success', 'Raid schedule updated and events generated!');
+    }
+
+    public function testDiscordWebhook(StaticGroup $static)
+    {
+        if ($static->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $success = $this->discordService->sendTestMessage();
+
+        return response()->json(['success' => $success]);
     }
 }

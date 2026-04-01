@@ -4,9 +4,10 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>StaticHub - Ethereal Command</title>
+        <title>BlastR - Blast Your Raid</title>
 
         <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
@@ -25,11 +26,14 @@
                     <span class="w-2 h-2 bg-success-neon rounded-full animate-pulse"></span>
                     <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">System Online: Midnight S1</span>
                 </div>
-                <h1 class="text-6xl md:text-8xl font-black text-white uppercase tracking-tighter italic leading-none">
-                    Static <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">Hub</span>
-                </h1>
-                <p class="text-on-surface-variant font-medium text-lg max-w-xl mx-auto uppercase tracking-widest text-[12px]">
-                    Tactical Command Interface for Azeroth's Elite Raid Groups
+                <div class="mb-8 flex items-center justify-center gap-6 drop-shadow-[0_0_40px_rgba(58,223,250,0.3)] transition-transform hover:scale-105 duration-500 mx-auto">
+                    <img src="/images/logo.svg" alt="BlastR Logo" class="w-32 h-32 object-contain" />
+                    <div class="text-7xl font-black uppercase tracking-tighter italic leading-none">
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-xs opacity-70 ml-1">r<span class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+                    </div>
+                </div>
+                <p class="mt-4 font-slogan text-lg md:text-xl font-bold tracking-[0.4em] uppercase text-on-surface drop-shadow-[0_0_8px_rgba(58,223,250,0.4)]">
+                    Blast Your Raid
                 </p>
             </div>
 
@@ -71,7 +75,7 @@
         </div>
 
         <footer class="fixed bottom-8 left-0 w-full text-center z-10">
-            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ date('Y') }} SHUB_SYSTEMS // PROTOCOL_V1</p>
+            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ date('Y') }} BLASTR_SYSTEMS // PROTOCOL_V1</p>
         </footer>
     </body>
 </html>

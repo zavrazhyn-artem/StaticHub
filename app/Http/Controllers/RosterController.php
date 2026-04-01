@@ -52,6 +52,26 @@ class RosterController extends Controller
         ]);
     }
 
+    public function overview(StaticGroup $static)
+    {
+        $allCharacters = $static->characters()->get();
+
+        $mains = $allCharacters->where(function ($char) {
+            return strtolower($char->pivot->role) === 'main';
+        })->values();
+
+        foreach ($mains as $main) {
+            $main->alts = $allCharacters->where('user_id', $main->user_id)
+                ->where('id', '!=', $main->id)
+                ->values();
+        }
+
+        return view('roster.overview', [
+            'static' => $static,
+            'characters' => $mains, // Передаємо мейнів, всередині яких тепер є масив ->alts
+        ]);
+    }
+
     public function updateParticipation(Request $request, StaticGroup $static)
     {
         $validated = $request->validate([
@@ -69,6 +89,10 @@ class RosterController extends Controller
             $validated['combat_roles']
         );
 
-        return redirect()->back();
+        if ($request->has('onboarding')) {
+            return redirect()->route('dashboard')->with('success', 'Roster updated successfully!');
+        }
+
+        return redirect()->back()->with('success', 'Roster updated successfully!');
     }
 }

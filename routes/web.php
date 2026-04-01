@@ -31,11 +31,13 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
 
     Route::get('/statics/{static}/dashboard', [App\Http\Controllers\DashboardController::class, 'show'])->name('statics.dashboard');
     Route::get('/statics/{static}/roster', [RosterController::class, 'index'])->name('statics.roster');
+    Route::get('/statics/{static}/roster/overview', [RosterController::class, 'overview'])->name('statics.roster.overview');
     Route::get('/statics/{static}/treasury', [App\Http\Controllers\TreasuryController::class, 'index'])->name('statics.treasury');
     Route::post('/statics/{static}/treasury', [App\Http\Controllers\TreasuryController::class, 'store'])->name('statics.treasury.store');
 
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::post('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
+    Route::post('/statics/{static}/settings/discord/test', [StaticSettingsController::class, 'testDiscordWebhook'])->name('statics.settings.discord.test');
 
     Route::get('/statics/{static}/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
     Route::post('/statics/{static}/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');

@@ -83,7 +83,8 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
                 "headline": ["Space Grotesk"],
                 "body": ["Manrope"],
-                "label": ["Space Grotesk"]
+                "label": ["Manrope"],
+                "slogan": ["Orbitron", "sans-serif"]
             },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
             typography: (theme) => ({

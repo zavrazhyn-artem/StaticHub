@@ -1,40 +1,43 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Join Static: ') }} {{ $static->name }}
-        </h2>
-    </x-slot>
+    <div class="mb-12">
+        <div class="flex justify-between items-end mb-4">
+            <div>
+                <span class="text-cyan-400 font-headline text-xs font-bold uppercase tracking-[0.3em] mb-2 block">— Command Authorization</span>
+                <h2 class="font-headline text-4xl font-black text-white uppercase tracking-tighter italic">
+                    Join {{ $static->name }}
+                </h2>
+                <p class="text-on-surface-variant font-medium mt-2 max-w-2xl text-sm leading-relaxed">
+                    You have been authorized to join this static operations group.
+                </p>
+            </div>
+        </div>
+    </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="max-w-md mx-auto">
-                    <h3 class="text-lg font-bold mb-4 text-center">You've been invited to join {{ $static->name }}</h3>
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-surface-container-high p-12 rounded-xl border border-white/5 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
 
-                    <form action="{{ route('statics.join.process', $static->invite_token) }}" method="POST">
-                        @csrf
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="character_id">
-                                Select which character will join this static:
-                            </label>
-                            <select name="character_id" id="character_id" required
-                                class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                @foreach($userCharacters as $character)
-                                    <option value="{{ $character->id }}">{{ $character->name }} - {{ $character->realm->name ?? '' }}</option>
-                                @endforeach
-                            </select>
-                            @error('character_id')
-                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+            <div class="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-8 mx-auto border border-primary/20">
+                <span class="material-symbols-outlined text-5xl text-primary">diversity_3</span>
+            </div>
 
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-                                Join Static
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <h3 class="font-headline text-white text-2xl font-black uppercase tracking-tight mb-4">Invitation Received</h3>
+            <p class="text-on-surface-variant mb-12">
+                By joining <strong>{{ $static->name }}</strong> ({{ strtoupper($static->region) }} - {{ $static->server }}), you will be able to participate in their raid events and coordinate with other members.
+            </p>
+
+            <form action="{{ route('statics.join.process', $static->invite_token) }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full bg-primary text-on-primary font-headline font-bold text-sm uppercase tracking-[0.2em] py-5 rounded hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3">
+                    <span class="material-symbols-outlined">login</span>
+                    Confirm Participation
+                </button>
+            </form>
+
+            <div class="mt-8 pt-8 border-t border-white/5">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50">
+                    Step 1: Join Group • Step 2: Select Character
+                </p>
             </div>
         </div>
     </div>

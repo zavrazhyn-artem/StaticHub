@@ -261,4 +261,32 @@ GQL;
         }
         return max(1, $duration / 1000);
     }
+
+    /**
+     * Fetch character parses from the WCL API.
+     */
+    public function getCharacterParses(string $region, string $server, string $name): ?array
+    {
+        $query = '
+            query ($name: String, $serverSlug: String, $serverRegion: String) {
+                characterData {
+                    character(name: $name, serverSlug: $serverSlug, serverRegion: $serverRegion) {
+                        zoneRankings
+                    }
+                }
+            }
+        ';
+
+        $variables = [
+            'name' => $name,
+            'serverSlug' => $server,
+            'serverRegion' => $region,
+        ];
+
+        try {
+            return $this->query($query, $variables);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 }

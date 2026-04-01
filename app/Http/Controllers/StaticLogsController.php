@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StaticGroup;
 use App\Models\TacticalReport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class StaticLogsController extends Controller
 {
@@ -43,6 +44,10 @@ class StaticLogsController extends Controller
             }
         }
 
-        return view('statics.logs.show', compact('static', 'report', 'userCharacter'));
+        // Load raw log data from file if exists
+        $logPath = storage_path("logs/wcl_debug_{$report->wcl_report_id}.json");
+        $rawLogData = File::exists($logPath) ? json_decode(File::get($logPath), true) : [];
+
+        return view('statics.logs.show', compact('static', 'report', 'userCharacter', 'rawLogData'));
     }
 }

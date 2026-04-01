@@ -360,6 +360,34 @@ class BlizzardApiService
     }
 
     /**
+     * Fetch character equipment from the WoW Profile API.
+     */
+    public function getCharacterEquipment(string $region, string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $response = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
+            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/" . strtolower($characterName) . "/equipment");
+
+        $equipment = $response->successful() ? $response->json() : null;
+
+        // Also fetch Mythic+ data for "Dungeons Done" and "Vault" info
+        $mPlusResponse = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
+            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/" . strtolower($characterName) . "/mythic-plus-progression/summary");
+
+        if ($mPlusResponse->successful()) {
+            if ($equipment) {
+                $equipment['mythic_plus_progression'] = $mPlusResponse->json();
+            } else {
+                $equipment = ['mythic_plus_progression' => $mPlusResponse->json()];
+            }
+        }
+
+        return $equipment;
+    }
+
+    /**
      * Fetch the real name, icon, and quality from the /data/wow/item/{id} endpoint.
      */
     public function syncItemMetadata(int $itemId): void

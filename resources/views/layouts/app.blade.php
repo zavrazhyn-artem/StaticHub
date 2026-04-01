@@ -8,11 +8,16 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Wowhead Tooltips -->
+        <script>const whTooltips = {colorLinks: true, iconizeLinks: false, renameLinks: false};</script>
+        <script src="https://wow.zamimg.com/js/tooltips.js"></script>
     </head>
     <body class="bg-background text-on-background min-h-screen arcane-bg antialiased">
         @php
@@ -21,13 +26,18 @@
         <!-- TopNavBar -->
         <header class="fixed top-0 z-50 w-full flex justify-between items-center px-6 py-4 bg-[#0e0e10]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
             <div class="flex items-center gap-8">
-                <div class="text-xl font-black text-cyan-400 uppercase tracking-widest font-headline">Static Hub</div>
+                <div class="flex items-center gap-3">
+                    <img src="/images/logo.svg" alt="BlastR Logo" class="h-8 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]" />
+                    <div class="text-2xl font-black uppercase tracking-tighter italic leading-none">
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-xs opacity-70 ml-0.5">r<span class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+                    </div>
+                </div>
                 @if($static)
                     <div class="hidden md:flex items-center gap-4 ml-4">
                         <button onclick="handleInviteClick({{ $static->id }})"
                                 class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
                             <span class="material-symbols-outlined text-sm">person_add</span>
-                            <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Invite to Static</span>
+                            <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Invite to Group</span>
                         </button>
                         <div id="invite-toast" class="hidden fixed bottom-6 right-6 bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce font-headline text-xs font-bold uppercase tracking-widest z-[100]">
                             Invite Link Copied!
@@ -139,6 +149,12 @@
                         <span class="font-headline text-xs font-bold uppercase tracking-widest">Roster</span>
                     </a>
 
+                    <a href="{{ route('statics.roster.overview', $static->id) }}"
+                       class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster.overview') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                        <span class="material-symbols-outlined {{ request()->routeIs('statics.roster.overview') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">grid_view</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Roster Overview</span>
+                    </a>
+
                     <a href="{{ route('consumables.index') }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('consumables.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('consumables.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">inventory_2</span>
@@ -174,8 +190,11 @@
                     </a>
                 </div>
             @else
-                <div class="px-6 mb-8">
-                    <h2 class="font-headline text-lg font-bold text-white uppercase tracking-tighter">Static Hub</h2>
+                <div class="px-6 mb-8 flex items-center gap-3">
+                    <img src="/images/logo.svg" alt="BlastR Logo" class="h-6 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]" />
+                    <div class="text-lg font-black uppercase tracking-tighter italic leading-none">
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-[8px] opacity-70 ml-0.5">r<span class="text-[6px] opacity-50 ml-0.5">r</span></span></span>
+                    </div>
                 </div>
             @endif
 

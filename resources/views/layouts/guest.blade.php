@@ -8,6 +8,7 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
@@ -17,8 +18,11 @@
     <body class="bg-background text-on-background min-h-screen arcane-bg antialiased flex flex-col items-center justify-center p-6">
         <div class="w-full sm:max-w-md mt-6 px-8 py-10 bg-surface-container-low border border-white/5 shadow-2xl overflow-hidden rounded-xl backdrop-blur-md">
             <div class="flex justify-center mb-8">
-                <a href="/" class="text-2xl font-black text-primary uppercase tracking-[0.2em] font-headline italic">
-                    Static <span class="text-white">Hub</span>
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/images/logo.svg" alt="BlastR Logo" class="h-10 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]" />
+                    <div class="text-3xl font-black uppercase tracking-tighter italic leading-none">
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-sm opacity-70 ml-0.5">r<span class="text-xs opacity-50 ml-0.5">r</span></span></span>
+                    </div>
                 </a>
             </div>
             {{ $slot }}
