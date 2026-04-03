@@ -84,6 +84,7 @@ final class RosterCompilerService
             weekly_runs_count:      $this->resolveWeeklyRunsCount($mplus),
             missing_enchants_slots: $this->resolveMissingEnchants($equippedItems),
             empty_sockets_count:    $this->resolveEmptySockets($equippedItems),
+            upgrades_missing:       $this->resolveTotalUpgradesMissing($equippedItems),
             tier_pieces:            $this->resolveTierPieces($equippedItems),
             raids:                  $this->resolveRaids($raid),
             equipment:              $this->resolveEquipment($equippedItems, $rioItems, $rawData),
@@ -273,6 +274,31 @@ final class RosterCompilerService
     }
 
     // -------------------------------------------------------------------------
+    // Equipment — upgrades
+    // -------------------------------------------------------------------------
+
+    /**
+     * Calculates the total number of missing upgrades for the character to reach 100% full BIS.
+     *
+     * @param  array<int,array<string,mixed>> $equippedItems
+     */
+    private function resolveTotalUpgradesMissing(array $equippedItems): int
+    {
+        $totalMissing = 0;
+
+        foreach ($equippedItems as $item) {
+            $bonuses = $item['bonus_list'] ?? [];
+            $upgrade = $this->resolveUpgradeTrack($bonuses);
+
+            if ($upgrade) {
+                $totalMissing += ($upgrade['max'] - $upgrade['level']);
+            }
+        }
+
+        return $totalMissing;
+    }
+
+    // -------------------------------------------------------------------------
     // Equipment — tier pieces
     // -------------------------------------------------------------------------
 
@@ -297,6 +323,14 @@ final class RosterCompilerService
         $bySlot = $this->indexBySlotType($equippedItems);
         $result = $this->emptyTierPieces;
 
+        $trackAbbreviations = [
+            'Myth'       => 'M',
+            'Hero'       => 'H',
+            'Champion'   => 'C',
+            'Veteran'    => 'V',
+            'Adventurer' => 'A',
+        ];
+
         foreach ($this->tierSlots as $abbrev => $slotType) {
             $item = $bySlot[$slotType] ?? null;
 
@@ -304,6 +338,16 @@ final class RosterCompilerService
                 continue; // Keeps the '-' default.
             }
 
+            // Try resolving via upgrade track first
+            $bonuses = $item['bonus_list'] ?? [];
+            $upgrade = $this->resolveUpgradeTrack($bonuses);
+
+            if ($upgrade !== null && isset($trackAbbreviations[$upgrade['track']])) {
+                $result[$abbrev] = $trackAbbreviations[$upgrade['track']];
+                continue;
+            }
+
+            // Fallback to ilvl-based classification
             $ilvl = (int) ($item['level']['value'] ?? 0);
             $result[$abbrev] = $this->classifyIlvl($ilvl);
         }
@@ -459,6 +503,8 @@ final class RosterCompilerService
      *             quality:      string,
      *             enchant_id:   int|null,
      *             gem_ids:      int[],
+     *             bonus_ids:    int[],
+     *             upgrade:      array{track: string, level: int, max: int}|null,
      *             socket_count: int,
      *             icon:         string|null,
      *         }>|null
@@ -491,6 +537,8 @@ final class RosterCompilerService
                 $iconName = data_get($rawData->rio_profile, "gear.items.{$rioSlotName}.icon");
             }
 
+            $bonuses = $item['bonus_list'] ?? [];
+
             $result[] = [
                 'slot'         => $slotType,
                 'id'           => $itemId,
@@ -499,12 +547,34 @@ final class RosterCompilerService
                 'quality'      => strtoupper((string) ($item['quality']['type'] ?? 'COMMON')),
                 'enchant_id'   => $this->extractEnchantId($item),
                 'gem_ids'      => $this->extractGemIds($item),
+                'bonus_ids'    => $bonuses,
+                'upgrade'      => $this->resolveUpgradeTrack($bonuses),
                 'socket_count' => count($item['sockets'] ?? []),
                 'icon'         => $iconName,
             ];
         }
 
         return $result !== [] ? $result : null;
+    }
+
+
+    /**
+     * Maps a list of bonus IDs to a structured upgrade track.
+     *
+     * @param  int[] $bonuses
+     * @return array{track: string, level: int, max: int}|null
+     */
+    private function resolveUpgradeTrack(array $bonuses): ?array
+    {
+        $tracks = config('wow_season.item_upgrade_tracks', []);
+
+        foreach ($bonuses as $bonusId) {
+            if (isset($tracks[$bonusId])) {
+                return $tracks[$bonusId];
+            }
+        }
+
+        return null;
     }
 
 

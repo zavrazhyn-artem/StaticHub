@@ -80,8 +80,7 @@ const slotLabels = {
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th class="p-2 text-center border-l border-white/5 w-[100px]">Audit</th>
-                        <th :colspan="slots.length" class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400">
+                        <th :colspan="slots.length" class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
                             Gear
                         </th>
                     </template>
@@ -118,7 +117,8 @@ const slotLabels = {
 
                     <template v-if="activeTab === 'gear'">
                         <th class="p-2 text-center border-l border-white/5 w-[100px]">Issues</th>
-                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-white/5 text-[7px] min-w-[32px]">
+                        <th class="p-1 text-center border-l border-white/5 text-[7px] min-w-[52px]">UPGRADES MISSING</th>
+                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-white/5 text-[7px] min-w-[52px]">
                             {{ slotLabels[slot] }}
                         </th>
                     </template>

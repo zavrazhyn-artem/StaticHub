@@ -5,6 +5,14 @@ const props = defineProps({
     tierCount: { type: Function, required: true },
     isAlt: { type: Boolean, default: false },
 });
+
+const trackColorMap = {
+    M: 'text-yellow-400',
+    H: 'text-purple-400',
+    C: 'text-blue-400',
+    V: 'text-green-400',
+    A: 'text-gray-400'
+};
 </script>
 
 <template>
@@ -13,7 +21,7 @@ const props = defineProps({
     </td>
     <td v-for="slot in ['H', 'S', 'C', 'G', 'L']" :key="'ms-' + slot"
         :class="isAlt ? 'h-[42px]' : 'h-[72px]'" class="p-1.5 text-center">
-        <span :class="tierColors[char?.tier_pieces?.[slot]] ?? 'text-gray-700'" class="text-[10px]">
+        <span :class="trackColorMap[char?.tier_pieces?.[slot]] ?? tierColors[char?.tier_pieces?.[slot]] ?? 'text-gray-700'" class="text-[10px] font-bold">
             {{ char?.tier_pieces?.[slot] || '-' }}
         </span>
     </td>

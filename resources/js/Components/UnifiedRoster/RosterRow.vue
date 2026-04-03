@@ -38,7 +38,7 @@ const emit = defineEmits([
         ]">
 
         <!-- Character identity -->
-        <td :class="isAlt ? 'p-1.5 pl-[70px] h-[42px]' : 'p-2.5 h-[72px]'">
+        <td :class="isAlt ? 'p-1.5 pl-[70px] h-[42px]' : 'p-2.5 h-[86px]'">
             <div :class="[
                 'flex flex-col justify-center h-full gap-1',
                 isAlt ? 'items-start' : 'items-center'
@@ -87,7 +87,7 @@ const emit = defineEmits([
 
         <!-- iLvL (hidden in raids and gear) -->
         <td v-if="activeTab !== 'raids' && activeTab !== 'gear'"
-            :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[72px]', 'text-center font-mono font-bold text-cyan-400 border-l border-white/5']">
+            :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center font-mono font-bold text-cyan-400 border-l border-white/5']">
             {{ char?.equipped_ilvl != null
                 ? Number(char.equipped_ilvl).toFixed(1)
                 : 'N/A' }}
@@ -117,11 +117,12 @@ const emit = defineEmits([
                        :is-alt="isAlt"
                        :has-audit-issues="hasAuditIssues"
                        :audit-title="auditTitle" />
+
         </template>
 
         <!-- Audit badge (summary only) -->
         <template v-if="activeTab === 'summary'">
-            <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[72px]', 'text-center border-l border-white/5']">
+            <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5']">
                 <span v-if="hasAuditIssues(char)"
                       :class="[isAlt ? 'text-[8px] px-1' : 'text-[9px] px-1.5', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded py-0.5 font-bold cursor-help']"
                       :title="auditTitle(char)">
@@ -133,7 +134,7 @@ const emit = defineEmits([
 
             <!-- Role / Status selects (summary only, main character only) -->
             <template v-if="!isAlt">
-                <td class="p-2 w-[130px] h-[72px] border-l border-white/5 text-center">
+                <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
                     <div v-if="canManageAccess">
                         <select :value="member.access_role"
                                 @change="emit('update-access-role', member, $event.target.value)"
@@ -149,7 +150,7 @@ const emit = defineEmits([
                         </span>
                     </div>
                 </td>
-                <td class="p-2 w-[130px] h-[72px] border-l border-white/5 text-center">
+                <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
                     <div v-if="canManageStatus">
                         <select :value="member.roster_status"
                                 @change="emit('update-roster-status', member, $event.target.value)"
@@ -166,8 +167,8 @@ const emit = defineEmits([
                 </td>
             </template>
             <template v-else>
-                <td class="w-[130px] h-[42px] border-l border-white/5"></td>
-                <td class="w-[130px] h-[42px] border-l border-white/5"></td>
+                <td class="w-[130px] h-[86px] border-l border-white/5"></td>
+                <td class="w-[130px] h-[86px] border-l border-white/5"></td>
             </template>
         </template>
     </tr>

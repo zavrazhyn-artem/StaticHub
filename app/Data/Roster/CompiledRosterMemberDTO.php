@@ -22,6 +22,7 @@ final readonly class CompiledRosterMemberDTO
      * @param  int                  $weekly_runs_count      Mythic+ keys timed this weekly reset.
      * @param  string[]             $missing_enchants_slots Slot type keys lacking a permanent enchant, e.g. ["CHEST","FEET"].
      * @param  int                  $empty_sockets_count    Gem sockets across all gear containing no gem.
+     * @param  int                  $upgrades_missing       Total number of missing upgrades across all equipped items.
      * @param  array<string,string> $tier_pieces            Tier abbreviation → difficulty label map.
      *                                                       Shape is always: ['H'=>'…','S'=>'…','C'=>'…','G'=>'…','L'=>'…'].
      *                                                       Value is one of 'M','H','N','F', or '-' when the slot is
@@ -58,6 +59,7 @@ final readonly class CompiledRosterMemberDTO
         public int     $weekly_runs_count,
         public array   $missing_enchants_slots,
         public int     $empty_sockets_count,
+        public int     $upgrades_missing,
         public array   $tier_pieces,
         public ?array  $raids,
         public ?array  $equipment,

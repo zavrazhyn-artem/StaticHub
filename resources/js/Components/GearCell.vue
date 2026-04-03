@@ -38,6 +38,14 @@ const QUALITY_COLORS = {
     HEIRLOOM:  'text-blue-200',
 };
 
+const trackAbbreviations = {
+    Myth: 'M',
+    Hero: 'H',
+    Champion: 'C',
+    Veteran: 'V',
+    Adventurer: 'A'
+};
+
 // ---------------------------------------------------------------------------
 // Computed
 // ---------------------------------------------------------------------------
@@ -87,6 +95,9 @@ const wowheadData = computed(() => {
     if (props.item.gem_ids?.length)
         parts.push(`gems=${props.item.gem_ids.join(':')}`);
 
+    if (props.item.bonus_ids?.length)
+        parts.push(`bonus=${props.item.bonus_ids.join(':')}`);
+
     return parts.join('&');
 });
 </script>
@@ -113,9 +124,15 @@ const wowheadData = computed(() => {
             </div>
 
             <!-- ilvl badge -->
-            <div class="absolute -bottom-1 -right-1 bg-black/80 px-0.5 text-[8px] font-bold leading-none rounded shadow-sm z-10"
+            <div class="absolute -top-1 -left-1 bg-black/80 px-0.5 text-[8px] font-bold leading-none rounded shadow-sm z-10"
                  :class="qualityColor">
                 {{ item.ilvl }}
+            </div>
+
+            <!-- Upgrade track badge -->
+            <div v-if="item.upgrade"
+                 class="absolute -bottom-1 -left-1 bg-black/90 px-0.5 text-[7px] font-bold tracking-tighter rounded shadow-sm z-10 text-green-400 border border-green-500/30">
+                {{ trackAbbreviations[item.upgrade.track] || item.upgrade.track }} {{ item.upgrade.level }}/{{ item.upgrade.max }}
             </div>
 
             <!-- Audit warning dot -->

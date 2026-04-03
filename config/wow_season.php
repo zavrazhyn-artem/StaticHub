@@ -83,4 +83,47 @@ return [
         'L' => 'LEGS',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Item Upgrade Tracks
+    |--------------------------------------------------------------------------
+    |
+    | Maps a Bonus ID to its corresponding upgrade track name, current level,
+    | and maximum possible level. These are used to render badges on items
+    | and for future mathematical calculations.
+    */
+    'item_upgrade_tracks' => [
+        // Placeholder keys -> Structured data
+        12801 => ['track' => 'Myth', 'level' => 1, 'max' => 6],
+        12802 => ['track' => 'Myth', 'level' => 2, 'max' => 6],
+        12803 => ['track' => 'Myth', 'level' => 3, 'max' => 6],
+        12804 => ['track' => 'Myth', 'level' => 4, 'max' => 6],
+        12805 => ['track' => 'Myth', 'level' => 5, 'max' => 6],
+        12806 => ['track' => 'Myth', 'level' => 6, 'max' => 6],
+        12793 => ['track' => 'Hero', 'level' => 1, 'max' => 6],
+        12794 => ['track' => 'Hero', 'level' => 2, 'max' => 6],
+        12795 => ['track' => 'Hero', 'level' => 3, 'max' => 6],
+        12796 => ['track' => 'Hero', 'level' => 4, 'max' => 6],
+        12797 => ['track' => 'Hero', 'level' => 5, 'max' => 6],
+        12798 => ['track' => 'Hero', 'level' => 6, 'max' => 6],
+        12785 => ['track' => 'Champion', 'level' => 1, 'max' => 6],
+        12786 => ['track' => 'Champion', 'level' => 2, 'max' => 6],
+        12787 => ['track' => 'Champion', 'level' => 3, 'max' => 6],
+        12788 => ['track' => 'Champion', 'level' => 4, 'max' => 6],
+        12789 => ['track' => 'Champion', 'level' => 5, 'max' => 6],
+        12790 => ['track' => 'Champion', 'level' => 6, 'max' => 6],
+        12777 => ['track' => 'Veteran', 'level' => 1, 'max' => 6],
+        12778 => ['track' => 'Veteran', 'level' => 2, 'max' => 6],
+        12779 => ['track' => 'Veteran', 'level' => 3, 'max' => 6],
+        12780 => ['track' => 'Veteran', 'level' => 4, 'max' => 6],
+        12781 => ['track' => 'Veteran', 'level' => 5, 'max' => 6],
+        12782 => ['track' => 'Veteran', 'level' => 6, 'max' => 6],
+        12769 => ['track' => 'Adventurer', 'level' => 1, 'max' => 6],
+        12770 => ['track' => 'Adventurer', 'level' => 2, 'max' => 6],
+        12771 => ['track' => 'Adventurer', 'level' => 3, 'max' => 6],
+        12772 => ['track' => 'Adventurer', 'level' => 4, 'max' => 6],
+        12773 => ['track' => 'Adventurer', 'level' => 5, 'max' => 6],
+        12774 => ['track' => 'Adventurer', 'level' => 6, 'max' => 6],
+    ],
+
 ];
