@@ -1,303 +1,294 @@
 <script setup>
-import { onUpdated, ref } from 'vue';
+import { ref, onMounted, onUpdated } from 'vue';
 import GearCell from './GearCell.vue';
 
-defineProps({
-  characters: Array
+/**
+ * Full-width gear audit table for the Roster Gear tab.
+ *
+ * Each member in `members` matches the UnifiedRoster roster shape:
+ *   { id, name, main_character: CompiledRosterMemberDTO, alts: CompiledRosterMemberDTO[] }
+ *
+ * The compiled DTO now includes an `equipment` array of flat item objects
+ * produced by RosterCompilerService::resolveEquipment().
+ */
+const props = defineProps({
+    members: { type: Array, required: true },
 });
+
+// ---------------------------------------------------------------------------
+// Row expand / collapse (alts)
+// ---------------------------------------------------------------------------
 
 const expandedRows = ref(new Set());
 
 const toggleRow = (id) => {
-  if (expandedRows.value.has(id)) {
-    expandedRows.value.delete(id);
-  } else {
-    expandedRows.value.add(id);
-  }
+    expandedRows.value.has(id)
+        ? expandedRows.value.delete(id)
+        : expandedRows.value.add(id);
 };
 
-onUpdated(() => {
-  if (window.whTooltips && typeof window.whTooltips.refreshLinks === 'function') {
-    window.whTooltips.refreshLinks();
-  }
-});
+// ---------------------------------------------------------------------------
+// Wowhead tooltip refresh
+// ---------------------------------------------------------------------------
+
+const refreshTooltips = () => {
+    if (window.whTooltips?.refreshLinks) {
+        window.whTooltips.refreshLinks();
+    }
+};
+
+onMounted(refreshTooltips);
+onUpdated(refreshTooltips);
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
 
 const GEAR_SLOTS = [
-  { key: 'HEAD', name: 'Head' },
-  { key: 'NECK', name: 'Neck' },
-  { key: 'SHOULDER', name: 'Shoulders' },
-  { key: 'BACK', name: 'Back' },
-  { key: 'CHEST', name: 'Chest' },
-  { key: 'WRIST', name: 'Wrist' },
-  { key: 'HANDS', name: 'Hands' },
-  { key: 'WAIST', name: 'Waist' },
-  { key: 'LEGS', name: 'Legs' },
-  { key: 'FEET', name: 'Feet' },
-  { key: 'FINGER_1', name: 'Ring 1' },
-  { key: 'FINGER_2', name: 'Ring 2' },
-  { key: 'TRINKET_1', name: 'Trinket 1' },
-  { key: 'TRINKET_2', name: 'Trinket 2' },
-  { key: 'MAIN_HAND', name: 'Main Hand' },
-  { key: 'OFF_HAND', name: 'Off Hand' }
+    { key: 'HEAD',      label: 'Head'      },
+    { key: 'NECK',      label: 'Neck'      },
+    { key: 'SHOULDER',  label: 'Shoulders' },
+    { key: 'BACK',      label: 'Back'      },
+    { key: 'CHEST',     label: 'Chest'     },
+    { key: 'WRIST',     label: 'Wrist'     },
+    { key: 'HANDS',     label: 'Hands'     },
+    { key: 'WAIST',     label: 'Waist'     },
+    { key: 'LEGS',      label: 'Legs'      },
+    { key: 'FEET',      label: 'Feet'      },
+    { key: 'FINGER_1',  label: 'Ring'    },
+    { key: 'FINGER_2',  label: 'Ring'    },
+    { key: 'TRINKET_1', label: 'Trinket' },
+    { key: 'TRINKET_2', label: 'Trinket' },
+    { key: 'MAIN_HAND', label: 'Main Hand' },
+    { key: 'OFF_HAND',  label: 'Off Hand'  },
 ];
 
-const RIO_SLOT_MAP = {
-    HEAD: 'head', NECK: 'neck', SHOULDER: 'shoulder', BACK: 'back',
-    CHEST: 'chest', WRIST: 'wrist', HANDS: 'hands', WAIST: 'waist',
-    LEGS: 'legs', FEET: 'feet', FINGER_1: 'finger1', FINGER_2: 'finger2',
-    TRINKET_1: 'trinket1', TRINKET_2: 'trinket2', MAIN_HAND: 'mainhand', OFF_HAND: 'offhand'
+const CLASS_COLORS = {
+    'Death Knight': 'text-[#C41F3B]', 'Demon Hunter': 'text-[#A330C9]',
+    'Druid':        'text-[#FF7C0A]', 'Evoker':       'text-[#33937F]',
+    'Hunter':       'text-[#ABD473]', 'Mage':         'text-[#3FC7EB]',
+    'Monk':         'text-[#00FF98]', 'Paladin':      'text-[#F48CBA]',
+    'Priest':       'text-[#FFFFFF]', 'Rogue':        'text-[#FFF468]',
+    'Shaman':       'text-[#0070DD]', 'Warlock':      'text-[#8788EE]',
+    'Warrior':      'text-[#C69B6D]',
 };
 
-const classColors = {
-  'Death Knight': 'text-[#C41F3B]',
-  'Demon Hunter': 'text-[#A330C9]',
-  'Druid': 'text-[#FF7C0A]',
-  'Evoker': 'text-[#33937F]',
-  'Hunter': 'text-[#ABD473]',
-  'Mage': 'text-[#3FC7EB]',
-  'Monk': 'text-[#00FF98]',
-  'Paladin': 'text-[#F48CBA]',
-  'Priest': 'text-[#FFFFFF]',
-  'Rogue': 'text-[#FFF468]',
-  'Shaman': 'text-[#0070DD]',
-  'Warlock': 'text-[#8788EE]',
-  'Warrior': 'text-[#C69B6D]',
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts the flat equipment array into a { SLOT_KEY: item } map for O(1)
+ * lookup when rendering each GearCell.
+ */
+const toSlotMap = (equipment) => {
+    if (!Array.isArray(equipment) || equipment.length === 0) return {};
+    return Object.fromEntries(equipment.map(item => [item.slot, item]));
 };
 
-const parseRawData = (data) => {
-    if (!data) return null;
-    if (typeof data === 'object') return data;
-    try {
-        return JSON.parse(data);
-    } catch (e) {
-        return null;
-    }
-};
-
-const getGearItem = (character, slotKey) => {
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    console.log("getGearItem for", character?.name, "slot", slotKey, "bnetData keys:", bnetData ? Object.keys(bnetData) : 'null');
-    if (!bnetData?.equipped_items) {
-        if (bnetData?.equipment?.equipped_items) {
-            return bnetData.equipment.equipped_items.find(i => i?.slot?.type === slotKey) || null;
-        }
-        return null;
-    }
-    return bnetData.equipped_items.find(i => i?.slot?.type === slotKey) || null;
-};
-
-const getRioIcon = (character, slotKey) => {
-    if (!character?.raw_raiderio_data) return null;
-
-    let rioData = character.raw_raiderio_data;
-
-    // Якщо RaiderIO дані прийшли як текстовий рядок — парсимо їх!
-    if (typeof rioData === 'string') {
-        try {
-            rioData = JSON.parse(rioData);
-        } catch (e) {
-            console.error("Failed to parse RaiderIO data for", character.name);
-            return null;
-        }
-    }
-
-    const rioSlot = RIO_SLOT_MAP[slotKey];
-    return rioData?.gear?.items?.[rioSlot]?.icon || null;
-};
-
-const countMissingEnchants = (character) => {
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
-    if (!equippedItems) return 0;
-
-    const enchantableSlots = ['BACK', 'CHEST', 'WRIST', 'LEGS', 'FEET', 'FINGER_1', 'FINGER_2', 'MAIN_HAND', 'OFF_HAND'];
-    let missingCount = 0;
-
-    enchantableSlots.forEach(slotType => {
-        const item = equippedItems.find(i => i?.slot?.type === slotType);
-        if (item) {
-            if (slotType === 'OFF_HAND' && item.inventory_type?.type !== 'WEAPON') {
-                return;
-            }
-            if (!item.enchantments || item.enchantments.length === 0) {
-                missingCount++;
-            }
-        }
-    });
-
-    return missingCount;
-};
-
-const countEmptySockets = (character) => {
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
-    if (!equippedItems) return 0;
-
-    let emptySockets = 0;
-    equippedItems.forEach(item => {
-        if (item.sockets) {
-            item.sockets.forEach(socket => {
-                if (!socket.item) {
-                    emptySockets++;
-                }
-            });
-        }
-    });
-    return emptySockets;
-};
+/** Members that have a linked character (filters out "no character" entries). */
+const linkedMembers = (members) => members.filter(m => m.main_character != null);
 </script>
 
 <template>
-  <div class="bg-[#0e0e10] border border-white/5 rounded-lg overflow-hidden max-w-[calc(100vw-3rem)] md:max-w-none">
-    <div class="overflow-x-auto custom-scrollbar">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[180px]">Character</th>
-            <th colspan="2" class="p-2 text-center border-l border-white/5">Audit</th>
-            <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">Equipment</th>
-          </tr>
-          <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold">
-            <th class="p-2 sticky left-0 z-20 bg-[#0e0e10] border-b border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-              <div class="flex justify-between items-center pr-2">
-                <span>Character</span>
-                <span class="text-gray-500 font-mono text-[9px]">ilvl</span>
-              </div>
-            </th>
-            <th class="p-2 border-b border-white/5 text-center text-[9px]">Ench</th>
-            <th class="p-2 border-b border-white/5 text-center text-[9px]">Gems</th>
-            <th v-for="slot in GEAR_SLOTS" :key="slot.key" class="p-1 border-b border-white/5 min-w-[42px] text-center">
-              {{ slot.name }}
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-white/5">
-          <template v-for="char in characters" :key="char.id">
-            <tr class="hover:bg-white/[0.02] transition-colors" :class="{ 'cursor-pointer': char.alts && char.alts.length > 0 }" @click="char.alts && char.alts.length > 0 && toggleRow(char.id)">
-              <td class="p-2 pl-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="flex items-center gap-3">
-                    <!-- Chevron Icon -->
-                    <div class="w-4 flex items-center justify-center">
-                      <svg v-if="char.alts && char.alts.length > 0"
-                           xmlns="http://www.w3.org/2000/svg"
-                           class="w-4 h-4 transition-transform duration-200"
-                           :class="{ 'rotate-90': expandedRows.has(char.id) }"
-                           viewBox="0 0 24 24"
-                           fill="none"
-                           stroke="currentColor"
-                           stroke-width="2"
-                           stroke-linecap="round"
-                           stroke-linejoin="round"
-                      >
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                      </svg>
-                    </div>
+    <div class="bg-surface-container-high rounded-2xl border border-white/5 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse min-w-max">
 
-                    <div class="w-8 h-8 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
-                      <img v-if="char.avatar_url" :src="char.avatar_url" :alt="char.name" class="w-full h-full object-cover" />
-                      <span v-else class="text-[10px] text-white/20">?</span>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="font-bold text-sm truncate" :class="classColors[char.playable_class] || 'text-white'">
-                        {{ char.name }}
-                      </div>
-                      <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
-                        {{ char.active_spec || 'Unknown' }}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-right shrink-0">
-                    <div class="text-xs font-mono font-bold text-cyan-400">
-                      {{ Math.floor(char.ilvl) || 'N/A' }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="p-2 text-center font-mono text-sm border-l border-white/5">
-                <span v-if="countMissingEnchants(char) > 0" class="text-red-500 font-bold">
-                  {{ countMissingEnchants(char) }}
-                </span>
-                <span v-else class="text-gray-600 text-xs">0</span>
-              </td>
-              <td class="p-2 text-center font-mono text-sm">
-                <span v-if="countEmptySockets(char) > 0" class="text-red-500 font-bold">
-                  {{ countEmptySockets(char) }}
-                </span>
-                <span v-else class="text-gray-600 text-xs">0</span>
-              </td>
-              <td v-for="slot in GEAR_SLOTS" :key="slot.key" class="p-1 text-center">
-                <div class="flex justify-center">
-                  <GearCell :item="getGearItem(char, slot.key)" :slotName="slot.key" :iconName="getRioIcon(char, slot.key)" />
-                </div>
-              </td>
-            </tr>
+                <!-- ── thead ───────────────────────────────────────────────── -->
+                <thead>
+                    <!-- Group headers -->
+                    <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
+                        <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[200px]">
+                            Character
+                        </th>
+                        <th colspan="2" class="p-2 text-center border-l border-white/5">Audit</th>
+                        <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">Equipment</th>
+                    </tr>
+                    <!-- Column sub-headers -->
+                    <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
+                        <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                            <div class="flex justify-between items-center pr-2">
+                                <span>Name</span>
+                                <span class="text-gray-500 font-mono text-[9px]">iLvL</span>
+                            </div>
+                        </th>
+                        <th class="p-2 text-center text-[9px]">Ench</th>
+                        <th class="p-2 text-center text-[9px]">Gems</th>
+                        <th v-for="slot in GEAR_SLOTS" :key="slot.key"
+                            class="p-1 min-w-[42px] text-center text-[9px]">
+                            {{ slot.label }}
+                        </th>
+                    </tr>
+                </thead>
 
-            <!-- Alt Rows -->
-            <tr v-for="alt in char.alts" :key="'alt-'+alt.id" v-show="expandedRows.has(char.id)" class="bg-black/40 hover:bg-white/[0.02] transition-colors">
-              <td class="p-2 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-                <div class="flex items-center justify-between gap-3 pl-8 relative">
-                  <!-- L-shape connector -->
-                  <div class="absolute left-4 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/10 rounded-bl-sm"></div>
+                <!-- ── tbody ───────────────────────────────────────────────── -->
+                <tbody class="divide-y divide-white/5">
+                    <template v-for="member in linkedMembers(members)" :key="member.id">
 
-                  <div class="flex items-center gap-3">
-                    <div class="w-6 h-6 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
-                      <img v-if="alt.avatar_url" :src="alt.avatar_url" :alt="alt.name" class="w-full h-full object-cover" />
-                      <span v-else class="text-[10px] text-white/20">?</span>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="font-bold text-xs truncate" :class="classColors[alt.playable_class] || 'text-white'">
-                        {{ alt.name }}
-                      </div>
-                      <div class="text-[8px] text-gray-500 uppercase font-medium truncate">
-                        {{ alt.active_spec || 'Unknown' }}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-right shrink-0">
-                    <div class="text-[10px] font-mono font-bold text-cyan-400/70">
-                      {{ Math.floor(alt.ilvl) || 'N/A' }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="p-2 text-center font-mono text-xs border-l border-white/5">
-                <span v-if="countMissingEnchants(alt) > 0" class="text-red-500/70 font-bold">
-                  {{ countMissingEnchants(alt) }}
-                </span>
-                <span v-else class="text-gray-700 text-[10px]">0</span>
-              </td>
-              <td class="p-2 text-center font-mono text-xs">
-                <span v-if="countEmptySockets(alt) > 0" class="text-red-500/70 font-bold">
-                  {{ countEmptySockets(alt) }}
-                </span>
-                <span v-else class="text-gray-700 text-[10px]">0</span>
-              </td>
-              <td v-for="slot in GEAR_SLOTS" :key="'alt-'+slot.key" class="p-1 text-center opacity-70 scale-90">
-                <div class="flex justify-center">
-                  <GearCell :item="getGearItem(alt, slot.key)" :slotName="slot.key" :iconName="getRioIcon(alt, slot.key)" />
-                </div>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+                        <!-- Main character row -->
+                        <tr class="hover:bg-white/[0.02] transition-colors"
+                            :class="{ 'cursor-pointer': (member.alts || []).length > 0 }"
+                            @click="(member.alts || []).length > 0 && toggleRow(member.id)">
+
+                            <!-- Identity (sticky) -->
+                            <td class="p-2 pl-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <!-- Expand chevron -->
+                                        <div class="w-4 flex items-center justify-center shrink-0">
+                                            <svg v-if="(member.alts || []).length > 0"
+                                                 xmlns="http://www.w3.org/2000/svg"
+                                                 class="w-4 h-4 transition-transform duration-200"
+                                                 :class="{ 'rotate-90': expandedRows.has(member.id) }"
+                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="9 18 15 12 9 6"></polyline>
+                                            </svg>
+                                        </div>
+                                        <!-- Avatar -->
+                                        <div class="w-8 h-8 rounded border border-white/10 bg-black/20 overflow-hidden shrink-0">
+                                            <img v-if="member.main_character.avatar_url"
+                                                 :src="member.main_character.avatar_url"
+                                                 :alt="member.main_character.name ?? member.name"
+                                                 class="w-full h-full object-cover" />
+                                            <div v-else class="w-full h-full flex items-center justify-center">
+                                                <span class="text-[10px] text-white/20">?</span>
+                                            </div>
+                                        </div>
+                                        <!-- Name / spec -->
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-sm truncate"
+                                                 :class="CLASS_COLORS[member.main_character.class] ?? 'text-white'">
+                                                {{ member.main_character.name ?? member.name }}
+                                            </div>
+                                            <div class="text-[9px] text-gray-500 uppercase font-medium">
+                                                {{ member.main_character.combat_role ?? '—' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- ilvl -->
+                                    <div class="text-right shrink-0 pr-1">
+                                        <span class="text-xs font-mono font-bold text-cyan-400">
+                                            {{ member.main_character.equipped_ilvl != null
+                                                ? Number(member.main_character.equipped_ilvl).toFixed(1)
+                                                : 'N/A' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Audit: missing enchants -->
+                            <td class="p-2 text-center font-mono text-sm border-l border-white/5">
+                                <span v-if="(member.main_character.missing_enchants_slots?.length ?? 0) > 0"
+                                      class="text-red-500 font-bold"
+                                      :title="'Missing enchants: ' + member.main_character.missing_enchants_slots.join(', ')">
+                                    {{ member.main_character.missing_enchants_slots.length }}
+                                </span>
+                                <span v-else class="text-gray-600 text-xs">✓</span>
+                            </td>
+
+                            <!-- Audit: empty sockets -->
+                            <td class="p-2 text-center font-mono text-sm">
+                                <span v-if="(member.main_character.empty_sockets_count ?? 0) > 0"
+                                      class="text-red-500 font-bold">
+                                    {{ member.main_character.empty_sockets_count }}
+                                </span>
+                                <span v-else class="text-gray-600 text-xs">✓</span>
+                            </td>
+
+                            <!-- Gear cells -->
+                            <td v-for="slot in GEAR_SLOTS" :key="slot.key" class="p-1 text-center">
+                                <div class="flex justify-center">
+                                    <GearCell
+                                        :item="toSlotMap(member.main_character.equipment)[slot.key] ?? null"
+                                        :slotName="slot.key" />
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Alt rows (visible when row is expanded) -->
+                        <template v-if="expandedRows.has(member.id)">
+                            <tr v-for="(alt, index) in (member.alts || [])"
+                                :key="'alt-' + (alt?.id || index)"
+                                class="bg-black/40 hover:bg-white/[0.02] transition-colors text-[11px]">
+
+                                <!-- Alt identity (sticky) -->
+                                <td class="p-2 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                                    <div class="flex items-center justify-between gap-3 pl-8 relative">
+                                        <!-- L-shape connector -->
+                                        <div class="absolute left-4 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/10 rounded-bl-sm"></div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded border border-white/10 bg-black/20 overflow-hidden shrink-0">
+                                                <img v-if="alt?.avatar_url"
+                                                     :src="alt.avatar_url"
+                                                     :alt="alt.name"
+                                                     class="w-full h-full object-cover" />
+                                                <div v-else class="w-full h-full flex items-center justify-center">
+                                                    <span class="text-[10px] text-white/20">?</span>
+                                                </div>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-xs truncate"
+                                                     :class="CLASS_COLORS[alt?.class] ?? 'text-white'">
+                                                    {{ alt?.name ?? 'Unknown' }}
+                                                </div>
+                                                <div class="text-[8px] text-gray-500 uppercase font-medium">
+                                                    {{ alt?.combat_role ?? '—' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right shrink-0 pr-1">
+                                            <span class="text-[10px] font-mono font-bold text-cyan-400/70">
+                                                {{ alt?.equipped_ilvl != null
+                                                    ? Number(alt.equipped_ilvl).toFixed(1)
+                                                    : 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Alt audit: enchants -->
+                                <td class="p-2 text-center font-mono text-xs border-l border-white/5">
+                                    <span v-if="(alt?.missing_enchants_slots?.length ?? 0) > 0"
+                                          class="text-red-500/70 font-bold"
+                                          :title="'Missing enchants: ' + alt.missing_enchants_slots.join(', ')">
+                                        {{ alt.missing_enchants_slots.length }}
+                                    </span>
+                                    <span v-else class="text-gray-700 text-[10px]">✓</span>
+                                </td>
+
+                                <!-- Alt audit: gems -->
+                                <td class="p-2 text-center font-mono text-xs">
+                                    <span v-if="(alt?.empty_sockets_count ?? 0) > 0"
+                                          class="text-red-500/70 font-bold">
+                                        {{ alt.empty_sockets_count }}
+                                    </span>
+                                    <span v-else class="text-gray-700 text-[10px]">✓</span>
+                                </td>
+
+                                <!-- Alt gear cells -->
+                                <td v-for="slot in GEAR_SLOTS" :key="'alt-' + slot.key" class="p-1 text-center opacity-75">
+                                    <div class="flex justify-center">
+                                        <GearCell
+                                            :item="toSlotMap(alt?.equipment)?.[slot.key] ?? null"
+                                            :slotName="slot.key" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+
+                    </template>
+                </tbody>
+
+            </table>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
+.custom-scrollbar::-webkit-scrollbar        { height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track  { background: rgba(0, 0, 0, 0.2); }
+.custom-scrollbar::-webkit-scrollbar-thumb  { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 </style>

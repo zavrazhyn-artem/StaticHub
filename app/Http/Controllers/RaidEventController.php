@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\RaidEvent;
-use App\Services\RaidEventService;
-use App\Services\DiscordMessageService;
+use App\Services\Raid\RaidEventService;
+use App\Services\Discord\DiscordMessageService;
 use App\Http\Requests\RsvpRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,7 @@ class RaidEventController extends Controller
      */
     public function show(RaidEvent $event): View
     {
-        $data = $this->raidEventService->getShowData($event, Auth::user());
+        $data = $this->raidEventService->buildEventShowPayload($event, Auth::user());
 
         return view('schedule.show', $data);
     }
@@ -32,7 +32,7 @@ class RaidEventController extends Controller
      */
     public function rsvp(RsvpRequest $request, RaidEvent $event): RedirectResponse
     {
-        $success = $this->raidEventService->handleRsvp($event, Auth::user(), $request->validated());
+        $success = $this->raidEventService->executeRsvp($event, Auth::user(), $request->validated());
 
         if (!$success) {
             return back()->withErrors(['character_id' => 'Invalid character selected.']);

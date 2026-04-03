@@ -15,6 +15,6 @@ class DiscordInteractionController extends Controller
 
     public function handle(Request $request): JsonResponse
     {
-        return response()->json($this->interactionService->handle($request));
+        return response()->json($this->interactionService->handle($request->all()));
     }
 }

@@ -92,13 +92,13 @@
                     <label class="block font-headline text-xs font-bold text-[#FFD700] uppercase tracking-[0.2em]">Treasury Parameters</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label for="guild_tax_per_player" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Weekly Tax Per Player</label>
+                            <label for="weekly_tax_per_player" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Weekly Tax Per Player</label>
                             <div class="relative group">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#FFD700] transition-colors text-lg">payments</span>
                                 </span>
-                                <input type="number" name="guild_tax_per_player" id="guild_tax_per_player"
-                                    value="{{ $static->guild_tax_per_player }}"
+                                <input type="number" name="weekly_tax_per_player" id="weekly_tax_per_player"
+                                    value="{{ (int) (($static->weekly_tax_per_player ?? 0) / 10000) }}"
                                     class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-[#FFD700] focus:border-transparent transition-all outline-none">
                             </div>
                             <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">Amount of gold each raider is expected to contribute weekly.</p>

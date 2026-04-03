@@ -3,14 +3,88 @@
 namespace App\Models;
 
 use App\Builders\CharacterBuilder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $realm_id
+ * @property string $name
+ * @property string|null $playable_class
+ * @property string|null $playable_race
+ * @property int|null $level
+ * @property int|null $item_level
+ * @property int|null $equipped_item_level
+ * @property string|null $active_spec
+ * @property string|null $avatar_url
+ * @property int|null $ilvl
+ * @property float|null $mythic_rating
+ * @property array|null $raw_bnet_data
+ * @property array|null $raw_raiderio_data
+ * @property array|null $raw_wcl_data
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $user
+ * @property-read Realm|null $realm
+ * @property-read Collection<int, StaticGroup> $statics
+ * @property-read Collection<int, RaidEvent> $raidEvents
+ * @property-read Collection<int, PersonalTacticalReport> $personalTacticalReports
+ * @method static CharacterBuilder query()
+ * @property-read int|null $personal_tactical_reports_count
+ * @property-read \App\Models\RaidAttendance|null $pivot
+ * @property-read int|null $raid_events_count
+ * @property-read int|null $statics_count
+ * @method static CharacterBuilder<static>|Character belongingTo(int $userId)
+ * @method static CharacterBuilder<static>|Character belongingToUserInStatic(int $userId, int $staticId)
+ * @method static CharacterBuilder<static>|Character defaultOrder()
+ * @method static CharacterBuilder<static>|Character findForRsvp(int $characterId, int $userId, int $staticId)
+ * @method static CharacterBuilder<static>|Character findMainInStatic(int $userId, int $staticId)
+ * @method static CharacterBuilder<static>|Character findUserCharacterInReport(int $userId, int $staticId, int $reportId)
+ * @method static CharacterBuilder<static>|Character inStatic(int $staticId)
+ * @method static CharacterBuilder<static>|Character newModelQuery()
+ * @method static CharacterBuilder<static>|Character newQuery()
+ * @method static CharacterBuilder<static>|Character orderedByStaticRole()
+ * @method static CharacterBuilder<static>|Character syncFromBlizzard(array $apiData, int $userId, int $realmId, ?string $avatarUrl)
+ * @method static CharacterBuilder<static>|Character whereActiveSpec($value)
+ * @method static CharacterBuilder<static>|Character whereAvatarUrl($value)
+ * @method static CharacterBuilder<static>|Character whereCreatedAt($value)
+ * @method static CharacterBuilder<static>|Character whereEquippedItemLevel($value)
+ * @method static CharacterBuilder<static>|Character whereId($value)
+ * @method static CharacterBuilder<static>|Character whereIlvl($value)
+ * @method static CharacterBuilder<static>|Character whereItemLevel($value)
+ * @method static CharacterBuilder<static>|Character whereLevel($value)
+ * @method static CharacterBuilder<static>|Character whereMythicRating($value)
+ * @method static CharacterBuilder<static>|Character whereName($value)
+ * @method static CharacterBuilder<static>|Character wherePlayableClass($value)
+ * @method static CharacterBuilder<static>|Character wherePlayableRace($value)
+ * @method static CharacterBuilder<static>|Character whereRawBnetData($value)
+ * @method static CharacterBuilder<static>|Character whereRawRaiderioData($value)
+ * @method static CharacterBuilder<static>|Character whereRawWclData($value)
+ * @method static CharacterBuilder<static>|Character whereRealmId($value)
+ * @method static CharacterBuilder<static>|Character whereUpdatedAt($value)
+ * @method static CharacterBuilder<static>|Character whereUserId($value)
+ * @method static CharacterBuilder<static>|Character withRoleAlt(int $staticId)
+ * @method static CharacterBuilder<static>|Character withRoleMain(int $staticId)
+ * @method static CharacterBuilder<static>|Character withStaticRole(int $staticId)
+ * @method static CharacterBuilder<static>|Character withStatics()
+ * @mixin \Eloquent
+ */
 class Character extends Model
 {
-    //
+    /**
+     * @param $query
+     * @return CharacterBuilder
+     */
+    public function newEloquentBuilder($query): CharacterBuilder
+    {
+        return new CharacterBuilder($query);
+    }
 
     protected $fillable = [
         'id',
@@ -29,19 +103,16 @@ class Character extends Model
         'raw_bnet_data',
         'raw_raiderio_data',
         'raw_wcl_data',
+        'compiled_data',
     ];
 
     protected $casts = [
         'raw_bnet_data' => 'array',
         'raw_raiderio_data' => 'array',
         'raw_wcl_data' => 'array',
+        'compiled_data' => 'array',
         'mythic_rating' => 'float',
     ];
-
-    public function newEloquentBuilder($query): CharacterBuilder
-    {
-        return new CharacterBuilder($query);
-    }
 
     /**
      * Get the user that owns the character.
@@ -80,8 +151,73 @@ class Character extends Model
             ->withTimestamps();
     }
 
-    public function personalTacticalReports()
+    public function personalTacticalReports(): HasMany
     {
         return $this->hasMany(PersonalTacticalReport::class);
+    }
+
+    public function serviceRawData(): HasOne
+    {
+        return $this->hasOne(ServiceRawData::class);
+    }
+
+    /**
+     * Downgrade a character from main to alt in a specific static.
+     *
+     * @param int $userId
+     * @param int $staticId
+     * @return void
+     */
+    public static function downgradeMainToAlt(int $userId, int $staticId): void
+    {
+        self::query()->belongingTo($userId)
+            ->withRoleMain($staticId)
+            ->each(function (Character $mainCharacter) use ($staticId) {
+                $mainCharacter->statics()->updateExistingPivot($staticId, ['role' => 'alt']);
+            });
+    }
+
+    /**
+     * Get the URL for the class icon.
+     */
+    public function getClassIconUrl(): string
+    {
+        return \App\Support\IconHelper::classUrl($this->playable_class);
+    }
+
+    /**
+     * Get the absolute URL for the class icon (for Discord).
+     */
+    public function getClassIconUrlAbsolute(): string
+    {
+        return \App\Support\IconHelper::classUrlAbsolute($this->playable_class);
+    }
+
+    /**
+     * Get the URL for the role icon in a specific static.
+     */
+    public function getRoleIconUrl(?int $staticId = null): ?string
+    {
+        $role = $staticId ? $this->getCombatRoleInStatic($staticId) : null;
+        return \App\Support\IconHelper::roleUrl($role);
+    }
+
+    /**
+     * Get the absolute URL for the role icon (for Discord).
+     */
+    public function getRoleIconUrlAbsolute(?int $staticId = null): ?string
+    {
+        $role = $staticId ? $this->getCombatRoleInStatic($staticId) : null;
+        return \App\Support\IconHelper::roleUrlAbsolute($role);
+    }
+
+    /**
+     * Get the combat role of the character in a specific static.
+     */
+    public function getCombatRoleInStatic(int $staticId): string
+    {
+        $static = $this->statics->firstWhere('id', $staticId);
+
+        return $static?->pivot?->combat_role ?? 'rdps';
     }
 }

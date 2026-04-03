@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Services\StaticGroup\RosterService;
+use App\Services\StaticGroup\TreasuryService;
+
 use App\Models\StaticGroup;
 use App\Models\RaidEvent;
 use App\Helpers\CurrencyHelper;
@@ -29,17 +32,21 @@ class DashboardService
         $roleCounts = $this->rosterService->getRoleCounts($static->id);
 
         // 3. Consumables
-        $consumables = $this->consumableService->getRaidConsumablesData($static);
+        $consumables = $this->consumableService->buildConsumablesPayload($static);
 
         // 4. Weekly Schedule (Next 7 days)
         $weeklySchedule = RaidEvent::query()->weeklySchedule($static->id);
 
         // 5. Treasury Data
-        $reserves = $this->treasuryService->getTotalReserves($static);
-        $weeklyCost = $consumables['grand_total_weekly_cost'] ?? 0;
-        $autonomy = CurrencyHelper::calculateAutonomy($reserves, $weeklyCost);
-        $targetTax = $consumables['guild_tax_per_raider'] ?? 0;
-        $weeklyStatus = $this->treasuryService->getWeeklyStatus($static, $targetTax);
+        $treasuryData = $this->treasuryService->buildTreasuryIndexPayload($static);
+        $reserves = $treasuryData['reserves'];
+        $weeklyCost = $treasuryData['weeklyCost'];
+        $autonomy = $treasuryData['autonomy'];
+        $targetTax = $treasuryData['targetTax'];
+        $weeklyStatus = $treasuryData['weeklyStatus'];
+        $taxStatus = $treasuryData['taxStatus'];
+        $taxDescription = $treasuryData['taxDescription'];
+        $taxIcon = $treasuryData['taxIcon'];
 
         // 6. Sync Data
         $syncData = [
@@ -59,6 +66,9 @@ class DashboardService
                 'weeklyCost',
                 'targetTax',
                 'weeklyStatus',
+                'taxStatus',
+                'taxDescription',
+                'taxIcon',
                 'syncData'
             ),
             $consumables

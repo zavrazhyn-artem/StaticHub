@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Helpers\ConsumableMetadataHelper;
 use App\Models\PriceSnapshot;
 use App\Models\Recipe;
 use App\Models\StaticGroup;
@@ -10,91 +13,32 @@ use Illuminate\Support\Collection;
 class ConsumableService
 {
     /**
-     * Get raid recipes with calculated crafting costs and display metadata.
+     * Orchestrator for building raid consumables data.
      */
-    public function getRaidConsumablesData(StaticGroup $static = null): array
+    public function buildConsumablesPayload(?StaticGroup $static): array
     {
-        $raidRecipeNames = [
-            'Voidlight Potion Cauldron',
-            'Cauldron of Sin\'dorei Flasks',
-            'Hearty Harandar Celebration',
-        ];
+        $recipes = $this->fetchTargetRecipes();
 
-        $recipes = Recipe::withNames($raidRecipeNames)
-            ->with(['outputItem', 'ingredients.item'])
-            ->get();
+        $recipes->each(function (Recipe $recipe) use ($static) {
+            $recipe->crafting_cost = $this->calculateRecipeCost($recipe);
+            ConsumableMetadataHelper::applyDisplayMetadata($recipe);
 
-        $recipes = $recipes->map(function (Recipe $recipe) use ($static) {
-            $craftingCost = 0;
-            foreach ($recipe->ingredients as $ingredient) {
-                $latestPrice = PriceSnapshot::latestPriceForItem($ingredient->item_id);
-                $craftingCost += ($latestPrice ?? 0) * $ingredient->quantity;
-            }
-
-            $recipe->crafting_cost = $craftingCost / ($recipe->yield_quantity ?: 1);
-
-            // Set display metadata and icons from WoW Zamimg
-            $iconName = $recipe->outputItem?->icon;
-            if ($iconName && !str_starts_with($iconName, 'http')) {
-                $iconUrl = "https://wow.zamimg.com/images/wow/icons/large/{$iconName}.jpg";
-            } else {
-                $iconUrl = $iconName;
-            }
-
-            if (str_contains($recipe->name, 'Potion Cauldron')) {
-                $recipe->display_icon_url = $iconUrl ?: 'https://wow.zamimg.com/images/wow/icons/large/inv_alchemy_elixir_empty.jpg';
-                $recipe->display_icon = 'science';
-                $recipe->display_color = 'mage';
-                $recipe->default_quantity = 1;
-            } elseif (str_contains($recipe->name, 'Sin\'dorei Flasks')) {
-                $recipe->display_icon_url = $iconUrl ?: 'https://wow.zamimg.com/images/wow/icons/large/inv_10_alchemy_flask_color_red.jpg';
-                $recipe->display_icon = 'science';
-                $recipe->display_color = 'druid';
-                $recipe->default_quantity = 1;
-            } else {
-                $recipe->display_icon_url = $iconUrl ?: 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_food_buff_revelation.jpg';
-                $recipe->display_icon = 'restaurant';
-                $recipe->display_color = 'secondary';
-                $recipe->default_quantity = 2;
-            }
-
-            // Override with static-specific quantities if they exist
-            if ($static && isset($static->consumable_settings['quantities'][$recipe->name])) {
-                $recipe->default_quantity = $static->consumable_settings['quantities'][$recipe->name];
-            }
-
-            // Compatibility for blade templates that might expect $recipe->icon from join
-            $recipe->icon = $recipe->outputItem?->icon;
-
-            return $recipe;
+            // Fetch the quantity, either from static settings or default from the helper
+            $recipe->quantity = $static
+                ? $static->getConsumableQuantity($recipe->name, (int) $recipe->default_quantity)
+                : (int) $recipe->default_quantity;
         });
 
-        $individualPotionPrice = PriceSnapshot::latestPriceForItem(241308) ?? 0;
+        $referencePrices = $this->fetchReferencePrices();
+        $economics = $this->calculateEconomics($recipes, $static);
 
-        $individualFlaskPrice = PriceSnapshot::latestPriceForItem(241320) ?? 0;
-
-        $grandTotalWeeklyCost = $this->calculateGrandTotalWeeklyCost($recipes, $static);
-        $activeMemberCount = $static ? $static->members()->count() : 0;
-        $totalMemberSlots = 20;
-        $guildTaxPerRaider = (int) ceil($grandTotalWeeklyCost / $totalMemberSlots);
-
-        return [
+        return array_merge([
             'recipes' => $recipes,
-            'individualPotionPrice' => $individualPotionPrice,
-            'individualFlaskPrice' => $individualFlaskPrice,
-            'grand_total_weekly_cost' => $grandTotalWeeklyCost,
-            'guild_tax_per_raider' => $guildTaxPerRaider,
-            'active_member_count' => $activeMemberCount,
-            'total_member_slots' => $totalMemberSlots,
-        ];
+        ], $referencePrices, $economics);
     }
 
     /**
      * Update consumable settings for a static group.
-     *
-     * @param StaticGroup $static
-     * @param array $quantities
-     * @return void
      */
     public function updateSettings(StaticGroup $static, array $quantities): void
     {
@@ -106,19 +50,67 @@ class ConsumableService
     }
 
     /**
-     * Calculate the total weekly cost for all raid consumables.
+     * Task: Fetch the target recipes with relations.
      */
-    protected function calculateGrandTotalWeeklyCost(Collection $recipes, StaticGroup $static = null): int
+    private function fetchTargetRecipes(): Collection
     {
-        $raidDays = 3;
-        if ($static && $static->raid_days) {
-            $raidDays = count($static->raid_days);
+        $raidRecipeNames = [
+            'Voidlight Potion Cauldron',
+            'Cauldron of Sin\'dorei Flasks',
+            'Hearty Harandar Celebration',
+        ];
+
+        return Recipe::query()
+            ->withNames($raidRecipeNames)
+            ->with(['outputItem', 'ingredients.item'])
+            ->get();
+    }
+
+    /**
+     * Task: Calculate crafting cost for a recipe.
+     */
+    private function calculateRecipeCost(Recipe $recipe): float
+    {
+        $totalCost = 0;
+        foreach ($recipe->ingredients as $ingredient) {
+            $latestPrice = PriceSnapshot::latestPriceForItem($ingredient->item_id);
+            $totalCost += ($latestPrice ?? 0) * $ingredient->quantity;
         }
 
-        return $recipes->sum(function ($recipe) use ($static, $raidDays) {
-            $quantity = $recipe->default_quantity; // Use the already determined default_quantity (which includes static settings)
+        return (float) ($totalCost / ($recipe->yield_quantity ?: 1));
+    }
 
-            return (int) ($recipe->crafting_cost * $quantity * $raidDays);
+    /**
+     * Task: Fetch individual potion and flask prices.
+     */
+    private function fetchReferencePrices(): array
+    {
+        return [
+            'individualPotionPrice' => PriceSnapshot::latestPriceForItem(241308) ?? 0,
+            'individualFlaskPrice' => PriceSnapshot::latestPriceForItem(241320) ?? 0,
+        ];
+    }
+
+    /**
+     * Task: Calculate grand totals and economic metrics.
+     */
+    private function calculateEconomics(Collection $recipes, ?StaticGroup $static): array
+    {
+        $raidDays = ($static && $static->raid_days) ? count($static->raid_days) : 3;
+
+        $grandTotalWeeklyCost = $recipes->sum(function (Recipe $recipe) use ($raidDays) {
+            return (int) ($recipe->crafting_cost * ($recipe->quantity ?? $recipe->default_quantity) * $raidDays);
         });
+
+        $activeMemberCount = $static ? $static->members()->count() : 0;
+        $totalMemberSlots = 20;
+        $guildTaxPerRaider = (int) ceil($grandTotalWeeklyCost / $totalMemberSlots);
+
+        return [
+            'grand_total_weekly_cost' => $grandTotalWeeklyCost,
+            'guild_tax_per_raider' => $guildTaxPerRaider,
+            'active_member_count' => $activeMemberCount,
+            'total_member_slots' => $totalMemberSlots,
+        ];
     }
 }

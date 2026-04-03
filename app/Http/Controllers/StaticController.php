@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportGuildRequest;
 use App\Http\Requests\StoreStaticRequest;
-use App\Services\StaticService;
+use App\Services\StaticGroup\StaticService;
 use App\Models\StaticGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +25,7 @@ class StaticController extends Controller
         // Permission check (only owner or admin can generate link)
         // For simplicity, we allow all members for now, but role check is better
 
-        $link = $this->staticService->generateInvite($static);
+        $link = $this->staticService->getInviteLink($static);
 
         return response()->json([
             'link' => $link
@@ -37,7 +37,7 @@ class StaticController extends Controller
      */
     public function index(): View
     {
-        $data = $this->staticService->getSetupData(
+        $data = $this->staticService->buildSetupPayload(
             Auth::id(),
             (string) session('battlenet_token')
         );
@@ -50,7 +50,7 @@ class StaticController extends Controller
      */
     public function store(StoreStaticRequest $request): RedirectResponse
     {
-        $this->staticService->createStatic($request->validated(), Auth::id());
+        $this->staticService->executeCreation($request->validated(), Auth::id());
 
         return redirect()->route('dashboard')->with('success', 'Static created successfully!');
     }
@@ -65,7 +65,7 @@ class StaticController extends Controller
             return back()->with('error', 'Session expired. Please log in again.');
         }
 
-        $this->staticService->importGuild($request->validated(), Auth::id());
+        $this->staticService->executeGuildImport($request->validated(), Auth::id());
 
         return redirect()->route('dashboard')->with('success', 'Guild imported as Static!');
     }

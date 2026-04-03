@@ -28,8 +28,8 @@
                 </div>
                 <div class="mb-8 flex items-center justify-center gap-6 drop-shadow-[0_0_40px_rgba(58,223,250,0.3)] transition-transform hover:scale-105 duration-500 mx-auto">
                     <img src="/images/logo.svg" alt="BlastR Logo" class="w-32 h-32 object-contain" />
-                    <div class="text-7xl font-black uppercase tracking-tighter italic leading-none">
-                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-xs opacity-70 ml-1">r<span class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+                    <div class="text-6xl md:text-8xl font-black uppercase tracking-tighter italic leading-none pr-4">
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R</span>
                     </div>
                 </div>
                 <p class="mt-4 font-slogan text-lg md:text-xl font-bold tracking-[0.4em] uppercase text-on-surface drop-shadow-[0_0_8px_rgba(58,223,250,0.4)]">

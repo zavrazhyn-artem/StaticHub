@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Services\UserService;
+use App\Services\Auth\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +33,7 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $this->userService->updateProfile($request->user(), $request->validated());
+        $this->userService->executeUpdateProfile($request->user(), $request->validated());
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -47,7 +47,7 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $this->userService->deleteUser($user);
+        $this->userService->executeUserDeletion($user);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -71,7 +71,7 @@ class ProfileController extends Controller
         try {
             $discordUser = Socialite::driver('discord')->user();
 
-            $this->userService->linkDiscord(Auth::user(), $discordUser);
+            $this->userService->executeDiscordLinking(Auth::user(), $discordUser);
 
             return Redirect::route('profile.edit')->with('status', 'discord-linked');
         } catch (\Exception $e) {
@@ -84,7 +84,7 @@ class ProfileController extends Controller
      */
     public function unlinkDiscord(): RedirectResponse
     {
-        $this->userService->unlinkDiscord(Auth::user());
+        $this->userService->executeDiscordUnlinking(Auth::user());
 
         return Redirect::route('profile.edit')->with('status', 'discord-unlinked');
     }

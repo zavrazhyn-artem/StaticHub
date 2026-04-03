@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Character;
-use App\Services\WclService;
+use App\Services\Analysis\WclService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/bnet_equipment.json",
+  "title": "Blizzard Character Equipment",
+  "description": "Raw response from /profile/wow/character/{realm}/{name}/equipment",
+  "type": "object",
+  "required": ["equipped_items"],
+  "properties": {
+    "equipped_items": {
+      "type": "array",
+      "description": "List of items currently equipped by the character.",
+      "items": {
+        "type": "object",
+        "required": ["slot", "item", "level"],
+        "properties": {
+          "slot": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          },
+          "item": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "integer" }
+            }
+          },
+          "level": {
+            "type": "object",
+            "required": ["value"],
+            "properties": {
+              "value": { "type": "integer", "minimum": 1 },
+              "display_string": { "type": "string" }
+            }
+          },
+          "enchantments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "enchantment_id": { "type": "integer" },
+                "display_string": { "type": "string" },
+                "enchantment_slot": {
+                  "type": "object",
+                  "properties": {
+                    "id":   { "type": "integer" },
+                    "type": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "sockets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "socket_type": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string" },
+                    "name": { "type": "string" }
+                  }
+                },
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -27,7 +27,7 @@ class ConsumablesController extends Controller
     {
         $static = StaticGroup::query()->firstForUser(Auth::id());
 
-        $data = $this->consumableService->getRaidConsumablesData($static);
+        $data = $this->consumableService->buildConsumablesPayload($static);
 
         return view('consumables.index', array_merge($data, ['static' => $static]));
     }

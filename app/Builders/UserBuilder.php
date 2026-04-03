@@ -39,7 +39,7 @@ class UserBuilder extends Builder
 
     public function hasAnyStatic(int $userId): bool
     {
-        return \DB::table('static_group_user')
+        return \DB::table('static_user')
             ->where('user_id', $userId)
             ->exists();
     }

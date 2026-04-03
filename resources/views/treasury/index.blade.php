@@ -42,11 +42,11 @@
                 </div>
                 <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">Required Weekly Tax</h3>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-white tracking-tighter font-headline">{{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}</span>
+                    <span class="text-4xl font-black {{ $taxStatus === 'danger' ? 'text-error' : ($taxStatus === 'warning' ? 'text-warning' : 'text-white') }} tracking-tighter font-headline">{{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}</span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Gold / Player</span>
                 </div>
-                <div class="mt-2 text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">
-                    Based on Weekly Cost & Member Count
+                <div class="mt-2 text-[10px] {{ $taxStatus === 'danger' ? 'text-error' : ($taxStatus === 'warning' ? 'text-warning' : 'text-on-surface-variant') }} uppercase font-bold tracking-widest">
+                    {{ $taxDescription }}
                 </div>
             </div>
 
@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="text-right">
                                     <div class="text-xs font-bold {{ $status['is_paid'] ? 'text-success-neon' : 'text-on-surface-variant' }}">
-                                        {{ \App\Helpers\CurrencyHelper::formatGold($status['total_paid'], false) }} / {{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}
+                                        {{ \App\Helpers\CurrencyHelper::formatGold($status['total_paid'], false) }} / {{ \App\Helpers\CurrencyHelper::formatGold($targetTax ?: 0, false) }}
                                     </div>
                                 </div>
                             </div>

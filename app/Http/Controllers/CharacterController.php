@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AssignCharacterRequest;
-use App\Services\CharacterService;
-use App\Services\CharacterSyncService;
-use App\Services\RosterService;
+use App\Services\Character\CharacterService;
+use App\Services\Character\CharacterSyncService;
+use App\Services\StaticGroup\RosterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -25,7 +25,7 @@ class CharacterController extends Controller
      */
     public function index(): View
     {
-        $data = $this->characterService->getIndexData(Auth::id());
+        $data = $this->characterService->buildIndexPayload(Auth::id());
 
         return view('characters.index', $data);
     }

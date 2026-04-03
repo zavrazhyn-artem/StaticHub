@@ -70,7 +70,7 @@ class CharacterBuilder extends Builder
             ->orderBy('equipped_item_level', 'desc');
     }
 
-    public function findForRsvp(int $characterId, int $userId, int $staticId): ?\App\Models\Character
+    public function findForRsvp(int $characterId, int $userId, int $staticId): ?Character
     {
         return $this->where('id', $characterId)
             ->belongingToUserInStatic($userId, $staticId)
@@ -80,7 +80,7 @@ class CharacterBuilder extends Builder
     /**
      * Find user's main character for a specific static.
      */
-    public function findMainInStatic(int $userId, int $staticId): ?\App\Models\Character
+    public function findMainInStatic(int $userId, int $staticId): ?Character
     {
         return $this->where('user_id', $userId)
             ->whereHas('statics', function ($query) use ($staticId) {
@@ -93,7 +93,7 @@ class CharacterBuilder extends Builder
     /**
      * Find user character in the context of a tactical report.
      */
-    public function findUserCharacterInReport(int $userId, int $staticId, int $reportId): ?\App\Models\Character
+    public function findUserCharacterInReport(int $userId, int $staticId, int $reportId): ?Character
     {
         return $this->where('user_id', $userId)
             ->join('character_static', 'characters.id', '=', 'character_static.character_id')
@@ -106,8 +106,13 @@ class CharacterBuilder extends Builder
 
     /**
      * Update or create a character from Blizzard API data.
+     * @param array $apiData
+     * @param int $userId
+     * @param int $realmId
+     * @param string|null $avatarUrl
+     * @return Character
      */
-    public function syncFromBlizzard(array $apiData, int $userId, int $realmId, ?string $avatarUrl): \App\Models\Character
+    public function syncFromBlizzard(array $apiData, int $userId, int $realmId, ?string $avatarUrl): Character
     {
         return $this->updateOrCreate(
             ['id' => $apiData['id']],

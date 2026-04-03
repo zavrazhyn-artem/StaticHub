@@ -102,7 +102,12 @@
                             <div class="space-y-1">
                                 @forelse(Auth::user()->characters->take(5) as $character)
                                     <div class="flex items-center gap-2 py-1">
-                                        <img src="{{ $character->avatar_url }}" class="w-4 h-4 rounded-full border border-white/10" alt="">
+                                        <div class="relative shrink-0">
+                                            <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded-full border border-white/10" alt="">
+                                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-surface-container rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
+                                                <img src="{{ $character->getClassIconUrl() }}" class="w-2.5 h-2.5" alt="">
+                                            </div>
+                                        </div>
                                         <span class="text-[10px] font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }} truncate">{{ $character->name }}</span>
                                     </div>
                                 @empty
@@ -147,12 +152,6 @@
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">groups</span>
                         <span class="font-headline text-xs font-bold uppercase tracking-widest">Roster</span>
-                    </a>
-
-                    <a href="{{ route('statics.roster.overview', $static->id) }}"
-                       class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster.overview') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
-                        <span class="material-symbols-outlined {{ request()->routeIs('statics.roster.overview') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">grid_view</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Roster Overview</span>
                     </a>
 
                     <a href="{{ route('consumables.index') }}"
@@ -214,7 +213,7 @@
         </aside>
 
         <!-- Main Content Canvas -->
-        <main class="lg:ml-64 pt-24 pb-12 px-8 min-h-screen">
+        <main class="lg:ml-64 pt-24 pb-12 px-8 min-h-screen" id="app">
             <div class="max-w-7xl mx-auto space-y-12">
                 {{ $slot }}
             </div>

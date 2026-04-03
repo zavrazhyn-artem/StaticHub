@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AiAnalystRequest;
-use App\Services\AiAnalystService;
+use App\Services\Analysis\AiAnalystService;
 use Illuminate\Http\JsonResponse;
 
 class AiAnalystController extends Controller

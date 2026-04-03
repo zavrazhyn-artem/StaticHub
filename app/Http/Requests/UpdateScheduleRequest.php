@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateScheduleRequest extends FormRequest
@@ -26,7 +25,7 @@ class UpdateScheduleRequest extends FormRequest
             'automation_settings.post_next_after_raid' => 'nullable|boolean',
             'automation_settings.reminder_hours_before' => 'nullable|integer|min:1|max:72',
             'automation_settings.ping_role_id' => 'nullable|string|max:20',
-            'guild_tax_per_player' => 'nullable|integer|min:0',
+            'weekly_tax_per_player' => 'nullable|integer|min:0',
         ];
     }
 }

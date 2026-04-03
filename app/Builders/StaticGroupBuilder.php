@@ -2,6 +2,7 @@
 
 namespace App\Builders;
 
+use App\Models\StaticGroup;
 use Illuminate\Database\Eloquent\Builder;
 
 class StaticGroupBuilder extends Builder
@@ -19,9 +20,9 @@ class StaticGroupBuilder extends Builder
      * Get the first static group for a user.
      *
      * @param int $userId
-     * @return \App\Models\StaticGroup|null
+     * @return StaticGroup|null
      */
-    public function firstForUser(int $userId): ?\App\Models\StaticGroup
+    public function firstForUser(int $userId): ?StaticGroup
     {
         return $this->whereUserIsMember($userId)->first();
     }
@@ -30,9 +31,9 @@ class StaticGroupBuilder extends Builder
      * Find a static group by invite token.
      *
      * @param string $token
-     * @return \App\Models\StaticGroup
+     * @return StaticGroup
      */
-    public function findByInviteToken(string $token): \App\Models\StaticGroup
+    public function findByInviteToken(string $token): StaticGroup
     {
         return $this->withoutGlobalScope('member')
             ->where('invite_token', $token)

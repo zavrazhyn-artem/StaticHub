@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/bnet_profile.json",
+  "title": "Blizzard Character Profile",
+  "description": "Raw response from /profile/wow/character/{realm}/{name}",
+  "type": "object",
+  "required": ["name", "character_class", "equipped_item_level"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "equipped_item_level": { "type": "integer", "minimum": 0 },
+    "character_class": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "id":   { "type": "integer" },
+        "name": { "type": "string" }
+      }
+    },
+    "active_spec": {
+      "type": "object",
+      "properties": {
+        "id":   { "type": "integer" },
+        "name": { "type": "string" }
+      }
+    },
+    "level": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": true
+}

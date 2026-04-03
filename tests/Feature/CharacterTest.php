@@ -2,14 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\StaticGroup;
 use App\Models\Character;
-use App\Services\BlizzardApiService;
-use App\Services\CharacterSyncService;
+use App\Models\StaticGroup;
+use App\Models\User;
+use App\Services\Character\CharacterSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Mockery\MockInterface;
+use Tests\TestCase;
 
 class CharacterTest extends TestCase
 {

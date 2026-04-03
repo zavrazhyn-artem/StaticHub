@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/bnet_mplus.json",
+  "title": "Blizzard Mythic+ Keystone Profile",
+  "description": "Raw response from /profile/wow/character/{realm}/{name}/mythic-keystone-profile",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "current_mythic_rating": {
+      "type": "object",
+      "required": ["rating"],
+      "properties": {
+        "rating": { "type": "number", "minimum": 0 },
+        "color": {
+          "type": "object",
+          "properties": {
+            "r": { "type": "integer" },
+            "g": { "type": "integer" },
+            "b": { "type": "integer" },
+            "a": { "type": "number" }
+          }
+        }
+      }
+    },
+    "best_runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "weekly_best_runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "current_period_best_runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "additionalProperties": true
+}

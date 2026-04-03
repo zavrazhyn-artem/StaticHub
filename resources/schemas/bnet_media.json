@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/bnet_media.json",
+  "title": "Blizzard Character Media",
+  "description": "Raw response from /profile/wow/character/{realm}/{name}/character-media",
+  "type": "object",
+  "required": ["assets"],
+  "properties": {
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key":        { "type": "string" },
+          "value":      { "type": "string", "format": "uri" },
+          "file_data_id": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

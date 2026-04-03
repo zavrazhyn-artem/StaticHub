@@ -44,6 +44,14 @@ class CurrencyHelper
     }
 
     /**
+     * Convert copper to gold.
+     */
+    public static function copperToGold(int|float $copper): float
+    {
+        return $copper / 10000;
+    }
+
+    /**
      * Calculate weeks of autonomy based on total reserves and weekly cost.
      */
     public static function calculateAutonomy(int|float $reserves, int|float $weeklyCost): float

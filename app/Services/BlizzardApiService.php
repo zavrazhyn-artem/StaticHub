@@ -1,21 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Models\Item;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Exception;
 
 class BlizzardApiService
 {
-    protected string $clientId;
-    protected string $clientSecret;
-    protected string $region;
+    private string $clientId;
+    private string $clientSecret;
+    private string $region;
 
     public function __construct()
     {
-        $this->clientId = config('services.battlenet.client_id');
-        $this->clientSecret = config('services.battlenet.client_secret');
-        $this->region = config('services.battlenet.region', 'eu');
+        $this->clientId = (string) config('services.battlenet.client_id');
+        $this->clientSecret = (string) config('services.battlenet.client_secret');
+        $this->region = (string) config('services.battlenet.region', 'eu');
     }
 
     /**
@@ -23,18 +27,22 @@ class BlizzardApiService
      */
     public function getAccessToken(): string
     {
-        return Cache::remember('blizzard_api_token', 86400, function () {
-            $response = Http::asForm()->withBasicAuth($this->clientId, $this->clientSecret)
-                ->post("https://{$this->region}.battle.net/oauth/token", [
-                    'grant_type' => 'client_credentials',
-                ]);
+        return Cache::remember('blizzard_api_token', 86400, fn() => $this->fetchNewToken());
+    }
 
-            if ($response->failed()) {
-                throw new \Exception('Failed to fetch Blizzard access token: ' . $response->body());
-            }
+    private function fetchNewToken(): string
+    {
+        $response = Http::asForm()
+            ->withBasicAuth($this->clientId, $this->clientSecret)
+            ->post("https://{$this->region}.battle.net/oauth/token", [
+                'grant_type' => 'client_credentials',
+            ]);
 
-            return $response->json('access_token');
-        });
+        if ($response->failed()) {
+            throw new Exception('Failed to fetch Blizzard access token: ' . $response->body());
+        }
+
+        return (string) $response->json('access_token');
     }
 
     /**
@@ -42,39 +50,36 @@ class BlizzardApiService
      */
     public function getUserGuilds(string $userToken): array
     {
-        $response = Http::withToken($userToken)
-            ->get("https://{$this->region}.api.blizzard.com/profile/user/wow");
-
-        if ($response->failed()) {
+        $data = $this->fetchUserProfile($userToken);
+        if (empty($data)) {
             return [];
         }
 
-        $accounts = $response->json('wow_accounts', []);
+        return $this->parseGuildsFromAccounts($data['wow_accounts'] ?? []);
+    }
+
+    private function fetchUserProfile(string $userToken): array
+    {
+        $response = Http::withToken($userToken)
+            ->get("https://{$this->region}.api.blizzard.com/profile/user/wow");
+
+        return $response->successful() ? $response->json() : [];
+    }
+
+    private function parseGuildsFromAccounts(array $accounts): array
+    {
         $guilds = [];
 
         foreach ($accounts as $account) {
             $characters = $account['characters'] ?? [];
             foreach ($characters as $character) {
-                // To check if they are GM, we might need more specific API calls per character or look at the profile response structure
-                // For simplicity, let's assume we fetch character profile which includes guild info
-                // However, the base profile response sometimes includes character guild memberships.
                 if (isset($character['guild'])) {
-                    $guildName = $character['guild']['name'];
-                    $realm = $character['realm']['name'];
-                    $realmSlug = $character['realm']['slug'];
-
-                    // We need to check if they are the GM.
-                    // This usually requires fetching the guild roster or the character's guild rank.
-                    // Let's implement a check for character guild rank if available,
-                    // but usually, it's safer to check the guild roster.
-                    // For the sake of this task, let's just collect the guilds first.
-
-                    $guildKey = $guildName . '-' . $realmSlug;
+                    $guildKey = "{$character['guild']['name']}-{$character['realm']['slug']}";
                     if (!isset($guilds[$guildKey])) {
                         $guilds[$guildKey] = [
-                            'name' => $guildName,
-                            'realm' => $realm,
-                            'realm_slug' => $realmSlug,
+                            'name' => $character['guild']['name'],
+                            'realm' => $character['realm']['name'],
+                            'realm_slug' => $character['realm']['slug'],
                             'character_name' => $character['name'],
                         ];
                     }
@@ -90,22 +95,26 @@ class BlizzardApiService
      */
     public function isGuildLeader(string $userToken, string $realmSlug, string $guildSlug): bool
     {
+        $roster = $this->fetchGuildRoster($userToken, $realmSlug, $guildSlug);
+
+        return $this->hasLeaderInRoster($roster);
+    }
+
+    private function fetchGuildRoster(string $userToken, string $realmSlug, string $guildSlug): array
+    {
         $response = Http::withToken($userToken)
             ->withHeaders(['Battlenet-Namespace' => "profile-{$this->region}"])
             ->get("https://{$this->region}.api.blizzard.com/data/wow/guild/{$realmSlug}/{$guildSlug}/roster");
 
-        if ($response->failed()) {
-            return false;
-        }
+        return $response->successful() ? $response->json('members', []) : [];
+    }
 
-        $members = $response->json('members', []);
+    private function hasLeaderInRoster(array $members): bool
+    {
         foreach ($members as $member) {
             // Rank 0 is usually Guild Master
-            if ($member['rank'] === 0) {
-                // Check if this character belongs to our user?
-                // We'd need to match character ID/name from the user's profile.
-                // For now, let's assume if we can find a character from the profile in this guild with rank 0, they are the leader.
-                return true; // Simplified for the exercise
+            if (($member['rank'] ?? -1) === 0) {
+                return true;
             }
         }
 
@@ -124,7 +133,11 @@ class BlizzardApiService
             return [];
         }
 
-        $accounts = $response->json('wow_accounts', []);
+        return $this->filterAndMapCharacters($response->json('wow_accounts', []));
+    }
+
+    private function filterAndMapCharacters(array $accounts): array
+    {
         $allCharacters = [];
 
         foreach ($accounts as $account) {
@@ -140,8 +153,6 @@ class BlizzardApiService
                         'playable_class' => $character['playable_class']['name'],
                         'playable_race' => $character['playable_race']['name'],
                         'level' => $character['level'],
-                        // Item level and avatar might require additional profile calls per character if not in this summary,
-                        // but let's see if they are available.
                     ];
                 }
             }
@@ -161,19 +172,114 @@ class BlizzardApiService
 
         $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}?namespace=profile-{$this->region}&locale=en_US";
 
-        $response = Http::withToken($token)
-            ->get($url);
+        $response = Http::withToken($token)->get($url);
 
         if ($response->failed()) {
             return null;
         }
 
-        return [
-            'equipped_item_level' => $response->json('equipped_item_level'),
-            'average_item_level' => $response->json('average_item_level'),
-            'active_spec' => $response->json('active_spec.name'),
-            'faction' => $response->json('faction.type'),
-        ];
+        return $response->json();
+    }
+
+    /**
+     * Get the equipment for a character.
+     */
+    public function getCharacterEquipment(string $region, string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment?namespace=profile-{$region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Get the media for a character.
+     */
+    public function getCharacterMedia(string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/character-media?namespace=profile-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Get the specializations for a character.
+     */
+    public function getCharacterSpecializations(string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/specializations?namespace=profile-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Get Mythic Keystone Profile for a character.
+     */
+    public function getCharacterMythicKeystoneProfile(string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        // Зверни увагу на зміну сегмента в URL: mythic-keystone-profile
+        $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-keystone-profile?namespace=profile-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Get Raid Encounters for a character.
+     */
+    public function getCharacterRaidEncounters(string $realmSlug, string $characterName): ?array
+    {
+        $token = $this->getAccessToken();
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
+
+        $url = "https://{$this->region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/encounters/raids?namespace=profile-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
     }
 
     /**
@@ -192,9 +298,13 @@ class BlizzardApiService
             return null;
         }
 
-        $assets = $response->json('assets', []);
+        return $this->extractAvatarUrl($response->json('assets', []));
+    }
+
+    private function extractAvatarUrl(array $assets): ?string
+    {
         foreach ($assets as $asset) {
-            if ($asset['key'] === 'avatar') {
+            if (($asset['key'] ?? '') === 'avatar') {
                 return $asset['value'];
             }
         }
@@ -213,10 +323,27 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/realm/index");
 
         if ($response->failed()) {
-            throw new \Exception('Failed to fetch realms from Blizzard API: ' . $response->body());
+            throw new Exception('Failed to fetch realms from Blizzard API: ' . $response->body());
         }
 
         return $response->json('realms', []);
+    }
+
+    /**
+     * Fetch all realms for the current region.
+     */
+    public function test(): array
+    {
+        $token = $this->getAccessToken();
+        $response = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "dynamic-{$this->region}"])
+            ->get("https://eu.api.blizzard.com/data/wow/mythic-keystone/period/1057?namespace=dynamic-eu");
+
+        if ($response->failed()) {
+            throw new Exception('Failed to fetch realms from Blizzard API: ' . $response->body());
+        }
+
+        return $response->json();
     }
 
     /**
@@ -230,7 +357,7 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/realm/{$realmId}");
 
         if ($response->failed()) {
-            throw new \Exception("Failed to fetch realm details for ID {$realmId}: " . $response->body());
+            throw new Exception("Failed to fetch realm details for ID {$realmId}: " . $response->body());
         }
 
         return $response->json();
@@ -250,7 +377,7 @@ class BlizzardApiService
             ->get($url);
 
         if ($response->failed()) {
-            throw new \Exception('Failed to fetch commodities: ' . $response->body());
+            throw new Exception('Failed to fetch commodities: ' . $response->body());
         }
 
         return $response->toPsrResponse()->getBody()->detach();
@@ -267,23 +394,22 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/profession/{$professionId}");
 
         if ($response->failed()) {
-            throw new \Exception("Failed to fetch profession tiers for ID {$professionId}: " . $response->body());
+            throw new Exception("Failed to fetch profession tiers for ID {$professionId}: " . $response->body());
         }
 
-        $tiers = $response->json('skill_tiers', []);
+        return $this->findMidnightTierId($response->json('skill_tiers', []));
+    }
 
-        // Find the one that contains "Midnight" or pick the one with the highest ID
-        $midnightTier = null;
+    private function findMidnightTierId(array $tiers): ?int
+    {
         foreach ($tiers as $tier) {
             if (str_contains($tier['name']['en_US'] ?? '', 'Midnight')) {
-                return $tier['id'];
+                return (int) $tier['id'];
             }
         }
 
-        // Fallback to highest ID if "Midnight" isn't found
         if (!empty($tiers)) {
-            $ids = array_column($tiers, 'id');
-            return max($ids);
+            return (int) max(array_column($tiers, 'id'));
         }
 
         return null;
@@ -300,33 +426,28 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}");
 
         if ($response->failed()) {
-            throw new \Exception("Failed to fetch recipes: " . $response->body());
+            throw new Exception("Failed to fetch recipes: " . $response->body());
         }
 
-        $data = $response->json();
-        $categories = $data['categories'] ?? [];
+        return $this->extractRecipesFromTierData($response->json());
+    }
+
+    private function extractRecipesFromTierData(array $data): array
+    {
         $recipes = [];
+        $categories = $data['categories'] ?? [];
 
         foreach ($categories as $category) {
-            // Optional: The command can handle logging if we return categories or provide a callback
-            // But for now let's just collect all recipes
-            $categoryRecipes = $category['recipes'] ?? [];
-            foreach ($categoryRecipes as $recipe) {
+            foreach ($category['recipes'] ?? [] as $recipe) {
                 $recipes[] = $recipe;
             }
         }
 
-        // Fallback to top-level recipes if categories are empty (for older tiers)
-        if (empty($recipes) && isset($data['recipes'])) {
-            $recipes = $data['recipes'];
-        }
-
-        return $recipes;
+        return empty($recipes) ? ($data['recipes'] ?? []) : $recipes;
     }
 
     /**
      * Fetch all categories and recipes for a given profession and skill tier.
-     * Useful for detailed logging in the command.
      */
     public function getTierDetails(int $professionId, int $tierId): array
     {
@@ -336,7 +457,7 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}");
 
         if ($response->failed()) {
-            throw new \Exception("Failed to fetch tier details: " . $response->body());
+            throw new Exception("Failed to fetch tier details: " . $response->body());
         }
 
         return $response->json();
@@ -353,98 +474,109 @@ class BlizzardApiService
             ->get("https://{$this->region}.api.blizzard.com/data/wow/recipe/{$recipeId}");
 
         if ($response->failed()) {
-            throw new \Exception("Failed to fetch recipe details for ID {$recipeId}: " . $response->body());
+            throw new Exception("Failed to fetch recipe details for ID {$recipeId}: " . $response->body());
         }
 
         return $response->json();
     }
 
     /**
-     * Fetch character equipment from the WoW Profile API.
+     * Fetch character equipment and M+ progression from the WoW Profile API.
      */
-    public function getCharacterEquipment(string $region, string $realmSlug, string $characterName): ?array
+    public function getCharacterEquipmentExtended(string $region, string $realmSlug, string $characterName): ?array
     {
         $token = $this->getAccessToken();
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/" . strtolower($characterName) . "/equipment");
+        $realmSlug = strtolower($realmSlug);
+        $characterName = strtolower($characterName);
 
-        $equipment = $response->successful() ? $response->json() : null;
+        $equipment = $this->fetchRawEquipment($region, $token, $realmSlug, $characterName);
+        $mPlus = $this->fetchRawMPlusProgression($region, $token, $realmSlug, $characterName);
 
-        // Also fetch Mythic+ data for "Dungeons Done" and "Vault" info
-        $mPlusResponse = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/" . strtolower($characterName) . "/mythic-plus-progression/summary");
-
-        if ($mPlusResponse->successful()) {
-            if ($equipment) {
-                $equipment['mythic_plus_progression'] = $mPlusResponse->json();
-            } else {
-                $equipment = ['mythic_plus_progression' => $mPlusResponse->json()];
-            }
+        if ($mPlus) {
+            $equipment = $equipment ?? [];
+            $equipment['mythic_plus_progression'] = $mPlus;
         }
 
         return $equipment;
     }
 
+    private function fetchRawEquipment(string $region, string $token, string $realmSlug, string $characterName): ?array
+    {
+        $response = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
+            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment");
+
+        return $response->successful() ? $response->json() : null;
+    }
+
+    private function fetchRawMPlusProgression(string $region, string $token, string $realmSlug, string $characterName): ?array
+    {
+        $response = Http::withToken($token)
+            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
+            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-plus-progression/summary");
+
+        return $response->successful() ? $response->json() : null;
+    }
+
     /**
-     * Fetch the real name, icon, and quality from the /data/wow/item/{id} endpoint.
+     * Fetch the real name, icon, and quality from the /data/wow/item/{id} endpoint and sync to DB.
      */
     public function syncItemMetadata(int $itemId): void
     {
         $token = $this->getAccessToken();
+        $data = $this->fetchItemData($itemId, $token);
+
+        if (empty($data)) {
+            return;
+        }
+
+        $name = $data['name']['en_US'] ?? $data['name'] ?? "Item #{$itemId}";
+        $iconUrl = $this->fetchItemIcon($itemId, $token, $data);
+
+        Item::query()->updateMetadata($itemId, $name, $iconUrl);
+    }
+
+    private function fetchItemData(int $itemId, string $token): array
+    {
         $response = Http::withToken($token)
             ->withHeaders(['Battlenet-Namespace' => "static-{$this->region}"])
             ->get("https://{$this->region}.api.blizzard.com/data/wow/item/{$itemId}");
 
-        if ($response->failed()) {
-            // Some items might be deleted or not found, we shouldn't fail the whole sync
-            return;
-        }
+        return $response->successful() ? $response->json() : [];
+    }
 
-        $data = $response->json();
-        $name = $data['name']['en_US'] ?? $data['name'] ?? "Item #{$itemId}";
-
-        // Fetching media for icon
+    private function fetchItemIcon(int $itemId, string $token, array $itemData): ?string
+    {
         $mediaResponse = Http::withToken($token)
             ->withHeaders(['Battlenet-Namespace' => "static-{$this->region}"])
             ->get("https://{$this->region}.api.blizzard.com/data/wow/media/item/{$itemId}");
 
-        $iconUrl = null;
         if ($mediaResponse->successful()) {
-            $mediaData = $mediaResponse->json();
-            foreach ($mediaData['assets'] ?? [] as $asset) {
-                if ($asset['key'] === 'icon') {
-                    $iconUrl = $asset['value'];
-                    break;
-                }
-            }
-        } else {
-            // Fallback to the href if specific media endpoint fails
-            $href = $data['media']['key']['href'] ?? null;
-            if ($href) {
-                $fallbackResponse = Http::withToken($token)
-                    ->withHeaders(['Battlenet-Namespace' => "static-{$this->region}"])
-                    ->get($href);
-                if ($fallbackResponse->successful()) {
-                    $mediaData = $fallbackResponse->json();
-                    foreach ($mediaData['assets'] ?? [] as $asset) {
-                        if ($asset['key'] === 'icon') {
-                            $iconUrl = $asset['value'];
-                            break;
-                        }
-                    }
-                }
+            return $this->extractIconFromAssets($mediaResponse->json('assets', []));
+        }
+
+        $fallbackHref = $itemData['media']['key']['href'] ?? null;
+        if ($fallbackHref) {
+            $fallbackResponse = Http::withToken($token)
+                ->withHeaders(['Battlenet-Namespace' => "static-{$this->region}"])
+                ->get($fallbackHref);
+
+            if ($fallbackResponse->successful()) {
+                return $this->extractIconFromAssets($fallbackResponse->json('assets', []));
             }
         }
 
-        \Illuminate\Support\Facades\DB::table('items')->updateOrInsert(
-            ['id' => $itemId],
-            [
-                'name' => $name,
-                'icon' => $iconUrl,
-                'updated_at' => now(),
-            ]
-        );
+        return null;
+    }
+
+    private function extractIconFromAssets(array $assets): ?string
+    {
+        foreach ($assets as $asset) {
+            if (($asset['key'] ?? '') === 'icon') {
+                return $asset['value'];
+            }
+        }
+
+        return null;
     }
 }

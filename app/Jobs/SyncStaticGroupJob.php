@@ -7,10 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
-use App\Jobs\SyncBnetDataJob;
-use App\Jobs\SyncRaiderIoDataJob;
-use App\Jobs\SyncWclDataJob;
-use App\Services\DiscordService;
+use App\Services\Discord\DiscordWebhookService;
 
 class SyncStaticGroupJob implements ShouldQueue, ShouldBeUnique
 {
@@ -42,7 +39,7 @@ class SyncStaticGroupJob implements ShouldQueue, ShouldBeUnique
     /**
      * Execute the job.
      */
-    public function handle(DiscordService $discordService): void
+    public function handle(DiscordWebhookService $discordService): void
     {
         Log::info("Starting background sync for Static Group: {$this->staticGroup->name}");
 
@@ -64,7 +61,7 @@ class SyncStaticGroupJob implements ShouldQueue, ShouldBeUnique
                 $missingEnchantsCount += $this->calculateMissingEnchants($character);
             }
             if ($syncRio) {
-                SyncRaiderIoDataJob::dispatch($character);
+                SyncRioDataJob::dispatch($character);
             }
             if ($syncWcl) {
                 SyncWclDataJob::dispatch($character);

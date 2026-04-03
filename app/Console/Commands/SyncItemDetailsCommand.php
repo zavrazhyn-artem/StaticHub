@@ -1,13 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
+use App\Jobs\SyncSingleItemMetadataJob;
+use App\Tasks\Item\FetchIncompleteItemIdsTask;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-
-use App\Services\BlizzardApiService;
-use Illuminate\Support\Facades\DB;
 
 #[Signature('app:sync-item-details')]
 #[Description('Sync real names and icons for items in our database from Blizzard API.')]
@@ -16,37 +17,31 @@ class SyncItemDetailsCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(BlizzardApiService $apiService)
+    public function handle(FetchIncompleteItemIdsTask $fetchIncompleteItemIdsTask): int
     {
-        $items = DB::table('items')
-            ->where('name', 'like', 'Item #%')
-            ->orWhereNull('icon')
-            ->get();
+        $itemIds = $fetchIncompleteItemIdsTask->run();
 
-        if ($items->isEmpty()) {
+        if (empty($itemIds)) {
             $this->info('No items to sync.');
             return 0;
         }
 
-        $this->info("Found {$items->count()} items to sync.");
+        $count = count($itemIds);
+        $this->info("Found {$count} items to sync. Dispatching jobs...");
 
-        $bar = $this->output->createProgressBar($items->count());
+        $bar = $this->output->createProgressBar($count);
         $bar->start();
 
-        foreach ($items as $item) {
-            try {
-                $apiService->syncItemMetadata($item->id);
-            } catch (\Exception $e) {
-                $this->newLine();
-                $this->error("Failed to sync item {$item->id}: " . $e->getMessage());
-            }
+        foreach ($itemIds as $id) {
+            SyncSingleItemMetadataJob::dispatch($id);
             $bar->advance();
         }
 
         $bar->finish();
         $this->newLine();
 
-        $this->info('Item metadata sync completed.');
+        $this->info('Successfully dispatched item metadata sync jobs.');
+
         return 0;
     }
 }

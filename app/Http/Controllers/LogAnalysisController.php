@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LogAnalysisRequest;
 use App\Models\StaticGroup;
-use App\Services\LogAnalysisService;
+use App\Services\Analysis\LogAnalysisService;
 use Illuminate\Http\RedirectResponse;
 
 class LogAnalysisController extends Controller
@@ -15,14 +15,10 @@ class LogAnalysisController extends Controller
 
     /**
      * Store manual log analysis request.
-     *
-     * @param LogAnalysisRequest $request
-     * @param StaticGroup $static
-     * @return RedirectResponse
      */
     public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
-        $report = $this->logAnalysisService->submitManualLog(
+        $report = $this->logAnalysisService->processManualLogSubmission(
             $request->input('wcl_url'),
             $static
         );

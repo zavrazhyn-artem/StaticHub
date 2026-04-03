@@ -2,10 +2,12 @@ import './bootstrap';
 
 import { createApp } from 'vue';
 import RosterOverview from './Components/RosterOverview.vue';
+import UnifiedRoster from './Components/UnifiedRoster.vue';
 import SyncStatusWidget from './Components/SyncStatusWidget.vue';
 
 const app = createApp({});
 app.component('roster-overview', RosterOverview);
+app.component('unified-roster', UnifiedRoster);
 app.component('sync-status-widget', SyncStatusWidget);
 
 // Mount Vue to the element with id="app" if it exists

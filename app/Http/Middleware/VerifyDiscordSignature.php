@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\DiscordService;
+use App\Tasks\Discord\VerifyDiscordSignatureTask;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class VerifyDiscordSignature
 {
     public function __construct(
-        protected DiscordService $discordService
+        protected VerifyDiscordSignatureTask $verifySignatureTask
     ) {}
 
     /**
@@ -28,7 +28,7 @@ class VerifyDiscordSignature
             return response('Unauthorized', 401);
         }
 
-        if (!$this->discordService->verifySignature($signature, $timestamp, $body)) {
+        if (!$this->verifySignatureTask->verify($signature, $timestamp, $body)) {
             return response('Invalid signature', 401);
         }
 

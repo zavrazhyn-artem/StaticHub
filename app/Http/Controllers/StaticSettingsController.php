@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateLogsRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\StaticGroup;
-use App\Services\StaticSettingsService;
+use App\Services\StaticGroup\StaticSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -18,26 +18,24 @@ class StaticSettingsController extends Controller
 
     public function schedule(StaticGroup $static): View
     {
-        return view('statics.settings.schedule', $this->service->getScheduleData($static));
+        return view('statics.settings.schedule', $this->service->buildScheduleSettingsPayload($static));
     }
 
     public function logs(StaticGroup $static): View
     {
-        $this->service->authorize($static);
-
         return view('statics.settings.logs', compact('static'));
     }
 
     public function updateLogs(UpdateLogsRequest $request, StaticGroup $static): RedirectResponse
     {
-        $this->service->updateLogs($static, $request->validated());
+        $this->service->executeUpdateLogsSettings($static, $request->validated());
 
         return redirect()->back()->with('success', 'Warcraft Logs settings updated!');
     }
 
     public function updateSchedule(UpdateScheduleRequest $request, StaticGroup $static): RedirectResponse
     {
-        $this->service->updateSchedule(
+        $this->service->executeUpdateScheduleSettings(
             $static,
             $request->validated(),
             $request->has('automation_settings.post_next_after_raid')
@@ -48,7 +46,7 @@ class StaticSettingsController extends Controller
 
     public function testDiscordWebhook(StaticGroup $static): JsonResponse
     {
-        $success = $this->service->testDiscordWebhook($static);
+        $success = $this->service->executeWebhookTest($static);
 
         return response()->json(['success' => $success]);
     }

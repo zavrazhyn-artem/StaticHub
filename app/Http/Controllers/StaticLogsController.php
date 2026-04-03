@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StaticGroup;
 use App\Models\TacticalReport;
-use App\Services\StaticLogService;
+use App\Services\Analysis\StaticLogService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,7 +16,7 @@ class StaticLogsController extends Controller
 
     public function index(StaticGroup $static, Request $request): View
     {
-        $logs = $this->logService->getPaginatedLogs($static, $request->get('difficulty'));
+        $logs = $this->logService->getPaginatedLogs($static, $request->input('difficulty'));
 
         return view('statics.logs.index', compact('static', 'logs'));
     }

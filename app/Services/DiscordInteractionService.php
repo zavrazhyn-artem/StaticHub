@@ -1,112 +1,214 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Jobs\Discord\ProcessRsvpInteractionJob;
+use App\Jobs\Discord\SwapRsvpCharacterJob;
+
+use App\Helpers\DiscordConstants;
+use App\Models\Character;
 use App\Models\RaidEvent;
 use App\Models\User;
-use App\Models\Character;
-use Illuminate\Http\Request;
 
 class DiscordInteractionService
 {
-    public function __construct(
-        private readonly RaidAttendanceService $attendanceService,
-        private readonly DiscordMessageService $discordMessageService
-    ) {}
-
-    public function handle(Request $request): array
+    /**
+     * Main Orchestrator for Discord Interactions.
+     */
+    public function handle(array $payload): array
     {
-        $type = $request->input('type');
+        $type = (int) ($payload['type'] ?? 0);
 
-        // type 1: PING
-        if ($type === 1) {
-            return ['type' => 1];
-        }
-
-        // type 3: MESSAGE_COMPONENT
-        if ($type === 3) {
-            return $this->handleMessageComponent($request);
-        }
-
-        return ['type' => 4, 'data' => ['content' => 'Interaction type not supported.']];
+        return match ($type) {
+            DiscordConstants::TYPE_PING => ['type' => DiscordConstants::RESPONSE_PONG],
+            DiscordConstants::TYPE_MESSAGE_COMPONENT => $this->handleMessageComponent($payload),
+            default => [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => ['content' => 'Interaction type not supported.'],
+            ],
+        };
     }
 
-    private function handleMessageComponent(Request $request): array
+    /**
+     * Task: Handle message component interactions (buttons, selects).
+     */
+    private function handleMessageComponent(array $payload): array
     {
-        $member = $request->input('member');
-        $discordId = $member['user']['id'] ?? null;
-        $customId = $request->input('data.custom_id');
+        $user = $this->resolveDiscordUser($payload['member'] ?? null);
+        $customId = $payload['data']['custom_id'] ?? '';
 
-        if (!$discordId) {
-            return ['type' => 4, 'data' => ['content' => 'Error: Could not identify Discord user.']];
-        }
-
-        $user = User::where('discord_id', $discordId)->first();
         if (!$user) {
             return [
-                'type' => 4,
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
                 'data' => [
                     'content' => 'Your Discord account is not linked to StaticHub. Please link it in your profile settings.',
-                    'flags' => 64 // Ephemeral
-                ]
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
             ];
         }
 
+        return $this->processComponentAction($customId, $payload, $user);
+    }
+
+    /**
+     * Task: Resolve Discord member data to a User model.
+     */
+    private function resolveDiscordUser(?array $memberData): ?User
+    {
+        $discordId = $memberData['user']['id'] ?? null;
+
+        if (!$discordId) {
+            return null;
+        }
+
+        return User::where('discord_id', $discordId)->first();
+    }
+
+    /**
+     * Task: Process the specific component action.
+     */
+    private function processComponentAction(string $customId, array $payload, User $user): array
+    {
         if (str_starts_with($customId, 'rsvp_select_')) {
-            return $this->handleRsvpSelect($request, $user, $customId);
+            return $this->processRsvpAction($customId, $payload['data']['values'] ?? [], $user);
+        }
+
+        if (str_starts_with($customId, 'rsvp_switch_')) {
+            return $this->processSwitchCharacterAction($customId, $user);
+        }
+
+        if (str_starts_with($customId, 'rsvp_confirm_char_')) {
+            return $this->processConfirmCharacterAction($customId, $payload, $user);
         }
 
         if (str_starts_with($customId, 'rsvp_comment_')) {
             return [
-                'type' => 4,
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
                 'data' => [
-                    'content' => 'Comments via Discord are coming soon! Please use the web interface for now.',
-                    'flags' => 64
-                ]
+                    'content' => 'This feature is coming soon to Discord! Please use the web interface for now.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
             ];
         }
-
-        if (str_starts_with($customId, 'rsvp_switch_')) {
-            return [
-                'type' => 4,
-                'data' => [
-                    'content' => 'Character switching via Discord is coming soon! Please use the web interface for now.',
-                    'flags' => 64
-                ]
-            ];
-        }
-
-        return ['type' => 4, 'data' => ['content' => 'Unknown interaction component.']];
-    }
-
-    private function handleRsvpSelect(Request $request, User $user, string $customId): array
-    {
-        $eventId = str_replace('rsvp_select_', '', $customId);
-        $event = RaidEvent::find($eventId);
-
-        if (!$event) {
-            return ['type' => 4, 'data' => ['content' => 'Raid event not found.']];
-        }
-
-        $status = $request->input('data.values.0');
-        $character = $this->findMainCharacterForStatic($user, $event->static_id);
-
-        if (!$character) {
-            return ['type' => 4, 'data' => ['content' => 'You have no characters linked to this static.']];
-        }
-
-        $this->attendanceService->updateAttendance($event, $character, $status);
 
         return [
-            'type' => 7, // UPDATE_MESSAGE
-            'data' => $this->discordMessageService->buildRaidMessage($event)
+            'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+            'data' => ['content' => 'Unknown interaction component.'],
         ];
     }
 
-    private function findMainCharacterForStatic(User $user, int $staticId): ?Character
+    /**
+     * Task: Process the "Switch Character" button click.
+     */
+    private function processSwitchCharacterAction(string $customId, User $user): array
     {
-        // For Discord RSVP, we need to find the user's main character for this static
-        return Character::query()->findMainInStatic($user->id, $staticId)
-            ?? $user->characters()->first();
+        $eventId = (int) str_replace('rsvp_switch_', '', $customId);
+        $event = RaidEvent::find($eventId);
+
+        if (!$event) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'Raid event not found.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        $characters = Character::query()
+            ->where('user_id', $user->id)
+            ->whereHas('statics', fn($q) => $q->where('statics.id', $event->static_id))
+            ->get();
+
+        if ($characters->count() <= 1) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'You only have one character linked to this static.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        $options = $characters->map(fn($char) => [
+            'label' => "{$char->name} ({$char->playable_class})",
+            'value' => (string) $char->id,
+        ])->toArray();
+
+        return [
+            'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+            'data' => [
+                'content' => 'Select the character you want to use for this raid:',
+                'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                'components' => [
+                    [
+                        'type' => 1,
+                        'components' => [
+                            [
+                                'type' => 3,
+                                'custom_id' => "rsvp_confirm_char_{$eventId}",
+                                'options' => $options,
+                                'placeholder' => 'Choose a character...',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Task: Process the character selection from the ephemeral menu.
+     */
+    private function processConfirmCharacterAction(string $customId, array $payload, User $user): array
+    {
+        $eventId = (int) str_replace('rsvp_confirm_char_', '', $customId);
+        $characterId = (int) ($payload['data']['values'][0] ?? 0);
+
+        if ($characterId > 0) {
+            SwapRsvpCharacterJob::dispatch($eventId, $user->id, $characterId);
+        }
+
+        return [
+            'type' => DiscordConstants::RESPONSE_UPDATE_MESSAGE,
+            'data' => [
+                'content' => '✅ Character successfully updated for this raid! (Updating main roster...)',
+                'components' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Task: Process RSVP selection and update attendance.
+     */
+    private function processRsvpAction(string $customId, array $values, User $user): array
+    {
+        $eventId = (int) str_replace('rsvp_select_', '', $customId);
+        $event = RaidEvent::find($eventId);
+
+        if (!$event) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => ['content' => 'Raid event not found.'],
+            ];
+        }
+
+        $status = $values[0] ?? null;
+        $character = $user->getMainCharacterForStatic($event->static_id);
+
+        if (!$character) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => ['content' => 'You have no characters linked to this static.'],
+            ];
+        }
+
+        ProcessRsvpInteractionJob::dispatch($event->id, $character->id, $status);
+
+        return [
+            'type' => DiscordConstants::RESPONSE_DEFERRED_UPDATE_MESSAGE,
+        ];
     }
 }

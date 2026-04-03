@@ -4,13 +4,12 @@ namespace App\Jobs;
 
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
-use App\Services\DiscordMessageService;
-use App\Services\GeminiService;
-use App\Services\WclService;
+use App\Services\Discord\DiscordMessageService;
+use App\Services\Analysis\GeminiService;
+use App\Services\Analysis\WclService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class ProcessRaidAnalysisJob implements ShouldQueue
 {

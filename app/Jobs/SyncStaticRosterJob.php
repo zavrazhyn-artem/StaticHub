@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
-use App\Models\Character;
 use App\Models\StaticGroup;
 use App\Services\BlizzardApiService;
-use App\Services\RaiderIoService;
-use App\Services\WclService;
+use App\Mappers\BlizzardDataMapper;
+use App\Services\Analysis\RaiderIoService;
+use App\Services\Analysis\WclService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -43,8 +45,17 @@ class SyncStaticRosterJob implements ShouldQueue
                 $realmSlug = $character->realm->slug;
                 $name = $character->name;
 
-                // 1. Bnet Data (Equipment & ilvl)
-                $bnetData = $bnetService->getCharacterEquipment($region, $realmSlug, $name);
+                // 1. Bnet Data (Profile, Equipment, Media, M+, Raid)
+                $profile = $bnetService->getCharacterProfileSummary($realmSlug, $name);
+                $equipment = $bnetService->getCharacterEquipment($region, $realmSlug, $name);
+                $media = $bnetService->getCharacterMedia($realmSlug, $name);
+                $mplus = $bnetService->getCharacterMythicKeystoneProfile($realmSlug, $name);
+                $raids = $bnetService->getCharacterRaidEncounters($realmSlug, $name);
+
+                $processedBnetData = null;
+                if ($profile && $equipment && $media) {
+                    $processedBnetData = BlizzardDataMapper::map($profile, $equipment, $media, $mplus ?? [], $raids ?? []);
+                }
 
                 // 2. Raider.IO Data (M+ Score & Progression)
                 $raiderIoData = $raiderIoService->getCharacterProfile($region, $realmSlug, $name);
@@ -53,27 +64,17 @@ class SyncStaticRosterJob implements ShouldQueue
                 $wclData = $wclService->getCharacterParses($region, $realmSlug, $name);
 
                 // Extract values
-                $ilvl = null;
-                if ($raiderIoData && isset($raiderIoData['gear']['item_level_equipped'])) {
-                    $ilvl = $raiderIoData['gear']['item_level_equipped'];
-                }
-
-                $mythicRating = null;
-                if ($raiderIoData && isset($raiderIoData['mythic_plus_scores_by_season'])) {
-                    // Public API returns an array or object depending on fields
-                    $scores = $raiderIoData['mythic_plus_scores_by_season'] ?? [];
-                    if (!empty($scores)) {
-                        $mythicRating = $scores[0]['scores']['all'] ?? null;
-                    }
-                }
+                $ilvl = $raiderIoData?->gear->item_level_equipped ?? ($processedBnetData?->stats['equipped_item_level'] ?? null);
+                $mythicRating = $raiderIoData?->mythic_plus_scores_by_season->toCollection()->first()?->scores->all;
 
                 // Update character
                 $character->update([
                     'ilvl' => $ilvl,
                     'mythic_rating' => $mythicRating,
-                    'raw_bnet_data' => $bnetData,
-                    'raw_raiderio_data' => $raiderIoData,
+                    'raw_bnet_data' => $processedBnetData?->toArray(),
+                    'raw_raiderio_data' => $raiderIoData?->toArray(),
                     'raw_wcl_data' => $wclData,
+                    'avatar_url' => $processedBnetData?->avatar_url ?? $character->avatar_url,
                 ]);
 
                 // Rate limiting

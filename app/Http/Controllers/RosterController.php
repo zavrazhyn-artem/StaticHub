@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateRosterRequest;
+use App\Http\Resources\StaticRosterMemberResource;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Services\ConsumableService;
-use App\Services\RosterService;
-use App\Services\TreasuryService;
+use App\Services\StaticGroup\RosterService;
+use App\Services\StaticGroup\TreasuryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -15,36 +18,42 @@ use Illuminate\View\View;
 class RosterController extends Controller
 {
     public function __construct(
-        protected RosterService $rosterService,
+        protected RosterService    $rosterService,
         protected ConsumableService $consumableService,
-        protected TreasuryService $treasuryService
+        protected TreasuryService  $treasuryService,
     ) {}
-
-    public function showFirst(): RedirectResponse
-    {
-        $static = User::query()->firstStaticForUser(Auth::id());
-
-        if (!$static) {
-            return redirect()->route('statics.setup');
-        }
-
-        return redirect()->route('statics.roster', $static->id);
-    }
 
     public function index(StaticGroup $static): View
     {
-        $consumablesData = $this->consumableService->getRaidConsumablesData($static);
-        $targetTax = $consumablesData['guild_tax_per_raider'] ?? 0;
+        // Load each member (User) with:
+        //   - their characters, each having the statics relationship scoped to
+        //     this static so the pivot role ('main'/'alt') is available in-memory.
+        //   - compiled_data is a column on characters, loaded automatically.
+        $members = $static->members()
+            ->with([
+                'characters' => fn ($q) => $q->with([
+                    'statics' => fn ($sq) => $sq->where('statics.id', $static->id),
+                ]),
+            ])
+            ->get();
 
-        $groupedRoster = $this->rosterService->getGroupedRoster($static->id);
-        $weeklyTaxStatus = $this->treasuryService->getWeeklyStatus($static, $targetTax)->keyBy('user_id');
+        $currentUserId    = (int) Auth::id();
+        $currentUserAccess = $members
+            ->first(fn (User $m) => $m->id === $currentUserId)
+            ?->pivot
+            ?->access_role ?? 'member';
 
-        return view('roster.index', [
-            'static' => $static,
-            'groupedRoster' => $groupedRoster,
-            'weeklyTaxStatus' => $weeklyTaxStatus,
-            'targetTax' => $targetTax,
-        ]);
+        $rosterData = [
+            'roster' => $members
+                ->map(fn (User $user) => (new StaticRosterMemberResource($user))
+                    ->setStaticId($static->id)
+                    ->resolve()
+                )
+                ->values(),
+            'current_user_access' => $currentUserAccess,
+        ];
+
+        return view('roster.index', compact('static', 'rosterData'));
     }
 
     public function overview(StaticGroup $static): View
@@ -52,7 +61,7 @@ class RosterController extends Controller
         $mains = $this->rosterService->getRosterOverview($static);
 
         return view('roster.overview', [
-            'static' => $static,
+            'static'     => $static,
             'characters' => $mains,
         ]);
     }

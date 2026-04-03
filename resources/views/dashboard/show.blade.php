@@ -120,19 +120,36 @@
                 </div>
 
                 <!-- Widget: Treasury Quick View -->
-                <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 relative overflow-hidden group">
+                <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 relative overflow-hidden group {{ $taxStatus === 'danger' ? 'border-l-4 border-error' : '' }}">
                     <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         <span class="material-symbols-outlined text-6xl text-[#FFD700]">payments</span>
                     </div>
-                    <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">Treasury Overview</h2>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">Treasury Overview</h2>
+                        @if($taxStatus !== 'success')
+                            <span class="material-symbols-outlined {{ $taxStatus === 'danger' ? 'text-error animate-pulse' : 'text-warning' }} text-lg" title="{{ $taxDescription }}">
+                                {{ $taxStatus === 'danger' ? 'warning' : 'info' }}
+                            </span>
+                        @endif
+                    </div>
 
                     <div class="space-y-6">
                         <div>
-                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Weekly Tax Goal</div>
+                            <div class="text-[10px] {{ $taxStatus === 'danger' ? 'text-error' : ($taxStatus === 'warning' ? 'text-warning' : 'text-on-surface-variant') }} font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                                @if($taxStatus !== 'success')
+                                    <span class="material-symbols-outlined text-[12px]">{{ $taxStatus === 'danger' ? 'trending_up' : 'trending_down' }}</span>
+                                @endif
+                                Weekly Tax Goal
+                            </div>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-3xl font-black text-white font-headline tracking-tighter">{{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}</span>
+                                <span class="text-3xl font-black {{ $taxStatus === 'danger' ? 'text-error' : ($taxStatus === 'warning' ? 'text-warning' : 'text-white') }} font-headline tracking-tighter">{{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}</span>
                                 <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Gold / Player</span>
                             </div>
+                            @if($taxStatus !== 'success')
+                                <div class="mt-1 text-[8px] {{ $taxStatus === 'danger' ? 'text-error' : 'text-warning' }} font-bold uppercase tracking-tighter">
+                                    {{ $taxDescription }}
+                                </div>
+                            @endif
                         </div>
 
                         <div class="pt-4 border-t border-white/5">

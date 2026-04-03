@@ -10,14 +10,18 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "ext-sodium": "*",
         "halaxa/json-machine": "^1.2",
         "laravel/framework": "^13.0",
         "laravel/socialite": "^5.26",
         "laravel/tinker": "^3.0",
+        "opis/json-schema": "^2.6",
         "socialiteproviders/battlenet": "^4.1",
-        "socialiteproviders/discord": "^4.2"
+        "socialiteproviders/discord": "^4.2",
+        "spatie/laravel-data": "^4.20"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.4",
         "laravel/pail": "^1.2.5",

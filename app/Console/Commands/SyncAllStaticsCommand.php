@@ -1,44 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
-use App\Models\StaticGroup;
-use App\Jobs\SyncStaticRosterJob;
+use App\Services\StaticGroup\Sync\UnifiedSyncOrchestratorService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class SyncAllStaticsCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'statics:sync-rosters';
+    protected $signature = 'statics:sync';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Dispatch SyncStaticRosterJob for all active static groups';
+    protected $description = 'Dispatch unified raw-data fetch jobs for all statics due for synchronization.';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(UnifiedSyncOrchestratorService $orchestrator): int
     {
-        $this->info('Starting dispatching synchronization jobs for all statics...');
+        $this->info('Starting unified sync dispatch...');
 
-        // Fetch all static groups.
-        // If there is an 'active' flag, we should filter by it.
-        // Based on the model, there's no obvious 'active' field, so we fetch all.
-        $statics = StaticGroup::withoutGlobalScopes()->get();
-
-        foreach ($statics as $static) {
-            $this->comment("Dispatching sync job for static: {$static->name} (ID: {$static->id})");
-            SyncStaticRosterJob::dispatch($static);
+        try {
+            $messages = $orchestrator->execute();
+        } catch (Throwable $e) {
+            $this->error('Sync orchestration failed: ' . $e->getMessage());
+            return self::FAILURE;
         }
 
-        $this->info('All jobs dispatched successfully.');
+        foreach ($messages as $message) {
+            $this->line($message);
+        }
+
+        $this->info('Sync dispatch completed.');
+
+        return self::SUCCESS;
     }
 }

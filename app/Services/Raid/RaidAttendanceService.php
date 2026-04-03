@@ -1,0 +1,176 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Raid;
+
+use App\Models\RaidEvent;
+use App\Models\Character;
+use App\Models\RaidAttendance;
+use App\Models\User;
+use Illuminate\Support\Collection;
+
+class RaidAttendanceService
+{
+    /**
+     * Update attendance for a character at a raid event.
+     */
+    public function updateAttendance(RaidEvent $event, Character $character, string $status, ?string $comment = null): RaidAttendance
+    {
+        return RaidAttendance::updateOrCreate([
+            'raid_event_id' => $event->id,
+            'character_id' => $character->id,
+        ], [
+            'status' => $status,
+            'comment' => $comment,
+        ]);
+    }
+
+    /**
+     * Get the roster grouped by combat roles, including pending status for non-RSVP'd members.
+     */
+    public function getGroupedRoster(RaidEvent $event): array
+    {
+        $staticMembers = $this->fetchStaticMembers($event->static_id);
+        $attendances = $this->fetchEventAttendances($event->id);
+
+        $resolvedCharacters = new Collection();
+
+        foreach ($staticMembers as $user) {
+            $resolved = $this->resolveUserCharacterForEvent($user, $attendances, $event->static_id);
+
+            if ($resolved) {
+                /** @var Character $character */
+                $character = $resolved['character'];
+
+                $this->attachVirtualAttendance(
+                    $character,
+                    $event->id,
+                    $resolved['status'],
+                    $resolved['comment']
+                );
+
+                $resolvedCharacters->push($character);
+            }
+        }
+
+        return $this->categorizeRoster($resolvedCharacters, $event->static_id);
+    }
+
+    /**
+     * Fetch ALL users belonging to the static with their characters loaded.
+     */
+    private function fetchStaticMembers(int $staticId): Collection
+    {
+        return User::query()
+            ->whereHas('statics', fn ($q) => $q->where('statics.id', $staticId))
+            ->with(['characters' => function ($query) use ($staticId) {
+                $query->whereHas('statics', fn ($q) => $q->where('statics.id', $staticId))
+                    ->with(['statics' => fn ($q) => $q->where('statics.id', $staticId)]);
+            }])
+            ->get();
+    }
+
+    /**
+     * Fetch all existing RaidAttendance records for this specific event.
+     */
+    private function fetchEventAttendances(int $eventId): Collection
+    {
+        return RaidAttendance::where('raid_event_id', $eventId)
+            ->get()
+            ->keyBy('character_id');
+    }
+
+    /**
+     * Determines which character to use for a user in an event.
+     */
+    private function resolveUserCharacterForEvent(User $user, Collection $attendances, int $staticId): ?array
+    {
+        $userAttendance = null;
+        $selectedCharacter = null;
+
+        // 1. Check if any of user's characters has an attendance record for this event
+        foreach ($user->characters as $char) {
+            if ($attendances->has($char->id)) {
+                $userAttendance = $attendances->get($char->id);
+                $selectedCharacter = $char;
+                break;
+            }
+        }
+
+        if ($userAttendance && $selectedCharacter) {
+            return [
+                'character' => $selectedCharacter,
+                'status' => $userAttendance->status,
+                'comment' => $userAttendance->comment,
+            ];
+        }
+
+        // 2. Fallback: Find this user's main character for this static
+        $mainCharacter = $user->getMainCharacterForStatic($staticId);
+
+        if (!$mainCharacter) {
+            // Fallback to first character if no main found
+            $mainCharacter = $user->characters->first();
+        }
+
+        if ($mainCharacter) {
+            return [
+                'character' => $mainCharacter,
+                'status' => 'pending',
+                'comment' => null,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Isolates the presentation logic of attaching a temporary pivot.
+     */
+    private function attachVirtualAttendance(Character $character, int $eventId, string $status, ?string $comment): void
+    {
+        $character->setRelation('pivot', new RaidAttendance([
+            'status' => $status,
+            'comment' => $comment,
+            'character_id' => $character->id,
+            'raid_event_id' => $eventId,
+        ]));
+    }
+
+    /**
+     * Handles sorting characters into roles.
+     */
+    private function categorizeRoster(Collection $resolvedCharacters, int $staticId): array
+    {
+        $mainRoster = [
+            'tank' => new Collection(),
+            'heal' => new Collection(),
+            'mdps' => new Collection(),
+            'rdps' => new Collection(),
+        ];
+        $absentRoster = new Collection();
+
+        foreach ($resolvedCharacters as $character) {
+            /** @var Character $character */
+            $status = $character->pivot->status;
+            $combatRole = $character->getCombatRoleInStatic($staticId);
+
+            if ($status === 'absent' || $status === 'tentative') {
+                $absentRoster->push($character);
+            } else {
+                if (isset($mainRoster[$combatRole])) {
+                    $mainRoster[$combatRole]->push($character);
+                } else {
+                    // Fallback to rdps if role is unknown
+                    $mainRoster['rdps']->push($character);
+                }
+            }
+        }
+
+        return [
+            'mainRoster' => $mainRoster,
+            'absentRoster' => $absentRoster,
+        ];
+    }
+}

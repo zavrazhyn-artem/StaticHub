@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/rio_profile.json",
+  "title": "Raider.io Character Profile",
+  "description": "Raw response from https://raider.io/api/v1/characters/profile",
+  "type": "object",
+  "required": ["name", "class", "gear"],
+  "properties": {
+    "name":  { "type": "string", "minLength": 1 },
+    "realm": { "type": "string" },
+    "region": {
+      "type": "string",
+      "enum": ["us", "eu", "kr", "tw", "cn"]
+    },
+    "class": { "type": "string", "minLength": 1 },
+    "active_spec_name": { "type": "string" },
+    "active_spec_role": {
+      "type": "string",
+      "enum": ["TANK", "HEALER", "DPS"]
+    },
+    "gear": {
+      "type": "object",
+      "required": ["item_level_equipped"],
+      "properties": {
+        "item_level_equipped": { "type": "number", "minimum": 0 },
+        "item_level_total":    { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "mythic_plus_scores_by_season": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "raid_progression": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "summary":              { "type": "string" },
+          "total_bosses":         { "type": "integer" },
+          "normal_bosses_killed": { "type": "integer" },
+          "heroic_bosses_killed": { "type": "integer" },
+          "mythic_bosses_killed": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

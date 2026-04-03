@@ -31,6 +31,9 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
 
     Route::get('/statics/{static}/dashboard', [App\Http\Controllers\DashboardController::class, 'show'])->name('statics.dashboard');
     Route::get('/statics/{static}/roster', [RosterController::class, 'index'])->name('statics.roster');
+    Route::patch('/statics/{static}/roster/{user}/access-role', [App\Http\Controllers\StaticGroupRosterController::class, 'updateAccessRole'])->name('statics.roster.update-access');
+    Route::patch('/statics/{static}/roster/{user}/roster-status', [App\Http\Controllers\StaticGroupRosterController::class, 'updateRosterStatus'])->name('statics.roster.update-status');
+    Route::delete('/statics/{static}/roster/{user}/kick', [App\Http\Controllers\StaticGroupRosterController::class, 'kick'])->name('statics.roster.kick');
     Route::get('/statics/{static}/roster/overview', [RosterController::class, 'overview'])->name('statics.roster.overview');
     Route::get('/statics/{static}/treasury', [App\Http\Controllers\TreasuryController::class, 'index'])->name('statics.treasury');
     Route::post('/statics/{static}/treasury', [App\Http\Controllers\TreasuryController::class, 'store'])->name('statics.treasury.store');

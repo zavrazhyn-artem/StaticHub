@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.local/bnet_raid.json",
+  "title": "Blizzard Raid Encounters",
+  "description": "Raw response from /profile/wow/character/{realm}/{name}/encounters/raids",
+  "type": "object",
+  "required": ["expansions"],
+  "properties": {
+    "expansions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["expansion", "instances"],
+        "properties": {
+          "expansion": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "id":   { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          },
+          "instances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["instance", "modes"],
+              "properties": {
+                "instance": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "id":   { "type": "integer" },
+                    "name": { "type": "string" }
+                  }
+                },
+                "modes": {
+                  "type": "array",
+                  "items": { "type": "object" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

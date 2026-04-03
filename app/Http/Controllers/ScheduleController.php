@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreScheduleRequest;
-use App\Services\ScheduleService;
+use App\Services\Raid\ScheduleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,11 +11,9 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    private ScheduleService $scheduleService;
-
-    public function __construct(ScheduleService $scheduleService)
-    {
-        $this->scheduleService = $scheduleService;
+    public function __construct(
+        private readonly ScheduleService $scheduleService
+    ) {
     }
 
     /**
@@ -26,7 +24,7 @@ class ScheduleController extends Controller
         $year = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
 
-        $scheduleData = $this->scheduleService->getScheduleData($year, $month, Auth::id());
+        $scheduleData = $this->scheduleService->buildSchedulePayload($year, $month, Auth::id());
 
         return view('schedule.index', $scheduleData);
     }
@@ -36,7 +34,7 @@ class ScheduleController extends Controller
      */
     public function store(StoreScheduleRequest $request): RedirectResponse
     {
-        $this->scheduleService->createEvent($request->validated(), Auth::id());
+        $this->scheduleService->executeEventCreation($request->validated(), Auth::id());
 
         return redirect()->back()->with('success', 'Event created successfully!');
     }

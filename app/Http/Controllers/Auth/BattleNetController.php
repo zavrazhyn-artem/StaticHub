@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Auth\BattleNetAuthService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 class BattleNetController extends Controller
@@ -26,7 +29,7 @@ class BattleNetController extends Controller
      */
     public function redirect(): SymfonyRedirectResponse
     {
-        return $this->authService->getRedirectResponse();
+        return $this->authService->buildRedirectProvider();
     }
 
     /**
@@ -36,7 +39,15 @@ class BattleNetController extends Controller
      */
     public function callback(): RedirectResponse
     {
-        $user = $this->authService->handleCallback();
+        $data = $this->authService->executeCallbackProcessing();
+
+        $user = $data['user'];
+        $token = $data['token'];
+
+        // Store token in session for API calls
+        session(['battlenet_token' => $token]);
+
+        Auth::login($user);
 
         if (User::query()->hasMainCharacter($user->id)) {
             return redirect()->route('dashboard');

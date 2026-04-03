@@ -111,10 +111,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     @php
                         $roles = [
-                            'tank' => ['label' => 'Tanks', 'icon' => 'shield', 'color' => 'text-blue-400', 'bg' => 'bg-blue-400/5'],
-                            'heal' => ['label' => 'Healers', 'icon' => 'medical_services', 'color' => 'text-success-neon', 'bg' => 'bg-success-neon/5'],
-                            'mdps' => ['label' => 'Melee DPS', 'icon' => 'swords', 'color' => 'text-error-dim', 'bg' => 'bg-error-dim/5'],
-                            'rdps' => ['label' => 'Ranged DPS', 'icon' => 'magic_button', 'color' => 'text-purple-400', 'bg' => 'bg-purple-400/5'],
+                            'tank' => ['label' => 'Tanks', 'icon' => 'tank.svg', 'color' => 'text-blue-400', 'bg' => 'bg-blue-400/5'],
+                            'heal' => ['label' => 'Healers', 'icon' => 'heal.svg', 'color' => 'text-success-neon', 'bg' => 'bg-success-neon/5'],
+                            'mdps' => ['label' => 'Melee DPS', 'icon' => 'melee.svg', 'color' => 'text-error-dim', 'bg' => 'bg-error-dim/5'],
+                            'rdps' => ['label' => 'Ranged DPS', 'icon' => 'range.svg', 'color' => 'text-purple-400', 'bg' => 'bg-purple-400/5'],
                         ];
                     @endphp
 
@@ -122,7 +122,7 @@
                         <div class="bg-surface-container border border-white/5 rounded-xl overflow-hidden flex flex-col min-h-[400px]">
                             <div class="px-5 py-3 {{ $roleData['bg'] }} border-b border-white/5 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined {{ $roleData['color'] }} text-lg">{{ $roleData['icon'] }}</span>
+                                    <img src="{{ asset('images/roles/' . $roleData['icon']) }}" class="w-4 h-4 opacity-80" alt="{{ $roleData['label'] }}">
                                     <span class="font-headline text-xs font-black uppercase tracking-widest text-white">{{ $roleData['label'] }}</span>
                                 </div>
                                 <span class="bg-white/10 px-2 py-0.5 rounded text-[10px] font-black text-white">{{ $mainRoster[$roleKey]->count() }}</span>
@@ -140,6 +140,9 @@
                                         <div class="flex items-center gap-3">
                                             <div class="relative">
                                                 <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded object-cover border border-white/10 {{ $isPending ? 'grayscale' : '' }}">
+                                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-surface-container rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
+                                                    <img src="{{ $character->getClassIconUrl() }}" class="w-2.5 h-2.5" alt="">
+                                                </div>
                                                 @if($isLate)
                                                     <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-surface-container flex items-center justify-center" title="Late">
                                                         <span class="material-symbols-outlined text-[8px] text-black font-bold">schedule</span>
@@ -176,7 +179,7 @@
                                     </div>
                                 @empty
                                     <div class="flex flex-col items-center justify-center py-12 text-center opacity-20">
-                                        <span class="material-symbols-outlined text-4xl mb-2">{{ $roleData['icon'] }}</span>
+                                        <img src="{{ asset('images/roles/' . $roleData['icon']) }}" class="w-12 h-12 mb-2" alt="">
                                         <span class="text-[10px] uppercase font-bold tracking-widest">Empty</span>
                                     </div>
                                 @endforelse

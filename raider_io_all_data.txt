@@ -1,0 +1,2897 @@
+array:28 [
+  "name" => "Zavrikk"
+  "race" => "Troll"
+  "class" => "Druid"
+  "active_spec_name" => "Guardian"
+  "active_spec_role" => "TANK"
+  "gender" => "male"
+  "faction" => "horde"
+  "achievement_points" => 36580
+  "thumbnail_url" => "https://render.worldofwarcraft.com/eu/character/tarren-mill/123/177564539-avatar.jpg?alt=/wow/static/images/2d/avatar/8-0.jpg"
+  "region" => "eu"
+  "realm" => "Tarren Mill"
+  "last_crawled_at" => "2026-04-01T05:34:57.000Z"
+  "profile_url" => "https://raider.io/characters/eu/tarren-mill/Zavrikk"
+  "profile_banner" => "hordebanner1"
+  "covenant" => null
+  "mythic_plus_scores_by_season" => array:2 [
+    0 => array:3 [
+      "season" => "season-mn-1"
+      "scores" => array:8 [
+        "all" => 2632.1
+        "dps" => 0
+        "healer" => 0
+        "tank" => 2632.1
+        "spec_0" => 0
+        "spec_1" => 0
+        "spec_2" => 2632.1
+        "spec_3" => 0
+      ]
+      "segments" => array:8 [
+        "all" => array:2 [
+          "score" => 2632.1
+          "color" => "#7957e7"
+        ]
+        "dps" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "healer" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "tank" => array:2 [
+          "score" => 2632.1
+          "color" => "#7957e7"
+        ]
+        "spec_0" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "spec_1" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "spec_2" => array:2 [
+          "score" => 2632.1
+          "color" => "#7957e7"
+        ]
+        "spec_3" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+      ]
+    ]
+    1 => array:3 [
+      "season" => "season-tww-3"
+      "scores" => array:8 [
+        "all" => 3593.1
+        "dps" => 0
+        "healer" => 3528.6
+        "tank" => 3263.3
+        "spec_0" => 0
+        "spec_1" => 0
+        "spec_2" => 3263.3
+        "spec_3" => 3528.6
+      ]
+      "segments" => array:8 [
+        "all" => array:2 [
+          "score" => 3593.1
+          "color" => "#d850a2"
+        ]
+        "dps" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "healer" => array:2 [
+          "score" => 3528.6
+          "color" => "#d24bae"
+        ]
+        "tank" => array:2 [
+          "score" => 3263.3
+          "color" => "#b33add"
+        ]
+        "spec_0" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "spec_1" => array:2 [
+          "score" => 0
+          "color" => "#ffffff"
+        ]
+        "spec_2" => array:2 [
+          "score" => 3263.3
+          "color" => "#b33add"
+        ]
+        "spec_3" => array:2 [
+          "score" => 3528.6
+          "color" => "#d24bae"
+        ]
+      ]
+    ]
+  ]
+  "mythic_plus_ranks" => array:12 [
+    "overall" => array:3 [
+      "world" => 310605
+      "region" => 124712
+      "realm" => 9520
+    ]
+    "class" => array:3 [
+      "world" => 34280
+      "region" => 13689
+      "realm" => 1011
+    ]
+    "tank" => array:3 [
+      "world" => 57256
+      "region" => 23455
+      "realm" => 1765
+    ]
+    "class_tank" => array:3 [
+      "world" => 4263
+      "region" => 2101
+      "realm" => 133
+    ]
+    "healer" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "class_healer" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "dps" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "class_dps" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_102" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_103" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_104" => array:3 [
+      "world" => 4263
+      "region" => 2101
+      "realm" => 133
+    ]
+    "spec_105" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+  ]
+  "previous_mythic_plus_ranks" => array:12 [
+    "overall" => array:3 [
+      "world" => 81845
+      "region" => 25246
+      "realm" => 2029
+    ]
+    "class" => array:3 [
+      "world" => 8874
+      "region" => 2803
+      "realm" => 230
+    ]
+    "tank" => array:3 [
+      "world" => 63981
+      "region" => 19277
+      "realm" => 1369
+    ]
+    "class_tank" => array:3 [
+      "world" => 5009
+      "region" => 1698
+      "realm" => 97
+    ]
+    "healer" => array:3 [
+      "world" => 22119
+      "region" => 6654
+      "realm" => 470
+    ]
+    "class_healer" => array:3 [
+      "world" => 9167
+      "region" => 2646
+      "realm" => 208
+    ]
+    "dps" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "class_dps" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_102" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_103" => array:3 [
+      "world" => 0
+      "region" => 0
+      "realm" => 0
+    ]
+    "spec_104" => array:3 [
+      "world" => 5009
+      "region" => 1698
+      "realm" => 97
+    ]
+    "spec_105" => array:3 [
+      "world" => 9167
+      "region" => 2646
+      "realm" => 208
+    ]
+  ]
+  "mythic_plus_recent_runs" => array:10 [
+    0 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-04-01T09:05:10.000Z"
+      "clear_time_ms" => 1387364
+      "keystone_run_id" => 5169116
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 332
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 158
+          "name" => "Xal'atath's Bargain: Voidbound"
+          "description" => "While in combat, Xal'atath summons a Voidbound Emissary that empowers nearby enemies."
+          "icon" => "inv_cosmicvoid_buff"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_buff.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=158"
+        ]
+        1 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+        2 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/5169116-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    1 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T19:49:33.000Z"
+      "clear_time_ms" => 1441777
+      "keystone_run_id" => 5102979
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 331
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/5102979-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    2 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T12:52:30.000Z"
+      "clear_time_ms" => 1334073
+      "keystone_run_id" => 4724622
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 332.2
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4724622-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    3 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T10:34:34.000Z"
+      "clear_time_ms" => 1277984
+      "keystone_run_id" => 4702858
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 333.3
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4702858-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    4 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T11:08:44.000Z"
+      "clear_time_ms" => 1236943
+      "keystone_run_id" => 4170920
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 334.1
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170920-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    5 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T10:11:01.000Z"
+      "clear_time_ms" => 1230061
+      "keystone_run_id" => 4170933
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 334.9
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170933-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    6 => array:18 [
+      "dungeon" => "Pit of Saron"
+      "short_name" => "POS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T08:54:15.000Z"
+      "clear_time_ms" => 1557860
+      "keystone_run_id" => 4169212
+      "par_time_ms" => 1800999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 556
+      "zone_id" => 4813
+      "zone_expansion_id" => 2
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_icecrown_pitofsaron.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion2/base/pit-of-saron.jpg"
+      "score" => 325.1
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4169212-10-pit-of-saron"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    7 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T21:15:31.000Z"
+      "clear_time_ms" => 1288883
+      "keystone_run_id" => 3139061
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 333.8
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139061-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    8 => array:18 [
+      "dungeon" => "Algeth'ar Academy"
+      "short_name" => "AA"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T20:49:39.000Z"
+      "clear_time_ms" => 1393141
+      "keystone_run_id" => 3139037
+      "par_time_ms" => 1740999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 402
+      "zone_id" => 14032
+      "zone_expansion_id" => 9
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_dragonacademy.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion9/base/algethar-academy.jpg"
+      "score" => 327.5
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139037-10-algethar-academy"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    9 => array:18 [
+      "dungeon" => "Maisara Caverns"
+      "short_name" => "MC"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T21:16:58.000Z"
+      "clear_time_ms" => 1736060
+      "keystone_run_id" => 2383102
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 560
+      "zone_id" => 16395
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_maisarahills.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/maisara-caverns.jpg"
+      "score" => 324.6
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/2383102-10-maisara-caverns"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+  ]
+  "mythic_plus_best_runs" => array:8 [
+    0 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T10:11:01.000Z"
+      "clear_time_ms" => 1230061
+      "keystone_run_id" => 4170933
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 334.9
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170933-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    1 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T11:08:44.000Z"
+      "clear_time_ms" => 1236943
+      "keystone_run_id" => 4170920
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 334.1
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170920-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    2 => array:18 [
+      "dungeon" => "Magisters' Terrace"
+      "short_name" => "MT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-26T12:37:12.000Z"
+      "clear_time_ms" => 1440325
+      "keystone_run_id" => 1018995
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 558
+      "zone_id" => 15829
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_magistersterrace.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/magisters-terrace.jpg"
+      "score" => 331
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1018995-10-magisters-terrace"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    3 => array:18 [
+      "dungeon" => "Maisara Caverns"
+      "short_name" => "MC"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T12:48:54.000Z"
+      "clear_time_ms" => 1560821
+      "keystone_run_id" => 1849474
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 560
+      "zone_id" => 16395
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_maisarahills.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/maisara-caverns.jpg"
+      "score" => 328
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1849474-10-maisara-caverns"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    4 => array:18 [
+      "dungeon" => "Nexus-Point Xenas"
+      "short_name" => "NPX"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T20:38:47.000Z"
+      "clear_time_ms" => 1434871
+      "keystone_run_id" => 2383112
+      "par_time_ms" => 1800999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 559
+      "zone_id" => 16573
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_voidscararena.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/nexuspoint-xenas.jpg"
+      "score" => 327.6
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/2383112-10-nexuspoint-xenas"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    5 => array:18 [
+      "dungeon" => "Algeth'ar Academy"
+      "short_name" => "AA"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T20:49:39.000Z"
+      "clear_time_ms" => 1393141
+      "keystone_run_id" => 3139037
+      "par_time_ms" => 1740999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 402
+      "zone_id" => 14032
+      "zone_expansion_id" => 9
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_dragonacademy.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion9/base/algethar-academy.jpg"
+      "score" => 327.5
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139037-10-algethar-academy"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    6 => array:18 [
+      "dungeon" => "Pit of Saron"
+      "short_name" => "POS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T08:54:15.000Z"
+      "clear_time_ms" => 1557860
+      "keystone_run_id" => 4169212
+      "par_time_ms" => 1800999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 556
+      "zone_id" => 4813
+      "zone_expansion_id" => 2
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_icecrown_pitofsaron.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion2/base/pit-of-saron.jpg"
+      "score" => 325.1
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4169212-10-pit-of-saron"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    7 => array:18 [
+      "dungeon" => "Skyreach"
+      "short_name" => "SR"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T11:35:38.000Z"
+      "clear_time_ms" => 1503845
+      "keystone_run_id" => 1889221
+      "par_time_ms" => 1680999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 161
+      "zone_id" => 6988
+      "zone_expansion_id" => 5
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_arakkoaspires.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion5/base/skyreach.jpg"
+      "score" => 324
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1889221-10-skyreach"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+  ]
+  "mythic_plus_highest_level_runs" => array:10 [
+    0 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 11
+      "completed_at" => "2026-03-26T11:57:48.000Z"
+      "clear_time_ms" => 2098719
+      "keystone_run_id" => 1020326
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 0
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 302.8
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1020326-11-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    1 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T10:11:01.000Z"
+      "clear_time_ms" => 1230061
+      "keystone_run_id" => 4170933
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 334.9
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170933-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    2 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T11:08:44.000Z"
+      "clear_time_ms" => 1236943
+      "keystone_run_id" => 4170920
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 334.1
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170920-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    3 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T10:34:34.000Z"
+      "clear_time_ms" => 1277984
+      "keystone_run_id" => 4702858
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 333.3
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4702858-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    4 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T21:15:31.000Z"
+      "clear_time_ms" => 1288883
+      "keystone_run_id" => 3139061
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 333.8
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139061-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    5 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T13:49:14.000Z"
+      "clear_time_ms" => 1303326
+      "keystone_run_id" => 1740104
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 333.6
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1740104-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    6 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T12:52:30.000Z"
+      "clear_time_ms" => 1334073
+      "keystone_run_id" => 4724622
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 332.2
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4724622-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    7 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-04-01T09:05:10.000Z"
+      "clear_time_ms" => 1387364
+      "keystone_run_id" => 5169116
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 332
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 158
+          "name" => "Xal'atath's Bargain: Voidbound"
+          "description" => "While in combat, Xal'atath summons a Voidbound Emissary that empowers nearby enemies."
+          "icon" => "inv_cosmicvoid_buff"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_buff.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=158"
+        ]
+        1 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+        2 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/5169116-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    8 => array:18 [
+      "dungeon" => "Algeth'ar Academy"
+      "short_name" => "AA"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T20:49:39.000Z"
+      "clear_time_ms" => 1393141
+      "keystone_run_id" => 3139037
+      "par_time_ms" => 1740999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 402
+      "zone_id" => 14032
+      "zone_expansion_id" => 9
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_dragonacademy.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion9/base/algethar-academy.jpg"
+      "score" => 327.5
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139037-10-algethar-academy"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    9 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T20:10:43.000Z"
+      "clear_time_ms" => 1424594
+      "keystone_run_id" => 2383109
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 331.3
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/2383109-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+  ]
+  "mythic_plus_weekly_highest_level_runs" => array:1 [
+    0 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-04-01T09:05:10.000Z"
+      "clear_time_ms" => 1387364
+      "keystone_run_id" => 5169116
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 332
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 158
+          "name" => "Xal'atath's Bargain: Voidbound"
+          "description" => "While in combat, Xal'atath summons a Voidbound Emissary that empowers nearby enemies."
+          "icon" => "inv_cosmicvoid_buff"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_buff.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=158"
+        ]
+        1 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=9"
+        ]
+        2 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/5169116-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+  ]
+  "mythic_plus_previous_weekly_highest_level_runs" => array:10 [
+    0 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 11
+      "completed_at" => "2026-03-26T11:57:48.000Z"
+      "clear_time_ms" => 2098719
+      "keystone_run_id" => 1020326
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 0
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 302.8
+      "affixes" => array:3 [
+        0 => array:6 [
+          "id" => 162
+          "name" => "Xal'atath's Bargain: Pulsar"
+          "description" => "While in combat, Xal'atath summons pulsars that orbit players."
+          "icon" => "inv_cosmicvoid_nova"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_nova.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=162"
+        ]
+        1 => array:6 [
+          "id" => 10
+          "name" => "Fortified"
+          "description" => "Non-boss enemies have 20% more health and inflict up to 20% increased damage."
+          "icon" => "ability_toughness"
+          "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg"
+          "wowhead_url" => "https://wowhead.com/affix=10"
+        ]
+        2 => array:6 [
+          "id" => 9
+          "name" => "Tyrannical"
+          "description" => "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage."
+          "icon" => "achievement_boss_archaedas"
+           …2
+        ]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1020326-11-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    1 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T10:11:01.000Z"
+      "clear_time_ms" => 1230061
+      "keystone_run_id" => 4170933
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 334.9
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170933-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    2 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-30T11:08:44.000Z"
+      "clear_time_ms" => 1236943
+      "keystone_run_id" => 4170920
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 334.1
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4170920-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    3 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T10:34:34.000Z"
+      "clear_time_ms" => 1277984
+      "keystone_run_id" => 4702858
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 333.3
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4702858-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    4 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T21:15:31.000Z"
+      "clear_time_ms" => 1288883
+      "keystone_run_id" => 3139061
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 333.8
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139061-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    5 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T13:49:14.000Z"
+      "clear_time_ms" => 1303326
+      "keystone_run_id" => 1740104
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 333.6
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/1740104-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    6 => array:18 [
+      "dungeon" => "Windrunner Spire"
+      "short_name" => "WS"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-31T12:52:30.000Z"
+      "clear_time_ms" => 1334073
+      "keystone_run_id" => 4724622
+      "par_time_ms" => 1980999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 557
+      "zone_id" => 15808
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_windrunnerspire.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/windrunner-spire.jpg"
+      "score" => 332.2
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/4724622-10-windrunner-spire"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    7 => array:18 [
+      "dungeon" => "Algeth'ar Academy"
+      "short_name" => "AA"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-28T20:49:39.000Z"
+      "clear_time_ms" => 1393141
+      "keystone_run_id" => 3139037
+      "par_time_ms" => 1740999
+      "num_keystone_upgrades" => 1
+      "map_challenge_mode_id" => 402
+      "zone_id" => 14032
+      "zone_expansion_id" => 9
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_dungeon_dragonacademy.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion9/base/algethar-academy.jpg"
+      "score" => 327.5
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/3139037-10-algethar-academy"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    8 => array:18 [
+      "dungeon" => "Seat of the Triumvirate"
+      "short_name" => "SEAT"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T20:10:43.000Z"
+      "clear_time_ms" => 1424594
+      "keystone_run_id" => 2383109
+      "par_time_ms" => 2040999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 239
+      "zone_id" => 8910
+      "zone_expansion_id" => 6
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg"
+      "score" => 331.3
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/2383109-10-seat-of-the-triumvirate"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+    9 => array:18 [
+      "dungeon" => "Nexus-Point Xenas"
+      "short_name" => "NPX"
+      "mythic_level" => 10
+      "completed_at" => "2026-03-27T20:38:47.000Z"
+      "clear_time_ms" => 1434871
+      "keystone_run_id" => 2383112
+      "par_time_ms" => 1800999
+      "num_keystone_upgrades" => 2
+      "map_challenge_mode_id" => 559
+      "zone_id" => 16573
+      "zone_expansion_id" => 11
+      "icon_url" => "https://cdn.raiderio.net/images/wow/icons/large/inv_achievement_dungeon_voidscararena.jpg"
+      "background_image_url" => "https://cdn.raiderio.net/images/dungeons/expansion11/base/nexuspoint-xenas.jpg"
+      "score" => 327.6
+      "affixes" => array:3 [
+        0 => array:6 [ …6]
+        1 => array:6 [ …6]
+        2 => array:6 [ …6]
+      ]
+      "url" => "https://raider.io/mythic-plus-runs/season-mn-1/2383112-10-nexuspoint-xenas"
+      "spec" => array:8 [
+        "id" => 104
+        "name" => "Guardian"
+        "slug" => "guardian"
+        "class_id" => 11
+        "role" => "tank"
+        "is_melee" => true
+        "patch" => "1.0.0"
+        "ordinal" => 2
+      ]
+      "role" => "tank"
+    ]
+  ]
+  "gear" => array:8 [
+    "created_at" => "2026-04-01T20:30:34.000Z"
+    "updated_at" => "2026-04-01T20:30:34.000Z"
+    "source" => "db"
+    "item_level_equipped" => 270.625
+    "item_level_total" => 0
+    "artifact_traits" => 0
+    "corruption" => array:5 [
+      "added" => 0
+      "resisted" => 0
+      "total" => 0
+      "cloakRank" => 0
+      "spells" => []
+    ]
+    "items" => array:16 [
+      "head" => array:17 [
+        "item_id" => 250024
+        "item_level" => 266
+        "enchant" => 7959
+        "icon" => "inv_helm_leather_raiddruidmidnight_d_01"
+        "name" => "Branches of the Luminous Bloom"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => true
+        "azerite_powers" => array:5 [ …5]
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "tier" => "35"
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:6 [ …6]
+      ]
+      "neck" => array:15 [
+        "item_id" => 151309
+        "item_level" => 266
+        "icon" => "inv_7_0raid_necklace_06d"
+        "name" => "Necklace of the Twisting Void"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => array:1 [ …1]
+        "gems_detail" => array:1 [ …1]
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:5 [ …5]
+      ]
+      "shoulder" => array:17 [
+        "item_id" => 250022
+        "item_level" => 266
+        "enchant" => 8031
+        "icon" => "inv_shoulder_leather_raiddruidmidnight_d_01"
+        "name" => "Seedpods of the Luminous Bloom"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => true
+        "azerite_powers" => array:5 [ …5]
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "tier" => "35"
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:6 [ …6]
+      ]
+      "back" => array:15 [
+        "item_id" => 193712
+        "item_level" => 269
+        "icon" => "inv_leather_dragondungeon_c_01_cape"
+        "name" => "Potion-Stained Cloak"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:5 [ …5]
+      ]
+      "chest" => array:16 [
+        "item_id" => 250027
+        "item_level" => 272
+        "icon" => "inv_chest_leather_raiddruidmidnight_d_01"
+        "name" => "Trunk of the Luminous Bloom"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "tier" => "35"
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:5 [ …5]
+      ]
+      "waist" => array:15 [
+        "item_id" => 249643
+        "item_level" => 263
+        "icon" => "inv_belt_leather_dungeonharronir_c_01"
+        "name" => "Osseoclad Waistbone"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:4 [ …4]
+      ]
+      "shirt" => array:15 [
+        "item_id" => 98084
+        "item_level" => 1
+        "icon" => "inv_chest_chain_13"
+        "name" => "Ooze-Soaked Shirt"
+        "item_quality" => 3
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => []
+      ]
+      "wrist" => array:15 [
+        "item_id" => 193714
+        "item_level" => 266
+        "icon" => "inv_leather_dragondungeon_c_01_bracer"
+        "name" => "Frenzyroot Cuffs"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:6 [ …6]
+      ]
+      "hands" => array:16 [
+        "item_id" => 250025
+        "item_level" => 266
+        "icon" => "inv_glove_leather_raiddruidmidnight_d_01"
+        "name" => "Arbortenders of the Luminous Bloom"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "tier" => "35"
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:6 [ …6]
+      ]
+      "legs" => array:15 [
+        "item_id" => 49817
+        "item_level" => 266
+        "icon" => "inv_pants_leather_30a"
+        "name" => "Shaggy Wyrmleather Leggings"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:5 [ …5]
+      ]
+      "feet" => array:16 [
+        "item_id" => 249334
+        "item_level" => 266
+        "enchant" => 8019
+        "icon" => "inv_boot_leather_raiddemonhuntermidnight_d_01"
+        "name" => "Void-Claimed Shinkickers"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:4 [ …4]
+      ]
+      "finger1" => array:16 [
+        "item_id" => 251093
+        "item_level" => 266
+        "enchant" => 8027
+        "icon" => "inv_12_trinket_devouring_host_currency1_silver"
+        "name" => "Omission of Light"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => array:1 [ …1]
+        "gems_detail" => array:1 [ …1]
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:5 [ …5]
+      ]
+      "finger2" => array:16 [
+        "item_id" => 151311
+        "item_level" => 276
+        "enchant" => 8027
+        "icon" => "inv_70_dungeon_ring2b"
+        "name" => "Band of the Triumvirate"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => array:1 [ …1]
+        "gems_detail" => array:1 [ …1]
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:5 [ …5]
+      ]
+      "trinket1" => array:15 [
+        "item_id" => 151312
+        "item_level" => 276
+        "icon" => "inv_archaeology_70_highborne_vialofpoison"
+        "name" => "Ampoule of Pure Void"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:4 [ …4]
+      ]
+      "trinket2" => array:15 [
+        "item_id" => 250256
+        "item_level" => 276
+        "icon" => "inv_10_jewelcrafting3_soulcage_air"
+        "name" => "Heart of Wind"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => []
+        "enchants_detail" => []
+        "bonuses" => array:4 [ …4]
+      ]
+      "mainhand" => array:16 [
+        "item_id" => 237848
+        "item_level" => 285
+        "enchant" => 8009
+        "icon" => "mace_2h_blacksmithing_d_04_icon"
+        "name" => "Blood Knight's Mercy"
+        "item_quality" => 4
+        "is_legendary" => false
+        "is_azerite_armor" => false
+        "azerite_powers" => []
+        "corruption" => array:3 [ …3]
+        "domination_shards" => []
+        "gems" => []
+        "gems_detail" => []
+        "enchants" => array:1 [ …1]
+        "enchants_detail" => array:1 [ …1]
+        "bonuses" => array:8 [ …8]
+      ]
+    ]
+  ]
+  "talentLoadout" => array:6 [
+    "loadout_spec_id" => 104
+    "loadout_text" => "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsMPwYMWMLzMPgZZZgZDGNRzMzyMzMzYMjBAAAAAYYbGAAAAMzsNLzMzAAYxYmBYxMYwgltBAzsAPA"
+    "class_talents" => array:33 [
+      0 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      1 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      2 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      3 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      4 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      5 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      6 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      7 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      8 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      9 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      10 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      11 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      12 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      13 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      14 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      15 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      16 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      17 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      18 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      19 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      20 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      21 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      22 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 1
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      23 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      24 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      25 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      26 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      27 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      28 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      29 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      30 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      31 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      32 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+    ]
+    "spec_talents" => array:29 [
+      0 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      1 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      2 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      3 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      4 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 1
+        "rank" => 1
+      ]
+      5 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      6 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      7 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      8 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      9 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      10 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      11 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 1
+        "rank" => 1
+      ]
+      12 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      13 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      14 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      15 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      16 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      17 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      18 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      19 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 2
+      ]
+      20 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      21 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      22 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      23 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      24 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      25 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      26 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      27 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      28 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+    ]
+    "hero_talents" => array:14 [
+      0 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      1 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      2 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      3 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      4 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      5 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      6 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      7 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      8 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      9 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 1
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      10 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      11 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+      12 => array:3 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+      ]
+      13 => array:4 [
+        "node" => array:11 [ …11]
+        "entryIndex" => 0
+        "rank" => 1
+        "includeInSummary" => true
+      ]
+    ]
+    "active_hero_tree" => array:6 [
+      "id" => 21
+      "traitTreeId" => 793
+      "name" => "Druid of the Claw"
+      "slug" => "druid-of-the-claw"
+      "description" => "Druids of the Claw are masters of their mighty animal forms. When they transform into cats or bears, they become ferocious combatants and protectors of the wild."
+      "iconUrl" => "https://cdn.raiderio.net/images/site/hero_specs/herospec_druid-of-the-claw.png"
+    ]
+  ]
+  "raid_progression" => array:1 [
+    "tier-mn-1" => array:6 [
+      "summary" => "6/9 H"
+      "expansion_id" => 11
+      "total_bosses" => 9
+      "normal_bosses_killed" => 7
+      "heroic_bosses_killed" => 6
+      "mythic_bosses_killed" => 0
+    ]
+  ]
+  "raid_achievement_curve" => array:1 [
+    0 => array:2 [
+      "raid" => "nerubar-palace"
+      "aotc" => "2024-10-20T20:51:57.000Z"
+    ]
+  ]
+  "guild" => array:2 [
+    "name" => "Нехай Щастить"
+    "realm" => "Tarren Mill"
+  ]
+] // app/Console/Commands/TestCommand.php:31
