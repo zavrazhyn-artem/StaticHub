@@ -34,8 +34,8 @@ class DashboardService
         // 3. Consumables
         $consumables = $this->consumableService->buildConsumablesPayload($static);
 
-        // 4. Weekly Schedule (Next 7 days)
-        $weeklySchedule = RaidEvent::query()->weeklySchedule($static->id);
+        // 4. Weekly Schedule (Next 3 events)
+        $weeklySchedule = RaidEvent::query()->weeklySchedule($static->id, 3);
 
         // 5. Treasury Data
         $treasuryData = $this->treasuryService->buildTreasuryIndexPayload($static);

@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>BlastR - Blast Your Raid</title>
+        <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">

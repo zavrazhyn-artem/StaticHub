@@ -49,7 +49,9 @@ class SyncBnetDataJob implements ShouldQueue
             'raw_bnet_data' => $processedData->toArray(),
             'item_level' => $processedData->stats['item_level'] ?? $this->character->item_level,
             'equipped_item_level' => $processedData->stats['equipped_item_level'] ?? $this->character->equipped_item_level,
-            'active_spec' => $profile['active_spec']['name'] ?? $this->character->active_spec,
+            'active_spec' => is_array($profile['active_spec'])
+                ? ($profile['active_spec']['name'] ?? $this->character->active_spec)
+                : ($profile['active_spec'] ?? $this->character->active_spec),
             'avatar_url' => $processedData->avatar_url ?? $this->character->avatar_url,
         ]);
     }

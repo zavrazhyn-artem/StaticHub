@@ -25,15 +25,15 @@ class RaidEventBuilder extends Builder
             ->first();
     }
 
-    public function weeklySchedule(int $staticId): \Illuminate\Database\Eloquent\Collection
+    public function weeklySchedule(int $staticId, int $limit = 7): \Illuminate\Database\Eloquent\Collection
     {
         return $this->where('static_id', $staticId)
             ->where('start_time', '>', now())
-            ->where('start_time', '<=', now()->addDays(7))
             ->withCount(['attendances as rsvp_count' => function ($query) {
                 $query->whereIn('status', ['present', 'late', 'tentative']);
             }])
             ->orderBy('start_time', 'asc')
+            ->limit($limit)
             ->get();
     }
 }

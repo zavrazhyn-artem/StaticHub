@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -76,14 +77,11 @@
                 @endif
             </div>
             <div class="flex items-center gap-4">
-                <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
-                <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">settings</button>
-
                 <!-- Settings Dropdown -->
                 <x-dropdown align="right" width="48" contentClasses="py-1 bg-surface-container-highest border border-white/10 shadow-2xl">
                     <x-slot name="trigger">
-                        <button class="h-10 w-10 rounded-lg overflow-hidden border border-outline-variant hover:border-primary transition-all active:scale-95">
-                            <img alt="User Avatar" class="w-full h-full object-cover" src="{{ Auth::user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name) }}"/>
+                        <button class="h-10 w-10 rounded-full overflow-hidden border border-outline-variant hover:border-primary transition-all active:scale-95">
+                            <img alt="User Avatar" class="w-full h-full object-cover rounded-full" src="{{ Auth::user()->getEffectiveAvatarUrl($static->id ?? null) }}"/>
                         </button>
                     </x-slot>
 

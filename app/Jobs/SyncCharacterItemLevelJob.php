@@ -34,7 +34,9 @@ class SyncCharacterItemLevelJob implements ShouldQueue
         if ($profileData !== null) {
             $this->character->update([
                 'equipped_item_level' => $profileData['equipped_item_level'],
-                'active_spec' => $profileData['active_spec'],
+                'active_spec' => is_array($profileData['active_spec'])
+                    ? ($profileData['active_spec']['name'] ?? null)
+                    : $profileData['active_spec'],
             ]);
         }
     }

@@ -83,7 +83,7 @@
                                 <div class="col-span-4 flex items-center gap-4">
                                     <div class="relative">
                                         <img src="{{ $character->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($character->name) }}"
-                                             class="w-12 h-12 rounded object-cover border border-white/5 shadow-lg group-hover:scale-105 transition-transform"
+                                             class="w-12 h-12 rounded-full object-cover border border-white/5 shadow-lg group-hover:scale-105 transition-transform"
                                              alt="{{ $character->name }}">
                                         <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-{{ $classColor }} rounded-full border-2 border-surface-container-high shadow-[0_0_10px_rgba(0,0,0,0.5)]"></div>
                                     </div>
@@ -97,7 +97,14 @@
                                         <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-2">
                                             <span>Level {{ $character->level }}</span>
                                             <span class="w-1 h-1 rounded-full bg-white/10"></span>
-                                            <span>{{ $character->active_spec ?? $character->playable_class }}</span>
+                                            @php
+                                                $displaySpec = $character->active_spec;
+                                                if ($displaySpec && str_starts_with($displaySpec, '{')) {
+                                                    $decoded = json_decode($displaySpec, true);
+                                                    $displaySpec = $decoded['name'] ?? $displaySpec;
+                                                }
+                                            @endphp
+                                            <span>{{ $displaySpec ?? $character->playable_class }}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -41,6 +41,19 @@ const parseRawData = (data) => {
     }
 };
 
+const formatActiveSpec = (spec) => {
+    if (!spec) return 'Unknown';
+    if (typeof spec === 'string' && spec.startsWith('{')) {
+        try {
+            const decoded = JSON.parse(spec);
+            return decoded.name || spec;
+        } catch (e) {
+            return spec;
+        }
+    }
+    return spec;
+};
+
 const getRaidProgression = (character) => {
     const rioData = parseRawData(character?.raw_raiderio_data);
     if (!rioData?.raid_progression) return '-';
@@ -136,7 +149,7 @@ const getBossStatus = (character, bossName) => {
                       {{ char.name }}
                     </div>
                     <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
-                      {{ char.active_spec || 'Unknown' }} {{ char.playable_class }}
+                      {{ formatActiveSpec(char.active_spec) }} {{ char.playable_class }}
                     </div>
                   </div>
                 </div>
@@ -179,7 +192,7 @@ const getBossStatus = (character, bossName) => {
                       {{ alt.name }}
                     </div>
                     <div class="text-[8px] text-gray-600 uppercase font-medium truncate">
-                      {{ alt.active_spec || 'Unknown' }} {{ alt.playable_class }}
+                      {{ formatActiveSpec(alt.active_spec) }} {{ alt.playable_class }}
                     </div>
                   </div>
                 </div>

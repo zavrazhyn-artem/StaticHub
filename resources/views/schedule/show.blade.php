@@ -164,7 +164,14 @@
                                                     {{ $character->name }}
                                                 </div>
                                                 <div class="text-[10px] text-on-surface-variant font-medium flex items-center gap-1">
-                                                    {{ $character->active_spec ?? $character->playable_class }}
+                                                    @php
+                                                        $displaySpec = $character->active_spec;
+                                                        if ($displaySpec && str_starts_with($displaySpec, '{')) {
+                                                            $decoded = json_decode($displaySpec, true);
+                                                            $displaySpec = $decoded['name'] ?? $displaySpec;
+                                                        }
+                                                    @endphp
+                                                    {{ $displaySpec ?? $character->playable_class }}
                                                     @if($isPending)
                                                         <span class="text-[8px] font-black uppercase tracking-tighter opacity-50">(Pending)</span>
                                                     @endif

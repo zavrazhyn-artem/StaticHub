@@ -29,6 +29,19 @@ const parseRawData = (data) => {
     }
 };
 
+const formatActiveSpec = (spec) => {
+    if (!spec) return 'Unknown';
+    if (typeof spec === 'string' && spec.startsWith('{')) {
+        try {
+            const decoded = JSON.parse(spec);
+            return decoded.name || spec;
+        } catch (e) {
+            return spec;
+        }
+    }
+    return spec;
+};
+
 const countMissingEnchants = (character) => {
     const bnetData = parseRawData(character?.raw_bnet_data);
     const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
@@ -111,7 +124,7 @@ const getRaidProgression = (character) => {
                     {{ char.name }}
                   </div>
                   <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
-                    {{ char.active_spec || 'Unknown' }} {{ char.playable_class }}
+                    {{ formatActiveSpec(char.active_spec) }} {{ char.playable_class }}
                   </div>
                 </div>
               </div>

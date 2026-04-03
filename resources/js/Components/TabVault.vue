@@ -41,6 +41,19 @@ const parseRawData = (data) => {
     }
 };
 
+const formatActiveSpec = (spec) => {
+    if (!spec) return 'Unknown';
+    if (typeof spec === 'string' && spec.startsWith('{')) {
+        try {
+            const decoded = JSON.parse(spec);
+            return decoded.name || spec;
+        } catch (e) {
+            return spec;
+        }
+    }
+    return spec;
+};
+
 /**
  * getVaultSlot returns the value for a specific vault slot.
  * Categories: 'raid', 'mythic', 'world'
@@ -179,7 +192,7 @@ const getSlotStyle = (value) => {
                       {{ char.name }}
                     </div>
                     <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
-                      {{ char.active_spec || 'Unknown' }} {{ char.playable_class }}
+                      {{ formatActiveSpec(char.active_spec) }} {{ char.playable_class }}
                     </div>
                   </div>
                 </div>
@@ -224,7 +237,7 @@ const getSlotStyle = (value) => {
                       {{ alt.name }}
                     </div>
                     <div class="text-[8px] text-gray-600 uppercase font-medium truncate">
-                      {{ alt.active_spec || 'Unknown' }} {{ alt.playable_class }}
+                      {{ formatActiveSpec(alt.active_spec) }} {{ alt.playable_class }}
                     </div>
                   </div>
                 </div>

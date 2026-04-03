@@ -41,7 +41,6 @@ const getNextRefresh = (timestamp) => {
 };
 
 const getProgress = (id) => {
-  // Mock progress based on minutes since last sync
   const timestamp = props.syncData[id];
   if (!timestamp) return 0;
   const date = new Date(timestamp);
@@ -51,55 +50,63 @@ const getProgress = (id) => {
 };
 
 const handleRefresh = (serviceId) => {
-  // Emit event to trigger manual sync
   emit('refresh', serviceId);
-  console.log(`Manual sync triggered for: ${serviceId}`);
-  // In a real app, this might call an API endpoint:
-  // axios.post(`/statics/${props.syncData.static_id}/sync/${serviceId}`)
 };
+
+const radius = 42;
+const circumference = 2 * Math.PI * radius;
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-3 gap-3 max-w-sm">
     <div v-for="service in services" :key="service.id"
-         class="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
+         @click="handleRefresh(service.id)"
+         class="flex flex-col items-center group cursor-pointer active:scale-95 transition-all">
 
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:border-blue-500/50 transition-colors">
-            <span class="material-symbols-outlined text-blue-500 text-xl">{{ service.icon }}</span>
-          </div>
-          <div>
-            <h3 class="text-white font-headline text-xs font-bold uppercase tracking-widest">{{ service.name }}</h3>
-            <p class="text-[10px] text-gray-500 font-medium uppercase tracking-tighter">Data Stream</p>
-          </div>
-        </div>
-        <button @click="handleRefresh(service.id)"
-                class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:border-blue-500/50 transition-all active:scale-95">
-          <span class="material-symbols-outlined text-sm">sync</span>
-        </button>
+      <!-- Service Label -->
+      <div class="text-[8px] font-black text-on-surface-variant uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">
+        {{ service.name }}
       </div>
 
-      <div class="space-y-3">
-        <div class="space-y-1">
-          <div class="flex justify-between text-[9px] font-bold uppercase tracking-widest">
-            <span class="text-gray-500">Sync Status</span>
-            <span class="text-blue-500">{{ Math.round(getProgress(service.id)) }}%</span>
-          </div>
-          <div class="h-1 bg-white/5 rounded-full overflow-hidden">
-            <div class="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-1000"
-                 :style="{ width: getProgress(service.id) + '%' }"></div>
-          </div>
-        </div>
+      <div class="relative w-16 h-16 bg-black/20 border border-white/5 rounded-full flex items-center justify-center group-hover:border-primary/30 transition-all duration-300 overflow-hidden">
+        <!-- Background Glow -->
+        <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none"></div>
 
-        <div class="flex justify-between items-end">
-          <div>
-            <div class="text-[8px] text-gray-600 font-bold uppercase tracking-[0.2em] mb-0.5">Last Refreshed</div>
-            <div class="text-[10px] text-white font-bold uppercase tracking-wider">{{ getTimeAgo(syncData[service.id]) }}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[8px] text-gray-600 font-bold uppercase tracking-[0.2em] mb-0.5">Next Run</div>
-            <div class="text-[10px] text-blue-500/80 font-bold uppercase tracking-wider">{{ getNextRefresh(syncData[service.id]) }}</div>
+        <div class="relative w-full h-full p-1.5">
+          <!-- SVG Circular Progress -->
+          <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+            <!-- Background Track -->
+            <circle
+              cx="50"
+              cy="50"
+              :r="radius"
+              fill="transparent"
+              stroke="currentColor"
+              stroke-width="6"
+              class="text-white/5"
+            />
+            <!-- Progress Bar -->
+            <circle
+              cx="50"
+              cy="50"
+              :r="radius"
+              fill="transparent"
+              stroke="currentColor"
+              stroke-width="6"
+              stroke-linecap="round"
+              class="text-primary transition-all duration-1000 ease-out"
+              :style="{
+                strokeDasharray: circumference,
+                strokeDashoffset: circumference - (getProgress(service.id) / 100) * circumference,
+                filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))'
+              }"
+            />
+          </svg>
+
+          <!-- Center Content -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+            <div class="text-[7px] text-gray-400 font-bold uppercase tracking-tighter leading-none mb-0.5">{{ getTimeAgo(syncData[service.id]) }}</div>
+            <div class="text-[6px] text-primary/60 font-black uppercase tracking-tighter leading-none">{{ getNextRefresh(syncData[service.id]) }}</div>
           </div>
         </div>
       </div>

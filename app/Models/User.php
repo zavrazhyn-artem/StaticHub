@@ -159,9 +159,37 @@ class User extends Authenticatable
      * Get the user's main character for a specific static.
      * Falls back to the first character if no specific main is found in that static.
      */
-    public function getMainCharacterForStatic(int $staticId): ?Character
+    public function getMainCharacterForStatic(?int $staticId): ?Character
     {
-        return Character::query()->findMainInStatic($this->id, $staticId)
-            ?? $this->characters()->first();
+        if ($staticId) {
+            $main = Character::query()->findMainInStatic($this->id, $staticId);
+            if ($main) {
+                return $main;
+            }
+        }
+
+        // If no static or no main in static, try to find any main in any static
+        return Character::query()
+            ->where('user_id', $this->id)
+            ->whereHas('statics', function ($query) {
+                $query->where('character_static.role', 'main');
+            })
+            ->first() ?? $this->characters()->first();
+    }
+
+    /**
+     * Get the effective avatar URL for the user.
+     * If a main character is chosen (for a specific static or globally), use its avatar.
+     * Otherwise, fallback to the user's social avatar or UI-avatars.
+     */
+    public function getEffectiveAvatarUrl(?int $staticId = null): string
+    {
+        $mainCharacter = $this->getMainCharacterForStatic($staticId);
+
+        if ($mainCharacter && $mainCharacter->avatar_url) {
+            return $mainCharacter->avatar_url;
+        }
+
+        return $this->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
     }
 }
