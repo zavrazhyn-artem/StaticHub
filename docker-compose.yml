@@ -1,0 +1,114 @@
+x-app-defaults: &app-defaults
+  build:
+    context: .
+    dockerfile: docker/dev/Dockerfile # Вказуємо локальний докерфайл
+  restart: unless-stopped
+  env_file: .env
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - app_network
+  volumes:
+    - .:/var/www/html
+    - ./docker/prod/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    depends_on:
+      - app
+    networks:
+      - app_network
+    volumes:
+      - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - .:/var/www/html:ro # Nginx тепер бачить всю папку
+
+  app:
+    <<: *app-defaults
+    ports:
+      - "5173:5173" # Прокидаємо порт для Vite HMR
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  worker:
+    <<: *app-defaults
+    command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
+
+  scheduler:
+    <<: *app-defaults
+    command: ["php", "artisan", "schedule:work"]
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE:      "${DB_DATABASE}"
+      MYSQL_USER:          "${DB_USERNAME}"
+      MYSQL_PASSWORD:      "${DB_PASSWORD}"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+      - --sort-buffer-size=4M
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass "${REDIS_PASSWORD}"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - app_network
+    depends_on:
+      - nginx
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

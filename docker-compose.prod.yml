@@ -1,0 +1,165 @@
+# Local Docker Compose – mirrors production topology as closely as possible.
+#
+# Key differences vs docker-compose.prod.yml (intentional):
+#   • app/worker/scheduler are built from source (same Dockerfile, same target)
+#   • Source code is bind-mounted → changes are live without a rebuild
+#   • vendor/ and public/build/ are named volumes, seeded from the image on
+#     first `docker compose up` – they are NOT bind-mounted, so they stay in
+#     sync with what was built into the image (run `docker compose build` after
+#     composer/npm changes).
+#   • A docker/local/php.ini override enables display_errors and opcache
+#     timestamp validation so PHP picks up file changes immediately.
+#   • nginx uses the plain nginx image + bind-mounted config and ./public,
+#     so frontend changes (after `npm run build`) are visible without rebuilding.
+#   • MySQL and Redis expose ports for local tooling (TablePlus, RedisInsight).
+#
+# First-time setup:
+#   docker compose build
+#   docker compose up -d
+#   docker compose exec app php artisan migrate --seed
+
+x-app-defaults: &app-defaults
+  build:
+    context: .
+    dockerfile: docker/production/Dockerfile
+    target: production
+  restart: unless-stopped
+  env_file: .env
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - app_network
+  volumes:
+    # Live source – changes are reflected immediately (PHP files, routes, etc.)
+    - .:/var/www/html
+    # Protect build artefacts from being wiped by the bind mount above.
+    # Docker seeds these named volumes from the image on first start.
+    - vendor:/var/www/html/vendor
+    - node_build:/var/www/html/public/build
+    # Writable runtime dirs
+    - app_storage:/var/www/html/storage
+    - app_bootstrap_cache:/var/www/html/bootstrap/cache
+    # Local PHP overrides (display_errors, opcache timestamps)
+    - ./docker/local/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Nginx – uses plain image + bind-mounted config and public dir.
+  # Run `npm run build` on the host to update Vite assets without a rebuild.
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    depends_on:
+      - app
+    networks:
+      - app_network
+    volumes:
+      - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+      - node_build:/var/www/html/public/build:ro
+      - app_storage:/var/www/html/storage:ro
+
+  # ---------------------------------------------------------------------------
+  # App – PHP-FPM (same Dockerfile target as production)
+  # ---------------------------------------------------------------------------
+  app:
+    <<: *app-defaults
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # Worker – Supervisor manages default + discord + ai queues (same conf as prod)
+  # ---------------------------------------------------------------------------
+  worker:
+    <<: *app-defaults
+    command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Scheduler – php artisan schedule:work (same as production)
+  # ---------------------------------------------------------------------------
+  scheduler:
+    <<: *app-defaults
+    command: ["php", "artisan", "schedule:work"]
+
+  # ---------------------------------------------------------------------------
+  # MySQL 8.4 – port 3306 exposed for TablePlus / DBeaver
+  # ---------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE:      "${DB_DATABASE}"
+      MYSQL_USER:          "${DB_USERNAME}"
+      MYSQL_PASSWORD:      "${DB_PASSWORD}"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+      - --sort-buffer-size=4M
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Redis 7 – port 6379 exposed for RedisInsight / redis-cli on host
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass "${REDIS_PASSWORD}"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  app_storage:
+  app_bootstrap_cache:
+  # Build artefacts – seeded from the image, isolated from the bind mount
+  vendor:
+  node_build:
