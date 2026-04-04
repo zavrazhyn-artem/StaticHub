@@ -21,7 +21,7 @@ const rsvpComment = ref(props.currentAttendance?.comment || '');
     <GlassModal :show="show" backdrop="bg-black/60" z-index="z-[110]" @close="emit('close')">
         <div class="p-8">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-xl font-black text-white uppercase tracking-tighter font-headline">Join Raid</h2>
+                <h2 class="text-xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Join Raid') }}</h2>
                 <button @click="emit('close')" class="text-on-surface-variant hover:text-white transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -32,7 +32,7 @@ const rsvpComment = ref(props.currentAttendance?.comment || '');
 
                 <!-- Character select -->
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">Character</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Character') }}</label>
                     <select
                         name="character_id"
                         v-model="rsvpCharacterId"
@@ -49,7 +49,7 @@ const rsvpComment = ref(props.currentAttendance?.comment || '');
 
                 <!-- Status selector -->
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">Attendance Status</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Attendance Status') }}</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button
                             type="button"
@@ -67,12 +67,12 @@ const rsvpComment = ref(props.currentAttendance?.comment || '');
 
                 <!-- Comment -->
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">Comment (Optional)</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Comment (Optional)') }}</label>
                     <input
                         type="text"
                         name="comment"
                         v-model="rsvpComment"
-                        placeholder="e.g., Might be 10m late"
+                        :placeholder="__('e.g., Might be 10m late')"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-green-500 outline-none"
                     >
                 </div>
@@ -80,7 +80,7 @@ const rsvpComment = ref(props.currentAttendance?.comment || '');
                 <button
                     type="submit"
                     class="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-xl font-headline text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-green-900/20"
-                >Confirm Attendance</button>
+                >{{ __('Confirm Attendance') }}</button>
             </form>
         </div>
     </GlassModal>

@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Helpers\CurrencyHelper;
 use App\Services\StaticGroup\TreasuryService;
 use App\Services\ConsumableService;
+use App\Helpers\TreasuryTaxWarningHelper;
 use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -47,7 +48,25 @@ class TreasuryController extends Controller
         return redirect()->back()->with('success', 'Transaction description updated.');
     }
 
-    public function updateConsumables(Request $request, StaticGroup $static)
+    public function updateSettings(Request $request, StaticGroup $static): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'weekly_tax_per_player' => 'required|integer|min:0',
+        ]);
+
+        $fixedTax = CurrencyHelper::goldToCopper($validated['weekly_tax_per_player']);
+        $static->update(['weekly_tax_per_player' => $fixedTax]);
+
+        $economics = $this->consumableService->buildConsumablesPayload($static);
+        $realCostPerPlayer = (int) ceil(($economics['grand_total_weekly_cost'] ?? 0) / 20);
+
+        return response()->json(array_merge(
+            ['success' => true, 'targetTax' => $fixedTax],
+            TreasuryTaxWarningHelper::compute($fixedTax, $realCostPerPlayer),
+        ));
+    }
+
+    public function updateConsumables(Request $request, StaticGroup $static): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'quantities' => 'required|array',
@@ -56,10 +75,14 @@ class TreasuryController extends Controller
 
         $this->consumableService->updateSettings($static, $validated['quantities']);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
+        $economics = $this->consumableService->buildConsumablesPayload($static);
+        $totalCost = (int) ($economics['grand_total_weekly_cost'] ?? 0);
+        $taxPerRaider = (int) ($economics['guild_tax_per_raider'] ?? 0);
+        $fixedTax = (int) ($static->weekly_tax_per_player ?? 0);
 
-        return redirect()->back()->with('success', 'Consumable settings updated.');
+        return response()->json(array_merge(
+            ['success' => true, 'taxPerRaider' => $taxPerRaider, 'totalCost' => $totalCost],
+            TreasuryTaxWarningHelper::compute($fixedTax, $taxPerRaider),
+        ));
     }
 }

@@ -28,6 +28,7 @@ class StaticRosterMemberResource extends JsonResource
             fn (Character $c) => $c->statics->isNotEmpty()
         );
 
+
         $mainCharacter = $characters->first(
             fn (Character $c) => $c->statics->first()?->pivot?->role === 'main'
         );

@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 
-#[Fillable(['name', 'email', 'password', 'battlenet_id', 'battletag', 'avatar', 'discord_id', 'discord_username'])]
+#[Fillable(['name', 'email', 'locale', 'password', 'battlenet_id', 'battletag', 'avatar', 'discord_id', 'discord_username'])]
 #[Hidden(['password', 'remember_token'])]
 /**
  * @property int $id

@@ -29,7 +29,7 @@
                                             <span class="material-symbols-outlined text-success-neon text-sm">check_circle</span>
                                         </div>
                                     @else
-                                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Not Connected</div>
+                                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -38,12 +38,12 @@
                                 <form method="POST" action="{{ route('profile.discord.unlink') }}">
                                     @csrf
                                     <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
-                                        Unlink
+                                        {{ __('Unlink') }}
                                     </button>
                                 </form>
                             @else
                                 <a href="{{ route('profile.discord.link') }}" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
-                                    Link Account
+                                    {{ __('Link Account') }}
                                 </a>
                             @endif
                         </div>

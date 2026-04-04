@@ -1,9 +1,15 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 import TabGear from './TabGear.vue';
 import RosterTabs from './UnifiedRoster/RosterTabs.vue';
 import RosterTable from './UnifiedRoster/RosterTable.vue';
+
+// ---------------------------------------------------------------------------
+// i18n helper
+// ---------------------------------------------------------------------------
+const { proxy } = getCurrentInstance();
+const __ = (key, replace = {}) => proxy.__(key, replace);
 
 // ---------------------------------------------------------------------------
 // Props
@@ -57,9 +63,9 @@ const getHighestActiveDifficulty = () => {
 // Config
 // ---------------------------------------------------------------------------
 const roles = [
-    { id: 'tank', label: 'Tanks',   max: 2,  barColor: 'bg-blue-500'  },
-    { id: 'heal', label: 'Healers', max: 4,  barColor: 'bg-green-500' },
-    { id: 'dps',  label: 'DPS',     max: 14, barColor: 'bg-red-500'   },
+    { id: 'tank', labelKey: 'Tanks',   max: 2,  barColor: 'bg-blue-500'  },
+    { id: 'heal', labelKey: 'Healers', max: 4,  barColor: 'bg-green-500' },
+    { id: 'dps',  labelKey: 'DPS',     max: 14, barColor: 'bg-red-500'   },
 ];
 
 const classColors = {
@@ -240,7 +246,7 @@ const updateAccessRole = async (member, newRole) => {
         member.access_role = newRole;
     } catch (err) {
         console.error('Failed to update access role:', err);
-        alert('Failed to update access role. Check permissions.');
+        alert(__('Failed to update access role. Check permissions.'));
     }
 };
 
@@ -250,18 +256,18 @@ const updateRosterStatus = async (member, newStatus) => {
         member.roster_status = newStatus;
     } catch (err) {
         console.error('Failed to update roster status:', err);
-        alert('Failed to update roster status. Check permissions.');
+        alert(__('Failed to update roster status. Check permissions.'));
     }
 };
 
 const kickMember = async (member) => {
-    if (!confirm(`Remove ${member.name} from this static?`)) return;
+    if (!confirm(__('Remove {name} from this static?', { name: member.name }))) return;
     try {
         await axios.delete(`/statics/${props.staticId}/roster/${member.id}/kick`);
         roster.value = roster.value.filter(m => m.id !== member.id);
     } catch (err) {
         console.error('Failed to kick member:', err);
-        alert(err.response?.data?.message || 'Failed to remove member.');
+        alert(err.response?.data?.message || __('Failed to remove member.'));
     }
 };
 </script>
@@ -277,7 +283,7 @@ const kickMember = async (member) => {
                     <img :src="roleIconSrc(role.id)" class="w-6 h-6 opacity-80" :alt="role.label">
                 </div>
                 <div>
-                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">{{ role.label }}</div>
+                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">{{ __(role.labelKey) }}</div>
                     <div class="flex items-baseline gap-1">
                         <span class="text-2xl font-black text-white font-headline">{{ stats[role.id] }}</span>
                         <span class="text-[10px] font-bold text-on-surface-variant">/ {{ role.max }}</span>
@@ -334,7 +340,7 @@ const kickMember = async (member) => {
                 <div class="flex items-center gap-2 border-b border-white/5 pb-2">
                     <span class="material-symbols-outlined text-sm text-gray-500">help</span>
                     <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">
-                        No Character Linked ({{ groupedRoster.unknown.length }})
+                        {{ __('No Character Linked') }} ({{ groupedRoster.unknown.length }})
                     </h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -346,13 +352,13 @@ const kickMember = async (member) => {
                             </div>
                             <div>
                                 <div class="font-bold text-white text-sm tracking-tight">{{ member.name }}</div>
-                                <div class="text-[9px] text-on-surface-variant font-black uppercase tracking-widest">No Character Linked</div>
+                                <div class="text-[9px] text-on-surface-variant font-black uppercase tracking-widest">{{ __('No Character Linked') }}</div>
                             </div>
                         </div>
                         <div v-if="canManageStatus" class="opacity-0 group-hover:opacity-100 transition-opacity">
                             <button @click="kickMember(member)"
                                     class="text-error hover:text-white text-[10px] font-black uppercase tracking-widest bg-error/10 hover:bg-error px-2 py-1 rounded transition-colors">
-                                Kick
+                                {{ __('Kick') }}
                             </button>
                         </div>
                     </div>

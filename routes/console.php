@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\FetchAuctionsCommand;
+use App\Console\Commands\SyncAllStaticsCommand;
 use App\Models\StaticGroup;
 use App\Jobs\SyncStaticGroupJob;
 use Illuminate\Foundation\Inspiring;
@@ -12,16 +13,12 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(FetchAuctionsCommand::class)->hourly();
+Schedule::command(FetchAuctionsCommand::class)->everyFifteenMinutes();
 Schedule::command(ProcessDiscordAutomations::class)->everyFifteenMinutes();
-Schedule::command('statics:sync-rosters')->hourly();
-Schedule::command('app:fetch-bonus-ids')->weekly();
+Schedule::command(SyncAllStaticsCommand::class)->everyFifteenMinutes();
 
-Schedule::call(function () {
-    $statics = StaticGroup::all();
+Schedule::command('backup:run --only-db')->daily()->at('03:00');
 
-    foreach ($statics as $static) {
-        SyncStaticGroupJob::dispatch($static);
-    }
-})->everyMinute();
+// Очищуємо старі бекапи (rotation), щоб не закінчилося місце
+Schedule::command('backup:clean')->daily()->at('04:00');
 

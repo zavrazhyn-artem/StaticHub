@@ -179,18 +179,18 @@ const getVaultOptions = (character) => {
         <thead>
           <!-- Group Header -->
           <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">Character</th>
-            <th class="p-2 text-center border-l border-white/5">iLvL</th>
-            <th colspan="6" class="p-2 text-center border-l border-white/5">Tier Pieces</th>
-            <th class="p-2 text-center border-l border-white/5">M+ Dungeons</th>
-            <th colspan="4" class="p-2 text-center border-l border-white/5">Great Vault</th>
-            <th class="p-2 text-center border-l border-white/5">M+ Rating</th>
-            <th colspan="3" class="p-2 text-center border-l border-white/5">Audit</th>
+            <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
+            <th class="p-2 text-center border-l border-white/5">{{ __('iLvL') }}</th>
+            <th colspan="6" class="p-2 text-center border-l border-white/5">{{ __('Tier Pieces') }}</th>
+            <th class="p-2 text-center border-l border-white/5">{{ __('M+ Dungeons') }}</th>
+            <th colspan="4" class="p-2 text-center border-l border-white/5">{{ __('Great Vault') }}</th>
+            <th class="p-2 text-center border-l border-white/5">{{ __('M+ Rating') }}</th>
+            <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
           </tr>
           <!-- Sub Header -->
           <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">Name</th>
-            <th class="p-4 text-center">Avg</th>
+            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
+            <th class="p-4 text-center">{{ __('Avg') }}</th>
 
             <th class="p-4 text-center border-l border-white/5 w-10">#</th>
             <th class="p-2 text-center w-8">H</th>
@@ -199,7 +199,7 @@ const getVaultOptions = (character) => {
             <th class="p-2 text-center w-8">G</th>
             <th class="p-2 text-center w-8">L</th>
 
-            <th class="p-4 text-center border-l border-white/5">This Week</th>
+            <th class="p-4 text-center border-l border-white/5">{{ __('This Week') }}</th>
 
             <th class="p-4 text-center border-l border-white/5 w-8">M</th>
             <th class="p-4 text-center w-8">H</th>
@@ -208,9 +208,9 @@ const getVaultOptions = (character) => {
 
             <th class="p-4 text-center border-l border-white/5">Rating</th>
 
-            <th class="p-4 text-center border-l border-white/5">Enchants</th>
-            <th class="p-4 text-center">Gems</th>
-            <th class="p-4 text-center">Progress</th>
+            <th class="p-4 text-center border-l border-white/5">{{ __('Enchants') }}</th>
+            <th class="p-4 text-center">{{ __('Gems') }}</th>
+            <th class="p-4 text-center">{{ __('Progress') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/5">

@@ -11,19 +11,34 @@ use Illuminate\Database\Eloquent\Builder;
 class TacticalReportBuilder extends Builder
 {
     /**
-     * Get tactical reports for a specific static group with optional difficulty filtering.
+     * Get tactical reports for a specific static group with optional filters.
      *
-     * @param int $staticId
-     * @param string|null $difficulty
+     * @param int      $staticId
+     * @param string[] $difficulties  Lowercase values, e.g. ['mythic', 'heroic']
+     * @param string|null $dateFrom   Y-m-d
+     * @param string|null $dateTo     Y-m-d
      * @return self
      */
-    public function forStatic(int $staticId, ?string $difficulty = null): self
+    public function forStatic(int $staticId, array $difficulties = [], ?string $dateFrom = null, ?string $dateTo = null): self
     {
         $this->where('static_id', $staticId)
             ->orderBy('created_at', 'desc');
 
-        if ($difficulty) {
-            $this->where('title', 'like', '%' . $difficulty . '%');
+        if ($difficulties) {
+            // Each difficulty is an OR condition: log must contain at least one selected value.
+            $this->where(function (self $q) use ($difficulties) {
+                foreach ($difficulties as $difficulty) {
+                    $q->orWhereRaw('JSON_CONTAINS(difficulties, ?)', [json_encode($difficulty)]);
+                }
+            });
+        }
+
+        if ($dateFrom) {
+            $this->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $this->whereDate('created_at', '<=', $dateTo);
         }
 
         return $this;

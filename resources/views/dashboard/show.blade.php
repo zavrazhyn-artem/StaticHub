@@ -2,20 +2,20 @@
     <section class="mb-8">
         <header class="flex items-end justify-between border-b border-white/5 pb-4">
             <div>
-                <span class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">War Room Dashboard</span>
+                <span class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">{{ __('War Room Dashboard') }}</span>
                 <h1 class="font-headline text-4xl font-extrabold tracking-tight flex items-center gap-3">
                     <span class="material-symbols-outlined text-success-neon">radio_button_checked</span>
-                    TACTICAL STATUS: {{ $static->name }}
+                    {{ __('TACTICAL STATUS:') }} {{ $static->name }}
                 </h1>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('statics.settings.schedule', $static->id) }}" class="bg-surface-container-high hover:bg-surface-container-highest text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">settings</span>
-                    SETTINGS
+                    {{ __('SETTINGS') }}
                 </a>
                 <a href="{{ route('schedule.index') }}" class="bg-surface-container-high hover:bg-surface-container-highest text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">calendar_month</span>
-                    OPEN CALENDAR
+                    {{ __('OPEN CALENDAR') }}
                 </a>
             </div>
         </header>
@@ -30,14 +30,14 @@
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                     <div>
-                        <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-1">Incoming Objective</h2>
+                        <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-1">{{ __('Incoming Objective') }}</h2>
                         @if($nextRaid)
-                            <h3 class="text-3xl font-extrabold text-white tracking-tight">Raid Event</h3>
+                            <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ __('Raid Event') }}</h3>
                             <p class="text-primary font-bold mt-1">
-                                {{ $nextRaid->start_time->setTimezone($static->timezone)->format('l, M d') }} @ {{ $nextRaid->start_time->setTimezone($static->timezone)->format('H:i') }}
+                                {{ $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('l, M d') }} @ {{ $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('H:i') }}
                             </p>
                         @else
-                            <h3 class="text-3xl font-extrabold text-on-surface-variant tracking-tight italic">No scheduled raids</h3>
+                            <h3 class="text-3xl font-extrabold text-on-surface-variant tracking-tight italic">{{ __('No scheduled raids') }}</h3>
                         @endif
                     </div>
 
@@ -59,19 +59,19 @@
                             }">
                                     <span x-text="days">0</span>d <span x-text="hours">0</span>h <span x-text="mins">0</span>m
                                 </div>
-                                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">Countdown to Pull</div>
+                                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{{ __('Countdown to Pull') }}</div>
                             </div>
                             <div class="h-12 w-px bg-white/10 hidden md:block"></div>
                             <div>
                                 @if($nextRaid->discord_message_id)
                                     <div class="flex items-center gap-2 text-success-neon">
                                         <span class="material-symbols-outlined text-sm">check_circle</span>
-                                        <span class="text-xs font-bold uppercase tracking-wider">Discord Posted</span>
+                                        <span class="text-xs font-bold uppercase tracking-wider">{{ __('Discord Posted') }}</span>
                                     </div>
                                 @else
                                     <div class="flex items-center gap-2 text-on-surface-variant">
                                         <span class="material-symbols-outlined text-sm">schedule</span>
-                                        <span class="text-xs font-bold uppercase tracking-wider">Pending Post</span>
+                                        <span class="text-xs font-bold uppercase tracking-wider">{{ __('Pending Post') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -82,7 +82,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6">
-                    <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">Roster Readiness</h2>
+                    <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">{{ __('Roster Readiness') }}</h2>
                     <div class="space-y-4">
                         @php
                             $roles = [
@@ -99,7 +99,7 @@
                             @endphp
                             <div class="space-y-1">
                                 <div class="flex justify-between text-xs font-bold uppercase tracking-wider">
-                                    <span class="text-white">{{ $meta['label'] }}</span>
+                                    <span class="text-white">{{ __($meta['label']) }}</span>
                                     <span class="text-on-surface-variant">{{ $count }} / {{ $meta['max'] }}</span>
                                 </div>
                                 <div class="h-2 bg-black/40 rounded-full overflow-hidden">
@@ -115,7 +115,7 @@
                         <span class="material-symbols-outlined text-6xl text-[#FFD700]">payments</span>
                     </div>
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">Treasury Overview</h2>
+                        <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">{{ __('Treasury Overview') }}</h2>
                         @if($taxStatus !== 'success')
                             <span class="material-symbols-outlined {{ $taxStatus === 'danger' ? 'text-error animate-pulse' : 'text-warning' }} text-lg" title="{{ $taxDescription }}">
                                 {{ $taxStatus === 'danger' ? 'warning' : 'info' }}
@@ -129,11 +129,11 @@
                                 @if($taxStatus !== 'success')
                                     <span class="material-symbols-outlined text-[12px]">{{ $taxStatus === 'danger' ? 'trending_up' : 'trending_down' }}</span>
                                 @endif
-                                Weekly Tax Goal
+                                {{ __('Weekly Tax Goal') }}
                             </div>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-3xl font-black {{ $taxStatus === 'danger' ? 'text-error' : ($taxStatus === 'warning' ? 'text-warning' : 'text-white') }} font-headline tracking-tighter">{{ \App\Helpers\CurrencyHelper::formatGold($targetTax, false) }}</span>
-                                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Gold / Player</span>
+                                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
                             </div>
                             @if($taxStatus !== 'success')
                                 <div class="mt-1 text-[8px] {{ $taxStatus === 'danger' ? 'text-error' : 'text-warning' }} font-bold uppercase tracking-tighter">
@@ -143,11 +143,11 @@
                         </div>
 
                         <div class="pt-4 border-t border-white/5">
-                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-3 text-center">Collection Progress ({{ now()->startOfWeek()->format('M d') }} - {{ now()->endOfWeek()->format('M d') }})</div>
+                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-3 text-center">{{ __('Collection Progress') }} ({{ now()->startOfWeek()->format('M d') }} - {{ now()->endOfWeek()->format('M d') }})</div>
                             <div class="grid grid-cols-10 gap-1">
                                 @foreach($weeklyStatus ?? [] as $status)
                                     <div class="h-1.5 rounded-full {{ $status['is_paid'] ? 'bg-success-neon shadow-[0_0_5px_rgba(0,255,153,0.3)]' : 'bg-white/10' }}"
-                                         title="{{ $status['name'] }}: {{ $status['is_paid'] ? 'Paid' : 'Pending' }}"></div>
+                                         title="{{ $status['name'] }}: {{ $status['is_paid'] ? __('Paid') : __('Pending') }}"></div>
                                 @endforeach
                                 @for($i = count($weeklyStatus ?? []); $i < 20; $i++)
                                     <div class="h-1.5 rounded-full bg-white/5 opacity-50 border border-dashed border-white/10" title="Empty Slot"></div>
@@ -155,10 +155,10 @@
                             </div>
                             <div class="flex justify-between mt-2">
                                 <span class="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">
-                                    Paid: {{ collect($weeklyStatus ?? [])->where('is_paid', true)->count() }} / 20
+                                    {{ __('Paid:') }} {{ collect($weeklyStatus ?? [])->where('is_paid', true)->count() }} / 20
                                 </span>
                                 <a href="{{ route('statics.treasury', $static->id) }}" class="text-[9px] font-bold text-primary hover:text-white uppercase tracking-widest flex items-center gap-1">
-                                    Full Ledger
+                                    {{ __('Full Ledger') }}
                                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                                 </a>
                             </div>
@@ -168,7 +168,7 @@
             </div>
 
             <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6">
-                <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">Logistics Snapshot</h2>
+                <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">{{ __('Logistics Snapshot') }}</h2>
                 <div class="space-y-4">
                     <a href="{{ route('statics.treasury', $static->id) }}" class="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:bg-white/5 transition-colors group">
                         <div class="flex items-center gap-3">
@@ -176,15 +176,15 @@
                                 <span class="material-symbols-outlined text-tertiary-dim">savings</span>
                             </div>
                             <div>
-                                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">Guild Bank</div>
+                                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{{ __('Guild Bank') }}</div>
                                 <div class="text-sm font-black text-[#FFD700]">{{ \App\Helpers\CurrencyHelper::formatGold($reserves) }}</div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-[8px] text-on-surface-variant font-bold uppercase tracking-[0.2em]">Autonomy</div>
-                            <div class="text-xs font-black {{ $autonomy > 2 ? 'text-success-neon' : 'text-error' }}">{{ $autonomy }} <span class="text-[8px] font-normal opacity-60">WEEKS</span></div>
+                            <div class="text-[8px] text-on-surface-variant font-bold uppercase tracking-[0.2em]">{{ __('Autonomy') }}</div>
+                            <div class="text-xs font-black {{ $autonomy > 2 ? 'text-success-neon' : 'text-error' }}">{{ $autonomy }} <span class="text-[8px] font-normal opacity-60">{{ __('WEEKS') }}</span></div>
                             @if($weeklyCost == 0)
-                                <div class="text-[8px] text-error font-bold uppercase tracking-tighter">PLANNING NEEDED</div>
+                                <div class="text-[8px] text-error font-bold uppercase tracking-tighter">{{ __('PLANNING NEEDED') }}</div>
                             @endif
                         </div>
                     </a>
@@ -200,7 +200,7 @@
                                     <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest truncate">{{ $recipe->name }}</div>
                                     <div class="text-lg font-black text-white mt-0.5">
                                         {{ $recipe->default_quantity * $raidDays }}
-                                        <span class="text-[10px] font-normal text-on-surface-variant uppercase ml-1">Needed / Week</span>
+                                        <span class="text-[10px] font-normal text-on-surface-variant uppercase ml-1">{{ __('Needed / Week') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -219,7 +219,7 @@
             <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 flex flex-col gap-8 flex-1">
 
                 <div>
-                    <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">Upcoming Objectives</h2>
+                    <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-6">{{ __('Upcoming Objectives') }}</h2>
                     <div class="space-y-4 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
                         @forelse($weeklySchedule as $event)
                             <div class="flex items-center justify-between p-4 bg-black/10 rounded-xl border border-white/5 hover:bg-white/5 transition-colors group">
@@ -230,25 +230,25 @@
                                         <span class="text-[10px] font-bold text-primary uppercase tracking-tighter leading-none mt-0.5">{{ $event->start_time->setTimezone($static->timezone)->format('D') }}</span>
                                     </div>
                                     <div>
-                                        <div class="text-xs font-bold text-white uppercase tracking-wider">Raid Event</div>
+                                        <div class="text-xs font-bold text-white uppercase tracking-wider">{{ __('Raid Event') }}</div>
                                         <div class="text-xs text-on-surface-variant flex items-center gap-2">
                                             <span class="material-symbols-outlined text-[12px]">schedule</span>
                                             {{ $event->start_time->setTimezone($static->timezone)->format('H:i') }}
                                             <span class="mx-1 opacity-20">•</span>
                                             <span class="flex items-center gap-1">
                                                 <span class="material-symbols-outlined text-[12px] text-success-neon">groups</span>
-                                                {{ $event->rsvp_count }} RSVPs
+                                                {{ $event->rsvp_count }} {{ __('RSVPs') }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                                 <a href="{{ route('schedule.event.show', $event->id) }}" class="bg-surface-container-highest hover:bg-primary/20 hover:text-primary text-on-surface-variant px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
-                                    MISSION INTEL
+                                    {{ __('MISSION INTEL') }}
                                 </a>
                             </div>
                         @empty
                             <div class="text-center py-8 text-on-surface-variant italic border border-dashed border-white/5 rounded-xl">
-                                No additional objectives detected for this cycle.
+                                {{ __('No additional objectives detected for this cycle.') }}
                             </div>
                         @endforelse
                     </div>

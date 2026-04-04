@@ -78,12 +78,12 @@ class SyncStaticGroupJob implements ShouldQueue, ShouldBeUnique
             $this->staticGroup->update($updateData);
 
             // Send Discord Sync Report
-            $discordService->sendSyncReport($this->staticGroup, [
-                'members_updated' => $characters->count() . '/' . $characters->count(),
-                'missing_enchants' => $missingEnchantsCount > 0
-                    ? $missingEnchantsCount . ' players need attention'
-                    : 'All players are fully enchanted!'
-            ]);
+//            $discordService->sendSyncReport($this->staticGroup, [
+//                'members_updated' => $characters->count() . '/' . $characters->count(),
+//                'missing_enchants' => $missingEnchantsCount > 0
+//                    ? $missingEnchantsCount . ' players need attention'
+//                    : 'All players are fully enchanted!'
+//            ]);
         }
     }
 

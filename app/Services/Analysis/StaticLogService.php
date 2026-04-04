@@ -25,9 +25,12 @@ class StaticLogService
     /**
      * Get paginated logs for a static group.
      */
-    public function getPaginatedLogs(StaticGroup $static, ?string $difficulty = null): LengthAwarePaginator
+    /**
+     * @param string[] $difficulties
+     */
+    public function getPaginatedLogs(StaticGroup $static, array $difficulties = [], ?string $dateFrom = null, ?string $dateTo = null): LengthAwarePaginator
     {
-        return $this->fetchPaginatedTacticalReportsTask->run($static->id, $difficulty);
+        return $this->fetchPaginatedTacticalReportsTask->run($static->id, $difficulties, $dateFrom, $dateTo);
     }
 
     /**

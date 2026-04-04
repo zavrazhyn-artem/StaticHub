@@ -13,6 +13,12 @@
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
+        <script>
+            // Читаємо JSON з перекладами і записуємо в глобальну змінну вікна
+            window.translations = {!! file_exists(base_path('lang/' . app()->getLocale() . '.json'))
+            ? file_get_contents(base_path('lang/' . app()->getLocale() . '.json'))
+            : '{}' !!};
+        </script>
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -38,7 +44,7 @@
                         <button onclick="handleInviteClick({{ $static->id }})"
                                 class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
                             <span class="material-symbols-outlined text-sm">person_add</span>
-                            <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Invite to Group</span>
+                            <span class="font-headline text-[10px] font-bold uppercase tracking-widest">{{ __("Invite to Group") }}</span>
                         </button>
                         <div id="invite-toast" class="hidden fixed bottom-6 right-6 bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce font-headline text-xs font-bold uppercase tracking-widest z-[100]">
                             Invite Link Copied!
@@ -77,57 +83,98 @@
                 @endif
             </div>
             <div class="flex items-center gap-4">
+                <!-- Language Selector -->
+                @php
+                    $localeMap = [
+                        'en' => ['country' => 'GB', 'label' => 'English'],
+                        'uk' => ['country' => 'UA', 'label' => 'Українська'],
+                    ];
+                    $availableLocales = collect(glob(base_path('lang/*.json')))
+                        ->map(fn($f) => pathinfo($f, PATHINFO_FILENAME))
+                        ->filter(fn($l) => isset($localeMap[$l]));
+                    $currentLocale = app()->getLocale();
+                    $currentCountry = $localeMap[$currentLocale]['country'] ?? 'US';
+                @endphp
+                <div class="relative group">
+                    <button class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white">
+                        <img src="/images/flags/{{ $currentCountry }}.svg" alt="{{ $currentCountry }}" class="w-5 h-auto rounded-sm">
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-36 py-1 bg-surface-container-highest border border-white/10 shadow-2xl rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                        <form action="{{ route('language.switch') }}" method="POST">
+                            @csrf
+                            @foreach($availableLocales as $locale)
+                                @php $info = $localeMap[$locale]; @endphp
+                                <button name="locale" value="{{ $locale }}" class="flex items-center gap-3 w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
+                                    <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}" class="w-5 h-auto rounded-sm">
+                                    {{ $info['label'] }}
+                                </button>
+                            @endforeach
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Settings Dropdown -->
-                <x-dropdown align="right" width="48" contentClasses="py-1 bg-surface-container-highest border border-white/10 shadow-2xl">
-                    <x-slot name="trigger">
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <div @click="open = !open">
                         <button class="h-10 w-10 rounded-full overflow-hidden border border-outline-variant hover:border-primary transition-all active:scale-95">
                             <img alt="User Avatar" class="w-full h-full object-cover rounded-full" src="{{ Auth::user()->getEffectiveAvatarUrl($static->id ?? null) }}"/>
                         </button>
-                    </x-slot>
+                    </div>
 
-                    <x-slot name="content">
-                        <div class="px-4 py-2 border-b border-white/5">
-                            <div class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ Auth::user()->name }}</div>
-                            <div class="text-[10px] text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
-                        </div>
-
-                        <x-dropdown-link :href="route('profile.edit')" class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <div class="px-4 py-2 border-y border-white/5 bg-black/10">
-                            <div class="font-headline text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">{{ __('My Characters') }}</div>
-                            <div class="space-y-1">
-                                @forelse(Auth::user()->characters->take(5) as $character)
-                                    <div class="flex items-center gap-2 py-1">
-                                        <div class="relative shrink-0">
-                                            <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded-full border border-white/10" alt="">
-                                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-surface-container rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
-                                                <img src="{{ $character->getClassIconUrl() }}" class="w-2.5 h-2.5" alt="">
-                                            </div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }} truncate">{{ $character->name }}</span>
-                                    </div>
-                                @empty
-                                    <div class="text-[9px] text-gray-600 italic tracking-wider">{{ __('No characters') }}</div>
-                                @endforelse
-                                @if(Auth::user()->characters->count() > 5)
-                                    <a href="{{ route('characters.index') }}" class="block text-[8px] font-bold text-cyan-400/60 hover:text-cyan-400 uppercase tracking-widest mt-1 transition-colors">{{ __('View All') }}</a>
-                                @endif
+                    <div
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-right rtl:origin-top-left end-0"
+                        style="display: none;"
+                        @click="open = false"
+                    >
+                        <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-surface-container-highest border border-white/10 shadow-2xl">
+                            <div class="px-4 py-2 border-b border-white/5">
+                                <div class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ Auth::user()->name }}</div>
+                                <div class="text-[10px] text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
                             </div>
-                        </div>
 
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')"
+                            <a href="{{ route('profile.edit') }}" class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors">
+                                {{ __('Profile') }}
+                            </a>
+
+                            <div class="px-4 py-2 border-y border-white/5 bg-black/10">
+                                <div class="font-headline text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">{{ __('My Characters') }}</div>
+                                <div class="space-y-1">
+                                    @forelse(Auth::user()->characters->take(5) as $character)
+                                        <div class="flex items-center gap-2 py-1">
+                                            <div class="relative shrink-0">
+                                                <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded-full border border-white/10" alt="">
+                                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-surface-container rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
+                                                    <img src="{{ $character->getClassIconUrl() }}" class="w-2.5 h-2.5" alt="">
+                                                </div>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }} truncate">{{ $character->name }}</span>
+                                        </div>
+                                    @empty
+                                        <div class="text-[9px] text-gray-600 italic tracking-wider">{{ __('No characters') }}</div>
+                                    @endforelse
+                                    <a href="{{ route('characters.index') }}" class="block text-[8px] font-bold text-cyan-400/60 hover:text-cyan-400 uppercase tracking-widest mt-1 transition-colors">{{ __('View All') }}</a>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <a href="{{ route('logout') }}"
                                     onclick="event.preventDefault(); this.closest('form').submit();"
                                     class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                                    {{ __('Log Out') }}
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -143,32 +190,32 @@
                     <a href="{{ route('statics.dashboard', $static->id) }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.dashboard') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.dashboard') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">dashboard</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Dashboard</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Dashboard') }}</span>
                     </a>
 
                     <a href="{{ route('statics.roster', $static->id) }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">groups</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Roster</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Roster') }}</span>
                     </a>
 
 
                     <a href="{{ route('schedule.index') }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('schedule.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('schedule.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">calendar_month</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Schedule</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
                     </a>
 
                     <a href="{{ route('statics.treasury', $static->id) }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">payments</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Treasury</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Treasury') }}</span>
                     </a>
 
                     <a href="{{ route('statics.logs.index', $static->id) }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-amber-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-amber-500' : 'group-hover:text-amber-500 transition-colors' }}">terminal</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Intelligence</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Intelligence') }}</span>
                     </a>
 
                     <div class="pt-4 pb-2 px-4">
@@ -178,7 +225,7 @@
                     <a href="{{ route('statics.settings.schedule', $static->id) }}"
                        class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                         <span class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
-                        <span class="font-headline text-xs font-bold uppercase tracking-widest">Settings</span>
+                        <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
                     </a>
                 </div>
             @else
@@ -191,17 +238,7 @@
             @endif
 
             <div class="p-6 border-t border-white/5 space-y-4">
-                <a href="{{ route('characters.index') }}" class="w-full block bg-primary text-center text-on-primary py-2 font-headline font-bold text-xs uppercase tracking-widest rounded-sm hover:brightness-110 active:scale-95 transition-all">My Characters</a>
-                <div class="flex flex-col gap-2">
-                    <a class="flex items-center gap-3 text-gray-500 hover:text-white transition-colors px-1" href="#">
-                        <span class="material-symbols-outlined text-lg">help</span>
-                        <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Support</span>
-                    </a>
-                    <a class="flex items-center gap-3 text-gray-500 hover:text-white transition-colors px-1" href="#">
-                        <span class="material-symbols-outlined text-lg">history</span>
-                        <span class="font-headline text-[10px] font-bold uppercase tracking-widest">Archive</span>
-                    </a>
-                </div>
+
             </div>
         </aside>
 

@@ -33,9 +33,14 @@ class StaticSettingsService
         $context = $this->resolveDiscordGuildContextTask->run($static->discord_guild_id);
         $timezones = timezone_identifiers_list();
 
+        $clientId = config('services.discord.client_id');
+        $redirectUri = urlencode(config('services.discord.redirect', ''));
+        $discordInviteUrl = "https://discord.com/oauth2/authorize?client_id={$clientId}&permissions=117760&response_type=code&redirect_uri={$redirectUri}&integration_type=0&scope=bot+applications.commands+guilds";
+
         return array_merge([
             'static' => $static,
             'timezones' => $timezones,
+            'discordInviteUrl' => $discordInviteUrl,
         ], $context);
     }
 

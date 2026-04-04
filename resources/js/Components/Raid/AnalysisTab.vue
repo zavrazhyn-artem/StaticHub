@@ -13,7 +13,7 @@ defineProps({
                 <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
                     <h3 class="text-primary font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined">strategy</span>
-                        Overall Strategy &amp; Execution
+                        {{ __('Overall Strategy & Execution') }}
                     </h3>
                     <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant" v-html="analysisHtml.strategy"></div>
                 </div>
@@ -21,7 +21,7 @@ defineProps({
                 <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
                     <h3 class="text-error font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined">dangerous</span>
-                        Critical Failures &amp; Wipe Reasons
+                        {{ __('Critical Failures & Wipe Reasons') }}
                     </h3>
                     <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant" v-html="analysisHtml.wipes"></div>
                 </div>
@@ -32,7 +32,7 @@ defineProps({
                 <div class="bg-surface-container-high border border-white/5 rounded-2xl p-6">
                     <h3 class="text-success-neon font-headline text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined">person</span>
-                        Performance Highlights
+                        {{ __('Performance Highlights') }}
                     </h3>
                     <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant" v-html="analysisHtml.individual"></div>
                 </div>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\StaticGroup;
 
+use App\Helpers\TreasuryTaxWarningHelper;
 use App\Models\StaticGroup;
 use App\Models\Transaction;
 use App\Services\ConsumableService;
@@ -37,34 +38,18 @@ class TreasuryService
 
         $autonomy = CurrencyHelper::calculateAutonomy($reserves, $weeklyCost);
 
-        $realCostPerPlayer = $weeklyCost / 20;
-
-        $taxStatus = 'success';
-        $taxDescription = '✅ Tax covers current AH prices.';
-        $taxIcon = 'heroicon-m-check-circle';
-
-        if ($realCostPerPlayer > $fixedTax) {
-            $taxStatus = 'danger';
-            $taxDescription = '⚠️ Deficit! Real cost is ~' . number_format(CurrencyHelper::copperToGold((int) $realCostPerPlayer)) . '. Increase tax.';
-            $taxIcon = 'heroicon-m-arrow-trending-up';
-        } elseif ($fixedTax > $realCostPerPlayer * 1.3) {
-            $taxStatus = 'warning';
-            $taxDescription = '📉 High Surplus. Real cost dropped to ~' . number_format(CurrencyHelper::copperToGold((int) $realCostPerPlayer)) . '. Consider lowering.';
-            $taxIcon = 'heroicon-m-arrow-trending-down';
-        }
+        $realCostPerPlayer = (int) ceil($weeklyCost / 20);
+        $warning = TreasuryTaxWarningHelper::compute($fixedTax, $realCostPerPlayer);
 
         return array_merge([
-            'static' => $static,
-            'reserves' => $reserves,
+            'static'            => $static,
+            'reserves'          => $reserves,
             'recentTransactions' => $recentTransactions,
-            'weeklyStatus' => $weeklyStatus,
-            'weeklyCost' => $weeklyCost,
-            'autonomy' => $autonomy,
-            'targetTax' => $fixedTax,
-            'taxStatus' => $taxStatus,
-            'taxDescription' => $taxDescription,
-            'taxIcon' => $taxIcon,
-        ], $consumablesData);
+            'weeklyStatus'      => $weeklyStatus,
+            'weeklyCost'        => $weeklyCost,
+            'autonomy'          => $autonomy,
+            'targetTax'         => $fixedTax,
+        ], $warning, $consumablesData);
     }
 
     public function fetchWeeklyTaxStatus(StaticGroup $static, ?int $targetTax = null, ?int $weekNumber = null): Collection

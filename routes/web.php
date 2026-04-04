@@ -5,6 +5,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\JoinStaticController;
 use App\Http\Controllers\StaticSettingsController;
 use App\Http\Controllers\StaticLogsController;
+use App\Http\Controllers\Api\DiscordGuildController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\BattleNetController;
 use App\Http\Controllers\StaticController;
@@ -16,6 +17,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switch'])->name('language.switch');
+
 Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'showFirst'])->name('dashboard');
 
@@ -24,8 +27,6 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/characters/import', [CharacterController::class, 'import'])->name('characters.import');
     Route::post('/characters/assign', [CharacterController::class, 'assignToStatic'])->name('characters.assign');
     Route::get('/personal-reports', [CharacterController::class, 'personalReports'])->name('personal-reports');
-
-    Route::post('/statics/{static}/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
 
     Route::get('/statics/{static}/dashboard', [App\Http\Controllers\DashboardController::class, 'show'])->name('statics.dashboard');
     Route::get('/statics/{static}/roster', [RosterController::class, 'index'])->name('statics.roster');
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/statics/{static}/treasury', [App\Http\Controllers\TreasuryController::class, 'store'])->name('statics.treasury.store');
     Route::post('/statics/{static}/consumables', [App\Http\Controllers\TreasuryController::class, 'updateConsumables'])->name('consumables.store');
     Route::patch('/statics/{static}/treasury/{transaction}', [App\Http\Controllers\TreasuryController::class, 'update'])->name('statics.treasury.update');
+    Route::patch('/statics/{static}/treasury-settings', [App\Http\Controllers\TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::post('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
@@ -58,10 +60,17 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::get('/schedule/event/{event}', [App\Http\Controllers\RaidEventController::class, 'show'])->name('schedule.event.show');
     Route::post('/schedule/event/{event}/rsvp', [App\Http\Controllers\RaidEventController::class, 'rsvp'])->name('schedule.event.rsvp');
     Route::post('/schedule/event/{event}/announce', [App\Http\Controllers\RaidEventController::class, 'announceToDiscord'])->name('schedule.announce');
+
+    Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
+    Route::get('/api/discord/guilds/{guildId}/roles',    [DiscordGuildController::class, 'roles']);
 });
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('/statics/{static}/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 

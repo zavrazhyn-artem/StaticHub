@@ -28,7 +28,7 @@ class GeminiService
         Log::info('Starting AI Tactical Analysis (Manual/Legacy)');
 
         $prompt = GeminiPromptBuilder::buildTacticalAnalysisPrompt($wclJsonData);
-        $rawResponse = $this->executeGeminiRequestTask->run($prompt, 180, 1);
+        $rawResponse = $this->executeGeminiRequestTask->run($prompt, 180, 1, true);
         $cleanedText = GeminiResponseFormatter::cleanMarkdown($rawResponse);
 
         Log::info('AI Tactical Analysis completed successfully');

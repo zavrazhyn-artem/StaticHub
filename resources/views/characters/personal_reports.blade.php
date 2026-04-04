@@ -2,19 +2,19 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-white uppercase tracking-tighter font-headline leading-none mb-4">
-                Personal Intelligence
+                {{ __('Personal Intelligence') }}
             </h1>
             <p class="text-on-surface-variant font-bold uppercase tracking-wider text-xs">
-                AI-driven tactical feedback for your characters across all raids.
+                {{ __('AI-driven tactical feedback for your characters across all raids.') }}
             </p>
         </div>
 
         @if($reports->isEmpty())
             <div class="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl">
                 <span class="material-symbols-outlined text-8xl text-white/5 mb-6">psychology</span>
-                <h3 class="text-2xl font-black text-white uppercase tracking-widest">No Intelligence Data</h3>
+                <h3 class="text-2xl font-black text-white uppercase tracking-widest">{{ __('No Intelligence Data') }}</h3>
                 <p class="text-on-surface-variant mt-4 max-w-md mx-auto uppercase tracking-wider text-xs leading-relaxed">
-                    You don't have any personal AI reports yet. Reports are generated after raid logs are analyzed by the Raid Leader.
+                    {{ __("You don't have any personal AI reports yet. Reports are generated after raid logs are analyzed by the Raid Leader.") }}
                 </p>
             </div>
         @else
@@ -22,7 +22,7 @@
                 @foreach($reports as $report)
                     @php
                         $classColor = strtolower(str_replace(' ', '-', $report->character->playable_class));
-                        $raidTitle = $report->tacticalReport->title ?? 'Raid Encounter';
+                        $raidTitle = $report->tacticalReport->title ?? __('Raid Encounter');
                         $date = $report->created_at->format('F d, Y');
                     @endphp
                     <div class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
@@ -48,7 +48,7 @@
                         </div>
                         <div class="px-8 py-4 bg-black/20 border-t border-white/5 flex justify-end">
                             <a href="{{ route('statics.logs.show', [$report->tacticalReport->static_id, $report->tacticalReport]) }}" class="text-[10px] font-black text-amber-500 uppercase tracking-widest hover:underline flex items-center gap-1">
-                                View Full Tactical Report
+                                {{ __('View Full Tactical Report') }}
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </a>
                         </div>

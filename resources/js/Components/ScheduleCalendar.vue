@@ -1,9 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useTimeFormatter } from '../composables/useTimeFormatter.js';
+import { useTranslation } from '../composables/useTranslation.js';
 import GlassModal from './UI/GlassModal.vue';
 import TimePickerCarousel from './UI/TimePickerCarousel.vue';
 import TimezoneSelector from './UI/TimezoneSelector.vue';
+
+const { __ } = useTranslation();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -24,7 +27,9 @@ const props = defineProps({
 
 const { formatRange } = useTimeFormatter();
 
-const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const daysOfWeek = computed(() => [
+    __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat'), __('Sun'),
+]);
 
 // Modal state
 const showModal = ref(Object.keys(props.errors).length > 0);
@@ -99,7 +104,7 @@ const closeModal = () => { showModal.value = false; };
         <!-- Page header -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">Raid Schedule</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Raid Schedule') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">
                     {{ staticName }} &bull; {{ currentMonthName }}
                 </p>
@@ -112,19 +117,19 @@ const closeModal = () => { showModal.value = false; };
                         class="bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2 mr-4"
                     >
                         <span class="material-symbols-outlined text-sm">settings</span>
-                        Static Settings
+                        {{ __('Static Settings') }}
                     </a>
                 </template>
 
                 <a :href="prevMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
-                    Previous
+                    {{ __('Previous') }}
                 </a>
                 <a :href="todayUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors">
-                    Today
+                    {{ __('Today') }}
                 </a>
                 <a :href="nextMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
-                    Next
+                    {{ __('Next') }}
                     <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </a>
             </div>
@@ -176,15 +181,6 @@ const closeModal = () => { showModal.value = false; };
                                         </div>
                                     </div>
                                 </a>
-                                <!-- Edit button on hover (owner only) -->
-                                <button
-                                    v-if="staticOwnerId === authUserId"
-                                    @click.prevent="openEditModal(event, day.formatted_date)"
-                                    class="absolute top-1 right-1 opacity-0 group-hover/event:opacity-100 transition-opacity w-5 h-5 bg-surface-container rounded flex items-center justify-center hover:bg-white/10"
-                                    title="Edit event"
-                                >
-                                    <span class="material-symbols-outlined text-on-surface-variant text-[12px]">edit</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -201,7 +197,7 @@ const closeModal = () => { showModal.value = false; };
                         <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'edit_calendar' : 'event_available' }}</span>
                     </div>
                     <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">
-                        {{ isEditing ? 'Edit Raid Event' : 'Plan Raid Event' }}
+                        {{ isEditing ? __('Edit Raid Event') : __('Plan Raid Event') }}
                     </h3>
                 </div>
                 <button @click="closeModal" class="text-on-surface-variant hover:text-white transition-colors p-1 hover:bg-white/5 rounded-md">
@@ -220,7 +216,7 @@ const closeModal = () => { showModal.value = false; };
                 <div v-if="Object.keys(errors).length > 0" class="p-4 bg-error-dim/20 border border-error-dim/50 rounded-xl">
                     <div class="flex items-center gap-2 mb-2 text-error-dim">
                         <span class="material-symbols-outlined text-sm">error</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest">Validation Errors</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest">{{ __('Validation Errors') }}</span>
                     </div>
                     <ul class="space-y-1">
                         <li v-for="(messages, field) in errors" :key="field" class="text-[10px] text-white/70 font-medium">
@@ -231,7 +227,7 @@ const closeModal = () => { showModal.value = false; };
 
                 <!-- Date display -->
                 <div class="space-y-1.5">
-                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Selected Date</label>
+                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Selected Date') }}</label>
                     <div class="flex items-center gap-2 px-3 py-2.5 bg-surface-container-highest border border-white/5 rounded-lg text-white font-headline text-sm font-bold tracking-tight">
                         <span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
                         {{ selectedDate }}
@@ -240,7 +236,7 @@ const closeModal = () => { showModal.value = false; };
 
                 <!-- Timezone -->
                 <div class="space-y-1.5">
-                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Timezone</label>
+                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Timezone') }}</label>
                     <TimezoneSelector
                         ref="timezoneSelectorRef"
                         v-model="selectedTimezone"
@@ -252,7 +248,7 @@ const closeModal = () => { showModal.value = false; };
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                            Start Time <span class="text-error">*</span>
+                            {{ __('Start Time') }} <span class="text-error">*</span>
                         </label>
                         <TimePickerCarousel
                             ref="startPickerRef"
@@ -265,7 +261,7 @@ const closeModal = () => { showModal.value = false; };
 
                     <div class="space-y-1.5">
                         <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                            End Time <span class="text-error">*</span>
+                            {{ __('End Time') }} <span class="text-error">*</span>
                         </label>
                         <TimePickerCarousel
                             ref="endPickerRef"
@@ -279,20 +275,20 @@ const closeModal = () => { showModal.value = false; };
                             :class="isOvernight ? 'opacity-100' : 'opacity-0 select-none pointer-events-none'"
                         >
                             <span class="material-symbols-outlined text-sm">event_repeat</span>
-                            <span class="text-[9px] font-black uppercase tracking-widest">Ends on the next day</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('Ends on the next day') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Notes -->
                 <div class="space-y-1.5">
-                    <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Notes (Optional)</label>
+                    <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notes (Optional)') }}</label>
                     <div class="relative">
                         <textarea
                             name="description"
                             id="description"
                             rows="2"
-                            placeholder="Any specific requirements?"
+                            :placeholder="__('Any specific requirements?')"
                             v-model="selectedDescription"
                             class="w-full bg-surface-container-highest border border-white/5 rounded-lg pl-9 pr-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-white/20 resize-none"
                         ></textarea>
@@ -307,7 +303,7 @@ const closeModal = () => { showModal.value = false; };
                         class="w-full bg-primary text-on-primary py-3.5 rounded-lg font-headline text-xs font-black uppercase tracking-[0.2em] hover:brightness-110 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
                         <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add_task' }}</span>
-                        {{ isEditing ? 'Update Event' : 'Publish Event' }}
+                        {{ isEditing ? __('Update Event') : __('Publish Event') }}
                     </button>
                 </div>
             </form>

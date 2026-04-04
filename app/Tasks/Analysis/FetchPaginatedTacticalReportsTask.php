@@ -12,10 +12,16 @@ class FetchPaginatedTacticalReportsTask
     /**
      * Get paginated logs for a static group.
      */
-    public function run(int $staticId, ?string $difficulty = null): LengthAwarePaginator
+    /**
+     * @param int      $staticId
+     * @param string[] $difficulties
+     * @param string|null $dateFrom
+     * @param string|null $dateTo
+     */
+    public function run(int $staticId, array $difficulties = [], ?string $dateFrom = null, ?string $dateTo = null): LengthAwarePaginator
     {
         return TacticalReport::query()
-            ->forStatic($staticId, $difficulty)
-            ->paginate(12);
+            ->forStatic($staticId, $difficulties, $dateFrom, $dateTo)
+            ->paginate(9);
     }
 }

@@ -15,7 +15,7 @@ class ExecuteGeminiRequestTask
     public function __construct()
     {
         $this->apiKey = config('services.gemini.key');
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
     }
 
     /**
@@ -27,7 +27,7 @@ class ExecuteGeminiRequestTask
      * @return string
      * @throws \Exception
      */
-    public function run(string $promptText, int $timeout = 120, int $retries = 3): string
+    public function run(string $promptText, int $timeout = 120, int $retries = 3, bool $jsonMode = false): string
     {
         $payload = [
             'contents' => [
@@ -38,6 +38,10 @@ class ExecuteGeminiRequestTask
                 ]
             ]
         ];
+
+        if ($jsonMode) {
+            $payload['generationConfig'] = ['responseMimeType' => 'application/json'];
+        }
 
         try {
             $response = Http::retry($retries, 1000)

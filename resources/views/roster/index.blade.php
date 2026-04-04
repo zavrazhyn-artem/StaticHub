@@ -4,7 +4,7 @@
             <div class="flex items-center space-x-4">
                 <div class="w-3 h-3 bg-success-neon rounded-full shadow-[0_0_8px_#39FF14]"></div>
                 <h2 class="font-headline text-xl text-on-surface leading-tight tracking-tight uppercase">
-                    Tactical Roster: {{ $static->name }}
+                    {{ __('Tactical Roster:') }} {{ $static->name }}
                 </h2>
             </div>
         </div>

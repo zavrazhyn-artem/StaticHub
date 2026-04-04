@@ -54,14 +54,14 @@ const emit = defineEmits([
                         </div>
                         <div v-if="!isAlt && member.roster_status === 'bench'"
                              class="absolute -top-1 -right-1 bg-error-dim text-[7px] font-bold px-1 rounded uppercase border border-error">
-                            Bench
+                            {{ __('Bench') }}
                         </div>
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-1">
                             <span class="font-bold tracking-tight truncate"
                                   :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[10px]' : 'text-xs']">
-                                {{ char?.name || (isAlt ? 'Unknown' : member.name) }}
+                                {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
                             <img v-if="char?.combat_role"
                                  :src="roleIconSrc(char.combat_role)"
@@ -139,9 +139,9 @@ const emit = defineEmits([
                         <select :value="member.access_role"
                                 @change="emit('update-access-role', member, $event.target.value)"
                                 class="bg-black/40 border border-white/10 rounded text-[8px] font-bold uppercase text-white py-0 px-1 focus:border-primary transition-all w-full h-[24px]">
-                            <option value="leader">Leader</option>
-                            <option value="officer">Officer</option>
-                            <option value="member">Member</option>
+                            <option value="leader">{{ __('Leader') }}</option>
+                            <option value="officer">{{ __('Officer') }}</option>
+                            <option value="member">{{ __('Member') }}</option>
                         </select>
                     </div>
                     <div v-else class="text-center">
@@ -155,8 +155,8 @@ const emit = defineEmits([
                         <select :value="member.roster_status"
                                 @change="emit('update-roster-status', member, $event.target.value)"
                                 class="bg-black/40 border border-white/10 rounded text-[8px] font-bold uppercase text-white py-0 px-1 focus:border-primary transition-all w-full h-[24px]">
-                            <option value="core">Core</option>
-                            <option value="bench">Bench</option>
+                            <option value="core">{{ __('Core') }}</option>
+                            <option value="bench">{{ __('Bench') }}</option>
                         </select>
                     </div>
                     <div v-else class="text-center">

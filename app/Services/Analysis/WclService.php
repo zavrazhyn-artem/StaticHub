@@ -28,6 +28,11 @@ class WclService
             return ['error' => 'No raid encounters found.'];
         }
 
+        $difficultyMap = [3 => 'normal', 4 => 'heroic', 5 => 'mythic'];
+        $difficulties = array_values(array_unique(
+            array_map(fn($f) => $difficultyMap[$f['difficulty']], $raidFights)
+        ));
+
         $fightIds = array_column($raidFights, 'id');
 
         $tablesQuery = WclQueryBuilder::buildTablesQuery();
@@ -71,7 +76,8 @@ class WclService
         );
 
         return [
-            'raid_title' => $initialData['title'] ?? 'Raid Analysis',
+            'raid_title'   => $initialData['title'] ?? 'Raid Analysis',
+            'difficulties' => $difficulties,
             'players' => $cleanPlayers,
             'deaths' => $cleanDeaths,
             'interrupts' => $cleanInterrupts,

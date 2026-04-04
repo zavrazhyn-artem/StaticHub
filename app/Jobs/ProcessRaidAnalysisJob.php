@@ -15,11 +15,14 @@ class ProcessRaidAnalysisJob implements ShouldQueue
 {
     use Queueable;
 
+    public int $timeout = 300;
+
     public TacticalReport $report;
 
     public function __construct(TacticalReport $report)
     {
         $this->report = $report;
+        $this->onQueue('ai');
     }
 
     public function handle(WclService $wclService, GeminiService $geminiService, DiscordMessageService $discordService): void
@@ -34,7 +37,11 @@ class ProcessRaidAnalysisJob implements ShouldQueue
             // Передаємо ростер для жорсткої фільтрації
             $logData = $wclService->getLogSummary($this->report->wcl_report_id, $rosterNames);
 
-            // Відправляємо в Gemini
+            // Зберігаємо складності одразу — вони вже відомі з WCL
+            $difficulties = $logData['difficulties'] ?? null;
+            unset($logData['difficulties']);
+
+            // Відправляємо в Gemini (без поля difficulties — AI воно не потрібне)
             $aiJsonResponse = $geminiService->analyzeTacticalData(json_encode($logData));
 
             // Розбираємо отриманий JSON
@@ -45,17 +52,19 @@ class ProcessRaidAnalysisJob implements ShouldQueue
                 return;
             }
 
-            // 1. Зберігаємо загальний звіт (ключ 'main')
+            // 1. Зберігаємо загальний звіт та мета-поля
             $this->report->update([
-                'title' => $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
-                'ai_analysis' => $parsedData['main'] ?? 'Analysis not generated.'
+                'title'        => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
+                'difficulties' => $difficulties,
+                'ai_analysis'  => $parsedData['main'] ?? 'Analysis not generated.',
             ]);
 
-            // 2. Зберігаємо особисті звіти (всі інші ключі)
+            // 2. Зберігаємо особисті звіти (всі інші ключі, крім мета-полів)
+            $metaKeys = ['title', 'main'];
             $rosterCharacters = $static->characters;
 
             foreach ($parsedData as $playerName => $content) {
-                if ($playerName === 'main') continue; // Пропускаємо загальний звіт
+                if (in_array($playerName, $metaKeys, true)) continue;
 
                 $character = $rosterCharacters->first(function ($c) use ($playerName) {
                     return strtolower($c->name) === strtolower(trim($playerName));

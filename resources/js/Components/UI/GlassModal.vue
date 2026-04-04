@@ -18,20 +18,22 @@ const emit = defineEmits(['close']);
         leave-from-class="opacity-100 translate-y-0 sm:scale-100"
         leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     >
-        <div
-            v-if="show"
-            class="fixed inset-0 flex items-center justify-center p-4 backdrop-blur-sm"
-            :class="[zIndex, backdrop]"
-            @click="closeable && emit('close')"
-        >
+        <Teleport to="body">
             <div
-                @click.stop
-                class="w-full bg-surface-container border border-white/10 rounded-2xl shadow-2xl overflow-hidden glassmorphism flex flex-col"
-                :class="maxWidth"
+                v-if="show"
+                class="fixed inset-0 flex items-center justify-center p-4 backdrop-blur-sm"
+                :class="[zIndex, backdrop]"
+                @click="closeable && emit('close')"
             >
-                <slot />
+                <div
+                    @click.stop
+                    class="w-full bg-surface-container border border-white/10 rounded-2xl shadow-2xl overflow-hidden glassmorphism flex flex-col"
+                    :class="[maxWidth]"
+                >
+                    <slot />
+                </div>
             </div>
-        </div>
+        </Teleport>
     </Transition>
 </template>
 

@@ -1,17 +1,21 @@
 <script setup>
 import { computed } from 'vue';
 import RosterCard from './RosterCard.vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     mainRoster: { type: Object, required: true },
     absentRoster: { type: Array, default: () => [] },
 });
 
+const emit = defineEmits(['open-comment']);
+
 const roles = {
-    tank: { label: 'Tanks', icon: 'tank.svg', color: 'text-blue-400', bg: 'bg-blue-400/5', capacity: 6 },
-    heal: { label: 'Healers', icon: 'heal.svg', color: 'text-green-500', bg: 'bg-green-500/5', capacity: 12 },
-    mdps: { label: 'Melee DPS', icon: 'melee.svg', color: 'text-red-500', bg: 'bg-red-500/5', capacity: 18 },
-    rdps: { label: 'Ranged DPS', icon: 'range.svg', color: 'text-red-500', bg: 'bg-red-500/5', capacity: 18 },
+    tank: { label: __('Tanks'), icon: 'tank.svg', color: 'text-blue-400', bg: 'bg-blue-400/5', capacity: 6 },
+    heal: { label: __('Healers'), icon: 'heal.svg', color: 'text-green-500', bg: 'bg-green-500/5', capacity: 12 },
+    mdps: { label: __('Melee DPS'), icon: 'melee.svg', color: 'text-red-500', bg: 'bg-red-500/5', capacity: 18 },
+    rdps: { label: __('Ranged DPS'), icon: 'range.svg', color: 'text-red-500', bg: 'bg-red-500/5', capacity: 18 },
 };
 
 // МАГІЯ СОРТУВАННЯ ТА СІТКИ
@@ -79,7 +83,7 @@ const layoutData = computed(() => {
 
                 <div class="flex items-center gap-2">
                     <span v-if="layoutData[roleKey].absentChars.length" class="text-[9px] font-black text-error-dim uppercase tracking-widest">
-                        {{ layoutData[roleKey].absentChars.length }} Absent
+                        {{ layoutData[roleKey].absentChars.length }} {{ __('Absent') }}
                     </span>
                     <span class="bg-white/10 px-2 py-0.5 rounded text-[10px] font-black text-white">
                         {{ layoutData[roleKey].mainChars.length }} / {{ roles[roleKey].capacity }}
@@ -94,7 +98,7 @@ const layoutData = computed(() => {
                     :key="'main-' + character.id"
                     :class="layoutData[roleKey].cardClass"
                 >
-                    <RosterCard :character="character" class="h-full" />
+                    <RosterCard :character="character" class="h-full" @open-comment="emit('open-comment', $event)" />
                 </div>
 
                 <div
@@ -102,7 +106,7 @@ const layoutData = computed(() => {
                     :key="'empty-' + i"
                     class="flex items-center justify-center p-2 opacity-20 border border-dashed border-white/10 rounded min-h-[34px] col-span-1"
                 >
-                    <span class="text-[8px] uppercase font-black tracking-widest text-on-surface-variant">Empty</span>
+                    <span class="text-[8px] uppercase font-black tracking-widest text-on-surface-variant">{{ __('Empty') }}</span>
                 </div>
 
                 <div
@@ -119,6 +123,7 @@ const layoutData = computed(() => {
                         :class="character.pivot?.status === 'tentative'
                             ? 'border-yellow-500/30 bg-yellow-500/5'
                             : 'border-error-dim/30 bg-error-dim/5'"
+                        @open-comment="emit('open-comment', $event)"
                     />
                 </div>
 

@@ -1,5 +1,7 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineEmits } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
   syncData: {
@@ -17,36 +19,36 @@ const services = [
 ];
 
 const getTimeAgo = (timestamp) => {
-  if (!timestamp) return 'Never';
+  if (!timestamp) return __('Never');
   try {
     const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 'Invalid Date';
+    if (isNaN(date.getTime())) return __('Invalid Date');
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / 60000);
 
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1) return __('Just now');
+    if (diffInMinutes < 60) return `${diffInMinutes}m ${__('ago')}`;
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 24) return `${diffInHours}h ${__('ago')}`;
     return date.toLocaleDateString();
   } catch (e) {
-    return 'Error';
+    return __('Error');
   }
 };
 
 const getNextRefresh = (timestamp) => {
-  if (!timestamp) return 'Soon';
+  if (!timestamp) return __('Soon');
   try {
     const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 'Soon';
+    if (isNaN(date.getTime())) return __('Soon');
     const next = new Date(date.getTime() + 60 * 60000); // Assuming 1 hour cycle
     const now = new Date();
     const diffInMinutes = Math.floor((next - now) / 60000);
 
-    if (diffInMinutes <= 0) return 'In queue';
-    return `in ${diffInMinutes}m`;
+    if (diffInMinutes <= 0) return __('In queue');
+    return `${__('in')} ${diffInMinutes}m`;
   } catch (e) {
-    return 'Soon';
+    return __('Soon');
   }
 };
 

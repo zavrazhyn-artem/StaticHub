@@ -52,15 +52,15 @@ class CharacterController extends Controller
         $token = session('battlenet_token');
 
         if (!$token) {
-            return redirect()->route('dashboard')->with('error', 'Battle.net token not found. Please log in again.');
+            return redirect()->route('dashboard')->with('error', __('Battle.net token not found. Please log in again.'));
         }
 
         try {
             $this->characterSyncService->syncUserCharacters($token, Auth::id());
 
-            return redirect()->back()->with('success', 'Characters synced successfully!');
+            return redirect()->back()->with('success', __('Characters synced successfully!'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to sync characters: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('Failed to sync characters:') . ' ' . $e->getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ class CharacterController extends Controller
                 Auth::id()
             );
 
-            return redirect()->back()->with('success', 'Character assigned to static successfully!');
+            return redirect()->back()->with('success', __('Character assigned to static successfully!'));
         } catch (\Exception $e) {
             if ($e->getCode() === 403) {
                 abort(403);

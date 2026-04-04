@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $raid_event_id
  * @property string $wcl_report_id
  * @property string|null $title
+ * @property array|null $difficulties
  * @property string|null $ai_analysis
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -53,11 +54,12 @@ class TacticalReport extends Model
         'raid_event_id',
         'wcl_report_id',
         'title',
+        'difficulties',
         'ai_analysis',
     ];
 
     protected $casts = [
-        //
+        'difficulties' => 'array',
     ];
 
     public function staticGroup(): BelongsTo

@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 import ToastNotification from './UI/ToastNotification.vue';
 import RaidHeader from './Raid/RaidHeader.vue';
 import RsvpModal from './Raid/RsvpModal.vue';
@@ -8,6 +10,7 @@ import AbsentRoster from './Raid/AbsentRoster.vue';
 import AnalysisTab from './Raid/AnalysisTab.vue';
 import EditEventModal from './Raid/EditEventModal.vue';
 import DeleteConfirmModal from './Raid/DeleteConfirmModal.vue';
+import CommentModal from './Raid/CommentModal.vue';
 
 const props = defineProps({
     event: { type: Object, required: true },
@@ -27,6 +30,13 @@ const props = defineProps({
 const showEdit = ref(false);
 const showDeleteConfirm = ref(false);
 const showRSVPModal = ref(false);
+const showCommentModal = ref(false);
+const commentModalData = ref({ characterName: '', comment: '' });
+
+const openComment = (data) => {
+    commentModalData.value = data;
+    showCommentModal.value = true;
+};
 
 // Tab state
 const activeTab = ref('roster');
@@ -40,10 +50,10 @@ if (props.successMessage) {
 
 // Role metadata (used for joined-role label only — grid uses its own copy)
 const ROLES = {
-    tank: { label: 'Tank' },
-    heal: { label: 'Healer' },
-    mdps: { label: 'Melee' },
-    rdps: { label: 'Ranged' },
+    tank: { label: __('Tank') },
+    heal: { label: __('Healer') },
+    mdps: { label: __('Melee') },
+    rdps: { label: __('Ranged') },
 };
 
 // Computed raid status summary for the header chips
@@ -140,7 +150,7 @@ const joinedRoleLabel = computed(() => {
 <!--                :analysis-html="event.ai_analysis_html"-->
 <!--            />-->
 <!--        </div>-->
-        <RosterGrid :main-roster="mainRoster" :absent-roster="absentRoster" />
+        <RosterGrid :main-roster="mainRoster" :absent-roster="absentRoster" @open-comment="openComment" />
 
         <!-- Modals -->
         <RsvpModal
@@ -166,6 +176,13 @@ const joinedRoleLabel = computed(() => {
             :csrf-token="csrfToken"
             :destroy-route="routes.destroy"
             @close="showDeleteConfirm = false"
+        />
+
+        <CommentModal
+            :show="showCommentModal"
+            :character-name="commentModalData.characterName"
+            :comment="commentModalData.comment"
+            @close="showCommentModal = false"
         />
     </div>
 </template>

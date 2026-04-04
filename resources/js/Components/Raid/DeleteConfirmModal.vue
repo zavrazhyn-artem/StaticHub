@@ -17,8 +17,8 @@ const emit = defineEmits(['close']);
                     <span class="material-symbols-outlined text-2xl">warning</span>
                 </div>
                 <div>
-                    <h3 class="font-headline text-lg font-black uppercase tracking-tighter text-white">Delete Event?</h3>
-                    <p class="text-on-surface-variant text-xs font-medium">This action cannot be undone.</p>
+                    <h3 class="font-headline text-lg font-black uppercase tracking-tighter text-white">{{ __('Delete Event?') }}</h3>
+                    <p class="text-on-surface-variant text-xs font-medium">{{ __('This action cannot be undone.') }}</p>
                 </div>
             </div>
 
@@ -26,14 +26,14 @@ const emit = defineEmits(['close']);
                 <button
                     @click="emit('close')"
                     class="px-6 py-2.5 rounded-lg font-headline text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors"
-                >Cancel</button>
+                >{{ __('Cancel') }}</button>
                 <form :action="destroyRoute" method="POST">
                     <input type="hidden" name="_token" :value="csrfToken">
                     <input type="hidden" name="_method" value="DELETE">
                     <button
                         type="submit"
                         class="px-6 py-2.5 bg-error-dim text-white rounded-lg font-headline text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
-                    >Delete Forever</button>
+                    >{{ __('Delete Forever') }}</button>
                 </form>
             </div>
         </div>

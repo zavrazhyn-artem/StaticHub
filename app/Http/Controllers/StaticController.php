@@ -52,7 +52,7 @@ class StaticController extends Controller
     {
         $this->staticService->executeCreation($request->validated(), Auth::id());
 
-        return redirect()->route('dashboard')->with('success', 'Static created successfully!');
+        return redirect()->route('dashboard')->with('success', __('Static created successfully!'));
     }
 
     /**
@@ -62,11 +62,11 @@ class StaticController extends Controller
     {
         $token = session('battlenet_token');
         if (!$token) {
-            return back()->with('error', 'Session expired. Please log in again.');
+            return back()->with('error', __('Session expired. Please log in again.'));
         }
 
         $this->staticService->executeGuildImport($request->validated(), Auth::id());
 
-        return redirect()->route('dashboard')->with('success', 'Guild imported as Static!');
+        return redirect()->route('dashboard')->with('success', __('Guild imported as Static!'));
     }
 }

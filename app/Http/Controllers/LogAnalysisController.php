@@ -24,10 +24,10 @@ class LogAnalysisController extends Controller
         );
 
         if (!$report) {
-            return back()->with('error', 'Invalid Warcraft Logs URL. Could not extract Report ID.');
+            return back()->with('error', __('Invalid Warcraft Logs URL. Could not extract Report ID.'));
         }
 
         return redirect()->route('statics.logs.index', $static)
-            ->with('success', 'Log submitted for analysis. It will appear here shortly.');
+            ->with('success', __('Log submitted for analysis. It will appear here shortly.'));
     }
 }

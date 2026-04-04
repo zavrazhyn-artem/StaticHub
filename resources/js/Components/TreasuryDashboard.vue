@@ -2,9 +2,9 @@
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">Guild Treasury</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Guild Treasury') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">
-                    {{ staticName }} • Financial Ledger
+                    {{ staticName }} • {{ __('Financial Ledger') }}
                 </p>
             </div>
 
@@ -14,14 +14,14 @@
                     class="bg-primary text-on-primary hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">add_circle</span>
-                    Record Deposit
+                    {{ __('Record Deposit') }}
                 </button>
                 <button
                     @click="openTransactionModal('withdrawal')"
                     class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">remove_circle</span>
-                    Record Withdrawal
+                    {{ __('Record Withdrawal') }}
                 </button>
             </div>
         </div>
@@ -31,10 +31,10 @@
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span class="material-symbols-outlined text-6xl text-primary">savings</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">Total Reserves</h3>
+                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Total Reserves') }}</h3>
                 <div class="flex items-baseline gap-2">
                     <span class="text-4xl font-black text-[#FFD700] tracking-tighter font-headline">{{ formatGold(reserves) }}</span>
-                    <span class="text-xs font-bold text-[#FFD700]/60 uppercase tracking-widest">Gold</span>
+                    <span class="text-xs font-bold text-[#FFD700]/60 uppercase tracking-widest">{{ __('Gold') }}</span>
                 </div>
             </div>
 
@@ -43,33 +43,36 @@
                     <span class="material-symbols-outlined text-6xl text-primary">payments</span>
                 </div>
 
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">Required Weekly Tax</h3>
+                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Required Weekly Tax') }}</h3>
 
                 <div class="flex items-baseline gap-2">
                     <span class="text-4xl font-black text-white tracking-tighter font-headline">
-                      {{ formatGold(initialTargetTax) }}
+                      {{ formatGold(dynamicTargetTax) }}
                     </span>
-                    <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Gold / Player</span>
+                    <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
                 </div>
 
-                <div class="mt-2 text-[10px] uppercase font-bold tracking-widest transition-colors" :class="getTaxStatusClass()">
-                    {{ getTaxStatusText() }}
+                <div class="mt-2 text-[10px] uppercase font-bold tracking-widest transition-colors" :class="taxClass">
+                    {{ taxDescription }}
                 </div>
+                <button @click="showTaxModal = true" class="absolute bottom-4 right-4 z-10 text-on-surface-variant hover:text-[#FFD700] transition-colors" :title="__('Edit Weekly Tax')">
+                    <span class="material-symbols-outlined text-lg">settings</span>
+                </button>
             </div>
 
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span class="material-symbols-outlined text-6xl text-primary">analytics</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">Financial Health</h3>
+                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Financial Health') }}</h3>
                 <div class="flex items-baseline gap-2">
-          <span class="text-4xl font-black tracking-tighter font-headline" :class="getAutonomyClass()">
-            {{ getAutonomyValue() }}
+          <span class="text-4xl font-black tracking-tighter font-headline" :class="autonomyClass">
+            {{ autonomyValue }}
           </span>
-                    <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Weeks of Autonomy</span>
+                    <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weeks of Autonomy') }}</span>
                 </div>
                 <div class="mt-2 text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">
-                    Weekly Cost: <span>{{ formatGold(dynamicWeeklyCost) }}</span> G
+                    {{ __('Weekly Cost:') }} <span>{{ formatGold(dynamicWeeklyCost) }}</span> G
                 </div>
             </div>
         </div>
@@ -81,7 +84,7 @@
 
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col h-full overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high shrink-0">
-                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">Weekly Tax Tracking</h3>
+                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Tax Tracking') }}</h3>
                 </div>
                 <div class="p-4 space-y-2 overflow-y-auto flex-1 custom-scrollbar">
                     <div v-for="status in weeklyStatus" :key="status.name" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
@@ -100,15 +103,15 @@
 
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col h-full overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
-                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">Recent Transactions</h3>
+                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
                 </div>
                 <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">Date</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">Member</th>
-                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">Amount</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Amount') }}</th>
                             <th class="px-4 py-3 text-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline w-10"></th>
                         </tr>
                         </thead>
@@ -133,7 +136,7 @@
                         </tr>
                         <tr v-if="recentTransactions.length === 0">
                             <td colspan="4" class="px-6 py-12 text-center text-on-surface-variant italic text-sm">
-                                No transactions recorded yet.
+                                {{ __('No transactions recorded yet.') }}
                             </td>
                         </tr>
                         </tbody>
@@ -142,10 +145,42 @@
             </div>
         </div>
 
+        <!-- Weekly Tax Modal -->
+        <GlassModal :show="showTaxModal" @close="closeTaxModal">
+            <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
+                <h3 class="font-headline text-xs font-bold text-[#FFD700] uppercase tracking-widest">{{ __('Edit Weekly Tax') }}</h3>
+                <button @click="closeTaxModal" class="text-on-surface-variant hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label for="tax_amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weekly Tax Per Player (Gold)') }}</label>
+                    <div class="relative group">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#FFD700] transition-colors text-lg">payments</span>
+                        </span>
+                        <input type="number" id="tax_amount" v-model.number="taxInputValue" min="0"
+                               class="w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-sm font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-[#FFD700] focus:border-transparent transition-all outline-none">
+                    </div>
+                    <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Amount of gold each raider is expected to contribute weekly.') }}</p>
+                </div>
+                <div v-if="taxSaveError" class="text-[10px] text-error font-bold uppercase tracking-wider">{{ taxSaveError }}</div>
+                <div class="pt-2">
+                    <button @click="saveTax" :disabled="taxSaving"
+                            class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        <span v-if="taxSaving" class="material-symbols-outlined text-lg animate-spin">sync</span>
+                        <span v-else class="material-symbols-outlined text-lg">save</span>
+                        {{ taxSaving ? __('Saving...') : __('Save') }}
+                    </button>
+                </div>
+            </div>
+        </GlassModal>
+
         <div v-if="showEditModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm ">
             <div @click.stop class="w-full max-w-md bg-surface-container border border-white/10 rounded-xl shadow-2xl overflow-hidden glassmorphism">
                 <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
-                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">Transaction Comment</h3>
+                    <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Transaction Comment') }}</h3>
                     <button @click="showEditModal = false" class="text-on-surface-variant hover:text-white transition-colors">
                         <span class="material-symbols-outlined">close</span>
                     </button>
@@ -166,14 +201,14 @@
                     </div>
 
                     <div class="space-y-1">
-                        <label for="edit_description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Comment</label>
-                        <textarea name="description" id="edit_description" rows="4" v-model="editingTransaction.description" placeholder="Optional notes..."
+                        <label for="edit_description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Comment') }}</label>
+                        <textarea name="description" id="edit_description" rows="4" v-model="editingTransaction.description" :placeholder="__('Optional notes...')"
                                   class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none"></textarea>
                     </div>
 
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
-                            Save Comment
+                            {{ __('Save Comment') }}
                         </button>
                     </div>
                 </form>
@@ -184,7 +219,7 @@
             <div @click.stop class="w-full max-w-md bg-surface-container border border-white/10 rounded-xl shadow-2xl overflow-hidden glassmorphism">
                 <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">
-                        {{ transactionType === 'deposit' ? 'Record Deposit' : 'Record Withdrawal' }}
+                        {{ transactionType === 'deposit' ? __('Record Deposit') : __('Record Withdrawal') }}
                     </h3>
                     <button @click="showDepositModal = false" class="text-on-surface-variant hover:text-white transition-colors">
                         <span class="material-symbols-outlined">close</span>
@@ -196,29 +231,29 @@
                     <input type="hidden" name="type" :value="transactionType">
 
                     <div class="space-y-1">
-                        <label for="user_id" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Select Member</label>
+                        <label for="user_id" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Select Member') }}</label>
                         <select name="user_id" id="user_id" required
                                 class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none">
-                            <option value="">Select a member...</option>
+                            <option value="">{{ __('Select a member...') }}</option>
                             <option v-for="member in members" :key="member.id" :value="member.id">{{ member.name }}</option>
                         </select>
                     </div>
 
                     <div class="space-y-1">
-                        <label for="amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Amount (Gold)</label>
-                        <input type="number" name="amount" id="amount" required placeholder="e.g., 50000"
+                        <label for="amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Amount (Gold)') }}</label>
+                        <input type="number" name="amount" id="amount" required :placeholder="__('e.g., 50000')"
                                class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none">
                     </div>
 
                     <div class="space-y-1">
-                        <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Description</label>
-                        <textarea name="description" id="description" rows="2" placeholder="Optional notes..."
+                        <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Description') }}</label>
+                        <textarea name="description" id="description" rows="2" :placeholder="__('Optional notes...')"
                                   class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none"></textarea>
                     </div>
 
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
-                            Save Transaction
+                            {{ __('Save Transaction') }}
                         </button>
                     </div>
                 </form>
@@ -228,7 +263,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+import GlassModal from '@/Components/UI/GlassModal.vue';
+const { __ } = useTranslation();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -237,6 +275,7 @@ const props = defineProps({
     initialWeeklyCost: { type: Number, required: true },
     initialTaxStatus: { type: String, required: true },
     initialTaxDescription: { type: String, required: true },
+    initialTaxClass: { type: String, required: true },
     reserves: { type: Number, required: true },
     members: { type: Array, required: true },
     weeklyStatus: { type: Array, required: true },
@@ -251,6 +290,44 @@ const editingTransaction = ref({ id: null, description: '', member: '', date: ''
 
 const dynamicTargetTax = ref(props.initialTargetTax);
 const dynamicWeeklyCost = ref(props.initialWeeklyCost);
+const taxDescription = ref(props.initialTaxDescription);
+const taxClass = ref(props.initialTaxClass);
+
+const showTaxModal = ref(false);
+const taxInputValue = ref(Math.floor(props.initialTargetTax / 10000));
+const taxSaving = ref(false);
+const taxSaveError = ref('');
+
+const closeTaxModal = () => {
+    showTaxModal.value = false;
+    taxSaveError.value = '';
+};
+
+const saveTax = async () => {
+    taxSaving.value = true;
+    taxSaveError.value = '';
+    try {
+        const response = await fetch(`/statics/${props.staticId}/treasury-settings`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': props.csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ weekly_tax_per_player: taxInputValue.value }),
+        });
+        if (!response.ok) throw new Error('Failed');
+        const data = await response.json();
+        dynamicTargetTax.value = data.targetTax;
+        taxDescription.value = data.taxDescription;
+        taxClass.value = data.taxClass;
+        closeTaxModal();
+    } catch {
+        taxSaveError.value = __('Failed to save. Please try again.');
+    } finally {
+        taxSaving.value = false;
+    }
+};
 
 const formatGold = (copper) => {
     return Math.floor(copper / 10000).toLocaleString();
@@ -263,8 +340,11 @@ const formatDate = (dateString) => {
 };
 
 const handleConsumablesUpdated = (event) => {
-    dynamicTargetTax.value = event.detail.taxPerRaider;
-    dynamicWeeklyCost.value = event.detail.totalCost;
+    const { taxPerRaider, totalCost, taxDescription: desc, taxClass: cls } = event.detail;
+    dynamicTargetTax.value = taxPerRaider;
+    dynamicWeeklyCost.value = totalCost;
+    taxDescription.value = desc;
+    taxClass.value = cls;
 };
 
 const openTransactionModal = (type) => {
@@ -284,44 +364,15 @@ const openEditModal = (tx) => {
     showEditModal.value = true;
 };
 
-const getTaxStatusClass = () => {
-    const diff = props.initialTargetTax - dynamicTargetTax.value;
-
-    if (dynamicTargetTax.value === props.initialTargetTax) {
-        return props.initialTaxStatus === 'danger' ? 'text-error' : (props.initialTaxStatus === 'warning' ? 'text-warning' : 'text-on-surface-variant');
-    }
-
-    if (diff < 0) return 'text-error';
-    if (dynamicTargetTax.value > 0 && diff > dynamicTargetTax.value * 0.5) return 'text-warning';
-    return 'text-success-neon';
-};
-
-// Відновлюємо функцію для виведення правильного тексту
-const getTaxStatusText = () => {
-    if (dynamicTargetTax.value === props.initialTargetTax) {
-        return props.initialTaxDescription;
-    }
-
-    const diff = props.initialTargetTax - dynamicTargetTax.value;
-
-    if (diff < 0) {
-        return `⚠️ DEFICIT: TAX IS ${formatGold(Math.abs(diff))}G BELOW MARKET COST!`;
-    } else if (dynamicTargetTax.value > 0 && diff > dynamicTargetTax.value * 0.5) {
-        return `⚠️ HIGH TAX: ${formatGold(diff)}G SURPLUS PER PLAYER`;
-    } else {
-        return `HEALTHY TAX`;
-    }
-};
-
-const getAutonomyValue = () => {
+const autonomyValue = computed(() => {
     if (dynamicWeeklyCost.value <= 0) return '∞';
     return (props.reserves / dynamicWeeklyCost.value).toFixed(1);
-};
+});
 
-const getAutonomyClass = () => {
+const autonomyClass = computed(() => {
     if (dynamicWeeklyCost.value <= 0) return 'text-success-neon';
     return (props.reserves / dynamicWeeklyCost.value) > 2 ? 'text-success-neon' : 'text-error';
-};
+});
 
 onMounted(() => {
     window.addEventListener('consumables-updated', handleConsumablesUpdated);

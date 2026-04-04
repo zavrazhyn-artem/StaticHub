@@ -1,743 +1,1263 @@
 {
-    "gear": {
-        "items": {
-            "back": {
-                "gems": [],
-                "icon": "inv_leather_dragondungeon_c_01_cape",
-                "name": "Potion-Stained Cloak",
-                "bonuses": [
-                    13440,
-                    6652,
-                    13577,
-                    12699,
-                    12796
-                ],
-                "item_id": 193712,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 269,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "feet": {
-                "gems": [],
-                "icon": "inv_boot_leather_raiddemonhuntermidnight_d_01",
-                "name": "Void-Claimed Shinkickers",
-                "bonuses": [
-                    42,
-                    13577,
-                    13334,
-                    12794
-                ],
-                "enchant": 8019,
-                "item_id": 249334,
-                "enchants": [
-                    8019
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 263,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [
-                    {
-                        "id": 244009,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
-                        "name": "Enchant Boots - Farstrider's Hunt"
-                    }
-                ],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "head": {
-                "gems": [],
-                "icon": "inv_helm_leather_raiddruidmidnight_d_01",
-                "name": "Branches of the Luminous Bloom",
-                "tier": "35",
-                "bonuses": [
-                    12794,
-                    13334,
-                    6652,
-                    12667,
-                    13338,
-                    13575,
-                    3148
-                ],
-                "enchant": 7959,
-                "item_id": 250024,
-                "enchants": [
-                    7959
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 263,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [
-                    null,
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    null
-                ],
-                "enchants_detail": [
-                    {
-                        "id": 243949,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_green",
-                        "name": "Enchant Helm - Hex of Leeching"
-                    }
-                ],
-                "is_azerite_armor": true,
-                "domination_shards": []
-            },
-            "legs": {
-                "gems": [],
-                "icon": "inv_pants_leather_30a",
-                "name": "Shaggy Wyrmleather Leggings",
-                "bonuses": [
-                    12795,
-                    13440,
-                    6652,
-                    13577,
-                    12699
-                ],
-                "item_id": 49817,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "neck": {
-                "gems": [
-                    240971
-                ],
-                "icon": "inv_7_0raid_necklace_06d",
-                "name": "Necklace of the Twisting Void",
-                "bonuses": [
-                    12795,
-                    13440,
-                    6652,
-                    13668,
-                    12699
-                ],
-                "item_id": 151309,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [
-                    {
-                        "id": 240971,
-                        "icon": "inv_12_profession_jewelcrafting_epic_gem_cut_pink",
-                        "name": "23 Primary / 13 Armor"
-                    }
-                ],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "chest": {
-                "gems": [],
-                "icon": "inv_chest_leather_raiddruidmidnight_d_01",
-                "name": "Trunk of the Luminous Bloom",
-                "tier": "35",
-                "bonuses": [
-                    13336,
-                    12801,
-                    13440,
-                    6652,
-                    13575
-                ],
-                "item_id": 250027,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 272,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "hands": {
-                "gems": [],
-                "icon": "inv_glove_leather_raiddruidmidnight_d_01",
-                "name": "Arbortenders of the Luminous Bloom",
-                "tier": "35",
-                "bonuses": [
-                    6652,
-                    12795,
-                    13440,
-                    13337,
-                    13574,
-                    3151
-                ],
-                "item_id": 250025,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "shirt": {
-                "gems": [],
-                "icon": "inv_chest_chain_13",
-                "name": "Ooze-Soaked Shirt",
-                "bonuses": [],
-                "item_id": 98084,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 1,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 3,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "waist": {
-                "gems": [],
-                "icon": "inv_belt_leather_dungeonharronir_c_01",
-                "name": "Osseoclad Waistbone",
-                "bonuses": [
-                    43,
-                    12667,
-                    13577,
-                    12790
-                ],
-                "item_id": 249643,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 263,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "wrist": {
-                "gems": [],
-                "icon": "inv_leather_dragondungeon_c_01_bracer",
-                "name": "Frenzyroot Cuffs",
-                "bonuses": [
-                    12795,
-                    13440,
-                    6652,
-                    12667,
-                    13577,
-                    12699
-                ],
-                "item_id": 193714,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "finger1": {
-                "gems": [
-                    240916
-                ],
-                "icon": "inv_12_trinket_devouring_host_currency1_silver",
-                "name": "Omission of Light",
-                "bonuses": [
-                    12795,
-                    13440,
-                    6652,
-                    13668,
-                    12699
-                ],
-                "enchant": 8027,
-                "item_id": 251093,
-                "enchants": [
-                    8027
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [
-                    {
-                        "id": 240916,
-                        "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_nature_blue",
-                        "name": "16 Vers & 7 Haste"
-                    }
-                ],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [
-                    {
-                        "id": 244017,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
-                        "name": "Enchant Ring - Silvermoon's Tenacity"
-                    }
-                ],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "finger2": {
-                "gems": [
-                    240916
-                ],
-                "icon": "inv_70_dungeon_ring2b",
-                "name": "Band of the Triumvirate",
-                "bonuses": [
-                    13440,
-                    6652,
-                    13668,
-                    12699,
-                    12798
-                ],
-                "enchant": 8027,
-                "item_id": 151311,
-                "enchants": [
-                    8027
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 276,
-                "gems_detail": [
-                    {
-                        "id": 240916,
-                        "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_nature_blue",
-                        "name": "16 Vers & 7 Haste"
-                    }
-                ],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [
-                    {
-                        "id": 244017,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
-                        "name": "Enchant Ring - Silvermoon's Tenacity"
-                    }
-                ],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "mainhand": {
-                "gems": [],
-                "icon": "mace_2h_blacksmithing_d_04_icon",
-                "name": "Blood Knight's Mercy",
-                "bonuses": [
-                    12214,
-                    12497,
-                    12066,
-                    13640,
-                    8960,
-                    8792,
-                    13622,
-                    13667
-                ],
-                "enchant": 8009,
-                "item_id": 237848,
-                "enchants": [
-                    8009,
-                    8051
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 285,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [
-                    {
-                        "id": 243999,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_purple",
-                        "name": "Enchant Weapon - Worldsoul Aegis"
-                    }
-                ],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "shoulder": {
-                "gems": [],
-                "icon": "inv_shoulder_leather_raiddruidmidnight_d_01",
-                "name": "Seedpods of the Luminous Bloom",
-                "tier": "35",
-                "bonuses": [
-                    6652,
-                    12795,
-                    13440,
-                    13340,
-                    13574,
-                    3151
-                ],
-                "enchant": 8031,
-                "item_id": 250022,
-                "enchants": [
-                    8031
-                ],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 266,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    {
-                        "id": 580,
-                        "tier": 999,
-                        "spell": {
-                            "id": 0,
-                            "icon": "inv_misc_questionmark",
-                            "name": "Unknown",
-                            "rank": null,
-                            "school": 0
-                        }
-                    },
-                    null
-                ],
-                "enchants_detail": [
-                    {
-                        "id": 244021,
-                        "icon": "inv_12_profession_enchanting_enchantedvellum_blue",
-                        "name": "Enchant Shoulders - Silvermoon's Mending"
-                    }
-                ],
-                "is_azerite_armor": true,
-                "domination_shards": []
-            },
-            "trinket1": {
-                "gems": [],
-                "icon": "inv_archaeology_70_highborne_vialofpoison",
-                "name": "Ampoule of Pure Void",
-                "bonuses": [
-                    13440,
-                    6652,
-                    12699,
-                    12798
-                ],
-                "item_id": 151312,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 276,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
-            },
-            "trinket2": {
-                "gems": [],
-                "icon": "inv_10_jewelcrafting3_soulcage_air",
-                "name": "Heart of Wind",
-                "bonuses": [
-                    13440,
-                    6652,
-                    12699,
-                    12798
-                ],
-                "item_id": 250256,
-                "enchants": [],
-                "corruption": {
-                    "added": 0,
-                    "total": 0,
-                    "resisted": 0
-                },
-                "item_level": 276,
-                "gems_detail": [],
-                "is_legendary": false,
-                "item_quality": 4,
-                "azerite_powers": [],
-                "enchants_detail": [],
-                "is_azerite_armor": false,
-                "domination_shards": []
+    "raid_title": "VS \/ DR \/ MQD",
+    "players": [
+        {
+            "id": 121,
+            "name": "Zavrikk",
+            "subType": "Druid"
+        }
+    ],
+    "deaths": [
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 3,
+            "killing_blow": "Lingering Miasma"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 3,
+            "killing_blow": "Alndust Upheaval"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 3,
+            "killing_blow": "Lingering Miasma"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 6,
+            "killing_blow": "Dark Upheaval"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 6,
+            "killing_blow": "Dark Upheaval"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "S\u00e1dn\u00e8ss",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 6,
+            "killing_blow": "Void Fall"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Abskurial",
+            "fight_id": 6,
+            "killing_blow": "Umbral Collapse"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 6,
+            "killing_blow": "Dark Upheaval"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 6,
+            "killing_blow": "Void Rupture"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 6,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 6,
+            "killing_blow": "Dark Upheaval"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 13,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 13,
+            "killing_blow": "Shadowclaw Slam"
+        },
+        {
+            "player": "Abskurial",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 13,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 13,
+            "killing_blow": "Primordial Power"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d",
+            "fight_id": 13,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "M\u00f8rw",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Gameofbugs",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 13,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "S\u00e1dn\u00e8ss",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 13,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Evodrowa",
+            "fight_id": 13,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 13,
+            "killing_blow": "Dark Energy"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 13,
+            "killing_blow": "Blisterburst"
+        },
+        {
+            "player": "Lumiral",
+            "fight_id": 13,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 14,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Abskurial",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 14,
+            "killing_blow": "Void Breath"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 24,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 24,
+            "killing_blow": "Void Howl"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 24,
+            "killing_blow": "Void Howl"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 24,
+            "killing_blow": "Void Howl"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 24,
+            "killing_blow": "Nullzone Implosion"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 24,
+            "killing_blow": "Nullzone Implosion"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 24,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 24,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 24,
+            "killing_blow": "Voidbolt"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 24,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Gameofbugs",
+            "fight_id": 24,
+            "killing_blow": "Gloomfield"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "M\u00f8rw",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 24,
+            "killing_blow": "Gloomfield"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 24,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 24,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 24,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 24,
+            "killing_blow": "Gloomfield"
+        },
+        {
+            "player": "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d",
+            "fight_id": 24,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 24,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "S\u00e1dn\u00e8ss",
+            "fight_id": 24,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Lumiral",
+            "fight_id": 24,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Evodrowa",
+            "fight_id": 24,
+            "killing_blow": "Midnight Flames"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 25,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Gameofbugs",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 25,
+            "killing_blow": "Gloom"
+        },
+        {
+            "player": "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d",
+            "fight_id": 25,
+            "killing_blow": "Gloom"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 25,
+            "killing_blow": "Gloom"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 25,
+            "killing_blow": "Gloom"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 25,
+            "killing_blow": "Gloom"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 25,
+            "killing_blow": "Gloomtouched"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 25,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "M\u00f8rw",
+            "fight_id": 25,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 25,
+            "killing_blow": "Rakfang"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 25,
+            "killing_blow": "Gloomfield"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 25,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 25,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 25,
+            "killing_blow": "Grappling Maw"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 25,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 25,
+            "killing_blow": "Midnight Manifestation"
+        },
+        {
+            "player": "Evodrowa",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Lumiral",
+            "fight_id": 25,
+            "killing_blow": "Dread Breath"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 25,
+            "killing_blow": "Gloomfield"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 25,
+            "killing_blow": "Void Howl"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 26,
+            "killing_blow": "Nullzone Implosion"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 30,
+            "killing_blow": "Shield of the Righteous"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 30,
+            "killing_blow": "Final Verdict"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 30,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "M\u00f8rw",
+            "fight_id": 30,
+            "killing_blow": "Final Verdict"
+        },
+        {
+            "player": "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d",
+            "fight_id": 30,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 30,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Abskurial",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 30,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 30,
+            "killing_blow": "Avenger's Shield"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 30,
+            "killing_blow": "Divine Consecration"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Gameofbugs",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "S\u00e1dn\u00e8ss",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Lumiral",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Evodrowa",
+            "fight_id": 30,
+            "killing_blow": "Devoured"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 30,
+            "killing_blow": "Light Infusion"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 30,
+            "killing_blow": "Divine Consecration"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 30,
+            "killing_blow": "Melee"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 31,
+            "killing_blow": "Avenger's Shield"
+        },
+        {
+            "player": "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d",
+            "fight_id": 33,
+            "killing_blow": "Bursting Emptiness"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 33,
+            "killing_blow": "Echoing Darkness"
+        },
+        {
+            "player": "Pristula",
+            "fight_id": 33,
+            "killing_blow": "Silverstrike Barrage"
+        },
+        {
+            "player": "Boomiechu",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Ahrni",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Peresmishnyk",
+            "fight_id": 33,
+            "killing_blow": "Cosmic Barrier"
+        },
+        {
+            "player": "Ziraelt",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 33,
+            "killing_blow": "Cosmic Barrier"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 33,
+            "killing_blow": "Void Expulsion"
+        },
+        {
+            "player": "S\u00e1dn\u00e8ss",
+            "fight_id": 33,
+            "killing_blow": "Void Barrage"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 33,
+            "killing_blow": "Void Barrage"
+        },
+        {
+            "player": "Abskurial",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Chong",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d",
+            "fight_id": 33,
+            "killing_blow": "Void Barrage"
+        },
+        {
+            "player": "Gameofbugs",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 33,
+            "killing_blow": "Void Remnants"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Lamiane",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Literium",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "M\u00f8rw",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Evodrowa",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Seizorq",
+            "fight_id": 33,
+            "killing_blow": "Rift Slash"
+        },
+        {
+            "player": "Doublefresh",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "\u0414\u0435\u0437\u043c\u0435\u0440\u0442",
+            "fight_id": 33,
+            "killing_blow": "Voidstalker Sting"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 33,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Lumiral",
+            "fight_id": 33,
+            "killing_blow": "Void Barrage"
+        },
+        {
+            "player": "Killadk",
+            "fight_id": 34,
+            "killing_blow": "Echoing Darkness"
+        },
+        {
+            "player": "Hex\u00ebd",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Norsemillian",
+            "fight_id": 34,
+            "killing_blow": "Bursting Emptiness"
+        },
+        {
+            "player": "Oaran",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Zav\u00f6d",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Zavrikk",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Alcomagic",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Yazhneloh",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "Harlem",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        },
+        {
+            "player": "\u0411\u043e\u0434\u044f",
+            "fight_id": 34,
+            "killing_blow": "Unknown Ability"
+        }
+    ],
+    "interrupts": [
+        {
+            "enemy_ability": "Corrupting Essence",
+            "total_interrupted": 1,
+            "total_missed": 125,
+            "interrupted_by": {
+                "Peresmishnyk": 1
             }
         },
-        "source": "db",
-        "corruption": {
-            "added": 0,
-            "total": 0,
-            "spells": [],
-            "resisted": 0,
-            "cloakRank": 0
-        },
-        "created_at": "2026-04-01T08:43:01.000Z",
-        "updated_at": "2026-04-01T08:43:01.000Z",
-        "artifact_traits": 0,
-        "item_level_total": 0,
-        "item_level_equipped": 270.25
-    },
-    "name": "Zavrikk",
-    "race": "Troll",
-    "class": "Druid",
-    "realm": "Tarren Mill",
-    "gender": "male",
-    "region": "eu",
-    "faction": "horde",
-    "profile_url": "https://raider.io/characters/eu/tarren-mill/Zavrikk",
-    "thumbnail_url": "https://render.worldofwarcraft.com/eu/character/tarren-mill/123/177564539-avatar.jpg?alt=/wow/static/images/2d/avatar/8-0.jpg",
-    "profile_banner": "hordebanner1",
-    "last_crawled_at": "2026-04-01T05:34:57.000Z",
-    "active_spec_name": "Guardian",
-    "active_spec_role": "TANK",
-    "raid_progression": {
-        "tier-mn-1": {
-            "summary": "6/9 H",
-            "expansion_id": 11,
-            "total_bosses": 9,
-            "heroic_bosses_killed": 6,
-            "mythic_bosses_killed": 0,
-            "normal_bosses_killed": 7
-        }
-    },
-    "achievement_points": 36580,
-    "mythic_plus_scores_by_season": [
         {
-            "scores": {
-                "all": 2632.1,
-                "dps": 0,
-                "tank": 2632.1,
-                "healer": 0,
-                "spec_0": 0,
-                "spec_1": 0,
-                "spec_2": 2632.1,
-                "spec_3": 0
-            },
-            "season": "season-mn-1",
-            "segments": {
-                "all": {
-                    "color": "#884ee9",
-                    "score": 2632.1
-                },
-                "dps": {
-                    "color": "#ffffff",
-                    "score": 0
-                },
-                "tank": {
-                    "color": "#884ee9",
-                    "score": 2632.1
-                },
-                "healer": {
-                    "color": "#ffffff",
-                    "score": 0
-                },
-                "spec_0": {
-                    "color": "#ffffff",
-                    "score": 0
-                },
-                "spec_1": {
-                    "color": "#ffffff",
-                    "score": 0
-                },
-                "spec_2": {
-                    "color": "#884ee9",
-                    "score": 2632.1
-                },
-                "spec_3": {
-                    "color": "#ffffff",
-                    "score": 0
-                }
+            "enemy_ability": "Voidbolt",
+            "total_interrupted": 47,
+            "total_missed": 207,
+            "interrupted_by": {
+                "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d": 8,
+                "Boomiechu": 5,
+                "Norsemillian": 1,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 3,
+                "Gameofbugs": 8,
+                "Chong": 18,
+                "Zavrikk": 3,
+                "\u0411\u043e\u0434\u044f": 1
+            }
+        },
+        {
+            "enemy_ability": "Pitch Bulwark",
+            "total_interrupted": 4,
+            "total_missed": 0,
+            "interrupted_by": {
+                "Abskurial": 1,
+                "Zavrikk": 1,
+                "\u0414\u0435\u0437\u043c\u0435\u0440\u0442": 1,
+                "Oaran": 1
+            }
+        },
+        {
+            "enemy_ability": "Blinding Light",
+            "total_interrupted": 6,
+            "total_missed": 0,
+            "interrupted_by": {
+                "Lamiane": 2,
+                "Literium": 1,
+                "Alcomagic": 1,
+                "Oaran": 1,
+                "Doublefresh": 1
+            }
+        },
+        {
+            "enemy_ability": "Essence Bolt",
+            "total_interrupted": 6,
+            "total_missed": 0,
+            "interrupted_by": {
+                "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d": 1,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 1,
+                "Killadk": 1,
+                "Zavrikk": 3
+            }
+        },
+        {
+            "enemy_ability": "Void Barrage",
+            "total_interrupted": 22,
+            "total_missed": 81,
+            "interrupted_by": {
+                "Norsemillian": 4,
+                "S\u00e1dn\u00e8ss": 4,
+                "Killadk": 1,
+                "Peresmishnyk": 1,
+                "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d": 1,
+                "Boomiechu": 1,
+                "Yazhneloh": 1,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 2,
+                "Gameofbugs": 1,
+                "Hex\u00ebd": 1,
+                "Zavrikk": 2,
+                "\u0414\u0435\u0437\u043c\u0435\u0440\u0442": 1,
+                "M\u00f8rw": 2
+            }
+        },
+        {
+            "enemy_ability": "Shadow Fracture",
+            "total_interrupted": 18,
+            "total_missed": 1,
+            "interrupted_by": {
+                "Boomiechu": 2,
+                "Lamiane": 2,
+                "Yazhneloh": 1,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 1,
+                "Hex\u00ebd": 3,
+                "Zav\u00f6d": 1,
+                "Zavrikk": 2,
+                "\u0411\u043e\u0434\u044f": 1,
+                "Oaran": 4,
+                "M\u00f8rw": 1
+            }
+        },
+        {
+            "enemy_ability": "Fearsome Cry",
+            "total_interrupted": 4,
+            "total_missed": 0,
+            "interrupted_by": {
+                "Norsemillian": 2,
+                "Chong": 1,
+                "Zavrikk": 1
             }
         }
     ],
-    "mythic_plus_weekly_highest_level_runs": [
+    "major_damage_taken": [
         {
-            "url": "https://raider.io/mythic-plus-runs/season-mn-1/5169116-10-seat-of-the-triumvirate",
-            "role": "tank",
-            "spec": {
-                "id": 104,
-                "name": "Guardian",
-                "role": "tank",
-                "slug": "guardian",
-                "patch": "1.0.0",
-                "ordinal": 2,
-                "class_id": 11,
-                "is_melee": true
-            },
-            "score": 332,
-            "affixes": [
-                {
-                    "id": 158,
-                    "icon": "inv_cosmicvoid_buff",
-                    "name": "Xal'atath's Bargain: Voidbound",
-                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/inv_cosmicvoid_buff.jpg",
-                    "description": "While in combat, Xal'atath summons a Voidbound Emissary that empowers nearby enemies.",
-                    "wowhead_url": "https://wowhead.com/affix=158"
-                },
-                {
-                    "id": 9,
-                    "icon": "achievement_boss_archaedas",
-                    "name": "Tyrannical",
-                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_archaedas.jpg",
-                    "description": "Bosses have 25% more health. Bosses and their minions inflict up to 15% increased damage.",
-                    "wowhead_url": "https://wowhead.com/affix=9"
-                },
-                {
-                    "id": 10,
-                    "icon": "ability_toughness",
-                    "name": "Fortified",
-                    "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/ability_toughness.jpg",
-                    "description": "Non-boss enemies have 20% more health and inflict up to 20% increased damage.",
-                    "wowhead_url": "https://wowhead.com/affix=10"
-                }
-            ],
-            "dungeon": "Seat of the Triumvirate",
-            "zone_id": 8910,
-            "icon_url": "https://cdn.raiderio.net/images/wow/icons/large/achievement_boss_triumvirate_darknaaru.jpg",
-            "short_name": "SEAT",
-            "par_time_ms": 2040999,
-            "completed_at": "2026-04-01T09:05:10.000Z",
-            "mythic_level": 10,
-            "clear_time_ms": 1387364,
-            "keystone_run_id": 5169116,
-            "zone_expansion_id": 6,
-            "background_image_url": "https://cdn.raiderio.net/images/dungeons/expansion6/base/seat-of-the-triumvirate.jpg",
-            "map_challenge_mode_id": 239,
-            "num_keystone_upgrades": 2
+            "ability": "Echoing Darkness",
+            "total_damage_to_raid": 223299429,
+            "biggest_victims": {
+                "Peresmishnyk": 8533736,
+                "S\u00e1dn\u00e8ss": 8335312,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 8293277
+            }
+        },
+        {
+            "ability": "Dark Upheaval",
+            "total_damage_to_raid": 152536955,
+            "biggest_victims": {
+                "Peresmishnyk": 6251904,
+                "Gameofbugs": 6059800,
+                "\u0410\u0440\u0442\u0435\u043c\u0438\u043e\u043d": 6042359
+            }
+        },
+        {
+            "ability": "Midnight Manifestation",
+            "total_damage_to_raid": 96312491,
+            "biggest_victims": {
+                "Killadk": 5332538,
+                "Hex\u00ebd": 4822392,
+                "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d": 4808837
+            }
+        },
+        {
+            "ability": "Caustic Phlegm",
+            "total_damage_to_raid": 85828969,
+            "biggest_victims": {
+                "\u041b\u0435\u0433\u043e\u0431\u044d\u0442\u043c\u0435\u043d": 3732637,
+                "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d": 3706700,
+                "Gameofbugs": 3599540
+            }
+        },
+        {
+            "ability": "Voidstalker Sting",
+            "total_damage_to_raid": 78879036,
+            "biggest_victims": {
+                "\u0414\u0435\u0437\u043c\u0435\u0440\u0442": 5145535,
+                "Ziraelt": 4903044,
+                "Peresmishnyk": 4763767
+            }
+        },
+        {
+            "ability": "Destabilizing Strikes",
+            "total_damage_to_raid": 10809449,
+            "biggest_victims": {
+                "Chong": 6138169,
+                "Zavrikk": 4671280
+            }
+        },
+        {
+            "ability": "Blessing of Dawn",
+            "total_damage_to_raid": 7568670,
+            "biggest_victims": {
+                "Zav\u00f6d": 7568670
+            }
+        },
+        {
+            "ability": "Umbral Collapse",
+            "total_damage_to_raid": 4569473,
+            "biggest_victims": {
+                "Yazhneloh": 2366773,
+                "Literium": 2202700
+            }
+        },
+        {
+            "ability": "Light Infusion",
+            "total_damage_to_raid": 4525780,
+            "biggest_victims": {
+                "Ahrni": 2346571,
+                "\u0411\u0440\u0430\u043d\u0434\u0440\u0435\u0439\u043d": 2179209
+            }
+        },
+        {
+            "ability": "Exorcism",
+            "total_damage_to_raid": 3563428,
+            "biggest_victims": {
+                "Zavrikk": 3563428
+            }
+        },
+        {
+            "ability": "Void Breath",
+            "total_damage_to_raid": 3111514,
+            "biggest_victims": {
+                "Lumiral": 3111514
+            }
+        },
+        {
+            "ability": "Avenger's Shield",
+            "total_damage_to_raid": 2837226,
+            "biggest_victims": {
+                "Oaran": 2837226
+            }
+        },
+        {
+            "ability": "Void Expulsion",
+            "total_damage_to_raid": 2596054,
+            "biggest_victims": {
+                "Abskurial": 2596054
+            }
         }
-    ]
+    ],
+    "casts_summary": {
+        "Zavrikk": {
+            "Berserking": 7,
+            "Mark of the Wild": 3,
+            "Stampeding Roar": 19,
+            "Barkskin": 57,
+            "Raze": 176,
+            "Rake": 1,
+            "Frenzied Regeneration": 66,
+            "Shred": 1,
+            "Swipe": 66,
+            "Cat Form": 2,
+            "Ravage": 223,
+            "Ferocious Bite": 2,
+            "Thrash": 440,
+            "Wild Guardian": 23,
+            "Rebirth": 6,
+            "Growl": 64,
+            "Survival Instincts": 17,
+            "Incarnation: Guardian of Ursoc": 23,
+            "Mangle": 876,
+            "Bear Form": 3,
+            "Moonfire": 316,
+            "Skull Bash": 19,
+            "Ironfur": 145,
+            "Lunar Beam": 38,
+            "Wild Charge": 28
+        }
+    },
+    "consumables_used": [],
+    "performance_metrics": {
+        "Zavrikk": {
+            "dps": 44481,
+            "dps_rank": 1,
+            "percentile": null,
+            "hps": 36964,
+            "hps_rank": 1
+        }
+    }
 }

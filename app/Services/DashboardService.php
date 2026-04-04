@@ -46,7 +46,7 @@ class DashboardService
         $weeklyStatus = $treasuryData['weeklyStatus'];
         $taxStatus = $treasuryData['taxStatus'];
         $taxDescription = $treasuryData['taxDescription'];
-        $taxIcon = $treasuryData['taxIcon'];
+        $taxClass = $treasuryData['taxClass'];
 
         // 6. Sync Data
         $syncData = [
@@ -68,7 +68,7 @@ class DashboardService
                 'weeklyStatus',
                 'taxStatus',
                 'taxDescription',
-                'taxIcon',
+                'taxClass',
                 'syncData'
             ),
             $consumables

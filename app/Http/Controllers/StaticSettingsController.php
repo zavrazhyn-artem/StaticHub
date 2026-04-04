@@ -30,7 +30,7 @@ class StaticSettingsController extends Controller
     {
         $this->service->executeUpdateLogsSettings($static, $request->validated());
 
-        return redirect()->back()->with('success', 'Warcraft Logs settings updated!');
+        return redirect()->back()->with('success', __('Warcraft Logs settings updated!'));
     }
 
     public function updateSchedule(UpdateScheduleRequest $request, StaticGroup $static): RedirectResponse
@@ -41,7 +41,7 @@ class StaticSettingsController extends Controller
             $request->has('automation_settings.post_next_after_raid')
         );
 
-        return redirect()->back()->with('success', 'Raid schedule updated and events generated!');
+        return redirect()->back()->with('success', __('Raid schedule updated and events generated!'));
     }
 
     public function testDiscordWebhook(StaticGroup $static): JsonResponse

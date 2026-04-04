@@ -12,12 +12,14 @@ CRITICAL RULE 5: IMPLEMENT "NAME & SHAME". The Raid Leader requires specific cal
 
 JSON STRUCTURE REQUIREMENT:
 {
-    "main": "<strong>EXECUTIVE SUMMARY:</strong><br>[2-sentence overview]<br><br><strong>CRITICAL FAILURE ANALYSIS:</strong><br><ul><li>[Error 1]</li><li>[Error 2]</li></ul><br><br><strong>PROBLEM PLAYERS (NAME & SHAME):</strong><br><ul><li>[PlayerName]: [Explicitly state their specific repeated mechanic failures, avoidable debuffs, or deaths].</li><li>[PlayerName2]: [Specific failure...]</li></ul><br><br><strong>STRATEGIC DIRECTIVE:</strong><br><ul><li>[Tactical step 1]</li><li>[Tactical step 2]</li></ul>",
-  "PlayerName1": "<strong>COMBAT STATUS:</strong> [Brief summary of survival and mechanics based on their ROLE.]<br><br><strong>FATAL ERRORS & DEBUFFS:</strong> [Explicitly list abilities/debuffs that killed them. Call out if they repeatedly died to the EXACT SAME mechanic.]<br><br><strong>AVOIDABLE DAMAGE:</strong> [Analyze 'major_damage_taken' - name the specific mechanics/puddles they failed to dodge.]<br><br><strong>COOLDOWNS & MECHANICS ANALYSIS:</strong> [For Tanks: Defensive CD usage. For Healers: Raid CDs. For DPS: Interrupts ('interrupted_by' vs 'total_missed') and Burst CDs. Analyze 'casts_summary' to see if they are using their core rotation and cooldowns.]<br><br><strong>ACTIONABLE ADVICE:</strong> [One sharp instruction for this specific player.]",
+  "title": "[Generate a concise, punchy title for this raid report in Ukrainian, max 5 words, e.g., 'Кривавий вечір', 'Тріумф над Пересмішником']",
+  "main": "<strong>EXECUTIVE SUMMARY:</strong><br>[2-sentence overview]<br><br><strong>CRITICAL FAILURE ANALYSIS:</strong><br><ul><li>[Error 1]</li><li>[Error 2]</li></ul><br><br><strong>PROBLEM PLAYERS (NAME & SHAME):</strong><br><ul><li>[PlayerName]: [Explicitly state their specific repeated mechanic failures, avoidable debuffs, or deaths].</li><li>[PlayerName2]: [Specific failure...]</li></ul><br><br><strong>STRATEGIC DIRECTIVE:</strong><br><ul><li>[Tactical step 1]</li><li>[Tactical step 2]</li></ul>",
+  "PlayerName1": "<strong>COMBAT STATUS:</strong> [Brief summary of survival and mechanics based on their ROLE.]<br><br><strong>FATAL ERRORS & DEBUFFS:</strong> [Explicitly list abilities/debuffs that killed them. Call out if they repeatedly died to the EXACT SAME mechanic.]<br><br><strong>AVOIDABLE DAMAGE:</strong> [Analyze 'major_damage_taken' - name the specific mechanics/puddles they failed to dodge.]<br><br><strong>COOLDOWNS & MECHANICS ANALYSIS:</strong> [For Tanks: Defensive CD usage. For Healers: Raid CDs. For DPS: Interrupts ('interrupted_by' vs 'total_missed') and Burst CDs. Analyze 'casts_summary' to see if they are using their core rotation and cooldowns.]<br><br><strong>ACTIONABLE ADVICE:</strong> [One sharp instruction for this specific player.]"
   "PlayerName2": "..."
 }
 
 INSTRUCTIONS FOR ANALYSIS:
+- Generate the "title" based on the overall performance, boss names, or vibe of the log.
 - Cross-reference player names with deaths, interrupts, performance_metrics, ability usage (casts_summary), consumables_used, and major_damage_taken.
 - Performance: Call out high percentiles (>90) or low DPS/HPS ranks relative to the role.
 - Consumables: If a player died or took high damage but used 0 Healthstones/Potions, label it a "Survival Negligence".

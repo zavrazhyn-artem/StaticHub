@@ -16,6 +16,35 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-background text-on-background min-h-screen arcane-bg antialiased flex flex-col items-center justify-center p-6 overflow-hidden">
+        <!-- Language Selector -->
+        @php
+            $localeMap = [
+                'en' => ['country' => 'GB', 'label' => 'English'],
+                'uk' => ['country' => 'UA', 'label' => 'Українська'],
+            ];
+            $availableLocales = collect(glob(base_path('lang/*.json')))
+                ->map(fn($f) => pathinfo($f, PATHINFO_FILENAME))
+                ->filter(fn($l) => isset($localeMap[$l]));
+            $currentLocale = app()->getLocale();
+        @endphp
+        <div class="fixed top-6 right-6 z-50 group">
+            <button class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white">
+                <img src="/images/flags/GB.svg" alt="EN" class="w-5 h-auto rounded-sm">
+                <span class="material-symbols-outlined text-sm">expand_more</span>
+            </button>
+            <div class="absolute right-0 mt-2 w-36 py-1 bg-surface-container-highest border border-white/10 shadow-2xl rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <form action="{{ route('language.switch') }}" method="POST">
+                    @csrf
+                    @foreach($availableLocales as $locale)
+                        @php $info = $localeMap[$locale]; @endphp
+                        <button name="locale" value="{{ $locale }}" class="flex items-center gap-3 w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
+                            <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}" class="w-5 h-auto rounded-sm">
+                            {{ $info['label'] }}
+                        </button>
+                    @endforeach
+                </form>
+            </div>
+        </div>
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]"></div>
@@ -30,7 +59,7 @@
                 <div class="mb-8 flex items-center justify-center gap-6 drop-shadow-[0_0_40px_rgba(58,223,250,0.3)] transition-transform hover:scale-105 duration-500 mx-auto">
                     <img src="/images/logo.svg" alt="BlastR Logo" class="w-32 h-32 object-contain" />
                     <div class="text-6xl md:text-8xl font-black uppercase tracking-tighter italic leading-none pr-4">
-                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R</span>
+                        <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-xs opacity-0 ml-2">r<span class="text-[10px] opacity-0 ml-1">r</span></span></span>
                     </div>
                 </div>
                 <p class="mt-4 font-slogan text-lg md:text-xl font-bold tracking-[0.4em] uppercase text-on-surface drop-shadow-[0_0_8px_rgba(58,223,250,0.4)]">
@@ -42,7 +71,7 @@
                 @auth
                     <a href="{{ route('dashboard') }}" class="group relative px-12 py-4 bg-primary text-on-primary font-headline font-black text-sm uppercase tracking-[0.2em] rounded-sm transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.1)]">
                         <span class="relative z-10 flex items-center gap-3">
-                            Enter Command Center
+                            {{ __('Enter Command Center') }}
                             <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
                         </span>
                     </a>
@@ -50,7 +79,7 @@
                     <a href="{{ url('/auth/battlenet/redirect') }}" class="group relative px-12 py-4 bg-[#00aeff] text-white font-headline font-black text-sm uppercase tracking-[0.2em] rounded-sm transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(0,174,255,0.3)]">
                         <span class="relative z-10 flex items-center gap-3">
                             <span class="material-symbols-outlined text-xl">login</span>
-                            Authorize Battle.net
+                            {{ __('Authorize Battle.net') }}
                         </span>
                     </a>
                 @endauth

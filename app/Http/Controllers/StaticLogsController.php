@@ -16,9 +16,23 @@ class StaticLogsController extends Controller
 
     public function index(StaticGroup $static, Request $request): View
     {
-        $logs = $this->logService->getPaginatedLogs($static, $request->input('difficulty'));
+        $fromDate   = $request->input('from_date');
+        $toDate     = $request->input('to_date');
+        $rawDiffs   = $request->input('difficulties'); // e.g. "Mythic,Heroic"
 
-        return view('statics.logs.index', compact('static', 'logs'));
+        $difficulties = $rawDiffs
+            ? array_map('strtolower', array_filter(array_map('trim', explode(',', $rawDiffs))))
+            : [];
+
+        $logs = $this->logService->getPaginatedLogs($static, $difficulties, $fromDate, $toDate);
+
+        return view('statics.logs.index', [
+            'static'              => $static,
+            'logs'                => $logs,
+            'currentFromDate'     => $fromDate,
+            'currentToDate'       => $toDate,
+            'currentDifficulties' => $rawDiffs ?? '',
+        ]);
     }
 
     public function show(StaticGroup $static, TacticalReport $report): View

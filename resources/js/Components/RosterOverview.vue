@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 import TabSummary from './TabSummary.vue';
 import TabGear from './TabGear.vue';
 import TabVault from './TabVault.vue';
@@ -13,10 +15,10 @@ if (charactersList.value.length > 0) {
 }
 
 const tabs = [
-  { id: 'summary', name: 'Summary', component: TabSummary },
-  { id: 'vault', name: 'Vault', component: TabVault },
-  { id: 'raids', name: 'Raids', component: TabRaids },
-  { id: 'gear', name: 'Gear', component: TabGear },
+  { id: 'summary', name: __('Summary'), component: TabSummary },
+  { id: 'vault', name: __('Vault'), component: TabVault },
+  { id: 'raids', name: __('Raids'), component: TabRaids },
+  { id: 'gear', name: __('Gear'), component: TabGear },
 ];
 
 const activeTab = ref('summary');

@@ -35,7 +35,7 @@ class RaidEventController extends Controller
         $success = $this->raidEventService->executeRsvp($event, Auth::user(), $request->validated());
 
         if (!$success) {
-            return back()->withErrors(['character_id' => 'Invalid character selected.']);
+            return back()->withErrors(['character_id' => __('Invalid character selected.')]);
         }
 
         // If the event is already posted to Discord, update the message
@@ -43,7 +43,7 @@ class RaidEventController extends Controller
             $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
         }
 
-        return back()->with('success', 'Attendance status updated!');
+        return back()->with('success', __('Attendance status updated!'));
     }
 
     /**
@@ -53,15 +53,15 @@ class RaidEventController extends Controller
     {
         // Only allow static owners to announce
         if (Auth::user()->id !== $event->static->owner_id) {
-            return back()->with('error', 'Only the static owner can post to Discord.');
+            return back()->with('error', __('Only the static owner can post to Discord.'));
         }
 
         $success = $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
 
         if ($success) {
-            return back()->with('success', 'Raid event posted to Discord!');
+            return back()->with('success', __('Raid event posted to Discord!'));
         }
 
-        return back()->with('error', 'Failed to post to Discord. Check if the channel ID is configured in settings.');
+        return back()->with('error', __('Failed to post to Discord. Check if the channel ID is configured in settings.'));
     }
 }

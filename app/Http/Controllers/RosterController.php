@@ -13,6 +13,7 @@ use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class RosterController extends Controller
@@ -69,6 +70,11 @@ class RosterController extends Controller
     public function updateParticipation(UpdateRosterRequest $request, StaticGroup $static): RedirectResponse
     {
         $validated = $request->validated();
+        Log::info('Updating roster participation for user', [
+            'user_id' => Auth::id(),
+            'static_group_id' => $static->id,
+            'validated' => $validated,
+        ]);
 
         $mainCharId = isset($validated['main_character_id']) ? (int) $validated['main_character_id'] : null;
         $raidingCharIds = isset($validated['raiding_characters']) ? array_map('intval', $validated['raiding_characters']) : [];

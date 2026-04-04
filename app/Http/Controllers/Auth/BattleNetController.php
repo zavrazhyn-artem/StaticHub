@@ -49,6 +49,12 @@ class BattleNetController extends Controller
 
         Auth::login($user);
 
+        // Sync locale from session if user doesn't have one
+        if (session()->has('locale') && (!$user->locale || $user->locale === 'en')) {
+            $user->locale = session('locale');
+            $user->save();
+        }
+
         if (User::query()->hasMainCharacter($user->id)) {
             return redirect()->route('dashboard');
         }
