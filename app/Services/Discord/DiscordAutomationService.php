@@ -37,7 +37,7 @@ class DiscordAutomationService
 
                 if ($nextRaid) {
                     $this->discordMessageService->sendOrUpdateRaidAnnouncement($nextRaid);
-                    $results[] = "Posted next raid for static: {$static->name} (Event: {$nextRaid->title})";
+                    $results[] = "Posted next raid for static: {$static->name} (Event ID: {$nextRaid->id})";
                 }
             }
         }
@@ -58,7 +58,7 @@ class DiscordAutomationService
         foreach ($upcomingRaids as $raid) {
             $static = $raid->static;
             $this->discordMessageService->sendOrUpdateRaidAnnouncement($raid);
-            $results[] = "Reminder: Posted upcoming raid for static: {$static->name} (Event: {$raid->title})";
+            $results[] = "Reminder: Posted upcoming raid for static: {$static->name} (Event ID: {$raid->id})";
         }
 
         return $results;

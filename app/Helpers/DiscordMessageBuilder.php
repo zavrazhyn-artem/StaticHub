@@ -24,7 +24,7 @@ class DiscordMessageBuilder
         }
 
         $embed = [
-            'title' => "📣 Raid Call: " . $event->title,
+            'title' => "📣 Raid Call",
             'description' => "🗓️ **Start:** <t:{$unixStart}:F>\n⏳ **Status:** <t:{$unixStart}:R>\n\n" .
                 $descriptionText .
                 "**Combat Roster:**" . $analysisText . "\n──────────────────────────",

@@ -53,7 +53,7 @@ class TreasuryService
             $taxIcon = 'heroicon-m-arrow-trending-down';
         }
 
-        return [
+        return array_merge([
             'static' => $static,
             'reserves' => $reserves,
             'recentTransactions' => $recentTransactions,
@@ -64,7 +64,7 @@ class TreasuryService
             'taxStatus' => $taxStatus,
             'taxDescription' => $taxDescription,
             'taxIcon' => $taxIcon,
-        ];
+        ], $consumablesData);
     }
 
     public function fetchWeeklyTaxStatus(StaticGroup $static, ?int $targetTax = null, ?int $weekNumber = null): Collection

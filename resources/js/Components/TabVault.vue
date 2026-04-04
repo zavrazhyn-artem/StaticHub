@@ -88,12 +88,17 @@ const getVaultSlot = (character, category, slotIndex) => {
         // Estimate from raid progression summary "X/Y H"
         // In reality, this should come from specific boss kills this week.
         const raids = rioData?.raid_progression || {};
-        const latestRaidKey = Object.keys(raids).pop();
+        const keys = Object.keys(raids);
+        if (keys.length === 0) return 0;
+        const latestRaidKey = keys.pop();
         const progress = raids[latestRaidKey];
 
         if (progress?.summary) {
-            const killed = parseInt(progress.summary.split('/')[0]);
-            const difficulty = progress.summary.split(' ').pop(); // e.g., "H", "M", "N"
+            const parts = progress.summary.split('/');
+            if (parts.length < 2) return 0;
+            const killed = parseInt(parts[0]);
+            const difficultyParts = progress.summary.split(' ');
+            const difficulty = difficultyParts.length > 0 ? difficultyParts.pop() : ''; // e.g., "H", "M", "N"
 
             // Vault Raid slots usually at 2, 4, 6 bosses
             if (slotIndex === 0 && killed >= 2) return difficulty;

@@ -18,10 +18,11 @@ class StoreScheduleRequest extends FormRequest
     {
         return [
             'static_id' => 'required|exists:statics,id',
-            'title' => 'required|string|max:255',
             'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
             'description' => 'nullable|string',
+            'timezone' => 'required|string',
         ];
     }
 }

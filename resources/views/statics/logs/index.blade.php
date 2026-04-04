@@ -64,20 +64,6 @@
                             @endif
                         </div>
 
-                        <!-- Summary Snippet -->
-                        <div class="bg-black/20 rounded-xl p-4 border border-white/5 min-h-[80px]">
-                            @if($log->ai_analysis && isset($log->ai_analysis['overall_strategy']))
-                                <div class="text-[11px] text-amber-500/80 font-mono leading-relaxed line-clamp-3">
-                                    <span class="opacity-40">></span> {{ Str::limit(strip_tags($log->ai_analysis['overall_strategy']), 140) }}
-                                </div>
-                            @else
-                                <div class="flex flex-col items-center justify-center h-full text-on-surface-variant/40 space-y-2">
-                                    <span class="material-symbols-outlined text-lg">hourglass_empty</span>
-                                    <span class="text-[9px] font-bold uppercase tracking-widest">Awaiting Analysis...</span>
-                                </div>
-                            @endif
-                        </div>
-
                         <!-- Stats & Footer -->
                         <div class="flex items-center justify-between pt-2">
                             <div class="flex gap-4">

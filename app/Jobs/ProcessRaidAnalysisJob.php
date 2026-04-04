@@ -47,7 +47,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue
 
             // 1. Зберігаємо загальний звіт (ключ 'main')
             $this->report->update([
-                'title' => $logData['raid_title'] ?? $this->report->title,
+                'title' => $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
                 'ai_analysis' => $parsedData['main'] ?? 'Analysis not generated.'
             ]);
 

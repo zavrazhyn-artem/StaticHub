@@ -12,14 +12,17 @@ class TestCommand extends Command
 {
     protected $signature = 'app:test';
 
-    public function __construct(private readonly BlizzardApiService $apiService){
+    public function __construct(
+        private readonly BlizzardApiService $apiService,
+        private readonly RaiderIoService $raiderIoService,
+    ){
         parent::__construct();
     }
 
     public function handle()
     {
 
-        $data = $this->apiService->getCharacterRaidEncounters('tarren-mill', 'Zavrikk');
-        dd($data['character']);
+        $data = $this->raiderIoService->getCharacterProfile('eu','tarren-mill','Zavrikk');
+        dd($data);
     }
 }

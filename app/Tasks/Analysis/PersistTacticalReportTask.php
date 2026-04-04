@@ -19,7 +19,7 @@ class PersistTacticalReportTask
             [
                 'static_id' => $raid->static_id,
                 'raid_event_id' => $raid->id,
-                'title' => $matchedLog['title'] ?? $raid->title
+                'title' => $matchedLog['title'] ?? 'Raid Analysis'
             ]
         );
     }

@@ -46,6 +46,7 @@ class CalendarService
         return RaidEvent::query()
             ->forStatic($staticId)
             ->betweenDates($startDate, $endDate)
+            ->withCount('characters')
             ->get()
             ->groupBy(fn (RaidEvent $event) => $event->start_time->format('Y-m-d'));
     }

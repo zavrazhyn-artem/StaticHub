@@ -32,7 +32,7 @@
                     <div>
                         <h2 class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest mb-1">Incoming Objective</h2>
                         @if($nextRaid)
-                            <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ $nextRaid->title }}</h3>
+                            <h3 class="text-3xl font-extrabold text-white tracking-tight">Raid Event</h3>
                             <p class="text-primary font-bold mt-1">
                                 {{ $nextRaid->start_time->setTimezone($static->timezone)->format('l, M d') }} @ {{ $nextRaid->start_time->setTimezone($static->timezone)->format('H:i') }}
                             </p>
@@ -213,7 +213,7 @@
         </div> <div class="flex flex-col gap-6 h-full">
 
             <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 items-center justify-center">
-                <sync-status-widget :sync-data="{{ json_encode($syncData) }}"></sync-status-widget>
+                <sync-status-widget :sync-data="{{ json_encode($syncData ?? (object)[]) }}"></sync-status-widget>
             </div>
 
             <div class="bg-surface-container-high rounded-2xl border border-white/5 p-6 flex flex-col gap-8 flex-1">
@@ -230,7 +230,7 @@
                                         <span class="text-[10px] font-bold text-primary uppercase tracking-tighter leading-none mt-0.5">{{ $event->start_time->setTimezone($static->timezone)->format('D') }}</span>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-bold text-white uppercase tracking-wider">{{ $event->title }}</div>
+                                        <div class="text-xs font-bold text-white uppercase tracking-wider">Raid Event</div>
                                         <div class="text-xs text-on-surface-variant flex items-center gap-2">
                                             <span class="material-symbols-outlined text-[12px]">schedule</span>
                                             {{ $event->start_time->setTimezone($static->timezone)->format('H:i') }}

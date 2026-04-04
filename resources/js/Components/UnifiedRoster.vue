@@ -191,7 +191,9 @@ const groupedRoster = computed(() => {
 
 const getFirstRaidBosses = (raids) => {
     if (!raids || Array.isArray(raids)) return [];
-    const first = Object.values(raids)[0];
+    const values = Object.values(raids);
+    if (values.length === 0) return [];
+    const first = values[0];
     return Array.isArray(first) ? first : [];
 };
 
@@ -203,7 +205,9 @@ const raidColumns = computed(() => {
         for (const member of members) {
             const raids = member.main_character?.raids;
             if (!raids || Array.isArray(raids)) continue;
-            const name = Object.keys(raids)[0];
+            const keys = Object.keys(raids);
+            if (keys.length === 0) continue;
+            const name = keys[0];
             if (name) {
                 firstRaidName = name;
                 bosses = getFirstRaidBosses(raids).map(b => b.name);

@@ -71,7 +71,7 @@ class WclService
         );
 
         return [
-            'raid_title' => $initialData['title'] ?? 'Unknown Raid',
+            'raid_title' => $initialData['title'] ?? 'Raid Analysis',
             'players' => $cleanPlayers,
             'deaths' => $cleanDeaths,
             'interrupts' => $cleanInterrupts,

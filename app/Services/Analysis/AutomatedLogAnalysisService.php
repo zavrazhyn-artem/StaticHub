@@ -38,7 +38,7 @@ class AutomatedLogAnalysisService
                 $static = $raid->static;
 
                 if (!$static->wcl_guild_id) {
-                    $messages[] = "WARN: Skipping raid '{$raid->title}': No WCL Guild ID configured for static '{$static->name}'";
+                    $messages[] = "WARN: Skipping raid (ID: {$raid->id}): No WCL Guild ID configured for static '{$static->name}'";
                     continue;
                 }
 
@@ -51,7 +51,7 @@ class AutomatedLogAnalysisService
                 $matchedLog = $this->matchRaidToWclLogTask->run($logs, $raid);
 
                 if (!$matchedLog) {
-                    $messages[] = "WARN: No matching WCL log found for raid: {$raid->title}";
+                    $messages[] = "WARN: No matching WCL log found for raid (ID: {$raid->id})";
                     continue;
                 }
 
@@ -66,12 +66,12 @@ class AutomatedLogAnalysisService
                         $this->discordMessageService->sendOrUpdateRaidAnnouncement($raid);
                     }
 
-                    $messages[] = "INFO: Successfully processed analysis for raid: {$raid->title}";
+                    $messages[] = "INFO: Successfully processed analysis for raid (ID: {$raid->id})";
                 } catch (Throwable $e) {
-                    $messages[] = "ERROR: Failed to analyze log for raid '{$raid->title}': " . $e->getMessage();
+                    $messages[] = "ERROR: Failed to analyze log for raid (ID: {$raid->id}): " . $e->getMessage();
                 }
             } catch (Throwable $e) {
-                $messages[] = "ERROR: General error processing raid '{$raid->title}': " . $e->getMessage();
+                $messages[] = "ERROR: General error processing raid (ID: {$raid->id}): " . $e->getMessage();
             }
         }
 

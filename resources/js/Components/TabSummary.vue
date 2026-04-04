@@ -152,11 +152,14 @@ const getVaultOptions = (character) => {
     // Raid Vault: 2, 4, 6 bosses (heuristics based on progression summary)
     const raidProgress = getRaidProgression(character); // e.g. "6/9 H"
     let raidOptions = 0;
-    if (raidProgress !== '-') {
-        const killed = parseInt(raidProgress.split('/')[0]);
-        if (killed >= 6) raidOptions = 3;
-        else if (killed >= 4) raidOptions = 2;
-        else if (killed >= 2) raidOptions = 1;
+    if (raidProgress && raidProgress !== '-') {
+        const parts = raidProgress.split('/');
+        if (parts.length > 0) {
+            const killed = parseInt(parts[0]);
+            if (killed >= 6) raidOptions = 3;
+            else if (killed >= 4) raidOptions = 2;
+            else if (killed >= 2) raidOptions = 1;
+        }
     }
 
     return {

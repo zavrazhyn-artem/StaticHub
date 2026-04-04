@@ -56,7 +56,6 @@ class RaidScheduleService
             'start_time' => $startTime,
         ], [
             'end_time' => $endTime,
-            'title' => 'Mythic Progression',
             'description' => 'Auto-generated raid session.',
         ]);
     }

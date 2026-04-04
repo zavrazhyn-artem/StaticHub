@@ -27,12 +27,33 @@ class CreateRaidEventTask
             throw new \Exception('Unauthorized', 403);
         }
 
-        $startTime = Carbon::parse($data['date'] . ' ' . $data['time']);
+        $timezone = $data['timezone'] ?? 'UTC';
+        $startTime = Carbon::parse($data['date'] . ' ' . $data['start_time'], $timezone)->setTimezone('UTC');
+        $endTime = isset($data['end_time'])
+            ? Carbon::parse($data['date'] . ' ' . $data['end_time'], $timezone)->setTimezone('UTC')
+            : null;
+
+        // Перевірка на дублікат івенту на цей день для цього статіка
+        $dayStart = $startTime->copy()->startOfDay();
+        $dayEnd = $startTime->copy()->endOfDay();
+
+        $exists = RaidEvent::where('static_id', $data['static_id'])
+            ->whereBetween('start_time', [$dayStart, $dayEnd])
+            ->exists();
+
+        if ($exists) {
+            throw new \Exception('На цей день вже заплановано івент.', 422);
+        }
+
+        // Якщо end_time раніше за start_time (наприклад, рейд після опівночі), додаємо день
+        if ($endTime && $endTime->lessThan($startTime)) {
+            $endTime->addDay();
+        }
 
         return RaidEvent::create([
             'static_id' => $data['static_id'],
-            'title' => $data['title'],
             'start_time' => $startTime,
+            'end_time' => $endTime,
             'description' => $data['description'] ?? null,
         ]);
     }

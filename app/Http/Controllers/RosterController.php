@@ -70,11 +70,14 @@ class RosterController extends Controller
     {
         $validated = $request->validated();
 
+        $mainCharId = isset($validated['main_character_id']) ? (int) $validated['main_character_id'] : null;
+        $raidingCharIds = isset($validated['raiding_characters']) ? array_map('intval', $validated['raiding_characters']) : [];
+
         $this->rosterService->updateUserParticipation(
             Auth::user(),
             $static,
-            $validated['main_character_id'] ?? null,
-            $validated['raiding_characters'] ?? [],
+            $mainCharId,
+            $raidingCharIds,
             $validated['combat_roles']
         );
 

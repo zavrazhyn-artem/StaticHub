@@ -14,7 +14,6 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $static_id
- * @property string $title
  * @property Carbon $start_time
  * @property Carbon|null $end_time
  * @property string|null $description
@@ -42,7 +41,6 @@ use Illuminate\Support\Carbon;
  * @method static RaidEventBuilder<static>|RaidEvent whereId($value)
  * @method static RaidEventBuilder<static>|RaidEvent whereStartTime($value)
  * @method static RaidEventBuilder<static>|RaidEvent whereStaticId($value)
- * @method static RaidEventBuilder<static>|RaidEvent whereTitle($value)
  * @method static RaidEventBuilder<static>|RaidEvent whereUpdatedAt($value)
  * @mixin \Eloquent
  */
@@ -50,7 +48,6 @@ class RaidEvent extends Model
 {
     protected $fillable = [
         'static_id',
-        'title',
         'start_time',
         'end_time',
         'description',

@@ -56,4 +56,56 @@ class ScheduleService
     {
         return $this->createRaidEventTask->run($data, $userId);
     }
+
+    /**
+     * Update an existing raid event.
+     *
+     * @param RaidEvent $event
+     * @param array $data
+     * @param int $userId
+     * @return RaidEvent
+     * @throws \Exception
+     */
+    public function executeEventUpdate(RaidEvent $event, array $data, int $userId): RaidEvent
+    {
+        // For simplicity, we can use the same logic for parsing times, but directly update the model.
+        // We'll extract time parsing logic into a helper or similar if it gets complex.
+        $timezone = $data['timezone'] ?? 'UTC';
+        $date = $data['date'] ?? $event->start_time->format('Y-m-d');
+
+        $startStr = $date . ' ' . $data['start_time'];
+        $endStr = $date . ' ' . $data['end_time'];
+
+        $startTime = \Illuminate\Support\Carbon::parse($startStr, $timezone)->setTimezone('UTC');
+        $endTime = \Illuminate\Support\Carbon::parse($endStr, $timezone)->setTimezone('UTC');
+
+        if ($endTime->lessThan($startTime)) {
+            $endTime->addDay();
+        }
+
+        $event->update([
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'description' => $data['description'] ?? $event->description,
+        ]);
+
+        return $event;
+    }
+
+    /**
+     * Delete a raid event.
+     *
+     * @param RaidEvent $event
+     * @param int $userId
+     * @return void
+     */
+    public function executeEventDeletion(RaidEvent $event, int $userId): void
+    {
+        // Only allow static owners to delete
+        if ($userId !== (int)$event->static->owner_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $event->delete();
+    }
 }
