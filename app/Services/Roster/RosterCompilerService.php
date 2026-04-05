@@ -81,7 +81,7 @@ final class RosterCompilerService
             combat_role:            $this->resolveRole($profile),
             equipped_ilvl:          $this->resolveEquippedIlvl($profile),
             mythic_rating:          $this->resolveMythicRating($mplus),
-            weekly_runs_count:      $this->resolveWeeklyRunsCount($mplus),
+            weekly_runs_count:      $this->resolveWeeklyRunsCount($mplus, $rio),
             missing_enchants_slots: $this->resolveMissingEnchants($equippedItems),
             empty_sockets_count:    $this->resolveEmptySockets($equippedItems),
             upgrades_missing:       $this->resolveTotalUpgradesMissing($equippedItems),
@@ -184,15 +184,21 @@ final class RosterCompilerService
         return $rating !== null ? (float) $rating : null;
     }
 
-    private function resolveWeeklyRunsCount(array $mplus): int
+    private function resolveWeeklyRunsCount(array $mplus, array $rio = []): int
     {
-        // Primary: current_period.best_runs — the canonical location in the
-        // Blizzard mythic-keystone-profile response for this reset's runs.
+        // Primary: Raider.io weekly_highest_level_runs — tracks every run
+        // completed this reset (including duplicates of the same dungeon),
+        // unlike Blizzard's best_runs which de-duplicates by dungeon.
+        if (isset($rio['mythic_plus_weekly_highest_level_runs']) && is_array($rio['mythic_plus_weekly_highest_level_runs'])) {
+            return count($rio['mythic_plus_weekly_highest_level_runs']);
+        }
+
+        // Fallback: Blizzard current_period.best_runs (unique dungeons only,
+        // so this under-counts when a dungeon is run more than once).
         if (isset($mplus['current_period']['best_runs']) && is_array($mplus['current_period']['best_runs'])) {
             return count($mplus['current_period']['best_runs']);
         }
 
-        // Fallbacks for alternative key names seen across API versions.
         if (isset($mplus['weekly_best_runs']) && is_array($mplus['weekly_best_runs'])) {
             return count($mplus['weekly_best_runs']);
         }

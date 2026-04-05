@@ -14,19 +14,15 @@ class TestCommand extends Command
 {
     protected $signature = 'app:test';
 
-    public function __construct(
+    public function __construct(private BlizzardApiService $blizzardApiService,
+    private RaiderIoService $raiderIoService,
     ){
         parent::__construct();
     }
 
     public function handle()
     {
-        $threshold = now()->subHour();
-
-        $statics = StaticGroup::all();
-
-        foreach ($statics as $static) {
-            SyncStaticGroupJob::dispatch($static);
-        }
+        $data = $this->raiderIoService->getCharacterProfile('eu', 'tarren-mill', 'Zavrikk');
+        dd($data);
     }
 }
