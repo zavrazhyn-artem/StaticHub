@@ -43,6 +43,11 @@ class CharacterBuilder extends Builder
         return $this->where('user_id', $userId);
     }
 
+    public function atMaxLevel(): self
+    {
+        return $this->where('level', '>=', config('wow_season.max_player_level'));
+    }
+
     public function withStatics(): self
     {
         return $this->with('statics');

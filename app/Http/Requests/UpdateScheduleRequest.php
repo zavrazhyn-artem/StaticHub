@@ -19,12 +19,9 @@ class UpdateScheduleRequest extends FormRequest
             'raid_start_time' => 'nullable|date_format:H:i',
             'raid_end_time' => 'nullable|date_format:H:i',
             'timezone' => 'required|timezone',
-            'discord_channel_id' => 'nullable|string|max:20',
-            'discord_guild_id' => 'nullable|string|max:20',
             'automation_settings' => 'nullable|array',
             'automation_settings.post_next_after_raid' => 'nullable|boolean',
             'automation_settings.reminder_hours_before' => 'nullable|integer|min:1|max:72',
-            'automation_settings.ping_role_id' => 'nullable|string|max:20',
             'weekly_tax_per_player' => 'nullable|integer|min:0',
         ];
     }

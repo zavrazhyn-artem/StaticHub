@@ -59,12 +59,14 @@ class ProcessRaidAnalysisJob implements ShouldQueue
                 'ai_analysis'  => $parsedData['main'] ?? 'Analysis not generated.',
             ]);
 
-            // 2. Зберігаємо особисті звіти (всі інші ключі, крім мета-полів)
+            // 2. Зберігаємо особисті звіти тільки для учасників рейду з ростеру
             $metaKeys = ['title', 'main'];
             $rosterCharacters = $static->characters;
+            $actualParticipantNames = array_map('strtolower', array_column($logData['players'] ?? [], 'name'));
 
             foreach ($parsedData as $playerName => $content) {
                 if (in_array($playerName, $metaKeys, true)) continue;
+                if (!in_array(strtolower(trim($playerName)), $actualParticipantNames)) continue;
 
                 $character = $rosterCharacters->first(function ($c) use ($playerName) {
                     return strtolower($c->name) === strtolower(trim($playerName));

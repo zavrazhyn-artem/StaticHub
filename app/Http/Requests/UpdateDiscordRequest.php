@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateDiscordRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'discord_guild_id'    => 'sometimes|nullable|string|max:20',
+            'discord_channel_id'  => 'sometimes|nullable|string|max:20',
+            'discord_webhook_url' => 'sometimes|nullable|url|max:500',
+            'automation_settings.ping_role_id'   => 'sometimes|nullable|string|max:20',
+            'automation_settings.webhook_muted'  => 'sometimes|nullable|boolean',
+        ];
+    }
+}

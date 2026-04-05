@@ -13,10 +13,12 @@ import LogShow from './Components/Statics/LogShow.vue';
 import SettingsTabs from './Components/Statics/SettingsTabs.vue';
 import SettingsLogs from './Components/Statics/SettingsLogs.vue';
 import SettingsSchedule from './Components/Statics/SettingsSchedule.vue';
+import SettingsDiscord from './Components/Statics/SettingsDiscord.vue';
 import StaticSetup from './Components/Statics/StaticSetup.vue';
 import ConsumablesPlanner from './Components/ConsumablesPlanner.vue';
 import ConsumableCard from './Components/ConsumableCard.vue';
 import DashboardView from './Components/Dashboard/DashboardView.vue';
+import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelect.vue';
 
 const app = createApp({});
 app.config.globalProperties.__ = (key, replace = {}) => {
@@ -43,10 +45,12 @@ app.component('log-show', LogShow);
 app.component('settings-tabs', SettingsTabs);
 app.component('settings-logs', SettingsLogs);
 app.component('settings-schedule', SettingsSchedule);
+app.component('settings-discord', SettingsDiscord);
 app.component('static-setup', StaticSetup);
 app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
 app.component('dashboard-view', DashboardView);
+app.component('transfer-ownership-select', TransferOwnershipSelect);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

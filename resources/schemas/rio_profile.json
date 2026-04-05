@@ -16,7 +16,7 @@
     "active_spec_name": { "type": "string" },
     "active_spec_role": {
       "type": "string",
-      "enum": ["TANK", "HEALER", "DPS"]
+      "enum": ["TANK", "HEALER", "HEALING", "DPS"]
     },
     "gear": {
       "type": "object",

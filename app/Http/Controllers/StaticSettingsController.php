@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateDiscordRequest;
 use App\Http\Requests\UpdateLogsRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\StaticGroup;
@@ -19,6 +20,11 @@ class StaticSettingsController extends Controller
     public function schedule(StaticGroup $static): View
     {
         return view('statics.settings.schedule', $this->service->buildScheduleSettingsPayload($static));
+    }
+
+    public function discord(StaticGroup $static): View
+    {
+        return view('statics.settings.discord', $this->service->buildDiscordSettingsPayload($static));
     }
 
     public function logs(StaticGroup $static): View
@@ -44,9 +50,26 @@ class StaticSettingsController extends Controller
         return redirect()->back()->with('success', __('Raid schedule updated and events generated!'));
     }
 
+    public function updateDiscord(UpdateDiscordRequest $request, StaticGroup $static): JsonResponse
+    {
+        $webhookChannel = $this->service->executeUpdateDiscordSettings($static, $request->validated());
+
+        return response()->json([
+            'success'        => true,
+            'webhook_channel' => $webhookChannel,
+        ]);
+    }
+
     public function testDiscordWebhook(StaticGroup $static): JsonResponse
     {
-        $success = $this->service->executeWebhookTest($static);
+        $result = $this->service->executeWebhookTest($static);
+
+        return response()->json($result);
+    }
+
+    public function deleteWebhookMessage(StaticGroup $static, string $messageId): JsonResponse
+    {
+        $success = $this->service->executeWebhookMessageDelete($static, $messageId);
 
         return response()->json(['success' => $success]);
     }

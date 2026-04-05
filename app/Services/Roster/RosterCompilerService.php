@@ -193,12 +193,6 @@ final class RosterCompilerService
             return count($rio['mythic_plus_weekly_highest_level_runs']);
         }
 
-        // Fallback: Blizzard current_period.best_runs (unique dungeons only,
-        // so this under-counts when a dungeon is run more than once).
-        if (isset($mplus['current_period']['best_runs']) && is_array($mplus['current_period']['best_runs'])) {
-            return count($mplus['current_period']['best_runs']);
-        }
-
         if (isset($mplus['weekly_best_runs']) && is_array($mplus['weekly_best_runs'])) {
             return count($mplus['weekly_best_runs']);
         }

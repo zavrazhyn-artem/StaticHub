@@ -99,6 +99,7 @@ class StaticGroup extends Model
         'timezone',
         'discord_channel_id',
         'discord_guild_id',
+        'discord_webhook_url',
         'automation_settings',
         'consumable_settings',
         'guild_tax_per_player',

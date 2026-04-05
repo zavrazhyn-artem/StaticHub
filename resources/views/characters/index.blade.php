@@ -65,7 +65,7 @@
                         <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Item Level') }}</div>
                         <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Realm') }}</div>
                         <div class="col-span-1 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Main') }}</div>
-                        <div class="col-span-1 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Alt') }}</div>
+                        <div class="col-span-1 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Ready For Raid') }}</div>
                         <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Role') }}</div>
                     </div>
 

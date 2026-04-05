@@ -17,7 +17,7 @@ class SyncWclDataJob implements ShouldQueue
      */
     public function __construct(protected Character $character)
     {
-        //
+        $this->onQueue(config('sync.queues.wcl', 'wcl'));
     }
 
     /**

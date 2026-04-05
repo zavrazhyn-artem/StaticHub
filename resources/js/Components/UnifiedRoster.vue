@@ -231,6 +231,7 @@ const raidColumns = computed(() => {
 // ---------------------------------------------------------------------------
 const canManageAccess = computed(() => currentUserAccess.value === 'leader' || currentUserAccess.value === 'admin');
 const canManageStatus = computed(() => ['leader', 'officer', 'admin'].includes(currentUserAccess.value));
+const canKick = computed(() => ['leader', 'officer', 'admin'].includes(currentUserAccess.value));
 
 const toggleRow = (memberId) => {
     if (expandedRows.value.has(memberId)) {
@@ -325,6 +326,7 @@ const kickMember = async (member) => {
                 :kill-mark-class="killMarkClass"
                 :can-manage-status="canManageStatus"
                 :can-manage-access="canManageAccess"
+                :can-kick="canKick"
                 :role-icon-src="roleIconSrc"
                 :tier-count="tierCount"
                 :has-audit-issues="hasAuditIssues"

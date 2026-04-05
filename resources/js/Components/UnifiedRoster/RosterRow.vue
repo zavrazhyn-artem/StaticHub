@@ -1,7 +1,22 @@
 <script setup>
+import { computed, getCurrentInstance } from 'vue';
 import SummaryCells from './Cells/SummaryCells.vue';
 import RaidCells from './Cells/RaidCells.vue';
 import GearCells from './Cells/GearCells.vue';
+import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
+
+const { proxy } = getCurrentInstance();
+const __ = (key, replace = {}) => proxy.__(key, replace);
+
+const accessRoleOptions = computed(() => [
+    { id: 'officer', name: __('Officer') },
+    { id: 'member',  name: __('Member')  },
+]);
+
+const rosterStatusOptions = computed(() => [
+    { id: 'core',  name: __('Core')  },
+    { id: 'bench', name: __('Bench') },
+]);
 
 const props = defineProps({
     member: { type: Object, required: true },
@@ -17,6 +32,7 @@ const props = defineProps({
     expanded: { type: Boolean, default: false },
     canManageStatus: { type: Boolean, default: false },
     canManageAccess: { type: Boolean, default: false },
+    canKick: { type: Boolean, default: false },
     roleIconSrc: { type: Function, required: true },
     tierCount: { type: Function, required: true },
     hasAuditIssues: { type: Function, required: true },
@@ -134,41 +150,59 @@ const emit = defineEmits([
 
             <!-- Role / Status selects (summary only, main character only) -->
             <template v-if="!isAlt">
+                <!-- Access Role -->
                 <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
-                    <div v-if="canManageAccess">
-                        <select :value="member.access_role"
-                                @change="emit('update-access-role', member, $event.target.value)"
-                                class="bg-black/40 border border-white/10 rounded text-[8px] font-bold uppercase text-white py-0 px-1 focus:border-primary transition-all w-full h-[24px]">
-                            <option value="leader">{{ __('Leader') }}</option>
-                            <option value="officer">{{ __('Officer') }}</option>
-                            <option value="member">{{ __('Member') }}</option>
-                        </select>
+                    <div v-if="canManageAccess && member.access_role !== 'leader'">
+                        <SearchableSelect
+                            :model-value="member.access_role"
+                            :options="accessRoleOptions"
+                            :use-search="false"
+                            :compact="true"
+                            icon="shield_person"
+                            :placeholder="__('Select role...')"
+                            accent-color="#a78bfa"
+                            @update:modelValue="emit('update-access-role', member, $event)"
+                        />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-2 py-1 rounded border border-white/10">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.access_role }}
                         </span>
                     </div>
                 </td>
+                <!-- Roster Status -->
                 <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
                     <div v-if="canManageStatus">
-                        <select :value="member.roster_status"
-                                @change="emit('update-roster-status', member, $event.target.value)"
-                                class="bg-black/40 border border-white/10 rounded text-[8px] font-bold uppercase text-white py-0 px-1 focus:border-primary transition-all w-full h-[24px]">
-                            <option value="core">{{ __('Core') }}</option>
-                            <option value="bench">{{ __('Bench') }}</option>
-                        </select>
+                        <SearchableSelect
+                            :model-value="member.roster_status"
+                            :options="rosterStatusOptions"
+                            :use-search="false"
+                            :compact="true"
+                            icon="group"
+                            :placeholder="__('Select status...')"
+                            accent-color="#a78bfa"
+                            @update:modelValue="emit('update-roster-status', member, $event)"
+                        />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-2 py-1 rounded border border-white/10">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.roster_status }}
                         </span>
                     </div>
+                </td>
+                <!-- Kick -->
+                <td v-if="canKick" class="w-[60px] h-[86px] border-l border-white/5 text-center">
+                    <button @click="emit('kick-member', member)"
+                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-error/10 hover:bg-error text-error hover:text-white transition-all"
+                            :title="__('Remove from static')">
+                        <span class="material-symbols-outlined text-base leading-none">close</span>
+                    </button>
                 </td>
             </template>
             <template v-else>
                 <td class="w-[130px] h-[86px] border-l border-white/5"></td>
                 <td class="w-[130px] h-[86px] border-l border-white/5"></td>
+                <td v-if="canKick" class="w-[60px] h-[86px] border-l border-white/5"></td>
             </template>
         </template>
     </tr>

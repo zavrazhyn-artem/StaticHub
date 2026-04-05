@@ -13,6 +13,8 @@ const props = defineProps({
     loading:           { type: Boolean, default: false },
     disabled:          { type: Boolean, default: false },
     accentColor:       { type: String, default: '#a78bfa' }, // matches --color-primary
+    useSearch:         { type: Boolean, default: true },
+    compact:           { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -35,7 +37,7 @@ const filtered = computed(() => {
 const toggle = () => {
     if (props.disabled || props.loading) return;
     open.value = !open.value;
-    if (open.value) {
+    if (open.value && props.useSearch) {
         search.value = '';
         nextTick(() => searchRef.value?.focus());
     }
@@ -64,8 +66,9 @@ defineExpose({ close });
         <!-- Trigger -->
         <div
             @click="toggle"
-            class="relative z-50 w-full bg-surface-container-highest border border-white/5 rounded-lg pl-10 pr-8 py-3 font-headline text-sm font-bold tracking-widest transition-all flex items-center justify-between"
+            class="relative z-50 w-full bg-surface-container-highest border border-white/5 font-headline font-bold tracking-widest transition-all flex items-center justify-between"
             :class="[
+                compact ? 'rounded pl-6 pr-5 py-1 text-[9px]' : 'rounded-lg pl-10 pr-8 py-3 text-sm',
                 loading || disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : 'cursor-pointer hover:border-white/20',
@@ -74,37 +77,35 @@ defineExpose({ close });
             :style="open ? `--tw-ring-color: ${accentColor}33; box-shadow: 0 0 0 2px ${accentColor}55;` : ''"
         >
             <!-- Leading icon -->
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <span :class="['absolute top-1/2 -translate-y-1/2 pointer-events-none', compact ? 'left-1.5' : 'left-3']">
                 <span
                     v-if="loading"
-                    class="material-symbols-outlined text-lg animate-spin"
+                    :class="['material-symbols-outlined animate-spin', compact ? 'text-[12px]' : 'text-lg']"
                     :style="`color: ${accentColor}`"
                 >sync</span>
                 <span
                     v-else
-                    class="material-symbols-outlined text-lg transition-colors"
+                    :class="['material-symbols-outlined transition-colors', compact ? 'text-[12px]' : 'text-lg', open ? '' : 'text-on-surface-variant']"
                     :style="open ? `color: ${accentColor}` : ''"
-                    :class="open ? '' : 'text-on-surface-variant'"
                 >{{ icon }}</span>
             </span>
 
             <!-- Label -->
-            <span v-if="selectedLabel" class="truncate text-white">{{ selectedLabel }}</span>
-            <span v-else-if="loading" class="truncate text-on-surface-variant/60 italic text-xs">{{ $slots.loading ? '' : placeholder }}</span>
-            <span v-else class="truncate text-on-surface-variant/50 italic text-xs font-normal">{{ placeholder }}</span>
+            <span v-if="selectedLabel" class="truncate text-white uppercase">{{ selectedLabel }}</span>
+            <span v-else-if="loading" :class="['truncate text-on-surface-variant/60 italic', compact ? '' : 'text-xs']">{{ $slots.loading ? '' : placeholder }}</span>
+            <span v-else :class="['truncate text-on-surface-variant/50 italic font-normal', compact ? '' : 'text-xs']">{{ placeholder }}</span>
 
             <!-- Trailing: clear OR chevron -->
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+            <span :class="['absolute top-1/2 -translate-y-1/2 flex items-center', compact ? 'right-1.5' : 'right-3']">
                 <button
                     v-if="modelValue && !loading && !disabled"
                     type="button"
                     @click="clear"
-                    class="material-symbols-outlined text-[14px] text-on-surface-variant hover:text-white transition-colors"
+                    :class="['material-symbols-outlined text-on-surface-variant hover:text-white transition-colors', compact ? 'text-[11px]' : 'text-[14px]']"
                 >close</button>
                 <span
                     v-else
-                    class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform"
-                    :class="{ 'rotate-180': open }"
+                    :class="['material-symbols-outlined text-on-surface-variant transition-transform', compact ? 'text-[13px]' : 'text-[16px]', open ? 'rotate-180' : '']"
                 >expand_more</span>
             </span>
         </div>
@@ -123,7 +124,7 @@ defineExpose({ close });
                 class="absolute z-[60] left-0 right-0 mt-2 bg-surface-container-high border border-white/10 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl"
             >
                 <!-- Search -->
-                <div class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
+                <div v-if="useSearch" class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">search</span>
                         <input

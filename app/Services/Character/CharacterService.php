@@ -63,7 +63,7 @@ class CharacterService
      */
     private function fetchCharactersForUser(int $userId, ?int $staticId = null): Collection
     {
-        $query = Character::query()->belongingTo($userId)->withStatics();
+        $query = Character::query()->belongingTo($userId)->atMaxLevel()->withStatics();
 
         if ($staticId) {
             $query->withStaticRole($staticId)->orderedByStaticRole();

@@ -147,16 +147,35 @@
                             <div class="px-4 py-2 border-y border-white/5 bg-black/10">
                                 <div class="font-headline text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">{{ __('My Characters') }}</div>
                                 <div class="space-y-1">
-                                    @forelse(Auth::user()->characters->take(5) as $character)
-                                        <div class="flex items-center gap-2 py-1">
+                                    @php
+                                        $wowClassColors = [
+                                            'Death Knight' => '#C41F3B', 'Demon Hunter' => '#A330C9',
+                                            'Druid'        => '#FF7C0A', 'Evoker'       => '#33937F',
+                                            'Hunter'       => '#AAD372', 'Mage'         => '#3FC7EB',
+                                            'Monk'         => '#00FF98', 'Paladin'      => '#F48CBA',
+                                            'Priest'       => '#FFFFFF', 'Rogue'        => '#FFF468',
+                                            'Shaman'       => '#0070DD', 'Warlock'      => '#8788EE',
+                                            'Warrior'      => '#C69B3A',
+                                        ];
+                                        $staticChars = Auth::user()->characters()
+                                            ->whereHas('statics')
+                                            ->with('statics')
+                                            ->get()
+                                            ->sortBy([
+                                                fn($c) => $c->statics->contains(fn($s) => $s->pivot->role === 'main') ? 0 : 1,
+                                                fn($c) => -($c->equipped_item_level ?? 0),
+                                            ])
+                                            ->values()
+                                            ->take(5);
+                                    @endphp
+                                    @forelse($staticChars as $character)
+                                        <a href="{{ route('characters.index') }}" class="flex items-center gap-2 py-1 hover:bg-white/5 rounded transition-colors -mx-1 px-1">
                                             <div class="relative shrink-0">
                                                 <img src="{{ $character->avatar_url }}" class="w-8 h-8 rounded-full border border-white/10" alt="">
-                                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-surface-container rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    <img src="{{ $character->getClassIconUrl() }}" class="w-2.5 h-2.5" alt="">
-                                                </div>
                                             </div>
-                                            <span class="text-[10px] font-bold text-{{ strtolower(str_replace(' ', '-', $character->playable_class)) }} truncate">{{ $character->name }}</span>
-                                        </div>
+                                            <span class="text-[10px] font-bold truncate"
+                                                  style="color: {{ $wowClassColors[$character->playable_class] ?? '#9ca3af' }}">{{ $character->name }}</span>
+                                        </a>
                                     @empty
                                         <div class="text-[9px] text-gray-600 italic tracking-wider">{{ __('No characters') }}</div>
                                     @endforelse

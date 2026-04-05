@@ -1,6 +1,14 @@
 <x-app-layout>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+
+            @if(session('status') === 'ownership-transferred')
+                <div class="p-4 bg-success-neon/10 border border-success-neon/30 rounded-xl flex items-center gap-3">
+                    <span class="material-symbols-outlined text-success-neon">check_circle</span>
+                    <p class="text-xs font-bold text-success-neon uppercase tracking-widest">{{ __('Ownership transferred successfully.') }}</p>
+                </div>
+            @endif
+
             <!-- Integrations Section -->
             <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
                 <div class="max-w-xl">
@@ -51,11 +59,74 @@
                 </div>
             </div>
 
+            <!-- Static Group Section -->
+            @if(auth()->user()->statics()->exists())
             <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
                 <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                    <header class="mb-6">
+                        <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
+                            {{ __('Static Group') }}
+                        </h2>
+                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                            {{ __('Manage your static group membership.') }}
+                        </p>
+                    </header>
+
+                    @foreach(auth()->user()->statics as $static)
+                    <div class="space-y-4 mb-4">
+                        <div class="flex items-center justify-between p-4 bg-surface-container-lowest border border-white/5 rounded-lg">
+                            <div>
+                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">{{ $static->name }}</div>
+                                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                                    @if($static->owner_id === auth()->id())
+                                        {{ __('Owner') }}
+                                    @else
+                                        {{ __('Member') }}
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if($static->owner_id !== auth()->id())
+                                <form method="POST" action="{{ route('profile.static.leave') }}"
+                                      onsubmit="return confirm('{{ __('Are you sure you want to leave this static group?') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
+                                        {{ __('Leave') }}
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
+                            @endif
+                        </div>
+
+                        {{-- Transfer Ownership (owner only) --}}
+                        @if($static->owner_id === auth()->id())
+                            @php
+                                $td = $transferData->firstWhere('id', $static->id);
+                            @endphp
+                            @if($td && count($td['members']) > 0)
+                            <transfer-ownership-select
+                                :static-id="{{ $td['id'] }}"
+                                static-name="{{ $td['name'] }}"
+                                transfer-url="{{ $td['url'] }}"
+                                :members='@json($td['members'])'
+                                csrf-token="{{ csrf_token() }}"
+                            />
+                            @endif
+                        @endif
+                    </div>
+                    @endforeach
+
+                    @if(session('error') === 'leave-owner')
+                        <p class="mt-3 text-xs text-red-400 font-bold uppercase tracking-widest">
+                            {{ __('You cannot leave a static group you own. Transfer ownership first.') }}
+                        </p>
+                    @endif
                 </div>
             </div>
+            @endif
+
         </div>
     </div>
 </x-app-layout>

@@ -6,20 +6,27 @@ namespace App\Helpers;
 
 class WclReportParserHelper
 {
-    public static function parseDeaths(array $deathsData): array
+    public static function parseDeaths(array $deathsData, array $rosterNames = []): array
     {
-        return array_map(fn($d) => [
+        $entries = $deathsData['entries'] ?? [];
+
+        if (!empty($rosterNames)) {
+            $entries = array_filter($entries, fn($d) => in_array($d['name'] ?? '', $rosterNames));
+        }
+
+        return array_values(array_map(fn($d) => [
             'player' => $d['name'] ?? 'Unknown',
             'fight_id' => $d['fight'] ?? null,
             'killing_blow' => $d['killingBlow']['name'] ?? 'Unknown Ability'
-        ], $deathsData['entries'] ?? []);
+        ], $entries));
     }
 
-    public static function parseInterrupts(array $interruptEntries): array
+    public static function parseInterrupts(array $interruptEntries, array $rosterNames = []): array
     {
-        return array_map(function ($int) {
+        return array_map(function ($int) use ($rosterNames) {
             $interrupters = [];
             foreach ($int['details'] ?? [] as $detail) {
+                if (!empty($rosterNames) && !in_array($detail['name'], $rosterNames)) continue;
                 $interrupters[$detail['name']] = $detail['total'];
             }
             return [
@@ -31,13 +38,15 @@ class WclReportParserHelper
         }, $interruptEntries);
     }
 
-    public static function parseDamageTaken(array $damageEntries): array
+    public static function parseDamageTaken(array $damageEntries, array $rosterNames = []): array
     {
         $abilityDamageMap = [];
 
         foreach ($damageEntries as $playerData) {
             if (($playerData['type'] ?? '') === 'NPC') continue;
             $playerName = $playerData['name'] ?? 'Unknown';
+
+            if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
 
             foreach ($playerData['abilities'] ?? [] as $ability) {
                 $abilityName = $ability['name'] ?? 'Unknown';
@@ -158,6 +167,25 @@ class WclReportParserHelper
         }
 
         return $performanceMetrics;
+    }
+
+    public static function parseDispels(array $dispelEntries, array $rosterNames = []): array
+    {
+        $playerDispels = [];
+
+        foreach ($dispelEntries as $spellData) {
+            foreach ($spellData['details'] ?? [] as $detail) {
+                $playerName = $detail['name'] ?? 'Unknown';
+
+                if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
+
+                $playerDispels[$playerName] = ($playerDispels[$playerName] ?? 0) + ($detail['total'] ?? 0);
+            }
+        }
+
+        arsort($playerDispels);
+
+        return $playerDispels;
     }
 
     public static function calculateRaidDuration(array $fights): int

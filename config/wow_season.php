@@ -11,6 +11,12 @@ return [
     */
 
     /*
+    | Maximum character level for the current expansion.
+    | Characters below this level are excluded from the roster/characters list.
+    */
+    'max_player_level' => 90,
+
+    /*
     | Gear slots that require a permanent enchant. The compiler flags any of
     | these slots that are missing a PERMANENT-type enchantment.
     | Values must match the `slot.type` key from the Blizzard equipment API.

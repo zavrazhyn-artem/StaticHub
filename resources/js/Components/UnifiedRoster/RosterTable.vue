@@ -14,6 +14,7 @@ const props = defineProps({
     killMarkClass: { type: [String, Object], required: true },
     canManageStatus: { type: Boolean, required: true },
     canManageAccess: { type: Boolean, required: true },
+    canKick: { type: Boolean, default: false },
     roleIconSrc: { type: Function, required: true },
     tierCount: { type: Function, required: true },
     hasAuditIssues: { type: Function, required: true },
@@ -68,6 +69,7 @@ const slotLabels = {
                         <th class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
                         <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Access Role') }}</th>
                         <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Roster Status') }}</th>
+                        <th v-if="canKick" class="p-2 text-center border-l border-white/5 w-[60px]"></th>
                     </template>
 
                     <!-- One spanning header per raid instance -->
@@ -100,6 +102,7 @@ const slotLabels = {
                         <th class="p-2 text-center border-l border-white/5">{{ __('Issues') }}</th>
                         <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Role') }}</th>
                         <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Status') }}</th>
+                        <th v-if="canKick" class="p-2 text-center border-l border-white/5 w-[60px]"></th>
                     </template>
 
                     <!-- One column per boss, horizontal label -->
@@ -155,6 +158,7 @@ const slotLabels = {
                                 :raid-columns="raidColumns"
                                 :can-manage-status="canManageStatus"
                                 :can-manage-access="canManageAccess"
+                                :can-kick="canKick"
                                 :role-icon-src="roleIconSrc"
                                 :tier-count="tierCount"
                                 :has-audit-issues="hasAuditIssues"
@@ -182,6 +186,7 @@ const slotLabels = {
                                     :raid-columns="raidColumns"
                                     :can-manage-status="canManageStatus"
                                     :can-manage-access="canManageAccess"
+                                    :can-kick="canKick"
                                     :role-icon-src="roleIconSrc"
                                     :tier-count="tierCount"
                                     :has-audit-issues="hasAuditIssues"

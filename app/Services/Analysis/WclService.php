@@ -33,6 +33,23 @@ class WclService
             array_map(fn($f) => $difficultyMap[$f['difficulty']], $raidFights)
         ));
 
+        $bossSummary = [];
+        foreach ($raidFights as $fight) {
+            $bossName = $fight['name'] ?? 'Unknown';
+            if (!isset($bossSummary[$bossName])) {
+                $bossSummary[$bossName] = ['kills' => 0, 'wipes' => 0, 'best_wipe_pct' => null];
+            }
+            if ($fight['kill'] ?? false) {
+                $bossSummary[$bossName]['kills']++;
+            } else {
+                $bossSummary[$bossName]['wipes']++;
+                $pct = isset($fight['bossPercentage']) ? round((float) $fight['bossPercentage'], 1) : null;
+                if ($pct !== null && ($bossSummary[$bossName]['best_wipe_pct'] === null || $pct < $bossSummary[$bossName]['best_wipe_pct'])) {
+                    $bossSummary[$bossName]['best_wipe_pct'] = $pct;
+                }
+            }
+        }
+
         $fightIds = array_column($raidFights, 'id');
 
         $tablesQuery = WclQueryBuilder::buildTablesQuery();
@@ -51,14 +68,14 @@ class WclService
         }
 
         // 2. Parse Deaths
-        $cleanDeaths = WclReportParserHelper::parseDeaths($tablesData['deaths']['data'] ?? []);
+        $cleanDeaths = WclReportParserHelper::parseDeaths($tablesData['deaths']['data'] ?? [], $rosterNames);
 
         // 3. Parse Interrupts
         $interruptEntries = $tablesData['interrupts']['data']['entries'][0]['entries'] ?? [];
-        $cleanInterrupts = WclReportParserHelper::parseInterrupts($interruptEntries);
+        $cleanInterrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
 
         // 4. Parse Damage Taken
-        $cleanDamageTaken = WclReportParserHelper::parseDamageTaken($tablesData['damageTaken']['data']['entries'] ?? []);
+        $cleanDamageTaken = WclReportParserHelper::parseDamageTaken($tablesData['damageTaken']['data']['entries'] ?? [], $rosterNames);
 
         // 5. Parse Casts & Consumables
         $castsAndConsumables = WclReportParserHelper::parseCastsAndConsumables(
@@ -75,16 +92,29 @@ class WclService
             $rosterNames
         );
 
+        // Inject spec into performance_metrics from players list
+        $playerSpecMap = array_column($cleanPlayers, 'subType', 'name');
+        foreach ($performanceMetrics as $name => &$metrics) {
+            $metrics['spec'] = $playerSpecMap[$name] ?? null;
+        }
+        unset($metrics);
+
+        // 7. Parse Dispels (same structure as interrupts: data.entries[0].entries with details per player)
+        $dispelEntries = $tablesData['dispels']['data']['entries'][0]['entries'] ?? [];
+        $cleanDispels = WclReportParserHelper::parseDispels($dispelEntries, $rosterNames);
+
         return [
-            'raid_title'   => $initialData['title'] ?? 'Raid Analysis',
-            'difficulties' => $difficulties,
-            'players' => $cleanPlayers,
-            'deaths' => $cleanDeaths,
-            'interrupts' => $cleanInterrupts,
+            'raid_title'        => $initialData['title'] ?? 'Raid Analysis',
+            'difficulties'      => $difficulties,
+            'boss_summary'      => $bossSummary,
+            'players'           => $cleanPlayers,
+            'deaths'            => $cleanDeaths,
+            'interrupts'        => $cleanInterrupts,
             'major_damage_taken' => array_slice($cleanDamageTaken, 0, 15),
-            'casts_summary' => $castsAndConsumables['casts'],
-            'consumables_used' => $castsAndConsumables['consumables'],
-            'performance_metrics' => $performanceMetrics
+            'casts_summary'     => $castsAndConsumables['casts'],
+            'consumables_used'  => $castsAndConsumables['consumables'],
+            'dispels'           => $cleanDispels,
+            'performance_metrics' => $performanceMetrics,
         ];
     }
 

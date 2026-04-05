@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\StaticGroup\KickStaticMemberAction;
+use App\Actions\StaticGroup\TransferStaticOwnershipAction;
 use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\StaticGroup;
 use App\Services\Auth\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,8 +26,32 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        $ownedStatics = $user->ownedStatics()->with([
+            'members' => fn ($q) => $q->where('user_id', '!=', $user->id)
+                ->with(['characters' => fn ($q2) => $q2->whereHas('statics', fn ($q3) => $q3->where('character_static.role', 'main'))]),
+        ])->get();
+
+        $transferData = $ownedStatics->map(fn ($static) => [
+            'id'      => $static->id,
+            'name'    => $static->name,
+            'url'     => route('profile.static.transfer', $static),
+            'members' => $static->members->map(fn ($member) => [
+                'id'        => $member->id,
+                'name'      => $member->name,
+                'character' => ($char = $member->characters->first()) ? [
+                    'name'          => $char->name,
+                    'playable_class' => $char->playable_class,
+                    'avatar_url'    => $char->avatar_url,
+                ] : null,
+            ])->values(),
+        ])->values();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'         => $user,
+            'ownedStatics' => $ownedStatics,
+            'transferData' => $transferData,
         ]);
     }
 
@@ -87,5 +114,45 @@ class ProfileController extends Controller
         $this->userService->executeDiscordUnlinking(Auth::user());
 
         return Redirect::route('profile.edit')->with('status', 'discord-unlinked');
+    }
+
+    /**
+     * Transfer ownership of a static group to another member.
+     */
+    public function transferOwnership(Request $request, StaticGroup $static, TransferStaticOwnershipAction $action): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($static->owner_id !== $user->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate(['new_owner_id' => 'required|integer']);
+
+        $newOwner = $static->members()
+            ->where('user_id', $validated['new_owner_id'])
+            ->firstOrFail();
+
+        $action->execute($static, $user, $newOwner);
+
+        return Redirect::route('profile.edit')->with('status', 'ownership-transferred');
+    }
+
+    /**
+     * Leave the current static group.
+     */
+    public function leaveStatic(Request $request, KickStaticMemberAction $kickAction): RedirectResponse
+    {
+        $user = $request->user();
+        $statics = $user->statics()->get();
+
+        foreach ($statics as $static) {
+            if ($static->owner_id === $user->id) {
+                return Redirect::route('profile.edit')->with('error', 'leave-owner');
+            }
+            $kickAction->execute($static, $user);
+        }
+
+        return Redirect::route('onboarding.index')->with('status', 'left-static');
     }
 }

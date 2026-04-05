@@ -42,7 +42,11 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
 
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::post('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
+
+    Route::get('/statics/{static}/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
+    Route::patch('/statics/{static}/settings/discord', [StaticSettingsController::class, 'updateDiscord'])->name('statics.settings.discord.update');
     Route::post('/statics/{static}/settings/discord/test', [StaticSettingsController::class, 'testDiscordWebhook'])->name('statics.settings.discord.test');
+    Route::delete('/statics/{static}/settings/discord/message/{messageId}', [StaticSettingsController::class, 'deleteWebhookMessage'])->name('statics.settings.discord.message.delete');
 
     Route::get('/statics/{static}/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
     Route::post('/statics/{static}/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
@@ -77,6 +81,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/discord/link', [ProfileController::class, 'linkDiscord'])->name('profile.discord.link');
     Route::get('/profile/discord/callback', [ProfileController::class, 'discordCallback'])->name('profile.discord.callback');
     Route::post('/profile/discord/unlink', [ProfileController::class, 'unlinkDiscord'])->name('profile.discord.unlink');
+
+    Route::delete('/profile/static/leave', [ProfileController::class, 'leaveStatic'])->name('profile.static.leave');
+    Route::post('/profile/static/{static}/transfer', [ProfileController::class, 'transferOwnership'])->name('profile.static.transfer');
 
     Route::get('/statics/setup', [StaticController::class, 'index'])->name('statics.setup');
     Route::post('/statics', [StaticController::class, 'store'])->name('statics.store');

@@ -33,6 +33,7 @@ GQL;
               casts: table(dataType: Casts, fightIDs: $fightIds, killType: Encounters, viewBy: Ability)
               damageDone: table(dataType: DamageDone, fightIDs: $fightIds, killType: Encounters)
               healing: table(dataType: Healing, fightIDs: $fightIds, killType: Encounters)
+              dispels: table(dataType: Dispels, fightIDs: $fightIds, killType: Encounters)
             }
           }
         }
