@@ -34,6 +34,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $bnet_last_synced_at
  * @property Carbon|null $rio_last_synced_at
  * @property Carbon|null $wcl_last_synced_at
+ * @property string $plan_tier
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $owner
@@ -105,6 +106,7 @@ class StaticGroup extends Model
         'bnet_last_synced_at',
         'rio_last_synced_at',
         'wcl_last_synced_at',
+        'plan_tier',
     ];
 
     protected $casts = [
@@ -116,6 +118,7 @@ class StaticGroup extends Model
         'bnet_last_synced_at' => 'datetime',
         'rio_last_synced_at' => 'datetime',
         'wcl_last_synced_at' => 'datetime',
+        'plan_tier' => 'string',
     ];
 
     public function newEloquentBuilder($query): StaticGroupBuilder

@@ -1,78 +1,105 @@
 <script setup>
-import { defineEmits } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+
 const { __ } = useTranslation();
 
 const props = defineProps({
   syncData: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
+  // How often the widget re-calculates progress/countdown (ms).
+  // Driven by config('sync.widget_tick_ms') passed from the blade template.
+  tickInterval: {
+    type: Number,
+    default: 1000,
+  },
 });
 
-const emit = defineEmits(['refresh']);
-
 const services = [
-  { id: 'bnet', name: 'Blizzard', icon: 'shield' },
-  { id: 'rio', name: 'Raider.io', icon: 'trending_up' },
-  { id: 'wcl', name: 'Warcraft Logs', icon: 'leaderboard' }
+  { id: 'bnet', name: 'Blizzard',      icon: 'shield'      },
+  { id: 'rio',  name: 'Raider.io',     icon: 'trending_up' },
+  { id: 'wcl',  name: 'Warcraft Logs', icon: 'leaderboard' },
 ];
 
-const getTimeAgo = (timestamp) => {
-  if (!timestamp) return __('Never');
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return __('Invalid Date');
-    const now = new Date();
-    const diffInMinutes = Math.floor((now - date) / 60000);
+// Reactive "current time" — updated on every tick so all computed values
+// automatically re-evaluate without any manual wiring.
+const now = ref(new Date());
+let timer = null;
 
-    if (diffInMinutes < 1) return __('Just now');
-    if (diffInMinutes < 60) return `${diffInMinutes}m ${__('ago')}`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ${__('ago')}`;
-    return date.toLocaleDateString();
-  } catch (e) {
-    return __('Error');
-  }
+onMounted(() => {
+  timer = setInterval(() => {
+    now.value = new Date();
+  }, props.tickInterval);
+});
+
+onUnmounted(() => {
+  clearInterval(timer);
+});
+
+// -----------------------------------------------------------------------
+// Helpers — all accept a service id and read from syncData[id]
+// -----------------------------------------------------------------------
+
+const getServiceData = (id) => props.syncData?.[id] ?? null;
+
+const getLastSyncedAt = (id) => {
+  const data = getServiceData(id);
+  if (!data?.last_synced_at) return null;
+  const d = new Date(data.last_synced_at);
+  return isNaN(d.getTime()) ? null : d;
 };
 
-const getNextRefresh = (timestamp) => {
-  if (!timestamp) return __('Soon');
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return __('Soon');
-    const next = new Date(date.getTime() + 60 * 60000); // Assuming 1 hour cycle
-    const now = new Date();
-    const diffInMinutes = Math.floor((next - now) / 60000);
-
-    if (diffInMinutes <= 0) return __('In queue');
-    return `${__('in')} ${diffInMinutes}m`;
-  } catch (e) {
-    return __('Soon');
-  }
+const getIntervalMs = (id) => {
+  const data = getServiceData(id);
+  const minutes = data?.interval_minutes ?? 60;
+  return minutes * 60 * 1000;
 };
 
+const getTimeAgo = (id) => {
+  const date = getLastSyncedAt(id);
+  if (!date) return __('Never');
+
+  const diffMs = now.value - date;
+  const diffMinutes = Math.floor(diffMs / 60000);
+
+  if (diffMinutes < 1)  return __('Just now');
+  if (diffMinutes < 60) return `${diffMinutes}${__('minute_short')} ${__('ago')}`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24)   return `${diffHours}${__('hour_short')} ${__('ago')}`;
+  return date.toLocaleDateString();
+};
+
+const getNextRefresh = (id) => {
+  const date = getLastSyncedAt(id);
+  if (!date) return __('Soon');
+
+  const nextMs  = date.getTime() + getIntervalMs(id);
+  const diffMs  = nextMs - now.value;
+
+  if (diffMs <= 0) return __('In queue');
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const minutes      = Math.floor(totalSeconds / 60);
+  const seconds      = totalSeconds % 60;
+
+  if (minutes > 0) return `⟳ ${minutes}${__('minute_short')} ${seconds}${__('second_short')}`;
+  return `⟳ ${seconds}${__('second_short')}`;
+};
+
+// Progress = how much of the interval has NOT yet elapsed (100% = just synced).
 const getProgress = (id) => {
-  if (!props.syncData || !id) return 0;
-  const timestamp = props.syncData[id];
-  if (!timestamp) return 0;
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 0;
-    const now = new Date();
-    const diffInMinutes = Math.floor((now - date) / 60000);
-    // Use Math.max to avoid negative progress if something is weird
-    return Math.max(0, Math.min(100, 100 - (diffInMinutes / 60) * 100));
-  } catch (e) {
-    return 0;
-  }
+  const date = getLastSyncedAt(id);
+  if (!date) return 0;
+
+  const elapsedMs  = now.value - date;
+  const intervalMs = getIntervalMs(id);
+
+  return Math.max(0, Math.min(100, 100 - (elapsedMs / intervalMs) * 100));
 };
 
-const handleRefresh = (serviceId) => {
-  emit('refresh', serviceId);
-};
-
-const radius = 42;
+const radius       = 42;
 const circumference = 2 * Math.PI * radius;
 </script>
 
@@ -80,7 +107,6 @@ const circumference = 2 * Math.PI * radius;
   <div class="grid grid-cols-3 gap-3 max-w-sm" v-if="services && services.length">
     <template v-for="service in services" :key="service?.id || Math.random()">
       <div v-if="service && service.id"
-           @click="handleRefresh(service.id)"
            class="flex flex-col items-center group cursor-pointer active:scale-95 transition-all">
 
         <!-- Service Label -->
@@ -105,7 +131,7 @@ const circumference = 2 * Math.PI * radius;
                 stroke-width="6"
                 class="text-white/5"
               />
-              <!-- Progress Bar -->
+              <!-- Progress Arc — updates every tick -->
               <circle
                 cx="50"
                 cy="50"
@@ -114,19 +140,24 @@ const circumference = 2 * Math.PI * radius;
                 stroke="currentColor"
                 stroke-width="6"
                 stroke-linecap="round"
-                class="text-primary transition-all duration-1000 ease-out"
+                class="text-primary"
                 :style="{
                   strokeDasharray: circumference,
                   strokeDashoffset: circumference - (getProgress(service.id) / 100) * circumference,
-                  filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))'
+                  filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))',
+                  transition: 'stroke-dashoffset 0.9s linear',
                 }"
               />
             </svg>
 
             <!-- Center Content -->
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
-              <div class="text-[7px] text-gray-400 font-bold uppercase tracking-tighter leading-none mb-0.5">{{ getTimeAgo(syncData && service?.id ? syncData[service.id] : null) }}</div>
-              <div class="text-[6px] text-primary/60 font-black uppercase tracking-tighter leading-none">{{ getNextRefresh(syncData && service?.id ? syncData[service.id] : null) }}</div>
+              <div class="text-[7px] text-gray-400 font-bold uppercase tracking-tighter leading-none mb-0.5">
+                {{ getTimeAgo(service.id) }}
+              </div>
+              <div class="text-[6px] text-primary/60 font-black uppercase tracking-tighter leading-none">
+                {{ getNextRefresh(service.id) }}
+              </div>
             </div>
           </div>
         </div>

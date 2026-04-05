@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
 
+use App\Enums\StaticGroup\SyncType;
+use App\Helpers\SyncIntervalHelper;
 use App\Models\StaticGroup;
 use App\Models\RaidEvent;
 use App\Helpers\CurrencyHelper;
@@ -48,11 +50,22 @@ class DashboardService
         $taxDescription = $treasuryData['taxDescription'];
         $taxClass = $treasuryData['taxClass'];
 
-        // 6. Sync Data
+        // 6. Sync Data — includes per-service interval so the widget can render
+        //    an accurate countdown without knowing the plan tier on the frontend.
+        $tier = $static->plan_tier ?? 'free';
         $syncData = [
-            'bnet' => $static->bnet_last_synced_at ? $static->bnet_last_synced_at->toIso8601String() : null,
-            'rio' => $static->rio_last_synced_at ? $static->rio_last_synced_at->toIso8601String() : null,
-            'wcl' => $static->wcl_last_synced_at ? $static->wcl_last_synced_at->toIso8601String() : null,
+            'bnet' => [
+                'last_synced_at'   => $static->bnet_last_synced_at?->toIso8601String(),
+                'interval_minutes' => SyncIntervalHelper::getIntervalInMinutes($tier, SyncType::BNET),
+            ],
+            'rio' => [
+                'last_synced_at'   => $static->rio_last_synced_at?->toIso8601String(),
+                'interval_minutes' => SyncIntervalHelper::getIntervalInMinutes($tier, SyncType::RIO),
+            ],
+            'wcl' => [
+                'last_synced_at'   => $static->wcl_last_synced_at?->toIso8601String(),
+                'interval_minutes' => SyncIntervalHelper::getIntervalInMinutes($tier, SyncType::WCL),
+            ],
         ];
 
         return array_merge(

@@ -33,10 +33,12 @@ final class SyncCharacterRawDataAction
     ) {}
 
     /**
-     * Syncs all API routes for the given character.
-     * The character must have its `realm` relationship loaded (or loadable).
+     * Syncs API routes for the given character.
+     *
+     * @param string $service Which service group to fetch: 'bnet', 'rio', or 'all'.
+     *                        Defaults to 'all' for backwards compatibility.
      */
-    public function execute(Character $character): void
+    public function execute(Character $character, string $service = 'all'): void
     {
         $realmSlug = strtolower((string) ($character->realm?->slug ?? ''));
         $name      = strtolower($character->name);
@@ -44,71 +46,75 @@ final class SyncCharacterRawDataAction
 
         $updates = [];
 
-        // -----------------------------------------------------------------
-        // Blizzard: profile summary
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'bnet_profile',
-            schema:     'bnet_profile',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->blizzard->getCharacterProfileSummary($realmSlug, $name),
-        );
+        if ($service === 'bnet' || $service === 'all') {
+            // -----------------------------------------------------------------
+            // Blizzard: profile summary
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'bnet_profile',
+                schema:     'bnet_profile',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->blizzard->getCharacterProfileSummary($realmSlug, $name),
+            );
 
-        // -----------------------------------------------------------------
-        // Blizzard: equipment
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'bnet_equipment',
-            schema:     'bnet_equipment',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->blizzard->getCharacterEquipment($region, $realmSlug, $name),
-        );
+            // -----------------------------------------------------------------
+            // Blizzard: equipment
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'bnet_equipment',
+                schema:     'bnet_equipment',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->blizzard->getCharacterEquipment($region, $realmSlug, $name),
+            );
 
-        // -----------------------------------------------------------------
-        // Blizzard: media (avatar)
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'bnet_media',
-            schema:     'bnet_media',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->blizzard->getCharacterMedia($realmSlug, $name),
-        );
+            // -----------------------------------------------------------------
+            // Blizzard: media (avatar)
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'bnet_media',
+                schema:     'bnet_media',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->blizzard->getCharacterMedia($realmSlug, $name),
+            );
 
-        // -----------------------------------------------------------------
-        // Blizzard: Mythic+ keystone profile
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'bnet_mplus',
-            schema:     'bnet_mplus',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->blizzard->getCharacterMythicKeystoneProfile($realmSlug, $name),
-        );
+            // -----------------------------------------------------------------
+            // Blizzard: Mythic+ keystone profile
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'bnet_mplus',
+                schema:     'bnet_mplus',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->blizzard->getCharacterMythicKeystoneProfile($realmSlug, $name),
+            );
 
-        // -----------------------------------------------------------------
-        // Blizzard: raid encounters
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'bnet_raid',
-            schema:     'bnet_raid',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->blizzard->getCharacterRaidEncounters($realmSlug, $name),
-        );
+            // -----------------------------------------------------------------
+            // Blizzard: raid encounters
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'bnet_raid',
+                schema:     'bnet_raid',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->blizzard->getCharacterRaidEncounters($realmSlug, $name),
+            );
+        }
 
-        // -----------------------------------------------------------------
-        // Raider.io: character profile
-        // -----------------------------------------------------------------
-        $this->tryFetch(
-            route:      'rio_profile',
-            schema:     'rio_profile',
-            character:  $character,
-            updates:    $updates,
-            fetcher:    fn() => $this->fetchRioProfile($region, $realmSlug, $name),
-        );
+        if ($service === 'rio' || $service === 'all') {
+            // -----------------------------------------------------------------
+            // Raider.io: character profile
+            // -----------------------------------------------------------------
+            $this->tryFetch(
+                route:      'rio_profile',
+                schema:     'rio_profile',
+                character:  $character,
+                updates:    $updates,
+                fetcher:    fn() => $this->fetchRioProfile($region, $realmSlug, $name),
+            );
+        }
 
         // Persist all successfully validated payloads in a single write.
         if ($updates !== []) {
@@ -119,11 +125,13 @@ final class SyncCharacterRawDataAction
 
             Log::info('SyncCharacterRawDataAction: persisted raw data.', [
                 'character_id' => $character->id,
+                'service'      => $service,
                 'routes'       => array_keys($updates),
             ]);
         } else {
             Log::warning('SyncCharacterRawDataAction: no valid data to persist.', [
                 'character_id' => $character->id,
+                'service'      => $service,
             ]);
         }
     }

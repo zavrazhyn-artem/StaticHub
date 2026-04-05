@@ -15,7 +15,7 @@ Artisan::command('inspire', function () {
 
 Schedule::command(FetchAuctionsCommand::class)->everyFifteenMinutes();
 Schedule::command(ProcessDiscordAutomations::class)->everyFifteenMinutes();
-Schedule::command(SyncAllStaticsCommand::class)->everyFifteenMinutes();
+Schedule::command(SyncAllStaticsCommand::class)->everyMinute();
 
 Schedule::command('backup:run --only-db')->daily()->at('03:00');
 

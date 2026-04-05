@@ -1,7 +1,7 @@
 x-app-defaults: &app-defaults
   build:
     context: .
-    dockerfile: docker/dev/Dockerfile # Вказуємо локальний докерфайл
+    dockerfile: docker/dev/Dockerfile
   restart: unless-stopped
   env_file: .env
   depends_on:
@@ -17,6 +17,7 @@ x-app-defaults: &app-defaults
 
 services:
   nginx:
+    container_name: blastr_nginx
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
@@ -27,12 +28,13 @@ services:
       - app_network
     volumes:
       - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - .:/var/www/html:ro # Nginx тепер бачить всю папку
+      - .:/var/www/html:ro
 
   app:
     <<: *app-defaults
+    container_name: blastr_app
     ports:
-      - "5173:5173" # Прокидаємо порт для Vite HMR
+      - "5173:5173"
     healthcheck:
       test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
       interval: 30s
@@ -42,13 +44,16 @@ services:
 
   worker:
     <<: *app-defaults
+    container_name: blastr_worker
     command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
 
   scheduler:
     <<: *app-defaults
+    container_name: blastr_scheduler
     command: ["php", "artisan", "schedule:work"]
 
   mysql:
+    container_name: blastr_mysql
     image: mysql:8.4
     restart: unless-stopped
     environment:
@@ -75,6 +80,7 @@ services:
       start_period: 30s
 
   redis:
+    container_name: blastr_redis
     image: redis:7-alpine
     restart: unless-stopped
     command: >
@@ -94,7 +100,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   cloudflared:
+    container_name: blastr_cloudflared
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     command: tunnel run

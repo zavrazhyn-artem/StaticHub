@@ -28,7 +28,9 @@ class CompileCharacterDataJob implements ShouldQueue
 
     public function __construct(
         public readonly Character $character,
-    ) {}
+    ) {
+        $this->onQueue(config('sync.queues.compile', 'compile'));
+    }
 
     public function handle(RosterCompilerService $compiler): void
     {

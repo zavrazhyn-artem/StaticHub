@@ -16,6 +16,7 @@ import SettingsSchedule from './Components/Statics/SettingsSchedule.vue';
 import StaticSetup from './Components/Statics/StaticSetup.vue';
 import ConsumablesPlanner from './Components/ConsumablesPlanner.vue';
 import ConsumableCard from './Components/ConsumableCard.vue';
+import DashboardView from './Components/Dashboard/DashboardView.vue';
 
 const app = createApp({});
 app.config.globalProperties.__ = (key, replace = {}) => {
@@ -45,6 +46,7 @@ app.component('settings-schedule', SettingsSchedule);
 app.component('static-setup', StaticSetup);
 app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
+app.component('dashboard-view', DashboardView);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

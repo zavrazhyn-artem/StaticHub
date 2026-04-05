@@ -380,5 +380,9 @@
     "Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.": "Після видалення акаунту всі його ресурси та дані будуть видалені назавжди. Будь ласка, введіть пароль для підтвердження видалення.",
     "Invite Bot to Server": "Запросити бота на сервер",
     "Post the next scheduled raid immediately after current one ends.": "Оголошує наступний запланований рейд безпосередньо після поточного.",
-    "Enable Auto-Post": "Увімкнути авто-оголошення"
+    "Enable Auto-Post": "Увімкнути авто-оголошення",
+    "minute_short": "х",
+    "second_short": "с",
+    "hour_short": "г",
+    "day_short": "д"
 }
