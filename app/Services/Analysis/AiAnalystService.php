@@ -6,6 +6,7 @@ namespace App\Services\Analysis;
 
 use App\Models\AiChatMessage;
 use App\Models\PersonalTacticalReport;
+use App\Models\StaticGroup;
 use App\Models\TacticalReport;
 
 class AiAnalystService
@@ -17,6 +18,18 @@ class AiAnalystService
         private readonly GeminiService $geminiService,
         private readonly WclService    $wclService
     ) {}
+
+    /**
+     * Get the character IDs belonging to a user within a static group.
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    public function getUserCharacterIdsInStatic(StaticGroup $static, int $userId): \Illuminate\Support\Collection
+    {
+        return $static->characters()
+            ->where('characters.user_id', $userId)
+            ->pluck('characters.id');
+    }
 
     /**
      * Full log analysis for leaders/officers.

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Jobs\Discord;
 
-use App\Models\RaidAttendance;
 use App\Models\Event;
 use App\Services\Discord\DiscordMessageService;
+use App\Services\Raid\RaidAttendanceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,28 +24,15 @@ class SwapRsvpSpecJob implements ShouldQueue
     ) {
     }
 
-    public function handle(DiscordMessageService $discordMessageService): void
+    public function handle(RaidAttendanceService $attendanceService, DiscordMessageService $discordMessageService): void
     {
-        $event = Event::find($this->eventId);
+        $event = Event::query()->findById($this->eventId);
 
         if (!$event || $event->raid_started) {
             return;
         }
 
-        $attendance = RaidAttendance::where('event_id', $this->eventId)
-            ->whereIn('character_id', function ($query) {
-                $query->select('id')
-                    ->from('characters')
-                    ->where('user_id', $this->userId);
-            })
-            ->first();
-
-        if (!$attendance) {
-            return;
-        }
-
-        $attendance->update(['spec_id' => $this->specId]);
-
+        $attendanceService->swapSpec($this->eventId, $this->userId, $this->specId);
         $discordMessageService->sendOrUpdateRaidAnnouncement($event);
     }
 }

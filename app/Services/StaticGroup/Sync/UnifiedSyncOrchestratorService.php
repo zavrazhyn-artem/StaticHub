@@ -6,8 +6,8 @@ namespace App\Services\StaticGroup\Sync;
 
 use App\Enums\StaticGroup\SyncType;
 use App\Helpers\SyncIntervalHelper;
-use App\Jobs\FetchBnetRawDataJob;
-use App\Jobs\FetchRioRawDataJob;
+use App\Jobs\Character\FetchBnetRawDataJob;
+use App\Jobs\Character\FetchRioRawDataJob;
 use App\Models\StaticGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Character;
 
-use App\Jobs\SyncCharacterItemLevelJob;
+use App\Jobs\Character\SyncCharacterItemLevelJob;
 use App\Models\Character;
 use App\Models\Realm;
 use App\Services\Blizzard\BlizzardCharacterApiService;
@@ -52,7 +52,7 @@ class CharacterSyncService
      * equipped_item_level, and auto-sets the main spec for every static the
      * character belongs to (skipped if specs are already configured).
      */
-    private function syncProfileAndSpec(Character $character): void
+    public function syncProfileAndSpec(Character $character): void
     {
         $profileData = $this->blizzardApiService->getCharacterProfileSummary(
             $character->realm->slug,

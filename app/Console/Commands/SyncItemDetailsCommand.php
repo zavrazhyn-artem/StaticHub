@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncSingleItemMetadataJob;
+use App\Jobs\Item\SyncSingleItemMetadataJob;
 use App\Services\Auction\AuctionSyncService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;

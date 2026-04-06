@@ -142,6 +142,14 @@ class TreasuryService
     }
 
     /**
+     * Update a transaction's description/comment.
+     */
+    public function updateTransactionComment(Transaction $transaction, ?string $description): void
+    {
+        $transaction->update(['description' => $description]);
+    }
+
+    /**
      * Compute tax warning based on fixed tax vs real cost.
      */
     public function computeTaxWarning(int $fixedTax, int $realCostPerPlayer): array

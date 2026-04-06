@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Analysis;
 
 use App\Helpers\WclParserHelper;
-use App\Jobs\ProcessRaidAnalysisJob;
+use App\Jobs\Analysis\ProcessRaidAnalysisJob;
 use App\Models\StaticGroup;
 use App\Models\TacticalReport;
 

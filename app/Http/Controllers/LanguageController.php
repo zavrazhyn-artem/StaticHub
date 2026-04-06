@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Auth\UserService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 
 class LanguageController extends Controller
 {
-    public function switch(Request $request)
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+
+    public function switch(Request $request): RedirectResponse
     {
         $locale = $request->input('locale');
 
@@ -19,9 +24,7 @@ class LanguageController extends Controller
         session(['locale' => $locale]);
 
         if (Auth::check()) {
-            $user = Auth::user();
-            $user->locale = $locale;
-            $user->save();
+            $this->userService->updateLocale(Auth::user(), $locale);
         }
 
         return redirect()->back();

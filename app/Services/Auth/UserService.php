@@ -7,9 +7,42 @@ namespace App\Services\Auth;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Collection;
 
 class UserService
 {
+    /**
+     * Build the payload for the profile edit view.
+     */
+    public function buildProfilePayload(User $user): array
+    {
+        $ownedStatics = $user->ownedStatics()->with([
+            'members' => fn ($q) => $q->where('user_id', '!=', $user->id)
+                ->with(['characters' => fn ($q2) => $q2->whereHas('statics', fn ($q3) => $q3->where('character_static.role', 'main'))]),
+        ])->get();
+
+        $transferData = $ownedStatics->map(fn ($static) => [
+            'id'      => $static->id,
+            'name'    => $static->name,
+            'url'     => route('profile.static.transfer', $static),
+            'members' => $static->members->map(fn ($member) => [
+                'id'        => $member->id,
+                'name'      => $member->name,
+                'character' => ($char = $member->characters->first()) ? [
+                    'name'          => $char->name,
+                    'playable_class' => $char->playable_class,
+                    'avatar_url'    => $char->avatar_url,
+                ] : null,
+            ])->values(),
+        ])->values();
+
+        return [
+            'user'         => $user,
+            'ownedStatics' => $ownedStatics,
+            'transferData' => $transferData,
+        ];
+    }
+
     /**
      * Update user profile data.
      */
@@ -38,6 +71,15 @@ class UserService
         event(new Registered($user));
 
         return $user;
+    }
+
+    /**
+     * Update the user's locale preference.
+     */
+    public function updateLocale(User $user, string $locale): void
+    {
+        $user->locale = $locale;
+        $user->save();
     }
 
     /**

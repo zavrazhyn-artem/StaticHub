@@ -14,6 +14,32 @@ use Illuminate\Support\Collection;
 class RaidAttendanceService
 {
     /**
+     * Swap the character on an existing RSVP, or create a tentative one.
+     */
+    public function swapCharacter(int $eventId, int $userId, int $newCharacterId): void
+    {
+        $attendance = RaidAttendance::query()->forEventAndUser($eventId, $userId);
+
+        if ($attendance) {
+            $attendance->update(['character_id' => $newCharacterId]);
+        } else {
+            RaidAttendance::query()->createForEvent($eventId, $newCharacterId, 'tentative');
+        }
+    }
+
+    /**
+     * Swap the spec on an existing RSVP.
+     */
+    public function swapSpec(int $eventId, int $userId, int $specId): void
+    {
+        $attendance = RaidAttendance::query()->forEventAndUser($eventId, $userId);
+
+        if ($attendance) {
+            $attendance->update(['spec_id' => $specId]);
+        }
+    }
+
+    /**
      * Update attendance for a character at a raid event.
      */
     public function updateAttendance(Event $event, Character $character, string $status, ?string $comment = null, ?int $specId = null): RaidAttendance

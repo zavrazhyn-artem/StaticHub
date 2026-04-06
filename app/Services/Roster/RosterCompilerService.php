@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Roster;
 
 use App\Data\Roster\CompiledRosterMemberDTO;
+use App\Models\Character;
 use App\Models\ServiceRawData;
+use App\Services\StaticGroup\RosterService;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Orchestrates compilation of a ServiceRawData record into a single,
@@ -22,11 +25,52 @@ final class RosterCompilerService
         private readonly VaultDataService       $vaultData,
         private readonly ProgressionDataService $progression,
         private readonly CollectionDataService  $collection,
+        private readonly RosterService          $rosterService,
     ) {}
 
     // -------------------------------------------------------------------------
     // Public API
     // -------------------------------------------------------------------------
+
+    /**
+     * Compile raw data for a character and persist the result.
+     */
+    public function compileAndPersist(Character $character): void
+    {
+        $rawData = $character->serviceRawData()->first();
+
+        if (!$rawData) {
+            Log::warning('No raw data for character', ['id' => $character->id]);
+            return;
+        }
+
+        $compiled = $this->compile($rawData);
+        $compiledArray = json_decode(json_encode($compiled), true);
+
+        // Extract active_spec from raw bnet profile
+        $bnetProfile = $rawData->bnet_profile ?? [];
+        $activeSpec = is_array($bnetProfile['active_spec'] ?? null)
+            ? ($bnetProfile['active_spec']['name'] ?? null)
+            : ($bnetProfile['active_spec'] ?? null);
+        if ($activeSpec === null) {
+            $activeSpec = is_array($bnetProfile['active_specialization'] ?? null)
+                ? ($bnetProfile['active_specialization']['name'] ?? null)
+                : ($bnetProfile['active_specialization'] ?? null);
+        }
+
+        $character->update([
+            'compiled_data' => $compiledArray,
+            'active_spec' => $activeSpec ?? $character->active_spec,
+        ]);
+
+        $character->refresh();
+
+        // Auto-set main spec for each static
+        $staticIds = $character->statics()->pluck('statics.id');
+        foreach ($staticIds as $staticId) {
+            $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
+        }
+    }
 
     public function compile(ServiceRawData $rawData): CompiledRosterMemberDTO
     {

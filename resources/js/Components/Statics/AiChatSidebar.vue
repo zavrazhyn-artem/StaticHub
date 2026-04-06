@@ -107,7 +107,7 @@ async function sendMessage() {
         leave-to-class="translate-x-full"
     >
         <div v-if="open"
-             class="fixed right-0 top-0 h-full w-96 bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 flex flex-col">
+             class="fixed right-0 top-0 h-full w-[600px] bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 flex flex-col">
             <!-- Header -->
             <div class="p-6 border-b border-white/5 flex items-center justify-between bg-surface-container-high">
                 <div class="flex items-center gap-3">

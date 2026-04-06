@@ -76,6 +76,50 @@ class CharacterService
     }
 
     /**
+     * Update the available specs and main spec for a character in a static.
+     */
+    public function updateSpecs(int $characterId, int $staticId, array $specIds, ?int $mainSpecId): void
+    {
+        // Ensure main_spec_id is in spec_ids
+        if ($mainSpecId !== null && !in_array($mainSpecId, $specIds, true)) {
+            $specIds[] = $mainSpecId;
+        }
+
+        // Delete old entries for this character+static
+        CharacterStaticSpec::where('character_id', $characterId)
+            ->where('static_id', $staticId)
+            ->delete();
+
+        // Insert new ones
+        foreach ($specIds as $specId) {
+            CharacterStaticSpec::create([
+                'character_id' => $characterId,
+                'static_id'    => $staticId,
+                'spec_id'      => $specId,
+                'is_main'      => $specId === $mainSpecId,
+            ]);
+        }
+    }
+
+    /**
+     * Get the main spec for a character in a given static.
+     *
+     * @return array|null
+     */
+    public function getMainSpecInStatic(int $characterId, int $staticId): ?array
+    {
+        $character = Character::find($characterId);
+        $mainSpec  = $character?->getMainSpecInStatic($staticId);
+
+        return $mainSpec ? [
+            'id'       => $mainSpec->id,
+            'name'     => $mainSpec->name,
+            'role'     => $mainSpec->role,
+            'icon_url' => $mainSpec->icon_url,
+        ] : null;
+    }
+
+    /**
      * Get personal tactical reports for a user.
      *
      * @param User $user

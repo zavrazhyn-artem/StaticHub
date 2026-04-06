@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Jobs\Discord;
 
-use App\Models\RaidAttendance;
 use App\Models\Event;
 use App\Services\Discord\DiscordMessageService;
+use App\Services\Raid\RaidAttendanceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,39 +30,15 @@ class SwapRsvpCharacterJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(DiscordMessageService $discordMessageService): void
+    public function handle(RaidAttendanceService $attendanceService, DiscordMessageService $discordMessageService): void
     {
-        $event = Event::find($this->eventId);
+        $event = Event::query()->findById($this->eventId);
 
         if (!$event || $event->raid_started) {
             return;
         }
 
-        // Find the current attendance record for this User and Event.
-        // Since attendance is linked to character_id, we need to find which character the user is currently using.
-        $attendance = RaidAttendance::where('event_id', $this->eventId)
-            ->whereIn('character_id', function ($query) {
-                $query->select('id')
-                    ->from('characters')
-                    ->where('user_id', $this->userId);
-            })
-            ->first();
-
-        if ($attendance) {
-            // Update existing attendance
-            $attendance->update([
-                'character_id' => $this->characterId,
-            ]);
-        } else {
-            // If no attendance record exists, create one with a 'tentative' status for the new character
-            RaidAttendance::create([
-                'event_id' => $this->eventId,
-                'character_id' => $this->characterId,
-                'status' => 'tentative',
-            ]);
-        }
-
-        // Refresh the public main roster message.
+        $attendanceService->swapCharacter($this->eventId, $this->userId, $this->characterId);
         $discordMessageService->sendOrUpdateRaidAnnouncement($event);
     }
 }

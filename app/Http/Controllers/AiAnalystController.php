@@ -30,9 +30,7 @@ class AiAnalystController extends Controller
         }
 
         // Members get personal report context only
-        $characterIds = $static->characters()
-            ->where('characters.user_id', $user->id)
-            ->pluck('characters.id');
+        $characterIds = $this->aiAnalystService->getUserCharacterIdsInStatic($static, $user->id);
 
         if ($characterIds->isEmpty()) {
             return response()->json([

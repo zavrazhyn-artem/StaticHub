@@ -33,8 +33,8 @@ class ProcessRsvpInteractionJob implements ShouldQueue
      */
     public function handle(RaidAttendanceService $attendanceService, DiscordMessageService $discordMessageService): void
     {
-        $event = Event::find($this->eventId);
-        $character = Character::find($this->characterId);
+        $event = Event::query()->findById($this->eventId);
+        $character = Character::query()->findById($this->characterId);
 
         if (!$event || !$character || $event->raid_started) {
             return;
