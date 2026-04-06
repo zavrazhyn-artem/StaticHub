@@ -1,7 +1,11 @@
+@php
+    $canManageTreasury = Auth::user()->can('canManageTreasury', $static);
+@endphp
 <x-app-layout>
     <treasury-dashboard
         :static-id="{{ $static->id }}"
         static-name="{{ $static->name }}"
+        :can-manage-treasury="{{ $canManageTreasury ? 'true' : 'false' }}"
         :initial-target-tax="{{ $targetTax ?: 0 }}"
         :initial-weekly-cost="{{ $weeklyCost ?: 0 }}"
         initial-tax-status="{{ $taxStatus }}"
@@ -21,7 +25,10 @@
                 :individual-potion-price="{{ $individualPotionPrice }}"
                 :individual-flask-price="{{ $individualFlaskPrice }}"
                 save-url="{{ route('consumables.store', $static) }}"
-                settings-schedule-url="{{ route('statics.settings.schedule', $static) }}"
+                :can-manage-treasury="{{ $canManageTreasury ? 'true' : 'false' }}"
+                @if ($canManageTreasury)
+                    settings-schedule-url="{{ route('statics.settings.schedule', $static) }}"
+                @endif
                 csrf-token="{{ csrf_token() }}"
             />
         </template>

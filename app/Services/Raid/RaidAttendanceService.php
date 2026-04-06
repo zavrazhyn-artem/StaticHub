@@ -7,6 +7,7 @@ namespace App\Services\Raid;
 use App\Models\RaidEvent;
 use App\Models\Character;
 use App\Models\RaidAttendance;
+use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -15,14 +16,15 @@ class RaidAttendanceService
     /**
      * Update attendance for a character at a raid event.
      */
-    public function updateAttendance(RaidEvent $event, Character $character, string $status, ?string $comment = null): RaidAttendance
+    public function updateAttendance(RaidEvent $event, Character $character, string $status, ?string $comment = null, ?int $specId = null): RaidAttendance
     {
         return RaidAttendance::updateOrCreate([
             'raid_event_id' => $event->id,
             'character_id' => $character->id,
         ], [
-            'status' => $status,
+            'status'  => $status,
             'comment' => $comment,
+            'spec_id' => $specId,
         ]);
     }
 
@@ -47,14 +49,15 @@ class RaidAttendanceService
                     $character,
                     $event->id,
                     $resolved['status'],
-                    $resolved['comment']
+                    $resolved['comment'],
+                    $resolved['spec_id'],
                 );
 
                 $resolvedCharacters->push($character);
             }
         }
 
-        return $this->categorizeRoster($resolvedCharacters, $event->static_id);
+        return $this->categorizeRoster($resolvedCharacters, $event->static_id, $attendances);
     }
 
     /**
@@ -101,8 +104,9 @@ class RaidAttendanceService
         if ($userAttendance && $selectedCharacter) {
             return [
                 'character' => $selectedCharacter,
-                'status' => $userAttendance->status,
-                'comment' => $userAttendance->comment,
+                'status'    => $userAttendance->status,
+                'comment'   => $userAttendance->comment,
+                'spec_id'   => $userAttendance->spec_id,
             ];
         }
 
@@ -117,8 +121,9 @@ class RaidAttendanceService
         if ($mainCharacter) {
             return [
                 'character' => $mainCharacter,
-                'status' => 'pending',
-                'comment' => null,
+                'status'    => 'pending',
+                'comment'   => null,
+                'spec_id'   => null,
             ];
         }
 
@@ -128,21 +133,32 @@ class RaidAttendanceService
     /**
      * Isolates the presentation logic of attaching a temporary pivot.
      */
-    private function attachVirtualAttendance(Character $character, int $eventId, string $status, ?string $comment): void
-    {
+    private function attachVirtualAttendance(
+        Character $character,
+        int $eventId,
+        string $status,
+        ?string $comment,
+        ?int $specId = null,
+    ): void {
         $character->setRelation('pivot', new RaidAttendance([
-            'status' => $status,
-            'comment' => $comment,
-            'character_id' => $character->id,
+            'status'        => $status,
+            'comment'       => $comment,
+            'spec_id'       => $specId,
+            'character_id'  => $character->id,
             'raid_event_id' => $eventId,
         ]));
     }
 
     /**
-     * Handles sorting characters into roles.
+     * Sorts characters into role groups.
+     * Uses the RSVP spec_id (from attendance) when available for role determination,
+     * falling back to the character's main spec in the static.
      */
-    private function categorizeRoster(Collection $resolvedCharacters, int $staticId): array
-    {
+    private function categorizeRoster(
+        Collection $resolvedCharacters,
+        int $staticId,
+        Collection $attendances,
+    ): array {
         $mainRoster = [
             'tank' => new Collection(),
             'heal' => new Collection(),
@@ -151,25 +167,32 @@ class RaidAttendanceService
         ];
         $absentRoster = new Collection();
 
+        // Pre-load all RSVP specializations in one query to avoid N+1.
+        $rsvpSpecIds = $attendances->pluck('spec_id')->filter()->unique();
+        $rsvpSpecs   = $rsvpSpecIds->isNotEmpty()
+            ? Specialization::whereIn('id', $rsvpSpecIds)->get()->keyBy('id')
+            : collect();
+
         foreach ($resolvedCharacters as $character) {
             /** @var Character $character */
             $status = $character->pivot->status;
-            $combatRole = $character->getCombatRoleInStatic($staticId);
+
+            // Prefer the spec chosen for this specific raid over the static main spec.
+            $rsvpSpecId = $attendances->get($character->id)?->spec_id;
+            $combatRole = $rsvpSpecId
+                ? ($rsvpSpecs->get($rsvpSpecId)?->role ?? $character->getCombatRoleInStatic($staticId))
+                : $character->getCombatRoleInStatic($staticId);
 
             if ($status === 'absent' || $status === 'tentative') {
+                $character->setAttribute('assigned_role', $combatRole);
                 $absentRoster->push($character);
             } else {
-                if (isset($mainRoster[$combatRole])) {
-                    $mainRoster[$combatRole]->push($character);
-                } else {
-                    // Fallback to rdps if role is unknown
-                    $mainRoster['rdps']->push($character);
-                }
+                ($mainRoster[$combatRole] ?? $mainRoster['rdps'])->push($character);
             }
         }
 
         return [
-            'mainRoster' => $mainRoster,
+            'mainRoster'   => $mainRoster,
             'absentRoster' => $absentRoster,
         ];
     }

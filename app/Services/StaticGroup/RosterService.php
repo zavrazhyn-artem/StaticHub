@@ -24,9 +24,6 @@ class RosterService
 
     /**
      * Get all members (users) of a static with their characters, grouped by role.
-     *
-     * @param int $staticId
-     * @return Collection
      */
     public function getGroupedRoster(int $staticId): Collection
     {
@@ -45,9 +42,6 @@ class RosterService
 
     /**
      * Get all members (users) of a static with their characters.
-     *
-     * @param int $staticId
-     * @return Collection
      */
     public function getStaticMembers(int $staticId): Collection
     {
@@ -56,9 +50,6 @@ class RosterService
 
     /**
      * Get role counts for a static roster.
-     *
-     * @param int $staticId
-     * @return array
      */
     public function getRoleCounts(int $staticId): array
     {
@@ -86,24 +77,14 @@ class RosterService
 
     /**
      * Assign a character to a static with a specific role and handle auto-downgrade.
-     *
-     * @param int $characterId
-     * @param int $staticId
-     * @param string $role
-     * @param string $combatRole
-     * @param int $userId
-     * @return void
      */
-    public function assignCharacterToStatic(int $characterId, int $staticId, string $role, string $combatRole, int $userId): void
+    public function assignCharacterToStatic(int $characterId, int $staticId, string $role, int $userId): void
     {
-        $this->assignCharacterRoleTask->run($characterId, $staticId, $role, $combatRole, $userId);
+        $this->assignCharacterRoleTask->run($characterId, $staticId, $role, $userId);
     }
 
     /**
      * Get the overview data for a static roster (mains with their alts).
-     *
-     * @param StaticGroup $static
-     * @return Collection
      */
     public function getRosterOverview(StaticGroup $static): Collection
     {
@@ -112,16 +93,9 @@ class RosterService
 
     /**
      * Update user participation for a static.
-     *
-     * @param User $user
-     * @param StaticGroup $static
-     * @param int|null $mainCharId
-     * @param array $raidingCharIds
-     * @param array $combatRoles
-     * @return void
      */
-    public function updateUserParticipation(User $user, StaticGroup $static, ?int $mainCharId, array $raidingCharIds, array $combatRoles): void
+    public function updateUserParticipation(User $user, StaticGroup $static, ?int $mainCharId, array $raidingCharIds): void
     {
-        $this->syncUserParticipationTask->run($user, $static, $mainCharId, $raidingCharIds, $combatRoles);
+        $this->syncUserParticipationTask->run($user, $static, $mainCharId, $raidingCharIds);
     }
 }

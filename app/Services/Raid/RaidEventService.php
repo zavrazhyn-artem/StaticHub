@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Raid;
 
+use App\Models\CharacterStaticSpec;
 use App\Models\RaidEvent;
+use App\Models\Specialization;
 use App\Models\User;
 use App\Models\Character;
 use App\Models\RaidAttendance;
@@ -54,31 +56,41 @@ class RaidEventService
             'individual' => Str::markdown($aiAnalysis['individual'] ?? $aiAnalysis['Individual Highlights/Issues'] ?? 'No individual data available.'),
         ];
 
-        // Enhance character data with class icon URL and guaranteed role for Vue
-        $enhanceRoster = function($characters) use ($event, $currentAttendance) {
-            return collect($characters)->map(function($char) use ($event, $currentAttendance) {
+        // Load all attendance spec_ids for this event in one query (keyed by character_id).
+        $allAttendanceSpecs = RaidAttendance::where('raid_event_id', $event->id)
+            ->whereNotNull('spec_id')
+            ->pluck('spec_id', 'character_id');
+
+        // Pre-load all Specialization objects we'll need (avoid N+1).
+        $specModels = Specialization::whereIn('id', $allAttendanceSpecs->values()->unique())
+            ->get()
+            ->keyBy('id');
+
+        // Enhance character data with class icon URL, main spec and role for Vue.
+        // Priority: spec chosen for this raid (from attendance) > main spec in static.
+        $enhanceRoster = function ($characters) use ($event, $allAttendanceSpecs, $specModels) {
+            return collect($characters)->map(function ($char) use ($event, $allAttendanceSpecs, $specModels) {
                 $char->setAttribute('class_icon_url', $char->getClassIconUrl());
 
-                $role = null;
+                $spec = null;
 
-                // 1. НАЙВИЩИЙ ПРІОРИТЕТ: Якщо це персонаж, яким ми зараз приєднані, беремо роль прямо з RSVP
-                if ($currentAttendance && $currentAttendance->character_id == $char->id) {
-                    $role = $currentAttendance->role ?? $currentAttendance->combat_role ?? null;
+                $rsvpSpecId = $allAttendanceSpecs->get($char->id);
+                if ($rsvpSpecId) {
+                    $spec = $specModels->get($rsvpSpecId);
                 }
 
-                // 2. Якщо ролі ще немає, шукаємо в pivot таблиці (працює для учасників ростеру)
-                if (!$role && isset($char->pivot)) {
-                    $role = $char->pivot->role ?? $char->pivot->combat_role ?? null;
+                if (!$spec) {
+                    $spec = $char->getMainSpecInStatic($event->static_id);
                 }
 
-                // 3. Якщо все ще немає, беремо дефолтну роль зі статіка (тепер вона 100% завантажена)
-                if (!$role && $char->relationLoaded('statics')) {
-                    $staticRecord = $char->statics->firstWhere('id', $event->static_id);
-                    $role = $staticRecord->pivot->combat_role ?? null;
-                }
+                $char->setAttribute('main_spec', $spec ? [
+                    'id'       => $spec->id,
+                    'name'     => $spec->name,
+                    'role'     => $spec->role,
+                    'icon_url' => $spec->icon_url,
+                ] : null);
 
-                // 4. Зберігаємо атрибут (тепер до mdps дійде тільки якщо людина взагалі без ролей)
-                $char->setAttribute('assigned_role', $role ?? 'mdps');
+                $char->setAttribute('assigned_role', $spec?->role ?? 'rdps');
 
                 return $char;
             });
@@ -91,13 +103,31 @@ class RaidEventService
         $absentRosterEnhanced = $enhanceRoster($rosterData['absentRoster']);
         $userCharactersEnhanced = $enhanceRoster($userCharacters);
 
+        // Спеки доступні для кожного персонажа в цьому статику (для RsvpModal)
+        $characterSpecs = $userCharacters->mapWithKeys(function ($char) use ($event) {
+            $specs = $char->specsInStatic($event->static_id);
+            $mainSpecRecord = CharacterStaticSpec::where('character_id', $char->id)
+                ->where('static_id', $event->static_id)
+                ->where('is_main', true)
+                ->value('spec_id');
+
+            return [$char->id => $specs->map(fn ($spec) => [
+                'id'       => $spec->id,
+                'name'     => $spec->name,
+                'role'     => $spec->role,
+                'icon_url' => $spec->icon_url,
+                'is_main'  => $spec->id === $mainSpecRecord,
+            ])->values()];
+        });
+
         return [
-            'event' => $event,
-            'mainRoster' => $mainRosterEnhanced,
-            'absentRoster' => $absentRosterEnhanced,
-            'userCharacters' => $userCharactersEnhanced,
-            'currentAttendance' => $currentAttendance,
+            'event'               => $event,
+            'mainRoster'          => $mainRosterEnhanced,
+            'absentRoster'        => $absentRosterEnhanced,
+            'userCharacters'      => $userCharactersEnhanced,
+            'currentAttendance'   => $currentAttendance,
             'selectedCharacterId' => $selectedCharacterId,
+            'characterSpecs'      => $characterSpecs,
         ];
     }
 
@@ -125,11 +155,14 @@ class RaidEventService
 
         $event->clearUserAttendance($user->id);
 
+        $specId = isset($data['spec_id']) ? (int) $data['spec_id'] : null;
+
         $this->attendanceService->updateAttendance(
             $event,
             $character,
             $data['status'],
-            $data['comment'] ?? null
+            $data['comment'] ?? null,
+            $specId
         );
 
         Log::info('RSVP success', [

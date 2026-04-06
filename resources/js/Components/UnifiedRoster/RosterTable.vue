@@ -25,7 +25,8 @@ const emit = defineEmits([
     'toggle-row',
     'update-access-role',
     'update-roster-status',
-    'kick-member'
+    'kick-member',
+    'open-audit-modal'
 ]);
 
 const allRaids = computed(() => {
@@ -163,6 +164,7 @@ const slotLabels = {
                                 :tier-count="tierCount"
                                 :has-audit-issues="hasAuditIssues"
                                 :audit-title="auditTitle"
+                                @open-audit-modal="(c) => emit('open-audit-modal', c)"
                                 @toggle-expand="(id) => emit('toggle-row', id)"
                                 @update-access-role="(m, r) => emit('update-access-role', m, r)"
                                 @update-roster-status="(m, s) => emit('update-roster-status', m, s)"
@@ -191,6 +193,7 @@ const slotLabels = {
                                     :tier-count="tierCount"
                                     :has-audit-issues="hasAuditIssues"
                                     :audit-title="auditTitle"
+                                    @open-audit-modal="(c) => emit('open-audit-modal', c)"
                                     @update-access-role="(m, r) => emit('update-access-role', m, r)"
                                     @update-roster-status="(m, s) => emit('update-roster-status', m, s)"
                                     @kick-member="(m) => emit('kick-member', m)"

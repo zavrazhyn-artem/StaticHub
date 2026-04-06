@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\BattleNetController;
 use App\Http\Controllers\StaticController;
 use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\CharacterSpecController;
 use App\Http\Controllers\RosterController;
 use App\Http\Controllers\ScheduleController;
 
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::get('/characters', [CharacterController::class, 'index'])->name('characters.index');
     Route::post('/characters/import', [CharacterController::class, 'import'])->name('characters.import');
     Route::post('/characters/assign', [CharacterController::class, 'assignToStatic'])->name('characters.assign');
+    Route::post('/characters/specs', [CharacterSpecController::class, 'update'])->name('characters.specs.update');
     Route::get('/personal-reports', [CharacterController::class, 'personalReports'])->name('personal-reports');
 
     Route::get('/statics/{static}/dashboard', [App\Http\Controllers\DashboardController::class, 'show'])->name('statics.dashboard');

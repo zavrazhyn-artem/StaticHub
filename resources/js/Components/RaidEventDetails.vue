@@ -6,8 +6,6 @@ import ToastNotification from './UI/ToastNotification.vue';
 import RaidHeader from './Raid/RaidHeader.vue';
 import RsvpModal from './Raid/RsvpModal.vue';
 import RosterGrid from './Raid/RosterGrid.vue';
-import AbsentRoster from './Raid/AbsentRoster.vue';
-import AnalysisTab from './Raid/AnalysisTab.vue';
 import EditEventModal from './Raid/EditEventModal.vue';
 import DeleteConfirmModal from './Raid/DeleteConfirmModal.vue';
 import CommentModal from './Raid/CommentModal.vue';
@@ -19,7 +17,10 @@ const props = defineProps({
     currentAttendance: { type: Object, default: null },
     mainRoster: { type: Object, required: true },
     absentRoster: { type: Array, required: true },
+    characterSpecs: { type: Object, default: () => ({}) },
     authUserId: { type: Number, required: true },
+    canManageSchedule: { type: Boolean, default: false },
+    canAnnounceToDiscord: { type: Boolean, default: false },
     csrfToken: { type: String, required: true },
     routes: { type: Object, required: true },
     successMessage: { type: String, default: '' },
@@ -95,7 +96,8 @@ const joinedRoleLabel = computed(() => {
             :current-attendance="currentAttendance"
             :joined-character="joinedCharacter"
             :joined-role-label="joinedRoleLabel"
-            :auth-user-id="authUserId"
+            :can-manage-schedule="canManageSchedule"
+            :can-announce-to-discord="canAnnounceToDiscord"
             :csrf-token="csrfToken"
             :routes="routes"
             @rsvp="showRSVPModal = true"
@@ -154,12 +156,14 @@ const joinedRoleLabel = computed(() => {
 
         <!-- Modals -->
         <RsvpModal
+            v-if="showRSVPModal"
             :show="showRSVPModal"
             :user-characters="userCharacters"
             :selected-character-id="selectedCharacterId"
             :current-attendance="currentAttendance"
             :csrf-token="csrfToken"
             :rsvp-route="routes.rsvp"
+            :character-specs="characterSpecs"
             @close="showRSVPModal = false"
         />
 

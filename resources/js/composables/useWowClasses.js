@@ -22,6 +22,9 @@ export function useWowClasses() {
     const getClassColor = (playableClass) => CLASS_BG_COLORS[playableClass] || 'bg-white/20';
 
     const getSpecName = (character) => {
+        // Prefer the raid/roster-specific spec (set by backend from RSVP or main spec in static).
+        if (character.main_spec?.name) return character.main_spec.name;
+
         let displaySpec = character.active_spec;
         if (displaySpec && typeof displaySpec === 'string' && displaySpec.startsWith('{')) {
             try {

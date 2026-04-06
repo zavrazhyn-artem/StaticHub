@@ -8,13 +8,14 @@ use App\Jobs\SyncCharacterItemLevelJob;
 use App\Models\Character;
 use App\Models\Realm;
 use App\Services\BlizzardApiService;
+use App\Tasks\StaticGroup\AssignCharacterRoleTask;
 
 class CharacterSyncService
 {
     public function __construct(
-        private readonly BlizzardApiService $blizzardApiService
-    ) {
-    }
+        private readonly BlizzardApiService      $blizzardApiService,
+        private readonly AssignCharacterRoleTask $assignTask,
+    ) {}
 
     /**
      * Orchestrates fetching characters from Blizzard API and storing them in the database.
@@ -33,11 +34,57 @@ class CharacterSyncService
      */
     private function processSingleCharacter(array $apiData, int $userId): void
     {
-        $realm = $this->resolveRealm($apiData);
+        $realm     = $this->resolveRealm($apiData);
         $avatarUrl = $this->fetchAvatarUrl($apiData);
         $character = $this->upsertCharacter($apiData, $userId, $realm->id, $avatarUrl);
 
+        // Fetch the character's profile summary to get active_spec and ilvl.
+        // This is done synchronously so that the spec assignment below works
+        // immediately — we cannot rely on the queued job for this.
+        $this->syncProfileAndSpec($character);
+
         $this->dispatchSyncJob($character);
+    }
+
+    /**
+     * Fetches the profile summary for the character, updates active_spec /
+     * equipped_item_level, and auto-sets the main spec for every static the
+     * character belongs to (skipped if specs are already configured).
+     */
+    private function syncProfileAndSpec(Character $character): void
+    {
+        $profileData = $this->blizzardApiService->getCharacterProfileSummary(
+            $character->realm->slug,
+            $character->name,
+        );
+
+        if ($profileData === null) {
+            return;
+        }
+
+        $activeSpec = is_array($profileData['active_spec'])
+            ? ($profileData['active_spec']['name'] ?? null)
+            : ($profileData['active_spec'] ?? null);
+
+        // active_specialization is the field name in some API versions
+        if ($activeSpec === null) {
+            $activeSpec = is_array($profileData['active_specialization'])
+                ? ($profileData['active_specialization']['name'] ?? null)
+                : ($profileData['active_specialization'] ?? null);
+        }
+
+        $character->update([
+            'equipped_item_level' => $profileData['equipped_item_level'] ?? $character->equipped_item_level,
+            'active_spec'         => $activeSpec ?? $character->active_spec,
+        ]);
+
+        $character->refresh();
+
+        // Auto-set main spec for each static this character belongs to.
+        $staticIds = $character->statics()->pluck('statics.id');
+        foreach ($staticIds as $staticId) {
+            $this->assignTask->autoSetMainSpecIfMissing($character, (int) $staticId);
+        }
     }
 
     /**
@@ -68,7 +115,7 @@ class CharacterSyncService
     }
 
     /**
-     * Dispatches the sync job for the character.
+     * Dispatches the full sync job for the character (ilvl, compiled data, etc.).
      */
     private function dispatchSyncJob(Character $character): void
     {

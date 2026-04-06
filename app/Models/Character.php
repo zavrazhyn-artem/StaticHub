@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -136,8 +137,16 @@ class Character extends Model
     public function statics(): BelongsToMany
     {
         return $this->belongsToMany(StaticGroup::class, 'character_static', 'character_id', 'static_id')
-            ->withPivot('role', 'combat_role')
+            ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * Get CharacterStaticSpec records for this character.
+     */
+    public function characterStaticSpecs(): HasMany
+    {
+        return $this->hasMany(CharacterStaticSpec::class);
     }
 
     /**
@@ -212,12 +221,40 @@ class Character extends Model
     }
 
     /**
+     * Get all available specializations for this character in a specific static.
+     */
+    public function specsInStatic(int $staticId): Collection
+    {
+        return Specialization::whereIn('id',
+            DB::table('character_static_specs')
+                ->where('character_id', $this->id)
+                ->where('static_id', $staticId)
+                ->pluck('spec_id')
+        )->get();
+    }
+
+    /**
+     * Get the main specialization for this character in a specific static.
+     */
+    public function getMainSpecInStatic(int $staticId): ?Specialization
+    {
+        $record = $this->characterStaticSpecs()
+            ->where('static_id', $staticId)
+            ->where('is_main', true)
+            ->with('specialization')
+            ->first();
+
+        return $record?->specialization;
+    }
+
+    /**
      * Get the combat role of the character in a specific static.
+     * Derived from the main specialization's role.
      */
     public function getCombatRoleInStatic(int $staticId): string
     {
-        $static = $this->statics->firstWhere('id', $staticId);
+        $spec = $this->getMainSpecInStatic($staticId);
 
-        return $static?->pivot?->combat_role ?? 'rdps';
+        return $spec?->role ?? 'rdps';
     }
 }

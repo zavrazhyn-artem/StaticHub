@@ -12,7 +12,8 @@ export default {
         individualPotionPrice: { type: Number, default: 0 },
         individualFlaskPrice: { type: Number, default: 0 },
         saveUrl: { type: String, required: true },
-        settingsScheduleUrl: { type: String, required: true },
+        settingsScheduleUrl: { type: String, default: '' },
+        canManageTreasury: { type: Boolean, default: false },
         csrfToken: { type: String, required: true },
     },
     data() {
@@ -116,7 +117,7 @@ export default {
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xs">calendar_month</span>
                         <span>{{ raidDays }}</span>
-                        <a :href="settingsScheduleUrl" class="ml-auto text-[8px] text-primary hover:underline uppercase tracking-widest">{{ __('Edit') }}</a>
+                        <a v-if="settingsScheduleUrl" :href="settingsScheduleUrl" class="ml-auto text-[8px] text-primary hover:underline uppercase tracking-widest">{{ __('Edit') }}</a>
                     </div>
                 </div>
                 <div class="bg-surface-container-lowest/50 p-3 rounded-lg border border-white/5">
@@ -135,6 +136,7 @@ export default {
                     :key="index"
                     :recipe="recipe"
                     v-model:quantity="localRecipes[index].quantity"
+                    :can-edit="canManageTreasury"
                 />
             </div>
 

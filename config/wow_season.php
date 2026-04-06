@@ -91,6 +91,87 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Specializations
+    |--------------------------------------------------------------------------
+    |
+    | Авторитетне джерело ролей для кожного спека.
+    | Ключ = Bnet spec ID, значення = роль (tank|heal|mdps|rdps).
+    |
+    | Blizzard API повертає лише TANK/HEALER/DPS — тому mdps/rdps розрізняємо тут.
+    | Команда `php artisan wow:sync-specializations` тягне name/class/icon з API,
+    | а роль бере з цього конфігу. Якщо Blizzard змінить роль спека —
+    | оновіть цей список і перезапустіть команду.
+    */
+    'specializations' => [
+        // Death Knight
+        250 => 'tank',  // Blood
+        251 => 'mdps',  // Frost
+        252 => 'mdps',  // Unholy
+
+        // Demon Hunter
+        577 => 'mdps',  // Havoc
+        581 => 'tank',  // Vengeance
+        1480 => 'rdps',  // Devourer
+
+        // Druid
+        102 => 'rdps',  // Balance
+        103 => 'mdps',  // Feral
+        104 => 'tank',  // Guardian
+        105 => 'heal',  // Restoration
+
+        // Evoker
+        1467 => 'rdps', // Devastation
+        1468 => 'heal', // Preservation
+        1473 => 'rdps', // Augmentation
+
+        // Hunter
+        253 => 'rdps',  // Beast Mastery
+        254 => 'rdps',  // Marksmanship
+        255 => 'mdps',  // Survival
+
+        // Mage
+        62 => 'rdps',   // Arcane
+        63 => 'rdps',   // Fire
+        64 => 'rdps',   // Frost
+
+        // Monk
+        268 => 'tank',  // Brewmaster
+        270 => 'heal',  // Mistweaver
+        269 => 'mdps',  // Windwalker
+
+        // Paladin
+        65 => 'heal',   // Holy
+        66 => 'tank',   // Protection
+        70 => 'mdps',   // Retribution
+
+        // Priest
+        256 => 'heal',  // Discipline
+        257 => 'heal',  // Holy
+        258 => 'rdps',  // Shadow
+
+        // Rogue
+        259 => 'mdps',  // Assassination
+        260 => 'mdps',  // Outlaw
+        261 => 'mdps',  // Subtlety
+
+        // Shaman
+        262 => 'rdps',  // Elemental
+        263 => 'mdps',  // Enhancement
+        264 => 'heal',  // Restoration
+
+        // Warlock
+        265 => 'rdps',  // Affliction
+        266 => 'rdps',  // Demonology
+        267 => 'rdps',  // Destruction
+
+        // Warrior
+        71 => 'mdps',   // Arms
+        72 => 'mdps',   // Fury
+        73 => 'tank',   // Protection
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Item Upgrade Tracks
     |--------------------------------------------------------------------------
     |

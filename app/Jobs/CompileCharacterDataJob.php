@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Models\Character;
 use App\Services\Roster\RosterCompilerService;
+use App\Tasks\StaticGroup\AssignCharacterRoleTask;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -32,7 +33,7 @@ class CompileCharacterDataJob implements ShouldQueue
         $this->onQueue(config('sync.queues.compile', 'compile'));
     }
 
-    public function handle(RosterCompilerService $compiler): void
+    public function handle(RosterCompilerService $compiler, AssignCharacterRoleTask $assignTask): void
     {
         Log::info('CompileCharacterDataJob: starting compilation.', [
             'character_id'   => $this->character->id,
@@ -58,7 +59,27 @@ class CompileCharacterDataJob implements ShouldQueue
         /** @var array<string,mixed> $compiled */
         $compiled = json_decode((string) json_encode($dto), associative: true);
 
-        $this->character->update(['compiled_data' => $compiled]);
+        // Extract active_spec name from raw bnet profile to keep the characters
+        // table up-to-date alongside compiled_data.
+        $profile    = $rawData->bnet_profile ?? [];
+        $activeSpec = $profile['active_spec']['name']
+            ?? $profile['active_specialization']['name']
+            ?? null;
+
+        $charUpdate = ['compiled_data' => $compiled];
+        if ($activeSpec !== null) {
+            $charUpdate['active_spec'] = (string) $activeSpec;
+        }
+
+        $this->character->update($charUpdate);
+        $this->character->refresh();
+
+        // Auto-set main spec for every static this character belongs to
+        // (skipped if specs are already configured for a given static).
+        $staticIds = $this->character->statics()->pluck('statics.id');
+        foreach ($staticIds as $staticId) {
+            $assignTask->autoSetMainSpecIfMissing($this->character, (int) $staticId);
+        }
 
         Log::info('CompileCharacterDataJob: compiled_data persisted.', [
             'character_id' => $this->character->id,

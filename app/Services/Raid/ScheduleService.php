@@ -99,13 +99,8 @@ class ScheduleService
      * @param int $userId
      * @return void
      */
-    public function executeEventDeletion(RaidEvent $event, int $userId): void
+    public function executeEventDeletion(RaidEvent $event): void
     {
-        // Only allow static owners to delete
-        if ($userId !== (int)$event->static->owner_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
         $event->delete();
     }
 }

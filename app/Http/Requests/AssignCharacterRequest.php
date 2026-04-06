@@ -23,9 +23,8 @@ class AssignCharacterRequest extends FormRequest
     {
         return [
             'character_id' => 'required|exists:characters,id',
-            'static_id' => 'required|exists:statics,id',
-            'role' => 'required|in:main,alt',
-            'combat_role' => 'required|in:tank,heal,mdps,rdps',
+            'static_id'    => 'required|exists:statics,id',
+            'role'         => 'required|in:main,alt',
         ];
     }
 }

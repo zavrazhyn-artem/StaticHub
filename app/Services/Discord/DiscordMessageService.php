@@ -17,6 +17,18 @@ class DiscordMessageService
     ) {
     }
 
+    private function postNewMessage(RaidEvent $event, string $channelId, array $payload): bool
+    {
+        $response = $this->discordApiTask->sendMessage($channelId, $payload);
+
+        if ($response && isset($response['id'])) {
+            $event->update(['discord_message_id' => $response['id']]);
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Fetch all guilds the bot is in.
      */
@@ -67,18 +79,18 @@ class DiscordMessageService
         }
 
         if (!$event->discord_message_id) {
-            $response = $this->discordApiTask->sendMessage($channelId, $payload);
-            if ($response && isset($response['id'])) {
-                $event->update(['discord_message_id' => $response['id']]);
-                return true;
-            }
-        } else {
-            $response = $this->discordApiTask->updateMessage($channelId, $event->discord_message_id, $payload);
-            if ($response) {
-                return true;
-            }
+            return $this->postNewMessage($event, $channelId, $payload);
         }
 
-        return false;
+        $response = $this->discordApiTask->updateMessage($channelId, $event->discord_message_id, $payload);
+
+        if ($response !== false) {
+            return (bool) $response;
+        }
+
+        // 404 — message was deleted; clear stored ID and post a fresh one
+        $event->update(['discord_message_id' => null]);
+
+        return $this->postNewMessage($event, $channelId, $payload);
     }
 }

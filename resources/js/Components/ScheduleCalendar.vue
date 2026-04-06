@@ -11,9 +11,8 @@ const { __ } = useTranslation();
 const props = defineProps({
     staticId: { type: Number, required: true },
     staticName: { type: String, required: true },
-    staticOwnerId: { type: Number, required: true },
+    canManageSchedule: { type: Boolean, default: false },
     defaultRaidTime: { type: String, default: '20:00' },
-    authUserId: { type: Number, required: true },
     currentMonthName: { type: String, required: true },
     prevMonthUrl: { type: String, required: true },
     nextMonthUrl: { type: String, required: true },
@@ -111,7 +110,7 @@ const closeModal = () => { showModal.value = false; };
             </div>
 
             <div class="flex items-center gap-2">
-                <template v-if="staticOwnerId === authUserId && settingsRoute">
+                <template v-if="canManageSchedule && settingsRoute">
                     <a
                         :href="settingsRoute"
                         class="bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2 mr-4"
@@ -149,10 +148,10 @@ const closeModal = () => { showModal.value = false; };
                 <div
                     v-for="(day, index) in grid"
                     :key="index"
-                    @click="staticOwnerId === authUserId && day.events.length === 0 ? openCreateModal(day.formatted_date, defaultRaidTime) : null"
+                    @click="canManageSchedule && day.events.length === 0 ? openCreateModal(day.formatted_date, defaultRaidTime) : null"
                     class="min-h-[100px] bg-surface-container-lowest p-2 transition-colors relative group flex flex-col"
                     :class="[
-                        staticOwnerId === authUserId && day.events.length === 0 ? 'cursor-pointer hover:bg-white/[0.02]' : '',
+                        canManageSchedule && day.events.length === 0 ? 'cursor-pointer hover:bg-white/[0.02]' : '',
                         day.is_today ? 'ring-1 ring-inset ring-primary/30' : '',
                     ]"
                 >
@@ -161,7 +160,7 @@ const closeModal = () => { showModal.value = false; };
                             class="font-headline font-bold text-sm"
                             :class="!day.is_current_month ? 'text-white/20' : (day.is_today ? 'text-primary' : 'text-on-surface-variant')"
                         >{{ day.day_number }}</span>
-                        <div v-if="staticOwnerId === authUserId && day.events.length === 0" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div v-if="canManageSchedule && day.events.length === 0" class="opacity-0 group-hover:opacity-100 transition-opacity">
                             <span class="material-symbols-outlined text-on-surface-variant hover:text-primary text-lg">add_circle</span>
                         </div>
                     </div>

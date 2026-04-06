@@ -10,41 +10,36 @@ use App\Models\User;
 
 class SyncUserParticipationTask
 {
+    public function __construct(
+        private readonly AssignCharacterRoleTask $assignCharacterRoleTask
+    ) {}
+
     /**
      * Update user participation for a static.
-     *
-     * @param User $user
-     * @param StaticGroup $static
-     * @param int|null $mainCharId
-     * @param array $raidingCharIds
-     * @param array $combatRoles
-     * @return void
      */
-    public function run(User $user, StaticGroup $static, ?int $mainCharId, array $raidingCharIds, array $combatRoles): void
+    public function run(User $user, StaticGroup $static, ?int $mainCharId, array $raidingCharIds): void
     {
-        // Step 1: Reset. Find all character IDs belonging to this $user.
         $userCharacterIds = Character::belongingTo($user->id)->pluck('id');
 
-        // Detach ALL of them from the given $static in the character_static pivot table.
         $static->characters()->detach($userCharacterIds);
 
-        // Step 2: Process Raiding Characters (Alts).
         foreach ($raidingCharIds as $charId) {
-            // If the ID is NOT the $mainCharId, attach it to the static with role => 'alt'
             if ($charId != $mainCharId) {
-                $static->characters()->attach($charId, [
-                    'role' => 'alt',
-                    'combat_role' => $combatRoles[$charId] ?? 'rdps',
-                ]);
+                $character = Character::find($charId);
+                if (!$character) {
+                    continue;
+                }
+                $static->characters()->attach($charId, ['role' => 'alt']);
+                $this->assignCharacterRoleTask->autoSetMainSpecIfMissing($character, $static->id);
             }
         }
 
-        // Step 3: Process the Main Character.
         if ($mainCharId) {
-            $static->characters()->attach($mainCharId, [
-                'role' => 'main',
-                'combat_role' => $combatRoles[$mainCharId] ?? 'rdps',
-            ]);
+            $character = Character::find($mainCharId);
+            if ($character) {
+                $static->characters()->attach($mainCharId, ['role' => 'main']);
+                $this->assignCharacterRoleTask->autoSetMainSpecIfMissing($character, $static->id);
+            }
         }
     }
 }

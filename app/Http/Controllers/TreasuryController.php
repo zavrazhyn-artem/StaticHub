@@ -11,6 +11,7 @@ use App\Helpers\TreasuryTaxWarningHelper;
 use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class TreasuryController extends Controller
@@ -27,9 +28,9 @@ class TreasuryController extends Controller
 
     public function store(StoreTransactionRequest $request, StaticGroup $static): RedirectResponse
     {
-        $validated = $request->validated();
+        Gate::authorize('canManageTreasury', $static);
 
-        // Convert gold from input to copper for database storage
+        $validated = $request->validated();
         $validated['amount'] = CurrencyHelper::goldToCopper($validated['amount']);
 
         $this->treasuryService->executeTransactionCreation($static, $validated);
@@ -39,6 +40,8 @@ class TreasuryController extends Controller
 
     public function update(Request $request, StaticGroup $static, Transaction $transaction): RedirectResponse
     {
+        Gate::authorize('canManageTreasury', $static);
+
         $validated = $request->validate([
             'description' => 'nullable|string|max:255',
         ]);
@@ -50,6 +53,8 @@ class TreasuryController extends Controller
 
     public function updateSettings(Request $request, StaticGroup $static): \Illuminate\Http\JsonResponse
     {
+        Gate::authorize('canManageTreasury', $static);
+
         $validated = $request->validate([
             'weekly_tax_per_player' => 'required|integer|min:0',
         ]);
@@ -68,17 +73,19 @@ class TreasuryController extends Controller
 
     public function updateConsumables(Request $request, StaticGroup $static): \Illuminate\Http\JsonResponse
     {
+        Gate::authorize('canManageTreasury', $static);
+
         $validated = $request->validate([
-            'quantities' => 'required|array',
+            'quantities'   => 'required|array',
             'quantities.*' => 'integer|min:0|max:9',
         ]);
 
         $this->consumableService->updateSettings($static, $validated['quantities']);
 
         $economics = $this->consumableService->buildConsumablesPayload($static);
-        $totalCost = (int) ($economics['grand_total_weekly_cost'] ?? 0);
+        $totalCost    = (int) ($economics['grand_total_weekly_cost'] ?? 0);
         $taxPerRaider = (int) ($economics['guild_tax_per_raider'] ?? 0);
-        $fixedTax = (int) ($static->weekly_tax_per_player ?? 0);
+        $fixedTax     = (int) ($static->weekly_tax_per_player ?? 0);
 
         return response()->json(array_merge(
             ['success' => true, 'taxPerRaider' => $taxPerRaider, 'totalCost' => $totalCost],

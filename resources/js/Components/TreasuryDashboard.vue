@@ -8,7 +8,7 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div v-if="canManageTreasury" class="flex items-center gap-2">
                 <button
                     @click="openTransactionModal('deposit')"
                     class="bg-primary text-on-primary hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
@@ -55,7 +55,7 @@
                 <div class="mt-2 text-[10px] uppercase font-bold tracking-widest transition-colors" :class="taxClass">
                     {{ taxDescription }}
                 </div>
-                <button @click="showTaxModal = true" class="absolute bottom-4 right-4 z-10 text-on-surface-variant hover:text-[#FFD700] transition-colors" :title="__('Edit Weekly Tax')">
+                <button v-if="canManageTreasury" @click="showTaxModal = true" class="absolute bottom-4 right-4 z-10 text-on-surface-variant hover:text-[#FFD700] transition-colors" :title="__('Edit Weekly Tax')">
                     <span class="material-symbols-outlined text-lg">settings</span>
                 </button>
             </div>
@@ -145,8 +145,8 @@
             </div>
         </div>
 
-        <!-- Weekly Tax Modal -->
-        <GlassModal :show="showTaxModal" @close="closeTaxModal">
+        <!-- Weekly Tax Modal (leader/officer only) -->
+        <GlassModal v-if="canManageTreasury" :show="showTaxModal" @close="closeTaxModal">
             <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
                 <h3 class="font-headline text-xs font-bold text-[#FFD700] uppercase tracking-widest">{{ __('Edit Weekly Tax') }}</h3>
                 <button @click="closeTaxModal" class="text-on-surface-variant hover:text-white transition-colors">
@@ -271,6 +271,7 @@ const { __ } = useTranslation();
 const props = defineProps({
     staticId: { type: Number, required: true },
     staticName: { type: String, required: true },
+    canManageTreasury: { type: Boolean, default: false },
     initialTargetTax: { type: Number, required: true },
     initialWeeklyCost: { type: Number, required: true },
     initialTaxStatus: { type: String, required: true },
@@ -341,7 +342,6 @@ const formatDate = (dateString) => {
 
 const handleConsumablesUpdated = (event) => {
     const { taxPerRaider, totalCost, taxDescription: desc, taxClass: cls } = event.detail;
-    dynamicTargetTax.value = taxPerRaider;
     dynamicWeeklyCost.value = totalCost;
     taxDescription.value = desc;
     taxClass.value = cls;

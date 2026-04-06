@@ -579,4 +579,35 @@ class BlizzardApiService
 
         return null;
     }
+
+    /**
+     * Get playable specialization data from Game Data API.
+     * Returns name, playable_class.name, role.type.
+     */
+    public function getPlayableSpecialization(int $specId): ?array
+    {
+        $token = $this->getAccessToken();
+        $url = "https://{$this->region}.api.blizzard.com/data/wow/playable-specialization/{$specId}?namespace=static-{$this->region}&locale=en_US";
+
+        $response = Http::withToken($token)->get($url);
+
+        return $response->successful() ? $response->json() : null;
+    }
+
+    /**
+     * Get icon URL for a playable specialization from Game Data API.
+     */
+    public function getPlayableSpecializationIcon(int $specId): ?string
+    {
+        $token = $this->getAccessToken();
+        $url = "https://{$this->region}.api.blizzard.com/data/wow/media/playable-specialization/{$specId}?namespace=static-{$this->region}";
+
+        $response = Http::withToken($token)->get($url);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $this->extractIconFromAssets($response->json('assets', []));
+    }
 }

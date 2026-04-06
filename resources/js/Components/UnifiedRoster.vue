@@ -4,6 +4,7 @@ import axios from 'axios';
 import TabGear from './TabGear.vue';
 import RosterTabs from './UnifiedRoster/RosterTabs.vue';
 import RosterTable from './UnifiedRoster/RosterTable.vue';
+import GlassModal from './UI/GlassModal.vue';
 
 // ---------------------------------------------------------------------------
 // i18n helper
@@ -28,6 +29,14 @@ const loading            = ref(true);
 const currentTab         = ref(localStorage.getItem('rosterActiveTab') || 'summary');
 const expandedRows       = ref(new Set());
 const selectedDifficulty = ref(localStorage.getItem('rosterSelectedDifficulty'));
+
+const showAuditModal     = ref(false);
+const selectedAuditChar  = ref(null);
+
+const openAuditModal = (char) => {
+    selectedAuditChar.value = char;
+    showAuditModal.value = true;
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -169,7 +178,14 @@ const fetchRoster = async () => {
 
 onMounted(fetchRoster);
 
-watch(currentTab,         val => localStorage.setItem('rosterActiveTab', val));
+watch(currentTab, (val) => {
+    localStorage.setItem('rosterActiveTab', val);
+    if (val === 'treasury') {
+        window.location.href = `/statics/${props.staticId}/treasury`;
+    } else if (val === 'settings') {
+        window.location.href = `/statics/${props.staticId}/settings/schedule`;
+    }
+});
 watch(selectedDifficulty, val => localStorage.setItem('rosterSelectedDifficulty', val));
 
 // ---------------------------------------------------------------------------
@@ -180,7 +196,7 @@ const coreRoster = computed(() => roster.value.filter(m => m.roster_status === '
 const stats = computed(() => {
     const counts = { tank: 0, heal: 0, dps: 0 };
     coreRoster.value.forEach(member => {
-        const key = normalizeRoleKey(member.main_character?.combat_role);
+        const key = normalizeRoleKey(member.main_character?.main_spec?.role);
         if (key in counts) counts[key]++;
     });
     return counts;
@@ -189,7 +205,7 @@ const stats = computed(() => {
 const groupedRoster = computed(() => {
     const groups = { tank: [], heal: [], dps: [], unknown: [] };
     roster.value.forEach(member => {
-        const key = normalizeRoleKey(member.main_character?.combat_role);
+        const key = normalizeRoleKey(member.main_character?.main_spec?.role);
         (groups[key] ?? groups.unknown).push(member);
     });
     return groups;
@@ -229,9 +245,9 @@ const raidColumns = computed(() => {
 // ---------------------------------------------------------------------------
 // Management actions
 // ---------------------------------------------------------------------------
-const canManageAccess = computed(() => currentUserAccess.value === 'leader' || currentUserAccess.value === 'admin');
-const canManageStatus = computed(() => ['leader', 'officer', 'admin'].includes(currentUserAccess.value));
-const canKick = computed(() => ['leader', 'officer', 'admin'].includes(currentUserAccess.value));
+const canManageAccess = computed(() => currentUserAccess.value === 'leader');
+const canManageStatus = computed(() => ['leader', 'officer'].includes(currentUserAccess.value));
+const canKick = computed(() => ['leader', 'officer'].includes(currentUserAccess.value));
 
 const toggleRow = (memberId) => {
     if (expandedRows.value.has(memberId)) {
@@ -303,6 +319,7 @@ const kickMember = async (member) => {
         <RosterTabs
             v-model:activeTab="currentTab"
             v-model:selectedDifficulty="selectedDifficulty"
+            :can-manage-status="canManageStatus"
         />
 
         <!-- ── Loading ──────────────────────────────────────────────────── -->
@@ -331,6 +348,7 @@ const kickMember = async (member) => {
                 :tier-count="tierCount"
                 :has-audit-issues="hasAuditIssues"
                 :audit-title="auditTitle"
+                @open-audit-modal="openAuditModal"
                 @toggle-row="toggleRow"
                 @update-access-role="updateAccessRole"
                 @update-roster-status="updateRosterStatus"
@@ -368,6 +386,69 @@ const kickMember = async (member) => {
             </div>
 
         </div>
+
+        <!-- ── Audit Issues Modal ───────────────────────────────────────── -->
+        <GlassModal :show="showAuditModal" @close="showAuditModal = false" max-width="max-w-lg">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-amber-400">warning</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white leading-tight">
+                                {{ __('Audit Issues') }}
+                            </h3>
+                            <p class="text-xs text-on-surface-variant font-medium uppercase tracking-wider" :class="classColors[selectedAuditChar?.class]">
+                                {{ selectedAuditChar?.name }}
+                            </p>
+                        </div>
+                    </div>
+                    <button @click="showAuditModal = false" class="text-on-surface-variant hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Missing Enchants -->
+                    <div v-if="selectedAuditChar?.missing_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Missing Enchants') }}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span v-for="slot in selectedAuditChar.missing_enchants_slots" :key="slot"
+                                  class="px-2 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300">
+                                {{ slot }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Empty Sockets -->
+                    <div v-if="selectedAuditChar?.empty_sockets_count > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-amber-400">hexagon</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Empty Sockets') }}</span>
+                        </div>
+                        <div class="text-2xl font-black text-white px-2">
+                            {{ selectedAuditChar.empty_sockets_count }}
+                        </div>
+                    </div>
+
+                    <div v-if="!selectedAuditChar?.missing_enchants_slots?.length && !selectedAuditChar?.empty_sockets_count" class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span>
+                        <p class="text-sm text-gray-400">{{ __('No issues found') }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button @click="showAuditModal = false"
+                            class="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold transition-all">
+                        {{ __('Close') }}
+                    </button>
+                </div>
+            </div>
+        </GlassModal>
 
     </div>
 </template>

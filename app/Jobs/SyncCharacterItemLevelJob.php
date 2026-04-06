@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Character;
 use App\Services\BlizzardApiService;
+use App\Tasks\StaticGroup\AssignCharacterRoleTask;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -24,7 +25,7 @@ class SyncCharacterItemLevelJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BlizzardApiService $blizzardApiService): void
+    public function handle(BlizzardApiService $blizzardApiService, AssignCharacterRoleTask $assignTask): void
     {
         $profileData = $blizzardApiService->getCharacterProfileSummary(
             $this->character->realm->slug,
@@ -38,6 +39,14 @@ class SyncCharacterItemLevelJob implements ShouldQueue
                     ? ($profileData['active_spec']['name'] ?? null)
                     : $profileData['active_spec'],
             ]);
+
+            // After active_spec is saved, auto-set main spec for every static
+            // this character belongs to (skipped if spec is already configured).
+            $this->character->refresh();
+            $staticIds = $this->character->statics()->pluck('statics.id');
+            foreach ($staticIds as $staticId) {
+                $assignTask->autoSetMainSpecIfMissing($this->character, (int) $staticId);
+            }
         }
     }
 }

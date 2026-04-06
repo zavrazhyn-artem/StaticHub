@@ -163,7 +163,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                 {{ member.main_character.name ?? member.name }}
                                             </div>
                                             <div class="text-[9px] text-gray-500 uppercase font-medium">
-                                                {{ member.main_character.combat_role ?? '—' }}
+                                                {{ member.main_character.main_spec?.name ?? '—' }}
                                             </div>
                                         </div>
                                     </div>
@@ -234,7 +234,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                     {{ alt?.name ?? 'Unknown' }}
                                                 </div>
                                                 <div class="text-[8px] text-gray-500 uppercase font-medium">
-                                                    {{ alt?.combat_role ?? '—' }}
+                                                    {{ alt?.main_spec?.name ?? '—' }}
                                                 </div>
                                             </div>
                                         </div>

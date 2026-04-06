@@ -6,7 +6,7 @@ namespace App\Helpers;
 
 class WclReportParserHelper
 {
-    public static function parseDeaths(array $deathsData, array $rosterNames = []): array
+    public static function parseDeaths(array $deathsData, array $rosterNames = [], array $fightStartTimes = []): array
     {
         $entries = $deathsData['entries'] ?? [];
 
@@ -14,11 +14,21 @@ class WclReportParserHelper
             $entries = array_filter($entries, fn($d) => in_array($d['name'] ?? '', $rosterNames));
         }
 
-        return array_values(array_map(fn($d) => [
-            'player' => $d['name'] ?? 'Unknown',
-            'fight_id' => $d['fight'] ?? null,
-            'killing_blow' => $d['killingBlow']['name'] ?? 'Unknown Ability'
-        ], $entries));
+        return array_values(array_map(function ($d) use ($fightStartTimes) {
+            $fightId        = $d['fight'] ?? null;
+            $timestampMs    = $d['timestamp'] ?? null;
+            $fightStartMs   = $fightId ? ($fightStartTimes[$fightId] ?? null) : null;
+            $relativeMs     = ($timestampMs !== null && $fightStartMs !== null)
+                ? $timestampMs - $fightStartMs
+                : $timestampMs;
+
+            return [
+                'player'          => $d['name'] ?? 'Unknown',
+                'fight_id'        => $fightId,
+                'killing_blow'    => $d['killingBlow']['name'] ?? 'Unknown Ability',
+                'time_into_fight' => self::msToFightTime($relativeMs),
+            ];
+        }, $entries));
     }
 
     public static function parseInterrupts(array $interruptEntries, array $rosterNames = []): array
@@ -30,10 +40,10 @@ class WclReportParserHelper
                 $interrupters[$detail['name']] = $detail['total'];
             }
             return [
-                'enemy_ability' => $int['name'] ?? 'Unknown',
+                'enemy_ability'     => $int['name'] ?? 'Unknown',
                 'total_interrupted' => $int['spellsInterrupted'] ?? 0,
-                'total_missed' => $int['spellsCompleted'] ?? 0,
-                'interrupted_by' => $interrupters,
+                'total_missed'      => $int['spellsCompleted'] ?? 0,
+                'interrupted_by'    => $interrupters,
             ];
         }, $interruptEntries);
     }
@@ -56,7 +66,8 @@ class WclReportParserHelper
                     $abilityDamageMap[$abilityName] = ['total_damage_to_raid' => 0, 'victims' => []];
                 }
                 $abilityDamageMap[$abilityName]['total_damage_to_raid'] += $ability['total'] ?? 0;
-                $abilityDamageMap[$abilityName]['victims'][$playerName] = ($abilityDamageMap[$abilityName]['victims'][$playerName] ?? 0) + ($ability['total'] ?? 0);
+                $abilityDamageMap[$abilityName]['victims'][$playerName] =
+                    ($abilityDamageMap[$abilityName]['victims'][$playerName] ?? 0) + ($ability['total'] ?? 0);
             }
         }
 
@@ -64,9 +75,9 @@ class WclReportParserHelper
         foreach ($abilityDamageMap as $abilityName => $data) {
             arsort($data['victims']);
             $cleanDamageTaken[] = [
-                'ability' => $abilityName,
+                'ability'             => $abilityName,
                 'total_damage_to_raid' => $data['total_damage_to_raid'],
-                'biggest_victims' => array_slice($data['victims'], 0, 3, true)
+                'biggest_victims'     => array_slice($data['victims'], 0, 3, true),
             ];
         }
 
@@ -77,7 +88,7 @@ class WclReportParserHelper
 
     public static function parseCastsAndConsumables(array $castEntries, array $rosterNames = []): array
     {
-        $castsSummary = [];
+        $castsSummary     = [];
         $cleanConsumables = [];
         $ignoredAbilities = ['Melee', 'Auto Attack', 'Shoot', 'Wand', 'Attack'];
 
@@ -93,34 +104,33 @@ class WclReportParserHelper
 
                 if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
 
-                $isPotion = stripos($abilityName, 'Potion') !== false;
+                $isPotion     = stripos($abilityName, 'Potion') !== false;
                 $isHealthstone = $abilityName === 'Healthstone';
 
                 if ($isPotion || $isHealthstone) {
-                    if (!isset($cleanConsumables[$playerName])) {
-                        $cleanConsumables[$playerName] = [];
-                    }
-                    $cleanConsumables[$playerName][$abilityName] = ($cleanConsumables[$playerName][$abilityName] ?? 0) + $totalCasts;
+                    $cleanConsumables[$playerName][$abilityName] =
+                        ($cleanConsumables[$playerName][$abilityName] ?? 0) + $totalCasts;
                 }
 
-                if (!isset($castsSummary[$playerName])) {
-                    $castsSummary[$playerName] = [];
-                }
-                $castsSummary[$playerName][$abilityName] = ($castsSummary[$playerName][$abilityName] ?? 0) + $totalCasts;
+                $castsSummary[$playerName][$abilityName] =
+                    ($castsSummary[$playerName][$abilityName] ?? 0) + $totalCasts;
             }
         }
 
         return [
-            'casts' => $castsSummary,
+            'casts'       => $castsSummary,
             'consumables' => $cleanConsumables,
         ];
     }
 
-    public static function calculatePerformanceMetrics(array $damageEntries, array $healingEntries, int $raidDuration, array $rosterNames = []): array
-    {
+    public static function calculatePerformanceMetrics(
+        array $damageEntries,
+        array $healingEntries,
+        int   $raidDuration,
+        array $rosterNames = []
+    ): array {
         $performanceMetrics = [];
 
-        // DPS
         $dpsList = [];
         foreach ($damageEntries as $entry) {
             if (($entry['type'] ?? '') === 'NPC') continue;
@@ -128,9 +138,9 @@ class WclReportParserHelper
 
             $dpsList[] = ['name' => $entry['name'], 'total' => $entry['total']];
             $performanceMetrics[$entry['name']] = [
-                'dps' => (int) round($entry['total'] / $raidDuration),
-                'dps_rank' => 0,
-                'percentile' => $entry['rankPercent'] ?? null
+                'dps'        => (int) round($entry['total'] / $raidDuration),
+                'dps_rank'   => 0,
+                'percentile' => $entry['rankPercent'] ?? null,
             ];
         }
 
@@ -141,19 +151,25 @@ class WclReportParserHelper
             }
         }
 
-        // HPS
         $hpsList = [];
         foreach ($healingEntries as $entry) {
             if (($entry['type'] ?? '') === 'NPC') continue;
             if (!empty($rosterNames) && !in_array($entry['name'], $rosterNames)) continue;
 
             $hpsList[] = ['name' => $entry['name'], 'total' => $entry['total']];
+
             if (!isset($performanceMetrics[$entry['name']])) {
                 $performanceMetrics[$entry['name']] = [];
             }
 
-            $performanceMetrics[$entry['name']]['hps'] = (int) round($entry['total'] / $raidDuration);
-            $performanceMetrics[$entry['name']]['hps_rank'] = 0;
+            $total    = $entry['total'] ?? 0;
+            $overheal = $entry['overheal'] ?? 0;
+            $performanceMetrics[$entry['name']]['hps']              = (int) round($total / $raidDuration);
+            $performanceMetrics[$entry['name']]['hps_rank']         = 0;
+            $performanceMetrics[$entry['name']]['overheal_pct']     = $total > 0
+                ? round($overheal / ($total + $overheal) * 100, 1)
+                : null;
+
             if (!isset($performanceMetrics[$entry['name']]['percentile'])) {
                 $performanceMetrics[$entry['name']]['percentile'] = $entry['rankPercent'] ?? null;
             }
@@ -195,5 +211,288 @@ class WclReportParserHelper
             $duration += ($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0);
         }
         return (int) max(1, $duration / 1000);
+    }
+
+    /**
+     * Parse playerDetails response into a compact per-player map.
+     * Actual API path: $raw['data']['playerDetails'] → { dps: [...], tanks: [...], healers: [...] }
+     * Each player has: name, type, specs, minItemLevel, maxItemLevel, potionUse, combatantInfo
+     * combatantInfo has: stats, talentTree, gear, specIDs, factionID
+     */
+    public static function parsePlayerDetails(mixed $raw, array $rosterNames = []): array
+    {
+        // Unwrap nested path: raw → data.playerDetails → { dps, tanks, healers }
+        $byRole = null;
+        if (isset($raw['data']['playerDetails'])) {
+            $byRole = $raw['data']['playerDetails'];
+        } elseif (isset($raw['playerDetails'])) {
+            $byRole = $raw['playerDetails'];
+        } elseif (is_array($raw) && isset($raw['dps'])) {
+            $byRole = $raw;
+        }
+
+        if (!is_array($byRole)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach (['dps', 'healers', 'tanks'] as $role) {
+            foreach ($byRole[$role] ?? [] as $player) {
+                $name = $player['name'] ?? null;
+                if (!$name) continue;
+                if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+                $combatantInfo = $player['combatantInfo'] ?? [];
+                $gear          = $combatantInfo['gear'] ?? [];
+
+                // Trinkets are at slot index 12 and 13
+                $trinkets = [];
+                foreach ($gear as $item) {
+                    if (in_array($item['slot'] ?? -1, [12, 13]) && isset($item['name'])) {
+                        $trinkets[] = ['name' => $item['name'], 'ilvl' => $item['itemLevel'] ?? null];
+                    }
+                }
+
+                // Average item level from gear slots (exclude shirt=18, tabard=19)
+                $itemLevels = array_filter(
+                    array_map(fn($i) => !in_array($i['slot'] ?? -1, [18, 19]) ? ($i['itemLevel'] ?? null) : null, $gear)
+                );
+                $avgIlvl = !empty($itemLevels)
+                    ? round(array_sum($itemLevels) / count($itemLevels), 1)
+                    : ($player['maxItemLevel'] ?? null);
+
+                // Stats summary (Crit, Haste, Mastery, Vers)
+                $stats = [];
+                foreach (['Crit', 'Haste', 'Mastery', 'Versatility'] as $stat) {
+                    if (isset($combatantInfo['stats'][$stat]['min'])) {
+                        $stats[$stat] = $combatantInfo['stats'][$stat]['min'];
+                    }
+                }
+
+                // Spec name from specs array: [{ spec: "Havoc", count: 1 }]
+                $specName = $player['specs'][0]['spec'] ?? null;
+
+                $result[$name] = [
+                    'role'        => $role,
+                    'class'       => $player['type'] ?? null,
+                    'spec'        => $specName,
+                    'avg_ilvl'    => $avgIlvl,
+                    'potion_use'  => $player['potionUse'] ?? 0,
+                    'trinkets'    => $trinkets,
+                    'stats'       => $stats,
+                    'spec_ids'    => $combatantInfo['specIDs'] ?? [],
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse rankings response into per-player parse percentiles.
+     * Returns: [ playerName => [ 'parse_pct' => float, 'today_pct' => float, 'role' => string, 'spec' => string ] ]
+     */
+    public static function parseRankings(mixed $rankingsRaw, array $rosterNames = []): array
+    {
+        if (!is_array($rankingsRaw)) {
+            return [];
+        }
+
+        $result = [];
+        $fights = is_array($rankingsRaw['data'] ?? null) ? $rankingsRaw['data'] : [$rankingsRaw];
+
+        foreach ($fights as $fight) {
+            $roles = $fight['roles'] ?? [];
+            foreach (['tanks', 'healers', 'dps'] as $role) {
+                foreach ($roles[$role]['characters'] ?? [] as $char) {
+                    $name = $char['name'] ?? null;
+                    if (!$name) continue;
+                    if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+                    // Keep best parse across multiple fights
+                    $existing = $result[$name]['parse_pct'] ?? 0;
+                    $current  = $char['rankPercent'] ?? $char['todayPercent'] ?? 0;
+                    if ($current > $existing) {
+                        $result[$name] = [
+                            'role'      => $role,
+                            'spec'      => $char['spec'] ?? null,
+                            'parse_pct' => round((float)($char['rankPercent'] ?? 0), 1),
+                            'today_pct' => round((float)($char['todayPercent'] ?? 0), 1),
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse Buffs table into top raid-wide aura uptime percentages.
+     * WCL Buffs table returns aggregate auras (not per-player) with structure:
+     *   data.{ auras: [{ name, totalUptime, totalUses, bands }], totalTime }
+     * Returns top auras sorted by uptime %, filtered to ≥5% uptime.
+     */
+    public static function parseBuffUptime(array $buffsData, int $totalDurationMs, array $rosterNames = []): array
+    {
+        $totalTime = $buffsData['totalTime'] ?? $totalDurationMs;
+        if ($totalTime <= 0) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($buffsData['auras'] ?? [] as $aura) {
+            $uptime   = $aura['totalUptime'] ?? 0;
+            $uptimePct = round($uptime / $totalTime * 100, 1);
+            if ($uptimePct < 5) continue;
+
+            $result[$aura['name']] = [
+                'uptime_pct'  => $uptimePct,
+                'total_uses'  => $aura['totalUses'] ?? 0,
+            ];
+        }
+
+        // Sort by uptime descending
+        uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
+
+        return $result;
+    }
+
+    /**
+     * Parse Debuffs table into per-debuff application counts and uptime.
+     * Returns: [ debuffName => [ 'total_uptime_pct' => float, 'applied_by' => [ playerName => count ] ] ]
+     */
+    public static function parseDebuffUptime(array $debuffsData, int $totalDurationMs, array $rosterNames = []): array
+    {
+        if ($totalDurationMs <= 0) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($debuffsData['auras'] ?? $debuffsData['entries'] ?? [] as $aura) {
+            $auraName = $aura['name'] ?? 'Unknown';
+            $uptime   = $aura['totalUptime'] ?? 0;
+            $appliedBy = [];
+
+            foreach ($aura['details'] ?? [] as $detail) {
+                $playerName = $detail['name'] ?? 'Unknown';
+                if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
+                $appliedBy[$playerName] = $detail['total'] ?? 0;
+            }
+
+            $result[$auraName] = [
+                'total_uptime_pct' => round($uptime / $totalDurationMs * 100, 1),
+                'applied_by'       => $appliedBy,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse Resources table into per-player resource waste (overcap) summary.
+     * Returns: [ playerName => [ 'resource' => string, 'generated' => int, 'wasted' => int, 'waste_pct' => float ] ]
+     */
+    public static function parseResources(array $resourcesData, array $rosterNames = []): array
+    {
+        $result = [];
+
+        foreach ($resourcesData['entries'] ?? [] as $player) {
+            $name = $player['name'] ?? null;
+            if (!$name) continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+            $generated = $player['total'] ?? 0;
+            $wasted    = $player['totalReduced'] ?? $player['wasted'] ?? 0;
+
+            if ($generated <= 0) continue;
+
+            $result[$name] = [
+                'resource'   => $player['resourceName'] ?? $player['type'] ?? 'Unknown',
+                'generated'  => $generated,
+                'wasted'     => $wasted,
+                'waste_pct'  => round($wasted / ($generated + $wasted) * 100, 1),
+            ];
+        }
+
+        arsort($result);
+
+        return $result;
+    }
+
+    /**
+     * Build per-fight phase summary: boss name → fight # → phase where fight ended.
+     * Uses report.phases for phase name lookup.
+     */
+    public static function buildPhaseSummary(array $raidFights, array $reportPhases): array
+    {
+        // Build lookup: encounterID → [ phaseIndex => phaseName ]
+        $phaseNames = [];
+        foreach ($reportPhases as $encounterPhase) {
+            $encId = $encounterPhase['encounterID'] ?? 0;
+            foreach ($encounterPhase['phases'] ?? [] as $phase) {
+                $phaseNames[$encId][$phase['id']] = [
+                    'name'           => $phase['name'] ?? "Phase {$phase['id']}",
+                    'isIntermission' => $phase['isIntermission'] ?? false,
+                ];
+            }
+        }
+
+        $summary = [];
+        foreach ($raidFights as $fight) {
+            $boss     = $fight['name'] ?? 'Unknown';
+            $encId    = $fight['encounterID'] ?? 0;
+            $lastPhase = $fight['lastPhase'] ?? null;
+            $isInter   = $fight['lastPhaseIsIntermission'] ?? false;
+            $outcome   = ($fight['kill'] ?? false) ? 'kill' : 'wipe';
+
+            $phaseName = null;
+            if ($lastPhase !== null) {
+                $phaseName = $phaseNames[$encId][$lastPhase]['name']
+                    ?? ($isInter ? "Intermission {$lastPhase}" : "Phase {$lastPhase}");
+            }
+
+            $summary[$boss][] = [
+                'fight_id'   => $fight['id'],
+                'outcome'    => $outcome,
+                'last_phase' => $phaseName,
+                'duration_s' => (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000),
+                'boss_pct'   => $fight['bossPercentage'] ?? null,
+            ];
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Calculate total fight time in seconds and per-fight durations for CPM support.
+     */
+    public static function buildFightDurations(array $raidFights): array
+    {
+        $totalMs = 0;
+        $perFight = [];
+
+        foreach ($raidFights as $fight) {
+            $durationMs = ($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0);
+            $totalMs += $durationMs;
+            $perFight[$fight['id']] = (int) round($durationMs / 1000);
+        }
+
+        return [
+            'total_seconds'    => (int) round($totalMs / 1000),
+            'per_fight_seconds' => $perFight,
+        ];
+    }
+
+    /**
+     * Convert a millisecond timestamp (relative to fight start) to "M:SS" string.
+     */
+    private static function msToFightTime(?int $ms): ?string
+    {
+        if ($ms === null) return null;
+        $seconds = (int) round($ms / 1000);
+        return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
     }
 }

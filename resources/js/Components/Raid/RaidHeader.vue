@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue';
 import { useTimeFormatter } from '../../composables/useTimeFormatter.js';
 
 const props = defineProps({
@@ -8,14 +7,14 @@ const props = defineProps({
     currentAttendance: { type: Object, default: null },
     joinedCharacter: { type: Object, default: null },
     joinedRoleLabel: { type: String, default: '' },
-    authUserId: { type: Number, required: true },
+    canManageSchedule: { type: Boolean, default: false },
+    canAnnounceToDiscord: { type: Boolean, default: false },
     csrfToken: { type: String, required: true },
     routes: { type: Object, required: true },
 });
 const emit = defineEmits(['rsvp', 'edit', 'delete']);
 
 const { formatDate, formatTime } = useTimeFormatter();
-const isOwner = computed(() => props.authUserId === props.event.static?.owner_id);
 </script>
 
 <template>
@@ -88,7 +87,7 @@ const isOwner = computed(() => props.authUserId === props.event.static?.owner_id
                 </button>
 
                 <button
-                    v-if="isOwner"
+                    v-if="canManageSchedule"
                     @click="emit('edit')"
                     class="w-10 h-10 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-500 rounded-xl transition-all border border-yellow-600/30 flex items-center justify-center shadow-lg"
                     :title="__('Edit Event')"
@@ -97,7 +96,7 @@ const isOwner = computed(() => props.authUserId === props.event.static?.owner_id
                 </button>
 
                 <button
-                    v-if="isOwner"
+                    v-if="canManageSchedule"
                     @click="emit('delete')"
                     class="w-10 h-10 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-xl transition-all border border-red-600/30 flex items-center justify-center shadow-lg"
                     :title="__('Delete Event')"
@@ -105,7 +104,7 @@ const isOwner = computed(() => props.authUserId === props.event.static?.owner_id
                     <span class="material-symbols-outlined text-xl">delete</span>
                 </button>
 
-                <form v-if="isOwner" :action="routes.announce" method="POST" class="h-full flex items-center">
+                <form v-if="canAnnounceToDiscord" :action="routes.announce" method="POST" class="h-full flex items-center">
                     <input type="hidden" name="_token" :value="csrfToken">
                     <button
                         type="submit"

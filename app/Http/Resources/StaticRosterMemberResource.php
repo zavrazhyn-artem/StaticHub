@@ -62,8 +62,11 @@ class StaticRosterMemberResource extends JsonResource
         return array_merge(
             $character->compiled_data ?? [],
             [
-                'id'   => $character->id,
-                'name' => $character->name,
+                'id'        => $character->id,
+                'name'      => $character->name,
+                // main_spec is set as an attribute by the controller (from CharacterStaticSpec).
+                // It overrides whatever compiled_data may have stored for this field.
+                'main_spec' => $character->getAttribute('main_spec'),
             ]
         );
     }

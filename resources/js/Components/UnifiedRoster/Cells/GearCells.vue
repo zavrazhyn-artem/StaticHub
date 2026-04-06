@@ -6,6 +6,8 @@ const props = defineProps({
     auditTitle: { type: Function, required: true },
 });
 
+const emit = defineEmits(['audit-click']);
+
 // WoW Equip Slots in order
 const slots = [
     'HEAD', 'NECK', 'SHOULDER', 'BACK', 'CHEST', 'WRIST',
@@ -75,9 +77,10 @@ const getQualityClass = (quality) => {
     <!-- Audit column -->
     <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5']">
         <span v-if="hasAuditIssues(char)"
-              :class="[isAlt ? 'text-[8px] px-1' : 'text-[9px] px-1.5', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded py-0.5 font-bold cursor-help']"
+              @click="emit('audit-click')"
+              :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
               :title="auditTitle(char)">
-            <span class="material-symbols-outlined text-[10px]">warning</span>
+            <span class="material-symbols-outlined text-[12px]">warning</span>
             {{ (char.missing_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
         </span>
         <span v-else class="text-gray-600 text-[10px]">✓</span>

@@ -24,8 +24,9 @@ class RsvpRequest extends FormRequest
     {
         return [
             'character_id' => 'required|exists:characters,id',
-            'status' => 'required|in:present,absent,tentative,late',
-            'comment' => 'nullable|string|max:255',
+            'status'       => 'required|in:present,absent,tentative,late',
+            'comment'      => 'nullable|string|max:255',
+            'spec_id'      => 'nullable|integer|exists:specializations,id',
         ];
     }
 }

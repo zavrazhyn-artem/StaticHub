@@ -19,8 +19,9 @@ class DiscordApiTask
 
     /**
      * Internal request handler with logging.
+     * Returns response array on success, false on 404, null on other errors.
      */
-    private function makeRequest(string $method, string $endpoint, array $payload = []): ?array
+    private function makeRequest(string $method, string $endpoint, array $payload = []): array|false|null
     {
         if (empty($this->botToken)) {
             Log::error('Discord bot token is missing in configuration.');
@@ -31,13 +32,17 @@ class DiscordApiTask
             ->{strtolower($method)}($this->baseUrl . $endpoint, $payload);
 
         if ($response->successful()) {
-            return $response->json();
+            return $response->json() ?? [];
+        }
+
+        if ($response->status() === 404) {
+            Log::warning("Discord message not found on {$method} {$endpoint} (deleted?)");
+            return false;
         }
 
         Log::error("Discord API error on {$method} {$endpoint}", [
             'status' => $response->status(),
-            'body' => $response->body(),
-            'payload' => $payload,
+            'body'   => $response->body(),
         ]);
 
         return null;
@@ -63,7 +68,7 @@ class DiscordApiTask
         return $this->makeRequest('POST', "/channels/{$channelId}/messages", $payload);
     }
 
-    public function updateMessage(string $channelId, string $messageId, array $payload): ?array
+    public function updateMessage(string $channelId, string $messageId, array $payload): array|false|null
     {
         return $this->makeRequest('PATCH', "/channels/{$channelId}/messages/{$messageId}", $payload);
     }

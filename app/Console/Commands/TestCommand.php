@@ -54,7 +54,31 @@ class TestCommand extends Command
         $this->info('--- Consumables: ' . json_encode($logData['consumables_used']) . ' ---');
         $this->info('--- Performance Metrics ---');
         foreach ($logData['performance_metrics'] ?? [] as $name => $m) {
-            $this->line("  {$name}: spec={$m['spec']} dps={$m['dps']} hps={$m['hps']} rank={$m['dps_rank']} pct={$m['percentile']}");
+            $parse = isset($m['parse_pct']) ? " parse={$m['parse_pct']}%" : '';
+            $overheal = isset($m['overheal_pct']) ? " overheal={$m['overheal_pct']}%" : '';
+            $this->line("  {$name}: spec={$m['spec']} dps=" . ($m['dps'] ?? 0) . " hps=" . ($m['hps'] ?? 0) . $parse . $overheal);
+        }
+
+        $this->info('--- Fight Durations ---');
+        $this->line('  total_seconds: ' . ($logData['fight_durations']['total_seconds'] ?? 0));
+
+        $this->info('--- Phase Summary ---');
+        foreach ($logData['phase_summary'] ?? [] as $boss => $fights) {
+            foreach ($fights as $f) {
+                $this->line("  {$boss} fight#{$f['fight_id']}: {$f['outcome']} phase={$f['last_phase']} dur={$f['duration_s']}s boss_pct={$f['boss_pct']}%");
+            }
+        }
+
+        $this->info('--- Player Details (' . count($logData['player_details'] ?? []) . ') ---');
+        foreach ($logData['player_details'] ?? [] as $name => $d) {
+            $trinkets = implode(', ', array_column($d['trinkets'] ?? [], 'name'));
+            $this->line("  {$name}: role={$d['role']} spec={$d['spec']} ilvl={$d['avg_ilvl']} trinkets=[{$trinkets}]");
+        }
+
+        $this->info('--- Buff Uptime (' . count($logData['buff_uptime'] ?? []) . ' players) ---');
+        $this->info('--- Resource Waste (' . count($logData['resource_waste'] ?? []) . ' players) ---');
+        foreach ($logData['resource_waste'] ?? [] as $name => $r) {
+            $this->line("  {$name}: {$r['resource']} waste={$r['waste_pct']}%");
         }
     }
 }

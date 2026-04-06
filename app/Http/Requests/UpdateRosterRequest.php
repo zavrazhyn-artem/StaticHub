@@ -23,10 +23,9 @@ class UpdateRosterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'main_character_id' => 'nullable|integer|exists:characters,id',
-            'raiding_characters' => 'nullable|array',
+            'main_character_id'    => 'nullable|integer|exists:characters,id',
+            'raiding_characters'   => 'nullable|array',
             'raiding_characters.*' => 'integer|exists:characters,id',
-            'combat_roles' => 'required|array',
         ];
     }
 }

@@ -19,6 +19,8 @@ import ConsumablesPlanner from './Components/ConsumablesPlanner.vue';
 import ConsumableCard from './Components/ConsumableCard.vue';
 import DashboardView from './Components/Dashboard/DashboardView.vue';
 import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelect.vue';
+import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue';
+import CharactersPage from './Components/Character/CharactersPage.vue';
 
 const app = createApp({});
 app.config.globalProperties.__ = (key, replace = {}) => {
@@ -51,6 +53,8 @@ app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
 app.component('dashboard-view', DashboardView);
 app.component('transfer-ownership-select', TransferOwnershipSelect);
+app.component('character-spec-picker', CharacterSpecPicker);
+app.component('characters-page', CharactersPage);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

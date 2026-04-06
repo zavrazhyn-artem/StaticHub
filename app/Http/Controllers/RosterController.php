@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateRosterRequest;
 use App\Http\Resources\StaticRosterMemberResource;
+use App\Models\CharacterStaticSpec;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Services\ConsumableService;
@@ -43,6 +44,32 @@ class RosterController extends Controller
             ->first(fn (User $m) => $m->id === $currentUserId)
             ?->pivot
             ?->access_role ?? 'member';
+
+        if ((int) $static->owner_id === $currentUserId) {
+            $currentUserAccess = 'leader';
+        }
+
+        // Pre-load main specs for all characters in this static (one query, no N+1).
+        $allCharacterIds = $members->flatMap(fn (User $u) => $u->characters->pluck('id'));
+        $mainSpecRecords = CharacterStaticSpec::whereIn('character_id', $allCharacterIds)
+            ->where('static_id', $static->id)
+            ->where('is_main', true)
+            ->with('specialization')
+            ->get()
+            ->keyBy('character_id');
+
+        // Attach main_spec attribute to each character so the resource can include it.
+        $members->each(function (User $user) use ($mainSpecRecords) {
+            $user->characters->each(function ($char) use ($mainSpecRecords) {
+                $spec = $mainSpecRecords->get($char->id)?->specialization;
+                $char->setAttribute('main_spec', $spec ? [
+                    'id'       => $spec->id,
+                    'name'     => $spec->name,
+                    'role'     => $spec->role,
+                    'icon_url' => $spec->icon_url,
+                ] : null);
+            });
+        });
 
         $rosterData = [
             'roster' => $members
@@ -83,9 +110,12 @@ class RosterController extends Controller
             Auth::user(),
             $static,
             $mainCharId,
-            $raidingCharIds,
-            $validated['combat_roles']
+            $raidingCharIds
         );
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         if ($request->has('onboarding')) {
             return redirect()->route('dashboard')->with('success', 'Roster updated successfully!');

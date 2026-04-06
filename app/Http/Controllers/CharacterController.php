@@ -77,7 +77,6 @@ class CharacterController extends Controller
                 $request->integer('character_id'),
                 $request->integer('static_id'),
                 $request->input('role'),
-                $request->input('combat_role'),
                 Auth::id()
             );
 

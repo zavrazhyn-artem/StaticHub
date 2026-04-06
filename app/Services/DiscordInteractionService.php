@@ -6,10 +6,14 @@ namespace App\Services;
 
 use App\Jobs\Discord\ProcessRsvpInteractionJob;
 use App\Jobs\Discord\SwapRsvpCharacterJob;
+use App\Jobs\Discord\SwapRsvpSpecJob;
 
 use App\Helpers\DiscordConstants;
 use App\Models\Character;
+use App\Models\CharacterStaticSpec;
+use App\Models\RaidAttendance;
 use App\Models\RaidEvent;
+use App\Models\Specialization;
 use App\Models\User;
 
 class DiscordInteractionService
@@ -81,6 +85,14 @@ class DiscordInteractionService
 
         if (str_starts_with($customId, 'rsvp_confirm_char_')) {
             return $this->processConfirmCharacterAction($customId, $payload, $user);
+        }
+
+        if (str_starts_with($customId, 'rsvp_spec_')) {
+            return $this->processSwitchSpecAction($customId, $user);
+        }
+
+        if (str_starts_with($customId, 'rsvp_confirm_spec_')) {
+            return $this->processConfirmSpecAction($customId, $payload, $user);
         }
 
         if (str_starts_with($customId, 'rsvp_comment_')) {
@@ -175,6 +187,114 @@ class DiscordInteractionService
             'type' => DiscordConstants::RESPONSE_UPDATE_MESSAGE,
             'data' => [
                 'content' => '✅ Character successfully updated for this raid! (Updating main roster...)',
+                'components' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Task: Process the "Change Spec" button click — shows spec dropdown.
+     */
+    private function processSwitchSpecAction(string $customId, User $user): array
+    {
+        $eventId = (int) str_replace('rsvp_spec_', '', $customId);
+        $event = RaidEvent::find($eventId);
+
+        if (!$event) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'Raid event not found.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        // Find the character this user is attending with
+        $attendance = RaidAttendance::where('raid_event_id', $eventId)
+            ->whereIn('character_id', function ($query) use ($user) {
+                $query->select('id')->from('characters')->where('user_id', $user->id);
+            })
+            ->first();
+
+        $character = $attendance
+            ? Character::find($attendance->character_id)
+            : $user->getMainCharacterForStatic($event->static_id);
+
+        if (!$character) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'You have no characters linked to this static.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        $specs = CharacterStaticSpec::where('character_id', $character->id)
+            ->where('static_id', $event->static_id)
+            ->with('specialization')
+            ->get();
+
+        if ($specs->isEmpty()) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'No specializations found for your character. Please set them up on the website.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        $roleEmoji = ['tank' => '🛡️', 'heal' => '💚', 'mdps' => '⚔️', 'rdps' => '🏹'];
+        $currentSpecId = $attendance?->spec_id;
+
+        $options = $specs->map(fn ($css) => [
+            'label'   => $css->specialization->name,
+            'value'   => (string) $css->spec_id,
+            'description' => ucfirst($css->specialization->role),
+            'emoji'   => ['name' => $roleEmoji[$css->specialization->role] ?? '🎯'],
+            'default' => $css->spec_id === $currentSpecId || ($currentSpecId === null && $css->is_main),
+        ])->toArray();
+
+        return [
+            'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+            'data' => [
+                'content' => "Select the specialization for **{$character->name}**:",
+                'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                'components' => [
+                    [
+                        'type' => 1,
+                        'components' => [
+                            [
+                                'type' => 3,
+                                'custom_id' => "rsvp_confirm_spec_{$eventId}",
+                                'options' => $options,
+                                'placeholder' => 'Choose a specialization...',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Task: Process spec selection from the ephemeral dropdown.
+     */
+    private function processConfirmSpecAction(string $customId, array $payload, User $user): array
+    {
+        $eventId = (int) str_replace('rsvp_confirm_spec_', '', $customId);
+        $specId  = (int) ($payload['data']['values'][0] ?? 0);
+
+        if ($specId > 0) {
+            SwapRsvpSpecJob::dispatch($eventId, $user->id, $specId);
+        }
+
+        return [
+            'type' => DiscordConstants::RESPONSE_UPDATE_MESSAGE,
+            'data' => [
+                'content' => '✅ Specialization updated for this raid! (Updating roster...)',
                 'components' => [],
             ],
         ];

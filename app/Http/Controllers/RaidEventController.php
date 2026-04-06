@@ -8,6 +8,7 @@ use App\Services\Discord\DiscordMessageService;
 use App\Http\Requests\RsvpRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class RaidEventController extends Controller
@@ -38,7 +39,6 @@ class RaidEventController extends Controller
             return back()->withErrors(['character_id' => __('Invalid character selected.')]);
         }
 
-        // If the event is already posted to Discord, update the message
         if ($event->discord_message_id) {
             $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
         }
@@ -51,10 +51,7 @@ class RaidEventController extends Controller
      */
     public function announceToDiscord(RaidEvent $event): RedirectResponse
     {
-        // Only allow static owners to announce
-        if (Auth::user()->id !== $event->static->owner_id) {
-            return back()->with('error', __('Only the static owner can post to Discord.'));
-        }
+        Gate::authorize('canAnnounceToDiscord', $event->static);
 
         $success = $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
 

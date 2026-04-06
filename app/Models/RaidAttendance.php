@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
  * @property int $character_id
  * @property string $status
  * @property string|null $comment
+ * @property int|null $spec_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance newModelQuery()
@@ -34,5 +35,6 @@ class RaidAttendance extends Pivot
         'character_id',
         'status',
         'comment',
+        'spec_id',
     ];
 }

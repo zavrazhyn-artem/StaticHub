@@ -10,7 +10,7 @@ use App\Http\Requests\UpdateRosterStatusRequest;
 use App\Http\Resources\StaticRosterMemberResource;
 use App\Models\StaticGroup;
 use App\Models\User;
-use App\Policies\StaticGroupRosterPolicy;
+use App\Policies\StaticGroupPermissionPolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -22,7 +22,7 @@ class StaticGroupRosterController extends Controller
      */
     public function updateAccessRole(UpdateAccessRoleRequest $request, StaticGroup $static, User $user, UpdateAccessRoleAction $action): JsonResponse
     {
-        Gate::authorize('updateAccessRole', [StaticGroupRosterPolicy::class, $static, $user]);
+        Gate::authorize('updateAccessRole', [StaticGroupPermissionPolicy::class, $static, $user]);
 
         $action->execute($static, $user, $request->validated('access_role'));
 
@@ -34,7 +34,7 @@ class StaticGroupRosterController extends Controller
      */
     public function updateRosterStatus(UpdateRosterStatusRequest $request, StaticGroup $static, User $user, UpdateRosterStatusAction $action): JsonResponse
     {
-        Gate::authorize('updateRosterStatus', [StaticGroupRosterPolicy::class, $static, $user]);
+        Gate::authorize('updateRosterStatus', [StaticGroupPermissionPolicy::class, $static, $user]);
 
         $action->execute($static, $user, $request->validated('roster_status'));
 
@@ -46,7 +46,7 @@ class StaticGroupRosterController extends Controller
      */
     public function kick(StaticGroup $static, User $user, KickStaticMemberAction $action): JsonResponse
     {
-        Gate::authorize('kick', [StaticGroupRosterPolicy::class, $static, $user]);
+        Gate::authorize('kick', [StaticGroupPermissionPolicy::class, $static, $user]);
 
         $action->execute($static, $user);
 

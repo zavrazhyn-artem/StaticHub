@@ -43,7 +43,8 @@ const emit = defineEmits([
     'toggle-expand',
     'update-access-role',
     'update-roster-status',
-    'kick-member'
+    'kick-member',
+    'open-audit-modal'
 ]);
 </script>
 
@@ -79,10 +80,14 @@ const emit = defineEmits([
                                   :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[10px]' : 'text-xs']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
-                            <img v-if="char?.combat_role"
-                                 :src="roleIconSrc(char.combat_role)"
+                            <img v-if="char?.main_spec?.icon_url"
+                                 :src="char.main_spec.icon_url"
+                                 :class="isAlt ? 'w-2.5 h-2.5 opacity-80' : 'w-4 h-4 opacity-90 rounded'"
+                                 :title="char.main_spec.name">
+                            <img v-else-if="char?.main_spec?.role"
+                                 :src="roleIconSrc(char.main_spec.role)"
                                  :class="isAlt ? 'w-2.5 h-2.5 opacity-80' : 'w-3 h-3 opacity-80'"
-                                 :title="char.combat_role">
+                                 :title="char.main_spec.role">
                             <span v-if="isAlt" class="text-[8px] text-on-surface-variant font-bold uppercase">{{ char?.class ?? '' }}</span>
 
                             <button v-if="!isAlt && (member.alts || []).length > 0"
@@ -132,7 +137,8 @@ const emit = defineEmits([
             <GearCells :char="char"
                        :is-alt="isAlt"
                        :has-audit-issues="hasAuditIssues"
-                       :audit-title="auditTitle" />
+                       :audit-title="auditTitle"
+                       @audit-click="emit('open-audit-modal', char)" />
 
         </template>
 
@@ -140,9 +146,10 @@ const emit = defineEmits([
         <template v-if="activeTab === 'summary'">
             <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5']">
                 <span v-if="hasAuditIssues(char)"
-                      :class="[isAlt ? 'text-[8px] px-1' : 'text-[9px] px-1.5', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded py-0.5 font-bold cursor-help']"
+                      @click="emit('open-audit-modal', char)"
+                      :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
                       :title="auditTitle(char)">
-                    <span class="material-symbols-outlined text-[10px]">warning</span>
+                    <span class="material-symbols-outlined text-[12px]">warning</span>
                     {{ (char.missing_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
                 </span>
                 <span v-else class="text-gray-600 text-[10px]">✓</span>

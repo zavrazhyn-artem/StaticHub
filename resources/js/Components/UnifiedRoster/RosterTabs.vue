@@ -1,18 +1,21 @@
 <script setup>
-import { computed } from 'vue';
+import {computed} from 'vue';
 
 const props = defineProps({
     activeTab: { type: String, required: true },
     selectedDifficulty: { type: String, required: true },
+    canManageStatus: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:activeTab', 'update:selectedDifficulty']);
 
-const tabs = [
-    { id: 'summary', labelKey: 'Summary',      icon: 'dashboard' },
-    { id: 'raids',   labelKey: 'Raids',        icon: 'swords'    },
-    { id: 'gear',    labelKey: 'Gear & Audit', icon: 'shield'    },
-];
+const tabs = computed(() => {
+    return [
+        {id: 'summary', labelKey: 'Summary', icon: 'dashboard'},
+        {id: 'raids', labelKey: 'Raids', icon: 'swords'},
+        {id: 'gear', labelKey: 'Gear & Audit', icon: 'shield'},
+    ];
+});
 
 const difficulties = [
     { key: 'M',   labelKey: 'Mythic', activeClass: 'bg-orange-500 text-white shadow-sm shadow-orange-500/40' },

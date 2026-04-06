@@ -76,7 +76,7 @@ class RaidEvent extends Model
     {
         return $this->belongsToMany(Character::class, 'raid_attendances')
             ->using(RaidAttendance::class)
-            ->withPivot('status', 'comment')
+            ->withPivot('status', 'comment', 'spec_id')
             ->withTimestamps();
     }
 

@@ -430,5 +430,14 @@
     "Select status...": "Select status...",
     "Remove from static": "Remove from static",
     "No members found.": "No members found.",
-    "Search...": "Search..."
+    "Search...": "Search...",
+    "Specializations": "Specializations",
+    "Specialization": "Specialization",
+    "No specializations found for this class.": "No specializations found for this class.",
+    "Main spec": "Main spec",
+    "Set as main": "Set as main",
+    "Not set": "Not set",
+    "Edit specializations": "Edit specializations",
+    "Saving...": "Saving...",
+    "Saved!": "Saved!"
 }

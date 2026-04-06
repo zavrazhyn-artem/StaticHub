@@ -21,12 +21,12 @@
                 </div>
             </a>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div v-for="recipe in recipes" :key="recipe.name" class="p-3 bg-black/20 rounded-xl border border-white/5 flex items-center gap-3">
-                    <img :src="recipe.icon" class="w-8 h-8 rounded border border-white/10" :alt="recipe.name">
+                    <img :src="recipe.icon" class="w-8 h-8 rounded border border-white/10 shrink-0" :alt="recipe.name">
                     <div class="min-w-0">
-                        <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest truncate">{{ recipe.name }}</div>
-                        <div class="text-lg font-black text-white mt-0.5">
+                        <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest truncate" :title="__(recipe.name)">{{ __(recipe.name) }}</div>
+                        <div class="text-lg font-black text-white mt-0.5 whitespace-nowrap">
                             {{ recipe.quantity * raidDays }}
                             <span class="text-[10px] font-normal text-on-surface-variant uppercase ml-1">{{ __('Needed / Week') }}</span>
                         </div>

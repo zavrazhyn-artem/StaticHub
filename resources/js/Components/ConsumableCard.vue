@@ -4,6 +4,7 @@ export default {
     props: {
         recipe: { type: Object, required: true },
         quantity: { type: Number, default: 0 },
+        canEdit: { type: Boolean, default: true },
     },
     emits: ['update:quantity'],
     data() {
@@ -44,31 +45,35 @@ export default {
         </div>
 
         <div class="flex items-center gap-2 bg-black/20 rounded-md p-1 border border-white/5">
-            <button
-                type="button"
-                @click="decrement"
-                @mousedown="startInterval(decrement)"
-                @mouseup="stopInterval"
-                @mouseleave="stopInterval"
-                :disabled="quantity <= 0"
-                class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-                <span class="material-symbols-outlined text-sm">remove</span>
-            </button>
+            <template v-if="canEdit">
+                <button
+                    type="button"
+                    @click="decrement"
+                    @mousedown="startInterval(decrement)"
+                    @mouseup="stopInterval"
+                    @mouseleave="stopInterval"
+                    :disabled="quantity <= 0"
+                    class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <span class="material-symbols-outlined text-sm">remove</span>
+                </button>
+            </template>
 
             <div class="min-w-[1.5rem] text-center font-headline font-black text-white text-sm tabular-nums">{{ quantity }}</div>
 
-            <button
-                type="button"
-                @click="increment"
-                @mousedown="startInterval(increment)"
-                @mouseup="stopInterval"
-                @mouseleave="stopInterval"
-                :disabled="quantity >= 9"
-                class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-                <span class="material-symbols-outlined text-sm">add</span>
-            </button>
+            <template v-if="canEdit">
+                <button
+                    type="button"
+                    @click="increment"
+                    @mousedown="startInterval(increment)"
+                    @mouseup="stopInterval"
+                    @mouseleave="stopInterval"
+                    :disabled="quantity >= 9"
+                    class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+            </template>
         </div>
     </div>
 </template>
