@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Mappers\BlizzardDataMapper;
 use App\Models\Character;
-use App\Services\BlizzardApiService;
+use App\Services\Blizzard\BlizzardCharacterApiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +24,7 @@ class SyncBnetDataJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BlizzardApiService $blizzardApiService): void
+    public function handle(BlizzardCharacterApiService $blizzardApiService): void
     {
         Log::info("Syncing Bnet data for character: {$this->character->name}");
 

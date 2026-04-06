@@ -9,5 +9,3 @@ use App\Http\Controllers\Api\DiscordGuildController;
 Route::post('/discord/interactions', [DiscordInteractionController::class, 'handle'])
     ->middleware(VerifyDiscordSignature::class);
 
-Route::post('/logs/analyze', [AiAnalystController::class, 'ask']);
-

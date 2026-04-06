@@ -6,15 +6,11 @@ namespace App\Services\Discord;
 
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\StaticGroup;
-use App\Tasks\Discord\SendDiscordWebhookTask;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class DiscordWebhookService
 {
-    public function __construct(
-        private readonly SendDiscordWebhookTask $sendWebhookTask
-    ) {}
 
     /**
      * Send an automatic service notification to the static's webhook.
@@ -34,7 +30,7 @@ class DiscordWebhookService
             return false;
         }
 
-        return $this->sendWebhookTask->run($webhookUrl, $payload);
+        return $this->sendWebhook($webhookUrl, $payload);
     }
 
     /**
@@ -133,6 +129,61 @@ class DiscordWebhookService
     }
 
     // -----------------------------------------------------------------------
+
+    /**
+     * Send a payload to a Discord webhook URL.
+     */
+    public function sendWebhook(string $webhookUrl, array $payload): bool
+    {
+        if (empty($webhookUrl)) {
+            Log::warning('Discord Webhook URL is empty.');
+            return false;
+        }
+
+        try {
+            $response = Http::post($webhookUrl, $payload);
+
+            if ($response->successful()) {
+                return true;
+            }
+
+            Log::error('Discord Webhook failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Discord Webhook exception', ['message' => $e->getMessage()]);
+        }
+
+        return false;
+    }
+
+    /**
+     * Verify the signature of an incoming Discord interaction.
+     */
+    public function verifySignature(string $signature, string $timestamp, string $body): bool
+    {
+        $publicKey = (string) config('services.discord.public_key');
+
+        if (!$publicKey) {
+            Log::error('Discord public key not configured');
+            return false;
+        }
+
+        try {
+            $binarySignature = hex2bin($signature);
+            $binaryPublicKey = hex2bin($publicKey);
+
+            if ($binarySignature === false || $binaryPublicKey === false) {
+                return false;
+            }
+
+            return sodium_crypto_sign_verify_detached($binarySignature, $timestamp . $body, $binaryPublicKey);
+        } catch (\Exception $e) {
+            Log::error('Discord signature verification exception', ['message' => $e->getMessage()]);
+            return false;
+        }
+    }
 
     /**
      * Parse a Discord webhook URL and return [webhookId, webhookToken].

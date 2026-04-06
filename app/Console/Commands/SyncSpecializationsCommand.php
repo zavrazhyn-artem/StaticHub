@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Specialization;
-use App\Services\BlizzardApiService;
+use App\Services\Blizzard\BlizzardGameDataApiService;
 use Illuminate\Console\Command;
 
 class SyncSpecializationsCommand extends Command
@@ -14,7 +14,7 @@ class SyncSpecializationsCommand extends Command
 
     protected $description = 'Тягне назву, клас та іконку кожного спека з Blizzard Game Data API і зберігає в таблицю specializations. Роль береться з config/wow_season.php. Запускати вручну при появі нового класу/спека.';
 
-    public function __construct(private readonly BlizzardApiService $blizzardApi)
+    public function __construct(private readonly BlizzardGameDataApiService $blizzardApi)
     {
         parent::__construct();
     }

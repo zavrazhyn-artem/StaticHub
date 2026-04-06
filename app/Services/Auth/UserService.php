@@ -5,31 +5,23 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Models\User;
-use App\Tasks\Auth\CreateUserTask;
-use App\Tasks\Auth\DeleteUserTask;
-use App\Tasks\Auth\LinkUserDiscordTask;
-use App\Tasks\Auth\UnlinkUserDiscordTask;
-use App\Tasks\Auth\UpdateUserPasswordTask;
-use App\Tasks\Auth\UpdateUserProfileTask;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
-    public function __construct(
-        protected CreateUserTask $createUserTask,
-        protected UpdateUserProfileTask $updateUserProfileTask,
-        protected UpdateUserPasswordTask $updateUserPasswordTask,
-        protected DeleteUserTask $deleteUserTask,
-        protected LinkUserDiscordTask $linkUserDiscordTask,
-        protected UnlinkUserDiscordTask $unlinkUserDiscordTask,
-    ) {}
-
     /**
      * Update user profile data.
      */
     public function executeUpdateProfile(User $user, array $data): void
     {
-        $this->updateUserProfileTask->run($user, $data);
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
     }
 
     /**
@@ -37,7 +29,11 @@ class UserService
      */
     public function executeRegistration(array $data): User
     {
-        $user = $this->createUserTask->run($data);
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
 
         event(new Registered($user));
 
@@ -49,7 +45,7 @@ class UserService
      */
     public function executeUserDeletion(User $user): void
     {
-        $this->deleteUserTask->run($user);
+        $user->delete();
     }
 
     /**
@@ -57,7 +53,10 @@ class UserService
      */
     public function executeDiscordLinking(User $user, object $discordUser): void
     {
-        $this->linkUserDiscordTask->run($user, $discordUser);
+        $user->update([
+            'discord_id' => $discordUser->id,
+            'discord_username' => $discordUser->nickname ?? $discordUser->name,
+        ]);
     }
 
     /**
@@ -65,7 +64,10 @@ class UserService
      */
     public function executeDiscordUnlinking(User $user): void
     {
-        $this->unlinkUserDiscordTask->run($user);
+        $user->update([
+            'discord_id' => null,
+            'discord_username' => null,
+        ]);
     }
 
     /**
@@ -73,6 +75,8 @@ class UserService
      */
     public function executePasswordUpdate(User $user, string $password): void
     {
-        $this->updateUserPasswordTask->run($user, $password);
+        $user->update([
+            'password' => Hash::make($password),
+        ]);
     }
 }

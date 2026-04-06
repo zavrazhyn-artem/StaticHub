@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\StaticGroup\KickStaticMemberAction;
-use App\Actions\StaticGroup\TransferStaticOwnershipAction;
 use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\StaticGroup;
 use App\Services\Auth\UserService;
+use App\Services\StaticGroup\RosterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +17,8 @@ use Laravel\Socialite\Facades\Socialite;
 class ProfileController extends Controller
 {
     public function __construct(
-        protected UserService $userService
+        protected UserService $userService,
+        protected RosterService $rosterService,
     ) {}
 
     /**
@@ -119,7 +119,7 @@ class ProfileController extends Controller
     /**
      * Transfer ownership of a static group to another member.
      */
-    public function transferOwnership(Request $request, StaticGroup $static, TransferStaticOwnershipAction $action): RedirectResponse
+    public function transferOwnership(Request $request, StaticGroup $static): RedirectResponse
     {
         $user = $request->user();
 
@@ -133,7 +133,7 @@ class ProfileController extends Controller
             ->where('user_id', $validated['new_owner_id'])
             ->firstOrFail();
 
-        $action->execute($static, $user, $newOwner);
+        $this->rosterService->transferOwnership($static, $user, $newOwner);
 
         return Redirect::route('profile.edit')->with('status', 'ownership-transferred');
     }
@@ -141,7 +141,7 @@ class ProfileController extends Controller
     /**
      * Leave the current static group.
      */
-    public function leaveStatic(Request $request, KickStaticMemberAction $kickAction): RedirectResponse
+    public function leaveStatic(Request $request): RedirectResponse
     {
         $user = $request->user();
         $statics = $user->statics()->get();
@@ -150,7 +150,7 @@ class ProfileController extends Controller
             if ($static->owner_id === $user->id) {
                 return Redirect::route('profile.edit')->with('error', 'leave-owner');
             }
-            $kickAction->execute($static, $user);
+            $this->rosterService->kickMember($static, $user);
         }
 
         return Redirect::route('onboarding.index')->with('status', 'left-static');

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreScheduleRequest;
-use App\Models\RaidEvent;
+use App\Models\Event;
 use App\Models\StaticGroup;
-use App\Services\Raid\ScheduleService;
+use App\Services\Raid\EventService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +16,7 @@ use Illuminate\View\View;
 class ScheduleController extends Controller
 {
     public function __construct(
-        private readonly ScheduleService $scheduleService
+        private readonly EventService $eventService
     ) {
     }
 
@@ -28,7 +28,7 @@ class ScheduleController extends Controller
         $year  = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
 
-        $scheduleData = $this->scheduleService->buildSchedulePayload($year, $month, Auth::id());
+        $scheduleData = $this->eventService->buildSchedulePayload($year, $month, Auth::id());
 
         return view('schedule.index', $scheduleData);
     }
@@ -42,7 +42,7 @@ class ScheduleController extends Controller
         Gate::authorize('canManageSchedule', $static);
 
         Log::info('Creating event', $request->validated());
-        $this->scheduleService->executeEventCreation($request->validated(), Auth::id());
+        $this->eventService->createEvent($request->validated(), Auth::id());
 
         return redirect()->back()->with('success', 'Event created successfully!');
     }
@@ -50,12 +50,16 @@ class ScheduleController extends Controller
     /**
      * Update an event in the schedule.
      */
-    public function update(StoreScheduleRequest $request, RaidEvent $event): RedirectResponse
+    public function update(StoreScheduleRequest $request, Event $event): RedirectResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
+        if ($event->raid_started) {
+            return redirect()->back()->withErrors(['event' => __('Event already started. Changes are not allowed.')]);
+        }
+
         Log::info('Updating event', $request->validated());
-        $this->scheduleService->executeEventUpdate($event, $request->validated(), Auth::id());
+        $this->eventService->executeEventUpdate($event, $request->validated(), Auth::id());
 
         return redirect()->back()->with('success', 'Event updated successfully!');
     }
@@ -63,11 +67,15 @@ class ScheduleController extends Controller
     /**
      * Delete an event from the schedule.
      */
-    public function destroy(RaidEvent $event): RedirectResponse
+    public function destroy(Event $event): RedirectResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
-        $this->scheduleService->executeEventDeletion($event);
+        if ($event->raid_started) {
+            return redirect()->back()->withErrors(['event' => __('Event already started. Changes are not allowed.')]);
+        }
+
+        $this->eventService->executeEventDeletion($event);
 
         return redirect()->route('schedule.index')->with('success', 'Event deleted successfully!');
     }

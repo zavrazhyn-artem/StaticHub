@@ -6,22 +6,42 @@ namespace App\Services\StaticGroup;
 
 use App\Models\Realm;
 use App\Models\StaticGroup;
-use App\Services\BlizzardApiService;
-use App\Tasks\StaticGroup\CreateStaticGroupTask;
+use App\Services\Blizzard\BlizzardGuildApiService;
+use App\Services\StaticGroup\ConsumableService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StaticService
 {
     /**
      * Create a new StaticService instance.
      *
-     * @param BlizzardApiService $blizzardApi
-     * @param CreateStaticGroupTask $createStaticGroupTask
+     * @param BlizzardGuildApiService $blizzardApi
+     * @param ConsumableService $consumableService
      */
     public function __construct(
-        protected BlizzardApiService $blizzardApi,
-        protected CreateStaticGroupTask $createStaticGroupTask
+        protected BlizzardGuildApiService $blizzardApi,
+        protected ConsumableService $consumableService
     ) {
+    }
+
+    /**
+     * Fetch the default static group for a user.
+     *
+     * @param int $userId
+     * @return StaticGroup
+     * @throws \RuntimeException
+     */
+    public function getDefaultStaticForUser(int $userId): StaticGroup
+    {
+        $static = StaticGroup::query()->firstForUser($userId);
+
+        if (!$static) {
+            throw new \RuntimeException('No static group found.');
+        }
+
+        return $static;
     }
 
     /**
@@ -74,7 +94,7 @@ class StaticService
             throw new ModelNotFoundException();
         }
 
-        return $this->createStaticGroupTask->run(
+        return $this->createStaticGroup(
             $data['name'],
             $realm->name,
             $realm->slug,
@@ -92,12 +112,45 @@ class StaticService
      */
     public function executeGuildImport(array $data, int $userId): StaticGroup
     {
-        return $this->createStaticGroupTask->run(
+        return $this->createStaticGroup(
             $data['name'],
             $data['realm'],
             $data['realm_slug'],
             'eu',
             $userId
         );
+    }
+
+    /**
+     * Create a new static group and assign its owner.
+     *
+     * @param string $name
+     * @param string $realmName
+     * @param string $realmSlug
+     * @param string $region
+     * @param int $ownerId
+     * @return StaticGroup
+     */
+    public function createStaticGroup(string $name, string $realmName, string $realmSlug, string $region, int $ownerId): StaticGroup
+    {
+        return DB::transaction(function () use ($name, $realmName, $realmSlug, $region, $ownerId) {
+            $static = StaticGroup::create([
+                'name' => $name,
+                'slug' => Str::slug($name . '-' . $realmSlug),
+                'server' => $realmName,
+                'region' => $region,
+                'owner_id' => $ownerId,
+            ]);
+
+            $calculatedCost = $this->consumableService->buildConsumablesPayload($static)['grand_total_weekly_cost'] ?? 0;
+            $costPerPlayer = $calculatedCost / 20;
+            // Round up to nearest 1000 gold (10 000 000 copper)
+            $roundedTax = (int) (ceil($costPerPlayer / 10000000) * 10000000);
+            $static->update(['weekly_tax_per_player' => $roundedTax]);
+
+            $static->assignOwner($ownerId);
+
+            return $static;
+        });
     }
 }

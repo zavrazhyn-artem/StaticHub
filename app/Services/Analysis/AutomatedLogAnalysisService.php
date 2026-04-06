@@ -5,21 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Analysis;
 
 use App\Services\Discord\DiscordMessageService;
-use App\Tasks\Analysis\FetchPendingAnalysisRaidsTask;
-use App\Tasks\Analysis\MatchRaidToWclLogTask;
-use App\Tasks\Analysis\PersistTacticalReportTask;
-use App\Tasks\Analysis\SaveAiAnalysisToReportTask;
 use Throwable;
 
 class AutomatedLogAnalysisService
 {
     public function __construct(
-        private readonly FetchPendingAnalysisRaidsTask $fetchPendingAnalysisRaidsTask,
-        private readonly MatchRaidToWclLogTask $matchRaidToWclLogTask,
-        private readonly PersistTacticalReportTask $persistTacticalReportTask,
-        private readonly SaveAiAnalysisToReportTask $saveAiAnalysisToReportTask,
+        private readonly StaticLogService $staticLogService,
         private readonly WclService $wclService,
-        private readonly RaidAiAnalystService $aiAnalyst,
+        private readonly GeminiService $aiAnalyst,
         private readonly DiscordMessageService $discordMessageService
     ) {}
 
@@ -31,7 +24,7 @@ class AutomatedLogAnalysisService
     public function executeAutomatedAnalysis(): array
     {
         $messages = [];
-        $raids = $this->fetchPendingAnalysisRaidsTask->run();
+        $raids = $this->staticLogService->getPendingAnalysisRaids();
 
         foreach ($raids as $raid) {
             try {
@@ -48,19 +41,19 @@ class AutomatedLogAnalysisService
                     $static->wcl_realm ?? $static->server
                 );
 
-                $matchedLog = $this->matchRaidToWclLogTask->run($logs, $raid);
+                $matchedLog = $this->staticLogService->matchRaidToWclLog($logs, $raid);
 
                 if (!$matchedLog) {
                     $messages[] = "WARN: No matching WCL log found for raid (ID: {$raid->id})";
                     continue;
                 }
 
-                $report = $this->persistTacticalReportTask->run($matchedLog, $raid);
+                $report = $this->staticLogService->persistTacticalReport($matchedLog, $raid);
                 $logSummary = $this->wclService->getLogSummary($matchedLog['code']);
 
                 try {
-                    $analysis = $this->aiAnalyst->analyzeLog($logSummary);
-                    $this->saveAiAnalysisToReportTask->run($report, $analysis);
+                    $analysis = $this->aiAnalyst->analyzeRaidLog($logSummary);
+                    $this->staticLogService->saveAiAnalysis($report, $analysis);
 
                     if ($raid->discord_message_id) {
                         $this->discordMessageService->sendOrUpdateRaidAnnouncement($raid);

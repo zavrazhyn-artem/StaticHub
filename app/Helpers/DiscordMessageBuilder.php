@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Helpers;
 
-use App\Models\RaidEvent;
+use App\Models\Event;
 use App\Support\IconHelper;
 use Illuminate\Support\Collection;
 
 class DiscordMessageBuilder
 {
-    public static function buildRaidMessage(RaidEvent $event, array $rosterData): array
+    public static function buildRaidMessage(Event $event, array $rosterData): array
     {
         // --- Reclassify for Discord display ---
         // Web keeps pending in mainRoster and tentative in absentRoster.
@@ -139,9 +139,24 @@ class DiscordMessageBuilder
             ],
         ];
 
-        return [
-            'embeds'     => [$embed],
-            'components' => [
+        // When raid has started, only show "Open on Website" button
+        if ($event->raid_started) {
+            $components = [
+                [
+                    'type' => 1,
+                    'components' => [
+                        [
+                            'type'  => 2,
+                            'style' => 5,
+                            'label' => 'Open on Website',
+                            'url'   => route('schedule.event.show', $event->id),
+                            'emoji' => ['name' => '🌐'],
+                        ],
+                    ],
+                ],
+            ];
+        } else {
+            $components = [
                 [
                     'type' => 1,
                     'components' => [
@@ -174,6 +189,11 @@ class DiscordMessageBuilder
                             'label'     => '👤 Change Character',
                             'custom_id' => "rsvp_switch_{$event->id}",
                         ],
+                    ],
+                ],
+                [
+                    'type' => 1,
+                    'components' => [
                         [
                             'type'      => 2,
                             'style'     => 2,
@@ -189,7 +209,12 @@ class DiscordMessageBuilder
                         ],
                     ],
                 ],
-            ],
+            ];
+        }
+
+        return [
+            'embeds'     => [$embed],
+            'components' => $components,
         ];
     }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\Discord;
 
 use App\Models\RaidAttendance;
-use App\Models\RaidEvent;
+use App\Models\Event;
 use App\Services\Discord\DiscordMessageService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -32,15 +32,15 @@ class SwapRsvpCharacterJob implements ShouldQueue
      */
     public function handle(DiscordMessageService $discordMessageService): void
     {
-        $event = RaidEvent::find($this->eventId);
+        $event = Event::find($this->eventId);
 
-        if (!$event) {
+        if (!$event || $event->raid_started) {
             return;
         }
 
         // Find the current attendance record for this User and Event.
         // Since attendance is linked to character_id, we need to find which character the user is currently using.
-        $attendance = RaidAttendance::where('raid_event_id', $this->eventId)
+        $attendance = RaidAttendance::where('event_id', $this->eventId)
             ->whereIn('character_id', function ($query) {
                 $query->select('id')
                     ->from('characters')
@@ -56,7 +56,7 @@ class SwapRsvpCharacterJob implements ShouldQueue
         } else {
             // If no attendance record exists, create one with a 'tentative' status for the new character
             RaidAttendance::create([
-                'raid_event_id' => $this->eventId,
+                'event_id' => $this->eventId,
                 'character_id' => $this->characterId,
                 'status' => 'tentative',
             ]);

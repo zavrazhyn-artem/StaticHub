@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->string('discord_message_id')->nullable()->after('description');
         });
     }
 
     public function down(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->dropColumn('discord_message_id');
         });
     }

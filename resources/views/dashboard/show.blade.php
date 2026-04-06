@@ -1,4 +1,3 @@
-@php use App\Policies\StaticGroupPolicy; @endphp
 <x-app-layout>
     <section class="mb-8">
         <header class="flex items-end justify-between border-b border-white/5 pb-4">
@@ -26,49 +25,6 @@
             </div>
         </header>
     </section>
-
-    @php
-        $dashboardData = [
-            'nextRaid' => $nextRaid ? [
-                'timestamp'     => $nextRaid->start_time->timestamp,
-                'date'          => $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('l, M d'),
-                'time'          => $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('H:i'),
-                'discordPosted' => (bool) $nextRaid->discord_message_id,
-            ] : null,
-            'roleCounts'    => $roleCounts,
-            'taxStatus'     => $taxStatus,
-            'taxDescription'=> $taxDescription,
-            'targetTax'     => \App\Helpers\CurrencyHelper::formatGold($targetTax, false),
-            'weeklyStatus'  => $weeklyStatus ?? [],
-            'paidCount'     => collect($weeklyStatus ?? [])->where('is_paid', true)->count(),
-            'weekRange'     => now()->startOfWeek()->format('M d') . ' - ' . now()->endOfWeek()->format('M d'),
-            'reserves'      => \App\Helpers\CurrencyHelper::formatGold($reserves),
-            'autonomy'      => $autonomy,
-            'weeklyCost'    => $weeklyCost,
-            'raidDays'      => count($static->raid_days ?? ['wed', 'thu', 'sun']),
-            'recipes'       => $recipes->map(fn($r) => [
-                'icon'     => $r->display_icon_url,
-                'name'     => $r->name,
-                'quantity' => $r->quantity ?? $r->default_quantity,
-            ])->values()->toArray(),
-            'weeklySchedule'=> $weeklySchedule->map(fn($e) => [
-                'id'        => $e->id,
-                'month'     => $e->start_time->setTimezone($static->timezone)->format('M'),
-                'day'       => $e->start_time->setTimezone($static->timezone)->format('d'),
-                'dayOfWeek' => $e->start_time->setTimezone($static->timezone)->format('D'),
-                'time'      => $e->start_time->setTimezone($static->timezone)->format('H:i'),
-                'rsvpCount' => $e->rsvp_count,
-            ])->values()->toArray(),
-            'syncData'      => $syncData ?? (object)[],
-            'tickInterval'  => config('sync.widget_tick_ms', 1000),
-            'routes' => [
-                'settings'  => route('statics.settings.schedule', $static->id),
-                'calendar'  => route('schedule.index'),
-                'treasury'  => route('statics.treasury', $static->id),
-                'eventShow' => route('schedule.event.show', '__ID__'),
-            ],
-        ];
-    @endphp
 
     <dashboard-view :data="{{ json_encode($dashboardData) }}"></dashboard-view>
 </x-app-layout>

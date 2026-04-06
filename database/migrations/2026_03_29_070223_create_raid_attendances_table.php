@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('raid_attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('raid_event_id')->constrained('raid_events')->onDelete('cascade');
+            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
             $table->foreignId('character_id')->constrained('characters')->onDelete('cascade');
             $table->string('status')->default('present'); // Using string for flexibility with 'present', 'absent', 'tentative', 'late'
             $table->string('comment')->nullable();
             $table->timestamps();
 
-            $table->unique(['raid_event_id', 'character_id']);
+            $table->unique(['event_id', 'character_id']);
         });
     }
 

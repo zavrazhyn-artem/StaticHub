@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Actions\SyncCharacterRawDataAction;
+use App\Services\Character\CharacterSyncService;
 use App\Models\Character;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -32,7 +32,7 @@ class FetchBnetRawDataJob implements ShouldQueue
         $this->onQueue(config('sync.queues.bnet', 'bnet'));
     }
 
-    public function handle(SyncCharacterRawDataAction $action): void
+    public function handle(CharacterSyncService $syncService): void
     {
         Log::info('FetchBnetRawDataJob: starting Blizzard data fetch.', [
             'character_id'   => $this->character->id,
@@ -40,7 +40,7 @@ class FetchBnetRawDataJob implements ShouldQueue
         ]);
 
         try {
-            $action->execute($this->character, 'bnet');
+            $syncService->syncRawData($this->character, 'bnet');
         } catch (Throwable $e) {
             Log::error('FetchBnetRawDataJob: fatal exception.', [
                 'character_id' => $this->character->id,

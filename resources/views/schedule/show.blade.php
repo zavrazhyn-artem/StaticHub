@@ -4,7 +4,7 @@
         $canAnnounceToDiscord = Auth::user()->can('canAnnounceToDiscord', $event->static);
     @endphp
     <div id="app">
-        <raid-event-details
+        <event-details
             :event="{{ $event->toJson() }}"
             :user-characters="{{ $userCharacters->toJson() }}"
             :selected-character-id="{{ $selectedCharacterId ?? 'null' }}"
@@ -25,6 +25,6 @@
             ]) }}"
             success-message="{{ session('success') }}"
             :errors="{{ $errors->any() ? json_encode($errors->toArray()) : '{}' }}"
-        ></raid-event-details>
+        ></event-details>
     </div>
 </x-app-layout>

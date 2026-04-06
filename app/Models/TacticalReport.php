@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $static_id
- * @property int|null $raid_event_id
+ * @property int|null $event_id
  * @property string $wcl_report_id
  * @property string|null $title
  * @property array|null $difficulties
@@ -20,7 +20,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read StaticGroup $staticGroup
- * @property-read RaidEvent|null $raidEvent
+ * @property-read Event|null $event
  * @property-read Collection<int, PersonalTacticalReport> $personalReports
  * @method static TacticalReportBuilder query()
  * @property-read int|null $personal_reports_count
@@ -51,7 +51,7 @@ class TacticalReport extends Model
 
     protected $fillable = [
         'static_id',
-        'raid_event_id',
+        'event_id',
         'wcl_report_id',
         'title',
         'difficulties',
@@ -67,9 +67,9 @@ class TacticalReport extends Model
         return $this->belongsTo(StaticGroup::class, 'static_id');
     }
 
-    public function raidEvent(): BelongsTo
+    public function event(): BelongsTo
     {
-        return $this->belongsTo(RaidEvent::class);
+        return $this->belongsTo(Event::class);
     }
 
     public function personalReports(): HasMany

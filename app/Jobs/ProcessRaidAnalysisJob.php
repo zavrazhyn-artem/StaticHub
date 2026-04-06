@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\Locale;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
 use App\Services\Discord\DiscordMessageService;
@@ -31,6 +32,10 @@ class ProcessRaidAnalysisJob implements ShouldQueue
 
         try {
             $static = $this->report->staticGroup;
+
+            // Завантажуємо characters з user для locale + members для лідера
+            $static->load('characters.user', 'members');
+
             // Отримуємо масив імен з бази
             $rosterNames = $static->characters->pluck('name')->toArray();
 
@@ -41,8 +46,11 @@ class ProcessRaidAnalysisJob implements ShouldQueue
             $difficulties = $logData['difficulties'] ?? null;
             unset($logData['difficulties']);
 
+            // Будуємо локалізаційний блок
+            $localization = $this->buildLocalization($static, $logData['players'] ?? []);
+
             // Відправляємо в Gemini (без поля difficulties — AI воно не потрібне)
-            $aiJsonResponse = $geminiService->analyzeTacticalData(json_encode($logData));
+            $aiJsonResponse = $geminiService->analyzeTacticalData(json_encode($logData), $localization);
 
             // Розбираємо отриманий JSON
             $parsedData = json_decode($aiJsonResponse, true);
@@ -83,13 +91,47 @@ class ProcessRaidAnalysisJob implements ShouldQueue
                 }
             }
 
-            if ($this->report->raid_event_id && $this->report->raidEvent) {
-                $discordService->sendOrUpdateRaidAnnouncement($this->report->raidEvent);
+            if ($this->report->event_id && $this->report->event) {
+                $discordService->sendOrUpdateRaidAnnouncement($this->report->event);
             }
 
         } catch (\Exception $e) {
             Log::error("ProcessRaidAnalysisJob failed: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Build the localization block for the AI prompt.
+     * Only includes participants who actually appeared in the WCL log.
+     *
+     * @param \App\Models\StaticGroup $static
+     * @param array $logPlayers  — players array from getLogSummary (filtered roster)
+     * @return array{raid_leader: array, participants: array}
+     */
+    private function buildLocalization(\App\Models\StaticGroup $static, array $logPlayers): array
+    {
+        // Raid leader: the single member with access_role = 'leader'
+        $leader = $static->members->first(
+            fn($user) => $user->pivot->access_role === \App\Enums\StaticGroup\Role::Leader->value
+        );
+        $leaderLocale = Locale::fromString($leader?->locale ?? 'en')->fullName();
+
+        // Only participants who actually showed up in the log
+        $actualNames = array_column($logPlayers, 'name');
+
+        $participants = $static->characters
+            ->filter(fn($char) => in_array($char->name, $actualNames))
+            ->map(fn($char) => [
+                'name'   => $char->name,
+                'locale' => Locale::fromString($char->user?->locale ?? 'en')->fullName(),
+            ])
+            ->values()
+            ->toArray();
+
+        return [
+            'raid_leader'  => ['locale' => $leaderLocale],
+            'participants' => $participants,
+        ];
     }
 }

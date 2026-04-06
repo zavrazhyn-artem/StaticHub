@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\Character;
-use App\Services\BlizzardApiService;
-use App\Tasks\StaticGroup\AssignCharacterRoleTask;
+use App\Services\Blizzard\BlizzardCharacterApiService;
+use App\Services\StaticGroup\RosterService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -25,7 +25,7 @@ class SyncCharacterItemLevelJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BlizzardApiService $blizzardApiService, AssignCharacterRoleTask $assignTask): void
+    public function handle(BlizzardCharacterApiService $blizzardApiService, RosterService $rosterService): void
     {
         $profileData = $blizzardApiService->getCharacterProfileSummary(
             $this->character->realm->slug,
@@ -45,7 +45,7 @@ class SyncCharacterItemLevelJob implements ShouldQueue
             $this->character->refresh();
             $staticIds = $this->character->statics()->pluck('statics.id');
             foreach ($staticIds as $staticId) {
-                $assignTask->autoSetMainSpecIfMissing($this->character, (int) $staticId);
+                $rosterService->autoSetMainSpecIfMissing($this->character, (int) $staticId);
             }
         }
     }

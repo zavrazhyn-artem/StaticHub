@@ -1,0 +1,79 @@
+GIT
+  remote: https://github.com/wowaudit/rbattlenet.git
+  revision: 39739655c01c892b44333e5c43f61c4364caae3e
+  branch: master
+  specs:
+    rbattlenet (2.0.0)
+      addressable
+      oj
+      require_all
+      typhoeus (~> 1.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
+    aws-eventstream (1.2.0)
+    aws-partitions (1.702.0)
+    aws-sdk-core (3.170.0)
+      aws-eventstream (~> 1, >= 1.0.2)
+      aws-partitions (~> 1, >= 1.651.0)
+      aws-sigv4 (~> 1.5)
+      jmespath (~> 1, >= 1.6.1)
+    aws-sdk-kms (1.62.0)
+      aws-sdk-core (~> 3, >= 3.165.0)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-s3 (1.119.0)
+      aws-sdk-core (~> 3, >= 3.165.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.4)
+    aws-sigv4 (1.5.2)
+      aws-eventstream (~> 1, >= 1.0.2)
+    byebug (11.1.0)
+    concurrent-ruby (1.2.0)
+    connection_pool (2.3.0)
+    ethon (0.16.0)
+      ffi (>= 1.15.0)
+    ffi (1.15.5)
+    jmespath (1.6.2)
+    json (2.6.3)
+    mysql2 (0.5.5)
+    oj (3.14.1)
+    public_suffix (6.0.1)
+    redis (5.0.6)
+      redis-client (>= 0.9.0)
+    redis-client (0.12.1)
+      connection_pool
+    require_all (3.0.0)
+    rexml (3.2.5)
+    rollbar (3.4.0)
+    sequel (5.65.0)
+    typhoeus (1.4.0)
+      ethon (>= 0.9.0)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  aws-sdk-s3
+  byebug
+  json
+  mysql2
+  oj
+  rbattlenet!
+  redis
+  require_all
+  rexml
+  rollbar
+  sequel
+  typhoeus
+  tzinfo
+
+RUBY VERSION
+   ruby 3.1.3p185
+
+BUNDLED WITH
+   2.4.1

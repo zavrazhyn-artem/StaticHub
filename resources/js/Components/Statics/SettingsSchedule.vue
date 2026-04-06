@@ -37,6 +37,21 @@ const showToast = (message, error = false, duration = 5000) => {
     toastTimer = setTimeout(() => { toastShow.value = false; }, duration);
 };
 
+const postNextAfterRaid = ref(!!props.scheduleData.automation_settings?.post_next_after_raid);
+const reminderHoursBefore = ref(props.scheduleData.automation_settings?.reminder_hours_before ?? '');
+
+const onPostNextChanged = () => {
+    if (postNextAfterRaid.value) {
+        reminderHoursBefore.value = '';
+    }
+};
+
+const onReminderHoursChanged = () => {
+    if (reminderHoursBefore.value) {
+        postNextAfterRaid.value = false;
+    }
+};
+
 const validateAndSubmit = () => {};
 
 const days = {
@@ -132,7 +147,8 @@ const days = {
                             <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Auto-Post Next Raid') }}</label>
                             <label class="flex items-center gap-4 w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors group">
                                 <input type="checkbox" name="automation_settings[post_next_after_raid]" value="1"
-                                       :checked="scheduleData.automation_settings?.post_next_after_raid"
+                                       v-model="postNextAfterRaid"
+                                       @change="onPostNextChanged"
                                        class="w-5 h-5 rounded border-white/10 bg-black/40 text-secondary-neon focus:ring-secondary-neon focus:ring-offset-0 focus:ring-offset-transparent transition-all cursor-pointer">
                                 <span class="font-headline text-sm font-bold text-white tracking-widest uppercase group-hover:text-secondary-neon transition-colors">{{ __('Enable Auto-Post') }}</span>
                             </label>
@@ -146,7 +162,8 @@ const days = {
                                     <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-secondary-neon transition-colors text-lg">notifications_active</span>
                                 </span>
                                 <input type="number" name="automation_settings[reminder_hours_before]" id="reminder_hours_before"
-                                       :value="scheduleData.automation_settings?.reminder_hours_before ?? ''"
+                                       v-model="reminderHoursBefore"
+                                       @input="onReminderHoursChanged"
                                        placeholder="e.g. 24"
                                        class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-secondary-neon focus:border-transparent transition-all outline-none appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                             </div>

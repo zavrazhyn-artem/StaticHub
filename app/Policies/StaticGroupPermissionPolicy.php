@@ -68,6 +68,20 @@ class StaticGroupPermissionPolicy
     }
 
     // -------------------------------------------------------------------------
+    // Logs / Reports
+    // -------------------------------------------------------------------------
+
+    /**
+     * View the full global (guild-wide) report and AI analysis.
+     * Members can only see their own personal report.
+     * Required role: leader or officer.
+     */
+    public function canViewGlobalReport(User $user, StaticGroup $static): bool
+    {
+        return $this->getUserRoleInStatic($user, $static)?->isManager() ?? false;
+    }
+
+    // -------------------------------------------------------------------------
     // Treasury
     // -------------------------------------------------------------------------
 
@@ -85,12 +99,12 @@ class StaticGroupPermissionPolicy
     // -------------------------------------------------------------------------
 
     /**
-     * Change another member's access role (leader → officer / officer → member etc.).
-     * Required role: leader only.
+     * Change another member's access role (officer → member etc.).
+     * Required role: leader or officer.
      */
-    public function updateAccessRole(User $user, StaticGroup $static, User $targetUser): bool
+    public function updateAccessRole(User $user, StaticGroup $static): bool
     {
-        return $this->getUserRoleInStatic($user, $static) === Role::Leader;
+        return $this->getUserRoleInStatic($user, $static)?->isManager() ?? false;
     }
 
     /**

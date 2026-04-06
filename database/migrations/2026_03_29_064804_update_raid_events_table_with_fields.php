@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->foreignId('static_id')->after('id')->constrained('statics')->onDelete('cascade');
             $table->string('title')->after('static_id');
             $table->datetime('start_time')->after('title');
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->dropForeign(['static_id']);
             $table->dropColumn(['static_id', 'title', 'start_time', 'description']);
         });

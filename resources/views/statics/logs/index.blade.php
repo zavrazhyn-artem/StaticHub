@@ -1,15 +1,4 @@
 <x-app-layout>
-    @php
-        $logsData = array_map(fn($log) => [
-            'id'           => $log->id,
-            'title'        => $log->title,
-            'difficulties' => $log->difficulties ?? [],
-            'date'         => $log->created_at->format('M d, Y'),
-            'has_ai'       => (bool) $log->ai_analysis,
-            'url'          => route('statics.logs.show', [$static, $log]),
-        ], $logs->items());
-    @endphp
-
     <logs-index
         static-name="{{ $static->name }}"
         :logs='@json($logsData)'

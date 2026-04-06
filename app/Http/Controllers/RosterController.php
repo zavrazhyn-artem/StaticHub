@@ -9,7 +9,7 @@ use App\Http\Resources\StaticRosterMemberResource;
 use App\Models\CharacterStaticSpec;
 use App\Models\StaticGroup;
 use App\Models\User;
-use App\Services\ConsumableService;
+use App\Services\StaticGroup\ConsumableService;
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
 use Illuminate\Http\RedirectResponse;

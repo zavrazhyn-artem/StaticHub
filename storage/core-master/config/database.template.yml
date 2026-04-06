@@ -1,0 +1,16 @@
+mysql:
+  adapter:
+  encoding:
+  pool:
+  username:
+  password:
+  database:
+  host:
+  port:
+
+mysql_replica:
+  host:
+
+redis:
+  host:
+  password:

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiAnalystController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\JoinStaticController;
@@ -63,15 +64,17 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
     Route::patch('/schedule/event/{event}', [ScheduleController::class, 'update'])->name('schedule.event.update');
     Route::delete('/schedule/event/{event}', [ScheduleController::class, 'destroy'])->name('schedule.event.destroy');
-    Route::get('/schedule/event/{event}', [App\Http\Controllers\RaidEventController::class, 'show'])->name('schedule.event.show');
-    Route::post('/schedule/event/{event}/rsvp', [App\Http\Controllers\RaidEventController::class, 'rsvp'])->name('schedule.event.rsvp');
-    Route::post('/schedule/event/{event}/announce', [App\Http\Controllers\RaidEventController::class, 'announceToDiscord'])->name('schedule.announce');
+    Route::get('/schedule/event/{event}', [App\Http\Controllers\EventController::class, 'show'])->name('schedule.event.show');
+    Route::post('/schedule/event/{event}/rsvp', [App\Http\Controllers\EventController::class, 'rsvp'])->name('schedule.event.rsvp');
+    Route::post('/schedule/event/{event}/announce', [App\Http\Controllers\EventController::class, 'announceToDiscord'])->name('schedule.announce');
 
     Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
     Route::get('/api/discord/guilds/{guildId}/roles',    [DiscordGuildController::class, 'roles']);
 });
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('/api/logs/analyze', [AiAnalystController::class, 'ask']);
 
     Route::post('/statics/{static}/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
 

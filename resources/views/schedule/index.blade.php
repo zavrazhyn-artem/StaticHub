@@ -1,21 +1,5 @@
 <x-app-layout>
     @php
-        $mappedGrid = collect($grid)->map(fn($day) => [
-            "day_number" => $day["date"]->format("j"),
-            "formatted_date" => $day["date"]->format("Y-m-d"),
-            "is_today" => $day["is_today"],
-            "is_current_month" => $day["is_current_month"],
-            "events" => collect($day["events"])->map(fn($event) => [
-                "id" => $event->id,
-                "show_url" => route("schedule.event.show", $event),
-                "update_url" => route("schedule.event.update", $event),
-                "start_time" => $event->start_time->toIso8601String(),
-                "end_time" => $event->end_time?->toIso8601String(),
-                "description" => $event->description,
-                "characters_count" => $event->characters_count ?? 0,
-            ])->values()->all()
-        ])->values()->all();
-
         $canManageSchedule = Auth::user()->can('canManageSchedule', $static);
     @endphp
 

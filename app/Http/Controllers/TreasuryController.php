@@ -6,8 +6,7 @@ use App\Models\StaticGroup;
 use App\Models\Transaction;
 use App\Helpers\CurrencyHelper;
 use App\Services\StaticGroup\TreasuryService;
-use App\Services\ConsumableService;
-use App\Helpers\TreasuryTaxWarningHelper;
+use App\Services\StaticGroup\ConsumableService;
 use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -67,7 +66,7 @@ class TreasuryController extends Controller
 
         return response()->json(array_merge(
             ['success' => true, 'targetTax' => $fixedTax],
-            TreasuryTaxWarningHelper::compute($fixedTax, $realCostPerPlayer),
+            $this->treasuryService->computeTaxWarning($fixedTax, $realCostPerPlayer),
         ));
     }
 
@@ -89,7 +88,7 @@ class TreasuryController extends Controller
 
         return response()->json(array_merge(
             ['success' => true, 'taxPerRaider' => $taxPerRaider, 'totalCost' => $totalCost],
-            TreasuryTaxWarningHelper::compute($fixedTax, $taxPerRaider),
+            $this->treasuryService->computeTaxWarning($fixedTax, $taxPerRaider),
         ));
     }
 }

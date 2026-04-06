@@ -2,28 +2,30 @@
 
 namespace App\Models;
 
+use App\Builders\RaidAttendanceBuilder;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $raid_event_id
+ * @property int $event_id
  * @property int $character_id
  * @property string $status
  * @property string|null $comment
  * @property int|null $spec_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereCharacterId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereComment($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereRaidEventId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RaidAttendance whereUpdatedAt($value)
+ * @method static RaidAttendanceBuilder query()
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance newModelQuery()
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance newQuery()
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance forEvent(int $eventId)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereCharacterId($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereComment($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereCreatedAt($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereId($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereRaidEventId($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereStatus($value)
+ * @method static RaidAttendanceBuilder<static>|RaidAttendance whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class RaidAttendance extends Pivot
@@ -31,10 +33,15 @@ class RaidAttendance extends Pivot
     protected $table = 'raid_attendances';
 
     protected $fillable = [
-        'raid_event_id',
+        'event_id',
         'character_id',
         'status',
         'comment',
         'spec_id',
     ];
+
+    public function newEloquentBuilder($query): RaidAttendanceBuilder
+    {
+        return new RaidAttendanceBuilder($query);
+    }
 }

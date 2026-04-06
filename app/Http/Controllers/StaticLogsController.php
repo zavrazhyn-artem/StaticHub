@@ -25,10 +25,12 @@ class StaticLogsController extends Controller
             : [];
 
         $logs = $this->logService->getPaginatedLogs($static, $difficulties, $fromDate, $toDate);
+        $logsData = $this->logService->buildLogsIndexPayload($static, $logs);
 
         return view('statics.logs.index', [
             'static'              => $static,
             'logs'                => $logs,
+            'logsData'            => $logsData,
             'currentFromDate'     => $fromDate,
             'currentToDate'       => $toDate,
             'currentDifficulties' => $rawDiffs ?? '',
@@ -41,12 +43,11 @@ class StaticLogsController extends Controller
             abort(404);
         }
 
-        $userCharacter = auth()->check()
-            ? $this->logService->getUserCharacterForReport(auth()->user(), $static, $report)
-            : null;
+        $payload = $this->logService->buildLogShowPayload($static, $report, auth()->user());
 
-        $rawLogData = $this->logService->getRawLogData($report->wcl_report_id);
-
-        return view('statics.logs.show', compact('static', 'report', 'userCharacter', 'rawLogData'));
+        return view('statics.logs.show', array_merge(
+            ['static' => $static, 'report' => $report],
+            $payload
+        ));
     }
 }

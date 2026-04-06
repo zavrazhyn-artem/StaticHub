@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * Virtual presentation properties (applied via ConsumableMetadataHelper):
+ * Virtual presentation properties (applied via ConsumableService):
  * @property string|null $display_icon
  * @property string|null $display_color
  * @property string|null $wow_zamimg_url

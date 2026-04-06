@@ -34,12 +34,12 @@ use Illuminate\Support\Facades\DB;
  * @property-read User $user
  * @property-read Realm|null $realm
  * @property-read Collection<int, StaticGroup> $statics
- * @property-read Collection<int, RaidEvent> $raidEvents
+ * @property-read Collection<int, Event> $events
  * @property-read Collection<int, PersonalTacticalReport> $personalTacticalReports
  * @method static CharacterBuilder query()
  * @property-read int|null $personal_tactical_reports_count
  * @property-read \App\Models\RaidAttendance|null $pivot
- * @property-read int|null $raid_events_count
+ * @property-read int|null $events_count
  * @property-read int|null $statics_count
  * @method static CharacterBuilder<static>|Character belongingTo(int $userId)
  * @method static CharacterBuilder<static>|Character belongingToUserInStatic(int $userId, int $staticId)
@@ -152,9 +152,9 @@ class Character extends Model
     /**
      * Get the raid events the character is attending.
      */
-    public function raidEvents(): BelongsToMany
+    public function events(): BelongsToMany
     {
-        return $this->belongsToMany(RaidEvent::class, 'raid_attendances')
+        return $this->belongsToMany(Event::class, 'raid_attendances')
             ->using(RaidAttendance::class)
             ->withPivot('status', 'comment')
             ->withTimestamps();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Jobs\SyncSingleItemMetadataJob;
-use App\Tasks\Item\FetchIncompleteItemIdsTask;
+use App\Services\Auction\AuctionSyncService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -17,9 +17,9 @@ class SyncItemDetailsCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(FetchIncompleteItemIdsTask $fetchIncompleteItemIdsTask): int
+    public function handle(AuctionSyncService $auctionSyncService): int
     {
-        $itemIds = $fetchIncompleteItemIdsTask->run();
+        $itemIds = $auctionSyncService->fetchIncompleteItemIds();
 
         if (empty($itemIds)) {
             $this->info('No items to sync.');

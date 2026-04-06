@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StaticGroup;
 use App\Models\User;
-use App\Services\DashboardService;
+use App\Services\StaticGroup\DashboardService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -39,8 +39,11 @@ class DashboardController extends Controller
      */
     public function show(StaticGroup $static): View
     {
-        $data = $this->dashboardService->getDashboardData($static);
+        $dashboardData = $this->dashboardService->buildDashboardViewPayload($static);
 
-        return view('dashboard.show', $data);
+        return view('dashboard.show', [
+            'static'        => $static,
+            'dashboardData' => $dashboardData,
+        ]);
     }
 }

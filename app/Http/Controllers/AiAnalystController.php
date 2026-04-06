@@ -3,31 +3,47 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AiAnalystRequest;
+use App\Models\TacticalReport;
 use App\Services\Analysis\AiAnalystService;
 use Illuminate\Http\JsonResponse;
 
 class AiAnalystController extends Controller
 {
-    protected AiAnalystService $aiAnalystService;
+    public function __construct(
+        private readonly AiAnalystService $aiAnalystService
+    ) {}
 
-    public function __construct(AiAnalystService $aiAnalystService)
-    {
-        $this->aiAnalystService = $aiAnalystService;
-    }
-
-    /**
-     * Ask Gemini to analyze the log data.
-     *
-     * @param AiAnalystRequest $request
-     * @return JsonResponse
-     */
     public function ask(AiAnalystRequest $request): JsonResponse
     {
-        $result = $this->aiAnalystService->analyze(
-            $request->integer('report_id'),
-            $request->input('message')
-        );
+        $reportId = $request->integer('report_id');
+        $message  = $request->input('message');
 
-        return response()->json(['reply' => $result]);
+        $report = TacticalReport::with('staticGroup')->findOrFail($reportId);
+        $static = $report->staticGroup;
+        $user   = auth()->user();
+
+        // Leaders and officers get full log context
+        if ($user->can('canViewGlobalReport', $static)) {
+            $reply = $this->aiAnalystService->analyze($reportId, $message, $user->id);
+
+            return response()->json(['reply' => $reply]);
+        }
+
+        // Members get personal report context only
+        $characterIds = $static->characters()
+            ->where('characters.user_id', $user->id)
+            ->pluck('characters.id');
+
+        if ($characterIds->isEmpty()) {
+            return response()->json([
+                'reply' => json_encode(['blocks' => [
+                    ['type' => 'alert', 'level' => 'danger', 'content' => 'Your character was not found in this static.'],
+                ]]),
+            ], 403);
+        }
+
+        $reply = $this->aiAnalystService->analyzePersonal($reportId, $message, $characterIds->all(), $user->id);
+
+        return response()->json(['reply' => $reply]);
     }
 }

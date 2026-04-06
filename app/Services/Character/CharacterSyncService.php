@@ -7,14 +7,15 @@ namespace App\Services\Character;
 use App\Jobs\SyncCharacterItemLevelJob;
 use App\Models\Character;
 use App\Models\Realm;
-use App\Services\BlizzardApiService;
-use App\Tasks\StaticGroup\AssignCharacterRoleTask;
+use App\Services\Blizzard\BlizzardCharacterApiService;
+use App\Services\StaticGroup\RosterService;
 
 class CharacterSyncService
 {
     public function __construct(
-        private readonly BlizzardApiService      $blizzardApiService,
-        private readonly AssignCharacterRoleTask $assignTask,
+        private readonly BlizzardCharacterApiService  $blizzardApiService,
+        private readonly RosterService       $rosterService,
+        private readonly RawDataSyncService  $rawDataSyncService,
     ) {}
 
     /**
@@ -83,7 +84,7 @@ class CharacterSyncService
         // Auto-set main spec for each static this character belongs to.
         $staticIds = $character->statics()->pluck('statics.id');
         foreach ($staticIds as $staticId) {
-            $this->assignTask->autoSetMainSpecIfMissing($character, (int) $staticId);
+            $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
         }
     }
 
@@ -120,5 +121,13 @@ class CharacterSyncService
     private function dispatchSyncJob(Character $character): void
     {
         SyncCharacterItemLevelJob::dispatch($character);
+    }
+
+    /**
+     * Delegate raw data sync to RawDataSyncService.
+     */
+    public function syncRawData(Character $character, string $service = 'all'): void
+    {
+        $this->rawDataSyncService->syncRawData($character, $service);
     }
 }

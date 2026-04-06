@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\FetchAuctionsCommand;
+use App\Console\Commands\GenerateEventsCommand;
 use App\Console\Commands\SyncAllStaticsCommand;
 use App\Models\StaticGroup;
 use App\Jobs\SyncStaticGroupJob;
@@ -14,8 +15,9 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(FetchAuctionsCommand::class)->everyFifteenMinutes();
-Schedule::command(ProcessDiscordAutomations::class)->everyFifteenMinutes();
+Schedule::command(ProcessDiscordAutomations::class)->everyMinute();
 Schedule::command(SyncAllStaticsCommand::class)->everyMinute();
+Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00');
 
 Schedule::command('backup:run --only-db')->daily()->at('03:00');
 

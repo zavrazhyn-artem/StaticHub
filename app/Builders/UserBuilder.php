@@ -56,4 +56,12 @@ class UserBuilder extends Builder
             ->whereIn('character_id', $user->characters()->pluck('id'))
             ->exists();
     }
+
+    public function updateOrCreateFromBattleNet(array $bnetData): \App\Models\User
+    {
+        return \App\Models\User::updateOrCreate(
+            ['bnet_id' => $bnetData['bnet_id']],
+            $bnetData
+        );
+    }
 }

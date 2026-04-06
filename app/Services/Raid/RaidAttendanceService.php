@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Raid;
 
-use App\Models\RaidEvent;
+use App\Models\Event;
 use App\Models\Character;
 use App\Models\RaidAttendance;
 use App\Models\Specialization;
@@ -16,10 +16,10 @@ class RaidAttendanceService
     /**
      * Update attendance for a character at a raid event.
      */
-    public function updateAttendance(RaidEvent $event, Character $character, string $status, ?string $comment = null, ?int $specId = null): RaidAttendance
+    public function updateAttendance(Event $event, Character $character, string $status, ?string $comment = null, ?int $specId = null): RaidAttendance
     {
         return RaidAttendance::updateOrCreate([
-            'raid_event_id' => $event->id,
+            'event_id' => $event->id,
             'character_id' => $character->id,
         ], [
             'status'  => $status,
@@ -31,7 +31,7 @@ class RaidAttendanceService
     /**
      * Get the roster grouped by combat roles, including pending status for non-RSVP'd members.
      */
-    public function getGroupedRoster(RaidEvent $event): array
+    public function getGroupedRoster(Event $event): array
     {
         $staticMembers = $this->fetchStaticMembers($event->static_id);
         $attendances = $this->fetchEventAttendances($event->id);
@@ -79,7 +79,7 @@ class RaidAttendanceService
      */
     private function fetchEventAttendances(int $eventId): Collection
     {
-        return RaidAttendance::where('raid_event_id', $eventId)
+        return RaidAttendance::where('event_id', $eventId)
             ->get()
             ->keyBy('character_id');
     }
@@ -145,7 +145,7 @@ class RaidAttendanceService
             'comment'       => $comment,
             'spec_id'       => $specId,
             'character_id'  => $character->id,
-            'raid_event_id' => $eventId,
+            'event_id' => $eventId,
         ]));
     }
 

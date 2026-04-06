@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Services\StaticGroup\Sync;
 
 use App\Enums\StaticGroup\SyncType;
+use App\Helpers\SyncIntervalHelper;
 use App\Jobs\FetchBnetRawDataJob;
 use App\Jobs\FetchRioRawDataJob;
-use App\Tasks\StaticGroup\Sync\FetchStaticsDueForSyncTask;
-use App\Tasks\StaticGroup\Sync\MarkStaticAsSyncedTask;
+use App\Models\StaticGroup;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 /**
  * Orchestrates the unified character sync pipeline.
@@ -29,11 +31,6 @@ use App\Tasks\StaticGroup\Sync\MarkStaticAsSyncedTask;
  */
 class UnifiedSyncOrchestratorService
 {
-    public function __construct(
-        private readonly FetchStaticsDueForSyncTask $fetchStaticsDueForSyncTask,
-        private readonly MarkStaticAsSyncedTask $markStaticAsSyncedTask,
-    ) {}
-
     /**
      * Find statics due for sync and dispatch fetch jobs for each character.
      *
@@ -41,7 +38,7 @@ class UnifiedSyncOrchestratorService
      */
     public function execute(): array
     {
-        $staticsDue = $this->fetchStaticsDueForSyncTask->run(SyncType::BNET);
+        $staticsDue = $this->fetchStaticsDueForSync(SyncType::BNET);
 
         if ($staticsDue->isEmpty()) {
             return ['No statics are currently due for sync.'];
@@ -59,9 +56,9 @@ class UnifiedSyncOrchestratorService
                 $dispatched++;
             }
 
-            $this->markStaticAsSyncedTask->run($static->id, SyncType::BNET);
-            $this->markStaticAsSyncedTask->run($static->id, SyncType::RIO);
-            $this->markStaticAsSyncedTask->run($static->id, SyncType::WCL);
+            $this->markStaticAsSynced($static->id, SyncType::BNET);
+            $this->markStaticAsSynced($static->id, SyncType::RIO);
+            $this->markStaticAsSynced($static->id, SyncType::WCL);
 
             $messages[] = sprintf(
                 'Dispatched bnet+rio sync for %d character(s) in static: %s (ID: %d)',
@@ -72,5 +69,50 @@ class UnifiedSyncOrchestratorService
         }
 
         return $messages;
+    }
+
+    /**
+     * Fetch static groups that are due for a specific sync type.
+     *
+     * @param SyncType $syncType The sync type enum.
+     * @return Collection<int, StaticGroup>
+     */
+    public function fetchStaticsDueForSync(SyncType $syncType): Collection
+    {
+        $syncTypeValue = $syncType->value;
+        $syncColumn = "{$syncTypeValue}_last_synced_at";
+
+        return StaticGroup::withoutGlobalScopes()->with('characters')->get()->filter(function (StaticGroup $static) use ($syncType, $syncColumn) {
+            $tier = $static->plan_tier ?? 'free';
+            $interval = SyncIntervalHelper::getIntervalInMinutes($tier, $syncType);
+            $lastSyncAt = $static->$syncColumn;
+
+            if ($lastSyncAt === null) {
+                return true;
+            }
+
+            $lastSyncAt = $lastSyncAt instanceof Carbon ? $lastSyncAt : Carbon::parse($lastSyncAt);
+
+            return $lastSyncAt->isBefore(now()->subMinutes($interval));
+        });
+    }
+
+    /**
+     * Update the last sync timestamp for a specific sync type of a static group.
+     *
+     * @param int $staticId The ID of the static group.
+     * @param SyncType $syncType The sync type enum.
+     * @return void
+     */
+    public function markStaticAsSynced(int $staticId, SyncType $syncType): void
+    {
+        $syncTypeValue = $syncType->value;
+        $syncColumn = "{$syncTypeValue}_last_synced_at";
+
+        StaticGroup::withoutGlobalScopes()
+            ->where('id', $staticId)
+            ->update([
+                $syncColumn => now(),
+            ]);
     }
 }

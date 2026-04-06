@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->datetime('end_time')->nullable()->after('start_time');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('raid_events', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->dropColumn('end_time');
         });
     }

@@ -17,4 +17,17 @@ class ItemBuilder extends Builder
             ]
         );
     }
+
+    public function incompleteIds(): array
+    {
+        return $this->whereNull('name')
+            ->orWhereNull('icon_url')
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function allTrackedIds(): array
+    {
+        return $this->pluck('id')->toArray();
+    }
 }

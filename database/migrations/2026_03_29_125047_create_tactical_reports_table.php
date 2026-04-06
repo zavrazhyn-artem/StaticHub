@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tactical_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('static_id')->constrained('statics')->onDelete('cascade');
-            $table->foreignId('raid_event_id')->nullable()->constrained('raid_events')->onDelete('set null');
+            $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('set null');
             $table->string('wcl_report_id');
             $table->string('title')->nullable();
             $table->json('ai_analysis')->nullable();

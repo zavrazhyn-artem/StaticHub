@@ -6,19 +6,67 @@ namespace App\Services\Analysis;
 
 use App\Helpers\WclQueryBuilder;
 use App\Helpers\WclReportParserHelper;
-use App\Tasks\Analysis\ExecuteWclGraphqlTask;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class WclService
 {
-    public function __construct(
-        protected ExecuteWclGraphqlTask $executeWclGraphqlTask
-    ) {}
+    protected string $baseUrl = 'https://www.warcraftlogs.com/api/v2/client';
+    protected ?string $accessToken = null;
+
+    /**
+     * Execute a WCL GraphQL query.
+     */
+    public function executeGraphql(string $query, array $variables = []): array
+    {
+        $response = Http::withToken($this->getAccessToken())->post($this->baseUrl, [
+            'query' => $query,
+            'variables' => $variables,
+        ]);
+
+        $data = $response->json();
+        if (isset($data['errors'])) {
+            throw new \Exception('WCL GraphQL Error: ' . json_encode($data['errors']));
+        }
+
+        return $data['data'] ?? [];
+    }
+
+    protected function getAccessToken(): string
+    {
+        if ($this->accessToken) {
+            return $this->accessToken;
+        }
+
+        $clientId = config('services.wcl.public_key');
+        $clientSecret = config('services.wcl.private_key');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            throw new \Exception('Warcraft Logs API credentials missing.');
+        }
+
+        $token = Cache::get('wcl_access_token');
+        if (is_string($token)) {
+            return $this->accessToken = $token;
+        }
+
+        $response = Http::asForm()->post('https://www.warcraftlogs.com/oauth/token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+        ]);
+
+        $token = $response->json('access_token');
+        Cache::put('wcl_access_token', $token, 3600);
+
+        return $this->accessToken = $token;
+    }
 
     public function getLogSummary(string $reportId, array $rosterNames = []): array
     {
         // --- Query 1: fights + phases + masterData ---
         $fightsQuery = WclQueryBuilder::buildFightsQuery();
-        $initialData = $this->executeWclGraphqlTask->run($fightsQuery, ['reportId' => $reportId])['reportData']['report'] ?? [];
+        $initialData = $this->executeGraphql($fightsQuery, ['reportId' => $reportId])['reportData']['report'] ?? [];
 
         if (empty($initialData['fights'])) {
             return ['error' => 'No data found.'];
@@ -38,7 +86,7 @@ class WclService
 
         // --- Query 2: tables + playerDetails + rankings ---
         $tablesQuery = WclQueryBuilder::buildTablesQuery();
-        $tablesData  = $this->executeWclGraphqlTask->run($tablesQuery, [
+        $tablesData  = $this->executeGraphql($tablesQuery, [
             'reportId' => $reportId,
             'fightIds' => $fightIds,
         ])['reportData']['report'] ?? [];
@@ -173,7 +221,7 @@ class WclService
         ];
 
         try {
-            return $this->executeWclGraphqlTask->run($query, $variables);
+            return $this->executeGraphql($query, $variables);
         } catch (\Exception $e) {
             return null;
         }

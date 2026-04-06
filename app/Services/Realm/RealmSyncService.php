@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Realm;
 
-use App\Services\BlizzardApiService;
-use App\Tasks\Realm\BulkUpsertRealmsTask;
-use App\Tasks\Realm\FormatRealmPayloadTask;
+use App\Models\Realm;
+use App\Services\Blizzard\BlizzardGameDataApiService;
 
 class RealmSyncService
 {
     public function __construct(
-        private readonly BlizzardApiService $blizzardApiService,
-        private readonly FormatRealmPayloadTask $formatRealmPayloadTask,
-        private readonly BulkUpsertRealmsTask $bulkUpsertRealmsTask,
+        private readonly BlizzardGameDataApiService $blizzardApiService,
     ) {
     }
 
@@ -27,8 +24,46 @@ class RealmSyncService
         $realms = $this->blizzardApiService->getRealms();
         $region = config('services.battlenet.region', 'eu');
 
-        $payload = $this->formatRealmPayloadTask->run($realms, (string) $region);
+        $payload = $this->formatRealmPayload($realms, (string) $region);
 
-        return $this->bulkUpsertRealmsTask->run($payload);
+        return $this->bulkUpsertRealms($payload);
+    }
+
+    /**
+     * Format raw realm data from Blizzard API into a database-ready payload.
+     *
+     * @param array $rawRealms
+     * @param string $region
+     * @return array
+     */
+    public function formatRealmPayload(array $rawRealms, string $region): array
+    {
+        $payload = [];
+
+        foreach ($rawRealms as $realmData) {
+            $name = $realmData['name']['en_GB'] ?? $realmData['name']['en_US'] ?? reset($realmData['name']);
+
+            $payload[] = [
+                'id' => $realmData['id'],
+                'name' => $name,
+                'slug' => $realmData['slug'],
+                'region' => $region,
+            ];
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Bulk upsert realms into the database.
+     *
+     * @param array $realmsData
+     * @return int
+     */
+    public function bulkUpsertRealms(array $realmsData): int
+    {
+        Realm::upsert($realmsData, ['id'], ['name', 'slug', 'region']);
+
+        return count($realmsData);
     }
 }

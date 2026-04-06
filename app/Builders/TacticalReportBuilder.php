@@ -54,4 +54,26 @@ class TacticalReportBuilder extends Builder
     {
         return $this->with('staticGroup.characters')->findOrFail($id);
     }
+
+    public function findByWclReportId(string $wclReportId): ?TacticalReport
+    {
+        return $this->where('wcl_report_id', $wclReportId)->first();
+    }
+
+    public function upsertFromWclLog(array $matchedLog, \App\Models\Event $raid): TacticalReport
+    {
+        return TacticalReport::updateOrCreate(
+            ['wcl_report_id' => $matchedLog['code']],
+            [
+                'static_id' => $raid->static_id,
+                'event_id' => $raid->id,
+                'title' => $matchedLog['title'] ?? 'Raid Analysis',
+            ]
+        );
+    }
+
+    public function findWithStaticGroup(int $id): TacticalReport
+    {
+        return $this->with(['staticGroup', 'personalReports.character'])->findOrFail($id);
+    }
 }

@@ -132,4 +132,9 @@ class CharacterBuilder extends Builder
             ]
         );
     }
+
+    public function findById(int $id): ?Character
+    {
+        return $this->find($id);
+    }
 }

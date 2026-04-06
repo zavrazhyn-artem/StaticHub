@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Services\Discord;
 
 use App\Helpers\DiscordMessageBuilder;
-use App\Models\RaidEvent;
+use App\Models\Event;
 use App\Services\Raid\RaidAttendanceService;
-use App\Tasks\Discord\DiscordApiTask;
+use App\Services\Discord\DiscordApiService;
 
 class DiscordMessageService
 {
     public function __construct(
         private readonly RaidAttendanceService $attendanceService,
-        private readonly DiscordApiTask $discordApiTask
+        private readonly DiscordApiService $discordApiTask
     ) {
     }
 
-    private function postNewMessage(RaidEvent $event, string $channelId, array $payload): bool
+    private function postNewMessage(Event $event, string $channelId, array $payload): bool
     {
         $response = $this->discordApiTask->sendMessage($channelId, $payload);
 
@@ -59,9 +59,33 @@ class DiscordMessageService
     }
 
     /**
+     * Delete a raid announcement from Discord and clear the stored message ID.
+     */
+    public function deleteRaidAnnouncement(Event $event): bool
+    {
+        if (!$event->discord_message_id) {
+            return true;
+        }
+
+        $channelId = (string) $event->static->discord_channel_id;
+
+        if (empty($channelId)) {
+            return false;
+        }
+
+        $deleted = $this->discordApiTask->deleteMessage($channelId, $event->discord_message_id);
+
+        if ($deleted) {
+            $event->update(['discord_message_id' => null]);
+        }
+
+        return $deleted;
+    }
+
+    /**
      * Send a new raid announcement or update an existing one.
      */
-    public function sendOrUpdateRaidAnnouncement(RaidEvent $event): bool
+    public function sendOrUpdateRaidAnnouncement(Event $event): bool
     {
         $channelId = (string) $event->static->discord_channel_id;
 

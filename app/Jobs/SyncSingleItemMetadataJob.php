@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Services\BlizzardApiService;
+use App\Services\Blizzard\BlizzardGameDataApiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -37,7 +37,7 @@ class SyncSingleItemMetadataJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BlizzardApiService $apiService): void
+    public function handle(BlizzardGameDataApiService $apiService): void
     {
         $apiService->syncItemMetadata($this->itemId);
     }

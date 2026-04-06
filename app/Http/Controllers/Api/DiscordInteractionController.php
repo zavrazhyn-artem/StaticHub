@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\DiscordInteractionService;
+use App\Services\Discord\DiscordInteractionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

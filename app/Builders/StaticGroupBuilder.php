@@ -40,4 +40,9 @@ class StaticGroupBuilder extends Builder
             ->where('invite_until', '>', now())
             ->firstOrFail();
     }
+
+    public function withRaidScheduleConfigured(): self
+    {
+        return $this->whereNotNull('raid_days')->whereNotNull('raid_start_time');
+    }
 }

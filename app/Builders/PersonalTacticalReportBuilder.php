@@ -20,7 +20,7 @@ class PersonalTacticalReportBuilder extends Builder
     public function forCharacters(array $characterIds): Collection
     {
         return $this->whereIn('character_id', $characterIds)
-            ->with(['tacticalReport.raidEvent', 'character'])
+            ->with(['tacticalReport.event', 'character'])
             ->latest()
             ->get();
     }

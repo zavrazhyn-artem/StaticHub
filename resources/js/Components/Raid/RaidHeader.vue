@@ -70,7 +70,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                 <button
                     v-if="!currentAttendance || currentAttendance.status === 'pending'"
                     @click="emit('rsvp')"
-                    class="h-10 px-6 bg-success-neon text-black hover:bg-[#00ffb3] hover:shadow-[0_0_15px_rgba(0,255,152,0.3)] rounded-xl flex items-center justify-center gap-2 transition-all duration-300 group shadow-lg"
+                    class="h-10 px-6 bg-green-500 text-black rounded-xl flex items-center justify-center gap-2 transition-all duration-300 group shadow-lg"
                     :title="__('Join Raid')"
                 >
                     <span class="material-symbols-outlined text-[18px] font-bold group-hover:scale-110 transition-transform">person_add</span>

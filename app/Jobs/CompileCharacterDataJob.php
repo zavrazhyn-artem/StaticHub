@@ -6,7 +6,7 @@ namespace App\Jobs;
 
 use App\Models\Character;
 use App\Services\Roster\RosterCompilerService;
-use App\Tasks\StaticGroup\AssignCharacterRoleTask;
+use App\Services\StaticGroup\RosterService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -33,7 +33,7 @@ class CompileCharacterDataJob implements ShouldQueue
         $this->onQueue(config('sync.queues.compile', 'compile'));
     }
 
-    public function handle(RosterCompilerService $compiler, AssignCharacterRoleTask $assignTask): void
+    public function handle(RosterCompilerService $compiler, RosterService $rosterService): void
     {
         Log::info('CompileCharacterDataJob: starting compilation.', [
             'character_id'   => $this->character->id,
@@ -78,7 +78,7 @@ class CompileCharacterDataJob implements ShouldQueue
         // (skipped if specs are already configured for a given static).
         $staticIds = $this->character->statics()->pluck('statics.id');
         foreach ($staticIds as $staticId) {
-            $assignTask->autoSetMainSpecIfMissing($this->character, (int) $staticId);
+            $rosterService->autoSetMainSpecIfMissing($this->character, (int) $staticId);
         }
 
         Log::info('CompileCharacterDataJob: compiled_data persisted.', [

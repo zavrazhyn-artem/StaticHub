@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\StaticGroup;
-use App\Services\BlizzardApiService;
+use App\Services\Blizzard\BlizzardCharacterApiService;
 use App\Mappers\BlizzardDataMapper;
 use App\Services\Analysis\RaiderIoService;
 use App\Services\Analysis\WclService;
@@ -33,7 +33,7 @@ class SyncStaticRosterJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BlizzardApiService $bnetService, RaiderIoService $raiderIoService, WclService $wclService): void
+    public function handle(BlizzardCharacterApiService $bnetService, RaiderIoService $raiderIoService, WclService $wclService): void
     {
         $charactersToSync = $this->staticGroup->characters()
             ->with('realm')

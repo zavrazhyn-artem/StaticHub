@@ -1,0 +1,480 @@
+<script setup>
+import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue';
+import axios from 'axios';
+import TabGear from './TabGear.vue';
+import RosterTabs from './UnifiedRoster/RosterTabs.vue';
+import RosterTable from './UnifiedRoster/RosterTable.vue';
+import GlassModal from '../UI/GlassModal.vue';
+
+// ---------------------------------------------------------------------------
+// i18n helper
+// ---------------------------------------------------------------------------
+const { proxy } = getCurrentInstance();
+const __ = (key, replace = {}) => proxy.__(key, replace);
+
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
+const props = defineProps({
+    staticId:    { type: Number, required: true },
+    initialData: { type: Object,  default: null  },
+});
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+const roster             = ref([]);
+const currentUserAccess  = ref('member');
+const loading            = ref(true);
+const currentTab         = ref(localStorage.getItem('rosterActiveTab') || 'summary');
+const expandedRows       = ref(new Set());
+const selectedDifficulty = ref(localStorage.getItem('rosterSelectedDifficulty'));
+
+const showAuditModal     = ref(false);
+const selectedAuditChar  = ref(null);
+
+const openAuditModal = (char) => {
+    selectedAuditChar.value = char;
+    showAuditModal.value = true;
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const getHighestActiveDifficulty = () => {
+    if (!roster.value || roster.value.length === 0) return 'H';
+
+    const difficulties = [
+        { name: 'Mythic', key: 'M', code: 'M' },
+        { name: 'Heroic', key: 'H', code: 'H' },
+        { name: 'Normal', key: 'N', code: 'N' },
+        { name: 'LFR',    key: 'LFR', code: 'LFR' }
+    ];
+
+    for (const diff of difficulties) {
+        const hasKill = roster.value.some(member => {
+            const raids = member.main_character?.raids;
+            if (!raids) return false;
+
+            return Object.values(raids).some(bosses =>
+                bosses.some(boss => boss[diff.key] === true)
+            );
+        });
+
+        if (hasKill) return diff.code;
+    }
+
+    return 'N';
+};
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+const roles = [
+    { id: 'tank', labelKey: 'Tanks',   max: 2,  barColor: 'bg-blue-500'  },
+    { id: 'heal', labelKey: 'Healers', max: 4,  barColor: 'bg-green-500' },
+    { id: 'dps',  labelKey: 'DPS',     max: 14, barColor: 'bg-red-500'   },
+];
+
+const classColors = {
+    'Death Knight': 'text-[#C41F3B]', 'Demon Hunter': 'text-[#A330C9]',
+    'Druid':        'text-[#FF7C0A]', 'Evoker':       'text-[#33937F]',
+    'Hunter':       'text-[#ABD473]', 'Mage':         'text-[#3FC7EB]',
+    'Monk':         'text-[#00FF98]', 'Paladin':      'text-[#F48CBA]',
+    'Priest':       'text-[#FFFFFF]', 'Rogue':        'text-[#FFF468]',
+    'Shaman':       'text-[#0070DD]', 'Warlock':      'text-[#8788EE]',
+    'Warrior':      'text-[#C69B6D]',
+};
+
+const tierColors = {
+    'Myth':       'text-orange-500 font-black',
+    'Hero':       'text-purple-500 font-bold',
+    'Champion':   'text-blue-500   font-bold',
+    'Veteran':    'text-green-500  font-bold',
+    'Adventurer': 'text-teal-500   font-bold',
+    'Explorer':   'text-gray-400   font-bold',
+    '-':          'text-gray-700',
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const roleIconSrc = (role) => {
+    const map = {
+        TANK: 'tank',  tank:   'tank',
+        HEALER: 'heal', heal:  'heal', healer: 'heal',
+        DPS: 'melee',  dps:   'melee', mdps:   'melee', rdps: 'range',
+    };
+    return `/images/roles/${role ? (map[role] ?? 'help') : 'help'}.svg`;
+};
+
+const normalizeRoleKey = (role) => {
+    if (!role) return 'unknown';
+    const map = {
+        TANK: 'tank', tank: 'tank',
+        HEALER: 'heal', heal: 'heal', healer: 'heal',
+        DPS: 'dps', mdps: 'dps', rdps: 'dps',
+    };
+    return map[role] ?? 'unknown';
+};
+
+const tierCount = (pieces) => {
+    if (!pieces) return 0;
+    return Object.values(pieces).filter(v => v !== '-').length;
+};
+
+const killMarkClass = computed(() => ({
+    M:   'text-orange-400',
+    H:   'text-purple-400',
+    N:   'text-blue-400',
+    LFR: 'text-green-400',
+}[selectedDifficulty.value] ?? 'text-green-400'));
+
+const hasAuditIssues = (char) => {
+    if (!char) return false;
+    return (char.missing_enchants_slots?.length ?? 0) > 0 || (char.empty_sockets_count ?? 0) > 0;
+};
+
+const auditTitle = (char) => {
+    if (!char) return '';
+    const parts = [];
+    if (char.missing_enchants_slots?.length > 0)
+        parts.push(`Missing enchants: ${char.missing_enchants_slots.join(', ')}`);
+    if (char.empty_sockets_count > 0)
+        parts.push(`Empty sockets: ${char.empty_sockets_count}`);
+    return parts.join(' | ');
+};
+
+// ---------------------------------------------------------------------------
+// Data fetching
+// ---------------------------------------------------------------------------
+const fetchRoster = async () => {
+    if (props.initialData) {
+        roster.value            = props.initialData.roster ?? [];
+        currentUserAccess.value = props.initialData.current_user_access ?? 'member';
+
+        if (!selectedDifficulty.value) {
+            selectedDifficulty.value = getHighestActiveDifficulty();
+        }
+
+        loading.value           = false;
+        return;
+    }
+    loading.value = true;
+    try {
+        const response          = await axios.get(`/statics/${props.staticId}/roster/data`);
+        roster.value            = response.data.roster ?? [];
+        currentUserAccess.value = response.data.current_user_access ?? 'member';
+
+        if (!selectedDifficulty.value) {
+            selectedDifficulty.value = getHighestActiveDifficulty();
+        }
+    } catch (err) {
+        console.error('Failed to fetch roster:', err);
+    } finally {
+        loading.value = false;
+    }
+};
+
+onMounted(fetchRoster);
+
+watch(currentTab, (val) => {
+    localStorage.setItem('rosterActiveTab', val);
+    if (val === 'treasury') {
+        window.location.href = `/statics/${props.staticId}/treasury`;
+    } else if (val === 'settings') {
+        window.location.href = `/statics/${props.staticId}/settings/schedule`;
+    }
+});
+watch(selectedDifficulty, val => localStorage.setItem('rosterSelectedDifficulty', val));
+
+// ---------------------------------------------------------------------------
+// Computed
+// ---------------------------------------------------------------------------
+const coreRoster = computed(() => roster.value.filter(m => m.roster_status === 'core'));
+
+const stats = computed(() => {
+    const counts = { tank: 0, heal: 0, dps: 0 };
+    coreRoster.value.forEach(member => {
+        const key = normalizeRoleKey(member.main_character?.main_spec?.role);
+        if (key in counts) counts[key]++;
+    });
+    return counts;
+});
+
+const groupedRoster = computed(() => {
+    const groups = { tank: [], heal: [], dps: [], unknown: [] };
+    roster.value.forEach(member => {
+        const key = normalizeRoleKey(member.main_character?.main_spec?.role);
+        (groups[key] ?? groups.unknown).push(member);
+    });
+    return groups;
+});
+
+const raidColumns = computed(() => {
+    // Find the first character that has raid data and return ALL raid instances
+    for (const members of Object.values(groupedRoster.value)) {
+        for (const member of members) {
+            const raids = member.main_character?.raids;
+            if (!raids || Array.isArray(raids)) continue;
+            const keys = Object.keys(raids);
+            if (keys.length === 0) continue;
+            return keys.map(name => ({
+                name,
+                bosses: (raids[name] || []).map(b => b.name),
+            }));
+        }
+    }
+    return [];
+});
+
+// ---------------------------------------------------------------------------
+// Management actions
+// ---------------------------------------------------------------------------
+const canManageAccess = computed(() => ['leader', 'officer'].includes(currentUserAccess.value));
+const canManageStatus = computed(() => ['leader', 'officer'].includes(currentUserAccess.value));
+const canKick = computed(() => ['leader', 'officer'].includes(currentUserAccess.value));
+
+const toggleRow = (memberId) => {
+    if (expandedRows.value.has(memberId)) {
+        expandedRows.value.delete(memberId);
+    } else {
+        expandedRows.value.add(memberId);
+    }
+};
+
+const updateAccessRole = async (member, newRole) => {
+    try {
+        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/access-role`, { access_role: newRole });
+        member.access_role = newRole;
+    } catch (err) {
+        console.error('Failed to update access role:', err);
+        alert(__('Failed to update access role. Check permissions.'));
+    }
+};
+
+const updateRosterStatus = async (member, newStatus) => {
+    try {
+        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/roster-status`, { roster_status: newStatus });
+        member.roster_status = newStatus;
+    } catch (err) {
+        console.error('Failed to update roster status:', err);
+        alert(__('Failed to update roster status. Check permissions.'));
+    }
+};
+
+const kickMember = async (member) => {
+    if (!confirm(__('Remove {name} from this static?', { name: member.name }))) return;
+    try {
+        await axios.delete(`/statics/${props.staticId}/roster/${member.id}/kick`);
+        roster.value = roster.value.filter(m => m.id !== member.id);
+    } catch (err) {
+        console.error('Failed to kick member:', err);
+        alert(err.response?.data?.message || __('Failed to remove member.'));
+    }
+};
+</script>
+
+<template>
+    <div class="space-y-8">
+
+        <!-- ── Role Summary Widgets ─────────────────────────────────────── -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div v-for="role in roles" :key="role.id"
+                 class="bg-surface-container-high rounded-2xl border border-white/5 p-4 flex items-center gap-4 relative overflow-hidden group">
+                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-blue-500/30 transition-all">
+                    <img :src="roleIconSrc(role.id)" class="w-6 h-6 opacity-80" :alt="role.label">
+                </div>
+                <div>
+                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">{{ __(role.labelKey) }}</div>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-black text-white font-headline">{{ stats[role.id] }}</span>
+                        <span class="text-[10px] font-bold text-on-surface-variant">/ {{ role.max }}</span>
+                    </div>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+                    <div class="h-full transition-all duration-700"
+                         :class="role.barColor"
+                         :style="{ width: Math.min(100, (stats[role.id] / role.max) * 100) + '%' }">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Tabs & Difficulty ────────────────────────────────────────── -->
+        <RosterTabs
+            v-model:activeTab="currentTab"
+            v-model:selectedDifficulty="selectedDifficulty"
+            :can-manage-status="canManageStatus"
+        />
+
+        <!-- ── Loading ──────────────────────────────────────────────────── -->
+        <div v-if="loading" class="flex justify-center p-12">
+            <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+        </div>
+
+        <!-- ── Content ──────────────────────────────────────────────────── -->
+        <div v-else class="space-y-4">
+
+            <!-- ── Main Roster Table (all tabs including vault) ──────── -->
+            <RosterTable
+                :grouped-roster="groupedRoster"
+                :active-tab="currentTab"
+                :selected-difficulty="selectedDifficulty"
+                :expanded-rows="expandedRows"
+                :raid-columns="raidColumns"
+                :roles="roles"
+                :class-colors="classColors"
+                :tier-colors="tierColors"
+                :kill-mark-class="killMarkClass"
+                :can-manage-status="canManageStatus"
+                :can-manage-access="canManageAccess"
+                :can-kick="canKick"
+                :role-icon-src="roleIconSrc"
+                :tier-count="tierCount"
+                :has-audit-issues="hasAuditIssues"
+                :audit-title="auditTitle"
+                @open-audit-modal="openAuditModal"
+                @toggle-row="toggleRow"
+                @update-access-role="updateAccessRole"
+                @update-roster-status="updateRosterStatus"
+                @kick-member="kickMember"
+            />
+
+            <!-- ── Unassigned / No Character ─────────────────────────── -->
+            <div v-if="groupedRoster.unknown.length > 0" class="space-y-3 pt-6 border-t border-white/5">
+                <div class="flex items-center gap-2 border-b border-white/5 pb-2">
+                    <span class="material-symbols-outlined text-sm text-gray-500">help</span>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">
+                        {{ __('No Character Linked') }} ({{ groupedRoster.unknown.length }})
+                    </h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div v-for="member in groupedRoster.unknown" :key="member.id"
+                         class="bg-surface-container-high/40 rounded-xl border border-white/5 p-3 flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-gray-600">person</span>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white text-sm tracking-tight">{{ member.name }}</div>
+                                <div class="text-[9px] text-on-surface-variant font-black uppercase tracking-widest">{{ __('No Character Linked') }}</div>
+                            </div>
+                        </div>
+                        <div v-if="canManageStatus" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button @click="kickMember(member)"
+                                    class="text-error hover:text-white text-[10px] font-black uppercase tracking-widest bg-error/10 hover:bg-error px-2 py-1 rounded transition-colors">
+                                {{ __('Kick') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Audit Issues Modal ───────────────────────────────────────── -->
+        <GlassModal :show="showAuditModal" @close="showAuditModal = false" max-width="max-w-lg">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-amber-400">warning</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white leading-tight">
+                                {{ __('Audit Issues') }}
+                            </h3>
+                            <p class="text-xs text-on-surface-variant font-medium uppercase tracking-wider" :class="classColors[selectedAuditChar?.class]">
+                                {{ selectedAuditChar?.name }}
+                            </p>
+                        </div>
+                    </div>
+                    <button @click="showAuditModal = false" class="text-on-surface-variant hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Missing Enchants -->
+                    <div v-if="selectedAuditChar?.missing_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Missing Enchants') }}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span v-for="slot in selectedAuditChar.missing_enchants_slots" :key="slot"
+                                  class="px-2 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300">
+                                {{ slot }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Empty Sockets -->
+                    <div v-if="selectedAuditChar?.empty_sockets_count > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-amber-400">hexagon</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Empty Sockets') }}</span>
+                        </div>
+                        <div class="text-2xl font-black text-white px-2">
+                            {{ selectedAuditChar.empty_sockets_count }}
+                        </div>
+                    </div>
+
+                    <!-- Upgrades Missing -->
+                    <div v-if="(selectedAuditChar?.upgrades_missing ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-blue-400">upgrade</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Upgrades Missing') }}</span>
+                        </div>
+                        <div class="text-2xl font-black text-white px-2">
+                            {{ selectedAuditChar.upgrades_missing }}
+                        </div>
+                    </div>
+
+                    <!-- Spark Gear -->
+                    <div v-if="(selectedAuditChar?.sparks_equipped ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-cyan-400">flash_on</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
+                        </div>
+                        <div class="text-2xl font-black text-white px-2">
+                            {{ selectedAuditChar.sparks_equipped }}
+                        </div>
+                    </div>
+
+                    <!-- Embellished Items -->
+                    <div v-if="selectedAuditChar?.embellished_items?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-purple-400">diamond</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Embellished Items') }}</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div v-for="(emb, i) in selectedAuditChar.embellished_items" :key="i"
+                                 class="flex items-center gap-2 text-sm">
+                                <span class="text-purple-300 font-bold">{{ emb.name }}</span>
+                                <span class="text-gray-500 text-xs">ilvl {{ emb.ilvl }}</span>
+                                <span v-if="emb.spell_name" class="text-gray-400 text-xs italic">{{ emb.spell_name }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="!selectedAuditChar?.missing_enchants_slots?.length && !selectedAuditChar?.empty_sockets_count && !(selectedAuditChar?.upgrades_missing > 0)" class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span>
+                        <p class="text-sm text-gray-400">{{ __('No issues found') }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button @click="showAuditModal = false"
+                            class="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold transition-all">
+                        {{ __('Close') }}
+                    </button>
+                </div>
+            </div>
+        </GlassModal>
+
+    </div>
+</template>

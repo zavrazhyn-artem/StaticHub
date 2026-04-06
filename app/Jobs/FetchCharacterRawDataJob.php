@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Actions\SyncCharacterRawDataAction;
+use App\Services\Character\CharacterSyncService;
 use App\Models\Character;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -36,7 +36,7 @@ class FetchCharacterRawDataJob implements ShouldQueue
         public readonly Character $character,
     ) {}
 
-    public function handle(SyncCharacterRawDataAction $action): void
+    public function handle(CharacterSyncService $syncService): void
     {
         Log::info('FetchCharacterRawDataJob: starting raw data fetch.', [
             'character_id'   => $this->character->id,
@@ -46,7 +46,7 @@ class FetchCharacterRawDataJob implements ShouldQueue
         try {
             // The action handles per-route failures internally (logs + skips).
             // Any exception escaping here is a fatal infrastructure problem.
-            $action->execute($this->character);
+            $syncService->syncRawData($this->character);
         } catch (Throwable $e) {
             Log::error('FetchCharacterRawDataJob: action threw a fatal exception.', [
                 'character_id' => $this->character->id,

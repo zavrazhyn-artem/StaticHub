@@ -18,6 +18,12 @@ class ProcessDiscordAutomations extends Command
      */
     public function handle(DiscordAutomationService $automationService): void
     {
+        $this->info("Marking raids as started...");
+        $startedMessages = $automationService->executeRaidStartedAutomations();
+        foreach ($startedMessages as $message) {
+            $this->info($message);
+        }
+
         $this->info("Checking for raids that just ended...");
         $postNextMessages = $automationService->executePostNextAutomations();
         foreach ($postNextMessages as $message) {
