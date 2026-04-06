@@ -17,7 +17,7 @@ defineProps({
                     activeTab === 'schedule' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-m">calendar_month</span>
-                {{ __('Schedule & Treasury') }}
+                {{ __('Schedule') }}
             </div>
             <div v-if="activeTab === 'schedule'"
                  class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
