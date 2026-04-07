@@ -54,7 +54,7 @@ class RosterController extends Controller
         ]);
     }
 
-    public function updateParticipation(UpdateRosterRequest $request, StaticGroup $static): RedirectResponse
+    public function updateParticipation(UpdateRosterRequest $request, StaticGroup $static): RedirectResponse|JsonResponse
     {
         $validated = $request->validated();
         Log::info('Updating roster participation for user', [
