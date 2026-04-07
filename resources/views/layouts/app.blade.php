@@ -33,6 +33,7 @@
 <body class="bg-background text-on-background min-h-screen arcane-bg antialiased">
 @php
     $static = Auth::user() ? Auth::user()->statics->first() : null;
+    $isOnboarding = $onboarding ?? false;
 @endphp
     <!-- TopNavBar -->
 <header
@@ -48,7 +49,7 @@
                             class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
             </div>
         </div>
-        @if($static)
+        @if($static && !$isOnboarding)
             <div class="hidden md:flex items-center gap-4 ml-4">
                 <button onclick="handleInviteClick({{ $static->id }})"
                         class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
@@ -130,6 +131,7 @@
             </div>
         </div>
 
+        @unless($isOnboarding)
         <!-- Settings Dropdown -->
         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
             <div @click="open = !open">
@@ -220,11 +222,12 @@
                 </div>
             </div>
         </div>
+        @endunless
     </div>
 </header>
 
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 hidden lg:flex flex-col">
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 hidden {{ $isOnboarding ? '' : 'lg:flex' }} flex-col">
     @if($static)
         <div class="px-6 mb-8">
             <h2 class="font-headline text-lg font-bold text-white uppercase tracking-tighter">{{ $static->name }}</h2>
@@ -299,7 +302,7 @@
 </aside>
 
 <!-- Main Content Canvas -->
-<main class="lg:ml-64 pt-24 px-8 min-h-screen" id="app">
+<main class="{{ $isOnboarding ? '' : 'lg:ml-64' }} pt-24 px-8 min-h-screen" id="app">
     <div class="max-w-7xl mx-auto">
         {{ $slot }}
     </div>

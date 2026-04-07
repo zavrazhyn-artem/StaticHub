@@ -21,15 +21,21 @@ class EnsureUserHasStatic
 
             // 1. If 0 statics, force onboarding
             if (!$userQuery->hasAnyStatic($userId)) {
-                if (!$request->is('onboarding*') && !$request->is('join/*')) {
+                // Capture join token from /join/{token} URL before redirecting to onboarding
+                if ($request->is('join/*')) {
+                    $token = $request->segment(2);
+                    session(['pending_join_token' => $token]);
+                    return redirect()->route('onboarding.index');
+                }
+
+                if (!$request->is('onboarding*') && !$request->is('api/onboarding/*')) {
                     return redirect()->route('onboarding.index');
                 }
             } else {
                 // 2. If has static, check if any character is attached to any static they belong to
-                // According to task: "Has a Static AND Has a Character attached to that specific Static."
                 if (!$userQuery->hasCharacterInAnyStatic($userId)) {
-                    if (!$request->is('characters*') && !$request->is('roster*') && !$request->is('onboarding*') && !$request->is('join/*') && !$request->is('logout')) {
-                        return redirect()->route('characters.index')->with('warning', 'Please select a character to participate in your static.');
+                    if (!$request->is('characters*') && !$request->is('roster*') && !$request->is('onboarding*') && !$request->is('api/onboarding/*') && !$request->is('join/*') && !$request->is('logout')) {
+                        return redirect()->route('onboarding.index');
                     }
                 }
             }

@@ -60,10 +60,23 @@ class BattleNetController extends Controller
             $user->save();
         }
 
+        // Check if user arrived via an invite link (stored in session or url.intended)
+        if (!session('pending_join_token')) {
+            $intended = session('url.intended', '');
+            if (preg_match('#/join/([A-Za-z0-9]+)#', $intended, $matches)) {
+                session(['pending_join_token' => $matches[1]]);
+                session()->forget('url.intended');
+            }
+        }
+
+        if (session('pending_join_token')) {
+            return redirect()->route('onboarding.index');
+        }
+
         if (User::query()->hasMainCharacter($user->id)) {
             return redirect()->route('dashboard');
         }
 
-        return redirect()->route('characters.index');
+        return redirect()->route('onboarding.index');
     }
 }

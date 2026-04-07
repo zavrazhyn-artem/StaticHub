@@ -7,11 +7,15 @@ use Illuminate\View\View;
 
 class AppLayout extends Component
 {
+    public function __construct(
+        public bool $onboarding = false,
+    ) {}
+
     /**
      * Get the view / contents that represents the component.
      */
     public function render(): View
     {
-        return view('layouts.app');
+        return view('layouts.app', ['onboarding' => $this->onboarding]);
     }
 }

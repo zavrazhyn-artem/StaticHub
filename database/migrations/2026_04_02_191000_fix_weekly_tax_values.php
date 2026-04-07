@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Services\StaticGroup\ConsumableService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use App\Services\ConsumableService;
 use App\Models\StaticGroup;
 
 return new class extends Migration

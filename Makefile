@@ -93,11 +93,6 @@ init:
 	fi
 	@echo "$(GREEN)[1/7] .env found$(RESET)"
 
-	@# 2. Build Vite assets on the host so nginx has ./public/build to serve
-	@echo "$(GREEN)[2/7] Building Vite assets (npm ci + npm run build)...$(RESET)"
-	npm ci --no-audit --no-fund
-	npm run build
-
 	@# 3. Build Docker images (uses docker-compose.yml)
 	@echo "$(GREEN)[3/7] Building Docker images...$(RESET)"
 	$(LOCAL_COMPOSE) build

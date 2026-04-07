@@ -22,6 +22,7 @@ import DashboardView from './Components/Dashboard/DashboardView.vue';
 import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelect.vue';
 import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue';
 import CharactersPage from './Components/Character/CharactersPage.vue';
+import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
 
 const app = createApp({});
 app.config.globalProperties.__ = (key, replace = {}) => {
@@ -57,6 +58,7 @@ app.component('dashboard-view', DashboardView);
 app.component('transfer-ownership-select', TransferOwnershipSelect);
 app.component('character-spec-picker', CharacterSpecPicker);
 app.component('characters-page', CharactersPage);
+app.component('onboarding-stepper', OnboardingStepper);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {
