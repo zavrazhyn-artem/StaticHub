@@ -6,6 +6,8 @@ namespace App\Services\StaticGroup;
 
 use App\Helpers\WeeklyResetHelper;
 use App\Http\Resources\StaticRosterMemberResource;
+use App\Jobs\Character\FetchBnetRawDataJob;
+use App\Jobs\Character\FetchRioRawDataJob;
 use App\Models\Character;
 use App\Models\CharacterStaticSpec;
 use App\Models\CharacterWeeklySnapshot;
@@ -407,6 +409,25 @@ class RosterService
                 $static->characters()->attach($mainCharId, ['role' => 'main']);
                 $this->autoSetMainSpecIfMissing($character, $static->id);
             }
+        }
+
+        $this->dispatchSyncForAttachedCharacters($mainCharId, $raidingCharIds);
+    }
+
+    /**
+     * Dispatch data sync jobs for all characters attached to a static.
+     */
+    private function dispatchSyncForAttachedCharacters(?int $mainCharId, array $raidingCharIds): void
+    {
+        $characterIds = array_unique(array_filter(
+            $mainCharId ? array_merge($raidingCharIds, [$mainCharId]) : $raidingCharIds
+        ));
+
+        $characters = Character::whereIn('id', $characterIds)->get();
+
+        foreach ($characters as $character) {
+            FetchBnetRawDataJob::dispatch($character);
+            FetchRioRawDataJob::dispatch($character);
         }
     }
 }

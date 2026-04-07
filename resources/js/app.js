@@ -1,6 +1,7 @@
 import './bootstrap';
 
 import { createApp } from 'vue';
+import * as Sentry from '@sentry/vue';
 import RosterOverview from './Components/Roster/RosterOverview.vue';
 import UnifiedRoster from './Components/Roster/UnifiedRoster.vue';
 import SyncStatusWidget from './Components/UI/SyncStatusWidget.vue';
@@ -24,7 +25,25 @@ import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue'
 import CharactersPage from './Components/Character/CharactersPage.vue';
 import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
 
+
+
+
 const app = createApp({});
+
+Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.VITE_APP_ENV || 'local',
+
+    integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 1.0,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+});
+
 app.config.globalProperties.__ = (key, replace = {}) => {
     const translations = window.translations || {};
     let translation = translations[key] || key;
