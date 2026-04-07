@@ -25,21 +25,21 @@ docker compose -f docker-compose.prod.yml down
 docker volume rm ${PROJECT_NAME}_vendor ${PROJECT_NAME}_node_build 2>/dev/null || true
 
 echo "🟢 4. Запускаємо контейнери..."
-docker compose up -d
+docker compose -f docker-compose.prod.yml up -d
 
 echo "🗄 5. Виконуємо міграції..."
 # Прапорець -T потрібен, щоб скрипт не сварився, якщо його запускати через крон або CI/CD
-docker compose exec -T app php artisan migrate --force
+docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
 
 echo "🧹 6. Очищуємо та прогріваємо кеш Laravel..."
-docker compose exec -T app php artisan optimize:clear
-docker compose exec -T app php artisan config:cache
-docker compose exec -T app php artisan route:cache
-docker compose exec -T app php artisan view:cache
+docker compose -f docker-compose.prod.yml exec -T app php artisan optimize:clear
+docker compose -f docker-compose.prod.yml exec -T app php artisan config:cache
+docker compose -f docker-compose.prod.yml exec -T app php artisan route:cache
+docker compose -f docker-compose.prod.yml exec -T app php artisan view:cache
 
 echo "🔄 7. Даємо команду воркерам перезапуститися..."
 # queue:restart м'яко зупиняє поточні задачі (без обриву) і запускає нові процеси
-docker compose exec -T app php artisan queue:restart
+docker compose -f docker-compose.prod.yml exec -T app php artisan queue:restart
 
 echo "========================================"
 echo "✅ Деплой успішно завершено!"
