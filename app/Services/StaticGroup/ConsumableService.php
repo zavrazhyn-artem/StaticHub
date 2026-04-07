@@ -18,17 +18,27 @@ class ConsumableService
     {
         $recipes = $this->fetchTargetRecipes();
 
-        $recipes->each(function (Recipe $recipe) use ($static) {
-            $recipe->crafting_cost = $this->calculateRecipeCost($recipe);
+        // Collect all item IDs we need prices for (ingredients + reference items)
+        $ingredientItemIds = $recipes->flatMap(fn (Recipe $recipe) => $recipe->ingredients->pluck('item_id'));
+        $referenceItemIds = collect([241308, 241320]);
+        $allItemIds = $ingredientItemIds->merge($referenceItemIds)->unique()->values()->all();
+
+        // Single batch query for all prices
+        $priceMap = PriceSnapshot::query()->latestPricesForItems($allItemIds);
+
+        $recipes->each(function (Recipe $recipe) use ($static, $priceMap) {
+            $recipe->crafting_cost = $this->calculateRecipeCost($recipe, $priceMap);
             $this->applyDisplayMetadata($recipe);
 
-            // Fetch the quantity, either from static settings or default from the helper
             $recipe->quantity = $static
                 ? $static->getConsumableQuantity($recipe->name, (int) $recipe->default_quantity)
                 : (int) $recipe->default_quantity;
         });
 
-        $referencePrices = $this->fetchReferencePrices();
+        $referencePrices = [
+            'individualPotionPrice' => $priceMap->get(241308, 0),
+            'individualFlaskPrice' => $priceMap->get(241320, 0),
+        ];
         $economics = $this->calculateEconomics($recipes, $static);
 
         return array_merge([
@@ -66,28 +76,16 @@ class ConsumableService
     }
 
     /**
-     * Task: Calculate crafting cost for a recipe.
+     * Task: Calculate crafting cost for a recipe using pre-fetched prices.
      */
-    private function calculateRecipeCost(Recipe $recipe): float
+    private function calculateRecipeCost(Recipe $recipe, Collection $priceMap): float
     {
         $totalCost = 0;
         foreach ($recipe->ingredients as $ingredient) {
-            $latestPrice = PriceSnapshot::latestPriceForItem($ingredient->item_id);
-            $totalCost += ($latestPrice ?? 0) * $ingredient->quantity;
+            $totalCost += ($priceMap->get($ingredient->item_id, 0)) * $ingredient->quantity;
         }
 
         return (float) ($totalCost / ($recipe->yield_quantity ?: 1));
-    }
-
-    /**
-     * Task: Fetch individual potion and flask prices.
-     */
-    private function fetchReferencePrices(): array
-    {
-        return [
-            'individualPotionPrice' => PriceSnapshot::latestPriceForItem(241308) ?? 0,
-            'individualFlaskPrice' => PriceSnapshot::latestPriceForItem(241320) ?? 0,
-        ];
     }
 
     /**

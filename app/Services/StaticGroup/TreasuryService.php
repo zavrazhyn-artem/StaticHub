@@ -23,7 +23,7 @@ class TreasuryService
     // PAYLOAD BUILDERS
     // =========================================================================
 
-    public function buildTreasuryIndexPayload(StaticGroup $static): array
+    public function buildTreasuryIndexPayload(StaticGroup $static, ?array $consumablesData = null): array
     {
         // Eager-load members with their main character for the member select
         $static->load(['members' => fn ($q) => $q->with([
@@ -32,7 +32,7 @@ class TreasuryService
             ),
         ])]);
 
-        $consumablesData = $this->consumableService->buildConsumablesPayload($static);
+        $consumablesData = $consumablesData ?? $this->consumableService->buildConsumablesPayload($static);
         $weeklyCost = $consumablesData['grand_total_weekly_cost'] ?? 0;
         $fixedTax = (int) ($static->weekly_tax_per_player ?? 0);
 

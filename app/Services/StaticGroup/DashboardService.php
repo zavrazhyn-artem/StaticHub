@@ -31,7 +31,7 @@ class DashboardService
         $consumables    = $this->consumableService->buildConsumablesPayload($static);
         $weeklySchedule = Event::query()->weeklySchedule($static->id, 3);
 
-        $treasuryData  = $this->treasuryService->buildTreasuryIndexPayload($static);
+        $treasuryData  = $this->treasuryService->buildTreasuryIndexPayload($static, $consumables);
         $reserves      = $treasuryData['reserves'];
         $autonomy      = $treasuryData['autonomy'];
         $weeklyStatus  = $treasuryData['weeklyStatus'];
