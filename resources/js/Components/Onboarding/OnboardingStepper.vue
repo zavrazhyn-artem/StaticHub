@@ -10,10 +10,10 @@
 
         <!-- Step Progress Bar -->
         <div class="mb-12 px-8">
-            <div class="flex items-start">
+            <div class="flex items-center">
                 <template v-for="(step, index) in steps" :key="index">
-                    <!-- Step node: circle + label stacked -->
-                    <div class="flex flex-col items-center shrink-0">
+                    <!-- Step node: circle + label below -->
+                    <div class="relative flex flex-col items-center shrink-0 w-10">
                         <div
                             class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300"
                             :class="stepCircleClass(index)"
@@ -21,8 +21,9 @@
                             <span v-if="index < currentStep" class="material-symbols-outlined text-lg">check</span>
                             <span v-else class="material-symbols-outlined text-lg">{{ step.icon }}</span>
                         </div>
+                        <!-- Label positioned absolutely so it doesn't affect flex layout -->
                         <span
-                            class="mt-2 font-headline text-[9px] font-bold uppercase tracking-[0.15em] transition-colors duration-300 whitespace-nowrap"
+                            class="absolute top-full mt-2 font-headline text-[9px] font-bold uppercase tracking-[0.15em] transition-colors duration-300 whitespace-nowrap"
                             :class="index <= currentStep ? 'text-primary' : 'text-on-surface-variant/40'"
                         >
                             {{ __(step.label) }}
@@ -32,7 +33,7 @@
                     <!-- Connector line between steps -->
                     <div
                         v-if="index < steps.length - 1"
-                        class="flex-1 h-0.5 rounded-full transition-all duration-500 ease-out mt-5"
+                        class="flex-1 h-0.5 rounded-full transition-all duration-500 ease-out"
                         :class="index < currentStep ? 'bg-primary' : 'bg-white/10'"
                     ></div>
                 </template>
