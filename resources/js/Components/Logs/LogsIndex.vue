@@ -11,10 +11,11 @@ const props = defineProps({
     staticName:         { type: String, required: true },
     logs:               { type: Array, default: () => [] },
     filterUrl:          { type: String, required: true },
-    currentDifficulties:{ type: String, default: '' }, // Змінено на String для підтримки "Mythic,Heroic"
+    currentDifficulties:{ type: String, default: '' },
     currentFromDate:    { type: String, default: '' },
     currentToDate:      { type: String, default: '' },
     manualLogUrl:       { type: String, required: true },
+    cooldownState:      { type: Object, default: () => ({ on_cooldown: false, remaining_seconds: 0, cooldown_minutes: 60 }) },
 });
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -22,9 +23,43 @@ const showModal = ref(false);
 const wclUrl = ref('');
 const isSubmitting = ref(false);
 
-const filterFormRef = ref(null); // Реф на форму для сабміту
+const filterFormRef = ref(null);
+
+// === COOLDOWN TIMER ===
+const remainingSeconds = ref(props.cooldownState.remaining_seconds);
+let cooldownInterval = null;
+
+const isOnCooldown = computed(() => remainingSeconds.value > 0);
+
+const cooldownDisplay = computed(() => {
+    const mins = Math.floor(remainingSeconds.value / 60);
+    const secs = remainingSeconds.value % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+});
+
+function startCooldownTimer() {
+    if (remainingSeconds.value <= 0) return;
+    cooldownInterval = setInterval(() => {
+        remainingSeconds.value--;
+        if (remainingSeconds.value <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+        }
+    }, 1000);
+}
+
+onMounted(() => {
+    if (remainingSeconds.value > 0) {
+        startCooldownTimer();
+    }
+});
+
+onBeforeUnmount(() => {
+    if (cooldownInterval) clearInterval(cooldownInterval);
+});
 
 async function submitManualLog() {
+    if (isOnCooldown.value) return;
     isSubmitting.value = true;
     const form = document.getElementById('manual-log-form');
     form.submit();
@@ -32,8 +67,7 @@ async function submitManualLog() {
 
 // === 1. ЛОГІКА КАЛЕНДАРЯ ===
 const dateInputRef = ref(null);
-const selectedDateRange = ref(''); // Видимий рядок для інпуту
-// Приховані поля для відправки на бекенд
+const selectedDateRange = ref('');
 const fromDate = ref(props.currentFromDate);
 const toDate = ref(props.currentToDate);
 
@@ -45,7 +79,6 @@ function clearDateFilter() {
 }
 
 onMounted(() => {
-    // Встановлюємо початкове значення для календаря, якщо дати вже є в URL
     const defaultDates = [];
     if (props.currentFromDate) defaultDates.push(props.currentFromDate);
     if (props.currentToDate) defaultDates.push(props.currentToDate);
@@ -58,9 +91,7 @@ onMounted(() => {
         onChange: (selectedDates, dateStr) => {
             selectedDateRange.value = dateStr;
 
-            // Якщо вибрано дві дати (старт і кінець)
             if (selectedDates.length === 2) {
-                // Встановлюємо значення з урахуванням часового поясу (щоб уникнути зсуву на день)
                 const adjustDate = (date) => {
                     const offset = date.getTimezoneOffset() * 60000;
                     return new Date(date.getTime() - offset).toISOString().split('T')[0];
@@ -69,11 +100,8 @@ onMounted(() => {
                 fromDate.value = adjustDate(selectedDates[0]);
                 toDate.value = adjustDate(selectedDates[1]);
 
-                // nextTick чекає поки Vue оновить DOM (hidden inputs),
-                // лише потім відправляє форму — інакше летять пусті значення
                 nextTick(() => { if (filterFormRef.value) filterFormRef.value.submit(); });
             } else if (selectedDates.length === 0) {
-                // Очищення дат
                 fromDate.value = '';
                 toDate.value = '';
                 nextTick(() => { if (filterFormRef.value) filterFormRef.value.submit(); });
@@ -86,7 +114,6 @@ onMounted(() => {
 const isDifficultyOpen = ref(false);
 const dropdownRef = ref(null);
 
-// Парсимо поточні складності з URL параметра (якщо вони були передані через кому)
 const initialDifficulties = props.currentDifficulties ? props.currentDifficulties.split(',') : [];
 const selectedDifficulties = ref(initialDifficulties);
 
@@ -100,15 +127,11 @@ const toggleDropdown = () => {
     isDifficultyOpen.value = !isDifficultyOpen.value;
 };
 
-// Закриття дропдауну при кліку повз нього
 const closeDropdown = (e) => {
     if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
         if(isDifficultyOpen.value) {
             isDifficultyOpen.value = false;
-            // Якщо дропдаун закрився, а значення змінилися - сабмітимо форму
-            // Щоб уникнути спаму запитів при кожному кліку на чекбокс
             if(filterFormRef.value) {
-                // Невелика затримка, щоб Vue встиг оновити v-model масив
                 setTimeout(() => { filterFormRef.value.submit(); }, 50);
             }
         }
@@ -118,7 +141,6 @@ const closeDropdown = (e) => {
 onMounted(() => document.addEventListener('click', closeDropdown));
 onBeforeUnmount(() => document.removeEventListener('click', closeDropdown));
 
-// Генерація тексту для кнопки селектора
 const displayDifficultyText = computed(() => {
     if (selectedDifficulties.value.length === 0) return __('All Difficulties');
     return selectedDifficulties.value.map(v =>
@@ -291,9 +313,7 @@ const displayDifficultyText = computed(() => {
                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                  @click.self="showModal = false">
                 <div class="w-full max-w-lg mx-4">
-                    <form id="manual-log-form" :action="manualLogUrl" method="POST"
-                          class="p-8 bg-surface-container-highest border border-white/5 rounded-2xl shadow-2xl">
-                        <input type="hidden" name="_token" :value="csrfToken">
+                    <div class="p-8 bg-surface-container-highest border border-white/5 rounded-2xl shadow-2xl">
 
                         <div class="flex items-center gap-3 mb-6">
                             <div class="p-3 bg-amber-500/10 rounded-xl">
@@ -305,30 +325,62 @@ const displayDifficultyText = computed(() => {
                             </div>
                         </div>
 
-                        <div class="space-y-6">
-                            <div>
-                                <label for="wcl_url" class="block text-amber-500/60 uppercase tracking-widest text-[10px] font-black mb-2">{{ __('WCL Report URL') }}</label>
-                                <input id="wcl_url" name="wcl_url" type="text" v-model="wclUrl"
-                                       class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-amber-500/50"
-                                       placeholder="https://www.warcraftlogs.com/reports/..."
-                                       required>
-                                <p class="mt-2 text-[9px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
-                                    Example: https://www.warcraftlogs.com/reports/aBcDeFg123456789
-                                </p>
+                        <!-- Cooldown Timer -->
+                        <div v-if="isOnCooldown"
+                             class="mb-6 p-4 bg-error/10 border border-error/20 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-error text-xl">timer</span>
+                                <div>
+                                    <p class="text-[10px] font-black text-error uppercase tracking-widest">{{ __('Cooldown Active') }}</p>
+                                    <p class="text-on-surface-variant text-[9px] font-bold uppercase tracking-widest mt-0.5">
+                                        {{ __('Next upload available in') }}
+                                    </p>
+                                </div>
+                                <div class="ml-auto font-mono text-2xl font-black text-error tracking-wider">
+                                    {{ cooldownDisplay }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mt-10 flex justify-end gap-3">
-                            <button type="button" @click="showModal = false"
-                                    class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
-                                {{ __('Cancel') }}
-                            </button>
-                            <button type="submit"
-                                    class="bg-amber-500 hover:bg-amber-400 text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20 transition-all active:scale-95">
-                                {{ __('Submit for Analysis') }}
-                            </button>
-                        </div>
-                    </form>
+                        <form id="manual-log-form" :action="manualLogUrl" method="POST">
+                            <input type="hidden" name="_token" :value="csrfToken">
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="wcl_url" class="block text-amber-500/60 uppercase tracking-widest text-[10px] font-black mb-2">{{ __('WCL Report URL') }}</label>
+                                    <input id="wcl_url" name="wcl_url" type="text" v-model="wclUrl"
+                                           :disabled="isOnCooldown"
+                                           class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-amber-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                           placeholder="https://www.warcraftlogs.com/reports/..."
+                                           required>
+                                    <p class="mt-2 text-[9px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
+                                        Example: https://www.warcraftlogs.com/reports/aBcDeFg123456789
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Info Note -->
+                            <div class="mt-4 p-3 bg-white/5 border border-white/5 rounded-lg flex items-start gap-2.5">
+                                <span class="material-symbols-outlined text-on-surface-variant text-base mt-0.5 shrink-0">info</span>
+                                <p class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
+                                    {{ __('Mythic+ logs and characters not in your roster will be filtered out and will not be processed.') }}
+                                </p>
+                            </div>
+
+                            <div class="mt-8 flex justify-end gap-3">
+                                <button type="button" @click="showModal = false"
+                                        class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
+                                    {{ __('Cancel') }}
+                                </button>
+                                <button type="submit"
+                                        :disabled="isOnCooldown"
+                                        class="bg-amber-500 hover:bg-amber-400 text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-500"
+                                        @click.prevent="submitManualLog">
+                                    {{ __('Submit for Analysis') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </Teleport>

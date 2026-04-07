@@ -76,4 +76,15 @@ class TacticalReportBuilder extends Builder
     {
         return $this->with(['staticGroup', 'personalReports.character'])->findOrFail($id);
     }
+
+    /**
+     * Find the most recent manual log for a static group.
+     */
+    public function latestManualForStatic(int $staticId): ?TacticalReport
+    {
+        return $this->where('static_id', $staticId)
+            ->whereNull('event_id')
+            ->orderByDesc('created_at')
+            ->first();
+    }
 }

@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
 
     // Roster
     Route::get('/statics/{static}/roster', [RosterController::class, 'index'])->name('statics.roster');
+    Route::get('/statics/{static}/roster/weekly-snapshot', [RosterController::class, 'weeklySnapshot'])->name('statics.roster.weekly-snapshot');
     Route::get('/statics/{static}/roster/overview', [RosterController::class, 'overview'])->name('statics.roster.overview');
     Route::patch('/statics/{static}/roster/{user}/access-role', [StaticRosterController::class, 'updateAccessRole'])->name('statics.roster.update-access');
     Route::patch('/statics/{static}/roster/{user}/roster-status', [StaticRosterController::class, 'updateRosterStatus'])->name('statics.roster.update-status');
@@ -65,6 +66,8 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::delete('/statics/{static}/settings/discord/message/{messageId}', [StaticSettingsController::class, 'deleteWebhookMessage'])->name('statics.settings.discord.message.delete');
     Route::get('/statics/{static}/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
     Route::post('/statics/{static}/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
+    Route::post('/statics/{static}/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
+    Route::post('/statics/{static}/settings/logs/disconnect-guild', [StaticSettingsController::class, 'disconnectGuild'])->name('statics.settings.logs.disconnect-guild');
 
     // Logs
     Route::get('/statics/{static}/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');

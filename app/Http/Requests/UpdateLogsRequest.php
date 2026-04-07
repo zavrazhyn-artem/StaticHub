@@ -20,6 +20,17 @@ class UpdateLogsRequest extends FormRequest
             'wcl_guild_id' => 'nullable|string|max:50',
             'wcl_region' => 'nullable|string|max:10',
             'wcl_realm' => 'nullable|string|max:100',
+            'auto_fetch_logs' => 'nullable|boolean',
+            'auto_fetch_delay_minutes' => 'nullable|integer|min:5|max:120',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('auto_fetch_logs')) {
+            $this->merge([
+                'auto_fetch_logs' => filter_var($this->input('auto_fetch_logs'), FILTER_VALIDATE_BOOLEAN),
+            ]);
+        }
     }
 }

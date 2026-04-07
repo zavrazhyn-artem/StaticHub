@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\StaticGroup;
 
 use App\Helpers\CurrencyHelper;
+use App\Helpers\WeeklyResetHelper;
 use App\Models\StaticGroup;
 use App\Models\Transaction;
-use App\Services\StaticGroup\ConsumableService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -19,15 +19,26 @@ class TreasuryService
         private readonly ConsumableService $consumableService,
     ) {}
 
+    // =========================================================================
+    // PAYLOAD BUILDERS
+    // =========================================================================
+
     public function buildTreasuryIndexPayload(StaticGroup $static): array
     {
+        // Eager-load members with their main character for the member select
+        $static->load(['members' => fn ($q) => $q->with([
+            'characters' => fn ($q2) => $q2->whereHas('statics', fn ($q3) =>
+                $q3->where('statics.id', $static->id)->where('character_static.role', 'main')
+            ),
+        ])]);
+
         $consumablesData = $this->consumableService->buildConsumablesPayload($static);
         $weeklyCost = $consumablesData['grand_total_weekly_cost'] ?? 0;
         $fixedTax = (int) ($static->weekly_tax_per_player ?? 0);
 
-        $reserves = $this->fetchTotalReserves($static);
+        $reserves = $this->calculateReserves($static);
         $recentTransactions = $this->fetchRecentTransactions($static, 5);
-        $weeklyStatus = $this->fetchWeeklyTaxStatus($static, $fixedTax);
+        $weeklyStatus = $this->fetchWeeklyTaxStatus($static);
 
         $autonomy = CurrencyHelper::calculateAutonomy($reserves, $weeklyCost);
 
@@ -35,111 +46,230 @@ class TreasuryService
         $warning = $this->computeTaxWarning($fixedTax, $realCostPerPlayer);
 
         return array_merge([
-            'static'            => $static,
-            'reserves'          => $reserves,
+            'static'             => $static,
+            'reserves'           => $reserves,
             'recentTransactions' => $recentTransactions,
-            'weeklyStatus'      => $weeklyStatus,
-            'weeklyCost'        => $weeklyCost,
-            'autonomy'          => $autonomy,
-            'targetTax'         => $fixedTax,
+            'weeklyStatus'       => $weeklyStatus,
+            'weeklyCost'         => $weeklyCost,
+            'autonomy'           => $autonomy,
+            'targetTax'          => $fixedTax,
+            'membersForSelect'   => $this->formatMembersForSelect($static),
         ], $warning, $consumablesData);
     }
 
-    public function fetchWeeklyTaxStatus(StaticGroup $static, ?int $targetTax = null, ?int $weekNumber = null): Collection
+    public function buildTransactionHistoryPayload(StaticGroup $static, ?int $userId = null): array
     {
-        $weekNumber = $weekNumber ?? Carbon::now()->weekOfYear;
-        $taxAmount = (int) ($targetTax ?? $static->guild_tax_per_player);
+        // Eager-load members with main character for the select
+        $static->load(['members' => fn ($q) => $q->with([
+            'characters' => fn ($q2) => $q2->whereHas('statics', fn ($q3) =>
+                $q3->where('statics.id', $static->id)->where('character_static.role', 'main')
+            ),
+        ])]);
 
-        $payments = Transaction::query()
+        $transactions = $this->getPaginatedTransactions($static->id, $userId);
+
+        return [
+            'static'         => $static,
+            'transactions'   => $transactions,
+            'members'        => $this->formatMembersForSelect($static),
+            'selectedUserId' => $userId,
+        ];
+    }
+
+    // =========================================================================
+    // RESERVES
+    // =========================================================================
+
+    /**
+     * Reserves = sum(user balances) + tax * count(covered users) - withdrawals_this_week
+     */
+    public function calculateReserves(StaticGroup $static): int
+    {
+        $region    = strtolower($static->region ?? 'eu');
+        $periodKey = WeeklyResetHelper::periodKey($region);
+        $tax       = (int) ($static->weekly_tax_per_player ?? 0);
+
+        $pivotData = DB::table('static_user')
+            ->where('static_id', $static->id)
+            ->select(
+                DB::raw('SUM(balance) as total_balance'),
+                DB::raw('SUM(CASE WHEN current_weekly_tax_covered = 1 THEN 1 ELSE 0 END) as covered_count'),
+            )
+            ->first();
+
+        $totalBalance = (int) ($pivotData->total_balance ?? 0);
+        $coveredCount = (int) ($pivotData->covered_count ?? 0);
+
+        $withdrawalsThisWeek = Transaction::query()
             ->forStatic($static->id)
-            ->inWeek($weekNumber)
-            ->byType('deposit')
-            ->select('user_id', DB::raw('SUM(amount) as total_paid'))
-            ->groupBy('user_id')
-            ->get()
-            ->keyBy('user_id');
-
-        return $static->members->map(function ($user) use ($payments, $taxAmount) {
-            $paid = $payments->get($user->id)->total_paid ?? 0;
-            return [
-                'user_id' => $user->id,
-                'name' => $user->name,
-                'total_paid' => (int) $paid,
-                'is_paid' => $taxAmount > 0 ? $paid >= $taxAmount : true,
-            ];
-        });
-    }
-
-    public function fetchTotalReserves(StaticGroup $static): int
-    {
-        return $this->calculateReserves($static->id);
-    }
-
-    /**
-     * Calculate the total treasury reserves for a static group.
-     *
-     * @param int $staticId
-     * @return int
-     */
-    public function calculateReserves(int $staticId): int
-    {
-        $deposits = Transaction::query()
-            ->forStatic($staticId)
-            ->byType('deposit')
-            ->sumAmount();
-
-        $withdrawals = Transaction::query()
-            ->forStatic($staticId)
             ->byType('withdrawal')
+            ->inPeriod($periodKey)
             ->sumAmount();
 
-        return $deposits - $withdrawals;
+        return $totalBalance + ($tax * $coveredCount) - $withdrawalsThisWeek;
+    }
+
+    // =========================================================================
+    // WEEKLY TAX STATUS
+    // =========================================================================
+
+    /**
+     * Returns weekly tax status per user from the pivot bool.
+     */
+    public function fetchWeeklyTaxStatus(StaticGroup $static): Collection
+    {
+        return $static->members->map(fn ($user) => [
+            'user_id'    => $user->id,
+            'name'       => $user->name,
+            'balance'    => (int) ($user->pivot->balance ?? 0),
+            'is_paid'    => (bool) ($user->pivot->current_weekly_tax_covered ?? false),
+        ]);
     }
 
     /**
-     * Create a new treasury transaction.
-     *
-     * @param int $staticId
-     * @param array $data
-     * @return Transaction
+     * Format members for the TransactionFormModal select (same shape as Transfer Ownership).
+     * Returns: [{ id, name, character: { name, playable_class, avatar_url } | null }]
      */
-    public function createTransaction(int $staticId, array $data): Transaction
+    private function formatMembersForSelect(StaticGroup $static): array
     {
+        return $static->members->map(fn ($user) => [
+            'id'        => $user->id,
+            'name'      => $user->name,
+            'character' => ($char = $user->characters->first()) ? [
+                'name'           => $char->name,
+                'playable_class' => $char->playable_class,
+                'avatar_url'     => $char->avatar_url,
+            ] : null,
+        ])->values()->toArray();
+    }
+
+    // =========================================================================
+    // TRANSACTIONS
+    // =========================================================================
+
+    /**
+     * Create a deposit: increases user balance, auto-covers tax if needed.
+     */
+    public function createDeposit(StaticGroup $static, int $userId, int $amount, ?string $description = null): Transaction
+    {
+        $region    = strtolower($static->region ?? 'eu');
+        $periodKey = WeeklyResetHelper::periodKey($region);
+
+        $transaction = Transaction::create([
+            'static_id'  => $static->id,
+            'user_id'    => $userId,
+            'amount'     => $amount,
+            'type'       => 'deposit',
+            'period_key' => $periodKey,
+            'description' => $description,
+            'created_at' => Carbon::now(),
+        ]);
+
+        // Increase user balance
+        DB::table('static_user')
+            ->where('static_id', $static->id)
+            ->where('user_id', $userId)
+            ->increment('balance', $amount);
+
+        // Auto-cover tax if not yet covered
+        $this->tryCoverTax($static, $userId);
+
+        return $transaction;
+    }
+
+    /**
+     * Create a withdrawal: does NOT affect user balance, just records the transaction.
+     */
+    public function createWithdrawal(StaticGroup $static, int $userId, int $amount, ?string $description = null): Transaction
+    {
+        $region    = strtolower($static->region ?? 'eu');
+        $periodKey = WeeklyResetHelper::periodKey($region);
+
         return Transaction::create([
-            'static_id' => $staticId,
-            'user_id' => $data['user_id'],
-            'amount' => $data['amount'],
-            'type' => $data['type'] ?? 'deposit',
-            'week_number' => $data['week_number'] ?? Carbon::now()->weekOfYear,
-            'description' => $data['description'] ?? null,
+            'static_id'  => $static->id,
+            'user_id'    => $userId,
+            'amount'     => $amount,
+            'type'       => 'withdrawal',
+            'period_key' => $periodKey,
+            'description' => $description,
             'created_at' => Carbon::now(),
         ]);
     }
 
-    public function executeTransactionCreation(StaticGroup $static, array $data): Transaction
+    /**
+     * If user hasn't covered tax yet and now has enough balance, deduct and mark covered.
+     */
+    public function tryCoverTax(StaticGroup $static, int $userId): void
     {
-        return $this->createTransaction($static->id, $data);
+        $tax = (int) ($static->weekly_tax_per_player ?? 0);
+        if ($tax <= 0) {
+            return;
+        }
+
+        $pivot = DB::table('static_user')
+            ->where('static_id', $static->id)
+            ->where('user_id', $userId)
+            ->first(['balance', 'current_weekly_tax_covered']);
+
+        if (!$pivot || $pivot->current_weekly_tax_covered) {
+            return;
+        }
+
+        if ($pivot->balance >= $tax) {
+            DB::table('static_user')
+                ->where('static_id', $static->id)
+                ->where('user_id', $userId)
+                ->update([
+                    'balance' => DB::raw("balance - {$tax}"),
+                    'current_weekly_tax_covered' => true,
+                ]);
+        }
     }
 
     /**
-     * Fetch recent transactions for a static group.
-     *
-     * @param int $staticId
-     * @param int $limit
-     * @return Collection
+     * Process weekly tax deduction for all users in a static.
+     * Called by WeeklyResetCommand.
      */
-    public function getRecentTransactions(int $staticId, int $limit = 10): Collection
+    public function processWeeklyTaxReset(StaticGroup $static): void
     {
-        return Transaction::query()
-            ->forStatic($staticId)
-            ->with('user')
-            ->recent($limit)
-            ->get();
+        $tax = (int) ($static->weekly_tax_per_player ?? 0);
+
+        $members = DB::table('static_user')
+            ->where('static_id', $static->id)
+            ->get(['user_id', 'balance']);
+
+        foreach ($members as $member) {
+            if ($tax > 0 && $member->balance >= $tax) {
+                DB::table('static_user')
+                    ->where('static_id', $static->id)
+                    ->where('user_id', $member->user_id)
+                    ->update([
+                        'balance' => DB::raw("balance - {$tax}"),
+                        'current_weekly_tax_covered' => true,
+                    ]);
+            } else {
+                DB::table('static_user')
+                    ->where('static_id', $static->id)
+                    ->where('user_id', $member->user_id)
+                    ->update([
+                        'current_weekly_tax_covered' => $tax <= 0,
+                    ]);
+            }
+        }
+    }
+
+    public function updateTransactionComment(Transaction $transaction, ?string $description): void
+    {
+        $transaction->update(['description' => $description]);
     }
 
     public function fetchRecentTransactions(StaticGroup $static, int $limit = 10): Collection
     {
-        return $this->getRecentTransactions($static->id, $limit);
+        return Transaction::query()
+            ->forStatic($static->id)
+            ->with('user')
+            ->recent($limit)
+            ->get();
     }
 
     public function getPaginatedTransactions(int $staticId, ?int $userId = null, int $perPage = 20): LengthAwarePaginator
@@ -156,34 +286,10 @@ class TreasuryService
         return $query->paginate($perPage);
     }
 
-    public function buildTransactionHistoryPayload(StaticGroup $static, ?int $userId = null): array
-    {
-        $transactions = $this->getPaginatedTransactions($static->id, $userId);
+    // =========================================================================
+    // TAX WARNING
+    // =========================================================================
 
-        $members = $static->members->map(fn ($user) => [
-            'id' => (string) $user->id,
-            'name' => $user->name,
-        ])->values();
-
-        return [
-            'static' => $static,
-            'transactions' => $transactions,
-            'members' => $members,
-            'selectedUserId' => $userId,
-        ];
-    }
-
-    /**
-     * Update a transaction's description/comment.
-     */
-    public function updateTransactionComment(Transaction $transaction, ?string $description): void
-    {
-        $transaction->update(['description' => $description]);
-    }
-
-    /**
-     * Compute tax warning based on fixed tax vs real cost.
-     */
     public function computeTaxWarning(int $fixedTax, int $realCostPerPlayer): array
     {
         $status      = 'success';

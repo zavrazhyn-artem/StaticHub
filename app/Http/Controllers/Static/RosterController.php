@@ -12,7 +12,9 @@ use App\Services\Character\CharacterService;
 use App\Services\StaticGroup\ConsumableService;
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -31,6 +33,15 @@ class RosterController extends Controller
         $rosterData = $this->rosterService->buildRosterIndexPayload($static);
 
         return view('roster.index', compact('static', 'rosterData'));
+    }
+
+    public function weeklySnapshot(Request $request, StaticGroup $static): JsonResponse
+    {
+        $week = $request->validate(['week' => 'required|string|max:10'])['week'];
+
+        $data = $this->rosterService->getWeeklySnapshotData($static, $week);
+
+        return response()->json(['snapshot' => $data]);
     }
 
     public function overview(StaticGroup $static): View

@@ -2,7 +2,8 @@
 import { computed, ref } from 'vue';
 
 const props = defineProps({
-  characters: Array
+  characters: Array,
+  selectedDifficulty: { type: String, default: null },
 });
 
 const expandedRows = ref(new Set());
@@ -31,76 +32,77 @@ const classColors = {
   'Warrior': 'text-[#C69B6D]',
 };
 
-const parseRawData = (data) => {
-    if (!data) return null;
-    if (typeof data === 'object') return data;
-    try {
-        return JSON.parse(data);
-    } catch (e) {
-        return null;
-    }
-};
-
-const formatActiveSpec = (spec) => {
-    if (!spec) return 'Unknown';
-    if (typeof spec === 'string' && spec.startsWith('{')) {
-        try {
-            const decoded = JSON.parse(spec);
-            return decoded.name || spec;
-        } catch (e) {
-            return spec;
-        }
-    }
-    return spec;
-};
-
-const getRaidProgression = (character) => {
-    const rioData = parseRawData(character?.raw_raiderio_data);
-    if (!rioData?.raid_progression) return '-';
-
-    const raids = Object.keys(rioData.raid_progression);
-    if (raids.length === 0) return '-';
-
-    const latestRaid = raids[raids.length - 1];
-    const progress = rioData.raid_progression[latestRaid];
-    return progress?.summary || '-';
+const diffColors = {
+  M: 'text-purple-400',
+  H: 'text-orange-400',
+  N: 'text-green-400',
+  LFR: 'text-blue-400',
 };
 
 /**
- * Extract all unique bosses across all characters from WCL data.
+ * Build structured boss list from raids data.
+ * Returns: [ { instance, bosses: [bossName, ...] }, ... ]
  */
-const allBosses = computed(() => {
-    const bosses = new Set();
-    const characters = props.characters || [];
-    characters.forEach(char => {
-        const wclData = parseRawData(char?.raw_wcl_data);
-        const rankings = wclData?.characterData?.character?.zoneRankings?.rankings || [];
-        rankings.forEach(ranking => {
-            if (ranking.encounter?.name) {
-                bosses.add(ranking.encounter.name);
-            }
-        });
-    });
-    return Array.from(bosses);
+const raidInstances = computed(() => {
+  const characters = props.characters || [];
+  const instanceMap = {};
+
+  for (const char of characters) {
+    const raids = char?.raids;
+    if (!raids) continue;
+    for (const [instanceName, bosses] of Object.entries(raids)) {
+      if (!instanceMap[instanceName]) {
+        instanceMap[instanceName] = bosses.map(b => b.name);
+      }
+    }
+  }
+
+  return Object.entries(instanceMap).map(([name, bosses]) => ({ name, bosses }));
 });
 
-const getBossStatus = (character, bossName) => {
-    const wclData = parseRawData(character?.raw_wcl_data);
-    const rankings = wclData?.characterData?.character?.zoneRankings?.rankings || [];
-    const ranking = rankings.find(r => r.encounter?.name === bossName);
+const allBosses = computed(() => raidInstances.value.flatMap(r => r.bosses));
 
-    if (!ranking) return null;
+/**
+ * Get the best difficulty killed this week for a boss.
+ * Priority: M > H > N > LFR
+ */
+const getBossKill = (char, bossName) => {
+  const raids = char?.raids;
+  if (!raids) return null;
 
-    // Difficulty in WCL zoneRankings: 3 = Normal, 4 = Heroic, 5 = Mythic
-    const difficultyMap = {
-        3: { label: 'N', color: 'text-blue-400' },
-        4: { label: 'H', color: 'text-green-400' },
-        5: { label: 'M', color: 'text-purple-400' }
-    };
+  for (const bosses of Object.values(raids)) {
+    const boss = bosses.find(b => b.name === bossName);
+    if (!boss) continue;
 
-    return difficultyMap[ranking.difficulty] || { label: 'K', color: 'text-white' };
+    if (boss.M) return { label: 'M', color: diffColors.M };
+    if (boss.H) return { label: 'H', color: diffColors.H };
+    if (boss.N) return { label: 'N', color: diffColors.N };
+    if (boss.LFR) return { label: 'LFR', color: diffColors.LFR };
+  }
+
+  return null;
 };
 
+const getWeeklyProgression = (char) => {
+  const raids = char?.raids;
+  if (!raids) return '-';
+  let totalKills = { M: 0, H: 0, N: 0, LFR: 0 };
+  let totalBosses = 0;
+  for (const bosses of Object.values(raids)) {
+    totalBosses += bosses.length;
+    for (const boss of bosses) {
+      if (boss.M) totalKills.M++;
+      if (boss.H) totalKills.H++;
+      if (boss.N) totalKills.N++;
+      if (boss.LFR) totalKills.LFR++;
+    }
+  }
+  if (totalKills.M > 0) return `${totalKills.M}/${totalBosses} M`;
+  if (totalKills.H > 0) return `${totalKills.H}/${totalBosses} H`;
+  if (totalKills.N > 0) return `${totalKills.N}/${totalBosses} N`;
+  if (totalKills.LFR > 0) return `${totalKills.LFR}/${totalBosses} LFR`;
+  return '-';
+};
 </script>
 
 <template>
@@ -108,9 +110,18 @@ const getBossStatus = (character, bossName) => {
     <div class="overflow-x-auto custom-scrollbar">
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
+          <!-- Instance headers -->
+          <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
+            <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
+            <th class="p-2 text-center border-l border-white/5">{{ __('Weekly') }}</th>
+            <template v-for="inst in raidInstances" :key="inst.name">
+              <th :colspan="inst.bosses.length" class="p-2 text-center border-l border-white/5">{{ inst.name }}</th>
+            </template>
+          </tr>
+          <!-- Boss name headers -->
           <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
-            <th class="p-4 text-center border-l border-white/5">{{ __('Progression') }}</th>
+            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
+            <th class="p-4 text-center border-l border-white/5">{{ __('Prog') }}</th>
             <th v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5 text-[9px] min-w-[80px]">
               {{ boss }}
             </th>
@@ -122,51 +133,41 @@ const getBossStatus = (character, bossName) => {
               <!-- Name -->
               <td class="p-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                 <div class="flex items-center gap-3">
-                  <!-- Expand Icon -->
                   <div class="w-4 flex items-center justify-center">
                     <svg v-if="char.alts && char.alts.length > 0"
                          xmlns="http://www.w3.org/2000/svg"
                          class="w-4 h-4 transition-transform duration-200"
                          :class="{ 'rotate-90': expandedRows.has(char.id) }"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                    >
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                     <div v-else class="w-4"></div>
                   </div>
-
                   <div class="w-8 h-8 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="char.avatar_url" :src="char.avatar_url" :alt="char.name" class="w-full h-full object-cover" />
                     <span v-else class="text-[10px] text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
-                    <div class="font-bold text-sm truncate" :class="classColors[char.playable_class] || 'text-white'">
+                    <div class="font-bold text-sm truncate" :class="classColors[char.class] || 'text-white'">
                       {{ char.name }}
-                    </div>
-                    <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
-                      {{ formatActiveSpec(char.active_spec) }} {{ char.playable_class }}
                     </div>
                   </div>
                 </div>
               </td>
 
-              <!-- Progression Summary -->
+              <!-- Weekly Progression Summary -->
               <td class="p-4 text-center border-l border-white/5">
                 <span class="text-[11px] font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
-                  {{ getRaidProgression(char) }}
+                  {{ getWeeklyProgression(char) }}
                 </span>
               </td>
 
               <!-- Boss Matrix -->
               <td v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5">
-                <template v-if="getBossStatus(char, boss)">
-                  <span :class="['font-bold font-mono text-sm', getBossStatus(char, boss).color]">
-                    {{ getBossStatus(char, boss).label }}
+                <template v-if="getBossKill(char, boss)">
+                  <span :class="['font-bold font-mono text-sm', getBossKill(char, boss).color]">
+                    {{ getBossKill(char, boss).label }}
                   </span>
                 </template>
                 <template v-else>
@@ -175,42 +176,28 @@ const getBossStatus = (character, bossName) => {
               </td>
             </tr>
 
-            <!-- Alts Rows -->
+            <!-- Alt Rows -->
             <tr v-for="alt in char.alts" :key="'alt-'+alt.id" v-show="expandedRows.has(char.id)" class="bg-black/40 border-b border-white/5 transition-colors text-[0.9em]">
-              <!-- Name with connector -->
               <td class="p-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                 <div class="flex items-center gap-3 pl-4">
-                  <!-- Visual connector -->
                   <div class="w-4 h-5 border-l-2 border-b-2 border-white/10 -mt-3 rounded-bl"></div>
-
                   <div class="w-7 h-7 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="alt.avatar_url" :src="alt.avatar_url" :alt="alt.name" class="w-full h-full object-cover opacity-70" />
                     <span v-else class="text-[10px] text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
-                    <div class="font-bold text-xs truncate" :class="classColors[alt.playable_class] || 'text-white'">
-                      {{ alt.name }}
-                    </div>
-                    <div class="text-[8px] text-gray-600 uppercase font-medium truncate">
-                      {{ formatActiveSpec(alt.active_spec) }} {{ alt.playable_class }}
-                    </div>
+                    <div class="font-bold text-xs truncate" :class="classColors[alt.class] || 'text-white'">{{ alt.name }}</div>
                   </div>
                 </div>
               </td>
 
-              <!-- Progression Summary (Alt) -->
               <td class="p-4 text-center border-l border-white/5 opacity-80">
-                <span class="text-[10px] font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
-                  {{ getRaidProgression(alt) }}
-                </span>
+                <span class="text-[10px] font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getWeeklyProgression(alt) }}</span>
               </td>
 
-              <!-- Boss Matrix (Alt) -->
               <td v-for="boss in allBosses" :key="'alt-'+boss" class="p-4 text-center border-l border-white/5 opacity-80">
-                <template v-if="getBossStatus(alt, boss)">
-                  <span :class="['font-bold font-mono text-xs', getBossStatus(alt, boss).color]">
-                    {{ getBossStatus(alt, boss).label }}
-                  </span>
+                <template v-if="getBossKill(alt, boss)">
+                  <span :class="['font-bold font-mono text-xs', getBossKill(alt, boss).color]">{{ getBossKill(alt, boss).label }}</span>
                 </template>
                 <template v-else>
                   <span class="text-gray-800 text-xs">-</span>

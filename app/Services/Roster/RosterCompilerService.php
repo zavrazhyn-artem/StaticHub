@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services\Roster;
 
-use App\Data\Roster\CompiledRosterMemberDTO;
+use App\Data\Roster\CharacterDataDTO;
+use App\Data\Roster\CharacterWeeklyDataDTO;
 use App\Models\Character;
 use App\Models\ServiceRawData;
 use App\Services\StaticGroup\RosterService;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Orchestrates compilation of a ServiceRawData record into a single,
- * frontend-ready DTO by delegating to focused sub-services.
+ * Orchestrates compilation of a ServiceRawData record into two DTOs:
+ *   - CharacterDataDTO      → characters.character_data   (persistent)
+ *   - CharacterWeeklyDataDTO → characters.character_weekly_data (resets weekly)
  *
- * No network calls are made here — all data comes from previously fetched
- * and validated JSON stored in the database.
+ * No network calls — all data comes from previously fetched JSON.
  */
 final class RosterCompilerService
 {
@@ -32,9 +33,6 @@ final class RosterCompilerService
     // Public API
     // -------------------------------------------------------------------------
 
-    /**
-     * Compile raw data for a character and persist the result.
-     */
     public function compileAndPersist(Character $character): void
     {
         $rawData = $character->serviceRawData()->first();
@@ -44,8 +42,13 @@ final class RosterCompilerService
             return;
         }
 
-        $compiled = $this->compile($rawData);
-        $compiledArray = json_decode(json_encode($compiled), true);
+        $region = strtolower((string) ($character->realm?->region ?? 'eu'));
+        $this->setRegion($region);
+
+        [$charData, $weeklyData] = $this->compile($rawData);
+
+        $charArray   = json_decode(json_encode($charData), true);
+        $weeklyArray = json_decode(json_encode($weeklyData), true);
 
         // Extract active_spec from raw bnet profile
         $bnetProfile = $rawData->bnet_profile ?? [];
@@ -59,8 +62,9 @@ final class RosterCompilerService
         }
 
         $character->update([
-            'compiled_data' => $compiledArray,
-            'active_spec' => $activeSpec ?? $character->active_spec,
+            'character_data'        => $charArray,
+            'character_weekly_data' => $weeklyArray,
+            'active_spec'           => $activeSpec ?? $character->active_spec,
         ]);
 
         $character->refresh();
@@ -72,13 +76,15 @@ final class RosterCompilerService
         }
     }
 
-    public function compile(ServiceRawData $rawData): CompiledRosterMemberDTO
+    /**
+     * @return array{CharacterDataDTO, CharacterWeeklyDataDTO}
+     */
+    public function compile(ServiceRawData $rawData): array
     {
         $profile   = $rawData->bnet_profile   ?? [];
         $equipment = $rawData->bnet_equipment ?? [];
         $media     = $rawData->bnet_media     ?? [];
         $mplus     = $rawData->bnet_mplus     ?? [];
-        $raid      = $rawData->bnet_raid      ?? [];
         $rio       = $rawData->rio_profile    ?? [];
         $achStats  = $rawData->bnet_achievement_statistics ?? [];
         $snapshot  = $rawData->vault_weekly_snapshot ?? [];
@@ -92,73 +98,72 @@ final class RosterCompilerService
         $equippedItems = $equipment['equipped_items'] ?? [];
         $rioItems      = $rio['gear']['items'] ?? [];
 
-        // Build quest lookup set once for quest/prey checks
         $completedQuestIds = $this->progression->buildCompletedQuestSet($quests);
+        $achStatsIndex     = $this->progression->indexAchievementStatistics($achStats);
 
-        // Parse achievement stats for raid/dungeon/delve weekly tracking
-        $achStatsIndex = $this->progression->indexAchievementStatistics($achStats);
-
-        // Prey and quest data
-        $preyWeekly = $this->progression->resolvePreyWeekly($completedQuestIds);
+        $preyWeekly   = $this->progression->resolvePreyWeekly($completedQuestIds);
         $weeklyQuests = $this->progression->resolveWeeklyQuests($completedQuestIds);
 
-        // Vault
         $weekRegularMythic = $this->vaultData->resolveWeekRegularMythicDungeons($achStatsIndex);
 
-        return new CompiledRosterMemberDTO(
-            // Profile
+        $charData = new CharacterDataDTO(
             avatar_url:             $this->resolveAvatarUrl($media),
             class:                  $this->resolveClass($profile),
             combat_role:            $this->resolveRole($profile),
             equipped_ilvl:          $this->resolveEquippedIlvl($profile),
-            highest_ilvl_ever:      null, // Requires historical tracking (future)
-            // M+
+            highest_ilvl_ever:      null,
             mythic_rating:          $this->instanceData->resolveMythicRating($mplus),
-            weekly_runs_count:      $this->instanceData->resolveWeeklyRunsCount($mplus, $rio),
-            week_regular_mythic:    $weekRegularMythic,
             season_heroic_dungeons: $this->instanceData->resolveSeasonHeroicDungeons($achStatsIndex),
-            // Gear audit
             missing_enchants_slots: $this->gearAudit->resolveMissingEnchants($equippedItems),
             empty_sockets_count:    $this->gearAudit->resolveEmptySockets($equippedItems),
             upgrades_missing:       $this->gearAudit->resolveTotalUpgradesMissing($equippedItems),
             sparks_equipped:        $this->gearAudit->resolveSparksEquipped($equippedItems),
             tier_pieces:            $this->gearAudit->resolveTierPieces($equippedItems),
             tier_ilvls:             $this->gearAudit->resolveTierIlvls($equippedItems),
-            // Raids
-            raids:                  $this->instanceData->resolveRaids($raid),
-            // Equipment
             equipment:              $this->gearAudit->resolveEquipment($equippedItems, $rioItems, $rawData),
-            // Vault
-            vault_weekly_runs:      $this->vaultData->resolveVaultWeeklyRuns($rio, $weekRegularMythic),
-            vault_world_runs:       $this->vaultData->resolveVaultWorldRuns($achStats, $snapshot, $weeklyQuests, $preyWeekly),
-            vault_raid_slots:       $this->vaultData->resolveVaultRaidSlots($achStatsIndex),
-            // Quests & Delves
-            prey_weekly:            $preyWeekly,
-            weekly_quests:          $weeklyQuests,
-            weekly_event_done:      $this->progression->resolveWeeklyEventDone($completedQuestIds),
             season_delves:          $this->progression->resolveSeasonDelves($achStatsIndex),
-            week_delves:            $this->progression->resolveWeekDelves($achStats, $snapshot),
             coffer_keys:            $this->progression->resolveCofferKeys($achStatsIndex),
-            // Achievements
             cutting_edge:           $this->progression->resolveCuttingEdge($achStats),
             ahead_of_the_curve:     $this->progression->resolveAheadOfTheCurve($achStats),
-            // Collections
             achievement_points:     (int) ($profile['achievement_points'] ?? 0),
             crests:                 $this->progression->resolveCrests($achStatsIndex),
             mounts_count:           count($mounts['mounts'] ?? []),
             unique_pets:            $this->collection->resolveUniquePets($pets),
             lvl_25_pets:            $this->collection->resolveLvl25Pets($pets),
             titles_count:           count($titles['titles'] ?? []),
-            // PvP
             honor_level:            (int) ($pvpSum['honor_level'] ?? 0),
             honorable_kills:        (int) ($pvpSum['honorable_kills'] ?? 0),
             pvp_brackets:           $this->collection->resolvePvpBrackets($pvpSum),
-            // Reputation
             renown:                 $this->collection->resolveRenown($reps),
-            // Crafting extras
             embellished_items:      $this->gearAudit->resolveEmbellishedItems($equippedItems),
             spark_gear:             $this->gearAudit->resolveSparkGear($equippedItems),
         );
+
+        $weeklyData = new CharacterWeeklyDataDTO(
+            weekly_runs_count:   $this->instanceData->resolveWeeklyRunsCount($mplus, $rio),
+            week_regular_mythic: $weekRegularMythic,
+            raids:               $this->instanceData->resolveWeeklyRaidKills($achStatsIndex),
+            vault_weekly_runs:   $this->vaultData->resolveVaultWeeklyRuns($rio, $weekRegularMythic),
+            vault_world_runs:    $this->vaultData->resolveVaultWorldRuns($achStats, $snapshot, $weeklyQuests, $preyWeekly),
+            vault_raid_slots:    $this->vaultData->resolveVaultRaidSlots($achStatsIndex),
+            prey_weekly:         $preyWeekly,
+            weekly_quests:       $weeklyQuests,
+            weekly_event_done:   $this->progression->resolveWeeklyEventDone($completedQuestIds),
+            week_delves:         $this->progression->resolveWeekDelves($achStats, $snapshot),
+        );
+
+        return [$charData, $weeklyData];
+    }
+
+    // =========================================================================
+    // REGION
+    // =========================================================================
+
+    private function setRegion(string $region): void
+    {
+        $this->progression->setRegion($region);
+        $this->vaultData->setRegion($region);
+        $this->instanceData->setRegion($region);
     }
 
     // =========================================================================

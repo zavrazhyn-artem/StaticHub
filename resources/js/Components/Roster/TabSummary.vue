@@ -30,144 +30,55 @@ const classColors = {
   'Warrior': 'text-[#C69B6D]',
 };
 
-const parseRawData = (data) => {
-    if (!data) return null;
-    if (typeof data === 'object') return data;
-    try {
-        return JSON.parse(data);
-    } catch (e) {
-        return null;
+const getTierCount = (char) => {
+  const pieces = char?.tier_pieces;
+  if (!pieces) return 0;
+  return Object.values(pieces).filter(v => v && v !== '-').length;
+};
+
+const hasTierSlot = (char, slot) => {
+  const val = char?.tier_pieces?.[slot];
+  return val && val !== '-';
+};
+
+const getVaultSlotCount = (runs, thresholds) => {
+  if (!runs || !Array.isArray(runs)) return 0;
+  let count = 0;
+  for (const t of thresholds) {
+    if (runs.length >= t) count++;
+  }
+  return count;
+};
+
+const getMplusVaultSlots = (char) => getVaultSlotCount(char?.vault_weekly_runs, [1, 4, 8]);
+
+const getRaidVaultSlots = (char) => {
+  const slots = char?.vault_raid_slots;
+  if (!slots || !Array.isArray(slots)) return 0;
+  return slots.filter(s => s !== null).length;
+};
+
+const getWorldVaultSlots = (char) => getVaultSlotCount(char?.vault_world_runs, [2, 4, 8]);
+
+const getRaidProgression = (char) => {
+  const raids = char?.raids;
+  if (!raids) return '-';
+  let totalKills = { M: 0, H: 0, N: 0, LFR: 0 };
+  let totalBosses = 0;
+  for (const bosses of Object.values(raids)) {
+    totalBosses += bosses.length;
+    for (const boss of bosses) {
+      if (boss.M) totalKills.M++;
+      if (boss.H) totalKills.H++;
+      if (boss.N) totalKills.N++;
+      if (boss.LFR) totalKills.LFR++;
     }
-};
-
-// --- Audit Helpers (Moved from Overview) ---
-
-const countMissingEnchants = (character) => {
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
-    if (!equippedItems) return 0;
-
-    const enchantableSlots = ['BACK', 'CHEST', 'WRIST', 'LEGS', 'FEET', 'FINGER_1', 'FINGER_2', 'MAIN_HAND', 'OFF_HAND'];
-    let missingCount = 0;
-
-    enchantableSlots.forEach(slotType => {
-        const item = equippedItems.find(i => i?.slot?.type === slotType);
-        if (item) {
-            if (slotType === 'OFF_HAND' && item.inventory_type?.type !== 'WEAPON') {
-                return;
-            }
-            if (!item.enchantments || item.enchantments.length === 0) {
-                missingCount++;
-            }
-        }
-    });
-
-    return missingCount;
-};
-
-const countEmptySockets = (character) => {
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
-    if (!equippedItems) return 0;
-
-    let emptySockets = 0;
-    equippedItems.forEach(item => {
-        if (item.sockets) {
-            item.sockets.forEach(socket => {
-                if (!socket.item) {
-                    emptySockets++;
-                }
-            });
-        }
-    });
-    return emptySockets;
-};
-
-const getRaidProgression = (character) => {
-    const rioData = parseRawData(character?.raw_raiderio_data);
-    if (!rioData?.raid_progression) return '-';
-
-    const raids = Object.keys(rioData.raid_progression);
-    if (raids.length === 0) return '-';
-
-    const latestRaid = raids[raids.length - 1];
-    const progress = rioData.raid_progression[latestRaid];
-    return progress?.summary || '-';
-};
-
-// --- New TabSummary Helpers ---
-
-const getTierInfo = (character) => {
-    if (!character) return { count: 0, slots: {} };
-    const bnetData = parseRawData(character?.raw_bnet_data);
-    const equippedItems = bnetData?.equipped_items || bnetData?.equipment?.equipped_items;
-    if (!equippedItems) return { count: 0, slots: {} };
-
-    const tierSlots = {
-        'HEAD': 'H',
-        'SHOULDER': 'S',
-        'CHEST': 'C',
-        'HANDS': 'G',
-        'LEGS': 'L'
-    };
-
-    let count = 0;
-    let slots = {};
-
-    equippedItems.forEach(item => {
-        const slotType = item?.slot?.type;
-        if (tierSlots[slotType]) {
-            // In WoW Bnet API, item names are often objects with 'en_US', etc.
-            const itemName = (typeof item.name === 'object') ? (item.name.name || item.name.en_US) : item.name;
-            if (item.set || (itemName && typeof itemName === 'string' && (itemName.includes('Tier') || item.binding?.type === 'ON_EQUIP'))) {
-                 count++;
-                 slots[tierSlots[slotType]] = true;
-            }
-        }
-    });
-
-    return { count, slots };
-};
-
-const getMythicDungeonsCount = (character) => {
-    if (!character) return 0;
-    const rioData = parseRawData(character?.raw_raiderio_data);
-    // Raider.io current_mythic_plus_weekly_highest_level_runs provides recent runs
-    const runs = rioData?.mythic_plus_weekly_highest_level_runs || [];
-    return runs.length;
-};
-
-const getVaultOptions = (character) => {
-    // Vault options are complex to calculate from just profile data without the specialized Vault API
-    // We can estimate from M+ weekly runs and Raid progression
-    const rioData = parseRawData(character?.raw_raiderio_data);
-    const mPlusRuns = rioData?.mythic_plus_weekly_highest_level_runs || [];
-
-    // M+ Vault: 1, 4, 8 runs
-    let mPlusOptions = 0;
-    if (mPlusRuns.length >= 8) mPlusOptions = 3;
-    else if (mPlusRuns.length >= 4) mPlusOptions = 2;
-    else if (mPlusRuns.length >= 1) mPlusOptions = 1;
-
-    // Raid Vault: 2, 4, 6 bosses (heuristics based on progression summary)
-    const raidProgress = getRaidProgression(character); // e.g. "6/9 H"
-    let raidOptions = 0;
-    if (raidProgress && raidProgress !== '-') {
-        const parts = raidProgress.split('/');
-        if (parts.length > 0) {
-            const killed = parseInt(parts[0]);
-            if (killed >= 6) raidOptions = 3;
-            else if (killed >= 4) raidOptions = 2;
-            else if (killed >= 2) raidOptions = 1;
-        }
-    }
-
-    return {
-        m: mPlusOptions,
-        h: raidOptions, // Using H for Raid in user's prompt
-        c: 0,
-        v: 0
-    };
+  }
+  if (totalKills.M > 0) return `${totalKills.M}/${totalBosses} M`;
+  if (totalKills.H > 0) return `${totalKills.H}/${totalBosses} H`;
+  if (totalKills.N > 0) return `${totalKills.N}/${totalBosses} N`;
+  if (totalKills.LFR > 0) return `${totalKills.LFR}/${totalBosses} LFR`;
+  return '-';
 };
 
 </script>
@@ -183,7 +94,7 @@ const getVaultOptions = (character) => {
             <th class="p-2 text-center border-l border-white/5">{{ __('iLvL') }}</th>
             <th colspan="6" class="p-2 text-center border-l border-white/5">{{ __('Tier Pieces') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('M+ Dungeons') }}</th>
-            <th colspan="4" class="p-2 text-center border-l border-white/5">{{ __('Great Vault') }}</th>
+            <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Great Vault') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('M+ Rating') }}</th>
             <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
           </tr>
@@ -201,10 +112,9 @@ const getVaultOptions = (character) => {
 
             <th class="p-4 text-center border-l border-white/5">{{ __('This Week') }}</th>
 
-            <th class="p-4 text-center border-l border-white/5 w-8">M</th>
-            <th class="p-4 text-center w-8">H</th>
-            <th class="p-4 text-center w-8">C</th>
-            <th class="p-4 text-center w-8">V</th>
+            <th class="p-4 text-center border-l border-white/5 w-8">M+</th>
+            <th class="p-4 text-center w-8">R</th>
+            <th class="p-4 text-center w-8">W</th>
 
             <th class="p-4 text-center border-l border-white/5">Rating</th>
 
@@ -220,30 +130,22 @@ const getVaultOptions = (character) => {
               <td class="p-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                 <div class="flex items-center gap-3">
                   <span class="text-gray-600 font-mono text-xs w-4">{{ index + 1 }}</span>
-
-                  <!-- Chevron Icon -->
                   <div class="w-4 flex items-center justify-center">
                     <svg v-if="char.alts && char.alts.length > 0"
                          xmlns="http://www.w3.org/2000/svg"
                          class="w-4 h-4 transition-transform duration-200"
                          :class="{ 'rotate-90': expandedRows.has(char.id) }"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                    >
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </div>
-
                   <div class="w-8 h-8 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="char.avatar_url" :src="char.avatar_url" :alt="char.name" class="w-full h-full object-cover" />
                     <span v-else class="text-[10px] text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
-                    <div class="font-bold text-sm truncate" :class="classColors[char.playable_class] || 'text-white'">
+                    <div class="font-bold text-sm truncate" :class="classColors[char.class] || 'text-white'">
                       {{ char.name }}
                     </div>
                   </div>
@@ -252,48 +154,49 @@ const getVaultOptions = (character) => {
 
               <!-- iLvL -->
               <td class="p-4 text-center font-mono font-bold text-cyan-400 border-l border-white/5">
-                {{ char.ilvl ? char.ilvl.toFixed(2) : '-' }}
+                {{ char.equipped_ilvl ? Number(char.equipped_ilvl).toFixed(0) : '-' }}
               </td>
 
               <!-- Tier Pieces -->
               <td class="p-4 text-center font-bold text-white border-l border-white/5">
-                {{ getTierInfo(char).count }}
+                {{ getTierCount(char) }}
               </td>
               <td v-for="slot in ['H', 'S', 'C', 'G', 'L']" :key="slot" class="p-2 text-center">
-                <span v-if="getTierInfo(char).slots[slot]" class="text-green-500 font-bold">{{ slot }}</span>
+                <span v-if="hasTierSlot(char, slot)" class="text-green-500 font-bold">{{ slot }}</span>
                 <span v-else class="text-gray-800">-</span>
               </td>
 
               <!-- Mythic Dungeons -->
               <td class="p-4 text-center font-mono font-bold text-white border-l border-white/5">
-                {{ getMythicDungeonsCount(char) }}
+                {{ char.weekly_runs_count || 0 }}
               </td>
 
-              <!-- Great Vault -->
-              <td class="p-4 text-center font-mono font-bold border-l border-white/5" :class="getVaultOptions(char).m > 0 ? 'text-green-400' : 'text-gray-700'">
-                {{ getVaultOptions(char).m }}
+              <!-- Great Vault: M+ / Raid / World -->
+              <td class="p-4 text-center font-mono font-bold border-l border-white/5" :class="getMplusVaultSlots(char) > 0 ? 'text-green-400' : 'text-gray-700'">
+                {{ getMplusVaultSlots(char) }}
               </td>
-              <td class="p-4 text-center font-mono font-bold" :class="getVaultOptions(char).h > 0 ? 'text-green-400' : 'text-gray-700'">
-                {{ getVaultOptions(char).h }}
+              <td class="p-4 text-center font-mono font-bold" :class="getRaidVaultSlots(char) > 0 ? 'text-green-400' : 'text-gray-700'">
+                {{ getRaidVaultSlots(char) }}
               </td>
-              <td class="p-4 text-center font-mono font-bold text-gray-700">0</td>
-              <td class="p-4 text-center font-mono font-bold text-gray-700">0</td>
+              <td class="p-4 text-center font-mono font-bold" :class="getWorldVaultSlots(char) > 0 ? 'text-green-400' : 'text-gray-700'">
+                {{ getWorldVaultSlots(char) }}
+              </td>
 
               <!-- M+ Rating -->
               <td class="p-4 text-center font-mono font-bold border-l border-white/5" :class="char.mythic_rating > 0 ? 'text-purple-400' : 'text-gray-600'">
-                {{ char.mythic_rating ? Math.round(parseFloat(char.mythic_rating)) : '0' }}
+                {{ char.mythic_rating ? Math.round(Number(char.mythic_rating)) : '0' }}
               </td>
 
-              <!-- Audit (Moved from Overview) -->
+              <!-- Audit -->
               <td class="p-4 text-center font-mono text-sm border-l border-white/5">
-                <span v-if="countMissingEnchants(char) > 0" class="text-red-500 font-bold bg-red-500/10 rounded px-2 py-0.5">
-                  {{ countMissingEnchants(char) }}
+                <span v-if="(char.missing_enchants_slots?.length || 0) > 0" class="text-red-500 font-bold bg-red-500/10 rounded px-2 py-0.5">
+                  {{ char.missing_enchants_slots.length }}
                 </span>
                 <span v-else class="text-gray-600">-</span>
               </td>
               <td class="p-4 text-center font-mono text-sm">
-                <span v-if="countEmptySockets(char) > 0" class="text-red-500 font-bold bg-red-500/10 rounded px-2 py-0.5">
-                  {{ countEmptySockets(char) }}
+                <span v-if="(char.empty_sockets_count || 0) > 0" class="text-red-500 font-bold bg-red-500/10 rounded px-2 py-0.5">
+                  {{ char.empty_sockets_count }}
                 </span>
                 <span v-else class="text-gray-600">-</span>
               </td>
@@ -306,75 +209,51 @@ const getVaultOptions = (character) => {
 
             <!-- Alt Rows -->
             <tr v-for="alt in char.alts" :key="'alt-'+alt.id" v-show="expandedRows.has(char.id)" class="bg-black/40 hover:bg-white/[0.02] transition-colors">
-              <!-- Name (Nested Style) -->
               <td class="p-4 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                 <div class="flex items-center gap-3 pl-8 relative">
-                  <!-- L-shape connector -->
                   <div class="absolute left-4 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/10 rounded-bl-sm"></div>
-
                   <div class="w-6 h-6 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="alt.avatar_url" :src="alt.avatar_url" :alt="alt.name" class="w-full h-full object-cover" />
                     <span v-else class="text-[10px] text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
-                    <div class="font-bold text-xs truncate" :class="classColors[alt.playable_class] || 'text-white'">
+                    <div class="font-bold text-xs truncate" :class="classColors[alt.class] || 'text-white'">
                       {{ alt.name }}
                     </div>
                   </div>
                 </div>
               </td>
 
-              <!-- iLvL -->
               <td class="p-4 text-center font-mono text-xs text-cyan-400/70 border-l border-white/5">
-                {{ alt.ilvl ? alt.ilvl.toFixed(2) : '-' }}
+                {{ alt.equipped_ilvl ? Number(alt.equipped_ilvl).toFixed(0) : '-' }}
               </td>
 
-              <!-- Tier Pieces -->
-              <td class="p-4 text-center text-sm font-bold text-white/70 border-l border-white/5">
-                {{ getTierInfo(alt).count }}
-              </td>
+              <td class="p-4 text-center text-sm font-bold text-white/70 border-l border-white/5">{{ getTierCount(alt) }}</td>
               <td v-for="slot in ['H', 'S', 'C', 'G', 'L']" :key="'alt-tier-'+slot" class="p-2 text-center">
-                <span v-if="getTierInfo(alt).slots[slot]" class="text-green-500/70 font-bold text-[10px]">{{ slot }}</span>
+                <span v-if="hasTierSlot(alt, slot)" class="text-green-500/70 font-bold text-[10px]">{{ slot }}</span>
                 <span v-else class="text-gray-800 text-[10px]">-</span>
               </td>
 
-              <!-- Mythic Dungeons -->
-              <td class="p-4 text-center font-mono text-sm font-bold text-white/70 border-l border-white/5">
-                {{ getMythicDungeonsCount(alt) }}
-              </td>
+              <td class="p-4 text-center font-mono text-sm font-bold text-white/70 border-l border-white/5">{{ alt.weekly_runs_count || 0 }}</td>
 
-              <!-- Great Vault -->
-              <td class="p-4 text-center font-mono text-sm font-bold border-l border-white/5" :class="getVaultOptions(alt).m > 0 ? 'text-green-400/70' : 'text-gray-800'">
-                {{ getVaultOptions(alt).m }}
-              </td>
-              <td class="p-4 text-center font-mono text-sm font-bold" :class="getVaultOptions(alt).h > 0 ? 'text-green-400/70' : 'text-gray-800'">
-                {{ getVaultOptions(alt).h }}
-              </td>
-              <td class="p-4 text-center font-mono text-sm font-bold text-gray-800">0</td>
-              <td class="p-4 text-center font-mono text-sm font-bold text-gray-800">0</td>
+              <td class="p-4 text-center font-mono text-sm font-bold border-l border-white/5" :class="getMplusVaultSlots(alt) > 0 ? 'text-green-400/70' : 'text-gray-800'">{{ getMplusVaultSlots(alt) }}</td>
+              <td class="p-4 text-center font-mono text-sm font-bold" :class="getRaidVaultSlots(alt) > 0 ? 'text-green-400/70' : 'text-gray-800'">{{ getRaidVaultSlots(alt) }}</td>
+              <td class="p-4 text-center font-mono text-sm font-bold" :class="getWorldVaultSlots(alt) > 0 ? 'text-green-400/70' : 'text-gray-800'">{{ getWorldVaultSlots(alt) }}</td>
 
-              <!-- M+ Rating -->
               <td class="p-4 text-center font-mono text-sm font-bold border-l border-white/5" :class="alt.mythic_rating > 0 ? 'text-purple-400/70' : 'text-gray-800'">
-                {{ alt.mythic_rating ? Math.round(parseFloat(alt.mythic_rating)) : '0' }}
+                {{ alt.mythic_rating ? Math.round(Number(alt.mythic_rating)) : '0' }}
               </td>
 
-              <!-- Audit -->
               <td class="p-4 text-center font-mono text-[10px] border-l border-white/5">
-                <span v-if="countMissingEnchants(alt) > 0" class="text-red-500/70 font-bold bg-red-500/5 rounded px-2 py-0.5">
-                  {{ countMissingEnchants(alt) }}
-                </span>
+                <span v-if="(alt.missing_enchants_slots?.length || 0) > 0" class="text-red-500/70 font-bold bg-red-500/5 rounded px-2 py-0.5">{{ alt.missing_enchants_slots.length }}</span>
                 <span v-else class="text-gray-800">-</span>
               </td>
               <td class="p-4 text-center font-mono text-[10px]">
-                <span v-if="countEmptySockets(alt) > 0" class="text-red-500/70 font-bold bg-red-500/5 rounded px-2 py-0.5">
-                  {{ countEmptySockets(alt) }}
-                </span>
+                <span v-if="(alt.empty_sockets_count || 0) > 0" class="text-red-500/70 font-bold bg-red-500/5 rounded px-2 py-0.5">{{ alt.empty_sockets_count }}</span>
                 <span v-else class="text-gray-800">-</span>
               </td>
               <td class="p-4 text-center">
-                <span class="text-[9px] font-bold text-white/50 whitespace-nowrap bg-white/5 px-2 py-1 rounded">
-                  {{ getRaidProgression(alt) }}
-                </span>
+                <span class="text-[9px] font-bold text-white/50 whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getRaidProgression(alt) }}</span>
               </td>
             </tr>
           </template>

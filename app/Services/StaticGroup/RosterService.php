@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\StaticGroup;
 
+use App\Helpers\WeeklyResetHelper;
 use App\Http\Resources\StaticRosterMemberResource;
 use App\Models\Character;
 use App\Models\CharacterStaticSpec;
+use App\Models\CharacterWeeklySnapshot;
 use App\Models\Specialization;
 use App\Models\StaticGroup;
 use App\Models\User;
@@ -18,6 +20,7 @@ class RosterService
 {
     /**
      * Build the full roster index payload for a static group.
+     * Always returns live (current week) data. Historical snapshots are loaded via API.
      */
     public function buildRosterIndexPayload(StaticGroup $static): array
     {
@@ -61,6 +64,17 @@ class RosterService
             });
         });
 
+        $region           = strtolower($static->region ?? 'eu');
+        $currentPeriodKey = WeeklyResetHelper::periodKey($region);
+        $availableWeeks   = $this->buildAvailableWeeks($region);
+
+        // Build static raid columns from config so the grid never disappears
+        $raidInstances = config('wow_season.current_raid_instances', []);
+        $raidColumns   = [];
+        foreach ($raidInstances as $name => $bosses) {
+            $raidColumns[] = ['name' => $name, 'bosses' => $bosses];
+        }
+
         return [
             'roster' => $members
                 ->map(fn (User $user) => (new StaticRosterMemberResource($user))
@@ -69,7 +83,74 @@ class RosterService
                 )
                 ->values(),
             'current_user_access' => $currentUserAccess,
+            'current_week'        => $currentPeriodKey,
+            'available_weeks'     => $availableWeeks,
+            'raid_columns'        => $raidColumns,
         ];
+    }
+
+    /**
+     * Load weekly snapshot data for a specific past week.
+     * Returns [ characterId => weeklyData array ] for all characters in the static.
+     */
+    public function getWeeklySnapshotData(StaticGroup $static, string $periodKey): array
+    {
+        $characterIds = $static->characters()->pluck('characters.id');
+
+        if ($characterIds->isEmpty()) {
+            return [];
+        }
+
+        return CharacterWeeklySnapshot::query()
+            ->whereIn('character_id', $characterIds)
+            ->forPeriod($periodKey)
+            ->pluck('weekly_data', 'character_id')
+            ->map(fn ($data) => is_string($data) ? json_decode($data, true) : $data)
+            ->toArray();
+    }
+
+    /**
+     * Build list of all season weeks from season_start to current week.
+     * Returns array of [ { key: "2026-W10", number: 1, current: bool }, ... ]
+     * ordered ascending (Week 1 first).
+     */
+    private function buildAvailableWeeks(string $region): array
+    {
+        $currentPeriodKey = WeeklyResetHelper::periodKey($region);
+        $seasonStart      = strtotime(config('wow_season.season_start', 'now'));
+
+        if ($seasonStart === false) {
+            return [['key' => $currentPeriodKey, 'number' => 1, 'current' => true]];
+        }
+
+        $weeks      = [];
+        $weekNumber = 1;
+        $cursor     = $seasonStart;
+
+        while (true) {
+            $periodKey = gmdate('o-\WW', $cursor);
+            $isCurrent = $periodKey === $currentPeriodKey;
+
+            $weeks[] = [
+                'key'     => $periodKey,
+                'number'  => $weekNumber,
+                'current' => $isCurrent,
+            ];
+
+            if ($isCurrent) {
+                break;
+            }
+
+            $cursor += 7 * 86400;
+            $weekNumber++;
+
+            // Safety: don't loop more than 52 weeks
+            if ($weekNumber > 52) {
+                break;
+            }
+        }
+
+        return $weeks;
     }
 
     /**

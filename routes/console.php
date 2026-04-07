@@ -19,6 +19,12 @@ Schedule::command(ProcessDiscordAutomations::class)->everyMinute();
 Schedule::command(SyncAllStaticsCommand::class)->everyMinute();
 Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00');
 
+// Weekly reset — snapshot character_weekly_data and clear it
+Schedule::command('weekly:reset eu')->weeklyOn(3, '04:01'); // Wednesday 04:01 UTC
+Schedule::command('weekly:reset us')->weeklyOn(2, '15:01'); // Tuesday   15:01 UTC
+Schedule::command('weekly:reset kr')->weeklyOn(3, '02:01'); // Wednesday 02:01 UTC
+Schedule::command('weekly:reset tw')->weeklyOn(3, '02:01'); // Wednesday 02:01 UTC
+
 Schedule::command('backup:run --only-db')->daily()->at('03:00');
 
 // Очищуємо старі бекапи (rotation), щоб не закінчилося місце

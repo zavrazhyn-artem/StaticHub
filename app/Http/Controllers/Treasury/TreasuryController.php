@@ -39,9 +39,24 @@ class TreasuryController extends Controller
         Gate::authorize('canManageTreasury', $static);
 
         $validated = $request->validated();
-        $validated['amount'] = CurrencyHelper::goldToCopper($validated['amount']);
+        $amount = CurrencyHelper::goldToCopper($validated['amount']);
+        $type = $validated['type'] ?? 'deposit';
 
-        $this->treasuryService->executeTransactionCreation($static, $validated);
+        if ($type === 'deposit') {
+            $this->treasuryService->createDeposit(
+                $static,
+                (int) $validated['user_id'],
+                $amount,
+                $validated['description'] ?? null,
+            );
+        } else {
+            $this->treasuryService->createWithdrawal(
+                $static,
+                (int) $validated['user_id'],
+                $amount,
+                $validated['description'] ?? null,
+            );
+        }
 
         return redirect()->back()->with('success', 'Transaction recorded successfully.');
     }

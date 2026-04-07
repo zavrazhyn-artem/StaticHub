@@ -16,9 +16,9 @@ class TransactionBuilder extends Builder
         return $this->where('type', $type);
     }
 
-    public function inWeek(int $weekNumber): self
+    public function inPeriod(string $periodKey): self
     {
-        return $this->where('week_number', $weekNumber);
+        return $this->where('period_key', $periodKey);
     }
 
     public function forUser(int $userId): self

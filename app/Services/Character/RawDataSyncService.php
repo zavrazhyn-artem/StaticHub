@@ -9,6 +9,7 @@ use App\Models\Character;
 use App\Models\ServiceRawData;
 use App\Services\Blizzard\BlizzardCharacterApiService;
 use App\Services\JsonSchemaValidatorService;
+use App\Helpers\WeeklyResetHelper;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -62,7 +63,7 @@ class RawDataSyncService
             );
 
             if (isset($updates['bnet_achievement_statistics'])) {
-                $this->updateVaultSnapshot($rawData, $updates['bnet_achievement_statistics']);
+                $this->updateVaultSnapshot($rawData, $updates['bnet_achievement_statistics'], $region);
             }
 
             Log::info('RawDataSyncService: persisted raw data.', [
@@ -78,9 +79,9 @@ class RawDataSyncService
         }
     }
 
-    private function updateVaultSnapshot(ServiceRawData $rawData, array $achStats): void
+    private function updateVaultSnapshot(ServiceRawData $rawData, array $achStats, string $region = 'eu'): void
     {
-        $periodKey = $this->currentWowPeriodKey();
+        $periodKey = $this->currentWowPeriodKey($region);
         $existingSnap = $rawData->vault_weekly_snapshot ?? [];
 
         if (isset($existingSnap[$periodKey])) {
@@ -125,14 +126,9 @@ class RawDataSyncService
         $rawData->update(['vault_weekly_snapshot' => $existingSnap]);
     }
 
-    private function currentWowPeriodKey(): string
+    private function currentWowPeriodKey(string $region = 'eu'): string
     {
-        $now = time();
-        $resetTimestamp = strtotime('last wednesday 04:00 UTC', $now);
-        if ($resetTimestamp > $now) {
-            $resetTimestamp = strtotime('-7 days', $resetTimestamp);
-        }
-        return gmdate('o-\WW', $resetTimestamp);
+        return WeeklyResetHelper::periodKey($region);
     }
 
     private function tryFetchNoSchema(string $column, Character $character, array &$updates, callable $fetcher): void

@@ -3,9 +3,11 @@
 namespace App\Jobs\Analysis;
 
 use App\Enums\Locale;
+use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
 use App\Services\Discord\DiscordMessageService;
+use App\Services\Discord\DiscordWebhookService;
 use App\Services\Analysis\GeminiService;
 use App\Services\Analysis\WclService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +28,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue
         $this->onQueue('ai');
     }
 
-    public function handle(WclService $wclService, GeminiService $geminiService, DiscordMessageService $discordService): void
+    public function handle(WclService $wclService, GeminiService $geminiService, DiscordMessageService $discordService, DiscordWebhookService $webhookService): void
     {
         if (!$this->report->wcl_report_id) return;
 
@@ -94,6 +96,12 @@ class ProcessRaidAnalysisJob implements ShouldQueue
             if ($this->report->event_id && $this->report->event) {
                 $discordService->sendOrUpdateRaidAnnouncement($this->report->event);
             }
+
+            // Send webhook notification that AI report is ready
+            $reportTitle = $this->report->title ?? 'Raid Analysis';
+            $reportUrl = route('statics.logs.show', [$static, $this->report]);
+            $payload = DiscordWebhookBuilder::buildAnalysisReadyPayload($reportTitle, $reportUrl);
+            $webhookService->sendNotification($static, $payload);
 
         } catch (\Exception $e) {
             Log::error("ProcessRaidAnalysisJob failed: " . $e->getMessage());

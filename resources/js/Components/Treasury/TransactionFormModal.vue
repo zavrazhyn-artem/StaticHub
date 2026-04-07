@@ -1,5 +1,7 @@
 <script setup>
+import { ref } from 'vue';
 import GlassModal from '../UI/GlassModal.vue';
+import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
 
 defineProps({
     show: { type: Boolean, required: true },
@@ -9,6 +11,8 @@ defineProps({
     csrfToken: { type: String, required: true },
 });
 const emit = defineEmits(['close']);
+
+const selectedUserId = ref('');
 </script>
 
 <template>
@@ -27,12 +31,14 @@ const emit = defineEmits(['close']);
             <input type="hidden" name="type" :value="transactionType">
 
             <div class="space-y-1">
-                <label for="user_id" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Select Member') }}</label>
-                <select name="user_id" id="user_id" required
-                        class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none">
-                    <option value="">{{ __('Select a member...') }}</option>
-                    <option v-for="member in members" :key="member.id" :value="member.id">{{ member.name }}</option>
-                </select>
+                <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Select Member') }}</label>
+                <SelectUserWithMain
+                    v-model="selectedUserId"
+                    :members="members"
+                    input-name="user_id"
+                    :placeholder="__('Select a member...')"
+                    :search-placeholder="__('Search...')"
+                />
             </div>
 
             <div class="space-y-1">
@@ -48,7 +54,8 @@ const emit = defineEmits(['close']);
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
+                <button type="submit" :disabled="!selectedUserId"
+                        class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     {{ __('Save Transaction') }}
                 </button>
             </div>

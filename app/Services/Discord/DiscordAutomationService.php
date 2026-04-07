@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Discord;
 
+use App\Jobs\Analysis\FetchPostRaidLogsJob;
 use App\Models\Event;
 use App\Services\Raid\RaidScheduleService;
 
@@ -63,6 +64,15 @@ class DiscordAutomationService
 
             $static = $raid->static;
             $automation = $static->automation_settings ?? [];
+
+            // Auto-fetch WCL logs after raid ends
+            if (!empty($automation['auto_fetch_logs']) && !empty($static->wcl_guild_id) && !$raid->ai_analysis_done) {
+                $delayMinutes = (int) ($automation['auto_fetch_delay_minutes']
+                    ?? config('tactical_logs.auto_fetch_delay_minutes', 30));
+
+                FetchPostRaidLogsJob::dispatch($raid->id)->delay(now()->addMinutes($delayMinutes));
+                $results[] = "Scheduled WCL log fetch in {$delayMinutes}min: Event ID {$raid->id}";
+            }
 
             if (!empty($automation['post_next_after_raid'])) {
                 // Delete the ended raid's Discord message

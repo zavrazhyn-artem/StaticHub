@@ -5,6 +5,7 @@ import TabGear from './TabGear.vue';
 import RosterTabs from './UnifiedRoster/RosterTabs.vue';
 import RosterTable from './UnifiedRoster/RosterTable.vue';
 import GlassModal from '../UI/GlassModal.vue';
+import SearchableSelect from '../UI/SearchableSelect.vue';
 
 // ---------------------------------------------------------------------------
 // i18n helper
@@ -19,6 +20,142 @@ const props = defineProps({
     staticId:    { type: Number, required: true },
     initialData: { type: Object,  default: null  },
 });
+
+// ---------------------------------------------------------------------------
+// Week selector
+// ---------------------------------------------------------------------------
+const rawWeeks        = props.initialData?.available_weeks ?? [];
+const currentWeek     = ref(props.initialData?.current_week ?? '');
+const selectedWeek    = ref(props.initialData?.current_week ?? '');
+const weekLoading     = ref(false);
+const isLive          = computed(() => selectedWeek.value === currentWeek.value);
+
+/** Options for SearchableSelect, sorted descending (current week first). */
+const weekOptions = computed(() =>
+    [...rawWeeks].reverse().map(w => ({
+        id:   w.key,
+        name: w.current ? 'Live Week' : `Week ${w.number}`,
+    }))
+);
+
+/** Get the week number for a given period key. */
+const weekNumber = (key) => {
+    const w = rawWeeks.find(w => w.key === key);
+    return w ? w.number : null;
+};
+
+// Keyed cache: periodKey → { characterId → weeklyData }
+const snapshotCache   = {};
+// Original live weekly fields per character, keyed by characterId
+let liveWeeklyData    = {};
+
+const WEEKLY_FIELDS = [
+    'weekly_runs_count', 'week_regular_mythic', 'raids',
+    'vault_weekly_runs', 'vault_world_runs', 'vault_raid_slots',
+    'prey_weekly', 'weekly_quests', 'weekly_event_done', 'week_delves',
+];
+
+/** Extract weekly fields from a character object. */
+const extractWeekly = (char) => {
+    const data = {};
+    for (const f of WEEKLY_FIELDS) {
+        data[f] = char[f] ?? null;
+    }
+    return data;
+};
+
+/** Apply weekly data overlay onto roster members (mutates in place). */
+const applyWeeklyOverlay = (overlay) => {
+    for (const member of roster.value) {
+        if (member.main_character) {
+            const snap = overlay?.[member.main_character.id];
+            if (snap) {
+                for (const f of WEEKLY_FIELDS) {
+                    member.main_character[f] = snap[f] ?? null;
+                }
+            } else {
+                for (const f of WEEKLY_FIELDS) {
+                    member.main_character[f] = null;
+                }
+            }
+        }
+        for (const alt of (member.alts || [])) {
+            const snap = overlay?.[alt.id];
+            if (snap) {
+                for (const f of WEEKLY_FIELDS) {
+                    alt[f] = snap[f] ?? null;
+                }
+            } else {
+                for (const f of WEEKLY_FIELDS) {
+                    alt[f] = null;
+                }
+            }
+        }
+    }
+};
+
+/** Restore live weekly data from the stored originals. */
+const restoreLiveData = () => {
+    for (const member of roster.value) {
+        if (member.main_character) {
+            const live = liveWeeklyData[member.main_character.id];
+            if (live) {
+                for (const f of WEEKLY_FIELDS) {
+                    member.main_character[f] = live[f] ?? null;
+                }
+            }
+        }
+        for (const alt of (member.alts || [])) {
+            const live = liveWeeklyData[alt.id];
+            if (live) {
+                for (const f of WEEKLY_FIELDS) {
+                    alt[f] = live[f] ?? null;
+                }
+            }
+        }
+    }
+};
+
+/** Store live weekly data from the current roster state. */
+const storeLiveData = () => {
+    liveWeeklyData = {};
+    for (const member of roster.value) {
+        if (member.main_character) {
+            liveWeeklyData[member.main_character.id] = extractWeekly(member.main_character);
+        }
+        for (const alt of (member.alts || [])) {
+            liveWeeklyData[alt.id] = extractWeekly(alt);
+        }
+    }
+};
+
+const onWeekChange = async (week) => {
+    selectedWeek.value = week;
+
+    if (week === currentWeek.value) {
+        restoreLiveData();
+        return;
+    }
+
+    // Check cache first
+    if (snapshotCache[week]) {
+        applyWeeklyOverlay(snapshotCache[week]);
+        return;
+    }
+
+    weekLoading.value = true;
+    try {
+        const { data } = await axios.get(`/statics/${props.staticId}/roster/weekly-snapshot`, {
+            params: { week },
+        });
+        snapshotCache[week] = data.snapshot || {};
+        applyWeeklyOverlay(snapshotCache[week]);
+    } catch (err) {
+        console.error('Failed to fetch weekly snapshot:', err);
+    } finally {
+        weekLoading.value = false;
+    }
+};
 
 // ---------------------------------------------------------------------------
 // State
@@ -159,6 +296,7 @@ const fetchRoster = async () => {
             selectedDifficulty.value = getHighestActiveDifficulty();
         }
 
+        storeLiveData();
         loading.value           = false;
         return;
     }
@@ -171,6 +309,8 @@ const fetchRoster = async () => {
         if (!selectedDifficulty.value) {
             selectedDifficulty.value = getHighestActiveDifficulty();
         }
+
+        storeLiveData();
     } catch (err) {
         console.error('Failed to fetch roster:', err);
     } finally {
@@ -213,22 +353,8 @@ const groupedRoster = computed(() => {
     return groups;
 });
 
-const raidColumns = computed(() => {
-    // Find the first character that has raid data and return ALL raid instances
-    for (const members of Object.values(groupedRoster.value)) {
-        for (const member of members) {
-            const raids = member.main_character?.raids;
-            if (!raids || Array.isArray(raids)) continue;
-            const keys = Object.keys(raids);
-            if (keys.length === 0) continue;
-            return keys.map(name => ({
-                name,
-                bosses: (raids[name] || []).map(b => b.name),
-            }));
-        }
-    }
-    return [];
-});
+// Raid columns from backend config — always present regardless of weekly data
+const raidColumns = computed(() => props.initialData?.raid_columns ?? []);
 
 // ---------------------------------------------------------------------------
 // Management actions
@@ -303,7 +429,34 @@ const kickMember = async (member) => {
             </div>
         </div>
 
-        <!-- ── Tabs & Difficulty ────────────────────────────────────────── -->
+        <!-- ── Week Header ──────────────────────────────────────────────── -->
+        <div class="flex items-center justify-between bg-surface-container-high rounded-xl border border-white/5 px-4 py-2.5">
+            <!-- Status indicator (left) -->
+            <div class="flex items-center gap-2">
+                <template v-if="isLive">
+                    <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
+                    <span class="text-[11px] font-black uppercase tracking-widest text-green-400">Live</span>
+                </template>
+                <template v-else>
+                    <span class="material-symbols-outlined text-sm text-amber-400">history</span>
+                    <span class="text-[11px] font-black uppercase tracking-widest text-amber-400">Week {{ weekNumber(selectedWeek) }}</span>
+                </template>
+                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-primary ml-1">sync</span>
+            </div>
+            <!-- Week selector (right) -->
+            <div class="w-52">
+                <SearchableSelect
+                    :model-value="selectedWeek"
+                    @update:model-value="onWeekChange"
+                    :options="weekOptions"
+                    :use-search="false"
+                    icon="date_range"
+                    placeholder="Select week..."
+                    compact
+                />
+            </div>
+        </div>
+
         <RosterTabs
             v-model:activeTab="currentTab"
             v-model:selectedDifficulty="selectedDifficulty"

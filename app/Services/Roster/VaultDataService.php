@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Roster;
 
+use App\Helpers\WeeklyResetHelper;
+
 /**
  * Handles Great Vault data: weekly M+ runs, world (delve) runs, and raid vault slots.
  */
 final class VaultDataService
 {
+    private string $region = 'eu';
     /** Great Vault ilvl reward tables: raid/dungeon/delve => ilvl+track. */
     private readonly array $vaultIlvlTable;
 
@@ -290,22 +293,25 @@ final class VaultDataService
     }
 
     // =========================================================================
+    // REGION
+    // =========================================================================
+
+    public function setRegion(string $region): void
+    {
+        $this->region = WeeklyResetHelper::normalizeRegion($region);
+    }
+
+    // =========================================================================
     // TIME HELPERS
     // =========================================================================
 
     private function currentWowPeriodKey(): string
     {
-        $resetTimestamp = $this->weeklyResetTimestamp();
-        return gmdate('o-\WW', $resetTimestamp);
+        return WeeklyResetHelper::periodKey($this->region);
     }
 
     private function weeklyResetTimestamp(): int
     {
-        $now = time();
-        $resetTimestamp = strtotime('last wednesday 04:00 UTC', $now);
-        if ($resetTimestamp > $now) {
-            $resetTimestamp = strtotime('-7 days', $resetTimestamp);
-        }
-        return $resetTimestamp;
+        return WeeklyResetHelper::resetTimestamp($this->region);
     }
 }

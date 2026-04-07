@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services\StaticGroup;
 
 use App\Helpers\CurrencyHelper;
+use App\Helpers\WclParserHelper;
 use App\Models\StaticGroup;
+use App\Services\Analysis\WclService;
 use App\Services\Discord\DiscordMessageService;
 use App\Services\Discord\DiscordWebhookService;
 use App\Services\Raid\RaidScheduleService;
@@ -16,7 +18,8 @@ class StaticSettingsService
     public function __construct(
         protected DiscordMessageService $discordMessageService,
         protected RaidScheduleService   $raidScheduleService,
-        protected DiscordWebhookService $discordWebhookService
+        protected DiscordWebhookService $discordWebhookService,
+        protected WclService            $wclService,
     ) {}
 
     public function buildScheduleSettingsPayload(StaticGroup $static): array
@@ -71,8 +74,105 @@ class StaticSettingsService
         ], $context);
     }
 
+    /**
+     * Connect a WCL guild by parsing the URL and fetching info from WCL API.
+     *
+     * @return array{success: bool, guild: array|null, error: string|null}
+     */
+    public function connectWclGuild(StaticGroup $static, string $url): array
+    {
+        $parsed = WclParserHelper::parseGuildUrl($url);
+
+        if (!$parsed) {
+            return ['success' => false, 'guild' => null, 'error' => 'invalid_url'];
+        }
+
+        try {
+            $guildInfo = $parsed['type'] === 'id'
+                ? $this->wclService->getGuildInfoById($parsed['guild_id'])
+                : $this->wclService->getGuildInfoByName($parsed['name'], $parsed['server'], $parsed['region']);
+        } catch (\Exception $e) {
+            return ['success' => false, 'guild' => null, 'error' => 'api_error'];
+        }
+
+        if (!$guildInfo) {
+            return ['success' => false, 'guild' => null, 'error' => 'not_found'];
+        }
+
+        $static->update([
+            'wcl_guild_id' => $guildInfo['id'],
+            'wcl_realm'    => $guildInfo['server_slug'],
+            'wcl_region'   => $guildInfo['region_slug'],
+        ]);
+
+        return ['success' => true, 'guild' => $guildInfo, 'error' => null];
+    }
+
+    /**
+     * Disconnect WCL guild from static.
+     */
+    public function disconnectWclGuild(StaticGroup $static): void
+    {
+        $automation = $static->automation_settings ?? [];
+        $automation['auto_fetch_logs'] = false;
+
+        $static->update([
+            'wcl_guild_id'        => null,
+            'wcl_realm'           => null,
+            'wcl_region'          => null,
+            'automation_settings' => $automation,
+        ]);
+    }
+
+    /**
+     * Build the guild info payload for the logs settings page.
+     */
+    public function buildLogsSettingsPayload(StaticGroup $static): array
+    {
+        $guildInfo = null;
+
+        if ($static->wcl_guild_id) {
+            try {
+                $guildInfo = $this->wclService->getGuildInfoById((int) $static->wcl_guild_id);
+            } catch (\Exception) {
+                // If WCL is down, show cached data
+                $guildInfo = [
+                    'id'          => (int) $static->wcl_guild_id,
+                    'name'        => null,
+                    'server_name' => $static->wcl_realm,
+                    'server_slug' => $static->wcl_realm,
+                    'region_slug' => $static->wcl_region,
+                    'region_name' => strtoupper($static->wcl_region ?? ''),
+                ];
+            }
+        }
+
+        $automation = $static->automation_settings ?? [];
+
+        return [
+            'guildInfo'             => $guildInfo,
+            'autoFetchLogs'         => (bool) ($automation['auto_fetch_logs'] ?? false),
+            'autoFetchDelayMinutes' => (int) ($automation['auto_fetch_delay_minutes'] ?? config('tactical_logs.auto_fetch_delay_minutes')),
+        ];
+    }
+
     public function executeUpdateLogsSettings(StaticGroup $static, array $data): void
     {
+        $automationSettings = $static->automation_settings ?? [];
+
+        if (array_key_exists('auto_fetch_logs', $data)) {
+            $automationSettings['auto_fetch_logs'] = (bool) $data['auto_fetch_logs'];
+            unset($data['auto_fetch_logs']);
+        }
+
+        if (array_key_exists('auto_fetch_delay_minutes', $data)) {
+            $automationSettings['auto_fetch_delay_minutes'] = (int) ($data['auto_fetch_delay_minutes']
+                ?? config('tactical_logs.auto_fetch_delay_minutes'));
+            unset($data['auto_fetch_delay_minutes']);
+        }
+
+        $data['automation_settings'] = $automationSettings;
+
         $this->updateSettings($static, $data);
     }
 

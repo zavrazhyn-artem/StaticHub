@@ -26,9 +26,8 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $avatar_url
  * @property int|null $ilvl
  * @property float|null $mythic_rating
- * @property array|null $raw_bnet_data
- * @property array|null $raw_raiderio_data
- * @property array|null $raw_wcl_data
+ * @property array|null $character_data
+ * @property array|null $character_weekly_data
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -101,17 +100,13 @@ class Character extends Model
         'avatar_url',
         'ilvl',
         'mythic_rating',
-        'raw_bnet_data',
-        'raw_raiderio_data',
-        'raw_wcl_data',
-        'compiled_data',
+        'character_data',
+        'character_weekly_data',
     ];
 
     protected $casts = [
-        'raw_bnet_data' => 'array',
-        'raw_raiderio_data' => 'array',
-        'raw_wcl_data' => 'array',
-        'compiled_data' => 'array',
+        'character_data' => 'array',
+        'character_weekly_data' => 'array',
         'mythic_rating' => 'float',
     ];
 
@@ -168,6 +163,11 @@ class Character extends Model
     public function serviceRawData(): HasOne
     {
         return $this->hasOne(ServiceRawData::class);
+    }
+
+    public function weeklySnapshots(): HasMany
+    {
+        return $this->hasMany(CharacterWeeklySnapshot::class);
     }
 
     /**

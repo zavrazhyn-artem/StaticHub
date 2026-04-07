@@ -6,6 +6,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Season identity
+    |--------------------------------------------------------------------------
+    */
+    'season_number' => 17,
+    'first_period'  => 1052,
+
+    /*
+    | Season start date (UTC) — the first weekly reset of the season.
+    | Used to generate the full list of weeks for the roster week selector.
+    */
+    'season_start' => '2026-03-04T04:00:00Z', // EU reset, Season 17 Week 1
+
+    /*
+    |--------------------------------------------------------------------------
+    | Weekly reset schedule per region
+    |--------------------------------------------------------------------------
+    | day  = ISO day of week (1=Mon … 7=Sun)
+    | hour = UTC hour of the reset
+    */
+    'weekly_reset' => [
+        'eu' => ['day' => 3, 'hour' => 4],  // Wednesday 04:00 UTC
+        'us' => ['day' => 2, 'hour' => 15], // Tuesday  15:00 UTC
+        'kr' => ['day' => 3, 'hour' => 2],  // Wednesday 02:00 UTC
+        'tw' => ['day' => 3, 'hour' => 2],  // Wednesday 02:00 UTC
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Expansion: Midnight — Season 17 (Midnight Season 1)
     |--------------------------------------------------------------------------
     */
@@ -203,7 +231,7 @@ return [
         'Vaelgor & Ezzorak'        => ['raid_finder' => [61288], 'normal' => [61289], 'heroic' => [61290], 'mythic' => [61291]],
         'Lightblinded Vanguard'    => ['raid_finder' => [61292], 'normal' => [61293], 'heroic' => [61294], 'mythic' => [61295]],
         'Crown of the Cosmos'      => ['raid_finder' => [61296], 'normal' => [61297], 'heroic' => [61298], 'mythic' => [61299]],
-        'Chimaerus'                => ['raid_finder' => [61474], 'normal' => [61475], 'heroic' => [61476], 'mythic' => [61477]],
+        'Chimaerus the Undreamt God' => ['raid_finder' => [61474], 'normal' => [61475], 'heroic' => [61476], 'mythic' => [61477]],
         "Belo'ren, Child of Al'ar" => ['raid_finder' => [61300], 'normal' => [61301], 'heroic' => [61302], 'mythic' => [61303]],
         'Midnight Falls'           => ['raid_finder' => [61304], 'normal' => [61305], 'heroic' => [61306], 'mythic' => [61307]],
     ],
@@ -221,7 +249,7 @@ return [
         'Vaelgor & Ezzorak',
         'Lightblinded Vanguard',
         'Crown of the Cosmos',
-        'Chimaerus',
+        'Chimaerus the Undreamt God',
         "Belo'ren, Child of Al'ar",
         'Midnight Falls',
     ],

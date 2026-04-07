@@ -208,6 +208,75 @@ class WclService
     }
 
     /**
+     * Fetch guild info by WCL guild ID.
+     *
+     * @return array{id: int, name: string, server_name: string, server_slug: string, region_slug: string, region_name: string}|null
+     */
+    public function getGuildInfoById(int $guildId): ?array
+    {
+        $query = WclQueryBuilder::buildGuildInfoByIdQuery();
+
+        $data = $this->executeGraphql($query, ['guildId' => $guildId]);
+        $guild = $data['guildData']['guild'] ?? null;
+
+        return $guild ? $this->formatGuildInfo($guild) : null;
+    }
+
+    /**
+     * Fetch guild info by name, server slug, and region.
+     *
+     * @return array{id: int, name: string, server_name: string, server_slug: string, region_slug: string, region_name: string}|null
+     */
+    public function getGuildInfoByName(string $name, string $serverSlug, string $serverRegion): ?array
+    {
+        $query = WclQueryBuilder::buildGuildInfoByNameQuery();
+
+        $data = $this->executeGraphql($query, [
+            'name'         => $name,
+            'serverSlug'   => $serverSlug,
+            'serverRegion' => $serverRegion,
+        ]);
+
+        $guild = $data['guildData']['guild'] ?? null;
+
+        return $guild ? $this->formatGuildInfo($guild) : null;
+    }
+
+    private function formatGuildInfo(array $guild): array
+    {
+        return [
+            'id'          => $guild['id'],
+            'name'        => $guild['name'],
+            'server_name' => $guild['server']['name'] ?? '',
+            'server_slug' => $guild['server']['slug'] ?? '',
+            'region_slug' => $guild['server']['region']['slug'] ?? '',
+            'region_name' => $guild['server']['region']['compactName'] ?? '',
+        ];
+    }
+
+    /**
+     * Fetch recent guild reports from WCL within a time range.
+     *
+     * @param int   $guildId    WCL guild ID
+     * @param float $startTime  UNIX timestamp (ms) — range start
+     * @param float $endTime    UNIX timestamp (ms) — range end
+     * @return array             Array of reports [{code, title, startTime, endTime}, ...]
+     */
+    public function getGuildReports(int $guildId, float $startTime, float $endTime): array
+    {
+        $query = WclQueryBuilder::buildGuildReportsQuery();
+
+        $data = $this->executeGraphql($query, [
+            'guildId'   => $guildId,
+            'startTime' => $startTime,
+            'endTime'   => $endTime,
+            'limit'     => 25,
+        ]);
+
+        return $data['reportData']['reports']['data'] ?? [];
+    }
+
+    /**
      * Fetch character parses from the WCL API.
      */
     public function getCharacterParses(string $region, string $server, string $name): ?array

@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * @property int $static_id
  * @property int $amount
  * @property string $type
- * @property int $week_number
+ * @property string $period_key
  * @property string|null $description
  * @property Carbon $created_at
  * @property-read User $user
@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @method static TransactionBuilder query()
  * @method static TransactionBuilder<static>|Transaction byType(string $type)
  * @method static TransactionBuilder<static>|Transaction forStatic(int $staticId)
- * @method static TransactionBuilder<static>|Transaction inWeek(int $weekNumber)
+ * @method static TransactionBuilder<static>|Transaction inPeriod(string $periodKey)
  * @method static TransactionBuilder<static>|Transaction newModelQuery()
  * @method static TransactionBuilder<static>|Transaction newQuery()
  * @method static TransactionBuilder<static>|Transaction recent(int $limit = 10)
@@ -33,7 +33,7 @@ use Illuminate\Support\Carbon;
  * @method static TransactionBuilder<static>|Transaction whereStaticId($value)
  * @method static TransactionBuilder<static>|Transaction whereType($value)
  * @method static TransactionBuilder<static>|Transaction whereUserId($value)
- * @method static TransactionBuilder<static>|Transaction whereWeekNumber($value)
+ * @method static TransactionBuilder<static>|Transaction wherePeriodKey($value)
  * @mixin \Eloquent
  */
 class Transaction extends Model
@@ -45,14 +45,13 @@ class Transaction extends Model
         'static_id',
         'amount',
         'type',
-        'week_number',
+        'period_key',
         'description',
         'created_at',
     ];
 
     protected $casts = [
         'amount' => 'integer',
-        'week_number' => 'integer',
         'created_at' => 'datetime',
     ];
 

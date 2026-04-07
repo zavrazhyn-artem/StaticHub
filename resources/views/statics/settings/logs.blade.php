@@ -1,13 +1,14 @@
 <x-app-layout>
     <settings-logs
         static-name="{{ $static->name }}"
-        wcl-guild-id="{{ $static->wcl_guild_id ?? '' }}"
-        wcl-region="{{ $static->wcl_region ?? '' }}"
-        wcl-realm="{{ $static->wcl_realm ?? $static->server ?? '' }}"
+        :guild-info='@json($guildInfo)'
+        :auto-fetch-logs="{{ json_encode($autoFetchLogs) }}"
+        :auto-fetch-delay-minutes="{{ $autoFetchDelayMinutes }}"
         update-url="{{ route('statics.settings.logs.update', $static) }}"
+        connect-guild-url="{{ route('statics.settings.logs.connect-guild', $static) }}"
+        disconnect-guild-url="{{ route('statics.settings.logs.disconnect-guild', $static) }}"
         schedule-tab-url="{{ route('statics.settings.schedule', $static) }}"
         discord-tab-url="{{ route('statics.settings.discord', $static) }}"
         logs-tab-url="{{ route('statics.settings.logs', $static) }}"
-        success-message="{{ session('success', '') }}"
     ></settings-logs>
 </x-app-layout>

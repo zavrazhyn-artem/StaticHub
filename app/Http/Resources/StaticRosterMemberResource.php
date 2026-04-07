@@ -12,22 +12,26 @@ class StaticRosterMemberResource extends JsonResource
 {
     private int $staticId;
 
+    /** Optional snapshot weekly_data keyed by character_id, injected by the controller. */
+    private ?array $weeklyOverrides = null;
+
     public function setStaticId(int $id): static
     {
         $this->staticId = $id;
         return $this;
     }
 
+    public function setWeeklyOverrides(?array $overrides): static
+    {
+        $this->weeklyOverrides = $overrides;
+        return $this;
+    }
+
     public function toArray(Request $request): array
     {
-        // Characters are eager-loaded with their `statics` relationship scoped
-        // to this static only, so ->first() on statics gives the single pivot
-        // entry for this group. Characters not in this static have an empty
-        // statics collection and are excluded by isNotEmpty().
         $characters = $this->characters->filter(
             fn (Character $c) => $c->statics->isNotEmpty()
         );
-
 
         $mainCharacter = $characters->first(
             fn (Character $c) => $c->statics->first()?->pivot?->role === 'main'
@@ -51,21 +55,20 @@ class StaticRosterMemberResource extends JsonResource
     }
 
     /**
-     * Merges compiled_data — the flat compiler output stored on the character —
-     * with the character's identity fields.
-     * No further parsing or mapping is performed here.
-     *
-     * @return array<string, mixed>
+     * Merges character_data + character_weekly_data with identity fields.
+     * When weekly overrides are set (snapshot view), uses snapshot data instead of live weekly.
      */
     private function formatCharacter(Character $character): array
     {
+        $charData   = $character->character_data ?? [];
+        $weeklyData = $this->weeklyOverrides[$character->id] ?? $character->character_weekly_data ?? [];
+
         return array_merge(
-            $character->compiled_data ?? [],
+            $charData,
+            $weeklyData,
             [
                 'id'        => $character->id,
                 'name'      => $character->name,
-                // main_spec is set as an attribute by the controller (from CharacterStaticSpec).
-                // It overrides whatever compiled_data may have stored for this field.
                 'main_spec' => $character->getAttribute('main_spec'),
             ]
         );

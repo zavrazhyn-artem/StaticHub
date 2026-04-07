@@ -53,6 +53,63 @@ GQL;
 GQL;
     }
 
+    /**
+     * Fetch guild info by ID.
+     */
+    public static function buildGuildInfoByIdQuery(): string
+    {
+        return <<<'GQL'
+        query ($guildId: Int!) {
+          guildData {
+            guild(id: $guildId) {
+              id
+              name
+              server { name slug region { slug compactName } }
+            }
+          }
+        }
+GQL;
+    }
+
+    /**
+     * Fetch guild info by name, server slug, and region.
+     */
+    public static function buildGuildInfoByNameQuery(): string
+    {
+        return <<<'GQL'
+        query ($name: String!, $serverSlug: String!, $serverRegion: String!) {
+          guildData {
+            guild(name: $name, serverSlug: $serverSlug, serverRegion: $serverRegion) {
+              id
+              name
+              server { name slug region { slug compactName } }
+            }
+          }
+        }
+GQL;
+    }
+
+    /**
+     * Fetch recent reports for a guild within a time range.
+     */
+    public static function buildGuildReportsQuery(): string
+    {
+        return <<<'GQL'
+        query ($guildId: Int!, $startTime: Float, $endTime: Float, $limit: Int) {
+          reportData {
+            reports(guildID: $guildId, startTime: $startTime, endTime: $endTime, limit: $limit) {
+              data {
+                code
+                title
+                startTime
+                endTime
+              }
+            }
+          }
+        }
+GQL;
+    }
+
     public static function buildCharacterParsesQuery(): string
     {
         return <<<'GQL'

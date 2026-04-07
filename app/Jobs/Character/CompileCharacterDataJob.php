@@ -10,8 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Compiles a character's raw API data into a frontend-ready DTO
- * and persists it in the characters.compiled_data JSON column.
+ * Compiles a character's raw API data into frontend-ready DTOs
+ * and persists them in characters.character_data + character_weekly_data.
  *
  * Dispatched by FetchBnetRawDataJob / FetchRioRawDataJob after a successful fetch.
  * Safe to dispatch independently for a manual recompile.

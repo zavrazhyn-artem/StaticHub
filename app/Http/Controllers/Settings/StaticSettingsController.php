@@ -10,7 +10,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\StaticGroup;
 use App\Services\StaticGroup\StaticSettingsService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -38,16 +38,41 @@ class StaticSettingsController extends Controller
     {
         Gate::authorize('canAccessSettings', $static);
 
-        return view('statics.settings.logs', compact('static'));
+        $payload = $this->service->buildLogsSettingsPayload($static);
+
+        return view('statics.settings.logs', array_merge(
+            ['static' => $static],
+            $payload,
+        ));
     }
 
-    public function updateLogs(UpdateLogsRequest $request, StaticGroup $static): RedirectResponse
+    public function updateLogs(UpdateLogsRequest $request, StaticGroup $static): JsonResponse
     {
         Gate::authorize('canAccessSettings', $static);
 
         $this->service->executeUpdateLogsSettings($static, $request->validated());
 
-        return redirect()->back()->with('success', __('Warcraft Logs settings updated!'));
+        return response()->json(['success' => true]);
+    }
+
+    public function connectGuild(Request $request, StaticGroup $static): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $request->validate(['wcl_url' => 'required|string|url']);
+
+        $result = $this->service->connectWclGuild($static, $request->input('wcl_url'));
+
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    public function disconnectGuild(StaticGroup $static): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $this->service->disconnectWclGuild($static);
+
+        return response()->json(['success' => true]);
     }
 
     public function updateSchedule(UpdateScheduleRequest $request, StaticGroup $static): RedirectResponse

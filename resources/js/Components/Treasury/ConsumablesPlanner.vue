@@ -11,6 +11,7 @@ export default {
         raidDays: { type: Number, default: 3 },
         individualPotionPrice: { type: Number, default: 0 },
         individualFlaskPrice: { type: Number, default: 0 },
+        totalMembers: { type: Number, default: 0 },
         saveUrl: { type: String, required: true },
         settingsScheduleUrl: { type: String, default: '' },
         canManageTreasury: { type: Boolean, default: false },
@@ -28,7 +29,7 @@ export default {
             return this.localRecipes.reduce((sum, r) => sum + (r.cost * r.quantity * this.raidDays), 0);
         },
         guildTaxPerRaider() {
-            const numRaiders = 20;
+            const numRaiders = this.totalMembers || 20;
             return Math.ceil(this.totalCost / numRaiders);
         },
         individualCostPerRaider() {
@@ -124,7 +125,7 @@ export default {
                     <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Total Members') }}</div>
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xs">groups</span>
-                        <span>1/20</span>
+                        <span>{{ totalMembers }}/20</span>
                     </div>
                 </div>
             </div>

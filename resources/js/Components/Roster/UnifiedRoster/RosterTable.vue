@@ -29,16 +29,7 @@ const emit = defineEmits([
     'open-audit-modal'
 ]);
 
-const allRaids = computed(() => {
-    // Find the first character that actually has raid data
-    const charWithRaids = props.groupedRoster && Object.values(props.groupedRoster).flat().find(m => m.main_character?.raids !== undefined && m.main_character?.raids !== null)?.main_character;
-    if (!charWithRaids) return {};
-
-    const raidsObj = charWithRaids.raids;
-    if (Array.isArray(raidsObj)) return {}; // Failsafe if backend returned empty array instead of object
-
-    return raidsObj;
-});
+// raidColumns prop is always populated from config — no need to derive from character data
 const slots = [
     'HEAD', 'NECK', 'SHOULDER', 'BACK', 'CHEST', 'WRIST',
     'HANDS', 'WAIST', 'LEGS', 'FEET', 'FINGER_1', 'FINGER_2',
@@ -74,10 +65,10 @@ const slotLabels = {
 
                     <!-- One spanning header per raid instance -->
                     <template v-if="activeTab === 'raids'">
-                        <th v-for="(bosses, raidName) in allRaids" :key="'rh-' + raidName"
-                            :colspan="bosses.length"
+                        <th v-for="raid in raidColumns" :key="'rh-' + raid.name"
+                            :colspan="raid.bosses.length"
                             class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400">
-                            {{ raidName }}
+                            {{ raid.name }}
                         </th>
                     </template>
 
@@ -120,12 +111,12 @@ const slotLabels = {
 
                     <!-- One column per boss, horizontal label -->
                     <template v-if="activeTab === 'raids'">
-                        <template v-for="(bosses, raidName) in allRaids" :key="raidName">
-                            <th v-for="boss in bosses" :key="boss.name"
+                        <template v-for="raid in raidColumns" :key="raid.name">
+                            <th v-for="bossName in raid.bosses" :key="bossName"
                                 class="px-1 py-1 align-middle border-l border-white/[0.04] text-center min-w-[60px]"
-                                :title="boss.name">
+                                :title="bossName">
                                 <div class="mx-auto text-[9px] text-on-surface-variant font-medium normal-case whitespace-normal break-words leading-tight">
-                                    {{ boss.name }}
+                                    {{ bossName }}
                                 </div>
                             </th>
                         </template>

@@ -33,6 +33,8 @@ class StaticLogsController extends Controller
         $logs = $this->logService->getPaginatedLogs($static, $difficulties, $fromDate, $toDate);
         $logsData = $this->logService->buildLogsIndexPayload($static, $logs);
 
+        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
+
         return view('statics.logs.index', [
             'static'              => $static,
             'logs'                => $logs,
@@ -40,6 +42,7 @@ class StaticLogsController extends Controller
             'currentFromDate'     => $fromDate,
             'currentToDate'       => $toDate,
             'currentDifficulties' => $rawDiffs ?? '',
+            'cooldownState'       => $cooldownState,
         ]);
     }
 
@@ -62,6 +65,12 @@ class StaticLogsController extends Controller
      */
     public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
+        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
+
+        if ($cooldownState['on_cooldown']) {
+            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
+        }
+
         $report = $this->logAnalysisService->processManualLogSubmission(
             $request->input('wcl_url'),
             $static

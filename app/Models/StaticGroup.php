@@ -141,7 +141,7 @@ class StaticGroup extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'static_user', 'static_id', 'user_id')
-            ->withPivot(['role', 'access_role', 'roster_status'])
+            ->withPivot(['role', 'access_role', 'roster_status', 'balance', 'current_weekly_tax_covered'])
             ->withTimestamps();
     }
 

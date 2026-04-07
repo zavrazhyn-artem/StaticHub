@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services\Roster;
 
+use App\Helpers\WeeklyResetHelper;
+
 /**
  * Handles progression data: delves, coffer keys, achievements (CE/AOTC),
  * crests, quests, prey weekly, and weekly events.
  */
 final class ProgressionDataService
 {
+    private string $region = 'eu';
     /** Weekly quest ID groups. */
     private readonly array $weeklyQuestIds;
     private readonly array $weeklyEventQuestIds;
@@ -222,25 +225,25 @@ final class ProgressionDataService
     }
 
     // =========================================================================
+    // REGION
+    // =========================================================================
+
+    public function setRegion(string $region): void
+    {
+        $this->region = WeeklyResetHelper::normalizeRegion($region);
+    }
+
+    // =========================================================================
     // TIME HELPERS
     // =========================================================================
 
     public function currentWowPeriodKey(): string
     {
-        $resetTimestamp = $this->weeklyResetTimestamp();
-        return gmdate('o-\WW', $resetTimestamp);
+        return WeeklyResetHelper::periodKey($this->region);
     }
 
-    /**
-     * Returns the Unix timestamp of the most recent EU weekly reset (Wednesday 04:00 UTC).
-     */
     public function weeklyResetTimestamp(): int
     {
-        $now = time();
-        $resetTimestamp = strtotime('last wednesday 04:00 UTC', $now);
-        if ($resetTimestamp > $now) {
-            $resetTimestamp = strtotime('-7 days', $resetTimestamp);
-        }
-        return $resetTimestamp;
+        return WeeklyResetHelper::resetTimestamp($this->region);
     }
 }

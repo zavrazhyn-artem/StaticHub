@@ -16,12 +16,11 @@
 
         <div class="flex items-center gap-4">
             <div class="w-64">
-                <SearchableSelect
+                <SelectUserWithMain
                     v-model="selectedMember"
-                    :options="members"
+                    :members="members"
                     :placeholder="__('Filter by member...')"
-                    :search-placeholder="__('Search members...')"
-                    icon="person_search"
+                    :search-placeholder="__('Search...')"
                     @update:model-value="applyFilter"
                 />
             </div>
@@ -94,7 +93,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
-import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
+import SelectUserWithMain from '@/Components/UI/SelectUserWithMain.vue';
 import TransactionCommentModal from './TransactionCommentModal.vue';
 
 const { __ } = useTranslation();

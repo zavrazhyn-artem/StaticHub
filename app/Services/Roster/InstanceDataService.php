@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Roster;
 
+use App\Helpers\WeeklyResetHelper;
+
 /**
  * Handles raid instance data, mythic+ rating, and dungeon run tracking.
  */
@@ -15,10 +17,25 @@ final class InstanceDataService
     /** Expansion dungeon stat IDs (heroic/mythic). */
     private readonly array $expansionDungeons;
 
+    /** Boss name => achievement stat IDs per difficulty. */
+    private readonly array $raidBossAchievementIds;
+
+    private string $region = 'eu';
+
     public function __construct()
     {
-        $this->currentRaidInstances = config('wow_season.current_raid_instances', []);
-        $this->expansionDungeons    = config('wow_season.expansion_dungeons', []);
+        $this->currentRaidInstances  = config('wow_season.current_raid_instances', []);
+        $this->expansionDungeons     = config('wow_season.expansion_dungeons', []);
+        $this->raidBossAchievementIds = config('wow_season.raid_boss_achievement_ids', []);
+    }
+
+    // =========================================================================
+    // REGION
+    // =========================================================================
+
+    public function setRegion(string $region): void
+    {
+        $this->region = WeeklyResetHelper::normalizeRegion($region);
     }
 
     // =========================================================================
@@ -60,7 +77,54 @@ final class InstanceDataService
     }
 
     // =========================================================================
-    // RAIDS
+    // RAIDS — WEEKLY KILLS (via achievement statistics timestamps)
+    // =========================================================================
+
+    /**
+     * Determine which bosses were killed THIS week, per difficulty.
+     * Uses achievement_statistics last_updated_timestamp > weekly reset timestamp.
+     *
+     * Returns: { instance_name: [ { name, LFR: bool, N: bool, H: bool, M: bool } ] }
+     */
+    public function resolveWeeklyRaidKills(array $achStatsIndex): ?array
+    {
+        if ($achStatsIndex === [] || $this->raidBossAchievementIds === []) {
+            return null;
+        }
+
+        $resetTs     = WeeklyResetHelper::resetTimestamp($this->region);
+        $diffMap     = ['raid_finder' => 'LFR', 'normal' => 'N', 'heroic' => 'H', 'mythic' => 'M'];
+        $result      = [];
+
+        foreach ($this->currentRaidInstances as $instanceName => $configBosses) {
+            $bosses = [];
+
+            foreach ($configBosses as $bossName) {
+                $bossStatIds = $this->raidBossAchievementIds[$bossName] ?? [];
+                $kills       = ['name' => $bossName, 'LFR' => false, 'N' => false, 'H' => false, 'M' => false];
+
+                foreach ($diffMap as $diffKey => $label) {
+                    $statIds = $bossStatIds[$diffKey] ?? [];
+                    foreach ($statIds as $statId) {
+                        $stat = $achStatsIndex[$statId] ?? null;
+                        if ($stat && (($stat['last_updated_timestamp'] ?? 0) / 1000) > $resetTs) {
+                            $kills[$label] = true;
+                            break;
+                        }
+                    }
+                }
+
+                $bosses[] = $kills;
+            }
+
+            $result[$instanceName] = $bosses;
+        }
+
+        return $result;
+    }
+
+    // =========================================================================
+    // RAIDS — CUMULATIVE (kept for reference, no longer used in compiled output)
     // =========================================================================
 
     public function resolveRaids(array $raid): ?array

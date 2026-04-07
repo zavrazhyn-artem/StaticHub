@@ -93,8 +93,11 @@
                             <span class="text-sm font-medium text-white">{{ status.name }}</span>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-on-surface-variant'">
-                                {{ formatGold(status.total_paid) }} / {{ formatGold(initialTargetTax) }}
+                            <span class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-error'">
+                                {{ status.is_paid ? __('Covered') : __('Not Covered') }}
+                            </span>
+                            <div class="text-[9px] text-on-surface-variant font-medium">
+                                {{ __('Balance:') }} {{ formatGold(status.balance) }}g
                             </div>
                         </div>
                     </div>
