@@ -16,10 +16,10 @@ git pull
 echo "📦 2. Збираємо імейджі..."
 # Docker розумний: якщо package.json чи composer.json не змінились,
 # він використає кеш і проскочить цей крок за 2 секунди.
-dcp build
+docker compose -f docker-compose.prod.yml build
 
 echo "🛑 3. Оновлюємо волюмі з залежностями..."
-dcp down
+docker compose -f docker-compose.prod.yml down
 # Видаляємо старі волюмі vendor та build.
 # При наступному up Docker автоматично заллє сюди свіжі файли з імейджа.
 docker volume rm ${PROJECT_NAME}_vendor ${PROJECT_NAME}_node_build 2>/dev/null || true
