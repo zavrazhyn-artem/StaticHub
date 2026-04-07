@@ -18,7 +18,7 @@ class RaidScheduleService
      * @param int $weeksAhead
      * @return void
      */
-    public function executeScheduleGeneration(StaticGroup $static, int $weeksAhead = 4): void
+    public function executeScheduleGeneration(StaticGroup $static): void
     {
         $raidDays = $static->getRaidDaysArray();
 
@@ -27,13 +27,14 @@ class RaidScheduleService
         }
 
         $timezone = $static->timezone ?? 'UTC';
+        $daysAhead = config('raid.schedule_days_ahead', 30);
 
         $events = $this->calculateEventTimestamps(
             $raidDays,
             $static->raid_start_time,
             $static->raid_end_time,
             $timezone,
-            $weeksAhead
+            $daysAhead
         );
 
         foreach ($events as $eventData) {
@@ -120,14 +121,17 @@ class RaidScheduleService
 
     /**
      * Calculate event timestamps based on raid days and start/end times.
+     * Only generates events in the future within the given days-ahead horizon.
      */
-    public function calculateEventTimestamps(array $raidDays, string $startTime, ?string $endTime, string $timezone, int $weeksAhead): array
+    public function calculateEventTimestamps(array $raidDays, string $startTime, ?string $endTime, string $timezone, int $daysAhead): array
     {
         $dayMap = [
             'mon' => Carbon::MONDAY, 'tue' => Carbon::TUESDAY, 'wed' => Carbon::WEDNESDAY,
             'thu' => Carbon::THURSDAY, 'fri' => Carbon::FRIDAY, 'sat' => Carbon::SATURDAY, 'sun' => Carbon::SUNDAY,
         ];
 
+        $now = Carbon::now($timezone);
+        $horizon = Carbon::today($timezone)->addDays($daysAhead);
         $timestamps = [];
 
         foreach ($raidDays as $day) {
@@ -137,24 +141,29 @@ class RaidScheduleService
             }
 
             $targetDay = $dayMap[$dayLower];
+            $date = Carbon::today($timezone);
+            $date = $date->isDayOfWeek($targetDay) ? $date->copy() : $date->copy()->next($targetDay);
 
-            for ($i = 0; $i < $weeksAhead; $i++) {
-                $currentDate = Carbon::today($timezone)->addWeeks($i);
-                $date = $currentDate->isDayOfWeek($targetDay) ? $currentDate : $currentDate->next($targetDay);
+            while ($date->lte($horizon)) {
+                $start = Carbon::parse($date->format('Y-m-d') . ' ' . $startTime, $timezone);
 
-                $start = Carbon::parse($date->format('Y-m-d') . ' ' . $startTime, $timezone)->setTimezone('UTC');
-                $end = null;
+                // Skip events that are in the past
+                if ($start->gt($now)) {
+                    $startUtc = $start->copy()->setTimezone('UTC');
+                    $endUtc = null;
 
-                if ($endTime) {
-                    $end = Carbon::parse($date->format('Y-m-d') . ' ' . $endTime, $timezone);
-                    $startInTimezone = $start->copy()->setTimezone($timezone);
-                    if ($end->lessThan($startInTimezone)) {
-                        $end->addDay();
+                    if ($endTime) {
+                        $end = Carbon::parse($date->format('Y-m-d') . ' ' . $endTime, $timezone);
+                        if ($end->lessThan($start)) {
+                            $end->addDay();
+                        }
+                        $endUtc = $end->setTimezone('UTC');
                     }
-                    $end->setTimezone('UTC');
+
+                    $timestamps[] = ['start' => $startUtc, 'end' => $endUtc];
                 }
 
-                $timestamps[] = ['start' => $start, 'end' => $end];
+                $date->addWeek();
             }
         }
 

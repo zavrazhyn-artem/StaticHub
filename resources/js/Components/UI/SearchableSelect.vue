@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
     modelValue:        { type: String, default: '' },
@@ -22,6 +22,8 @@ const emit = defineEmits(['update:modelValue']);
 const search      = ref('');
 const open        = ref(false);
 const searchRef   = ref(null);
+const triggerRef  = ref(null);
+const dropdownStyle = ref({});
 
 const selectedLabel = computed(() => {
     const found = props.options.find(o => o.id === props.modelValue);
@@ -34,12 +36,26 @@ const filtered = computed(() => {
     return props.options.filter(o => o.name.toLowerCase().includes(q));
 });
 
+function updateDropdownPosition() {
+    if (!triggerRef.value) return;
+    const rect = triggerRef.value.getBoundingClientRect();
+    dropdownStyle.value = {
+        position: 'fixed',
+        top: `${rect.bottom + 8}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+    };
+}
+
 const toggle = () => {
     if (props.disabled || props.loading) return;
     open.value = !open.value;
-    if (open.value && props.useSearch) {
-        search.value = '';
-        nextTick(() => searchRef.value?.focus());
+    if (open.value) {
+        updateDropdownPosition();
+        if (props.useSearch) {
+            search.value = '';
+            nextTick(() => searchRef.value?.focus());
+        }
     }
 };
 
@@ -55,18 +71,24 @@ const clear = (e) => {
 };
 
 const close = () => { open.value = false; };
+
+function onScroll() {
+    if (open.value) updateDropdownPosition();
+}
+
+window.addEventListener('scroll', onScroll, true);
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll, true));
+
 defineExpose({ close });
 </script>
 
 <template>
     <div class="relative">
-        <!-- Backdrop -->
-        <div v-if="open" class="fixed inset-0 z-40" @click="close" />
-
         <!-- Trigger -->
         <div
+            ref="triggerRef"
             @click="toggle"
-            class="relative z-50 w-full bg-surface-container-highest border border-white/5 font-headline font-bold tracking-widest transition-all flex items-center justify-between"
+            class="relative w-full bg-surface-container-highest border border-white/5 font-headline font-bold tracking-widest transition-all flex items-center justify-between"
             :class="[
                 compact ? 'rounded pl-6 pr-5 py-1 text-[9px]' : 'rounded-lg pl-10 pr-8 py-3 text-sm',
                 loading || disabled
@@ -110,59 +132,65 @@ defineExpose({ close });
             </span>
         </div>
 
-        <!-- Dropdown -->
-        <Transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
-        >
-            <div
-                v-if="open"
-                class="absolute z-[60] left-0 right-0 mt-2 bg-surface-container-high border border-white/10 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl"
-            >
-                <!-- Search -->
-                <div v-if="useSearch" class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">search</span>
-                        <input
-                            ref="searchRef"
-                            v-model="search"
-                            type="text"
-                            :placeholder="searchPlaceholder"
-                            class="w-full bg-surface-container/50 border border-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:ring-1 outline-none transition-all"
-                            :style="`--tw-ring-color: ${accentColor}88`"
-                            @click.stop
-                        />
-                    </div>
-                </div>
-
-                <!-- Options -->
-                <div class="max-h-60 overflow-y-auto custom-scrollbar p-1">
-                    <div v-if="filtered.length === 0" class="py-4 text-center text-xs text-on-surface-variant">
-                        {{ emptyText }}
-                    </div>
-                    <button
-                        v-for="option in filtered"
-                        :key="option.id"
-                        type="button"
-                        class="w-full text-left px-3 py-2 rounded-md text-xs transition-colors flex items-center justify-between gap-2"
-                        :class="modelValue === option.id
-                            ? 'font-bold'
-                            : 'text-on-surface-variant hover:bg-white/5 hover:text-white'"
-                        :style="modelValue === option.id ? `background: ${accentColor}22; color: ${accentColor}` : ''"
-                        @click="select(option)"
-                    >
-                        <span class="truncate">{{ prefix }}{{ option.name }}</span>
-                        <span v-if="modelValue === option.id" class="material-symbols-outlined text-[14px] shrink-0">check</span>
-                    </button>
-                </div>
-            </div>
-        </Transition>
-
         <input v-if="inputName" type="hidden" :name="inputName" :value="modelValue">
+
+        <!-- Teleported dropdown — escapes any stacking context -->
+        <Teleport to="body">
+            <!-- Backdrop -->
+            <div v-if="open" class="fixed inset-0 z-[9998]" @click="close" />
+
+            <Transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="opacity-0 scale-95"
+                enter-to-class="opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="opacity-100 scale-100"
+                leave-to-class="opacity-0 scale-95"
+            >
+                <div
+                    v-if="open"
+                    class="z-[9999] bg-surface-container-high border border-white/10 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl"
+                    :style="dropdownStyle"
+                >
+                    <!-- Search -->
+                    <div v-if="useSearch" class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">search</span>
+                            <input
+                                ref="searchRef"
+                                v-model="search"
+                                type="text"
+                                :placeholder="searchPlaceholder"
+                                class="w-full bg-surface-container/50 border border-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:ring-1 outline-none transition-all"
+                                :style="`--tw-ring-color: ${accentColor}88`"
+                                @click.stop
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar p-1">
+                        <div v-if="filtered.length === 0" class="py-4 text-center text-xs text-on-surface-variant">
+                            {{ emptyText }}
+                        </div>
+                        <button
+                            v-for="option in filtered"
+                            :key="option.id"
+                            type="button"
+                            class="w-full text-left px-3 py-2 rounded-md text-xs transition-colors flex items-center justify-between gap-2"
+                            :class="modelValue === option.id
+                                ? 'font-bold'
+                                : 'text-on-surface-variant hover:bg-white/5 hover:text-white'"
+                            :style="modelValue === option.id ? `background: ${accentColor}22; color: ${accentColor}` : ''"
+                            @click="select(option)"
+                        >
+                            <span class="truncate">{{ prefix }}{{ option.name }}</span>
+                            <span v-if="modelValue === option.id" class="material-symbols-outlined text-[14px] shrink-0">check</span>
+                        </button>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
     </div>
 </template>
 

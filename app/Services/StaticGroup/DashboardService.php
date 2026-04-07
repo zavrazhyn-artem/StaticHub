@@ -4,6 +4,7 @@ namespace App\Services\StaticGroup;
 
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
+use App\Services\Roster\InstanceDataService;
 
 use App\Enums\StaticGroup\SyncType;
 use App\Helpers\SyncIntervalHelper;
@@ -14,44 +15,27 @@ use App\Helpers\CurrencyHelper;
 class DashboardService
 {
     public function __construct(
-        protected RosterService     $rosterService,
-        protected ConsumableService $consumableService,
-        protected TreasuryService   $treasuryService
+        protected RosterService       $rosterService,
+        protected ConsumableService   $consumableService,
+        protected TreasuryService     $treasuryService,
+        protected InstanceDataService $instanceDataService
     ) {}
 
     /**
      * Get all data for the dashboard.
-     *
-     * @param StaticGroup $static
-     * @return array
      */
     public function getDashboardData(StaticGroup $static): array
     {
-        // 1. Next Raid
-        $nextRaid = Event::query()->nextRaid($static->id);
-
-        // 2. Roster Summary
-        $roleCounts = $this->rosterService->getRoleCounts($static->id);
-
-        // 3. Consumables
-        $consumables = $this->consumableService->buildConsumablesPayload($static);
-
-        // 4. Weekly Schedule (Next 3 events)
+        $nextRaid       = Event::query()->nextRaid($static->id);
+        $roleCounts     = $this->rosterService->getRoleCounts($static->id);
+        $consumables    = $this->consumableService->buildConsumablesPayload($static);
         $weeklySchedule = Event::query()->weeklySchedule($static->id, 3);
 
-        // 5. Treasury Data
-        $treasuryData = $this->treasuryService->buildTreasuryIndexPayload($static);
-        $reserves = $treasuryData['reserves'];
-        $weeklyCost = $treasuryData['weeklyCost'];
-        $autonomy = $treasuryData['autonomy'];
-        $targetTax = $treasuryData['targetTax'];
-        $weeklyStatus = $treasuryData['weeklyStatus'];
-        $taxStatus = $treasuryData['taxStatus'];
-        $taxDescription = $treasuryData['taxDescription'];
-        $taxClass = $treasuryData['taxClass'];
+        $treasuryData  = $this->treasuryService->buildTreasuryIndexPayload($static);
+        $reserves      = $treasuryData['reserves'];
+        $autonomy      = $treasuryData['autonomy'];
+        $weeklyStatus  = $treasuryData['weeklyStatus'];
 
-        // 6. Sync Data — includes per-service interval so the widget can render
-        //    an accurate countdown without knowing the plan tier on the frontend.
         $tier = $static->plan_tier ?? 'free';
         $syncData = [
             'bnet' => [
@@ -68,6 +52,8 @@ class DashboardService
             ],
         ];
 
+        $raidProgression = $this->getStaticRaidProgression($static);
+
         return array_merge(
             compact(
                 'static',
@@ -76,16 +62,81 @@ class DashboardService
                 'weeklySchedule',
                 'reserves',
                 'autonomy',
-                'weeklyCost',
-                'targetTax',
                 'weeklyStatus',
-                'taxStatus',
-                'taxDescription',
-                'taxClass',
-                'syncData'
+                'syncData',
+                'raidProgression'
             ),
             $consumables
         );
+    }
+
+    /**
+     * Aggregate cumulative raid boss kills across the static's roster.
+     * A boss counts as killed at a difficulty if >= 60% of the roster has killed it.
+     */
+    public function getStaticRaidProgression(StaticGroup $static): array
+    {
+        $characters = $static->characters()->with('serviceRawData')->get();
+        $rosterSize = $characters->count();
+
+        if ($rosterSize === 0) {
+            return [];
+        }
+
+        $threshold   = (int) ceil($rosterSize * 0.6);
+        $difficulties = ['LFR', 'N', 'H', 'M'];
+        $counters    = []; // [instance][bossName][difficulty] => kill count
+
+        $this->instanceDataService->setRegion($static->region ?? 'eu');
+
+        foreach ($characters as $character) {
+            $raidData = $character->serviceRawData?->bnet_raid ?? [];
+            if ($raidData === []) {
+                continue;
+            }
+
+            $charProgression = $this->instanceDataService->resolveRaids($raidData);
+            if ($charProgression === null) {
+                continue;
+            }
+
+            foreach ($charProgression as $instance => $bosses) {
+                foreach ($bosses as $boss) {
+                    foreach ($difficulties as $diff) {
+                        if ($boss[$diff] ?? false) {
+                            $counters[$instance][$boss['name']][$diff]
+                                = ($counters[$instance][$boss['name']][$diff] ?? 0) + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        $result = [];
+        $instances = config('wow_season.current_raid_instances', []);
+
+        foreach ($instances as $instanceName => $configBosses) {
+            $bosses = [];
+            foreach ($configBosses as $bossName) {
+                $best = null;
+                foreach ($difficulties as $diff) {
+                    $count = $counters[$instanceName][$bossName][$diff] ?? 0;
+                    if ($count >= $threshold) {
+                        $best = $diff;
+                    }
+                }
+                $bosses[] = [
+                    'name'       => $bossName,
+                    'difficulty' => $best,
+                ];
+            }
+            $result[] = [
+                'instance' => $instanceName,
+                'bosses'   => $bosses,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -109,22 +160,19 @@ class DashboardService
                 'time'          => $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('H:i'),
                 'discordPosted' => (bool) $nextRaid->discord_message_id,
             ] : null,
-            'roleCounts'     => $data['roleCounts'],
-            'taxStatus'      => $data['taxStatus'],
-            'taxDescription' => $data['taxDescription'],
-            'targetTax'      => CurrencyHelper::formatGold($data['targetTax'], false),
             'weeklyStatus'   => $data['weeklyStatus'] ?? [],
             'paidCount'      => collect($data['weeklyStatus'] ?? [])->where('is_paid', true)->count(),
             'weekRange'      => now()->startOfWeek()->format('M d') . ' - ' . now()->endOfWeek()->format('M d'),
             'reserves'       => CurrencyHelper::formatGold($data['reserves']),
             'autonomy'       => $data['autonomy'],
-            'weeklyCost'     => $data['weeklyCost'],
             'raidDays'       => count($static->raid_days ?? ['wed', 'thu', 'sun']),
             'recipes'        => $recipes->map(fn($r) => [
                 'icon'     => $r->display_icon_url,
                 'name'     => $r->name,
                 'quantity' => $r->quantity ?? $r->default_quantity,
             ])->values()->toArray(),
+            'roleCounts'      => $data['roleCounts'],
+            'raidProgression' => $data['raidProgression'],
             'weeklySchedule' => $weeklySchedule->map(fn($e) => [
                 'id'        => $e->id,
                 'month'     => $e->start_time->setTimezone($static->timezone)->format('M'),

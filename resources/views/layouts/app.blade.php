@@ -300,7 +300,7 @@
 
 <!-- Main Content Canvas -->
 <main class="lg:ml-64 pt-24 px-8 min-h-screen" id="app">
-    <div class="max-w-7xl mx-auto space-y-12">
+    <div class="max-w-7xl mx-auto">
         {{ $slot }}
     </div>
 </main>

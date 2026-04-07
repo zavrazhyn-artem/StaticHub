@@ -75,17 +75,17 @@ class StaticSettingsController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function updateSchedule(UpdateScheduleRequest $request, StaticGroup $static): RedirectResponse
+    public function updateSchedule(UpdateScheduleRequest $request, StaticGroup $static): JsonResponse
     {
         Gate::authorize('canAccessSettings', $static);
 
         $this->service->executeUpdateScheduleSettings(
             $static,
             $request->validated(),
-            $request->has('automation_settings.post_next_after_raid')
+            $request->boolean('automation_settings.post_next_after_raid')
         );
 
-        return redirect()->back()->with('success', __('Raid schedule updated and events generated!'));
+        return response()->json(['success' => true]);
     }
 
     public function updateDiscord(UpdateDiscordRequest $request, StaticGroup $static): JsonResponse

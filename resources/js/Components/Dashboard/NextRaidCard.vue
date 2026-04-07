@@ -16,11 +16,11 @@
 
             <div v-if="nextRaid" class="flex items-center gap-6">
                 <div class="text-center">
-                    <div class="text-3xl font-black text-white">
-                        <span>{{ days }}</span>{{ __('day_short') }}
-                        <span>{{ hours }}</span>{{ __('hour_short') }}
-                        <span>{{ mins }}</span>{{ __('minute_short') }}
-                        <span>{{ secs }}</span>{{ __('second_short') }}
+                    <div class="text-3xl font-black text-white tabular-nums">
+                        <span class="inline-block min-w-[1.5ch] text-right">{{ days }}</span>{{ __('day_short') }}
+                        <span class="inline-block min-w-[2ch] text-right">{{ padTwo(hours) }}</span>{{ __('hour_short') }}
+                        <span class="inline-block min-w-[2ch] text-right">{{ padTwo(mins) }}</span>{{ __('minute_short') }}
+                        <span class="inline-block min-w-[2ch] text-right">{{ padTwo(secs) }}</span>{{ __('second_short') }}
                     </div>
                     <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{{ __('Countdown to Pull') }}</div>
                 </div>
@@ -53,6 +53,10 @@ const mins = ref(0)
 const secs = ref(0)
 
 let interval = null
+
+function padTwo(n) {
+    return String(n).padStart(2, '0')
+}
 
 function calculate() {
     if (!props.nextRaid) return

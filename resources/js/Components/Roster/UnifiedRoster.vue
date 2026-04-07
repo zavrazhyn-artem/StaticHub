@@ -495,37 +495,6 @@ const kickMember = async (member) => {
                 @update-roster-status="updateRosterStatus"
                 @kick-member="kickMember"
             />
-
-            <!-- ── Unassigned / No Character ─────────────────────────── -->
-            <div v-if="groupedRoster.unknown.length > 0" class="space-y-3 pt-6 border-t border-white/5">
-                <div class="flex items-center gap-2 border-b border-white/5 pb-2">
-                    <span class="material-symbols-outlined text-sm text-gray-500">help</span>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">
-                        {{ __('No Character Linked') }} ({{ groupedRoster.unknown.length }})
-                    </h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="member in groupedRoster.unknown" :key="member.id"
-                         class="bg-surface-container-high/40 rounded-xl border border-white/5 p-3 flex items-center justify-between group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-gray-600">person</span>
-                            </div>
-                            <div>
-                                <div class="font-bold text-white text-sm tracking-tight">{{ member.name }}</div>
-                                <div class="text-[9px] text-on-surface-variant font-black uppercase tracking-widest">{{ __('No Character Linked') }}</div>
-                            </div>
-                        </div>
-                        <div v-if="canManageStatus" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button @click="kickMember(member)"
-                                    class="text-error hover:text-white text-[10px] font-black uppercase tracking-widest bg-error/10 hover:bg-error px-2 py-1 rounded transition-colors">
-                                {{ __('Kick') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <!-- ── Audit Issues Modal ───────────────────────────────────────── -->

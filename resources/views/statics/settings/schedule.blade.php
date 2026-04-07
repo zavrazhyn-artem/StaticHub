@@ -5,6 +5,5 @@
         schedule-tab-url="{{ route('statics.settings.schedule', $static) }}"
         discord-tab-url="{{ route('statics.settings.discord', $static) }}"
         logs-tab-url="{{ route('statics.settings.logs', $static) }}"
-        success-message="{{ session('success', '') }}"
     ></settings-schedule>
 </x-app-layout>
