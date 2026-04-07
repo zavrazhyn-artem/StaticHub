@@ -39,9 +39,6 @@ x-app-defaults: &app-defaults
     # Docker seeds these named volumes from the image on first start.
     - vendor:/var/www/html/vendor
     - node_build:/var/www/html/public/build
-    # Writable runtime dirs
-    - app_storage:/var/www/html/storage
-    - app_bootstrap_cache:/var/www/html/bootstrap/cache
     # Local PHP overrides (display_errors, opcache timestamps)
     - ./docker/local/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
 
@@ -66,7 +63,6 @@ services:
       - ./public:/var/www/html/public:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - node_build:/var/www/html/public/build:ro
-      - app_storage:/var/www/html/storage:ro
 
   # ---------------------------------------------------------------------------
   # App – PHP-FPM (same Dockerfile target as production)
@@ -161,8 +157,6 @@ networks:
 volumes:
   mysql_data:
   redis_data:
-  app_storage:
-  app_bootstrap_cache:
   # Build artefacts – seeded from the image, isolated from the bind mount
   vendor:
   node_build:
