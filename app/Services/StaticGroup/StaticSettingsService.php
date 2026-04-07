@@ -33,9 +33,7 @@ class StaticSettingsService
 
         $scheduleData = [
             'static_name'           => $static->name,
-            'raid_days'             => is_array($static->raid_days)
-                ? $static->raid_days
-                : (json_decode($static->raid_days, true) ?? []),
+            'raid_days'             => $static->raid_days ?? [],
             'raid_start_time'       => $static->raid_start_time
                 ? Carbon::parse($static->raid_start_time)->format('H:i')
                 : '',
