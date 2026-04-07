@@ -86,6 +86,7 @@ services:
   worker:
     <<: *app-defaults
     command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
+    user: root
     healthcheck:
       test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
       interval: 30s
