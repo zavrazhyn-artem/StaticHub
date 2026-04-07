@@ -131,6 +131,7 @@ class DiscordMessageBuilder
                 . "**Combat Roster:**" . $analysisText . "\n──────────────────────────",
             'color'     => 0x00A3FF,
             'thumbnail' => ['url' => config('app.url') . '/images/logo.svg'],
+            'image'     => ['url' => config('app.url') . '/images/spacer-365.png'],
             'fields'    => $fields,
             'timestamp' => now()->toIso8601String(),
             'footer'    => [
@@ -186,8 +187,16 @@ class DiscordMessageBuilder
                         [
                             'type'      => 2,
                             'style'     => 2,
-                            'label'     => '👤 Change Character',
-                            'custom_id' => "rsvp_switch_{$event->id}",
+                            'label'     => 'Comment',
+                            'custom_id' => "rsvp_comment_{$event->id}",
+                            'emoji'     => ['name' => '💬'],
+                        ],
+                        [
+                            'type'      => 2,
+                            'style'     => 2,
+                            'label'     => 'Refresh',
+                            'custom_id' => "rsvp_refresh_{$event->id}",
+                            'emoji'     => ['name' => '🔄'],
                         ],
                     ],
                 ],
@@ -203,9 +212,8 @@ class DiscordMessageBuilder
                         [
                             'type'      => 2,
                             'style'     => 2,
-                            'label'     => 'Comment',
-                            'custom_id' => "rsvp_comment_{$event->id}",
-                            'emoji'     => ['name' => '💬'],
+                            'label'     => '👤 Change Character',
+                            'custom_id' => "rsvp_switch_{$event->id}",
                         ],
                     ],
                 ],

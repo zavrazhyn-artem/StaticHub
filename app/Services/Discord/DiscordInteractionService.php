@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Discord;
 
 use App\Jobs\Discord\ProcessRsvpInteractionJob;
+use App\Jobs\Discord\RefreshRaidMessageJob;
 use App\Jobs\Discord\SwapRsvpCharacterJob;
 use App\Jobs\Discord\SwapRsvpSpecJob;
 
@@ -93,6 +94,10 @@ class DiscordInteractionService
 
         if (str_starts_with($customId, 'rsvp_confirm_spec_')) {
             return $this->processConfirmSpecAction($customId, $payload, $user);
+        }
+
+        if (str_starts_with($customId, 'rsvp_refresh_')) {
+            return $this->processRefreshAction($customId);
         }
 
         if (str_starts_with($customId, 'rsvp_comment_')) {
@@ -317,6 +322,31 @@ class DiscordInteractionService
                 'content' => '✅ Specialization updated for this raid! (Updating roster...)',
                 'components' => [],
             ],
+        ];
+    }
+
+    /**
+     * Task: Process the "Refresh" button click — re-renders the raid message.
+     */
+    private function processRefreshAction(string $customId): array
+    {
+        $eventId = (int) str_replace('rsvp_refresh_', '', $customId);
+        $event = Event::find($eventId);
+
+        if (!$event) {
+            return [
+                'type' => DiscordConstants::RESPONSE_CHANNEL_MESSAGE,
+                'data' => [
+                    'content' => 'Raid event not found.',
+                    'flags' => DiscordConstants::FLAG_EPHEMERAL,
+                ],
+            ];
+        }
+
+        RefreshRaidMessageJob::dispatch($event->id);
+
+        return [
+            'type' => DiscordConstants::RESPONSE_DEFERRED_UPDATE_MESSAGE,
         ];
     }
 

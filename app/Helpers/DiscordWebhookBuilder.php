@@ -8,6 +8,10 @@ use App\Models\StaticGroup;
 
 class DiscordWebhookBuilder
 {
+    private static function spacerImageUrl(): string
+    {
+        return config('app.url') . '/images/spacer.png';
+    }
     /**
      * Build the payload for a sync report.
      */
@@ -34,6 +38,7 @@ class DiscordWebhookBuilder
                             'inline' => true
                         ]
                     ],
+                    'image' => ['url' => self::spacerImageUrl()],
                     'footer' => [
                         'text' => 'Blast Your Raid • blastr.pro',
                     ],
@@ -55,6 +60,7 @@ class DiscordWebhookBuilder
                     'description' => "Analysis for **{$reportTitle}** has been completed.",
                     'color' => 5763719, // Green
                     'fields' => [],
+                    'image' => ['url' => self::spacerImageUrl()],
                     'footer' => [
                         'text' => 'Blast Your Raid • blastr.pro',
                     ],
@@ -88,6 +94,7 @@ class DiscordWebhookBuilder
                     'title' => '⚠️ No WCL Log Found',
                     'description' => "No Warcraft Logs report was found for the raid on **{$raidDate}**. Please upload a log manually for AI analysis.",
                     'color' => 15105570, // Orange / warning
+                    'image' => ['url' => self::spacerImageUrl()],
                     'footer' => [
                         'text' => 'Blast Your Raid • blastr.pro',
                     ],
@@ -121,6 +128,7 @@ class DiscordWebhookBuilder
                     'title' => '🧪 BlastR: Webhook Test',
                     'description' => 'This is a test message to confirm your Discord Webhook integration is working correctly.',
                     'color' => 3447003,
+                    'image' => ['url' => self::spacerImageUrl()],
                     'footer' => [
                         'text' => 'Blast Your Raid • blastr.pro',
                     ],
