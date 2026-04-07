@@ -196,7 +196,8 @@ const emit = defineEmits([
                 </td>
                 <!-- Kick -->
                 <td v-if="canKick" class="w-[60px] h-[86px] border-l border-white/5 text-center">
-                    <button @click="emit('kick-member', member)"
+                    <button v-if="member.access_role !== 'leader'"
+                            @click="emit('kick-member', member)"
                             class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-error/10 hover:bg-error text-error hover:text-white transition-all"
                             :title="__('Remove from static')">
                         <span class="material-symbols-outlined text-base leading-none">close</span>

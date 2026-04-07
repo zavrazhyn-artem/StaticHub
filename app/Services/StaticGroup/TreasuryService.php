@@ -9,6 +9,7 @@ use App\Models\StaticGroup;
 use App\Models\Transaction;
 use App\Services\StaticGroup\ConsumableService;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -25,7 +26,7 @@ class TreasuryService
         $fixedTax = (int) ($static->weekly_tax_per_player ?? 0);
 
         $reserves = $this->fetchTotalReserves($static);
-        $recentTransactions = $this->fetchRecentTransactions($static);
+        $recentTransactions = $this->fetchRecentTransactions($static, 5);
         $weeklyStatus = $this->fetchWeeklyTaxStatus($static, $fixedTax);
 
         $autonomy = CurrencyHelper::calculateAutonomy($reserves, $weeklyCost);
@@ -139,6 +140,37 @@ class TreasuryService
     public function fetchRecentTransactions(StaticGroup $static, int $limit = 10): Collection
     {
         return $this->getRecentTransactions($static->id, $limit);
+    }
+
+    public function getPaginatedTransactions(int $staticId, ?int $userId = null, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = Transaction::query()
+            ->forStatic($staticId)
+            ->with('user')
+            ->latestFirst();
+
+        if ($userId) {
+            $query->forUser($userId);
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function buildTransactionHistoryPayload(StaticGroup $static, ?int $userId = null): array
+    {
+        $transactions = $this->getPaginatedTransactions($static->id, $userId);
+
+        $members = $static->members->map(fn ($user) => [
+            'id' => (string) $user->id,
+            'name' => $user->name,
+        ])->values();
+
+        return [
+            'static' => $static,
+            'transactions' => $transactions,
+            'members' => $members,
+            'selectedUserId' => $userId,
+        ];
     }
 
     /**

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import GlassModal from './GlassModal.vue';
 
 const { __ } = useTranslation();
 
@@ -16,6 +17,8 @@ const props = defineProps({
     default: 1000,
   },
 });
+
+const showModal = ref(false);
 
 const services = [
   { id: 'bnet', name: 'Blizzard',      icon: 'shield'      },
@@ -84,8 +87,24 @@ const getNextRefresh = (id) => {
   const minutes      = Math.floor(totalSeconds / 60);
   const seconds      = totalSeconds % 60;
 
-  if (minutes > 0) return `⟳ ${minutes}${__('minute_short')} ${seconds}${__('second_short')}`;
-  return `⟳ ${seconds}${__('second_short')}`;
+  if (minutes > 0) return `${minutes}${__('minute_short')} ${seconds}${__('second_short')}`;
+  return `${seconds}${__('second_short')}`;
+};
+
+const getNextRefreshParts = (id) => {
+  const date = getLastSyncedAt(id);
+  if (!date) return { label: __('Soon') };
+
+  const nextMs  = date.getTime() + getIntervalMs(id);
+  const diffMs  = nextMs - now.value;
+
+  if (diffMs <= 0) return { label: __('In queue') };
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const minutes      = Math.floor(totalSeconds / 60);
+  const seconds      = totalSeconds % 60;
+
+  return { minutes: `${minutes}${__('minute_short')}`, seconds: `${seconds}${__('second_short')}` };
 };
 
 // Progress = how much of the interval has NOT yet elapsed (100% = just synced).
@@ -107,7 +126,8 @@ const circumference = 2 * Math.PI * radius;
   <div class="grid grid-cols-3 gap-3 max-w-sm" v-if="services && services.length">
     <template v-for="service in services" :key="service?.id || Math.random()">
       <div v-if="service && service.id"
-           class="flex flex-col items-center group cursor-pointer active:scale-95 transition-all">
+           class="flex flex-col items-center group cursor-pointer active:scale-95 transition-all"
+           @click="showModal = true">
 
         <!-- Service Label -->
         <div class="text-[8px] font-black text-on-surface-variant uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">
@@ -152,16 +172,72 @@ const circumference = 2 * Math.PI * radius;
 
             <!-- Center Content -->
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
-              <div class="text-[7px] text-gray-400 font-bold uppercase tracking-tighter leading-none mb-0.5">
-                {{ getTimeAgo(service.id) }}
-              </div>
-              <div class="text-[6px] text-primary/60 font-black uppercase tracking-tighter leading-none">
-                {{ getNextRefresh(service.id) }}
-              </div>
+              <template v-if="getNextRefreshParts(service.id).label">
+                <div class="text-[10px] text-primary/60 font-black uppercase tracking-tighter leading-none">
+                  {{ getNextRefreshParts(service.id).label }}
+                </div>
+              </template>
+              <template v-else>
+                <div class="text-[10px] text-primary/60 font-black uppercase tracking-tighter leading-none">
+                  {{ getNextRefreshParts(service.id).minutes }}
+                </div>
+                <div class="text-[9px] text-primary/40 font-black uppercase tracking-tighter leading-none mt-0.5">
+                  {{ getNextRefreshParts(service.id).seconds }}
+                </div>
+              </template>
             </div>
           </div>
         </div>
       </div>
     </template>
   </div>
+
+  <!-- Enlarged modal view -->
+  <GlassModal :show="showModal" max-width="max-w-lg" @close="showModal = false">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-base font-headline text-on-surface">{{ __('Sync Status') }}</h3>
+        <button @click="showModal = false" class="text-on-surface-variant hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <div v-for="service in services" :key="'modal-' + service.id" class="flex flex-col items-center">
+          <div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">
+            {{ service.name }}
+          </div>
+
+          <div class="relative w-36 h-36 bg-black/20 border border-white/5 rounded-full flex items-center justify-center overflow-hidden">
+            <div class="relative w-full h-full p-2">
+              <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" :r="radius" fill="transparent" stroke="currentColor" stroke-width="5" class="text-white/5" />
+                <circle
+                  cx="50" cy="50" :r="radius"
+                  fill="transparent" stroke="currentColor" stroke-width="5" stroke-linecap="round"
+                  class="text-primary"
+                  :style="{
+                    strokeDasharray: circumference,
+                    strokeDashoffset: circumference - (getProgress(service.id) / 100) * circumference,
+                    filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))',
+                    transition: 'stroke-dashoffset 0.9s linear',
+                  }"
+                />
+              </svg>
+
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+                <div class="text-[14px] text-gray-400 font-bold uppercase tracking-tighter leading-none mb-1">
+                  {{ getTimeAgo(service.id) }}
+                </div>
+                <div class="text-[13px] text-primary/60 font-black uppercase tracking-tighter leading-none flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-[13px]">refresh</span>
+                  {{ getNextRefresh(service.id) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </GlassModal>
 </template>

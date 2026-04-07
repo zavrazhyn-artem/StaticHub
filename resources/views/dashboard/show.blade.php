@@ -9,20 +9,6 @@
                     {{ __('TACTICAL STATUS:') }} {{ $static->name }}
                 </h1>
             </div>
-            <div class="flex gap-2">
-                @can('manage', $static)
-                    <a href="{{ route('statics.settings.schedule', $static->id) }}"
-                       class="bg-surface-container-high hover:bg-surface-container-highest text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">settings</span>
-                        {{ __('SETTINGS') }}
-                    </a>
-                @endcan
-                <a href="{{ route('schedule.index') }}"
-                   class="bg-surface-container-high hover:bg-surface-container-highest text-white px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">calendar_month</span>
-                    {{ __('OPEN CALENDAR') }}
-                </a>
-            </div>
         </header>
     </section>
 

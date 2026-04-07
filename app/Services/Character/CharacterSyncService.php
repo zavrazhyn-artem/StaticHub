@@ -7,6 +7,7 @@ namespace App\Services\Character;
 use App\Jobs\Character\SyncCharacterItemLevelJob;
 use App\Models\Character;
 use App\Models\Realm;
+use App\Models\User;
 use App\Services\Blizzard\BlizzardCharacterApiService;
 use App\Services\StaticGroup\RosterService;
 
@@ -27,6 +28,35 @@ class CharacterSyncService
 
         foreach ($apiCharacters as $apiData) {
             $this->processSingleCharacter($apiData, $userId);
+        }
+
+        $this->autoSetSpecsForUserStatics($userId);
+    }
+
+    /**
+     * Auto-set main specs for all user's characters across all their statics.
+     */
+    public function autoSetSpecsForUserStatics(int $userId): void
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return;
+        }
+
+        $staticIds = $user->statics()->pluck('statics.id');
+        if ($staticIds->isEmpty()) {
+            return;
+        }
+
+        $characters = Character::query()
+            ->belongingTo($userId)
+            ->whereNotNull('active_spec')
+            ->get();
+
+        foreach ($staticIds as $staticId) {
+            foreach ($characters as $character) {
+                $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
+            }
         }
     }
 

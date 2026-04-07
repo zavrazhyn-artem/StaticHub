@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import CharacterSpecPicker from './CharacterSpecPicker.vue';
 import { useTranslation } from '@/composables/useTranslation';
 
@@ -25,6 +25,7 @@ const props = defineProps({
 // ---------------------------------------------------------------------------
 const mainCharId  = ref(props.initialMain);
 const raidingIds  = ref([...props.initialRaiding]);
+const specs       = reactive({ ...props.characterSpecs });
 const saving      = ref(false);
 const savedFlash  = ref(false);
 
@@ -76,7 +77,7 @@ function toggleRaiding(charId) {
 async function persist() {
     saving.value = true;
     try {
-        await fetch(props.saveRoute, {
+        const response = await fetch(props.saveRoute, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,6 +89,10 @@ async function persist() {
                 raiding_characters: raidingIds.value,
             }),
         });
+        const data = await response.json();
+        if (data.characterSpecs) {
+            Object.assign(specs, data.characterSpecs);
+        }
         savedFlash.value = true;
         setTimeout(() => { savedFlash.value = false; }, 2000);
     } finally {
@@ -113,7 +118,16 @@ function classColor(playableClass) {
 }
 
 function specForChar(charId) {
-    return props.characterSpecs[charId] ?? { spec_ids: [], main_spec_id: null };
+    return specs[charId] ?? { spec_ids: [], main_spec_id: null };
+}
+
+function mainSpecName(charId) {
+    const data = specForChar(charId);
+    if (data.main_spec_id) {
+        const spec = props.specializations.find(s => s.id === data.main_spec_id);
+        if (spec) return spec.name;
+    }
+    return null;
 }
 </script>
 
@@ -158,7 +172,7 @@ function specForChar(charId) {
                         <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-2">
                             <span>{{ __('Level') }} {{ char.level }}</span>
                             <span class="w-1 h-1 rounded-full bg-white/10"></span>
-                            <span>{{ char.active_spec || char.playable_class }}</span>
+                            <span>{{ mainSpecName(char.id) || char.active_spec || char.playable_class }}</span>
                         </div>
                     </div>
                 </div>

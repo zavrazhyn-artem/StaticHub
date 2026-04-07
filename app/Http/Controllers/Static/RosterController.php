@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\UpdateRosterRequest;
 use App\Models\StaticGroup;
+use App\Services\Character\CharacterService;
 use App\Services\StaticGroup\ConsumableService;
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
@@ -19,9 +20,10 @@ use Illuminate\View\View;
 class RosterController extends Controller
 {
     public function __construct(
-        protected RosterService    $rosterService,
+        protected RosterService     $rosterService,
         protected ConsumableService $consumableService,
-        protected TreasuryService  $treasuryService,
+        protected TreasuryService   $treasuryService,
+        protected CharacterService  $characterService,
     ) {}
 
     public function index(StaticGroup $static): View
@@ -61,7 +63,12 @@ class RosterController extends Controller
         );
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            $characterSpecs = $this->characterService->buildCharacterSpecs($raidingCharIds, $static->id);
+
+            return response()->json([
+                'success'        => true,
+                'characterSpecs' => $characterSpecs,
+            ]);
         }
 
         if ($request->has('onboarding')) {

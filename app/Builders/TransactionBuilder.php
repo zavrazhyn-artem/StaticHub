@@ -21,9 +21,19 @@ class TransactionBuilder extends Builder
         return $this->where('week_number', $weekNumber);
     }
 
+    public function forUser(int $userId): self
+    {
+        return $this->where('user_id', $userId);
+    }
+
     public function recent(int $limit = 10): self
     {
         return $this->orderBy('created_at', 'desc')->limit($limit);
+    }
+
+    public function latestFirst(): self
+    {
+        return $this->orderBy('created_at', 'desc');
     }
 
     public function sumAmount(): int

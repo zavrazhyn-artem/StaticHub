@@ -6,6 +6,7 @@
         wcl-realm="{{ $static->wcl_realm ?? $static->server ?? '' }}"
         update-url="{{ route('statics.settings.logs.update', $static) }}"
         schedule-tab-url="{{ route('statics.settings.schedule', $static) }}"
+        discord-tab-url="{{ route('statics.settings.discord', $static) }}"
         logs-tab-url="{{ route('statics.settings.logs', $static) }}"
         success-message="{{ session('success', '') }}"
     ></settings-logs>

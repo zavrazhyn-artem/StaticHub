@@ -31,22 +31,9 @@ class CharacterService
         $specializations = Specialization::orderBy('class_name')->orderBy('name')->get();
 
         // Current specs per character in this static (spec_ids + main_spec_id)
-        $characterSpecs = [];
-        if ($static) {
-            $characterIds = $characters->pluck('id');
-            $specRecords = CharacterStaticSpec::whereIn('character_id', $characterIds)
-                ->where('static_id', $static->id)
-                ->get()
-                ->groupBy('character_id');
-
-            foreach ($characters as $character) {
-                $records = $specRecords->get($character->id, collect());
-                $characterSpecs[$character->id] = [
-                    'spec_ids'     => $records->pluck('spec_id')->map(fn ($id) => (int) $id)->toArray(),
-                    'main_spec_id' => $records->firstWhere('is_main', true)?->spec_id,
-                ];
-            }
-        }
+        $characterSpecs = $static
+            ? $this->buildCharacterSpecs($characters->pluck('id')->toArray(), $static->id)
+            : [];
 
         // Derive main / raiding initial state for the AJAX-driven UI
         $mainCharId    = null;
@@ -99,6 +86,28 @@ class CharacterService
                 'is_main'      => $specId === $mainSpecId,
             ]);
         }
+    }
+
+    /**
+     * Build the spec_ids + main_spec_id map for a set of characters in a static.
+     */
+    public function buildCharacterSpecs(array $characterIds, int $staticId): array
+    {
+        $specRecords = CharacterStaticSpec::whereIn('character_id', $characterIds)
+            ->where('static_id', $staticId)
+            ->get()
+            ->groupBy('character_id');
+
+        $result = [];
+        foreach ($characterIds as $charId) {
+            $records = $specRecords->get($charId, collect());
+            $result[$charId] = [
+                'spec_ids'     => $records->pluck('spec_id')->map(fn ($id) => (int) $id)->toArray(),
+                'main_spec_id' => (int) ($records->firstWhere('is_main', true)?->spec_id ?? 0) ?: null,
+            ];
+        }
+
+        return $result;
     }
 
     /**

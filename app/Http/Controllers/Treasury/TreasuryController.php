@@ -27,6 +27,13 @@ class TreasuryController extends Controller
         return view('treasury.index', $this->treasuryService->buildTreasuryIndexPayload($static));
     }
 
+    public function history(Request $request, StaticGroup $static): View
+    {
+        $userId = $request->query('member') ? (int) $request->query('member') : null;
+
+        return view('treasury.history', $this->treasuryService->buildTransactionHistoryPayload($static, $userId));
+    }
+
     public function store(StoreTransactionRequest $request, StaticGroup $static): RedirectResponse
     {
         Gate::authorize('canManageTreasury', $static);

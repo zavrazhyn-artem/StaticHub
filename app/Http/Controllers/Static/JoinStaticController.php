@@ -6,16 +6,19 @@ namespace App\Http\Controllers\Static;
 
 use App\Http\Controllers\Controller;
 
+use App\Services\Character\CharacterSyncService;
 use App\Services\StaticGroup\JoinStaticService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class JoinStaticController extends Controller
 {
     public function __construct(
-        protected JoinStaticService $joinStaticService
+        protected JoinStaticService    $joinStaticService,
+        protected CharacterSyncService $characterSyncService,
     ) {}
 
     /**
@@ -33,8 +36,19 @@ class JoinStaticController extends Controller
      */
     public function processJoin(Request $request, string $token): RedirectResponse
     {
-        $this->joinStaticService->executeJoin($token, (int) Auth::id());
+        $userId = (int) Auth::id();
 
-        return redirect()->route('characters.index');
+        $this->joinStaticService->executeJoin($token, $userId);
+
+        $bnetToken = session('battlenet_token');
+        if ($bnetToken) {
+            try {
+                $this->characterSyncService->syncUserCharacters($bnetToken, $userId);
+            } catch (\Exception $e) {
+                Log::warning('Auto-import on join failed', ['user_id' => $userId, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return redirect()->route('characters.index')->with('success', __('Welcome to the team! Your characters have been synced.'));
     }
 }

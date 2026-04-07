@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
 
     // Treasury
     Route::get('/statics/{static}/treasury', [TreasuryController::class, 'index'])->name('statics.treasury');
+    Route::get('/statics/{static}/treasury/history', [TreasuryController::class, 'history'])->name('statics.treasury.history');
     Route::post('/statics/{static}/treasury', [TreasuryController::class, 'store'])->name('statics.treasury.store');
     Route::post('/statics/{static}/consumables', [TreasuryController::class, 'updateConsumables'])->name('consumables.store');
     Route::patch('/statics/{static}/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');

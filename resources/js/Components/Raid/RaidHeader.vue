@@ -65,7 +65,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 h-10 shrink-0">
+            <div v-if="!event.raid_started" class="flex items-center gap-2 h-10 shrink-0">
 
                 <button
                     v-if="!currentAttendance || currentAttendance.status === 'pending'"

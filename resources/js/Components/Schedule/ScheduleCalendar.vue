@@ -110,16 +110,6 @@ const closeModal = () => { showModal.value = false; };
             </div>
 
             <div class="flex items-center gap-2">
-                <template v-if="canManageSchedule && settingsRoute">
-                    <a
-                        :href="settingsRoute"
-                        class="bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2 mr-4"
-                    >
-                        <span class="material-symbols-outlined text-sm">settings</span>
-                        {{ __('Static Settings') }}
-                    </a>
-                </template>
-
                 <a :href="prevMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                     {{ __('Previous') }}

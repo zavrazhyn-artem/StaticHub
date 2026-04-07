@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\Auth\BattleNetAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Two\InvalidStateException;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 class BattleNetController extends Controller
@@ -39,7 +40,11 @@ class BattleNetController extends Controller
      */
     public function callback(): RedirectResponse
     {
-        $data = $this->authService->executeCallbackProcessing();
+        try {
+            $data = $this->authService->executeCallbackProcessing();
+        } catch (InvalidStateException) {
+            return redirect('/');
+        }
 
         $user = $data['user'];
         $token = $data['token'];

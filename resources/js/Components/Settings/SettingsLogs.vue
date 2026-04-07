@@ -12,6 +12,7 @@ const props = defineProps({
     wclRealm:        { type: String, default: '' },
     updateUrl:       { type: String, required: true },
     scheduleTabUrl:  { type: String, required: true },
+    discordTabUrl:   { type: String, required: true },
     logsTabUrl:      { type: String, required: true },
     successMessage:  { type: String, default: '' },
 });
@@ -39,7 +40,7 @@ if (props.successMessage) {
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
-        <SettingsTabs :schedule-url="scheduleTabUrl" :logs-url="logsTabUrl" active-tab="logs" />
+        <SettingsTabs :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="logs" />
 
         <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
             <form :action="updateUrl" method="POST" class="space-y-8">

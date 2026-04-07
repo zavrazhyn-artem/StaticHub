@@ -82,11 +82,11 @@
                 <slot name="planner"></slot>
             </div>
 
-            <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col h-full overflow-hidden">
+            <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Tax Tracking') }}</h3>
                 </div>
-                <div class="p-4 space-y-2 overflow-y-auto flex-1 custom-scrollbar">
+                <div class="p-4 space-y-2 overflow-y-auto custom-scrollbar max-h-[468px]">
                     <div v-for="status in weeklyStatus" :key="status.name" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full" :class="status.is_paid ? 'bg-success-neon shadow-[0_0_8px_rgba(0,255,153,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(255,68,68,0.5)]'"></div>
@@ -101,11 +101,15 @@
                 </div>
             </div>
 
-            <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col h-full overflow-hidden">
+            <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
+                    <a :href="`/statics/${staticId}/treasury/history`" class="text-[10px] font-bold text-primary hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+                        {{ __('View All') }}
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
                 </div>
-                <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
+                <div class="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[348px]">
                     <table class="w-full text-left border-collapse">
                         <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">

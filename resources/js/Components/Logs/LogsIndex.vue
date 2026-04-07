@@ -227,12 +227,24 @@ const displayDifficultyText = computed(() => {
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
 
                     <div class="p-6 space-y-6">
-                        <div class="flex justify-between items-start">
+                        <div>
                             <div class="space-y-1">
-                                <div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">
-                                    {{ log.date }}
+                                <div class="flex justify-between">
+                                    <div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">
+                                        {{ log.date }}
+                                    </div>
+                                    <span v-if="log.has_ai"
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-[9px] font-black text-success-neon uppercase tracking-widest">
+                                    <span class="w-1 h-1 bg-success-neon rounded-full animate-pulse"></span>
+                                    {{ __('Analyzed') }}
+                                    </span>
+                                    <span v-else
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                                    <span class="w-1 h-1 bg-amber-500 rounded-full animate-pulse"></span>
+                                    {{ __('Pending AI') }}
+                                    </span>
                                 </div>
-                                <h3 class="text-xl font-black text-white uppercase tracking-tight group-hover:text-amber-500 transition-colors">
+                                <h3 class="text-l font-black text-white uppercase tracking-tight group-hover:text-amber-500 transition-colors">
                                     {{ log.title ?? __('Manual Log Analysis') }}
                                 </h3>
                                 <div v-if="log.difficulties && log.difficulties.length" class="flex gap-2 mt-2">
@@ -243,17 +255,6 @@ const displayDifficultyText = computed(() => {
                                      </span>
                                 </div>
                             </div>
-
-                            <span v-if="log.has_ai"
-                                  class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-[9px] font-black text-success-neon uppercase tracking-widest">
-                                <span class="w-1 h-1 bg-success-neon rounded-full animate-pulse"></span>
-                                {{ __('Analyzed') }}
-                            </span>
-                            <span v-else
-                                  class="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-black text-amber-500 uppercase tracking-widest">
-                                <span class="w-1 h-1 bg-amber-500 rounded-full animate-pulse"></span>
-                                {{ __('Pending AI') }}
-                            </span>
                         </div>
 
                         <div class="flex items-center justify-between pt-2">

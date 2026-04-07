@@ -49,7 +49,7 @@ class CharacterController extends Controller
      *
      * @return RedirectResponse
      */
-    public function import(): RedirectResponse
+        public function import(): RedirectResponse
     {
         $token = session('battlenet_token');
 
