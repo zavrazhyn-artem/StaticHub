@@ -26,3 +26,5 @@ Thumbs.db
 
 storage/core-master
 storage/wowaudit-summary.csv
+
+nginx/ssl
