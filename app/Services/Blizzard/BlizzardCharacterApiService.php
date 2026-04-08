@@ -4,13 +4,27 @@ declare(strict_types=1);
 
 namespace App\Services\Blizzard;
 
+use App\Services\Logging\ApiLogger;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class BlizzardCharacterApiService
 {
     public function __construct(
         private readonly BlizzardAuthService $authService,
+        private readonly ApiLogger $apiLogger,
     ) {}
+
+    private function loggedGet(string $url, ?string $token = null, array $headers = []): Response
+    {
+        $startTime = microtime(true);
+        $response = Http::withToken($token ?? $this->authService->getAccessToken())
+            ->withHeaders($headers)
+            ->get($url);
+        $this->apiLogger->logApiCall('blizzard', $url, 'GET', $response, $startTime);
+
+        return $response;
+    }
 
     /**
      * Get the authenticated user's WoW characters.
@@ -18,9 +32,9 @@ class BlizzardCharacterApiService
     public function getUserCharacters(string $userAccessToken): array
     {
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/profile/user/wow?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($userAccessToken)
-            ->get("https://{$region}.api.blizzard.com/profile/user/wow?namespace=profile-{$region}&locale=en_US");
+        $response = $this->loggedGet($url, $userAccessToken);
 
         if ($response->failed()) {
             return [];
@@ -59,20 +73,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterProfileSummary(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -80,19 +89,14 @@ class BlizzardCharacterApiService
      */
     public function getCharacterEquipment(string $region, string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -100,20 +104,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterMedia(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/character-media?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -121,20 +120,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterSpecializations(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/specializations?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -142,20 +136,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterMythicKeystoneProfile(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-keystone-profile?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -163,20 +152,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterRaidEncounters(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/encounters/raids?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -185,20 +169,15 @@ class BlizzardCharacterApiService
      */
     public function getCharacterAchievementStatistics(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/achievements/statistics?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $response->json();
+        return $response->failed() ? null : $response->json();
     }
 
     /**
@@ -206,14 +185,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterCompletedQuests(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/quests/completed?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -223,14 +201,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterPvpSummary(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/pvp-summary?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -240,14 +217,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterPvpBracket(string $realmSlug, string $characterName, string $bracket): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/pvp-bracket/{$bracket}?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -257,14 +233,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterReputations(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/reputations?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -274,14 +249,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterTitles(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/titles?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -291,14 +265,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterMounts(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/collections/mounts?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -308,14 +281,13 @@ class BlizzardCharacterApiService
      */
     public function getCharacterPets(string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/collections/pets?namespace=profile-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->failed() ? null : $response->json();
     }
@@ -325,13 +297,12 @@ class BlizzardCharacterApiService
      */
     public function getCharacterAvatar(string $realmSlug, string $characterName): ?string
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $characterNameLower = mb_strtolower($characterName);
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterNameLower}/character-media");
+        $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterNameLower}/character-media";
+
+        $response = $this->loggedGet($url, null, ['Battlenet-Namespace' => "profile-{$region}"]);
 
         if ($response->failed()) {
             return null;
@@ -356,12 +327,11 @@ class BlizzardCharacterApiService
      */
     public function getCharacterEquipmentExtended(string $region, string $realmSlug, string $characterName): ?array
     {
-        $token = $this->authService->getAccessToken();
         $realmSlug = strtolower($realmSlug);
         $characterName = mb_strtolower($characterName);
 
-        $equipment = $this->fetchRawEquipment($region, $token, $realmSlug, $characterName);
-        $mPlus = $this->fetchRawMPlusProgression($region, $token, $realmSlug, $characterName);
+        $equipment = $this->fetchRawEquipment($region, $realmSlug, $characterName);
+        $mPlus = $this->fetchRawMPlusProgression($region, $realmSlug, $characterName);
 
         if ($mPlus) {
             $equipment = $equipment ?? [];
@@ -371,20 +341,20 @@ class BlizzardCharacterApiService
         return $equipment;
     }
 
-    private function fetchRawEquipment(string $region, string $token, string $realmSlug, string $characterName): ?array
+    private function fetchRawEquipment(string $region, string $realmSlug, string $characterName): ?array
     {
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment");
+        $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment";
+
+        $response = $this->loggedGet($url, null, ['Battlenet-Namespace' => "profile-{$region}"]);
 
         return $response->successful() ? $response->json() : null;
     }
 
-    private function fetchRawMPlusProgression(string $region, string $token, string $realmSlug, string $characterName): ?array
+    private function fetchRawMPlusProgression(string $region, string $realmSlug, string $characterName): ?array
     {
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-plus-progression/summary");
+        $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-plus-progression/summary";
+
+        $response = $this->loggedGet($url, null, ['Battlenet-Namespace' => "profile-{$region}"]);
 
         return $response->successful() ? $response->json() : null;
     }

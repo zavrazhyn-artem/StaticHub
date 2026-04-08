@@ -2,6 +2,7 @@
 
 use App\Console\Commands\FetchAuctionsCommand;
 use App\Console\Commands\GenerateEventsCommand;
+use App\Console\Commands\PurgeOldLogsCommand;
 use App\Console\Commands\SyncAllStaticsCommand;
 use App\Models\StaticGroup;
 use App\Jobs\SyncStaticGroupJob;
@@ -29,4 +30,6 @@ Schedule::command('backup:run --only-db')->daily()->at('03:00');
 
 // Очищуємо старі бекапи (rotation), щоб не закінчилося місце
 Schedule::command('backup:clean')->daily()->at('04:00');
+
+Schedule::command(PurgeOldLogsCommand::class)->daily()->at('05:00');
 

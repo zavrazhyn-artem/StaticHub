@@ -25,6 +25,7 @@ class OnboardingRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'region' => 'required|string',
+            'invite_code' => 'required|string',
         ];
     }
 }

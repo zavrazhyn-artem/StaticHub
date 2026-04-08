@@ -26,6 +26,7 @@ class StoreStaticRequest extends FormRequest
             'name' => 'required|string|max:255',
             'realm_slug' => 'required|string|exists:realms,slug',
             'region' => 'required|string|in:eu,us,kr,tw',
+            'invite_code' => 'required|string',
         ];
     }
 }

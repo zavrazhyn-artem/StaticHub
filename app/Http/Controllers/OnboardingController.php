@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OnboardingRequest;
+use App\Services\InviteCode\InviteCodeService;
 use App\Services\StaticGroup\OnboardingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,8 @@ use Illuminate\View\View;
 class OnboardingController extends Controller
 {
     public function __construct(
-        protected OnboardingService $onboardingService
+        protected OnboardingService $onboardingService,
+        protected InviteCodeService $inviteCodeService,
     ) {}
 
     /**
@@ -33,10 +35,14 @@ class OnboardingController extends Controller
      */
     public function createStatic(OnboardingRequest $request): JsonResponse
     {
+        $this->inviteCodeService->validate($request->input('invite_code'));
+
         $static = $this->onboardingService->executeStaticCreation(
             $request->validated(),
             Auth::id()
         );
+
+        $this->inviteCodeService->redeem($request->input('invite_code'), Auth::id());
 
         $characterData = $this->onboardingService->buildCharacterStepPayload(Auth::user(), $static);
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\ImportGuildRequest;
 use App\Http\Requests\StoreStaticRequest;
+use App\Services\InviteCode\InviteCodeService;
 use App\Services\StaticGroup\StaticService;
 use App\Models\StaticGroup;
 use Illuminate\Http\JsonResponse;
@@ -16,12 +17,10 @@ use Illuminate\View\View;
 
 class StaticController extends Controller
 {
-    protected StaticService $staticService;
-
-    public function __construct(StaticService $staticService)
-    {
-        $this->staticService = $staticService;
-    }
+    public function __construct(
+        protected StaticService $staticService,
+        protected InviteCodeService $inviteCodeService,
+    ) {}
 
     public function generateInvite(StaticGroup $static): JsonResponse
     {
@@ -52,7 +51,11 @@ class StaticController extends Controller
      */
     public function store(StoreStaticRequest $request): RedirectResponse
     {
+        $this->inviteCodeService->validate($request->input('invite_code'));
+
         $this->staticService->executeCreation($request->validated(), Auth::id());
+
+        $this->inviteCodeService->redeem($request->input('invite_code'), Auth::id());
 
         return redirect()->route('dashboard')->with('success', __('Static created successfully!'));
     }

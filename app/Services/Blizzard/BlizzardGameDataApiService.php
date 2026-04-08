@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Blizzard;
 
 use App\Models\Item;
+use App\Services\Logging\ApiLogger;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
@@ -12,19 +14,29 @@ class BlizzardGameDataApiService
 {
     public function __construct(
         private readonly BlizzardAuthService $authService,
+        private readonly ApiLogger $apiLogger,
     ) {}
+
+    private function loggedGet(string $url, array $headers = []): Response
+    {
+        $startTime = microtime(true);
+        $response = Http::withToken($this->authService->getAccessToken())
+            ->withHeaders($headers)
+            ->get($url);
+        $this->apiLogger->logApiCall('blizzard', $url, 'GET', $response, $startTime);
+
+        return $response;
+    }
 
     /**
      * Fetch all realms for the current region.
      */
     public function getRealms(): array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/realm/index";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "dynamic-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/realm/index");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "dynamic-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception('Failed to fetch realms from Blizzard API: ' . $response->body());
@@ -38,12 +50,10 @@ class BlizzardGameDataApiService
      */
     public function getRealmDetails(int $realmId): array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/realm/{$realmId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "dynamic-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/realm/{$realmId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "dynamic-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception("Failed to fetch realm details for ID {$realmId}: " . $response->body());
@@ -61,10 +71,13 @@ class BlizzardGameDataApiService
         $region = $this->authService->getRegion();
         $url = "https://{$region}.api.blizzard.com/data/wow/auctions/commodities";
 
+        $startTime = microtime(true);
         $response = Http::withToken($token)
             ->withHeaders(['Battlenet-Namespace' => "dynamic-{$region}"])
             ->withOptions(['stream' => true])
             ->get($url);
+
+        $this->apiLogger->logApiCall('blizzard', $url, 'GET', $response, $startTime);
 
         if ($response->failed()) {
             throw new Exception('Failed to fetch commodities: ' . $response->body());
@@ -78,12 +91,10 @@ class BlizzardGameDataApiService
      */
     public function getMidnightProfessionTier(int $professionId): ?int
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception("Failed to fetch profession tiers for ID {$professionId}: " . $response->body());
@@ -112,12 +123,10 @@ class BlizzardGameDataApiService
      */
     public function getRecipesFromTier(int $professionId, int $tierId): array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception("Failed to fetch recipes: " . $response->body());
@@ -145,12 +154,10 @@ class BlizzardGameDataApiService
      */
     public function getTierDetails(int $professionId, int $tierId): array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/profession/{$professionId}/skill-tier/{$tierId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception("Failed to fetch tier details: " . $response->body());
@@ -164,12 +171,10 @@ class BlizzardGameDataApiService
      */
     public function getRecipeDetails(int $recipeId): array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/recipe/{$recipeId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/recipe/{$recipeId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         if ($response->failed()) {
             throw new Exception("Failed to fetch recipe details for ID {$recipeId}: " . $response->body());
@@ -183,37 +188,34 @@ class BlizzardGameDataApiService
      */
     public function syncItemMetadata(int $itemId): void
     {
-        $token = $this->authService->getAccessToken();
-        $data = $this->fetchItemData($itemId, $token);
+        $data = $this->fetchItemData($itemId);
 
         if (empty($data)) {
             return;
         }
 
         $name = $data['name']['en_US'] ?? $data['name'] ?? "Item #{$itemId}";
-        $iconUrl = $this->fetchItemIcon($itemId, $token, $data);
+        $iconUrl = $this->fetchItemIcon($itemId, $data);
 
         Item::query()->updateMetadata($itemId, $name, $iconUrl);
     }
 
-    private function fetchItemData(int $itemId, string $token): array
+    private function fetchItemData(int $itemId): array
     {
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/item/{$itemId}";
 
-        $response = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/item/{$itemId}");
+        $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         return $response->successful() ? $response->json() : [];
     }
 
-    private function fetchItemIcon(int $itemId, string $token, array $itemData): ?string
+    private function fetchItemIcon(int $itemId, array $itemData): ?string
     {
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/media/item/{$itemId}";
 
-        $mediaResponse = Http::withToken($token)
-            ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/media/item/{$itemId}");
+        $mediaResponse = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         if ($mediaResponse->successful()) {
             return $this->extractIconFromAssets($mediaResponse->json('assets', []));
@@ -221,9 +223,7 @@ class BlizzardGameDataApiService
 
         $fallbackHref = $itemData['media']['key']['href'] ?? null;
         if ($fallbackHref) {
-            $fallbackResponse = Http::withToken($token)
-                ->withHeaders(['Battlenet-Namespace' => "static-{$region}"])
-                ->get($fallbackHref);
+            $fallbackResponse = $this->loggedGet($fallbackHref, ['Battlenet-Namespace' => "static-{$region}"]);
 
             if ($fallbackResponse->successful()) {
                 return $this->extractIconFromAssets($fallbackResponse->json('assets', []));
@@ -250,11 +250,10 @@ class BlizzardGameDataApiService
      */
     public function getPlayableSpecialization(int $specId): ?array
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $url = "https://{$region}.api.blizzard.com/data/wow/playable-specialization/{$specId}?namespace=static-{$region}&locale=en_US";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
         return $response->successful() ? $response->json() : null;
     }
@@ -264,16 +263,11 @@ class BlizzardGameDataApiService
      */
     public function getPlayableSpecializationIcon(int $specId): ?string
     {
-        $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $url = "https://{$region}.api.blizzard.com/data/wow/media/playable-specialization/{$specId}?namespace=static-{$region}";
 
-        $response = Http::withToken($token)->get($url);
+        $response = $this->loggedGet($url);
 
-        if ($response->failed()) {
-            return null;
-        }
-
-        return $this->extractIconFromAssets($response->json('assets', []));
+        return $response->failed() ? null : $this->extractIconFromAssets($response->json('assets', []));
     }
 }

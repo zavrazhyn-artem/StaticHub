@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 use App\Http\Middleware\HasStatic;
 use App\Http\Middleware\EnsureUserHasStatic;
@@ -15,6 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            $host = parse_url(config('app.url'), PHP_URL_HOST);
+            $adminDomain = config('admin.subdomain', 'admin') . '.' . $host;
+
+            Route::domain($adminDomain)
+                ->middleware('web')
+                ->group(base_path('routes/admin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
@@ -24,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'has_static' => HasStatic::class,
             'ensure_has_static' => EnsureUserHasStatic::class,
+            'admin_auth' => AdminAuthenticate::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('battlenet.redirect'));

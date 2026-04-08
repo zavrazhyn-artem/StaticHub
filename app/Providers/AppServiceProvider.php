@@ -28,9 +28,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        URL::forceScheme('https');
+        if (config('app.env') !== 'development') {
+            URL::forceScheme('https');
+        }
 
         Gate::policy(StaticGroup::class, StaticGroupPermissionPolicy::class);
+
+        Gate::define('viewLogViewer', function ($user = null) {
+            return session('admin_authenticated') === true;
+        });
 
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('battlenet', BattlenetProvider::class);

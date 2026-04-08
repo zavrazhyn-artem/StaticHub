@@ -6,6 +6,7 @@ namespace App\Services\Analysis;
 
 use App\Helpers\WclQueryBuilder;
 use App\Helpers\WclReportParserHelper;
+use App\Services\Logging\ApiLogger;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -14,15 +15,23 @@ class WclService
     protected string $baseUrl = 'https://www.warcraftlogs.com/api/v2/client';
     protected ?string $accessToken = null;
 
+    public function __construct(
+        private readonly ApiLogger $apiLogger,
+    ) {}
+
     /**
      * Execute a WCL GraphQL query.
      */
     public function executeGraphql(string $query, array $variables = []): array
     {
+        $startTime = microtime(true);
+
         $response = Http::withToken($this->getAccessToken())->post($this->baseUrl, [
             'query' => $query,
             'variables' => $variables,
         ]);
+
+        $this->apiLogger->logApiCall('wcl', $this->baseUrl, 'POST', $response, $startTime);
 
         $data = $response->json();
         if (isset($data['errors'])) {
@@ -50,11 +59,16 @@ class WclService
             return $this->accessToken = $token;
         }
 
-        $response = Http::asForm()->post('https://www.warcraftlogs.com/oauth/token', [
+        $tokenUrl = 'https://www.warcraftlogs.com/oauth/token';
+        $startTime = microtime(true);
+
+        $response = Http::asForm()->post($tokenUrl, [
             'grant_type' => 'client_credentials',
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
         ]);
+
+        $this->apiLogger->logApiCall('wcl', $tokenUrl, 'POST', $response, $startTime);
 
         $token = $response->json('access_token');
         Cache::put('wcl_access_token', $token, 3600);

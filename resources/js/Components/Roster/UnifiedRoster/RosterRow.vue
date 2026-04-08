@@ -57,10 +57,7 @@ const emit = defineEmits([
 
         <!-- Character identity -->
         <td :class="isAlt ? 'p-1.5 pl-[70px] h-[42px]' : 'p-2.5 h-[86px]'">
-            <div :class="[
-                'flex flex-col justify-center h-full gap-1',
-                isAlt ? 'items-start' : 'items-center'
-            ]">
+            <div :class="['flex flex-col justify-center h-full gap-1 items-start']">
                 <div class="flex items-center gap-2">
                     <div class="relative shrink-0">
                         <img v-if="char?.avatar_url"

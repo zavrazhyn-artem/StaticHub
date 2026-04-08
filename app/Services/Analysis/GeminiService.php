@@ -7,6 +7,7 @@ namespace App\Services\Analysis;
 use App\Helpers\GeminiPromptBuilder;
 use App\Helpers\GeminiResponseFormatter;
 use App\Helpers\RaidAnalysisPromptBuilder;
+use App\Services\Logging\AiRequestLogger;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -15,8 +16,9 @@ class GeminiService
     private string $apiKey;
     private string $baseUrl;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly AiRequestLogger $aiLogger,
+    ) {
         $this->apiKey = (string) config('services.gemini.key', config('services.gemini.api_key'));
         $this->baseUrl = (string) config(
             'services.gemini.base_url',
@@ -43,6 +45,8 @@ class GeminiService
             $payload['generationConfig'] = ['responseMimeType' => 'application/json'];
         }
 
+        $startTime = microtime(true);
+
         try {
             $response = Http::retry($retries, 1000)
                 ->withHeaders(['Content-Type' => 'application/json'])
@@ -54,13 +58,25 @@ class GeminiService
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
+                $this->aiLogger->logRequest(
+                    'gemini', $this->extractModelName(), $this->baseUrl,
+                    $response->json(), $startTime, 'error', $response->body()
+                );
+
                 throw new \Exception('Gemini API Error: ' . $response->body());
             }
 
-            $text = $response->json('candidates.0.content.parts.0.text');
+            $responseData = $response->json();
+            $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+            $this->aiLogger->logRequest(
+                'gemini', $this->extractModelName(), $this->baseUrl,
+                $responseData, $startTime, 'success'
+            );
 
             if (!$text) {
-                Log::warning('Gemini API returned empty response', ['response' => $response->json()]);
+                Log::warning('Gemini API returned empty response', ['response' => $responseData]);
             }
 
             return (string) ($text ?? '');
@@ -75,14 +91,26 @@ class GeminiService
      */
     public function executeApiRequest(array $payload): string
     {
+        $startTime = microtime(true);
         $response = Http::post($this->baseUrl . '?key=' . $this->apiKey, $payload);
 
         if ($response->failed()) {
             Log::error('Gemini API Error: ' . $response->body());
+
+            $this->aiLogger->logRequest(
+                'gemini', $this->extractModelName(), $this->baseUrl,
+                $response->json(), $startTime, 'error', $response->body()
+            );
+
             throw new \Exception('AI Analysis failed: ' . $response->body());
         }
 
         $result = $response->json();
+
+        $this->aiLogger->logRequest(
+            'gemini', $this->extractModelName(), $this->baseUrl,
+            $result, $startTime, 'success'
+        );
 
         return $result['candidates'][0]['content']['parts'][0]['text'] ?? 'AI Analysis could not be generated.';
     }
@@ -133,5 +161,14 @@ class GeminiService
         $payload = RaidAnalysisPromptBuilder::buildPayload($logData);
 
         return $this->executeApiRequest($payload);
+    }
+
+    private function extractModelName(): string
+    {
+        if (preg_match('#/models/([^/:]+)#', $this->baseUrl, $matches)) {
+            return $matches[1];
+        }
+
+        return 'unknown';
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Blizzard;
 
+use App\Services\Logging\ApiLogger;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Exception;
@@ -14,8 +15,9 @@ class BlizzardAuthService
     private string $clientSecret;
     private string $region;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ApiLogger $apiLogger,
+    ) {
         $this->clientId = (string) config('services.battlenet.client_id');
         $this->clientSecret = (string) config('services.battlenet.client_secret');
         $this->region = (string) config('services.battlenet.region', 'eu');
@@ -39,11 +41,16 @@ class BlizzardAuthService
 
     private function fetchNewToken(): string
     {
+        $url = "https://{$this->region}.battle.net/oauth/token";
+        $startTime = microtime(true);
+
         $response = Http::asForm()
             ->withBasicAuth($this->clientId, $this->clientSecret)
-            ->post("https://{$this->region}.battle.net/oauth/token", [
+            ->post($url, [
                 'grant_type' => 'client_credentials',
             ]);
+
+        $this->apiLogger->logApiCall('blizzard', $url, 'POST', $response, $startTime);
 
         if ($response->failed()) {
             throw new Exception('Failed to fetch Blizzard access token: ' . $response->body());

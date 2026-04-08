@@ -4,13 +4,27 @@ declare(strict_types=1);
 
 namespace App\Services\Blizzard;
 
+use App\Services\Logging\ApiLogger;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class BlizzardGuildApiService
 {
     public function __construct(
         private readonly BlizzardAuthService $authService,
+        private readonly ApiLogger $apiLogger,
     ) {}
+
+    private function loggedGet(string $url, ?string $token = null, array $headers = []): Response
+    {
+        $startTime = microtime(true);
+        $response = Http::withToken($token ?? $this->authService->getAccessToken())
+            ->withHeaders($headers)
+            ->get($url);
+        $this->apiLogger->logApiCall('blizzard', $url, 'GET', $response, $startTime);
+
+        return $response;
+    }
 
     /**
      * Fetch user characters and guilds they lead.
@@ -28,9 +42,9 @@ class BlizzardGuildApiService
     private function fetchUserProfile(string $userToken): array
     {
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/profile/user/wow";
 
-        $response = Http::withToken($userToken)
-            ->get("https://{$region}.api.blizzard.com/profile/user/wow");
+        $response = $this->loggedGet($url, $userToken);
 
         return $response->successful() ? $response->json() : [];
     }
@@ -72,10 +86,9 @@ class BlizzardGuildApiService
     private function fetchGuildRoster(string $userToken, string $realmSlug, string $guildSlug): array
     {
         $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/guild/{$realmSlug}/{$guildSlug}/roster";
 
-        $response = Http::withToken($userToken)
-            ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
-            ->get("https://{$region}.api.blizzard.com/data/wow/guild/{$realmSlug}/{$guildSlug}/roster");
+        $response = $this->loggedGet($url, $userToken, ['Battlenet-Namespace' => "profile-{$region}"]);
 
         return $response->successful() ? $response->json('members', []) : [];
     }
