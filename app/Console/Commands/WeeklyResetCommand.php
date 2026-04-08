@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Helpers\WeeklyResetHelper;
 use App\Models\Character;
 use App\Models\CharacterWeeklySnapshot;
+use App\Models\ServiceRawData;
 use App\Models\StaticGroup;
 use App\Services\StaticGroup\TreasuryService;
 use Illuminate\Console\Command;
@@ -28,15 +29,19 @@ class WeeklyResetCommand extends Command
         // ── 1. Character weekly snapshots ────────────────────────────────
         $snapshotCount = $this->snapshotCharacters($region, $periodKey);
 
-        // ── 2. Treasury tax deduction ────────────────────────────────────
+        // ── 2. Clear stale quest data from raw storage ──────────────────
+        $questsCleared = $this->clearCompletedQuests($region);
+
+        // ── 3. Treasury tax deduction ────────────────────────────────────
         $taxCount = $this->processTreasuryTaxes($region, $treasury);
 
-        $this->info("Archived {$snapshotCount} character snapshots. Processed taxes for {$taxCount} statics.");
+        $this->info("Archived {$snapshotCount} character snapshots. Cleared quests for {$questsCleared} characters. Processed taxes for {$taxCount} statics.");
         Log::info('Weekly reset completed.', [
-            'region'     => $region,
-            'period_key' => $periodKey,
-            'snapshots'  => $snapshotCount,
-            'statics_taxed' => $taxCount,
+            'region'         => $region,
+            'period_key'     => $periodKey,
+            'snapshots'      => $snapshotCount,
+            'quests_cleared' => $questsCleared,
+            'statics_taxed'  => $taxCount,
         ]);
 
         return self::SUCCESS;
@@ -84,6 +89,18 @@ class WeeklyResetCommand extends Command
             ->update(['character_weekly_data' => null]);
 
         return $snapshotCount;
+    }
+
+    /**
+     * Null out bnet_completed_quests so the first post-reset compilation
+     * doesn't carry over stale weekly / prey / event quest completions.
+     */
+    private function clearCompletedQuests(string $region): int
+    {
+        return ServiceRawData::query()
+            ->whereHas('character', fn ($q) => $q->whereHas('realm', fn ($r) => $r->where('region', $region)))
+            ->whereNotNull('bnet_completed_quests')
+            ->update(['bnet_completed_quests' => null]);
     }
 
     private function processTreasuryTaxes(string $region, TreasuryService $treasury): int

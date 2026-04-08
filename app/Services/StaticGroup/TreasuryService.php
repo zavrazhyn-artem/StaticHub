@@ -229,32 +229,37 @@ class TreasuryService
     /**
      * Process weekly tax deduction for all users in a static.
      * Called by WeeklyResetCommand.
+     *
+     * 1. Reset everyone to uncovered.
+     * 2. If tax > 0, deduct from users who can afford it and mark them covered.
      */
     public function processWeeklyTaxReset(StaticGroup $static): void
     {
         $tax = (int) ($static->weekly_tax_per_player ?? 0);
 
+        // Step 1: reset all members to uncovered
+        DB::table('static_user')
+            ->where('static_id', $static->id)
+            ->update(['current_weekly_tax_covered' => false]);
+
+        if ($tax <= 0) {
+            return;
+        }
+
+        // Step 2: deduct tax from members who have enough balance
         $members = DB::table('static_user')
             ->where('static_id', $static->id)
-            ->get(['user_id', 'balance']);
+            ->where('balance', '>=', $tax)
+            ->get(['user_id']);
 
         foreach ($members as $member) {
-            if ($tax > 0 && $member->balance >= $tax) {
-                DB::table('static_user')
-                    ->where('static_id', $static->id)
-                    ->where('user_id', $member->user_id)
-                    ->update([
-                        'balance' => DB::raw("balance - {$tax}"),
-                        'current_weekly_tax_covered' => true,
-                    ]);
-            } else {
-                DB::table('static_user')
-                    ->where('static_id', $static->id)
-                    ->where('user_id', $member->user_id)
-                    ->update([
-                        'current_weekly_tax_covered' => $tax <= 0,
-                    ]);
-            }
+            DB::table('static_user')
+                ->where('static_id', $static->id)
+                ->where('user_id', $member->user_id)
+                ->update([
+                    'balance' => DB::raw("balance - {$tax}"),
+                    'current_weekly_tax_covered' => true,
+                ]);
         }
     }
 

@@ -19,6 +19,9 @@ class RawDataSyncService
     private const RIO_BASE_URL = 'https://raider.io/api/v1/characters/profile';
     private const RIO_FIELDS = 'mythic_plus_scores_by_season:current,mythic_plus_ranks,mythic_plus_recent_runs,mythic_plus_best_runs,mythic_plus_weekly_highest_level_runs,gear,talents,raid_progression,guild';
 
+    /** Hours after weekly reset during which Blizzard quest data is unreliable. */
+    private const QUEST_GRACE_PERIOD_HOURS = 2;
+
     public function __construct(
         private readonly BlizzardCharacterApiService $blizzardApiService,
         private readonly JsonSchemaValidatorService $schemaValidator,
@@ -44,7 +47,9 @@ class RawDataSyncService
             $this->tryFetch('bnet_mplus', 'bnet_mplus', $character, $updates, fn() => $this->blizzardApiService->getCharacterMythicKeystoneProfile($realmSlug, $name));
             $this->tryFetch('bnet_raid', 'bnet_raid', $character, $updates, fn() => $this->blizzardApiService->getCharacterRaidEncounters($realmSlug, $name));
             $this->tryFetchNoSchema('bnet_achievement_statistics', $character, $updates, fn() => $this->blizzardApiService->getCharacterAchievementStatistics($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_completed_quests', $character, $updates, fn() => $this->blizzardApiService->getCharacterCompletedQuests($realmSlug, $name));
+            if (! $this->isWithinQuestGracePeriod($region)) {
+                $this->tryFetchNoSchema('bnet_completed_quests', $character, $updates, fn() => $this->blizzardApiService->getCharacterCompletedQuests($realmSlug, $name));
+            }
             $this->tryFetchNoSchema('bnet_pvp_summary', $character, $updates, fn() => $this->blizzardApiService->getCharacterPvpSummary($realmSlug, $name));
             $this->tryFetchNoSchema('bnet_reputations', $character, $updates, fn() => $this->blizzardApiService->getCharacterReputations($realmSlug, $name));
             $this->tryFetchNoSchema('bnet_titles', $character, $updates, fn() => $this->blizzardApiService->getCharacterTitles($realmSlug, $name));
@@ -124,6 +129,17 @@ class RawDataSyncService
         }
 
         $rawData->update(['vault_weekly_snapshot' => $existingSnap]);
+    }
+
+    /**
+     * True when we are within QUEST_GRACE_PERIOD_HOURS of the weekly reset,
+     * meaning the Blizzard completed-quests endpoint may still return stale data.
+     */
+    private function isWithinQuestGracePeriod(string $region): bool
+    {
+        $resetTs = WeeklyResetHelper::resetTimestamp($region);
+
+        return time() < $resetTs + (self::QUEST_GRACE_PERIOD_HOURS * 3600);
     }
 
     private function currentWowPeriodKey(string $region = 'eu'): string
