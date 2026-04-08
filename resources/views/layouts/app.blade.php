@@ -96,6 +96,38 @@
             </script>
         @endif
     </div>
+
+    @auth
+        @unless(Auth::user()->discord_id)
+            <div id="discord-link-banner"
+                 class="hidden items-center gap-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm text-amber-400">
+                <span class="material-symbols-outlined text-base leading-none">link_off</span>
+                <span class="font-headline text-[10px] font-bold uppercase tracking-widest leading-none">{{ __('Link your Discord for bot commands, RSVP & notifications') }}</span>
+                <a href="{{ route('profile.discord.link') }}"
+                   class="ml-2 font-headline text-[10px] font-bold uppercase tracking-widest leading-none px-3 py-1.5 rounded-sm bg-amber-500 hover:bg-amber-400 text-black transition-all active:scale-95 flex items-center">
+                    {{ __('Link Discord') }}
+                </a>
+                <button onclick="dismissDiscordBanner()"
+                        class="ml-1 opacity-60 hover:opacity-100 transition-opacity flex items-center">
+                    <span class="material-symbols-outlined text-sm leading-none">close</span>
+                </button>
+            </div>
+            <script>
+                (function() {
+                    if (!localStorage.getItem('alert_dismissed_discord-link-reminder')) {
+                        document.getElementById('discord-link-banner').classList.remove('hidden');
+                        document.getElementById('discord-link-banner').classList.add('flex');
+                    }
+                })();
+                function dismissDiscordBanner() {
+                    localStorage.setItem('alert_dismissed_discord-link-reminder', '1');
+                    document.getElementById('discord-link-banner').classList.add('hidden');
+                    document.getElementById('discord-link-banner').classList.remove('flex');
+                }
+            </script>
+        @endunless
+    @endauth
+
     <div class="flex items-center gap-4">
         <!-- Language Selector -->
         @php
@@ -240,6 +272,9 @@
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
+                @unless(Auth::user()->discord_id)
+                    <span class="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse-dot shadow-[0_0_8px_rgba(239,68,68,0.6)] shrink-0"></span>
+                @endunless
             </a>
         </div>
     @else

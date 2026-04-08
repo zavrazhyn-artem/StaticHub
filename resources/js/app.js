@@ -25,6 +25,7 @@ import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelec
 import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue';
 import CharactersPage from './Components/Character/CharactersPage.vue';
 import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
+import AlertBanner from './Components/UI/AlertBanner.vue';
 
 
 
@@ -80,6 +81,7 @@ app.component('transfer-ownership-select', TransferOwnershipSelect);
 app.component('character-spec-picker', CharacterSpecPicker);
 app.component('characters-page', CharactersPage);
 app.component('onboarding-stepper', OnboardingStepper);
+app.component('alert-banner', AlertBanner);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

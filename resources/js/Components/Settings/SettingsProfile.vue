@@ -111,7 +111,10 @@ const unlinkDiscord = async () => {
 
         <div class="space-y-4">
             <!-- Integrations -->
-            <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
+            <div :class="[
+                'bg-surface-container-low rounded-xl p-8 shadow-2xl backdrop-blur-sm',
+                discord.connected ? 'border border-white/5' : 'border-2 animate-pulse-border-cyan'
+            ]">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary text-xl">link</span>
                     <h2 class="font-headline text-sm font-bold text-white uppercase tracking-[0.2em]">{{ __('Integrations') }}</h2>
