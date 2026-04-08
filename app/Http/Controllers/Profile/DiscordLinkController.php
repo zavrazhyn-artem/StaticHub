@@ -34,9 +34,9 @@ class DiscordLinkController extends Controller
 
             $this->userService->executeDiscordLinking(Auth::user(), $discordUser);
 
-            return Redirect::route('profile.edit')->with('status', 'discord-linked');
+            return $this->redirectToSettings('discord-linked');
         } catch (\Exception $e) {
-            return Redirect::route('profile.edit')->with('error', 'Failed to link Discord account: ' . $e->getMessage());
+            return $this->redirectToSettings('discord-link-failed');
         }
     }
 
@@ -47,6 +47,17 @@ class DiscordLinkController extends Controller
     {
         $this->userService->executeDiscordUnlinking(Auth::user());
 
-        return Redirect::route('profile.edit')->with('status', 'discord-unlinked');
+        return $this->redirectToSettings('discord-unlinked');
+    }
+
+    private function redirectToSettings(string $status): RedirectResponse
+    {
+        $static = Auth::user()->statics()->first();
+
+        if ($static) {
+            return Redirect::route('statics.settings.profile', $static->id)->with('status', $status);
+        }
+
+        return Redirect::route('profile.edit')->with('status', $status);
     }
 }
