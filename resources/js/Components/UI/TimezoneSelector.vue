@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 
 const props = defineProps({
     modelValue: { type: String, required: true },
@@ -7,10 +7,27 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
-const allTimezones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
+const TIMEZONE_ALIASES = {
+    'Europe/Kiev': 'Europe/Kyiv',
+    'Asia/Calcutta': 'Asia/Kolkata',
+    'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+    'Asia/Rangoon': 'Asia/Yangon',
+    'Pacific/Ponape': 'Pacific/Pohnpei',
+    'Pacific/Truk': 'Pacific/Chuuk',
+    'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+};
+
+const rawTimezones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
     'UTC', 'Europe/Kyiv', 'Europe/Warsaw', 'Europe/London', 'Europe/Berlin', 'Europe/Paris',
     'America/New_York', 'America/Los_Angeles', 'Asia/Tokyo', 'Asia/Dubai',
 ];
+
+const allTimezones = [...new Set(rawTimezones.map(tz => TIMEZONE_ALIASES[tz] || tz))].sort();
+
+onMounted(() => {
+    const canonical = TIMEZONE_ALIASES[props.modelValue];
+    if (canonical) emit('update:modelValue', canonical);
+});
 
 const timezoneSearch = ref('');
 const showDropdown = ref(false);
