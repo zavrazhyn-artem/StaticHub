@@ -1,4 +1,8 @@
 <script setup>
+import { inject, computed } from 'vue';
+
+const rowHeights = inject('rowHeights');
+
 const props = defineProps({
     char: { type: Object, required: true },
     groupedRoster: { type: Object, required: true },
@@ -7,6 +11,8 @@ const props = defineProps({
     killMarkClass: { type: [String, Object], required: true },
     isAlt: { type: Boolean, default: false },
 });
+
+const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
 const getBossData = (raidName, bossName) => {
     return (props.char?.raids?.[raidName] ?? []).find(b => b.name === bossName);
@@ -17,10 +23,10 @@ const getBossData = (raidName, bossName) => {
     <template v-for="raid in raidColumns" :key="raid.name">
         <td v-for="bossName in raid.bosses"
             :key="bossName"
-            :class="isAlt ? 'h-[42px]' : 'h-[72px]'"
+            :class="rh"
             class="p-0 text-center border-l border-white/[0.04] min-w-[60px]"
             :title="`${bossName} (${raid.name}) – ${getBossData(raid.name, bossName)?.[selectedDifficulty] ? 'Killed' : 'Not killed'} (${selectedDifficulty})`">
-            <div class="flex items-center justify-center px-1" :class="isAlt ? 'py-1.5' : 'py-2.5'">
+            <div class="flex items-center justify-center px-1" :class="isAlt ? 'py-0' : 'py-2.5'">
                 <span v-if="getBossData(raid.name, bossName)?.[selectedDifficulty]"
                       class="font-black leading-none"
                       :class="[killMarkClass, isAlt ? 'text-sm opacity-70' : 'text-base']">✔</span>

@@ -56,6 +56,19 @@ class DiscordMessageService
     }
 
     /**
+     * Fetch bot guilds filtered to only those where the given Discord user is a member.
+     */
+    public function getGuildsForMember(string $discordUserId): array
+    {
+        $botGuilds = $this->discordApiTask->getGuilds();
+
+        return collect($botGuilds)
+            ->filter(fn(array $guild) => $this->discordApiTask->getGuildMember($guild['id'], $discordUserId) !== null)
+            ->values()
+            ->toArray();
+    }
+
+    /**
      * Fetch all text channels from the guild where the bot is present.
      */
     public function getGuildChannels(string $guildId): array

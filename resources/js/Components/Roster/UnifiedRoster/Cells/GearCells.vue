@@ -1,10 +1,16 @@
 <script setup>
+import { inject, computed } from 'vue';
+
+const rowHeights = inject('rowHeights');
+
 const props = defineProps({
     char: { type: Object, required: true },
     isAlt: { type: Boolean, default: false },
     hasAuditIssues: { type: Function, required: true },
     auditTitle: { type: Function, required: true },
 });
+
+const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
 const emit = defineEmits(['audit-click']);
 
@@ -75,7 +81,7 @@ const getQualityClass = (quality) => {
 
 <template>
     <!-- Audit column -->
-    <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5']">
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
         <span v-if="hasAuditIssues(char)"
               @click="emit('audit-click')"
               :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
@@ -85,42 +91,40 @@ const getQualityClass = (quality) => {
         </span>
         <span v-else class="text-gray-600 text-[10px]">✓</span>
     </td>
-    <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5 font-bold text-gray-300']">
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5 font-bold text-gray-300']">
         {{ char.upgrades_missing ?? 0 }}
     </td>
 
-    <td v-for="slot in slots" :key="slot" :class="isAlt ? 'h-[42px]' : 'h-[86px]'" class="p-0.5 border-l border-white/5">
-        <div v-if="getItem(slot)" class="flex flex-col items-center justify-center h-full">
-            <!-- ilvl badge above icon -->
-            <div class="mb-0.5 text-[10px] font-bold leading-none"
-                 :class="getQualityColor(getItem(slot).quality)">
+    <td v-for="slot in slots" :key="slot" :class="rh" class="p-0.5 border-l border-white/5">
+        <div v-if="getItem(slot)" class="flex items-center justify-center h-full" :class="isAlt ? 'gap-1' : 'flex-col'">
+            <!-- ilvl badge above icon (main) or inline (alt) -->
+            <div :class="[isAlt ? 'text-[8px]' : 'mb-0.5 text-[10px]', 'font-bold leading-none', getQualityColor(getItem(slot).quality)]">
                 {{ getItem(slot).ilvl }}
             </div>
 
             <a :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
-               class="w-[48px] h-[48px] shrink-0 relative block bg-gray-800 border rounded transition-colors flex items-center justify-center group"
-               :class="getQualityClass(getItem(slot).quality)"
+               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors flex items-center justify-center group', getQualityClass(getItem(slot).quality)]"
                target="_blank"
                :data-wowhead="getWowheadData(getItem(slot))">
                 <img v-if="getItem(slot).icon"
                      :src="`https://wow.zamimg.com/images/wow/icons/large/${getItem(slot).icon}.jpg`"
                      class="w-full h-full object-cover rounded"
                      :alt="getItem(slot).name" />
-                <span v-else class="text-[8px] text-gray-500 font-bold uppercase">
+                <span v-else class="text-[6px] text-gray-500 font-bold uppercase">
                     {{ getItem(slot).slot ? getItem(slot).slot.substring(0,2) : '??' }}
                 </span>
             </a>
 
-            <!-- Upgrade track badge below icon -->
-            <div class="mt-0.5 h-[12px] flex items-center">
+            <!-- Upgrade track badge below icon (main only) -->
+            <div v-if="!isAlt" class="mt-0.5 h-[12px] flex items-center">
                 <div v-if="getItem(slot).upgrade"
                      :class="['font-bold text-[10px]', trackColorMap[getItem(slot).upgrade.track] || 'text-gray-400']">
                     {{ trackAbbreviations[getItem(slot).upgrade.track] || getItem(slot).upgrade.track }} {{ getItem(slot).upgrade.level }}/{{ getItem(slot).upgrade.max }}
                 </div>
             </div>
         </div>
-        <div v-else class="w-[48px] h-[48px] mx-auto rounded border border-white/5 bg-black/20 flex items-center justify-center" :title="slot">
-            <span class="text-[9px] text-gray-800 font-bold uppercase">{{ slot.substring(0, 3) }}</span>
+        <div v-else :class="isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]'" class="mx-auto rounded border border-white/5 bg-black/20 flex items-center justify-center" :title="slot">
+            <span :class="isAlt ? 'text-[6px]' : 'text-[9px]'" class="text-gray-800 font-bold uppercase">{{ slot.substring(0, 3) }}</span>
         </div>
     </td>
 </template>

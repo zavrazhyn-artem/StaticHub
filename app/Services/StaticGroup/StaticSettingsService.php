@@ -55,7 +55,7 @@ class StaticSettingsService
 
     public function buildDiscordSettingsPayload(StaticGroup $static): array
     {
-        $context = $this->resolveDiscordGuildContext($static->discord_guild_id);
+        $context = $this->resolveDiscordGuildContext($static);
 
         $clientId    = config('services.discord.client_id');
         $redirectUri = urlencode(config('services.discord.redirect', ''));
@@ -290,14 +290,17 @@ class StaticSettingsService
 
     /**
      * Resolve Discord guild context including bot guilds, channels, and roles.
-     *
-     * @param string|null $savedGuildId
-     * @return array
+     * Guilds are filtered to only those where the static's leader is a member.
      */
-    public function resolveDiscordGuildContext(?string $savedGuildId): array
+    public function resolveDiscordGuildContext(StaticGroup $static): array
     {
-        $botGuilds = $this->discordMessageService->getGuildsTheBotIsIn();
-        $discordGuildId = $savedGuildId;
+        $ownerDiscordId = $static->owner?->discord_id;
+
+        $botGuilds = $ownerDiscordId
+            ? $this->discordMessageService->getGuildsForMember($ownerDiscordId)
+            : [];
+
+        $discordGuildId = $static->discord_guild_id;
 
         if (empty($discordGuildId) && count($botGuilds) === 1) {
             $discordGuildId = $botGuilds[0]['id'];
