@@ -35,7 +35,7 @@ class RawDataSyncService
     public function syncRawData(Character $character, string $service = 'all'): void
     {
         $realmSlug = strtolower((string) ($character->realm?->slug ?? ''));
-        $name      = strtolower($character->name);
+        $name      = mb_strtolower($character->name);
         $region    = strtolower((string) ($character->realm?->region ?? config('services.battlenet.region', 'eu')));
 
         $updates = [];

@@ -62,7 +62,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}?namespace=profile-{$region}&locale=en_US";
 
@@ -82,7 +82,7 @@ class BlizzardCharacterApiService
     {
         $token = $this->authService->getAccessToken();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment?namespace=profile-{$region}&locale=en_US";
 
@@ -103,7 +103,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/character-media?namespace=profile-{$region}&locale=en_US";
 
@@ -124,7 +124,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/specializations?namespace=profile-{$region}&locale=en_US";
 
@@ -145,7 +145,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/mythic-keystone-profile?namespace=profile-{$region}&locale=en_US";
 
@@ -166,7 +166,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/encounters/raids?namespace=profile-{$region}&locale=en_US";
 
@@ -188,7 +188,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/achievements/statistics?namespace=profile-{$region}&locale=en_US";
 
@@ -209,7 +209,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/quests/completed?namespace=profile-{$region}&locale=en_US";
 
@@ -226,7 +226,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/pvp-summary?namespace=profile-{$region}&locale=en_US";
 
@@ -243,7 +243,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/pvp-bracket/{$bracket}?namespace=profile-{$region}&locale=en_US";
 
@@ -260,7 +260,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/reputations?namespace=profile-{$region}&locale=en_US";
 
@@ -277,7 +277,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/titles?namespace=profile-{$region}&locale=en_US";
 
@@ -294,7 +294,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/collections/mounts?namespace=profile-{$region}&locale=en_US";
 
@@ -311,7 +311,7 @@ class BlizzardCharacterApiService
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/collections/pets?namespace=profile-{$region}&locale=en_US";
 
@@ -327,7 +327,7 @@ class BlizzardCharacterApiService
     {
         $token = $this->authService->getAccessToken();
         $region = $this->authService->getRegion();
-        $characterNameLower = strtolower($characterName);
+        $characterNameLower = mb_strtolower($characterName);
 
         $response = Http::withToken($token)
             ->withHeaders(['Battlenet-Namespace' => "profile-{$region}"])
@@ -358,7 +358,7 @@ class BlizzardCharacterApiService
     {
         $token = $this->authService->getAccessToken();
         $realmSlug = strtolower($realmSlug);
-        $characterName = strtolower($characterName);
+        $characterName = mb_strtolower($characterName);
 
         $equipment = $this->fetchRawEquipment($region, $token, $realmSlug, $characterName);
         $mPlus = $this->fetchRawMPlusProgression($region, $token, $realmSlug, $characterName);

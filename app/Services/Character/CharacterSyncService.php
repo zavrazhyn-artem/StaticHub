@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Character;
 
+use App\Jobs\Character\FetchBnetRawDataJob;
+use App\Jobs\Character\FetchRioRawDataJob;
 use App\Jobs\Character\SyncCharacterItemLevelJob;
 use App\Models\Character;
 use App\Models\Realm;
@@ -151,6 +153,8 @@ class CharacterSyncService
     private function dispatchSyncJob(Character $character): void
     {
         SyncCharacterItemLevelJob::dispatch($character);
+        FetchBnetRawDataJob::dispatch($character);
+        FetchRioRawDataJob::dispatch($character);
     }
 
     /**
