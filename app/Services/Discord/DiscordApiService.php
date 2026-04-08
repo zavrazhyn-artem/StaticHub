@@ -68,6 +68,37 @@ class DiscordApiService
         return $this->makeRequest('POST', "/channels/{$channelId}/messages", $payload);
     }
 
+    /**
+     * Send a message and return detailed result including error info.
+     */
+    public function sendMessageDetailed(string $channelId, array $payload): array
+    {
+        if (empty($this->botToken)) {
+            return ['success' => false, 'error' => 'Bot token is missing in configuration.'];
+        }
+
+        $response = Http::withToken($this->botToken, 'Bot')
+            ->post($this->baseUrl . "/channels/{$channelId}/messages", $payload);
+
+        if ($response->successful()) {
+            $data = $response->json() ?? [];
+            return ['success' => true, 'message_id' => $data['id'] ?? null];
+        }
+
+        $body = $response->json() ?? [];
+
+        Log::error("Discord API error on POST /channels/{$channelId}/messages", [
+            'status' => $response->status(),
+            'body'   => $response->body(),
+        ]);
+
+        return [
+            'success'    => false,
+            'error'      => $body['message'] ?? 'Unknown Discord API error',
+            'error_code' => $body['code'] ?? $response->status(),
+        ];
+    }
+
     public function updateMessage(string $channelId, string $messageId, array $payload): array|false|null
     {
         return $this->makeRequest('PATCH', "/channels/{$channelId}/messages/{$messageId}", $payload);

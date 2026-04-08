@@ -100,6 +100,24 @@ class StaticSettingsController extends Controller
         ]);
     }
 
+    public function testDiscordChannel(StaticGroup $static): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $result = $this->service->executeChannelTest($static);
+
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    public function deleteChannelMessage(StaticGroup $static, string $messageId): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $success = $this->service->executeChannelMessageDelete($static, $messageId);
+
+        return response()->json(['success' => $success]);
+    }
+
     public function testDiscordWebhook(StaticGroup $static): JsonResponse
     {
         Gate::authorize('canAccessSettings', $static);

@@ -30,6 +30,24 @@ class DiscordMessageService
     }
 
     /**
+     * Send a test message to a channel via the bot and return detailed result.
+     */
+    public function sendTestMessageToChannel(string $channelId): array
+    {
+        $payload = DiscordMessageBuilder::buildChannelTestPayload();
+
+        return $this->discordApiTask->sendMessageDetailed($channelId, $payload);
+    }
+
+    /**
+     * Delete a message from a channel via the bot.
+     */
+    public function deleteChannelMessage(string $channelId, string $messageId): bool
+    {
+        return $this->discordApiTask->deleteMessage($channelId, $messageId);
+    }
+
+    /**
      * Fetch all guilds the bot is in.
      */
     public function getGuildsTheBotIsIn(): array

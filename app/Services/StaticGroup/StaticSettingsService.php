@@ -243,6 +243,24 @@ class StaticSettingsService
         return null;
     }
 
+    public function executeChannelTest(StaticGroup $static): array
+    {
+        if (empty($static->discord_channel_id)) {
+            return ['success' => false, 'error' => 'No announcement channel configured.'];
+        }
+
+        return $this->discordMessageService->sendTestMessageToChannel($static->discord_channel_id);
+    }
+
+    public function executeChannelMessageDelete(StaticGroup $static, string $messageId): bool
+    {
+        if (empty($static->discord_channel_id)) {
+            return false;
+        }
+
+        return $this->discordMessageService->deleteChannelMessage($static->discord_channel_id, $messageId);
+    }
+
     public function executeWebhookTest(StaticGroup $static): array
     {
         $messageId = $this->discordWebhookService->sendTestMessage($static);

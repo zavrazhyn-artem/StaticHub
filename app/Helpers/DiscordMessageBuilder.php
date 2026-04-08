@@ -10,6 +10,30 @@ use Illuminate\Support\Collection;
 
 class DiscordMessageBuilder
 {
+    private static function spacerImageUrl(): string
+    {
+        return config('app.url') . '/images/spacer.png';
+    }
+
+    /**
+     * Build a simple test message payload for the announcement channel.
+     */
+    public static function buildChannelTestPayload(): array
+    {
+        return [
+            'embeds' => [
+                [
+                    'title'       => '🧪 BlastR: Channel Test',
+                    'description' => 'This is a test message to confirm the bot can post in this channel. You can safely delete it.',
+                    'color'       => 3447003,
+                    'image'       => ['url' => self::spacerImageUrl()],
+                    'footer'      => ['text' => 'Blast Your Raid • blastr.pro'],
+                    'timestamp'   => now()->toIso8601String(),
+                ],
+            ],
+        ];
+    }
+
     public static function buildRaidMessage(Event $event, array $rosterData): array
     {
         // --- Reclassify for Discord display ---

@@ -19,8 +19,10 @@ const props = defineProps({
     webhookChannel:   { type: Object,  default: null },
     webhookMuted:     { type: Boolean, default: false },
     updateUrl:        { type: String,  required: true },
-    testUrl:          { type: String,  required: true },
-    deleteMessageUrl: { type: String,  required: true },
+    testUrl:                { type: String,  required: true },
+    testChannelUrl:         { type: String,  required: true },
+    deleteMessageUrl:       { type: String,  required: true },
+    deleteChannelMessageUrl:{ type: String,  required: true },
     inviteUrl:        { type: String,  required: true },
     scheduleTabUrl:   { type: String,  required: true },
     discordTabUrl:    { type: String,  required: true },
@@ -52,6 +54,12 @@ const saved  = ref({});
 const testState     = ref('idle'); // idle | loading | success | error
 const testMessageId = ref(null);
 const deletingMsg   = ref(false);
+
+// Test channel (bot API)
+const channelTestState     = ref('idle'); // idle | loading | success | error
+const channelTestMessageId = ref(null);
+const channelTestError     = ref('');
+const deletingChannelMsg   = ref(false);
 
 // Toast
 const toastShow    = ref(false);
@@ -208,6 +216,61 @@ async function deleteTestMessage() {
     }
 }
 
+// --- Test channel (bot API) ---
+async function testChannel() {
+    channelTestState.value     = 'loading';
+    channelTestMessageId.value = null;
+    channelTestError.value     = '';
+
+    try {
+        const res  = await fetch(props.testChannelUrl, {
+            method:  'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            channelTestState.value     = 'success';
+            channelTestMessageId.value = data.message_id || null;
+        } else {
+            channelTestState.value = 'error';
+            channelTestError.value = data.error || __('Unknown error');
+            setTimeout(() => { channelTestState.value = 'idle'; channelTestError.value = ''; }, 8000);
+        }
+    } catch {
+        channelTestState.value = 'error';
+        channelTestError.value = __('Network error. Please try again.');
+        setTimeout(() => { channelTestState.value = 'idle'; channelTestError.value = ''; }, 8000);
+    }
+}
+
+async function deleteChannelTestMessage() {
+    if (!channelTestMessageId.value) return;
+    deletingChannelMsg.value = true;
+
+    const url = props.deleteChannelMessageUrl.replace(':messageId', channelTestMessageId.value);
+
+    try {
+        const res  = await fetch(url, {
+            method:  'DELETE',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            channelTestMessageId.value = null;
+            channelTestState.value     = 'idle';
+            showToast(__('Test message deleted.'));
+        } else {
+            showToast(__('Could not delete the message.'), true);
+        }
+    } catch {
+        showToast(__('Could not delete the message.'), true);
+    } finally {
+        deletingChannelMsg.value = false;
+    }
+}
+
 const noChannelsError = () =>
     selectedGuildId.value &&
     !channelsLoading.value &&
@@ -341,22 +404,39 @@ const noChannelsError = () =>
                                 <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_channel_id').cls]">{{ fieldIcon('discord_channel_id').icon }}</span>
                             </template>
                         </div>
-                        <SearchableSelect
-                            v-if="selectedGuildId"
-                            v-model="selectedChannelId"
-                            :options="channels"
-                            input-name="discord_channel_id"
-                            icon="chat"
-                            prefix="# "
-                            :placeholder="channelsLoading ? __('Loading channels...') : __('Select a channel...')"
-                            :search-placeholder="__('Search channel...')"
-                            :empty-text="__('No channels found.')"
-                            :loading="channelsLoading"
-                            :disabled="noChannelsError()"
-                            accent-color="#5865F2"
-                        />
-                        <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
-                            {{ __('Select Server first...') }}
+                        <div :class="['relative', selectedChannelId ? 'channel-test-group' : '']">
+                            <SearchableSelect
+                                v-if="selectedGuildId"
+                                v-model="selectedChannelId"
+                                :options="channels"
+                                input-name="discord_channel_id"
+                                icon="chat"
+                                prefix="# "
+                                :placeholder="channelsLoading ? __('Loading channels...') : __('Select a channel...')"
+                                :search-placeholder="__('Search channel...')"
+                                :empty-text="__('No channels found.')"
+                                :loading="channelsLoading"
+                                :disabled="noChannelsError()"
+                                accent-color="#5865F2"
+                            />
+                            <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
+                                {{ __('Select Server first...') }}
+                            </div>
+                            <!-- Integrated test button (same pattern as webhook) -->
+                            <button
+                                v-if="selectedChannelId"
+                                type="button"
+                                :disabled="channelTestState === 'loading'"
+                                @click="testChannel"
+                                :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
+                                         channelTestState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
+                                         channelTestState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
+                                                                           'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
+                                <span :class="['material-symbols-outlined text-base leading-none', channelTestState === 'loading' ? 'animate-spin' : '']">
+                                    {{ channelTestState === 'loading' ? 'sync' : channelTestState === 'success' ? 'check_circle' : channelTestState === 'error' ? 'error' : 'send' }}
+                                </span>
+                                <span>{{ __('Test') }}</span>
+                            </button>
                         </div>
                         <p v-if="noChannelsError()" class="text-[9px] text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
                             <span class="material-symbols-outlined text-[11px]">error</span>
@@ -391,6 +471,35 @@ const noChannelsError = () =>
                             {{ __('Select Server first...') }}
                         </div>
                         <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('This role will be pinged when a raid announcement is posted.') }}</p>
+                    </div>
+                </div>
+
+                <!-- Channel test success banner -->
+                <div v-if="channelTestMessageId"
+                     class="flex items-center gap-3 p-4 mt-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
+                    <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
+                    <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                        {{ __('Test message sent! Check your Discord channel.') }}
+                    </p>
+                    <button
+                        type="button"
+                        :disabled="deletingChannelMsg"
+                        @click="deleteChannelTestMessage"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                        <span :class="['material-symbols-outlined text-sm', deletingChannelMsg ? 'animate-spin' : '']">
+                            {{ deletingChannelMsg ? 'sync' : 'delete' }}
+                        </span>
+                        {{ __('Delete message') }}
+                    </button>
+                </div>
+
+                <!-- Channel test error banner -->
+                <div v-if="channelTestState === 'error' && channelTestError"
+                     class="flex items-center gap-3 p-4 mt-4 rounded-lg bg-error-neon/5 border border-error-neon/20">
+                    <span class="material-symbols-outlined text-error-neon text-lg flex-shrink-0">error</span>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-headline font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
+                        <p class="text-[10px] text-on-surface-variant font-medium mt-1">{{ channelTestError }}</p>
                     </div>
                 </div>
             </div>
@@ -538,3 +647,16 @@ const noChannelsError = () =>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* When test button is overlaid, adjust the SearchableSelect trigger */
+.channel-test-group :deep(> div > div:first-child) {
+    padding-right: 88px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+/* Shift the clear/chevron icons left so they don't overlap the test button */
+.channel-test-group :deep(> div > div:first-child > span:last-of-type) {
+    right: 96px;
+}
+</style>
