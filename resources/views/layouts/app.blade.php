@@ -50,6 +50,7 @@
             </div>
         </div>
         @if($static && !$isOnboarding)
+            @can('manage', $static)
             <div class="hidden md:flex items-center gap-4 ml-4">
                 <button onclick="handleInviteClick({{ $static->id }})"
                         class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
@@ -62,6 +63,7 @@
                     Invite Link Copied!
                 </div>
             </div>
+            @endcan
 
             <script>
                 async function handleInviteClick(staticId) {

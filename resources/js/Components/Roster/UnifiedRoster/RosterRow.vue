@@ -78,7 +78,7 @@ const emit = defineEmits([
                     <div class="min-w-0">
                         <div class="flex items-center gap-1">
                             <span class="font-bold tracking-tight truncate"
-                                  :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[10px]' : 'text-xs']">
+                                  :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[12px]' : 'text-[16px]']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
                             <img v-if="char?.main_spec?.icon_url"

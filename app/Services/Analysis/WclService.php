@@ -153,9 +153,17 @@ class WclService
 
         // Buff uptime (raid-wide auras ≥5% uptime)
         $totalDurationMs = $durations['total_seconds'] * 1000;
+        $fightCount      = count($raidFights);
         $buffUptime = WclReportParserHelper::parseBuffUptime(
             $tablesData['buffs']['data'] ?? [],
             $totalDurationMs
+        );
+
+        // Consumable buffs (flasks, food, augment runes) — raid-wide aggregate
+        $consumableBuffs = WclReportParserHelper::parseConsumableBuffs(
+            $tablesData['buffs']['data'] ?? [],
+            $totalDurationMs,
+            $fightCount
         );
 
         // Debuff uptime
@@ -175,9 +183,32 @@ class WclService
         $playerDetailsRaw = $tablesData['playerDetails'] ?? null;
         $playerDetails    = WclReportParserHelper::parsePlayerDetails($playerDetailsRaw, $rosterNames);
 
-        // Rankings (parse %)
-        $rankingsRaw = $tablesData['rankings'] ?? null;
-        $rankings    = WclReportParserHelper::parseRankings($rankingsRaw, $rosterNames);
+        // Merge actual consumable usage into player_details
+        $consumables = $castsAndConsumables['consumables'];
+        foreach ($playerDetails as $name => &$details) {
+            $details['consumables'] = $consumables[$name] ?? [];
+        }
+        unset($details);
+
+        // Rankings (parse %) — only available for kills
+        $hasKills  = !empty(array_filter($raidFights, fn($f) => $f['kill'] ?? false));
+        $rankings  = [];
+
+        if ($hasKills) {
+            $killFightIds = array_values(array_map(
+                fn($f) => $f['id'],
+                array_filter($raidFights, fn($f) => $f['kill'] ?? false)
+            ));
+
+            // Re-query rankings with kill-only fight IDs for accurate parse %
+            $rankingsQuery = WclQueryBuilder::buildRankingsQuery();
+            $rankingsData  = $this->executeGraphql($rankingsQuery, [
+                'reportId' => $reportId,
+                'fightIds' => $killFightIds,
+            ])['reportData']['report'] ?? [];
+
+            $rankings = WclReportParserHelper::parseRankings($rankingsData['rankings'] ?? null, $rosterNames);
+        }
 
         // Merge rankings parse % into performance_metrics
         foreach ($rankings as $name => $rankData) {
@@ -190,6 +221,7 @@ class WclService
         return [
             'raid_title'         => $initialData['title'] ?? 'Raid Analysis',
             'difficulties'       => $difficulties,
+            'has_kills'          => $hasKills,
             'fight_durations'    => $durations,
             'phase_summary'      => $phaseSummary,
             'players'            => $cleanPlayers,
@@ -198,8 +230,9 @@ class WclService
             'interrupts'         => $cleanInterrupts,
             'major_damage_taken' => array_slice($cleanDamageTaken, 0, 15),
             'casts_summary'      => $castsAndConsumables['casts'],
-            'consumables_used'   => $castsAndConsumables['consumables'],
+            'consumables_used'   => $consumables,
             'dispels'            => $cleanDispels,
+            'consumable_buffs'   => $consumableBuffs,
             'buff_uptime'        => $buffUptime,
             'debuff_uptime'      => $debuffUptime,
             'resource_waste'     => $resourceWaste,

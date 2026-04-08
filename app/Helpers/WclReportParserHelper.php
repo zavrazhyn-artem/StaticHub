@@ -96,18 +96,19 @@ class WclReportParserHelper
             $abilityName = $abilityData['name'] ?? 'Unknown';
             if (in_array($abilityName, $ignoredAbilities)) continue;
 
-            $actors = $abilityData['entries'] ?? $abilityData['details'] ?? $abilityData['sources'] ?? [];
+            $isConsumable = self::isConsumableAbility($abilityName, $abilityData['abilityIcon'] ?? '');
+
+            // WCL viewBy: Ability returns player data in subentries (complete) or sources (top 5 only)
+            $actors       = $abilityData['subentries'] ?? $abilityData['entries'] ?? $abilityData['details'] ?? $abilityData['sources'] ?? [];
+            $useActorName = isset($abilityData['subentries']);
 
             foreach ($actors as $actor) {
-                $playerName = $actor['name'] ?? 'Unknown';
+                $playerName = $useActorName ? ($actor['actorName'] ?? $actor['name'] ?? 'Unknown') : ($actor['name'] ?? 'Unknown');
                 $totalCasts = $actor['total'] ?? 0;
 
                 if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
 
-                $isPotion     = stripos($abilityName, 'Potion') !== false;
-                $isHealthstone = $abilityName === 'Healthstone';
-
-                if ($isPotion || $isHealthstone) {
+                if ($isConsumable) {
                     $cleanConsumables[$playerName][$abilityName] =
                         ($cleanConsumables[$playerName][$abilityName] ?? 0) + $totalCasts;
                 }
@@ -121,6 +122,20 @@ class WclReportParserHelper
             'casts'       => $castsSummary,
             'consumables' => $cleanConsumables,
         ];
+    }
+
+    /**
+     * Detect consumable abilities by icon pattern and name keywords.
+     * Alchemy items use inv_*alchemy*|inv_potion* icons; Healthstones use warlock_-healthstone/bloodstone.
+     */
+    private static function isConsumableAbility(string $name, string $icon): bool
+    {
+        $iconLower = strtolower($icon);
+        if (str_contains($iconLower, 'alchemy') || str_contains($iconLower, 'potion') || str_contains($iconLower, 'healthstone') || str_contains($iconLower, 'bloodstone')) {
+            return true;
+        }
+
+        return stripos($name, 'Potion') !== false || stripos($name, 'Healthstone') !== false;
     }
 
     public static function calculatePerformanceMetrics(
@@ -140,6 +155,7 @@ class WclReportParserHelper
             $performanceMetrics[$entry['name']] = [
                 'dps'        => (int) round($entry['total'] / $raidDuration),
                 'dps_rank'   => 0,
+                'ilvl'       => $entry['itemLevel'] ?? null,
                 'percentile' => $entry['rankPercent'] ?? null,
             ];
         }
@@ -254,9 +270,10 @@ class WclReportParserHelper
                     }
                 }
 
-                // Average item level from gear slots (exclude shirt=18, tabard=19)
+                // Average item level from gear slots (exclude shirt=3, tabard=17, empty/cosmetic ilvl ≤ 1)
                 $itemLevels = array_filter(
-                    array_map(fn($i) => !in_array($i['slot'] ?? -1, [18, 19]) ? ($i['itemLevel'] ?? null) : null, $gear)
+                    array_map(fn($i) => !in_array($i['slot'] ?? -1, [3, 17]) ? ($i['itemLevel'] ?? null) : null, $gear),
+                    fn($ilvl) => $ilvl !== null && $ilvl > 1
                 );
                 $avgIlvl = !empty($itemLevels)
                     ? round(array_sum($itemLevels) / count($itemLevels), 1)
@@ -278,7 +295,6 @@ class WclReportParserHelper
                     'class'       => $player['type'] ?? null,
                     'spec'        => $specName,
                     'avg_ilvl'    => $avgIlvl,
-                    'potion_use'  => $player['potionUse'] ?? 0,
                     'trinkets'    => $trinkets,
                     'stats'       => $stats,
                     'spec_ids'    => $combatantInfo['specIDs'] ?? [],
@@ -354,6 +370,45 @@ class WclReportParserHelper
         }
 
         // Sort by uptime descending
+        uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
+
+        return $result;
+    }
+
+    /**
+     * Extract consumable buffs (flasks, food, augment runes) from aggregate Buffs data.
+     * Returns: [ buffName => [ 'uptime_pct' => float, 'avg_players_per_fight' => float ] ]
+     */
+    public static function parseConsumableBuffs(array $buffsData, int $totalDurationMs, int $fightCount): array
+    {
+        $totalTime = $buffsData['totalTime'] ?? $totalDurationMs;
+        if ($totalTime <= 0 || $fightCount <= 0) {
+            return [];
+        }
+
+        $consumableKeywords = ['Flask', 'Phial', 'Well Fed', 'Hearty', 'Augmentation', 'Vantus Rune'];
+        $result = [];
+
+        foreach ($buffsData['auras'] ?? [] as $aura) {
+            $name = $aura['name'] ?? '';
+            $isConsumable = false;
+            foreach ($consumableKeywords as $keyword) {
+                if (stripos($name, $keyword) !== false) {
+                    $isConsumable = true;
+                    break;
+                }
+            }
+            if (!$isConsumable) continue;
+
+            $uptime   = $aura['totalUptime'] ?? 0;
+            $uses     = $aura['totalUses'] ?? 0;
+
+            $result[$name] = [
+                'uptime_pct'           => round($uptime / $totalTime * 100, 1),
+                'avg_players_per_fight' => round($uses / $fightCount, 1),
+            ];
+        }
+
         uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
 
         return $result;

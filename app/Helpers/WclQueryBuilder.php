@@ -15,7 +15,7 @@ class WclQueryBuilder
               title
               phases { encounterID separatesWipes phases { id name isIntermission } }
               fights {
-                id name difficulty kill
+                id name difficulty kill encounterID
                 bossPercentage fightPercentage
                 startTime endTime averageItemLevel
                 lastPhase lastPhaseIsIntermission
@@ -46,6 +46,18 @@ GQL;
               debuffs:     table(dataType: Debuffs,     fightIDs: $fightIds, killType: Encounters)
               resources:   table(dataType: Resources,   fightIDs: $fightIds, killType: Encounters)
               playerDetails(fightIDs: $fightIds, includeCombatantInfo: true)
+            }
+          }
+        }
+GQL;
+    }
+
+    public static function buildRankingsQuery(): string
+    {
+        return <<<'GQL'
+        query ($reportId: String!, $fightIds: [Int]!) {
+          reportData {
+            report(code: $reportId) {
               rankings(fightIDs: $fightIds, compare: Parses)
             }
           }

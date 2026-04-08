@@ -11,6 +11,7 @@ use App\Models\StaticGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class StaticController extends Controller
@@ -24,8 +25,7 @@ class StaticController extends Controller
 
     public function generateInvite(StaticGroup $static): JsonResponse
     {
-        // Permission check (only owner or admin can generate link)
-        // For simplicity, we allow all members for now, but role check is better
+        Gate::authorize('manage', $static);
 
         $link = $this->staticService->getInviteLink($static);
 

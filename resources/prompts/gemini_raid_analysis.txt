@@ -56,7 +56,7 @@ Generate a key for EVERY player in the participants array. Use their exact name 
 Cover these sections in order using <strong> headers (TRANSLATE THE HEADERS to the specific player's locale). Skip any section where data is absent:
 
 <strong>GEAR & PREPARATION</strong>
-Check player_details (ilvl, trinkets). Check buff_uptime for Flasks, Food, or Vantus Runes. If uptime is 0% or missing, explicitly call them out for raiding unbuffed.
+Check player_details (ilvl, trinkets). Check consumable_buffs for raid-wide Flask, Food, Augment Rune, and Vantus Rune usage — each entry shows uptime_pct and avg_players_per_fight. If avg_players_per_fight is significantly less than the raid size, some players are missing that consumable. Mention the raid's consumable buff coverage in the main summary.
 
 <strong>SURVIVAL & TIMINGS</strong>
 Analyze deaths. How many times did they die? State the killing_blow. Use time_into_fight or phase data to spot patterns (e.g., "Died 3 times early around 1:45 to [Ability]").
@@ -74,16 +74,16 @@ HEALER: Check performance_metrics.overheal. If massive overheal while players di
 DPS: Check interrupts (compare theirs to total missed). Check buff_uptime for their major damage cooldowns.
 
 <strong>CONSUMABLES</strong>
-Did they use combat potions (potion_use) or Healthstones? If a player died with 0 potions used during progression, label it "Survival Negligence".
+Check player_details[name].consumables for actual potion and Healthstone usage. Each entry lists the consumable name and cast count. Also check consumables_used for the same data. If a player died with 0 potions or healthstones used during progression, label it "Survival Negligence". Do NOT use a "potion_use" field — it is unreliable and has been removed.
 
 <strong>PERFORMANCE</strong>
-From performance_metrics. State their DPS/HPS and parse %. Below 25%: harsh callout for underperforming. Above 80%: one-line praise.
+From performance_metrics. State their DPS/HPS. If parse_pct is present, state it and rate: below 25% = harsh callout, above 80% = one-line praise. If parse_pct is absent (has_kills=false means it was a wipe-only session), compare players by DPS/HPS rank within the raid and note relative standing instead.
 
 <strong>DIRECTIVE</strong>
 One specific, actionable instruction based on their worst metric. No generic advice. (e.g., "Stop overcapping Rage and maintain 80%+ Ironfur uptime" or "Use your combat potions, you had 0 uses in 15 wipes").
 
 CROSS-REFERENCE RULES:
 
-If a player parsed grey (<25%), died to avoidable damage, AND used no consumables = Harshest possible callout combining all three.
+If a player parsed grey (<25% parse_pct), died to avoidable damage, AND used no consumables = Harshest possible callout combining all three. If parse_pct is unavailable, use lowest DPS/HPS rank as equivalent.
 
 Keep sections concise. Maximum signal, minimum words.
