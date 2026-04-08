@@ -164,55 +164,6 @@
                         <div class="text-[10px] text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
                     </div>
 
-                    <a href="{{ route('profile.edit') }}"
-                       class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors">
-                        {{ __('Profile') }}
-                    </a>
-
-                    <div class="px-4 py-2 border-y border-white/5 bg-black/10">
-                        <div
-                            class="font-headline text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">{{ __('My Characters') }}</div>
-                        <div class="space-y-1">
-                            @php
-                                $wowClassColors = [
-                                    'Death Knight' => '#C41F3B', 'Demon Hunter' => '#A330C9',
-                                    'Druid'        => '#FF7C0A', 'Evoker'       => '#33937F',
-                                    'Hunter'       => '#AAD372', 'Mage'         => '#3FC7EB',
-                                    'Monk'         => '#00FF98', 'Paladin'      => '#F48CBA',
-                                    'Priest'       => '#FFFFFF', 'Rogue'        => '#FFF468',
-                                    'Shaman'       => '#0070DD', 'Warlock'      => '#8788EE',
-                                    'Warrior'      => '#C69B3A',
-                                ];
-                                $staticChars = Auth::user()->characters()
-                                    ->whereHas('statics')
-                                    ->with('statics')
-                                    ->get()
-                                    ->sortBy([
-                                        fn($c) => $c->statics->contains(fn($s) => $s->pivot->role === 'main') ? 0 : 1,
-                                        fn($c) => -($c->equipped_item_level ?? 0),
-                                    ])
-                                    ->values()
-                                    ->take(5);
-                            @endphp
-                            @forelse($staticChars as $character)
-                                <a href="{{ route('characters.index') }}"
-                                   class="flex items-center gap-2 py-1 hover:bg-white/5 rounded transition-colors -mx-1 px-1">
-                                    <div class="relative shrink-0">
-                                        <img src="{{ $character->avatar_url }}"
-                                             class="w-8 h-8 rounded-full border border-white/10" alt="">
-                                    </div>
-                                    <span class="text-[10px] font-bold truncate"
-                                          style="color: {{ $wowClassColors[$character->playable_class] ?? '#9ca3af' }}">{{ $character->name }}</span>
-                                </a>
-                            @empty
-                                <div
-                                    class="text-[9px] text-gray-600 italic tracking-wider">{{ __('No characters') }}</div>
-                            @endforelse
-                            <a href="{{ route('characters.index') }}"
-                               class="block text-[8px] font-bold text-cyan-400/60 hover:text-cyan-400 uppercase tracking-widest mt-1 transition-colors">{{ __('View All') }}</a>
-                        </div>
-                    </div>
-
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <a href="{{ route('logout') }}"
@@ -277,14 +228,19 @@
                 <div class="h-px bg-white/5 w-full"></div>
             </div>
 
-            @can('manage', $static)
-                <a href="{{ route('statics.settings.schedule', $static->id) }}"
-                   class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
-                    <span
-                        class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
-                    <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
-                </a>
-            @endcan
+            <a href="{{ route('characters.index') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('characters.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('characters.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">person</span>
+                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('My Characters') }}</span>
+            </a>
+
+            <a href="{{ route('statics.settings.profile', $static->id) }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
+                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
+            </a>
         </div>
     @else
         <div class="px-6 mb-8 flex items-center gap-3">

@@ -135,11 +135,36 @@ class StaticLogService
         if ($authUserReport) {
             $char = $authUserReport->character;
             $personalData = [
+                'id'             => $authUserReport->id,
                 'html'           => Str::markdown($authUserReport->content),
                 'char_name'      => $char->name,
                 'char_class'     => $char->playable_class,
                 'char_class_css' => strtolower(str_replace(' ', '-', $char->playable_class)),
             ];
+        }
+
+        // All roster personal reports for leaders/officers
+        $rosterReports = [];
+        $rosterMembers = [];
+        if ($canViewGlobalReport) {
+            $allPersonalReports = $report->personalReports()->with('character')->get();
+
+            $rosterReports = $allPersonalReports->mapWithKeys(function ($pr) {
+                return [$pr->id => Str::markdown($pr->content)];
+            })->all();
+
+            $rosterMembers = $allPersonalReports->map(function ($pr) {
+                $char = $pr->character;
+                return [
+                    'id'        => $pr->id,
+                    'name'      => $char->name,
+                    'character' => [
+                        'name'           => $char->name,
+                        'playable_class' => $char->playable_class,
+                        'avatar_url'     => $char->avatar_url,
+                    ],
+                ];
+            })->sortBy('name')->values()->all();
         }
 
         $reportData = [
@@ -168,6 +193,8 @@ class StaticLogService
         return [
             'reportData'         => $reportData,
             'personalData'       => $personalData,
+            'rosterReports'      => $rosterReports,
+            'rosterMembers'      => $rosterMembers,
             'canViewGlobalReport' => $canViewGlobalReport,
             'canUseAiChat'       => $canUseAiChat,
             'chatHistory'        => $chatHistory,

@@ -3,46 +3,60 @@ import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
 
 defineProps({
+    profileUrl:  { type: String, required: true },
     scheduleUrl: { type: String, required: true },
     discordUrl:  { type: String, required: true },
     logsUrl:     { type: String, required: true },
-    activeTab:   { type: String, required: true }, // 'schedule' | 'discord' | 'logs'
+    activeTab:   { type: String, required: true }, // 'profile' | 'schedule' | 'discord' | 'logs'
+    canManage:   { type: Boolean, default: false },
 });
 </script>
 
 <template>
     <div class="flex items-center gap-2 border-b border-white/5 mb-8">
-        <a :href="scheduleUrl"
+        <a :href="profileUrl"
            :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                    activeTab === 'schedule' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                    activeTab === 'profile' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
             <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-m">calendar_month</span>
-                {{ __('Schedule') }}
+                <span class="material-symbols-outlined text-m">person</span>
+                {{ __('Profile') }}
             </div>
-            <div v-if="activeTab === 'schedule'"
+            <div v-if="activeTab === 'profile'"
                  class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
         </a>
-        <a :href="discordUrl"
-           :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                    activeTab === 'discord' ? 'text-[#5865F2]' : 'text-on-surface-variant hover:text-white']">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2758-3.68-.2758-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1971.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
-                </svg>
-                {{ __('Discord') }}
-            </div>
-            <div v-if="activeTab === 'discord'"
-                 class="absolute bottom-0 left-0 w-full h-0.5 bg-[#5865F2] shadow-[0_0_10px_rgba(88,101,242,0.5)]"></div>
-        </a>
-        <a :href="logsUrl"
-           :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                    activeTab === 'logs' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-m">analytics</span>
-                {{ __('Warcraft Logs & AI') }}
-            </div>
-            <div v-if="activeTab === 'logs'"
-                 class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
-        </a>
+        <template v-if="canManage">
+            <a :href="scheduleUrl"
+               :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
+                        activeTab === 'schedule' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-m">calendar_month</span>
+                    {{ __('Schedule') }}
+                </div>
+                <div v-if="activeTab === 'schedule'"
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+            </a>
+            <a :href="discordUrl"
+               :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
+                        activeTab === 'discord' ? 'text-[#5865F2]' : 'text-on-surface-variant hover:text-white']">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2758-3.68-.2758-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1971.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
+                    </svg>
+                    {{ __('Discord') }}
+                </div>
+                <div v-if="activeTab === 'discord'"
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-[#5865F2] shadow-[0_0_10px_rgba(88,101,242,0.5)]"></div>
+            </a>
+            <a :href="logsUrl"
+               :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
+                        activeTab === 'logs' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-m">analytics</span>
+                    {{ __('Warcraft Logs & AI') }}
+                </div>
+                <div v-if="activeTab === 'logs'"
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+            </a>
+        </template>
     </div>
 </template>
