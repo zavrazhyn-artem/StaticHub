@@ -21,6 +21,8 @@ RUN npm run build
 # =============================================================================
 FROM composer:2.8 AS composer-builder
 
+RUN docker-php-ext-install pcntl
+
 WORKDIR /app
 
 # Install deps first (layer-cache friendly)
