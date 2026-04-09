@@ -97,7 +97,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
                             <span
                                 v-if="spec.is_main"
                                 class="absolute top-1 left-1 w-3.5 h-3.5 bg-yellow-400 rounded-full flex items-center justify-center shadow-sm"
-                                title="Main spec"
+                                :title="__('Main spec')"
                             >
                                 <span class="material-symbols-outlined text-black leading-none" style="font-size: 9px;">star</span>
                             </span>

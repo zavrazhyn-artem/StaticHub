@@ -102,7 +102,7 @@ defineExpose({ close });
                             ref="searchInputRef"
                             type="text"
                             v-model="timezoneSearch"
-                            placeholder="Search timezone..."
+                            :placeholder="__('Search timezone...')"
                             class="w-full bg-surface-container/50 border border-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:ring-1 focus:ring-primary outline-none transition-all"
                             @click.stop
                         />

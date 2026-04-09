@@ -82,13 +82,14 @@ const props = defineProps({
     csrfToken: { type: String, required: true },
     isGuildMaster: { type: Boolean, default: false },
     guildName: { type: String, default: '' },
+    inviteCode: { type: String, required: true },
 });
 
 const emit = defineEmits(['back', 'created']);
 
 const regionOptions = [
-    { id: 'eu', name: 'EU — Europe' },
-    { id: 'us', name: 'US — Americas' },
+    { id: 'eu', name: `EU — ${__('Europe')}` },
+    { id: 'us', name: `US — ${__('Americas')}` },
 ];
 
 const form = reactive({
@@ -115,7 +116,10 @@ async function submit() {
                 'X-CSRF-TOKEN': props.csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify(form),
+            body: JSON.stringify({
+                ...form,
+                invite_code: props.inviteCode,
+            }),
         });
 
         if (!response.ok) {

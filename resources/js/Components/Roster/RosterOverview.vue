@@ -65,8 +65,8 @@ const activeComponent = computed(() => {
       </div>
       <h3 class="text-lg font-medium text-white mb-2 italic uppercase tracking-widest">Blast Your Raid</h3>
       <p class="text-gray-400 max-w-sm">
-        We couldn't find any main characters in this raid group.
-        Make sure characters are assigned as "Main" in the Tactical Roster.
+        {{ __("We couldn't find any main characters in this raid group.") }}
+        {{ __('Make sure characters are assigned as Main in the Tactical Roster.') }}
       </p>
     </div>
   </div>

@@ -169,7 +169,7 @@ function closeModal() {
                             <!-- Inline save status -->
                             <span v-if="saving" class="material-symbols-outlined text-sm text-on-surface-variant animate-spin">progress_activity</span>
                             <span v-else-if="savedFlash" class="text-[10px] text-green-400 font-bold uppercase tracking-wider">{{ __('Saved!') }}</span>
-                            <span v-else-if="errorFlash" class="text-[10px] text-red-400 font-bold uppercase tracking-wider">Error</span>
+                            <span v-else-if="errorFlash" class="text-[10px] text-red-400 font-bold uppercase tracking-wider">{{ __('Error') }}</span>
 
                             <button
                                 type="button"

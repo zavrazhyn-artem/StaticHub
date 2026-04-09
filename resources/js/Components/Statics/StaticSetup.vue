@@ -1,5 +1,8 @@
 <script setup>
+import { ref } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import InviteCodeModal from '../UI/InviteCodeModal.vue';
+
 const { __ } = useTranslation();
 
 const props = defineProps({
@@ -10,6 +13,23 @@ const props = defineProps({
 });
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const showInviteModal = ref(false);
+const inviteCode = ref('');
+
+function handleCreateClick(event) {
+    event.preventDefault();
+    showInviteModal.value = true;
+}
+
+function handleInviteConfirmed(code) {
+    inviteCode.value = code;
+    showInviteModal.value = false;
+
+    // Submit the form after invite code is confirmed
+    setTimeout(() => {
+        document.getElementById('create-static-form').submit();
+    }, 50);
+}
 </script>
 
 <template>
@@ -19,8 +39,9 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
             <h2 class="text-2xl font-black text-white uppercase tracking-tight font-headline mb-1">{{ __('Create a New Static') }}</h2>
             <p class="text-on-surface-variant text-sm mb-6">{{ __('Manually create a new raiding group.') }}</p>
 
-            <form method="POST" :action="storeUrl" class="space-y-6">
+            <form id="create-static-form" method="POST" :action="storeUrl" class="space-y-6">
                 <input type="hidden" name="_token" :value="csrfToken">
+                <input type="hidden" name="invite_code" :value="inviteCode">
 
                 <div class="space-y-2">
                     <label for="name" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Static Name') }}</label>
@@ -41,14 +62,14 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
                     <label for="region" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Region') }}</label>
                     <select id="region" name="region"
                         class="block w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none appearance-none">
-                        <option value="eu">Europe</option>
-                        <option value="us">Americas</option>
-                        <option value="kr">Korea</option>
-                        <option value="tw">Taiwan</option>
+                        <option value="eu">{{ __('Europe') }}</option>
+                        <option value="us">{{ __('Americas') }}</option>
+                        <option value="kr">{{ __('Korea') }}</option>
+                        <option value="tw">{{ __('Taiwan') }}</option>
                     </select>
                 </div>
 
-                <button type="submit"
+                <button type="button" @click="handleCreateClick"
                     class="bg-primary text-on-primary px-8 py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
                     {{ __('Create Static') }}
                 </button>
@@ -80,5 +101,12 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
                 </div>
             </div>
         </div>
+
+        <InviteCodeModal
+            :show="showInviteModal"
+            :csrf-token="csrfToken"
+            @confirmed="handleInviteConfirmed"
+            @close="showInviteModal = false"
+        />
     </div>
 </template>

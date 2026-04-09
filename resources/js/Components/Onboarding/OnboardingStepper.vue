@@ -53,6 +53,7 @@
                 :csrf-token="csrfToken"
                 :is-guild-master="isGuildMaster"
                 :guild-name="guildName"
+                :invite-code="inviteCode"
                 @back="goBack"
                 @created="handleStaticCreated"
             />
@@ -77,6 +78,13 @@
             />
         </Transition>
 
+        <InviteCodeModal
+            :show="showInviteModal"
+            :csrf-token="csrfToken"
+            @confirmed="handleInviteConfirmed"
+            @close="showInviteModal = false"
+        />
+
         <!-- Help Modal -->
         <HelpPanel
             :show="showHelp"
@@ -95,6 +103,7 @@ import StepCreate from './StepCreate.vue';
 import StepJoin from './StepJoin.vue';
 import StepCharacters from './StepCharacters.vue';
 import HelpPanel from './HelpPanel.vue';
+import InviteCodeModal from '../UI/InviteCodeModal.vue';
 
 const { __ } = useTranslation();
 
@@ -116,6 +125,8 @@ const steps = [
 const currentStep = ref(props.pendingJoinToken ? 1 : 0);
 const choice = ref(props.pendingJoinToken ? 'join' : null);
 const showHelp = ref(false);
+const showInviteModal = ref(false);
+const inviteCode = ref('');
 const transitionName = ref('slide-left');
 
 // Data passed between steps
@@ -135,7 +146,19 @@ function stepCircleClass(index) {
 }
 
 function handleChoice(selected) {
+    if (selected === 'create') {
+        showInviteModal.value = true;
+        return;
+    }
     choice.value = selected;
+    transitionName.value = 'slide-left';
+    currentStep.value = 1;
+}
+
+function handleInviteConfirmed(code) {
+    inviteCode.value = code;
+    showInviteModal.value = false;
+    choice.value = 'create';
     transitionName.value = 'slide-left';
     currentStep.value = 1;
 }

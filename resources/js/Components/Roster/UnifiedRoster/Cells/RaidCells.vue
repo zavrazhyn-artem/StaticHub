@@ -1,5 +1,8 @@
 <script setup>
-import { inject, computed } from 'vue';
+import { inject, computed, getCurrentInstance } from 'vue';
+
+const { proxy } = getCurrentInstance();
+const __ = (key, replace = {}) => proxy.__(key, replace);
 
 const rowHeights = inject('rowHeights');
 
@@ -25,7 +28,7 @@ const getBossData = (raidName, bossName) => {
             :key="bossName"
             :class="rh"
             class="p-0 text-center border-l border-white/[0.04] min-w-[60px]"
-            :title="`${bossName} (${raid.name}) – ${getBossData(raid.name, bossName)?.[selectedDifficulty] ? 'Killed' : 'Not killed'} (${selectedDifficulty})`">
+            :title="`${bossName} (${raid.name}) – ${getBossData(raid.name, bossName)?.[selectedDifficulty] ? __('Killed') : __('Not killed')} (${selectedDifficulty})`">
             <div class="flex items-center justify-center px-1" :class="isAlt ? 'py-0' : 'py-2.5'">
                 <span v-if="getBossData(raid.name, bossName)?.[selectedDifficulty]"
                       class="font-black leading-none"

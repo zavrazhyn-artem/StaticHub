@@ -28,4 +28,11 @@ class OnboardingRequest extends FormRequest
             'invite_code' => 'required|string',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'invite_code.required' => __('An invite code is required to create a team.'),
+        ];
+    }
 }

@@ -157,7 +157,7 @@ defineExpose({ close });
             <div
                 @click="close"
                 class="bg-[#0a0a0a] border-t border-white/10 text-primary text-center py-3 text-xs font-black uppercase tracking-widest cursor-pointer hover:brightness-125 transition-colors"
-            >Done</div>
+            >{{ __('Done') }}</div>
         </div>
 
         <input type="hidden" :name="inputName" :value="modelValue">

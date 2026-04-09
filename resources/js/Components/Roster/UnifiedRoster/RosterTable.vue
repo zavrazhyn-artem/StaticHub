@@ -67,7 +67,7 @@ const filteredRoster = computed(() => {
 });
 
 const slotLabels = {
-    'HEAD': 'Head', 'NECK': 'Neck', 'SHOULDER': 'Shoulder', 'BACK': 'Back', 'CHEST': 'Chest', 'WRIST': 'Wrist',
+    'HEAD': 'Head', 'NECK': 'Neck', 'SHOULDER': 'Shoulder', 'BACK': 'Cloak', 'CHEST': 'Chest', 'WRIST': 'Wrist',
     'HANDS': 'Hands', 'WAIST': 'Waist', 'LEGS': 'Legs', 'FEET': 'Feet', 'FINGER_1': 'Ring', 'FINGER_2': 'Ring',
     'TRINKET_1': 'Trinket', 'TRINKET_2': 'Trinket', 'MAIN_HAND': 'Main Hand', 'OFF_HAND': 'Off Hand'
 };
@@ -179,7 +179,7 @@ const slotLabels = {
                         <th class="p-2 text-center border-l border-[#222] w-[100px]">{{ __('Issues') }}</th>
                         <th class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
                         <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">
-                            {{ slotLabels[slot] }}
+                            {{ __(slotLabels[slot]) }}
                         </th>
                     </template>
 

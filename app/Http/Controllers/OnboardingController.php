@@ -58,6 +58,22 @@ class OnboardingController extends Controller
     }
 
     /**
+     * Validate an invite code (AJAX).
+     */
+    public function validateInviteCode(Request $request): JsonResponse
+    {
+        $request->validate(['invite_code' => 'required|string']);
+
+        try {
+            $this->inviteCodeService->validate($request->input('invite_code'));
+
+            return response()->json(['valid' => true]);
+        } catch (\Throwable) {
+            return response()->json(['valid' => false, 'message' => __('Invalid or already used invite code.')], 422);
+        }
+    }
+
+    /**
      * Validate an invite token and return static info (AJAX).
      */
     public function validateToken(Request $request): JsonResponse

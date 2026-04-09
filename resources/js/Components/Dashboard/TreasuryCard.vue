@@ -58,7 +58,7 @@
                         v-for="i in emptySlots"
                         :key="'empty-' + i"
                         class="h-1.5 rounded-full bg-white/5 opacity-50 border border-dashed border-white/10"
-                        title="Empty Slot"
+                        :title="__('Empty Slot')"
                     ></div>
                 </div>
                 <div class="flex justify-between mt-2">

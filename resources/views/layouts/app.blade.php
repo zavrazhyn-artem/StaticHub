@@ -97,8 +97,7 @@
         @endif
     </div>
 
-    @auth
-        @unless(Auth::user()->discord_id)
+    @if($static && !$isOnboarding && Auth::check() && !Auth::user()->discord_id)
             <div id="discord-link-banner"
                  class="hidden items-center gap-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm text-amber-400">
                 <span class="material-symbols-outlined text-base leading-none">link_off</span>
@@ -125,8 +124,7 @@
                     document.getElementById('discord-link-banner').classList.remove('flex');
                 }
             </script>
-        @endunless
-    @endauth
+    @endif
 
     <div class="flex items-center gap-4">
         <!-- Language Selector -->

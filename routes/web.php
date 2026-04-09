@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function () {
     // Onboarding
     Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
     Route::post('/onboarding/create', [OnboardingController::class, 'createStatic'])->name('onboarding.create');
+    Route::post('/onboarding/validate-invite-code', [OnboardingController::class, 'validateInviteCode'])->name('onboarding.validate-invite-code');
     Route::post('/onboarding/validate-token', [OnboardingController::class, 'validateToken'])->name('onboarding.validate-token');
     Route::post('/onboarding/join', [OnboardingController::class, 'joinStatic'])->name('onboarding.join');
     Route::post('/onboarding/sync-characters', [OnboardingController::class, 'syncCharacters'])->name('onboarding.sync-characters');

@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
+
 defineProps({
   characters: Array
 });
@@ -116,7 +119,7 @@ const getRaidProgression = (char) => {
             <th class="p-4 text-center w-8">R</th>
             <th class="p-4 text-center w-8">W</th>
 
-            <th class="p-4 text-center border-l border-white/5">Rating</th>
+            <th class="p-4 text-center border-l border-white/5">{{ __('Rating') }}</th>
 
             <th class="p-4 text-center border-l border-white/5">{{ __('Enchants') }}</th>
             <th class="p-4 text-center">{{ __('Gems') }}</th>

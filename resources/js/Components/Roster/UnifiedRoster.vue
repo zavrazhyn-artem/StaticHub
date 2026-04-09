@@ -34,7 +34,7 @@ const isLive          = computed(() => selectedWeek.value === currentWeek.value)
 const weekOptions = computed(() =>
     [...rawWeeks].reverse().map(w => ({
         id:   w.key,
-        name: w.current ? 'Live Week' : `Week ${w.number}`,
+        name: w.current ? __('Live Week') : `${__('Week')} ${w.number}`,
     }))
 );
 
@@ -435,11 +435,11 @@ const kickMember = async (member) => {
             <div class="flex items-center gap-2">
                 <template v-if="isLive">
                     <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
-                    <span class="text-[11px] font-black uppercase tracking-widest text-green-400">Live</span>
+                    <span class="text-[11px] font-black uppercase tracking-widest text-green-400">{{ __('Live') }}</span>
                 </template>
                 <template v-else>
                     <span class="material-symbols-outlined text-sm text-amber-400">history</span>
-                    <span class="text-[11px] font-black uppercase tracking-widest text-amber-400">Week {{ weekNumber(selectedWeek) }}</span>
+                    <span class="text-[11px] font-black uppercase tracking-widest text-amber-400">{{ __('Week') }} {{ weekNumber(selectedWeek) }}</span>
                 </template>
                 <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-primary ml-1">sync</span>
             </div>
@@ -451,7 +451,7 @@ const kickMember = async (member) => {
                     :options="weekOptions"
                     :use-search="false"
                     icon="date_range"
-                    placeholder="Select week..."
+                    :placeholder="__('Select week...')"
                     compact
                 />
             </div>

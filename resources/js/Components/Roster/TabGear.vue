@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, onUpdated } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
 import GearCell from './GearCell.vue';
+
+const { __ } = useTranslation();
 
 /**
  * Full-width gear audit table for the Roster Gear tab.
@@ -48,7 +51,7 @@ const GEAR_SLOTS = [
     { key: 'HEAD',      label: 'Head'      },
     { key: 'NECK',      label: 'Neck'      },
     { key: 'SHOULDER',  label: 'Shoulders' },
-    { key: 'BACK',      label: 'Back'      },
+    { key: 'BACK',      label: 'Cloak'     },
     { key: 'CHEST',     label: 'Chest'     },
     { key: 'WRIST',     label: 'Wrist'     },
     { key: 'HANDS',     label: 'Hands'     },
@@ -100,24 +103,24 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                     <!-- Group headers -->
                     <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
                         <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[200px]">
-                            Character
+                            {{ __('Character') }}
                         </th>
-                        <th colspan="2" class="p-2 text-center border-l border-white/5">Audit</th>
-                        <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">Equipment</th>
+                        <th colspan="2" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
+                        <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">{{ __('Equipment') }}</th>
                     </tr>
                     <!-- Column sub-headers -->
                     <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
                         <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                             <div class="flex justify-between items-center pr-2">
-                                <span>Name</span>
-                                <span class="text-gray-500 font-mono text-[9px]">iLvL</span>
+                                <span>{{ __('Name') }}</span>
+                                <span class="text-gray-500 font-mono text-[9px]">{{ __('iLvL') }}</span>
                             </div>
                         </th>
-                        <th class="p-2 text-center text-[9px]">Ench</th>
-                        <th class="p-2 text-center text-[9px]">Gems</th>
+                        <th class="p-2 text-center text-[9px]">{{ __('Ench') }}</th>
+                        <th class="p-2 text-center text-[9px]">{{ __('Gems') }}</th>
                         <th v-for="slot in GEAR_SLOTS" :key="slot.key"
                             class="p-1 min-w-[42px] text-center text-[9px]">
-                            {{ slot.label }}
+                            {{ __(slot.label) }}
                         </th>
                     </tr>
                 </thead>
@@ -182,7 +185,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                             <td class="p-2 text-center font-mono text-sm border-l border-white/5">
                                 <span v-if="(member.main_character.missing_enchants_slots?.length ?? 0) > 0"
                                       class="text-red-500 font-bold"
-                                      :title="'Missing enchants: ' + member.main_character.missing_enchants_slots.join(', ')">
+                                      :title="__('Missing enchants:') + ' ' + member.main_character.missing_enchants_slots.join(', ')">
                                     {{ member.main_character.missing_enchants_slots.length }}
                                 </span>
                                 <span v-else class="text-gray-600 text-xs">✓</span>
@@ -252,7 +255,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                 <td class="p-2 text-center font-mono text-xs border-l border-white/5">
                                     <span v-if="(alt?.missing_enchants_slots?.length ?? 0) > 0"
                                           class="text-red-500/70 font-bold"
-                                          :title="'Missing enchants: ' + alt.missing_enchants_slots.join(', ')">
+                                          :title="__('Missing enchants:') + ' ' + alt.missing_enchants_slots.join(', ')">
                                         {{ alt.missing_enchants_slots.length }}
                                     </span>
                                     <span v-else class="text-gray-700 text-[10px]">✓</span>
