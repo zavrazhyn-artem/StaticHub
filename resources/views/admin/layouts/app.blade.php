@@ -165,11 +165,13 @@
                 <div style="margin: 1rem 0; border-top: 1px solid rgba(255,255,255,0.06);"></div>
                 <span style="padding: 0 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555;">External Tools</span>
 
+                {{-- Pulse disabled temporarily due to PHP 8.5 compatibility issue
                 <a href="/pulse" target="_blank" class="admin-nav-link">
                     <span class="material-symbols-outlined" style="font-size: 20px;">monitor_heart</span>
                     Pulse
                     <span class="material-symbols-outlined" style="font-size: 14px; margin-left: auto;">open_in_new</span>
                 </a>
+                --}}
                 <a href="/horizon" target="_blank" class="admin-nav-link">
                     <span class="material-symbols-outlined" style="font-size: 20px;">queue</span>
                     Horizon

@@ -13,7 +13,7 @@ x-app-defaults: &app-defaults
     - app_network
   volumes:
     - .:/var/www/html
-    - ./docker/prod/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
+    - ./docker/production/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
 
 services:
   nginx:

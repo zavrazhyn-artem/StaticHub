@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Collection;
 use Laravel\Pulse\Http\Middleware\Authorize;
 use Laravel\Pulse\Pulse;
 use Laravel\Pulse\Recorders;

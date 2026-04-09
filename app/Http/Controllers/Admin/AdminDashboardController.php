@@ -30,7 +30,6 @@ class AdminDashboardController extends Controller
         ];
 
         $toolLinks = [
-            ['name' => 'Laravel Pulse', 'url' => '/pulse', 'description' => 'Application performance monitoring'],
             ['name' => 'Laravel Horizon', 'url' => '/horizon', 'description' => 'Queue monitoring dashboard'],
             ['name' => 'Log Viewer', 'url' => '/log-viewer', 'description' => 'Application log browser'],
         ];
