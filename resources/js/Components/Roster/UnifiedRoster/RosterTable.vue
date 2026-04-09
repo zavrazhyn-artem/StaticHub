@@ -1,6 +1,26 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, nextTick, provide } from 'vue';
 import RosterRow from './RosterRow.vue';
+
+// ── Row height tokens (single source of truth) ──
+const ROW_HEIGHTS = {
+    main: 'h-[72px]',
+    alt:  'h-[42px]',
+};
+provide('rowHeights', ROW_HEIGHTS);
+
+const searchQuery = ref('');
+const showSearch = ref(false);
+const searchInput = ref(null);
+
+const toggleSearch = () => {
+    showSearch.value = !showSearch.value;
+    if (!showSearch.value) {
+        searchQuery.value = '';
+    } else {
+        nextTick(() => searchInput.value?.focus());
+    }
+};
 
 const props = defineProps({
     groupedRoster: { type: Object, required: true },
@@ -36,6 +56,16 @@ const slots = [
     'TRINKET_1', 'TRINKET_2', 'MAIN_HAND', 'OFF_HAND'
 ];
 
+const filteredRoster = computed(() => {
+    const q = searchQuery.value.toLowerCase().trim();
+    if (!q) return props.groupedRoster;
+    const result = {};
+    for (const [roleKey, members] of Object.entries(props.groupedRoster)) {
+        result[roleKey] = members.filter(m => m.main_character?.name?.toLowerCase().includes(q));
+    }
+    return result;
+});
+
 const slotLabels = {
     'HEAD': 'Head', 'NECK': 'Neck', 'SHOULDER': 'Shoulder', 'BACK': 'Back', 'CHEST': 'Chest', 'WRIST': 'Wrist',
     'HANDS': 'Hands', 'WAIST': 'Waist', 'LEGS': 'Legs', 'FEET': 'Feet', 'FINGER_1': 'Ring', 'FINGER_2': 'Ring',
@@ -44,42 +74,42 @@ const slotLabels = {
 </script>
 
 <template>
-    <div class="w-full bg-surface-container-high rounded-2xl border border-white/5">
+    <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[55vh] overflow-y-auto overflow-x-auto roster-scroll">
         <table class="text-left text-[11px] border-collapse w-full">
             <!-- thead ──────────────────────────────────────── -->
-            <thead>
+            <thead class="sticky top-0 z-20">
                 <!-- Group header row -->
-                <tr class="bg-black/20 text-gray-500 text-[8px] uppercase tracking-widest font-bold border-b border-white/5 h-8">
+                <tr class="bg-[#1a1a1a] text-gray-500 text-[8px] uppercase tracking-widest font-bold h-8" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="p-2 pl-4 w-[200px] min-w-[200px]">{{ __('Character') }}</th>
 
                     <template v-if="activeTab === 'summary'">
-                        <th class="p-2 text-center border-l border-white/5 w-[60px]">{{ __('iLvL') }}</th>
-                        <th colspan="6" class="p-2 text-center border-l border-white/5">{{ __('Tier Pieces') }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('M+ Runs') }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('M+ Rating') }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
-                        <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Access Role') }}</th>
-                        <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Roster Status') }}</th>
-                        <th v-if="canKick" class="p-2 text-center border-l border-white/5 w-[60px]"></th>
+                        <th class="p-2 text-center border-l border-[#222] w-[60px]">{{ __('iLvL') }}</th>
+                        <th colspan="6" class="p-2 text-center border-l border-[#222]">{{ __('Tier Pieces') }}</th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('M+ Runs') }}</th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('M+ Rating') }}</th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('Audit') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Access Role') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Roster Status') }}</th>
+                        <th v-if="canKick" class="p-2 text-center border-l border-[#222] w-[60px]"></th>
                     </template>
 
                     <!-- One spanning header per raid instance -->
                     <template v-if="activeTab === 'raids'">
                         <th v-for="raid in raidColumns" :key="'rh-' + raid.name"
                             :colspan="raid.bosses.length"
-                            class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400">
+                            class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400">
                             {{ raid.name }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th :colspan="slots.length" class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
+                        <th :colspan="slots.length" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
                             {{ __('Gear') }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'vault'">
-                        <th colspan="3" class="p-2 text-center border-l border-white/5 uppercase tracking-widest font-bold text-gray-400">
+                        <th colspan="3" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400">
                             {{ __('Raids') }}
                         </th>
                         <th colspan="3" class="p-2 text-center border-l border-white/10 uppercase tracking-widest font-bold text-gray-400">
@@ -92,21 +122,44 @@ const slotLabels = {
                 </tr>
 
                 <!-- Column sub-header row -->
-                <tr class="bg-black/40 text-cyan-400 text-[9px] uppercase tracking-widest font-bold border-b border-white/5 h-10">
-                    <th class="px-4 py-2 w-[200px] min-w-[200px]">{{ __('Name') }}</th>
+                <tr class="bg-[#111111] text-cyan-400 text-[9px] uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                    <th class="px-4 py-1 w-[200px] min-w-[200px]">
+                        <div class="flex items-center gap-1">
+                            <template v-if="showSearch">
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    class="w-full bg-white/10 border border-white/10 rounded px-1.5 py-px text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 font-normal normal-case tracking-normal leading-tight h-5"
+                                    :placeholder="__('Search...')"
+                                    @keydown.escape="toggleSearch"
+                                    ref="searchInput"
+                                />
+                                <button @click="toggleSearch" class="text-gray-500 hover:text-white transition-colors shrink-0">
+                                    <span class="material-symbols-outlined text-[14px]">close</span>
+                                </button>
+                            </template>
+                            <template v-else>
+                                <span>{{ __('Name') }}</span>
+                                <span class="flex-1"></span>
+                                <button @click="toggleSearch" class="text-gray-500 hover:text-cyan-400 transition-colors">
+                                    <span class="material-symbols-outlined text-[14px]">search</span>
+                                </button>
+                            </template>
+                        </div>
+                    </th>
 
                     <template v-if="activeTab === 'summary'">
                         <th class="px-2 py-2 text-center w-[60px]">{{ __('Avg') }}</th>
 
-                        <th class="p-2 text-center border-l border-white/5 w-[40px]">#</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[40px]">#</th>
                         <th v-for="slot in ['H','S','C','G','L']" :key="slot"
                             class="p-1 text-center text-on-surface-variant w-8">{{ slot }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('Runs') }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('Rating') }}</th>
-                        <th class="p-2 text-center border-l border-white/5">{{ __('Issues') }}</th>
-                        <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Role') }}</th>
-                        <th class="p-2 text-center border-l border-white/5 w-[130px]">{{ __('Status') }}</th>
-                        <th v-if="canKick" class="p-2 text-center border-l border-white/5 w-[60px]"></th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('Runs') }}</th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('Rating') }}</th>
+                        <th class="p-2 text-center border-l border-[#222]">{{ __('Issues') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Role') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Status') }}</th>
+                        <th v-if="canKick" class="p-2 text-center border-l border-[#222] w-[60px]"></th>
                     </template>
 
                     <!-- One column per boss, horizontal label -->
@@ -123,15 +176,15 @@ const slotLabels = {
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th class="p-2 text-center border-l border-white/5 w-[100px]">{{ __('Issues') }}</th>
-                        <th class="p-1 text-center border-l border-white/5 text-[7px] min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
-                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-white/5 text-[7px] min-w-[52px]">
+                        <th class="p-2 text-center border-l border-[#222] w-[100px]">{{ __('Issues') }}</th>
+                        <th class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
+                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">
                             {{ slotLabels[slot] }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'vault'">
-                        <th class="p-2 text-center border-l border-white/5 w-auto">{{ __('Slot 1') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-auto">{{ __('Slot 1') }}</th>
                         <th class="p-2 text-center w-auto">{{ __('Slot 2') }}</th>
                         <th class="p-2 text-center w-auto">{{ __('Slot 3') }}</th>
                         <th class="p-2 text-center border-l border-white/10 w-auto">{{ __('Slot 1') }}</th>
@@ -146,7 +199,7 @@ const slotLabels = {
 
             <!-- tbody ──────────────────────────────────────── -->
             <tbody class="divide-y divide-white/5">
-                <template v-for="(members, roleKey) in groupedRoster" :key="roleKey">
+                <template v-for="(members, roleKey) in filteredRoster" :key="roleKey">
                     <!-- Role group separator row -->
                     <tr v-if="members.length > 0 && roleKey !== 'unknown'"
                         class="bg-gray-800/80 border-y border-gray-700">
@@ -221,3 +274,37 @@ const slotLabels = {
         </table>
     </div>
 </template>
+
+<style scoped>
+/* Dark scrollbar matching rounded-2xl container */
+.roster-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.roster-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+.roster-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+}
+.roster-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+.roster-scroll::-webkit-scrollbar-corner {
+    background: transparent;
+}
+/* Firefox */
+.roster-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Ensure all header cells are opaque so content doesn't bleed through */
+thead th {
+    background: inherit;
+}
+</style>

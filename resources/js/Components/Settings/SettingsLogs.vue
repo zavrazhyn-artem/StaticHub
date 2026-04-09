@@ -14,9 +14,11 @@ const props = defineProps({
     updateUrl:              { type: String, required: true },
     connectGuildUrl:        { type: String, required: true },
     disconnectGuildUrl:     { type: String, required: true },
+    profileTabUrl:          { type: String, required: true },
     scheduleTabUrl:         { type: String, required: true },
     discordTabUrl:          { type: String, required: true },
     logsTabUrl:             { type: String, required: true },
+    canManage:              { type: Boolean, default: false },
 });
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -122,7 +124,7 @@ async function disconnectGuild() {
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
-        <SettingsTabs :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="logs" />
+        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="logs" :can-manage="canManage" />
 
         <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm space-y-8">
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Raid;
 
+use App\Models\CharacterStaticSpec;
 use App\Models\Event;
 use App\Models\Character;
 use App\Models\RaidAttendance;
@@ -136,13 +137,10 @@ class RaidAttendanceService
             ];
         }
 
-        // 2. Fallback: Find this user's main character for this static
-        $mainCharacter = $user->getMainCharacterForStatic($staticId);
-
-        if (!$mainCharacter) {
-            // Fallback to first character if no main found
-            $mainCharacter = $user->characters->first();
-        }
+        // 2. Fallback: Find this user's main character from already-loaded relations
+        $mainCharacter = $user->characters->first(
+            fn ($char) => $char->statics->first()?->pivot->role === 'main'
+        ) ?? $user->characters->first();
 
         if ($mainCharacter) {
             return [
@@ -199,15 +197,25 @@ class RaidAttendanceService
             ? Specialization::whereIn('id', $rsvpSpecIds)->get()->keyBy('id')
             : collect();
 
+        // Pre-load all main specs for resolved characters in one query.
+        $characterIds = $resolvedCharacters->pluck('id');
+        $mainSpecMap = CharacterStaticSpec::whereIn('character_id', $characterIds)
+            ->where('static_id', $staticId)
+            ->where('is_main', true)
+            ->with('specialization')
+            ->get()
+            ->keyBy('character_id');
+
         foreach ($resolvedCharacters as $character) {
             /** @var Character $character */
             $status = $character->pivot->status;
 
             // Prefer the spec chosen for this specific raid over the static main spec.
             $rsvpSpecId = $attendances->get($character->id)?->spec_id;
+            $mainSpecRole = $mainSpecMap->get($character->id)?->specialization?->role ?? 'rdps';
             $combatRole = $rsvpSpecId
-                ? ($rsvpSpecs->get($rsvpSpecId)?->role ?? $character->getCombatRoleInStatic($staticId))
-                : $character->getCombatRoleInStatic($staticId);
+                ? ($rsvpSpecs->get($rsvpSpecId)?->role ?? $mainSpecRole)
+                : $mainSpecRole;
 
             if ($status === 'absent' || $status === 'tentative') {
                 $character->setAttribute('assigned_role', $combatRole);

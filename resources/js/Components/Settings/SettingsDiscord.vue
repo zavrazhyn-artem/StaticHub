@@ -24,9 +24,11 @@ const props = defineProps({
     deleteMessageUrl:       { type: String,  required: true },
     deleteChannelMessageUrl:{ type: String,  required: true },
     inviteUrl:        { type: String,  required: true },
+    profileTabUrl:    { type: String,  required: true },
     scheduleTabUrl:   { type: String,  required: true },
     discordTabUrl:    { type: String,  required: true },
     logsTabUrl:       { type: String,  required: true },
+    canManage:        { type: Boolean, default: false },
 });
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -329,7 +331,7 @@ const noChannelsError = () =>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
-        <SettingsTabs :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="discord" />
+        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="discord" :can-manage="canManage" />
 
         <div class="space-y-4">
 

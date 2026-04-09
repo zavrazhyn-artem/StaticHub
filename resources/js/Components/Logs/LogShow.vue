@@ -1,12 +1,15 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import AiChatSidebar from './AiChatSidebar.vue';
+import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
 const { __ } = useTranslation();
 
 const props = defineProps({
     report:              { type: Object, required: true },
     personalReport:      { type: Object, default: null },
+    rosterReports:       { type: Object, default: () => ({}) },
+    rosterMembers:       { type: Array, default: () => [] },
     isRaidLeader:        { type: Boolean, default: false },
     canViewGlobalReport: { type: Boolean, default: false },
     canUseAiChat:        { type: Boolean, default: false },
@@ -18,6 +21,25 @@ const props = defineProps({
 
 const activeTab = ref('global');
 const chatOpen = ref(false);
+
+// Character selector for leaders/officers on Personal Report tab
+const selectedReportId = ref(props.personalReport?.id ? String(props.personalReport.id) : '');
+
+const activePersonalReport = computed(() => {
+    if (!props.canViewGlobalReport || !props.rosterMembers.length) {
+        return props.personalReport;
+    }
+    const id = selectedReportId.value;
+    const member = props.rosterMembers.find(m => String(m.id) === id);
+    if (!member) return props.personalReport;
+    const html = props.rosterReports[id];
+    return {
+        html,
+        char_name:      member.character.name,
+        char_class:     member.character.playable_class,
+        char_class_css: member.character.playable_class.toLowerCase().replace(/ /g, '-'),
+    };
+});
 </script>
 
 <template>
@@ -118,19 +140,32 @@ const chatOpen = ref(false);
 
             <!-- Leader/Officer view: full tabs with Global Report + Personal Report -->
             <div v-else-if="report.has_ai_analysis" class="space-y-8">
-                <div class="flex gap-4 border-b border-white/5 pb-px">
-                    <button @click="activeTab = 'global'"
-                            :class="activeTab === 'global' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
-                            class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">public</span>
-                        {{ __('Global Report') }}
-                    </button>
-                    <button @click="activeTab = 'roster'"
-                            :class="activeTab === 'roster' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
-                            class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">person</span>
-                        {{ __('Personal Report') }}
-                    </button>
+                <div class="flex items-center border-b border-white/5 pb-px">
+                    <div class="flex gap-4">
+                        <button @click="activeTab = 'global'"
+                                :class="activeTab === 'global' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
+                                class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">public</span>
+                            {{ __('Global Report') }}
+                        </button>
+                        <button @click="activeTab = 'roster'"
+                                :class="activeTab === 'roster' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
+                                class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">person</span>
+                            {{ __('Personal Report') }}
+                        </button>
+                    </div>
+
+                    <div v-if="rosterMembers.length > 0 && activeTab === 'roster'" class="ml-auto w-64">
+                        <SelectUserWithMain
+                            v-model="selectedReportId"
+                            :members="rosterMembers"
+                            :placeholder="__('Select Character...')"
+                            :search-placeholder="__('Search character...')"
+                            :empty-text="__('No characters found.')"
+                            accent-color="#f59e0b"
+                        />
+                    </div>
                 </div>
 
                 <!-- Global Tab -->
@@ -193,31 +228,31 @@ const chatOpen = ref(false);
                 <!-- Roster Tab -->
                 <div v-show="activeTab === 'roster'" class="space-y-6">
                     <!-- Personal report found -->
-                    <div v-if="personalReport" class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                    <div v-if="activePersonalReport" class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
                         <div class="bg-amber-500/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <div :class="`w-10 h-10 rounded-xl bg-${personalReport.char_class_css}/20 flex items-center justify-center border border-${personalReport.char_class_css}/30`">
-                                    <span :class="`material-symbols-outlined text-${personalReport.char_class_css}`">person</span>
+                                <div :class="`w-10 h-10 rounded-xl bg-${activePersonalReport.char_class_css}/20 flex items-center justify-center border border-${activePersonalReport.char_class_css}/30`">
+                                    <span :class="`material-symbols-outlined text-${activePersonalReport.char_class_css}`">person</span>
                                 </div>
                                 <div>
                                     <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1">
-                                        {{ personalReport.char_name }}
+                                        {{ activePersonalReport.char_name }}
                                     </h2>
-                                    <p :class="`text-[9px] font-black text-${personalReport.char_class_css} uppercase tracking-widest`">
-                                        {{ personalReport.char_class }}
+                                    <p :class="`text-[9px] font-black text-${activePersonalReport.char_class_css} uppercase tracking-widest`">
+                                        {{ activePersonalReport.char_class }}
                                     </p>
                                 </div>
                             </div>
                             <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] font-black text-amber-500 uppercase tracking-widest">
-                                {{ __('Your personal Report') }}
+                                {{ personalReport && activePersonalReport.id === personalReport.id ? __('Your personal Report') : __('Personal Report') }}
                             </span>
                         </div>
                         <div class="p-8">
-                            <div class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="personalReport.html"></div>
+                            <div class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="activePersonalReport.html"></div>
                         </div>
                     </div>
 
-                    <!-- Not participated -->
+                    <!-- Not participated (only when no roster reports and no personal report) -->
                     <div v-else class="bg-surface-container-low border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
                         <span class="material-symbols-outlined text-6xl text-on-surface-variant opacity-20 mb-6">person_off</span>
                         <h3 class="text-2xl font-black text-white uppercase tracking-tighter mb-3">{{ __('You did not participate in this raid') }}</h3>

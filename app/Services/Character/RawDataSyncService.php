@@ -41,20 +41,39 @@ class RawDataSyncService
         $updates = [];
 
         if ($service === 'bnet' || $service === 'all') {
-            $this->tryFetch('bnet_profile', 'bnet_profile', $character, $updates, fn() => $this->blizzardApiService->getCharacterProfileSummary($realmSlug, $name));
-            $this->tryFetch('bnet_equipment', 'bnet_equipment', $character, $updates, fn() => $this->blizzardApiService->getCharacterEquipment($region, $realmSlug, $name));
-            $this->tryFetch('bnet_media', 'bnet_media', $character, $updates, fn() => $this->blizzardApiService->getCharacterMedia($realmSlug, $name));
-            $this->tryFetch('bnet_mplus', 'bnet_mplus', $character, $updates, fn() => $this->blizzardApiService->getCharacterMythicKeystoneProfile($realmSlug, $name));
-            $this->tryFetch('bnet_raid', 'bnet_raid', $character, $updates, fn() => $this->blizzardApiService->getCharacterRaidEncounters($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_achievement_statistics', $character, $updates, fn() => $this->blizzardApiService->getCharacterAchievementStatistics($realmSlug, $name));
-            if (! $this->isWithinQuestGracePeriod($region)) {
-                $this->tryFetchNoSchema('bnet_completed_quests', $character, $updates, fn() => $this->blizzardApiService->getCharacterCompletedQuests($realmSlug, $name));
+            $skip = $this->isWithinQuestGracePeriod($region) ? ['bnet_completed_quests'] : [];
+
+            $bnetResults = $this->blizzardApiService->fetchAllCharacterEndpoints($region, $realmSlug, $name, $skip);
+
+            // Columns that require JSON schema validation
+            $schemaColumns = [
+                'bnet_profile'   => 'bnet_profile',
+                'bnet_equipment' => 'bnet_equipment',
+                'bnet_media'     => 'bnet_media',
+                'bnet_mplus'     => 'bnet_mplus',
+                'bnet_raid'      => 'bnet_raid',
+            ];
+
+            foreach ($bnetResults as $column => $payload) {
+                if ($payload === null || $payload === []) {
+                    continue;
+                }
+
+                if (isset($schemaColumns[$column])) {
+                    try {
+                        $this->schemaValidator->validate($payload, $schemaColumns[$column]);
+                        $updates[$column] = $payload;
+                    } catch (JsonSchemaValidationException $e) {
+                        Log::error("RawDataSyncService: schema validation failed for route '{$column}'.", [
+                            'character_id' => $character->id,
+                            'schema'       => $schemaColumns[$column],
+                            'errors'       => $e->getErrorMessages(),
+                        ]);
+                    }
+                } else {
+                    $updates[$column] = $payload;
+                }
             }
-            $this->tryFetchNoSchema('bnet_pvp_summary', $character, $updates, fn() => $this->blizzardApiService->getCharacterPvpSummary($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_reputations', $character, $updates, fn() => $this->blizzardApiService->getCharacterReputations($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_titles', $character, $updates, fn() => $this->blizzardApiService->getCharacterTitles($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_mounts', $character, $updates, fn() => $this->blizzardApiService->getCharacterMounts($realmSlug, $name));
-            $this->tryFetchNoSchema('bnet_pets', $character, $updates, fn() => $this->blizzardApiService->getCharacterPets($realmSlug, $name));
         }
 
         if ($service === 'rio' || $service === 'all') {

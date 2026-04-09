@@ -6,6 +6,7 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Services\Character\CharacterSyncService;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
@@ -13,6 +14,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class BattleNetAuthService
 {
+    private const TOKEN_RETRY_ATTEMPTS = 3;
+    private const TOKEN_RETRY_DELAY_MS = 1000;
+
     public function __construct(
         protected CharacterSyncService $characterSyncService,
     ) {}
@@ -35,20 +39,45 @@ class BattleNetAuthService
     public function executeCallbackProcessing(): array
     {
         /** @var \Laravel\Socialite\Two\User $socialUser */
-        $socialUser = Socialite::driver('battlenet')->user();
+        $socialUser = $this->resolveUserWithRetry();
 
         $user = $this->updateOrCreateFromSocialite($socialUser);
-
-        try {
-            $this->characterSyncService->syncUserCharacters($socialUser->token, $user->id);
-        } catch (\Exception $e) {
-            Log::error('Failed to sync characters on login: ' . $e->getMessage());
-        }
 
         return [
             'user' => $user,
             'token' => $socialUser->token,
         ];
+    }
+
+    /**
+     * Resolve the Socialite user with retry logic for Blizzard 429 rate limits.
+     */
+    private function resolveUserWithRetry(): \Laravel\Socialite\Two\User
+    {
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= self::TOKEN_RETRY_ATTEMPTS; $attempt++) {
+            try {
+                return Socialite::driver('battlenet')->user();
+            } catch (ClientException $e) {
+                if ($e->getResponse()->getStatusCode() !== 429) {
+                    throw $e;
+                }
+
+                $lastException = $e;
+
+                Log::warning('Blizzard OAuth 429 rate limit hit, retrying.', [
+                    'attempt' => $attempt,
+                    'max_attempts' => self::TOKEN_RETRY_ATTEMPTS,
+                ]);
+
+                if ($attempt < self::TOKEN_RETRY_ATTEMPTS) {
+                    usleep(self::TOKEN_RETRY_DELAY_MS * 1000 * $attempt);
+                }
+            }
+        }
+
+        throw $lastException;
     }
 
     /**

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, getCurrentInstance } from 'vue';
+import { computed, inject, getCurrentInstance } from 'vue';
 import SummaryCells from './Cells/SummaryCells.vue';
 import RaidCells from './Cells/RaidCells.vue';
 import GearCells from './Cells/GearCells.vue';
@@ -40,6 +40,9 @@ const props = defineProps({
     auditTitle: { type: Function, required: true },
 });
 
+const rowHeights = inject('rowHeights');
+const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
+
 const emit = defineEmits([
     'toggle-expand',
     'update-access-role',
@@ -56,8 +59,11 @@ const emit = defineEmits([
         ]">
 
         <!-- Character identity -->
-        <td :class="isAlt ? 'p-1.5 pl-[70px] h-[42px]' : 'p-2.5 h-[86px]'">
-            <div :class="['flex flex-col justify-center h-full gap-1 items-start']">
+        <td :class="[rh, isAlt ? 'pl-5' : 'p-2']">
+            <div :class="[
+                'flex flex-col justify-center h-full',
+                isAlt ? 'items-start pl-1' : 'items-start pl-4 gap-1'
+            ]">
                 <div class="flex items-center gap-2">
                     <div class="relative shrink-0">
                         <img v-if="char?.avatar_url"
@@ -138,7 +144,7 @@ const emit = defineEmits([
 
         <!-- Audit badge (summary only) -->
         <template v-if="activeTab === 'summary'">
-            <td :class="[isAlt ? 'p-1.5 h-[42px]' : 'p-2.5 h-[86px]', 'text-center border-l border-white/5']">
+            <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
                 <span v-if="hasAuditIssues(char)"
                       @click="emit('open-audit-modal', char)"
                       :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
@@ -152,7 +158,7 @@ const emit = defineEmits([
             <!-- Role / Status selects (summary only, main character only) -->
             <template v-if="!isAlt">
                 <!-- Access Role -->
-                <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
+                <td :class="[rh, 'p-2 w-[130px] border-l border-white/5 text-center']">
                     <div v-if="canManageAccess && member.access_role !== 'leader'">
                         <SearchableSelect
                             :model-value="member.access_role"
@@ -172,7 +178,7 @@ const emit = defineEmits([
                     </div>
                 </td>
                 <!-- Roster Status -->
-                <td class="p-2 w-[130px] h-[86px] border-l border-white/5 text-center">
+                <td :class="[rh, 'p-2 w-[130px] border-l border-white/5 text-center']">
                     <div v-if="canManageStatus">
                         <SearchableSelect
                             :model-value="member.roster_status"
@@ -192,7 +198,7 @@ const emit = defineEmits([
                     </div>
                 </td>
                 <!-- Kick -->
-                <td v-if="canKick" class="w-[60px] h-[86px] border-l border-white/5 text-center">
+                <td v-if="canKick" :class="[rh, 'w-[60px] border-l border-white/5 text-center']">
                     <button v-if="member.access_role !== 'leader'"
                             @click="emit('kick-member', member)"
                             class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-error/10 hover:bg-error text-error hover:text-white transition-all"
@@ -202,9 +208,9 @@ const emit = defineEmits([
                 </td>
             </template>
             <template v-else>
-                <td class="w-[130px] h-[86px] border-l border-white/5"></td>
-                <td class="w-[130px] h-[86px] border-l border-white/5"></td>
-                <td v-if="canKick" class="w-[60px] h-[86px] border-l border-white/5"></td>
+                <td :class="[rh, 'w-[130px] border-l border-white/5']"></td>
+                <td :class="[rh, 'w-[130px] border-l border-white/5']"></td>
+                <td v-if="canKick" :class="[rh, 'w-[60px] border-l border-white/5']"></td>
             </template>
         </template>
     </tr>

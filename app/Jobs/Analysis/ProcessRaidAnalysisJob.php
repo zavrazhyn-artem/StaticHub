@@ -6,19 +6,20 @@ use App\Enums\Locale;
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
-use App\Services\Discord\DiscordMessageService;
 use App\Services\Discord\DiscordWebhookService;
 use App\Services\Analysis\GeminiService;
 use App\Services\Analysis\WclService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-class ProcessRaidAnalysisJob implements ShouldQueue
+class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
     public int $timeout = 300;
+    public int $uniqueFor = 300;
 
     public TacticalReport $report;
 
@@ -28,7 +29,12 @@ class ProcessRaidAnalysisJob implements ShouldQueue
         $this->onQueue('ai');
     }
 
-    public function handle(WclService $wclService, GeminiService $geminiService, DiscordMessageService $discordService, DiscordWebhookService $webhookService): void
+    public function uniqueId(): string
+    {
+        return (string) $this->report->id;
+    }
+
+    public function handle(WclService $wclService, GeminiService $geminiService, DiscordWebhookService $webhookService): void
     {
         if (!$this->report->wcl_report_id) return;
 
@@ -91,10 +97,6 @@ class ProcessRaidAnalysisJob implements ShouldQueue
                         ['content' => $content]
                     );
                 }
-            }
-
-            if ($this->report->event_id && $this->report->event) {
-                $discordService->sendOrUpdateRaidAnnouncement($this->report->event);
             }
 
             // Send webhook notification that AI report is ready

@@ -120,8 +120,12 @@ class Event extends Model
      */
     public function clearUserAttendance(int $userId): void
     {
-        $this->characters()
+        $characterIds = $this->characters()
             ->where('user_id', $userId)
-            ->detach();
+            ->pluck('characters.id');
+
+        if ($characterIds->isNotEmpty()) {
+            $this->characters()->detach($characterIds);
+        }
     }
 }

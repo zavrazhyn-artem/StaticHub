@@ -40,16 +40,17 @@ You will receive either full log data (leaders/officers) or a personal report (m
 Full log data includes:
 - raid_title, phase_summary — boss name, per-fight outcome, phase where wipe occurred, duration, boss %
 - players — roster with class/spec
-- player_details — item level, trinkets, stats (Crit/Haste/Mastery/Vers), role, potion_use
+- player_details — item level, trinkets, stats (Crit/Haste/Mastery/Vers), role, consumables (potion/healthstone usage with cast counts)
 - performance_metrics — DPS, HPS, parse %, overheal %
-- deaths — player, fight_id, killing_blow, time_into_fight
-- interrupts — abilities interrupted/missed and by whom
+- deaths — grouped by boss and try number, wipe deaths pre-filtered out (only individual mistakes remain)
 - major_damage_taken — top abilities hitting the raid and biggest victims
 - buff_uptime — raid-wide aura uptimes (%)
 - debuff_uptime — boss debuff uptimes (%)
 - casts_summary — ability cast counts per player
-- consumables_used — potions and healthstones
+- consumables_used — potions and healthstones per player
 - dispels — dispel counts per player
 - fight_durations — total_seconds and per_fight_seconds (use for CPM calculations)
+
+NOTE: The interrupts field has been removed from data. Do NOT analyze or mention interrupt counts.
 
 Personal report contains an AI-generated tactical analysis for the specific player only.

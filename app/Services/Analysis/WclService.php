@@ -123,16 +123,15 @@ class WclService
         // Build fightId → startTimeMs map for death timestamp normalisation
         $fightStartTimes = array_column($raidFights, 'startTime', 'id');
 
-        // Deaths (with fight-relative timestamp)
+        // Deaths (grouped by boss/try, wipe deaths filtered out)
+        $raidSize = count($rosterNames) ?: count($cleanPlayers);
         $cleanDeaths = WclReportParserHelper::parseDeaths(
             $tablesData['deaths']['data'] ?? [],
             $rosterNames,
-            $fightStartTimes
+            $fightStartTimes,
+            $phaseSummary,
+            $raidSize
         );
-
-        // Interrupts
-        $interruptEntries = $tablesData['interrupts']['data']['entries'][0]['entries'] ?? [];
-        $cleanInterrupts  = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
 
         // Damage Taken
         $cleanDamageTaken = WclReportParserHelper::parseDamageTaken(
@@ -241,7 +240,6 @@ class WclService
             'players'            => $cleanPlayers,
             'player_details'     => $playerDetails,
             'deaths'             => $cleanDeaths,
-            'interrupts'         => $cleanInterrupts,
             'major_damage_taken' => array_slice($cleanDamageTaken, 0, 15),
             'casts_summary'      => $castsAndConsumables['casts'],
             'consumables_used'   => $consumables,

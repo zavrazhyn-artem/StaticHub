@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::patch('/statics/{static}/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
     // Settings
+    Route::get('/statics/{static}/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::patch('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
     Route::get('/statics/{static}/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');

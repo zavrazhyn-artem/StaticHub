@@ -23,13 +23,55 @@ class CharacterSyncService
 
     /**
      * Orchestrates fetching characters from Blizzard API and storing them in the database.
+     * Uses batch HTTP calls to fetch avatars and profiles concurrently.
      */
     public function syncUserCharacters(string $token, int $userId): void
     {
         $apiCharacters = $this->blizzardApiService->getUserCharacters($token);
 
-        foreach ($apiCharacters as $apiData) {
-            $this->processSingleCharacter($apiData, $userId);
+        if (empty($apiCharacters)) {
+            return;
+        }
+
+        // Batch fetch all avatars concurrently
+        $avatars = $this->blizzardApiService->fetchAvatarsBatch($apiCharacters);
+
+        // Upsert all characters with their avatars
+        $characters = [];
+        foreach ($apiCharacters as $idx => $apiData) {
+            $realm = $this->resolveRealm($apiData);
+            $characters[$idx] = $this->upsertCharacter($apiData, $userId, $realm->id, $avatars[$idx] ?? null);
+        }
+
+        // Batch fetch all profile summaries concurrently
+        $profiles = $this->blizzardApiService->fetchProfilesBatch($apiCharacters);
+
+        // Update active_spec and ilvl from profiles
+        foreach ($characters as $idx => $character) {
+            $profileData = $profiles[$idx] ?? null;
+            if ($profileData === null) {
+                continue;
+            }
+
+            $activeSpec = is_array($profileData['active_spec'] ?? null)
+                ? ($profileData['active_spec']['name'] ?? null)
+                : ($profileData['active_spec'] ?? null);
+
+            if ($activeSpec === null) {
+                $activeSpec = is_array($profileData['active_specialization'] ?? null)
+                    ? ($profileData['active_specialization']['name'] ?? null)
+                    : ($profileData['active_specialization'] ?? null);
+            }
+
+            $character->update([
+                'equipped_item_level' => $profileData['equipped_item_level'] ?? $character->equipped_item_level,
+                'active_spec'         => $activeSpec ?? $character->active_spec,
+            ]);
+        }
+
+        // Dispatch async sync jobs for all characters
+        foreach ($characters as $character) {
+            $this->dispatchSyncJob($character);
         }
 
         $this->autoSetSpecsForUserStatics($userId);

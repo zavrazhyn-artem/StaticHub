@@ -1,8 +1,14 @@
 <script setup>
+import { inject, computed } from 'vue';
+
+const rowHeights = inject('rowHeights');
+
 const props = defineProps({
     char: { type: Object, required: true },
     isAlt: { type: Boolean, default: false },
 });
+
+const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
 /**
  * Vault slot logic:
@@ -59,8 +65,8 @@ const slotStyle = (slot) => {
 <template>
     <!-- Raid Slots -->
     <td v-for="i in [0, 1, 2]" :key="'vr-' + i"
-        :class="[isAlt ? 'h-[42px]' : 'h-[72px]', i === 0 ? 'border-l border-white/5' : '']"
-        class="p-2 text-center font-mono text-sm">
+        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/5' : '']"
+        class="text-center font-mono text-sm">
         <span :class="slotStyle(getVaultSlot('raid', i))">
             {{ getVaultSlot('raid', i)?.ilvl || '-' }}
         </span>
@@ -68,8 +74,8 @@ const slotStyle = (slot) => {
 
     <!-- M+ Slots -->
     <td v-for="i in [0, 1, 2]" :key="'vm-' + i"
-        :class="[isAlt ? 'h-[42px]' : 'h-[72px]', i === 0 ? 'border-l border-white/10' : '']"
-        class="p-2 text-center font-mono text-sm">
+        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/10' : '']"
+        class="text-center font-mono text-sm">
         <span :class="slotStyle(getVaultSlot('mythic', i))">
             {{ getVaultSlot('mythic', i)?.ilvl || '-' }}
         </span>
@@ -77,8 +83,8 @@ const slotStyle = (slot) => {
 
     <!-- World Slots -->
     <td v-for="i in [0, 1, 2]" :key="'vw-' + i"
-        :class="[isAlt ? 'h-[42px]' : 'h-[72px]', i === 0 ? 'border-l border-white/10' : '']"
-        class="p-2 text-center font-mono text-sm">
+        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/10' : '']"
+        class="text-center font-mono text-sm">
         <span :class="slotStyle(getVaultSlot('world', i))">
             {{ getVaultSlot('world', i)?.ilvl || '-' }}
         </span>

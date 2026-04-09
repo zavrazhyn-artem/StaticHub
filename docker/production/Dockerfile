@@ -52,6 +52,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libicu-dev \
         libsodium-dev \
+        default-mysql-client \
         supervisor \
         unzip \
         curl \
@@ -91,6 +92,7 @@ RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
         storage/logs \
+        storage/app/backup-temp \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache

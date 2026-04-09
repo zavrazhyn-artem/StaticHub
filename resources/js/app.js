@@ -15,6 +15,7 @@ import SettingsTabs from './Components/Settings/SettingsTabs.vue';
 import SettingsLogs from './Components/Settings/SettingsLogs.vue';
 import SettingsSchedule from './Components/Settings/SettingsSchedule.vue';
 import SettingsDiscord from './Components/Settings/SettingsDiscord.vue';
+import SettingsProfile from './Components/Settings/SettingsProfile.vue';
 import StaticSetup from './Components/Statics/StaticSetup.vue';
 import ConsumablesPlanner from './Components/Treasury/ConsumablesPlanner.vue';
 import TransactionHistory from './Components/Treasury/TransactionHistory.vue';
@@ -24,6 +25,7 @@ import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelec
 import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue';
 import CharactersPage from './Components/Character/CharactersPage.vue';
 import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
+import AlertBanner from './Components/UI/AlertBanner.vue';
 
 
 
@@ -69,6 +71,7 @@ app.component('settings-tabs', SettingsTabs);
 app.component('settings-logs', SettingsLogs);
 app.component('settings-schedule', SettingsSchedule);
 app.component('settings-discord', SettingsDiscord);
+app.component('settings-profile', SettingsProfile);
 app.component('static-setup', StaticSetup);
 app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
@@ -78,6 +81,7 @@ app.component('transfer-ownership-select', TransferOwnershipSelect);
 app.component('character-spec-picker', CharacterSpecPicker);
 app.component('characters-page', CharactersPage);
 app.component('onboarding-stepper', OnboardingStepper);
+app.component('alert-banner', AlertBanner);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

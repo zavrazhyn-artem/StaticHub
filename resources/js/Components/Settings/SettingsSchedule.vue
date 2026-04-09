@@ -9,9 +9,11 @@ const { __ } = useTranslation();
 const props = defineProps({
     scheduleData:   { type: Object, required: true },
     updateUrl:      { type: String, required: true },
+    profileTabUrl:  { type: String, required: true },
     scheduleTabUrl: { type: String, required: true },
     discordTabUrl:  { type: String, required: true },
     logsTabUrl:     { type: String, required: true },
+    canManage:      { type: Boolean, default: false },
 });
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -129,7 +131,7 @@ const days = {
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ scheduleData.static_name }}</p>
         </div>
 
-        <SettingsTabs :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="schedule" />
+        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="schedule" :can-manage="canManage" />
 
         <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
             <div class="space-y-8">

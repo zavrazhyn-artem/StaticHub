@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libicu-dev \
         libsodium-dev \
+        default-mysql-client \
         supervisor \
         unzip \
         curl \

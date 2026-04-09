@@ -60,8 +60,22 @@ class EventPayloadService
             ->get()
             ->keyBy('id');
 
-        $enhanceRoster = function ($characters) use ($event, $allAttendanceSpecs, $specModels) {
-            return collect($characters)->map(function ($char) use ($event, $allAttendanceSpecs, $specModels) {
+        // Pre-load all main specs for all characters appearing in the roster (one query).
+        $allRosterCharIds = collect($rosterData['mainRoster'])->flatten()
+            ->merge($rosterData['absentRoster'])
+            ->merge($userCharacters)
+            ->pluck('id')
+            ->unique();
+
+        $mainSpecMap = CharacterStaticSpec::whereIn('character_id', $allRosterCharIds)
+            ->where('static_id', $event->static_id)
+            ->where('is_main', true)
+            ->with('specialization')
+            ->get()
+            ->keyBy('character_id');
+
+        $enhanceRoster = function ($characters) use ($allAttendanceSpecs, $specModels, $mainSpecMap) {
+            return collect($characters)->map(function ($char) use ($allAttendanceSpecs, $specModels, $mainSpecMap) {
                 $char->setAttribute('class_icon_url', $char->getClassIconUrl());
 
                 $spec = null;
@@ -70,7 +84,7 @@ class EventPayloadService
                     $spec = $specModels->get($rsvpSpecId);
                 }
                 if (!$spec) {
-                    $spec = $char->getMainSpecInStatic($event->static_id);
+                    $spec = $mainSpecMap->get($char->id)?->specialization;
                 }
 
                 $char->setAttribute('main_spec', $spec ? [
@@ -92,20 +106,25 @@ class EventPayloadService
         $absentRosterEnhanced = $enhanceRoster($rosterData['absentRoster']);
         $userCharactersEnhanced = $enhanceRoster($userCharacters);
 
-        $characterSpecs = $userCharacters->mapWithKeys(function ($char) use ($event) {
-            $specs = $char->specsInStatic($event->static_id);
-            $mainSpecRecord = CharacterStaticSpec::where('character_id', $char->id)
-                ->where('static_id', $event->static_id)
-                ->where('is_main', true)
-                ->value('spec_id');
+        // Pre-load all specs for user's characters in one query.
+        $userCharIds = $userCharacters->pluck('id');
+        $allUserSpecRecords = CharacterStaticSpec::whereIn('character_id', $userCharIds)
+            ->where('static_id', $event->static_id)
+            ->with('specialization')
+            ->get()
+            ->groupBy('character_id');
 
-            return [$char->id => $specs->map(fn ($spec) => [
-                'id'       => $spec->id,
-                'name'     => $spec->name,
-                'role'     => $spec->role,
-                'icon_url' => $spec->icon_url,
-                'is_main'  => $spec->id === $mainSpecRecord,
-            ])->values()];
+        $characterSpecs = $userCharacters->mapWithKeys(function ($char) use ($allUserSpecRecords) {
+            $specRecords = $allUserSpecRecords->get($char->id, collect());
+
+            return [$char->id => $specRecords->filter(fn ($r) => $r->specialization)
+                ->map(fn ($r) => [
+                    'id'       => $r->specialization->id,
+                    'name'     => $r->specialization->name,
+                    'role'     => $r->specialization->role,
+                    'icon_url' => $r->specialization->icon_url,
+                    'is_main'  => (bool) $r->is_main,
+                ])->values()];
         });
 
         return [
@@ -142,7 +161,9 @@ class EventPayloadService
             return null;
         }
 
-        $mainCharacter = $user->getMainCharacterForStatic($staticId);
+        $mainCharacter = $userCharacters->first(
+            fn ($char) => $char->statics->contains(fn ($s) => $s->pivot->role === 'main')
+        );
         return $mainCharacter ? $mainCharacter->id : $userCharacters->first()->id;
     }
 }

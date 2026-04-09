@@ -63,6 +63,13 @@ class DiscordApiService
         return $this->makeRequest('GET', "/guilds/{$guildId}/roles") ?? [];
     }
 
+    public function getGuildMember(string $guildId, string $userId): ?array
+    {
+        $result = $this->makeRequest('GET', "/guilds/{$guildId}/members/{$userId}");
+
+        return is_array($result) ? $result : null;
+    }
+
     public function sendMessage(string $channelId, array $payload): ?array
     {
         return $this->makeRequest('POST', "/channels/{$channelId}/messages", $payload);

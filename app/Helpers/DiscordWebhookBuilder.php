@@ -57,7 +57,7 @@ class DiscordWebhookBuilder
             'embeds' => [
                 [
                     'title' => '🧠 AI Tactical Report Ready',
-                    'description' => "Analysis for **{$reportTitle}** has been completed.",
+                    'description' => "Analysis for **{$reportTitle}** has been completed.\n\n📄 [View Full Report]({$reportUrl})",
                     'color' => 5763719, // Green
                     'fields' => [],
                     'image' => ['url' => self::spacerImageUrl()],

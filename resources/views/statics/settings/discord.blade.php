@@ -16,8 +16,10 @@
         delete-message-url="{{ route('statics.settings.discord.message.delete', [$static, ':messageId']) }}"
         delete-channel-message-url="{{ route('statics.settings.discord.channel-message.delete', [$static, ':messageId']) }}"
         invite-url="{{ $discordInviteUrl }}"
+        profile-tab-url="{{ route('statics.settings.profile', $static) }}"
         schedule-tab-url="{{ route('statics.settings.schedule', $static) }}"
         discord-tab-url="{{ route('statics.settings.discord', $static) }}"
         logs-tab-url="{{ route('statics.settings.logs', $static) }}"
+        :can-manage="true"
     ></settings-discord>
 </x-app-layout>
