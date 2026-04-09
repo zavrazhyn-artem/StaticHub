@@ -72,17 +72,17 @@ return [
             -1 => ['ilvl' => null, 'track' => null],      // No run
         ],
         'delve' => [
-            11 => ['ilvl' => 259, 'track' => 'Hero'],
+            11 => ['ilvl' => 259, 'track' => 'Hero'],      // 8+ all give Hero 1/6
             10 => ['ilvl' => 259, 'track' => 'Hero'],
              9 => ['ilvl' => 259, 'track' => 'Hero'],
              8 => ['ilvl' => 259, 'track' => 'Hero'],
-             7 => ['ilvl' => 259, 'track' => 'Hero'],
-             6 => ['ilvl' => 256, 'track' => 'Champion'],
-             5 => ['ilvl' => 253, 'track' => 'Champion'],
-             4 => ['ilvl' => 246, 'track' => 'Veteran'],
-             3 => ['ilvl' => 243, 'track' => 'Veteran'],
-             2 => ['ilvl' => 240, 'track' => 'Veteran'],
-             1 => ['ilvl' => 237, 'track' => 'Veteran'],
+             7 => ['ilvl' => 256, 'track' => 'Champion'],  // Champion 4/6
+             6 => ['ilvl' => 253, 'track' => 'Champion'],  // Champion 3/6
+             5 => ['ilvl' => 246, 'track' => 'Champion'],  // Champion 1/6
+             4 => ['ilvl' => 243, 'track' => 'Veteran'],   // Veteran 4/6
+             3 => ['ilvl' => 240, 'track' => 'Veteran'],   // Veteran 3/6
+             2 => ['ilvl' => 237, 'track' => 'Veteran'],   // Veteran 2/6
+             1 => ['ilvl' => 233, 'track' => 'Veteran'],   // Veteran 1/6
              0 => ['ilvl' => null, 'track' => null],
         ],
     ],
@@ -418,6 +418,19 @@ return [
     | Matches the name_description.display_string of crafted items.
     */
     'spark_label' => 'Radiance Crafted',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Crafted item ilvl color tiers (passed to frontend)
+    |--------------------------------------------------------------------------
+    | Each entry: [min_ilvl, max_ilvl, css_color_class].
+    | Evaluated top-down, first match wins.
+    */
+    'crafted_ilvl_tiers' => [
+        ['min' => 275, 'max' => 285, 'color' => 'text-orange-400'],
+        ['min' => 262, 'max' => 274, 'color' => 'text-purple-400'],
+        ['min' => 246, 'max' => 261, 'color' => 'text-green-400'],
+    ],
 
     /*
     |--------------------------------------------------------------------------

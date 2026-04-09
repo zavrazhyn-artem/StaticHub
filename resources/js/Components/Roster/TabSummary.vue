@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import InfoTooltip from '@/Components/UI/InfoTooltip.vue';
 const { __ } = useTranslation();
 
 defineProps({
@@ -63,6 +64,13 @@ const getRaidVaultSlots = (char) => {
 
 const getWorldVaultSlots = (char) => getVaultSlotCount(char?.vault_world_runs, [2, 4, 8]);
 
+const runsColor = (count, isAlt = false) => {
+  const opacity = isAlt ? '/70' : '';
+  if (count >= 8) return `text-green-400${opacity}`;
+  if (count >= 4) return `text-amber-400${opacity}`;
+  return `text-red-400${opacity}`;
+};
+
 const getRaidProgression = (char) => {
   const raids = char?.raids;
   if (!raids) return '-';
@@ -113,7 +121,12 @@ const getRaidProgression = (char) => {
             <th class="p-2 text-center w-8">G</th>
             <th class="p-2 text-center w-8">L</th>
 
-            <th class="p-4 text-center border-l border-white/5">{{ __('This Week') }}</th>
+            <th class="px-4 py-4 border-l border-white/5">
+              <span class="flex items-center justify-between">
+                <span class="flex-1 text-center">{{ __('This Week') }}</span>
+                <InfoTooltip :text="__('Only keys +10 and above are counted')" />
+              </span>
+            </th>
 
             <th class="p-4 text-center border-l border-white/5 w-8">M+</th>
             <th class="p-4 text-center w-8">R</th>
@@ -170,7 +183,8 @@ const getRaidProgression = (char) => {
               </td>
 
               <!-- Mythic Dungeons -->
-              <td class="p-4 text-center font-mono font-bold text-white border-l border-white/5">
+              <td class="p-4 text-center font-mono font-bold border-l border-white/5"
+                  :class="runsColor(char.weekly_runs_count || 0)">
                 {{ char.weekly_runs_count || 0 }}
               </td>
 
@@ -239,7 +253,7 @@ const getRaidProgression = (char) => {
                 <span v-else class="text-gray-800 text-[10px]">-</span>
               </td>
 
-              <td class="p-4 text-center font-mono text-sm font-bold text-white/70 border-l border-white/5">{{ alt.weekly_runs_count || 0 }}</td>
+              <td class="p-4 text-center font-mono text-sm font-bold border-l border-white/5" :class="runsColor(alt.weekly_runs_count || 0, true)">{{ alt.weekly_runs_count || 0 }}</td>
 
               <td class="p-4 text-center font-mono text-sm font-bold border-l border-white/5" :class="getMplusVaultSlots(alt) > 0 ? 'text-green-400/70' : 'text-gray-800'">{{ getMplusVaultSlots(alt) }}</td>
               <td class="p-4 text-center font-mono text-sm font-bold" :class="getRaidVaultSlots(alt) > 0 ? 'text-green-400/70' : 'text-gray-800'">{{ getRaidVaultSlots(alt) }}</td>

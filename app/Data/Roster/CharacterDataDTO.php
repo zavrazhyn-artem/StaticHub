@@ -14,6 +14,8 @@ final readonly class CharacterDataDTO
         // Profile
         public ?string $avatar_url,
         public ?string $class,
+        public ?int    $class_id,
+        public ?int    $spec_id,
         public ?string $combat_role,
         public ?float  $equipped_ilvl,
         public ?float  $highest_ilvl_ever,

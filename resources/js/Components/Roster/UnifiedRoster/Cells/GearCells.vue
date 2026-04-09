@@ -3,6 +3,7 @@ import { inject, computed } from 'vue';
 
 const rowHeights = inject('rowHeights');
 
+
 const props = defineProps({
     char: { type: Object, required: true },
     isAlt: { type: Boolean, default: false },
@@ -24,6 +25,12 @@ const slots = [
 const getItem = (slot) => {
     return (props.char?.equipment || []).find(i => i.slot === slot);
 };
+
+const setItemIds = computed(() => {
+    return (props.char?.equipment || [])
+        .filter(i => i.is_set_piece)
+        .map(i => i.id);
+});
 
 const trackAbbreviations = {
     Myth: 'M',
@@ -49,6 +56,9 @@ const getWowheadData = (item) => {
     if (item.enchant_id) parts.push(`ench=${item.enchant_id}`);
     if (item.gem_ids?.length) parts.push(`gems=${item.gem_ids.join(':')}`);
     if (item.bonus_ids?.length) parts.push(`bonus=${item.bonus_ids.join(':')}`);
+    if (props.char?.class_id) parts.push(`class=${props.char.class_id}`);
+    if (props.char?.spec_id) parts.push(`spec=${props.char.spec_id}`);
+    if (setItemIds.value.length) parts.push(`pcs=${setItemIds.value.join(':')}`);
     return parts.join('&');
 };
 
@@ -77,6 +87,19 @@ const getQualityClass = (quality) => {
     };
     return map[quality] ?? 'border-white/10';
 };
+
+const craftedColorClass = (ilvl) => {
+    if (ilvl >= 275) return 'text-orange-400';
+    if (ilvl >= 262) return 'text-purple-400';
+    if (ilvl >= 246) return 'text-green-400';
+    return 'text-gray-400';
+};
+
+const ilvlColorClass = (item) => {
+    if (item.is_crafted) return craftedColorClass(item.ilvl);
+    if (item.upgrade?.track) return trackColorMap[item.upgrade.track] || 'text-gray-400';
+    return 'text-gray-400';
+};
 </script>
 
 <template>
@@ -98,7 +121,7 @@ const getQualityClass = (quality) => {
     <td v-for="slot in slots" :key="slot" :class="rh" class="p-0.5 border-l border-white/5">
         <div v-if="getItem(slot)" class="flex items-center justify-center h-full" :class="isAlt ? 'gap-1' : 'flex-col'">
             <!-- ilvl badge above icon (main) or inline (alt) -->
-            <div :class="[isAlt ? 'text-[8px]' : 'mb-0.5 text-[10px]', 'font-bold leading-none', getQualityColor(getItem(slot).quality)]">
+            <div :class="[isAlt ? 'text-[8px]' : 'mb-0.5 text-[10px]', 'font-bold leading-none', ilvlColorClass(getItem(slot))]">
                 {{ getItem(slot).ilvl }}
             </div>
 
@@ -115,9 +138,13 @@ const getQualityClass = (quality) => {
                 </span>
             </a>
 
-            <!-- Upgrade track badge below icon (main only) -->
+            <!-- Track / Craft badge below icon (main only) -->
             <div v-if="!isAlt" class="mt-0.5 h-[12px] flex items-center">
-                <div v-if="getItem(slot).upgrade"
+                <div v-if="getItem(slot).is_crafted"
+                     :class="['font-black text-[9px] uppercase tracking-wide', craftedColorClass(getItem(slot).ilvl)]">
+                    CRAFT
+                </div>
+                <div v-else-if="getItem(slot).upgrade"
                      :class="['font-bold text-[10px]', trackColorMap[getItem(slot).upgrade.track] || 'text-gray-400']">
                     {{ trackAbbreviations[getItem(slot).upgrade.track] || getItem(slot).upgrade.track }} {{ getItem(slot).upgrade.level }}/{{ getItem(slot).upgrade.max }}
                 </div>

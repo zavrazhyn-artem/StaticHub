@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, nextTick, provide } from 'vue';
 import RosterRow from './RosterRow.vue';
+import InfoTooltip from '@/Components/UI/InfoTooltip.vue';
 
 // ── Row height tokens (single source of truth) ──
 const ROW_HEIGHTS = {
@@ -154,7 +155,12 @@ const slotLabels = {
                         <th class="p-2 text-center border-l border-[#222] w-[40px]">#</th>
                         <th v-for="slot in ['H','S','C','G','L']" :key="slot"
                             class="p-1 text-center text-on-surface-variant w-8">{{ slot }}</th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('Runs') }}</th>
+                        <th class="px-2 py-2 border-l border-[#222]">
+                            <span class="flex items-center justify-between">
+                                <span class="flex-1 text-center">{{ __('Runs') }}</span>
+                                <InfoTooltip :text="__('Only keys +10 and above are counted')" />
+                            </span>
+                        </th>
                         <th class="p-2 text-center border-l border-[#222]">{{ __('Rating') }}</th>
                         <th class="p-2 text-center border-l border-[#222]">{{ __('Issues') }}</th>
                         <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Role') }}</th>

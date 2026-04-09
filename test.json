@@ -1,0 +1,471 @@
+{
+    "class": "Druid",
+    "crests": {
+        "hero": 520,
+        "myth": 370,
+        "veteran": 1170,
+        "champion": 710,
+        "adventurer": 1180
+    },
+    "renown": {
+        "harati": 18,
+        "amani_tribe": 18,
+        "the_singularity": 19,
+        "silvermoon_court": 20
+    },
+    "equipment": [
+        {
+            "id": 250024,
+            "icon": "inv_helm_leather_raiddruidmidnight_d_01",
+            "ilvl": 266,
+            "name": "Branches of the Luminous Bloom",
+            "slot": "HEAD",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 3,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13334,
+                6652,
+                12667,
+                13338,
+                13575,
+                12795
+            ],
+            "enchant_id": 7959,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 151309,
+            "icon": "inv_7_0raid_necklace_06d",
+            "ilvl": 269,
+            "name": "Necklace of the Twisting Void",
+            "slot": "NECK",
+            "gem_ids": [
+                240971
+            ],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 4,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13440,
+                6652,
+                13668,
+                12699,
+                12796
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 1
+        },
+        {
+            "id": 250022,
+            "icon": "inv_shoulder_leather_raiddruidmidnight_d_01",
+            "ilvl": 266,
+            "name": "Seedpods of the Luminous Bloom",
+            "slot": "SHOULDER",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 3,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                6652,
+                12795,
+                13440,
+                13340,
+                13574,
+                3151
+            ],
+            "enchant_id": 8031,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 98084,
+            "icon": null,
+            "ilvl": 1,
+            "name": "Ooze-Soaked Shirt",
+            "slot": "SHIRT",
+            "gem_ids": [],
+            "quality": "RARE",
+            "upgrade": null,
+            "bonus_ids": [],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 250027,
+            "icon": "inv_chest_leather_raiddruidmidnight_d_01",
+            "ilvl": 272,
+            "name": "Trunk of the Luminous Bloom",
+            "slot": "CHEST",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 1,
+                "track": "Myth"
+            },
+            "bonus_ids": [
+                13336,
+                12801,
+                13440,
+                6652,
+                13575
+            ],
+            "enchant_id": 7985,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 249374,
+            "icon": "inv_belt_leather_raidmonkmidnight_d_01",
+            "ilvl": 263,
+            "name": "Scorn-Scarred Shul'ka's Belt",
+            "slot": "WAIST",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 2,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                6652,
+                12667,
+                13577,
+                13334,
+                12794
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 250023,
+            "icon": "inv_pant_leather_raiddruidmidnight_d_01",
+            "ilvl": 276,
+            "name": "Phloemwraps of the Luminous Bloom",
+            "slot": "LEGS",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 2,
+                "track": "Myth"
+            },
+            "bonus_ids": [
+                6652,
+                13440,
+                13339,
+                13575,
+                12802
+            ],
+            "enchant_id": 8159,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 249334,
+            "icon": "inv_boot_leather_raiddemonhuntermidnight_d_01",
+            "ilvl": 269,
+            "name": "Void-Claimed Shinkickers",
+            "slot": "FEET",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 4,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                42,
+                13577,
+                13334,
+                12796
+            ],
+            "enchant_id": 7963,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 250020,
+            "icon": "inv_bracer_leather_raiddruidmidnight_d_01",
+            "ilvl": 266,
+            "name": "Bindings of the Luminous Bloom",
+            "slot": "WRIST",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 3,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                6652,
+                12667,
+                12795,
+                13440,
+                3151
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 250025,
+            "icon": "inv_glove_leather_raiddruidmidnight_d_01",
+            "ilvl": 269,
+            "name": "Arbortenders of the Luminous Bloom",
+            "slot": "HANDS",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 4,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                6652,
+                13440,
+                13337,
+                13574,
+                12796
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 251093,
+            "icon": "inv_12_trinket_devouring_host_currency1_silver",
+            "ilvl": 269,
+            "name": "Omission of Light",
+            "slot": "FINGER_1",
+            "gem_ids": [
+                240916
+            ],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 4,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13440,
+                6652,
+                13668,
+                12699,
+                12796
+            ],
+            "enchant_id": 8027,
+            "is_crafted": false,
+            "socket_count": 1
+        },
+        {
+            "id": 151311,
+            "icon": "inv_70_dungeon_ring2b",
+            "ilvl": 276,
+            "name": "Band of the Triumvirate",
+            "slot": "FINGER_2",
+            "gem_ids": [
+                240916
+            ],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 6,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13440,
+                6652,
+                13668,
+                12699,
+                12798
+            ],
+            "enchant_id": 8027,
+            "is_crafted": false,
+            "socket_count": 1
+        },
+        {
+            "id": 249339,
+            "icon": "inv_12_trinket_raid_voidspire_tank1_smolderinggloomscale",
+            "ilvl": 276,
+            "name": "Gloom-Spattered Dreadscale",
+            "slot": "TRINKET_1",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 6,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                6652,
+                13334,
+                12798
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 250256,
+            "icon": "inv_10_jewelcrafting3_soulcage_air",
+            "ilvl": 276,
+            "name": "Heart of Wind",
+            "slot": "TRINKET_2",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 6,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13440,
+                6652,
+                12699,
+                12798
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 193712,
+            "icon": "inv_leather_dragondungeon_c_01_cape",
+            "ilvl": 269,
+            "name": "Potion-Stained Cloak",
+            "slot": "BACK",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": {
+                "max": 6,
+                "level": 4,
+                "track": "Hero"
+            },
+            "bonus_ids": [
+                13440,
+                6652,
+                13577,
+                12699,
+                12796
+            ],
+            "enchant_id": null,
+            "is_crafted": false,
+            "socket_count": 0
+        },
+        {
+            "id": 237848,
+            "icon": "mace_2h_blacksmithing_d_04_icon",
+            "ilvl": 285,
+            "name": "Blood Knight's Mercy",
+            "slot": "MAIN_HAND",
+            "gem_ids": [],
+            "quality": "EPIC",
+            "upgrade": null,
+            "bonus_ids": [
+                12214,
+                12497,
+                12066,
+                13640,
+                8960,
+                8792,
+                13622,
+                13667
+            ],
+            "enchant_id": 8009,
+            "is_crafted": true,
+            "socket_count": 0
+        }
+    ],
+    "avatar_url": "https://render.worldofwarcraft.com/eu/character/tarren-mill/123/177564539-avatar.jpg",
+    "spark_gear": {
+        "main_hand": {
+            "id": 237848,
+            "ilvl": 285,
+            "name": "Blood Knight's Mercy"
+        }
+    },
+    "tier_ilvls": {
+        "C": 272,
+        "G": 269,
+        "H": 266,
+        "L": 276,
+        "S": 266
+    },
+    "coffer_keys": 227,
+    "combat_role": "TANK",
+    "honor_level": 20,
+    "lvl_25_pets": 64,
+    "tier_pieces": {
+        "C": "Myth",
+        "G": "Hero",
+        "H": "Hero",
+        "L": "Myth",
+        "S": "Hero"
+    },
+    "unique_pets": 482,
+    "cutting_edge": 0,
+    "mounts_count": 707,
+    "pvp_brackets": {
+        "2v2": {
+            "rating": 0,
+            "week_played": 0,
+            "season_played": 0
+        },
+        "3v3": {
+            "rating": 0,
+            "week_played": 0,
+            "season_played": 0
+        },
+        "rbg": {
+            "rating": 0,
+            "week_played": 0,
+            "season_played": 0
+        },
+        "shuffle": {
+            "rating": 0,
+            "week_played": 0,
+            "season_played": 0
+        }
+    },
+    "titles_count": 183,
+    "equipped_ilvl": 272,
+    "mythic_rating": 2633.0952,
+    "season_delves": 251,
+    "honorable_kills": 8685,
+    "sparks_equipped": 2,
+    "upgrades_missing": 32,
+    "embellished_items": [
+        {
+            "id": 237848,
+            "ilvl": 285,
+            "name": "Blood Knight's Mercy",
+            "spell_id": 1245052,
+            "spell_name": "Void"
+        }
+    ],
+    "highest_ilvl_ever": null,
+    "achievement_points": 36645,
+    "ahead_of_the_curve": 0,
+    "empty_sockets_count": 0,
+    "missing_enchants_slots": [],
+    "season_heroic_dungeons": 36,
+    "low_quality_enchants_slots": [
+        "HEAD"
+    ]
+}

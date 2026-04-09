@@ -89,6 +89,11 @@ const toSlotMap = (equipment) => {
     return Object.fromEntries(equipment.map(item => [item.slot, item]));
 };
 
+const getSetItemIds = (equipment) => {
+    if (!Array.isArray(equipment)) return [];
+    return equipment.filter(i => i.is_set_piece).map(i => i.id);
+};
+
 /** Members that have a linked character (filters out "no character" entries). */
 const linkedMembers = (members) => members.filter(m => m.main_character != null);
 </script>
@@ -209,7 +214,10 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                 <div class="flex justify-center">
                                     <GearCell
                                         :item="toSlotMap(member.main_character.equipment)[slot.key] ?? null"
-                                        :slotName="slot.key" />
+                                        :slotName="slot.key"
+                                        :classId="member.main_character.class_id"
+                                        :specId="member.main_character.spec_id"
+                                        :setItemIds="getSetItemIds(member.main_character.equipment)" />
                                 </div>
                             </td>
                         </tr>
@@ -283,7 +291,10 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                     <div class="flex justify-center">
                                         <GearCell
                                             :item="toSlotMap(alt?.equipment)?.[slot.key] ?? null"
-                                            :slotName="slot.key" />
+                                            :slotName="slot.key"
+                                            :classId="alt?.class_id"
+                                            :specId="alt?.spec_id"
+                                            :setItemIds="getSetItemIds(alt?.equipment)" />
                                     </div>
                                 </td>
                             </tr>

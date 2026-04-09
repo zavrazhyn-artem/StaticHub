@@ -30,6 +30,12 @@ const trackAbbrev = (track) => {
 };
 
 const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
+
+const runsColorClass = (count) => {
+    if (count >= 8) return 'text-green-400';
+    if (count >= 4) return 'text-amber-400';
+    return 'text-red-400';
+};
 </script>
 
 <template>
@@ -47,7 +53,7 @@ const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
             {{ trackAbbrev(char?.tier_pieces?.[slot]) }}
         </span>
     </td>
-    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5']" class="text-center font-mono font-bold text-white border-l border-white/5">
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', runsColorClass(char?.weekly_runs_count ?? 0)]" class="text-center font-mono font-bold border-l border-white/5">
         {{ char?.weekly_runs_count ?? 0 }}
     </td>
     <td :class="[

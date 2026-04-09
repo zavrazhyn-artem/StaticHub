@@ -359,6 +359,9 @@ final class GearAuditService
 
             $bonuses = $item['bonus_list'] ?? [];
 
+            $descLabel  = (string) ($item['name_description']['display_string'] ?? '');
+            $isCrafted  = $this->sparkLabel !== '' && $descLabel === $this->sparkLabel;
+
             $result[] = [
                 'slot'         => $slotType,
                 'id'           => $itemId,
@@ -371,6 +374,8 @@ final class GearAuditService
                 'upgrade'      => $this->resolveUpgradeTrack($bonuses),
                 'socket_count' => count($item['sockets'] ?? []),
                 'icon'         => $iconName,
+                'is_crafted'   => $isCrafted,
+                'is_set_piece' => isset($item['set']),
             ];
         }
 

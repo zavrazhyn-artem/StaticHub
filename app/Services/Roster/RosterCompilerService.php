@@ -109,6 +109,8 @@ final class RosterCompilerService
         $charData = new CharacterDataDTO(
             avatar_url:             $this->resolveAvatarUrl($media),
             class:                  $this->resolveClass($profile),
+            class_id:               $this->resolveClassId($profile),
+            spec_id:                $this->resolveSpecId($profile),
             combat_role:            $this->resolveRole($profile),
             equipped_ilvl:          $this->resolveEquippedIlvl($profile),
             highest_ilvl_ever:      null,
@@ -190,6 +192,20 @@ final class RosterCompilerService
     {
         $name = (string) ($profile['character_class']['name'] ?? $profile['class'] ?? '');
         return $name !== '' ? $name : null;
+    }
+
+    private function resolveClassId(array $profile): ?int
+    {
+        $id = $profile['character_class']['id'] ?? null;
+        return $id !== null ? (int) $id : null;
+    }
+
+    private function resolveSpecId(array $profile): ?int
+    {
+        $id = $profile['active_specialization']['id']
+            ?? $profile['active_spec']['id']
+            ?? null;
+        return $id !== null ? (int) $id : null;
     }
 
     private function resolveEquippedIlvl(array $profile): ?float

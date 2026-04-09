@@ -16,6 +16,18 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    classId: {
+        type: Number,
+        default: null,
+    },
+    specId: {
+        type: Number,
+        default: null,
+    },
+    setItemIds: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 // ---------------------------------------------------------------------------
@@ -97,6 +109,10 @@ const wowheadData = computed(() => {
 
     if (props.item.bonus_ids?.length)
         parts.push(`bonus=${props.item.bonus_ids.join(':')}`);
+
+    if (props.classId) parts.push(`class=${props.classId}`);
+    if (props.specId) parts.push(`spec=${props.specId}`);
+    if (props.setItemIds.length) parts.push(`pcs=${props.setItemIds.join(':')}`);
 
     return parts.join('&');
 });

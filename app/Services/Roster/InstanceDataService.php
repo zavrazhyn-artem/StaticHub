@@ -50,18 +50,25 @@ final class InstanceDataService
         return $rating !== null ? (float) $rating : null;
     }
 
-    public function resolveWeeklyRunsCount(array $mplus, array $rio = []): int
+    public function resolveWeeklyRunsCount(array $mplus, array $rio = [], int $minLevel = 10): int
     {
-        if (isset($rio['mythic_plus_weekly_highest_level_runs']) && is_array($rio['mythic_plus_weekly_highest_level_runs'])) {
-            return count($rio['mythic_plus_weekly_highest_level_runs']);
+        $runs = $rio['mythic_plus_weekly_highest_level_runs']
+            ?? $mplus['weekly_best_runs']
+            ?? $mplus['current_period_best_runs']
+            ?? [];
+
+        if (!is_array($runs)) {
+            return 0;
         }
-        if (isset($mplus['weekly_best_runs']) && is_array($mplus['weekly_best_runs'])) {
-            return count($mplus['weekly_best_runs']);
+
+        $count = 0;
+        foreach ($runs as $run) {
+            $level = (int) ($run['mythic_level'] ?? 0);
+            if ($level >= $minLevel) {
+                $count++;
+            }
         }
-        if (isset($mplus['current_period_best_runs']) && is_array($mplus['current_period_best_runs'])) {
-            return count($mplus['current_period_best_runs']);
-        }
-        return 0;
+        return $count;
     }
 
     public function resolveSeasonHeroicDungeons(array $achStatsIndex): int

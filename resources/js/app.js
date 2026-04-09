@@ -93,3 +93,67 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 Alpine.start();
+
+// ---------------------------------------------------------------------------
+// Wowhead tooltip viewport containment
+// ---------------------------------------------------------------------------
+// The Wowhead script positions tooltips with absolute top/left which can push
+// them below the viewport, causing the page to scroll. This observer watches
+// for tooltip elements and repositions them so they stay within the viewport.
+(() => {
+    const PADDING = 8;
+
+    const isTooltipEl = (el) => el?.id?.startsWith?.('wowhead-tooltip');
+
+    const clamp = (el) => {
+        if (!el?.style) return;
+
+        // Wowhead calculates top/left for position:absolute (includes scrollY).
+        // CSS forces position:fixed, so subtract scroll to convert to viewport coords.
+        let top = parseFloat(el.style.top);
+        let left = parseFloat(el.style.left);
+        if (isNaN(top) || isNaN(left)) return;
+
+        top -= window.scrollY;
+        left -= window.scrollX;
+
+        const rect = el.getBoundingClientRect();
+        const h = rect.height || el.offsetHeight;
+        const w = rect.width || el.offsetWidth;
+        if (!h) return;
+
+        // Clamp within viewport
+        if (top + h > window.innerHeight - PADDING) {
+            top = Math.max(PADDING, window.innerHeight - h - PADDING);
+        }
+        if (top < PADDING) top = PADDING;
+
+        if (left + w > window.innerWidth - PADDING) {
+            left = Math.max(PADDING, window.innerWidth - w - PADDING);
+        }
+        if (left < PADDING) left = PADDING;
+
+        el.style.top = top + 'px';
+        el.style.left = left + 'px';
+    };
+
+    const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.type === 'attributes' && m.attributeName === 'style' && isTooltipEl(m.target)) {
+                clamp(m.target);
+            }
+            for (const node of m.addedNodes) {
+                if (node.nodeType === 1 && isTooltipEl(node)) {
+                    clamp(node);
+                }
+            }
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style'],
+    });
+})();
