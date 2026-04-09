@@ -9,15 +9,17 @@ use App\Models\TacticalReport;
 use App\Services\Discord\DiscordWebhookService;
 use App\Services\Analysis\GeminiService;
 use App\Services\Analysis\WclService;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-class ProcessRaidAnalysisJob implements ShouldQueue
+class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
     public int $timeout = 300;
+    public int $uniqueFor = 300;
 
     public TacticalReport $report;
 
@@ -25,6 +27,11 @@ class ProcessRaidAnalysisJob implements ShouldQueue
     {
         $this->report = $report;
         $this->onQueue('ai');
+    }
+
+    public function uniqueId(): string
+    {
+        return (string) $this->report->id;
     }
 
     public function handle(WclService $wclService, GeminiService $geminiService, DiscordWebhookService $webhookService): void

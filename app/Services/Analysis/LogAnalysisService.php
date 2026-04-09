@@ -17,7 +17,7 @@ class LogAnalysisService
      */
     public function getCooldownMinutes(): int
     {
-        return (int) 0; //config('tactical_logs.manual_cooldown_minutes.free', 60);
+        return (int)config('tactical_logs.manual_cooldown_minutes.free', 60);
     }
 
     /**
@@ -59,23 +59,27 @@ class LogAnalysisService
             return null;
         }
 
-        $report = $this->createReportRecord($static, $reportId);
+        // Prevent duplicate reports for the same WCL log within the same static
+        $existing = TacticalReport::query()
+            ->where('static_id', $static->id)
+            ->where('wcl_report_id', $reportId)
+            ->first();
 
-        $this->dispatchAnalysisJob($report);
+        if ($existing) {
+            // Re-dispatch analysis to refresh the existing report
+            $this->dispatchAnalysisJob($existing);
+            return $existing;
+        }
 
-        return $report;
-    }
-
-    /**
-     * Create a new TacticalReport record.
-     */
-    private function createReportRecord(StaticGroup $static, string $reportId): TacticalReport
-    {
-        return TacticalReport::create([
+        $report = TacticalReport::create([
             'static_id' => $static->id,
             'wcl_report_id' => $reportId,
             'title' => 'Manual Log Analysis',
         ]);
+
+        $this->dispatchAnalysisJob($report);
+
+        return $report;
     }
 
     /**
