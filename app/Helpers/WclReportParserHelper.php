@@ -6,19 +6,31 @@ namespace App\Helpers;
 
 class WclReportParserHelper
 {
-    public static function parseDeaths(array $deathsData, array $rosterNames = [], array $fightStartTimes = []): array
-    {
+    /**
+     * Parse deaths, filter out wipe deaths, and group by boss/try.
+     *
+     * @param array $phaseSummary  Boss → [ fight_id, outcome, ... ] from buildPhaseSummary()
+     * @param int   $raidSize      Number of roster players (for wipe detection threshold)
+     */
+    public static function parseDeaths(
+        array $deathsData,
+        array $rosterNames = [],
+        array $fightStartTimes = [],
+        array $phaseSummary = [],
+        int   $raidSize = 20
+    ): array {
         $entries = $deathsData['entries'] ?? [];
 
         if (!empty($rosterNames)) {
             $entries = array_filter($entries, fn($d) => in_array($d['name'] ?? '', $rosterNames));
         }
 
-        return array_values(array_map(function ($d) use ($fightStartTimes) {
-            $fightId        = $d['fight'] ?? null;
-            $timestampMs    = $d['timestamp'] ?? null;
-            $fightStartMs   = $fightId ? ($fightStartTimes[$fightId] ?? null) : null;
-            $relativeMs     = ($timestampMs !== null && $fightStartMs !== null)
+        // Parse all deaths with relative timestamps
+        $allDeaths = array_values(array_map(function ($d) use ($fightStartTimes) {
+            $fightId      = $d['fight'] ?? null;
+            $timestampMs  = $d['timestamp'] ?? null;
+            $fightStartMs = $fightId ? ($fightStartTimes[$fightId] ?? null) : null;
+            $relativeMs   = ($timestampMs !== null && $fightStartMs !== null)
                 ? $timestampMs - $fightStartMs
                 : $timestampMs;
 
@@ -27,8 +39,70 @@ class WclReportParserHelper
                 'fight_id'        => $fightId,
                 'killing_blow'    => $d['killingBlow']['name'] ?? 'Unknown Ability',
                 'time_into_fight' => self::msToFightTime($relativeMs),
+                '_relative_ms'    => $relativeMs,
             ];
         }, $entries));
+
+        // Group deaths by fight_id
+        $byFight = [];
+        foreach ($allDeaths as $death) {
+            $byFight[$death['fight_id']][] = $death;
+        }
+
+        // Build fight_id → boss name lookup from phase_summary
+        $fightBossMap = [];
+        $fightTryMap  = [];
+        foreach ($phaseSummary as $bossName => $tries) {
+            $tryNum = 0;
+            foreach ($tries as $try) {
+                $tryNum++;
+                $fightBossMap[$try['fight_id']] = $bossName;
+                $fightTryMap[$try['fight_id']]  = $tryNum;
+            }
+        }
+
+        // Build fight outcome lookup from phase_summary
+        $fightOutcomes = [];
+        foreach ($phaseSummary as $tries) {
+            foreach ($tries as $try) {
+                $fightOutcomes[$try['fight_id']] = $try['outcome'] ?? 'wipe';
+            }
+        }
+
+        // Filter wipe cascade deaths.
+        // Deaths that occur while < 60% of the raid is dead = individual mistakes (keep).
+        // Deaths after 60% of the raid is already dead = wipe cascade (discard).
+        $cascadeThreshold = (int) ceil($raidSize * 0.6);
+        $individualDeaths = [];
+
+        foreach ($byFight as $fightId => $fightDeaths) {
+            usort($fightDeaths, fn($a, $b) => ($a['_relative_ms'] ?? 0) <=> ($b['_relative_ms'] ?? 0));
+
+            $deadCount = 0;
+            foreach ($fightDeaths as $death) {
+                $deadCount++;
+                if ($deadCount > $cascadeThreshold) {
+                    break; // 60%+ dead — rest is wipe cascade
+                }
+                $individualDeaths[] = $death + ['fight_id' => $fightId];
+            }
+        }
+
+        // Group by boss → try_N, strip internal fields
+        $grouped = [];
+        foreach ($individualDeaths as $death) {
+            $fightId  = $death['fight_id'];
+            $bossName = $fightBossMap[$fightId] ?? 'Unknown';
+            $tryNum   = $fightTryMap[$fightId] ?? 1;
+            $tryKey   = "try_{$tryNum}";
+
+            unset($death['_relative_ms']);
+            unset($death['fight_id']);
+
+            $grouped[$bossName][$tryKey][] = $death;
+        }
+
+        return $grouped;
     }
 
     public static function parseInterrupts(array $interruptEntries, array $rosterNames = []): array
@@ -361,7 +435,7 @@ class WclReportParserHelper
         foreach ($buffsData['auras'] ?? [] as $aura) {
             $uptime   = $aura['totalUptime'] ?? 0;
             $uptimePct = round($uptime / $totalTime * 100, 1);
-            if ($uptimePct < 5) continue;
+            if ($uptimePct < 5 || $uptimePct >= 98) continue;
 
             $result[$aura['name']] = [
                 'uptime_pct'  => $uptimePct,
@@ -502,6 +576,13 @@ class WclReportParserHelper
             $lastPhase = $fight['lastPhase'] ?? null;
             $isInter   = $fight['lastPhaseIsIntermission'] ?? false;
             $outcome   = ($fight['kill'] ?? false) ? 'kill' : 'wipe';
+            $bossPct   = $fight['bossPercentage'] ?? null;
+            $durationS = (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000);
+
+            // Skip accidental pulls / commanded wipes (short fight + boss barely damaged)
+            if ($outcome === 'wipe' && $durationS < 30 && $bossPct !== null && $bossPct >= 90) {
+                continue;
+            }
 
             $phaseName = null;
             if ($lastPhase !== null) {
@@ -513,8 +594,8 @@ class WclReportParserHelper
                 'fight_id'   => $fight['id'],
                 'outcome'    => $outcome,
                 'last_phase' => $phaseName,
-                'duration_s' => (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000),
-                'boss_pct'   => $fight['bossPercentage'] ?? null,
+                'duration_s' => $durationS,
+                'boss_pct'   => $bossPct,
             ];
         }
 

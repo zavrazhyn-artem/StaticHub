@@ -17,7 +17,7 @@ class LogAnalysisService
      */
     public function getCooldownMinutes(): int
     {
-        return (int) config('tactical_logs.manual_cooldown_minutes.free', 60);
+        return (int) 0; //config('tactical_logs.manual_cooldown_minutes.free', 60);
     }
 
     /**

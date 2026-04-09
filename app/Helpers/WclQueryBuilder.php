@@ -36,7 +36,6 @@ GQL;
           reportData {
             report(code: $reportId) {
               deaths:      table(dataType: Deaths,      fightIDs: $fightIds, killType: Encounters)
-              interrupts:  table(dataType: Interrupts,  fightIDs: $fightIds, killType: Encounters)
               damageTaken: table(dataType: DamageTaken, fightIDs: $fightIds, killType: Encounters)
               casts:       table(dataType: Casts,       fightIDs: $fightIds, killType: Encounters, viewBy: Ability)
               damageDone:  table(dataType: DamageDone,  fightIDs: $fightIds, killType: Encounters)
