@@ -12,6 +12,7 @@
         "php": "^8.4",
         "ext-sodium": "*",
         "ext-zip": "*",
+        "ext-pcntl": "*",
         "halaxa/json-machine": "^1.2",
         "laravel/framework": "^13.0",
         "laravel/horizon": "^5.45",
