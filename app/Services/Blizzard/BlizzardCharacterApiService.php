@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Blizzard;
 
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 
 class BlizzardCharacterApiService
@@ -11,6 +12,52 @@ class BlizzardCharacterApiService
     public function __construct(
         private readonly BlizzardAuthService $authService,
     ) {}
+
+    /**
+     * Fetch all character endpoints concurrently using Http::pool().
+     * Returns [column => responseArray|null] for each endpoint.
+     *
+     * @param array<string> $skip Column names to skip (e.g. ['bnet_completed_quests'])
+     */
+    public function fetchAllCharacterEndpoints(string $region, string $realmSlug, string $characterName, array $skip = []): array
+    {
+        $token = $this->authService->getAccessToken();
+        $base  = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}";
+        $query = "namespace=profile-{$region}&locale=en_US";
+
+        $endpoints = [
+            'bnet_profile'                => '',
+            'bnet_equipment'              => '/equipment',
+            'bnet_media'                  => '/character-media',
+            'bnet_mplus'                  => '/mythic-keystone-profile',
+            'bnet_raid'                   => '/encounters/raids',
+            'bnet_achievement_statistics' => '/achievements/statistics',
+            'bnet_completed_quests'       => '/quests/completed',
+            'bnet_pvp_summary'            => '/pvp-summary',
+            'bnet_reputations'            => '/reputations',
+            'bnet_titles'                 => '/titles',
+            'bnet_mounts'                 => '/collections/mounts',
+            'bnet_pets'                   => '/collections/pets',
+        ];
+
+        $toFetch = array_diff_key($endpoints, array_flip($skip));
+
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn (string $path, string $key) => $pool->as($key)->withToken($token)->get("{$base}{$path}?{$query}"),
+            array_values($toFetch),
+            array_keys($toFetch),
+        ));
+
+        $results = [];
+        foreach ($toFetch as $key => $_) {
+            $response = $responses[$key] ?? null;
+            $results[$key] = ($response instanceof \Illuminate\Http\Client\Response && $response->successful())
+                ? $response->json()
+                : null;
+        }
+
+        return $results;
+    }
 
     /**
      * Get the authenticated user's WoW characters.
@@ -318,6 +365,66 @@ class BlizzardCharacterApiService
         $response = Http::withToken($token)->get($url);
 
         return $response->failed() ? null : $response->json();
+    }
+
+    /**
+     * Fetch avatars for multiple characters concurrently.
+     * Returns [index => avatarUrl|null].
+     */
+    public function fetchAvatarsBatch(array $characters): array
+    {
+        $token = $this->authService->getAccessToken();
+        $region = $this->authService->getRegion();
+
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn (array $char, int $idx) => $pool->as((string) $idx)
+                ->withToken($token)
+                ->get("https://{$region}.api.blizzard.com/profile/wow/character/"
+                    . strtolower($char['realm_slug']) . '/' . mb_strtolower($char['name'])
+                    . "/character-media?namespace=profile-{$region}&locale=en_US"),
+            $characters,
+            array_keys($characters),
+        ));
+
+        $results = [];
+        foreach ($characters as $idx => $char) {
+            $response = $responses[(string) $idx] ?? null;
+            $results[$idx] = ($response instanceof \Illuminate\Http\Client\Response && $response->successful())
+                ? $this->extractAvatarUrl($response->json('assets', []))
+                : null;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Fetch profile summaries for multiple characters concurrently.
+     * Returns [index => profileArray|null].
+     */
+    public function fetchProfilesBatch(array $characters): array
+    {
+        $token = $this->authService->getAccessToken();
+        $region = $this->authService->getRegion();
+
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn (array $char, int $idx) => $pool->as((string) $idx)
+                ->withToken($token)
+                ->get("https://{$region}.api.blizzard.com/profile/wow/character/"
+                    . strtolower($char['realm_slug']) . '/' . mb_strtolower($char['name'])
+                    . "?namespace=profile-{$region}&locale=en_US"),
+            $characters,
+            array_keys($characters),
+        ));
+
+        $results = [];
+        foreach ($characters as $idx => $char) {
+            $response = $responses[(string) $idx] ?? null;
+            $results[$idx] = ($response instanceof \Illuminate\Http\Client\Response && $response->successful())
+                ? $response->json()
+                : null;
+        }
+
+        return $results;
     }
 
     /**

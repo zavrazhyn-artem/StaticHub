@@ -163,13 +163,20 @@ class RosterService
         $users = $this->getStaticMembers($staticId);
 
         $users->each(function (User $user) use ($staticId) {
-            $user->setRelation('mainCharacter', $user->getMainCharacterForStatic($staticId));
-            $user->setRelation('altCharacters', $user->getAltCharactersForStatic($staticId));
+            $main = $user->characters->first(
+                fn ($char) => $char->statics->first()?->pivot->role === 'main'
+            );
+            $alts = $user->characters->filter(
+                fn ($char) => $char->statics->first()?->pivot->role !== 'main'
+            )->values();
+
+            $user->setRelation('mainCharacter', $main);
+            $user->setRelation('altCharacters', $alts);
         });
 
-        return $users->groupBy(function (User $user) use ($staticId) {
+        return $users->groupBy(function (User $user) {
             $main = $user->mainCharacter;
-            return $main ? $main->getCombatRoleInStatic($staticId) : 'unknown';
+            return $main ? ($main->main_spec['role'] ?? 'rdps') : 'unknown';
         });
     }
 
@@ -233,9 +240,12 @@ class RosterService
         ];
 
         foreach ($users as $user) {
-            $main = $user->getMainCharacterForStatic($staticId);
+            $main = $user->characters->first(
+                fn ($char) => $char->statics->first()?->pivot->role === 'main'
+            );
+
             if ($main) {
-                $role = $main->getCombatRoleInStatic($staticId);
+                $role = $main->main_spec['role'] ?? 'rdps';
                 if (isset($roleCounts[$role])) {
                     $roleCounts[$role]++;
                 }

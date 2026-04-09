@@ -96,9 +96,6 @@ class OnboardingService
      */
     public function buildCharacterStepPayload(User $user, StaticGroup $static): array
     {
-        // Auto-sync characters if Battle.net token available
-        $this->attemptCharacterSync($user);
-
         $characters = Character::query()
             ->belongingTo($user->id)
             ->atMaxLevel()

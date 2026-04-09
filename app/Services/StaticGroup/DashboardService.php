@@ -76,7 +76,9 @@ class DashboardService
      */
     public function getStaticRaidProgression(StaticGroup $static): array
     {
-        $characters = $static->characters()->with('serviceRawData')->get();
+        $characters = $static->characters()->with(['serviceRawData' => function ($q) {
+            $q->select('id', 'character_id', 'bnet_raid');
+        }])->get();
         $rosterSize = $characters->count();
 
         if ($rosterSize === 0) {
