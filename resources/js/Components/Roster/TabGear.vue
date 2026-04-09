@@ -181,12 +181,16 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                 </div>
                             </td>
 
-                            <!-- Audit: missing enchants -->
+                            <!-- Audit: enchants -->
                             <td class="p-2 text-center font-mono text-sm border-l border-white/5">
-                                <span v-if="(member.main_character.missing_enchants_slots?.length ?? 0) > 0"
-                                      class="text-red-500 font-bold"
-                                      :title="__('Missing enchants:') + ' ' + member.main_character.missing_enchants_slots.join(', ')">
-                                    {{ member.main_character.missing_enchants_slots.length }}
+                                <span v-if="(member.main_character.missing_enchants_slots?.length ?? 0) + (member.main_character.low_quality_enchants_slots?.length ?? 0) > 0"
+                                      class="font-bold"
+                                      :class="(member.main_character.missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500' : 'text-amber-400'"
+                                      :title="[
+                                          (member.main_character.missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + member.main_character.missing_enchants_slots.join(', ') : ''),
+                                          (member.main_character.low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + member.main_character.low_quality_enchants_slots.join(', ') : ''),
+                                      ].filter(Boolean).join(' | ')">
+                                    {{ (member.main_character.missing_enchants_slots?.length ?? 0) + (member.main_character.low_quality_enchants_slots?.length ?? 0) }}
                                 </span>
                                 <span v-else class="text-gray-600 text-xs">✓</span>
                             </td>
@@ -253,10 +257,14 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
 
                                 <!-- Alt audit: enchants -->
                                 <td class="p-2 text-center font-mono text-xs border-l border-white/5">
-                                    <span v-if="(alt?.missing_enchants_slots?.length ?? 0) > 0"
-                                          class="text-red-500/70 font-bold"
-                                          :title="__('Missing enchants:') + ' ' + alt.missing_enchants_slots.join(', ')">
-                                        {{ alt.missing_enchants_slots.length }}
+                                    <span v-if="(alt?.missing_enchants_slots?.length ?? 0) + (alt?.low_quality_enchants_slots?.length ?? 0) > 0"
+                                          class="font-bold"
+                                          :class="(alt?.missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500/70' : 'text-amber-400/70'"
+                                          :title="[
+                                              (alt?.missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + alt.missing_enchants_slots.join(', ') : ''),
+                                              (alt?.low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + alt.low_quality_enchants_slots.join(', ') : ''),
+                                          ].filter(Boolean).join(' | ')">
+                                        {{ (alt?.missing_enchants_slots?.length ?? 0) + (alt?.low_quality_enchants_slots?.length ?? 0) }}
                                     </span>
                                     <span v-else class="text-gray-700 text-[10px]">✓</span>
                                 </td>

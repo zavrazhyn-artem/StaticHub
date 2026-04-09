@@ -282,6 +282,68 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enchant quality map
+    |--------------------------------------------------------------------------
+    | Maps enchantment_id => quality (2 or 4) per slot.
+    | Quality 4 = best-in-slot tier enchant, quality 2 = lower tier.
+    | Source: wowaudit gear_constants.rb ENCHANTS hash.
+    | Only enchants present here are recognized; unknown enchants get quality 0.
+    */
+    'enchant_quality_map' => [
+        'HEAD' => [
+            7988 => 2, 7989 => 2, 7990 => 2, 7991 => 4, // Blessing of Speed
+            7958 => 2, 7959 => 2, 7960 => 2, 7961 => 4, // Hex of Leeching
+            8014 => 2, 8015 => 2, 8016 => 2, 8017 => 4, // Rune of Avoidance
+        ],
+        'SHOULDER' => [
+            8028 => 2, 8029 => 2, // Thalassian Recovery
+            7970 => 2, 7971 => 2, // Flight of the Eagle
+            7998 => 2, 7999 => 2, // Nature's Grace
+            7972 => 2, 7973 => 4, // Akil'zon's Swiftness
+            8000 => 2, 8001 => 4, // Amirdrassil's Grace
+            8030 => 2, 8031 => 4, // Silvermoon's Mending
+        ],
+        'CHEST' => [
+            7956 => 2, 7957 => 4, // Mark of Nalorakk
+            8012 => 2, 8013 => 4, // Mark of the Magister
+            7984 => 2, 7985 => 4, // Mark of the Rootwarden
+            7986 => 2, 7987 => 4, // Mark of the Worldsoul
+        ],
+        'LEGS' => [
+            7938 => 2, 7939 => 2, 7936 => 2, 7937 => 4, // Spellthread
+            7934 => 2, 7935 => 4, // Sunfire Silk Spellthread
+            8160 => 2, 8161 => 2, 8158 => 2, 8159 => 4, // Armor Kits (Scout/Hunter)
+            8162 => 2, 8163 => 4, // Blood Knight's Armor Kit
+        ],
+        'FEET' => [
+            8018 => 2, 8019 => 4, // Farstrider's Hunt
+            7962 => 2, 7963 => 4, // Lynx's Dexterity
+            7992 => 2, 7993 => 4, // Shaladrassil's Roots
+        ],
+        'FINGER' => [
+            7994 => 2, 7995 => 2, 7996 => 2, 7997 => 4, // Nature's Wrath/Fury (crit)
+            8020 => 2, 8021 => 2, 8024 => 2, 8025 => 4, // Thalassian Haste / Silvermoon's Alacrity
+            8022 => 2, 8023 => 2, 8026 => 2, 8027 => 4, // Thalassian Versatility / Silvermoon's Tenacity
+            7964 => 2, 7965 => 2, 7968 => 2, 7969 => 4, // Amani Mastery / Zul'jin's Mastery
+            7966 => 2, 7967 => 4, // Eyes of the Eagle
+        ],
+        'WEAPON' => [
+            3370 => 4, 3847 => 4, 3368 => 4, // DK runes (Razorice, Stoneskin, Fallen Crusader)
+            6241 => 4, 6242 => 4, 6243 => 4, 6244 => 4, 6245 => 4, // DK runes (Sanguination, Spellwarding, Hysteria, Thirst, Apocalypse)
+            8038 => 2, 8039 => 4, // Acuity of the Ren'dorei
+            8040 => 2, 8041 => 4, // Arcane Mastery
+            7982 => 2, 7983 => 4, // Berserker's Rage
+            8036 => 2, 8037 => 4, // Flames of the Sin'dorei
+            7980 => 2, 7981 => 4, // Jan'alai's Precision
+            7978 => 2, 7979 => 4, // Strength of Halazzi
+            8008 => 2, 8009 => 4, // Worldsoul Aegis
+            8006 => 2, 8007 => 4, // Worldsoul Cradle
+            8010 => 2, 8011 => 4, // Worldsoul Tenacity
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Tier set slots
     |--------------------------------------------------------------------------
     */

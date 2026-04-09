@@ -271,7 +271,16 @@ const killMarkClass = computed(() => ({
 
 const hasAuditIssues = (char) => {
     if (!char) return false;
-    return (char.missing_enchants_slots?.length ?? 0) > 0 || (char.empty_sockets_count ?? 0) > 0;
+    return (char.missing_enchants_slots?.length ?? 0) > 0
+        || (char.low_quality_enchants_slots?.length ?? 0) > 0
+        || (char.empty_sockets_count ?? 0) > 0;
+};
+
+const auditIssueCount = (char) => {
+    if (!char) return 0;
+    return (char.missing_enchants_slots?.length ?? 0)
+        + (char.low_quality_enchants_slots?.length ?? 0)
+        + (char.empty_sockets_count ?? 0);
 };
 
 const auditTitle = (char) => {
@@ -279,6 +288,8 @@ const auditTitle = (char) => {
     const parts = [];
     if (char.missing_enchants_slots?.length > 0)
         parts.push(`Missing enchants: ${char.missing_enchants_slots.join(', ')}`);
+    if (char.low_quality_enchants_slots?.length > 0)
+        parts.push(`Low quality enchants: ${char.low_quality_enchants_slots.join(', ')}`);
     if (char.empty_sockets_count > 0)
         parts.push(`Empty sockets: ${char.empty_sockets_count}`);
     return parts.join(' | ');
@@ -523,12 +534,26 @@ const kickMember = async (member) => {
                     <!-- Missing Enchants -->
                     <div v-if="selectedAuditChar?.missing_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
+                            <span class="material-symbols-outlined text-sm text-red-400">auto_fix_high</span>
                             <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Missing Enchants') }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span v-for="slot in selectedAuditChar.missing_enchants_slots" :key="slot"
-                                  class="px-2 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-bold text-gray-300">
+                                  class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-300">
+                                {{ slot }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Low Quality Enchants -->
+                    <div v-if="selectedAuditChar?.low_quality_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Low Quality Enchants') }}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span v-for="slot in selectedAuditChar.low_quality_enchants_slots" :key="slot"
+                                  class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-300">
                                 {{ slot }}
                             </span>
                         </div>
@@ -583,7 +608,7 @@ const kickMember = async (member) => {
                         </div>
                     </div>
 
-                    <div v-if="!selectedAuditChar?.missing_enchants_slots?.length && !selectedAuditChar?.empty_sockets_count && !(selectedAuditChar?.upgrades_missing > 0)" class="text-center py-8">
+                    <div v-if="!selectedAuditChar?.missing_enchants_slots?.length && !selectedAuditChar?.low_quality_enchants_slots?.length && !selectedAuditChar?.empty_sockets_count && !(selectedAuditChar?.upgrades_missing > 0)" class="text-center py-8">
                         <span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span>
                         <p class="text-sm text-gray-400">{{ __('No issues found') }}</p>
                     </div>

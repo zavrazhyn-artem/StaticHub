@@ -150,7 +150,7 @@ const emit = defineEmits([
                       :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
                       :title="auditTitle(char)">
                     <span class="material-symbols-outlined text-[12px]">warning</span>
-                    {{ (char.missing_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
+                    {{ (char.missing_enchants_slots?.length ?? 0) + (char.low_quality_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
                 </span>
                 <span v-else class="text-gray-600 text-[10px]">✓</span>
             </td>

@@ -192,8 +192,10 @@ const getRaidProgression = (char) => {
 
               <!-- Audit -->
               <td class="p-4 text-center font-mono text-sm border-l border-white/5">
-                <span v-if="(char.missing_enchants_slots?.length || 0) > 0" class="text-red-500 font-bold bg-red-500/10 rounded px-2 py-0.5">
-                  {{ char.missing_enchants_slots.length }}
+                <span v-if="(char.missing_enchants_slots?.length || 0) + (char.low_quality_enchants_slots?.length || 0) > 0"
+                      class="font-bold rounded px-2 py-0.5"
+                      :class="(char.missing_enchants_slots?.length || 0) > 0 ? 'text-red-500 bg-red-500/10' : 'text-amber-400 bg-amber-400/10'">
+                  {{ (char.missing_enchants_slots?.length || 0) + (char.low_quality_enchants_slots?.length || 0) }}
                 </span>
                 <span v-else class="text-gray-600">-</span>
               </td>
@@ -248,7 +250,11 @@ const getRaidProgression = (char) => {
               </td>
 
               <td class="p-4 text-center font-mono text-[10px] border-l border-white/5">
-                <span v-if="(alt.missing_enchants_slots?.length || 0) > 0" class="text-red-500/70 font-bold bg-red-500/5 rounded px-2 py-0.5">{{ alt.missing_enchants_slots.length }}</span>
+                <span v-if="(alt.missing_enchants_slots?.length || 0) + (alt.low_quality_enchants_slots?.length || 0) > 0"
+                      class="font-bold rounded px-2 py-0.5"
+                      :class="(alt.missing_enchants_slots?.length || 0) > 0 ? 'text-red-500/70 bg-red-500/5' : 'text-amber-400/70 bg-amber-400/5'">
+                  {{ (alt.missing_enchants_slots?.length || 0) + (alt.low_quality_enchants_slots?.length || 0) }}
+                </span>
                 <span v-else class="text-gray-800">-</span>
               </td>
               <td class="p-4 text-center font-mono text-[10px]">

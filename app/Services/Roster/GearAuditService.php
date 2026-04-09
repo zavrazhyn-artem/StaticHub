@@ -15,6 +15,9 @@ final class GearAuditService
     /** @var string[] */
     private readonly array $enchantableSlots;
 
+    /** Slot group key => [enchantment_id => quality]. */
+    private readonly array $enchantQualityMap;
+
     /** ilvl (int) => track name (string), sorted highest-key-first. */
     private readonly array $tierThresholds;
 
@@ -30,6 +33,7 @@ final class GearAuditService
     public function __construct()
     {
         $this->enchantableSlots = config('wow_season.enchantable_slots', []);
+        $this->enchantQualityMap = config('wow_season.enchant_quality_map', []);
         $this->sparkLabel       = (string) config('wow_season.spark_label', '');
 
         $tierSlots             = config('wow_season.tier_slots', []);
@@ -56,7 +60,6 @@ final class GearAuditService
                 continue;
             }
 
-            // Off-hand items that are not weapons can't be enchanted (wowaudit fix)
             if ($slotType === 'OFF_HAND' && !isset($item['weapon'])) {
                 continue;
             }
@@ -69,15 +72,61 @@ final class GearAuditService
         return $missing;
     }
 
+    public function resolveLowQualityEnchants(array $equippedItems): array
+    {
+        $bySlot     = $this->indexBySlotType($equippedItems);
+        $lowQuality = [];
+
+        foreach ($this->enchantableSlots as $slotType) {
+            $item = $bySlot[$slotType] ?? null;
+            if ($item === null) {
+                continue;
+            }
+
+            if ($slotType === 'OFF_HAND' && !isset($item['weapon'])) {
+                continue;
+            }
+
+            $enchantId = $this->extractPermanentEnchantId($item);
+            if ($enchantId === null) {
+                continue; // no enchant at all — already in missing_enchants_slots
+            }
+
+            $quality = $this->lookupEnchantQuality($slotType, $enchantId);
+            if ($quality < 4) {
+                $lowQuality[] = $slotType;
+            }
+        }
+
+        return $lowQuality;
+    }
+
     public function hasPermanentEnchant(array $item): bool
+    {
+        return $this->extractPermanentEnchantId($item) !== null;
+    }
+
+    private function extractPermanentEnchantId(array $item): ?int
     {
         foreach ($item['enchantments'] ?? [] as $enchantment) {
             $type = strtoupper((string) ($enchantment['enchantment_slot']['type'] ?? ''));
             if ($type === 'PERMANENT') {
-                return true;
+                $id = $enchantment['enchantment_id'] ?? null;
+                return $id !== null ? (int) $id : null;
             }
         }
-        return false;
+        return null;
+    }
+
+    private function lookupEnchantQuality(string $slotType, int $enchantId): int
+    {
+        $mapKey = match ($slotType) {
+            'FINGER_1', 'FINGER_2' => 'FINGER',
+            'MAIN_HAND', 'OFF_HAND' => 'WEAPON',
+            default => $slotType,
+        };
+
+        return $this->enchantQualityMap[$mapKey][$enchantId] ?? 0;
     }
 
     // =========================================================================

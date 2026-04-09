@@ -22,6 +22,7 @@ final readonly class CharacterDataDTO
         public int     $season_heroic_dungeons,
         // Gear audit
         public array   $missing_enchants_slots,
+        public array   $low_quality_enchants_slots,
         public int     $empty_sockets_count,
         public int     $upgrades_missing,
         public int     $sparks_equipped,
