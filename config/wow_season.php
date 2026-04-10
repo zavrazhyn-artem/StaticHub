@@ -405,7 +405,7 @@ return [
         'The Dreamrift' => [
             'Chimaerus the Undreamt God',
         ],
-        'The Midnight Sanctum' => [
+        'March on Quel\'Danas' => [
             "Belo'ren, Child of Al'ar",
             'Midnight Falls',
         ],
