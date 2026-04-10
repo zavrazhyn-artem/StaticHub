@@ -33,9 +33,11 @@ class StaticProgressionService
      */
     public function recalculate(StaticGroup $static): int
     {
-        $characters = $static->characters()->with(['serviceRawData' => function ($q) {
-            $q->select('id', 'character_id', 'bnet_raid');
-        }])->get();
+        $characters = $static->characters()
+            ->wherePivot('role', 'main')
+            ->with(['serviceRawData' => function ($q) {
+                $q->select('id', 'character_id', 'bnet_raid');
+            }])->get();
 
         $rosterSize = $characters->count();
 
