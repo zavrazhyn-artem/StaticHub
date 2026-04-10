@@ -113,7 +113,7 @@ const slotLabels = {
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th :colspan="slots.length" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
+                        <th :colspan="slots.length + 2" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
                             {{ __('Gear') }}
                         </th>
                     </template>

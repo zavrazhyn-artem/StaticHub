@@ -209,9 +209,9 @@ const getHighestActiveDifficulty = () => {
 // Config
 // ---------------------------------------------------------------------------
 const roles = [
-    { id: 'tank', labelKey: 'Tanks',   max: 2,  barColor: 'bg-blue-500'  },
-    { id: 'heal', labelKey: 'Healers', max: 4,  barColor: 'bg-green-500' },
-    { id: 'dps',  labelKey: 'DPS',     max: 14, barColor: 'bg-red-500'   },
+    { id: 'tank', labelKey: 'Tanks',   max: 2,  color: 'text-blue-400'  },
+    { id: 'heal', labelKey: 'Healers', max: 4,  color: 'text-green-400' },
+    { id: 'dps',  labelKey: 'DPS',     max: 14, color: 'text-red-400'   },
 ];
 
 const classColors = {
@@ -417,31 +417,8 @@ const kickMember = async (member) => {
 <template>
     <div class="space-y-8">
 
-        <!-- ── Role Summary Widgets ─────────────────────────────────────── -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div v-for="role in roles" :key="role.id"
-                 class="bg-surface-container-high rounded-2xl border border-white/5 p-4 flex items-center gap-4 relative overflow-hidden group">
-                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-blue-500/30 transition-all">
-                    <img :src="roleIconSrc(role.id)" class="w-6 h-6 opacity-80" :alt="role.label">
-                </div>
-                <div>
-                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">{{ __(role.labelKey) }}</div>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-2xl font-black text-white font-headline">{{ stats[role.id] }}</span>
-                        <span class="text-[10px] font-bold text-on-surface-variant">/ {{ role.max }}</span>
-                    </div>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
-                    <div class="h-full transition-all duration-700"
-                         :class="role.barColor"
-                         :style="{ width: Math.min(100, (stats[role.id] / role.max) * 100) + '%' }">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ── Week Header ──────────────────────────────────────────────── -->
-        <div class="flex items-center justify-between bg-surface-container-high rounded-xl border border-white/5 px-4 py-2.5">
+        <!-- ── Week Header + Role Summary ──────────────────────────────── -->
+        <div class="flex items-center justify-between bg-surface-container-high rounded-xl border border-white/5 px-4 py-2">
             <!-- Status indicator (left) -->
             <div class="flex items-center gap-2">
                 <template v-if="isLive">
@@ -454,6 +431,16 @@ const kickMember = async (member) => {
                 </template>
                 <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-primary ml-1">sync</span>
             </div>
+
+            <!-- Role counts (center) -->
+            <div class="flex items-center gap-4">
+                <div v-for="role in roles" :key="role.id" class="flex items-center gap-1.5">
+                    <img :src="roleIconSrc(role.id)" class="w-4 h-4 opacity-70" :alt="__(role.labelKey)">
+                    <span class="text-[11px] font-bold" :class="role.color">{{ stats[role.id] }}</span>
+                    <span class="text-[10px] text-gray-600">/{{ role.max }}</span>
+                </div>
+            </div>
+
             <!-- Week selector (right) -->
             <div class="w-52">
                 <SearchableSelect
