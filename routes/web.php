@@ -96,6 +96,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/schedule/event/{event}/encounter-roster', [EventController::class, 'updateEncounterRoster'])->name('schedule.event.encounter-roster.update');
     Route::post('/schedule/event/{event}/encounter-roster/assign', [EventController::class, 'assignEncounterCharacter'])->name('schedule.event.encounter-roster.assign');
     Route::delete('/schedule/event/{event}/encounter-roster/remove', [EventController::class, 'removeEncounterCharacter'])->name('schedule.event.encounter-roster.remove');
+    Route::post('/schedule/event/{event}/assign-plan', [EventController::class, 'assignPlan'])->name('schedule.event.assign-plan');
 
     // Boss Planner (standalone section)
     Route::get('/statics/{static}/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');

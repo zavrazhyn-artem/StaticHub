@@ -1,103 +1,161 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     plannerData: { type: Object, default: () => ({}) },
     bossPlannerUrl: { type: String, required: true },
+    selectedEncounter: { type: String, default: null },
+    assignedPlans: { type: Object, default: () => ({}) },
+    canManage: { type: Boolean, default: false },
+    csrfToken: { type: String, default: '' },
+    assignUrl: { type: String, default: '' },
 });
 
 const encounters = computed(() => props.plannerData.encounters || []);
 
-const instanceGroups = computed(() => {
-    const groups = {};
-    encounters.value.forEach(enc => {
-        if (!groups[enc.instance]) {
-            groups[enc.instance] = [];
-        }
-        groups[enc.instance].push(enc);
-    });
-    return groups;
+const currentEncounter = computed(() => {
+    if (!props.selectedEncounter) return null;
+    return encounters.value.find(e => e.slug === props.selectedEncounter) || null;
 });
 
-const plansCount = computed(() => encounters.value.filter(e => e.has_plan).length);
+const plans = computed(() => currentEncounter.value?.plans || []);
+
+const localAssigned = ref({ ...props.assignedPlans });
+
+const assignedPlanId = computed(() => {
+    if (!props.selectedEncounter) return null;
+    return localAssigned.value[props.selectedEncounter] || null;
+});
+
+const assignedPlan = computed(() => {
+    if (!assignedPlanId.value) return null;
+    return plans.value.find(p => p.id === assignedPlanId.value) || null;
+});
+
+const assignPlan = async (planId) => {
+    if (!props.assignUrl || !props.selectedEncounter) return;
+    localAssigned.value[props.selectedEncounter] = planId;
+    try {
+        await fetch(props.assignUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ encounter_slug: props.selectedEncounter, plan_id: planId }),
+        });
+    } catch (e) { console.error('Assign failed:', e); }
+};
+
+const unassignPlan = async () => {
+    if (!props.assignUrl || !props.selectedEncounter) return;
+    delete localAssigned.value[props.selectedEncounter];
+    localAssigned.value = { ...localAssigned.value };
+    try {
+        await fetch(props.assignUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ encounter_slug: props.selectedEncounter, plan_id: null }),
+        });
+    } catch (e) { console.error('Unassign failed:', e); }
+};
 </script>
 
 <template>
-    <div class="space-y-6">
-        <!-- Header with link to standalone planner -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-xl text-orange-400">map</span>
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-widest text-white">Boss Plans</h3>
-                    <p class="text-[9px] text-on-surface-variant mt-0.5">{{ plansCount }} of {{ encounters.length }} encounters have plans</p>
-                </div>
-            </div>
-            <a
-                :href="bossPlannerUrl"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-widest hover:bg-orange-500/20 transition-all"
-            >
-                <span class="material-symbols-outlined text-sm">open_in_new</span>
-                Open Planner
-            </a>
+    <div>
+        <!-- No boss selected -->
+        <div v-if="!selectedEncounter" class="flex flex-col items-center justify-center py-20 text-center">
+            <span class="material-symbols-outlined text-5xl text-on-surface-variant/15">touch_app</span>
+            <p class="text-sm text-on-surface-variant/40 mt-4">{{ __('Select a boss from the sidebar to view plans') }}</p>
         </div>
 
-        <!-- Encounter plan list -->
-        <div v-for="(bosses, instanceName) in instanceGroups" :key="instanceName" class="space-y-2">
-            <div class="px-1">
-                <span class="text-[8px] font-black uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
+        <!-- Boss selected -->
+        <div v-else class="space-y-4">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img v-if="currentEncounter?.portrait" :src="currentEncounter.portrait" class="w-9 h-9 rounded-lg border border-white/10 object-cover">
+                    <div>
+                        <h3 class="text-sm font-black text-white uppercase tracking-tight">{{ currentEncounter?.name }}</h3>
+                        <span class="text-[9px] text-on-surface-variant/50">{{ plans.length }} {{ __('plans available') }}</span>
+                    </div>
+                </div>
+                <a :href="bossPlannerUrl"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[9px] font-bold uppercase tracking-widest hover:bg-orange-500/20 transition-all">
+                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                    {{ __('Open Planner') }}
+                </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                <div
-                    v-for="enc in bosses"
-                    :key="enc.slug"
-                    class="bg-surface-container/60 border rounded-xl p-4 transition-all"
-                    :class="enc.has_plan
-                        ? 'border-white/10 hover:border-orange-500/30'
-                        : 'border-white/5 opacity-50'"
-                >
+            <!-- Currently assigned plan -->
+            <div v-if="assignedPlan" class="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
+                <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-surface-container-high border border-white/10 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-lg" :class="enc.has_plan ? 'text-orange-400' : 'text-on-surface-variant/30'">swords</span>
+                        <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-sm text-green-400">check_circle</span>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-black uppercase tracking-widest text-green-400/60">{{ __('Assigned Plan') }}</div>
+                            <div class="text-xs font-bold text-white">{{ assignedPlan.title || currentEncounter?.name }}</div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                    :class="{
+                                        'bg-orange-500/10 text-orange-400': assignedPlan.difficulty === 'mythic',
+                                        'bg-purple-500/10 text-purple-400': assignedPlan.difficulty === 'heroic',
+                                        'bg-green-500/10 text-green-400': assignedPlan.difficulty === 'normal',
+                                        'bg-blue-500/10 text-blue-400': assignedPlan.difficulty === 'raid_finder',
+                                    }">{{ assignedPlan.difficulty === 'raid_finder' ? 'LFR' : assignedPlan.difficulty }}</span>
+                                <span class="text-[8px] text-on-surface-variant/40">{{ assignedPlan.steps?.length || 0 }} {{ __('phases') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button v-if="canManage" @click="unassignPlan"
+                        class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-bold hover:bg-red-500/20 transition-all">
+                        <span class="material-symbols-outlined text-xs">close</span>
+                        {{ __('Remove') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plans list (select to assign) -->
+            <div v-if="plans.length > 0" class="space-y-1.5">
+                <div class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/40 px-1">
+                    {{ assignedPlan ? __('Other Plans') : __('Select a plan to assign') }}
+                </div>
+                <template v-for="plan in plans" :key="plan.id">
+                    <div v-if="plan.id !== assignedPlanId"
+                        class="flex items-center gap-3 px-4 py-3 bg-surface-container/60 border border-white/5 rounded-xl transition-all"
+                        :class="canManage ? 'hover:border-orange-500/30 cursor-pointer' : ''"
+                    >
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-sm text-orange-400">map</span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-xs font-bold text-white truncate">{{ enc.name }}</div>
-                            <div v-if="enc.has_plan" class="flex items-center gap-2 mt-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                                <span class="text-[8px] text-on-surface-variant">
-                                    {{ enc.plan.steps?.length || 0 }} phase{{ (enc.plan.steps?.length || 0) !== 1 ? 's' : '' }}
-                                </span>
-                                <span class="text-[8px] text-on-surface-variant/40">&bull;</span>
-                                <span class="text-[8px] text-orange-400/60 font-bold uppercase">{{ enc.plan.difficulty }}</span>
-                            </div>
-                            <div v-else class="mt-1">
-                                <span class="text-[8px] text-on-surface-variant/40">No plan</span>
+                            <div class="text-xs font-bold text-white truncate">{{ plan.title || currentEncounter?.name }}</div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                    :class="{
+                                        'bg-orange-500/10 text-orange-400': plan.difficulty === 'mythic',
+                                        'bg-purple-500/10 text-purple-400': plan.difficulty === 'heroic',
+                                        'bg-green-500/10 text-green-400': plan.difficulty === 'normal',
+                                        'bg-blue-500/10 text-blue-400': plan.difficulty === 'raid_finder',
+                                    }">{{ plan.difficulty === 'raid_finder' ? 'LFR' : plan.difficulty }}</span>
+                                <span class="text-[8px] text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
                             </div>
                         </div>
+                        <button v-if="canManage" @click="assignPlan(plan.id)"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[9px] font-bold hover:bg-primary/20 transition-all shrink-0">
+                            <span class="material-symbols-outlined text-xs">add_circle</span>
+                            {{ __('Assign') }}
+                        </button>
                     </div>
-
-                    <!-- Plan preview: player count per step -->
-                    <div v-if="enc.has_plan && enc.plan.steps" class="mt-3 flex items-center gap-1.5 flex-wrap">
-                        <div
-                            v-for="(step, i) in enc.plan.steps"
-                            :key="i"
-                            class="flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/5"
-                        >
-                            <span class="text-[7px] font-black text-on-surface-variant/60 uppercase">{{ step.label }}</span>
-                            <span class="text-[7px] font-bold text-primary">
-                                {{ (step.players || []).length }} <span class="text-on-surface-variant/40">players</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                </template>
             </div>
-        </div>
 
-        <!-- Empty state -->
-        <div v-if="encounters.length === 0" class="text-center py-12">
-            <span class="material-symbols-outlined text-4xl text-on-surface-variant/20">map</span>
-            <p class="text-xs text-on-surface-variant/40 mt-2">No encounters configured</p>
+            <!-- No plans -->
+            <div v-if="plans.length === 0" class="flex flex-col items-center py-12 text-center">
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant/15">map</span>
+                <p class="text-xs text-on-surface-variant/30 mt-3">{{ __('No plans created for this boss') }}</p>
+            </div>
         </div>
     </div>
 </template>

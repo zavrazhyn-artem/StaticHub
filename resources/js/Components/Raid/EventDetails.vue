@@ -250,15 +250,14 @@ const getAllCharacters = () => {
                     : 'border-transparent text-on-surface-variant hover:text-white'"
             >
                 <span class="material-symbols-outlined text-sm align-middle mr-1">map</span>
-                Boss Planner
+                {{ __('Plans') }}
             </button>
         </div>
 
-        <!-- Roster tab -->
-        <div v-show="activeTab === 'roster'" class="flex flex-col lg:flex-row gap-6">
-            <!-- Encounter sidebar -->
+        <!-- Content area with shared sidebar -->
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Encounter sidebar (shared between Roster and Plans tabs) -->
             <div v-if="encounters.length > 0" class="lg:w-64 shrink-0">
-                <!-- Mobile toggle -->
                 <button
                     @click="sidebarOpen = !sidebarOpen"
                     class="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-surface-container-high border border-white/10 rounded-xl mb-3"
@@ -285,13 +284,14 @@ const getAllCharacters = () => {
                 </div>
             </div>
 
-            <!-- Main roster area -->
+            <!-- Main content area -->
             <div class="flex-1 min-w-0">
-                <!-- All encounters view: show standard roster grid -->
-                <div v-if="!selectedEncounter">
-                    <RosterGrid
-                        :main-roster="mainRoster"
-                        :absent-roster="absentRoster"
+                <!-- ═══ ROSTER TAB ═══ -->
+                <div v-show="activeTab === 'roster'">
+                    <div v-if="!selectedEncounter">
+                        <RosterGrid
+                            :main-roster="mainRoster"
+                            :absent-roster="absentRoster"
                         @open-comment="openComment"
                     />
                 </div>
@@ -312,15 +312,21 @@ const getAllCharacters = () => {
                         @remove="handleRemove"
                     />
                 </div>
-            </div>
-        </div>
+                </div>
 
-        <!-- Boss Plans tab -->
-        <div v-show="activeTab === 'planner'">
-            <EventPlanSelector
-                :planner-data="plannerData"
-                :boss-planner-url="bossPlannerUrl"
-            />
+                <!-- ═══ PLANS TAB ═══ -->
+                <div v-show="activeTab === 'planner'">
+                    <EventPlanSelector
+                        :planner-data="plannerData"
+                        :boss-planner-url="bossPlannerUrl"
+                        :selected-encounter="selectedEncounter"
+                        :assigned-plans="event.assigned_plans || {}"
+                        :can-manage="canManageSchedule"
+                        :csrf-token="csrfToken"
+                        :assign-url="routes.assignPlan"
+                    />
+                </div>
+            </div>
         </div>
 
         <!-- Modals (unchanged logic) -->

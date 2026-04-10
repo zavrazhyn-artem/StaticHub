@@ -30,6 +30,7 @@
                 'encounterRoster' => route('schedule.event.encounter-roster.update', $event),
                 'encounterAssign' => route('schedule.event.encounter-roster.assign', $event),
                 'encounterRemove' => route('schedule.event.encounter-roster.remove', $event),
+                'assignPlan' => route('schedule.event.assign-plan', $event),
             ]) }}"
             success-message="{{ session('success') }}"
             :errors="{{ $errors->any() ? json_encode($errors->toArray()) : '{}' }}"

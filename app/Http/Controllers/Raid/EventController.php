@@ -140,4 +140,26 @@ class EventController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Assign a plan to an encounter in this event.
+     */
+    public function assignPlan(Request $request, Event $event): JsonResponse
+    {
+        Gate::authorize('canManageSchedule', $event->static);
+
+        $validated = $request->validate([
+            'encounter_slug' => 'required|string',
+            'plan_id' => 'nullable|integer|exists:raid_plans,id',
+        ]);
+
+        $plans = $event->assigned_plans ?? [];
+        if ($validated['plan_id']) {
+            $plans[$validated['encounter_slug']] = $validated['plan_id'];
+        } else {
+            unset($plans[$validated['encounter_slug']]);
+        }
+        $event->update(['assigned_plans' => $plans]);
+
+        return response()->json(['success' => true]);
+    }
 }

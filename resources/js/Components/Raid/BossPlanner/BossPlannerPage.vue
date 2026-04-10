@@ -115,6 +115,13 @@ const confirmTextPopup = () => {
 const cancelTextPopup = () => { textPopup.value = null; };
 
 const showHelp = ref(false);
+const showDiffDropdown = ref(false);
+const diffOptions = [
+    { value: 'mythic', label: 'Mythic', color: 'text-orange-400', dot: 'bg-orange-400' },
+    { value: 'heroic', label: 'Heroic', color: 'text-purple-400', dot: 'bg-purple-400' },
+    { value: 'normal', label: 'Normal', color: 'text-green-400', dot: 'bg-green-400' },
+    { value: 'raid_finder', label: 'LFR', color: 'text-blue-400', dot: 'bg-blue-400' },
+];
 
 // ─── Show Me — highlight my characters ───
 const showingMe = ref(false);
@@ -440,14 +447,37 @@ const currentGroups = computed(() => {
 });
 
 // Open editor for an encounter
-const openEditor = (index) => {
+const openEditor = (index, planIndex = 0) => {
     editorEncounterIndex.value = index;
     const enc = encounters.value[index];
-    if (enc?.plan) {
+    const plans = enc?.plans || [];
+    if (plans[planIndex]) {
+        localPlan.value = JSON.parse(JSON.stringify(plans[planIndex]));
+    } else if (enc?.plan) {
         localPlan.value = JSON.parse(JSON.stringify(enc.plan));
     } else {
         localPlan.value = null;
     }
+    currentStepIndex.value = 0;
+    activeTool.value = 'select';
+    editorTab.value = 'map';
+    showingMe.value = false;
+    editorOpen.value = true;
+    document.body.style.overflow = 'hidden';
+};
+
+const openEditorWithPlan = (encIndex, planIndex) => {
+    openEditor(encIndex, planIndex);
+};
+
+const createNewPlanForEncounter = (encIndex) => {
+    editorEncounterIndex.value = encIndex;
+    localPlan.value = {
+        id: null,
+        title: null,
+        steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
+        difficulty: 'mythic',
+    };
     currentStepIndex.value = 0;
     activeTool.value = 'select';
     editorTab.value = 'map';
@@ -820,6 +850,10 @@ const handlePlaceFormation = ({ groupId, formation }) => {
 
 // Stats for cards
 const plansCount = computed(() => encounters.value.filter(e => e.has_plan).length);
+
+// Accordion — only one boss expanded
+const expandedBoss = ref(null);
+const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug ? null : slug; };
 </script>
 
 <template>
@@ -837,70 +871,79 @@ const plansCount = computed(() => encounters.value.filter(e => e.has_plan).lengt
             </div>
         </div>
 
-        <!-- Encounter cards grid -->
-        <div v-for="(bosses, instanceName) in instanceGroups" :key="instanceName" class="space-y-3">
-            <div class="px-1 flex items-center gap-2">
+        <!-- Encounter accordion -->
+        <div v-for="(bosses, instanceName) in instanceGroups" :key="instanceName" class="space-y-2">
+            <div class="px-1 flex items-center gap-2 mt-4">
                 <span class="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <button
-                    v-for="enc in bosses"
-                    :key="enc.slug"
-                    @click="openEditor(enc._index)"
-                    class="group text-left bg-surface-container/60 border rounded-xl p-5 transition-all hover:scale-[1.01] hover:shadow-xl"
-                    :class="enc.has_plan
-                        ? 'border-white/10 hover:border-orange-500/40'
-                        : 'border-white/5 hover:border-white/15'"
-                >
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl overflow-hidden shrink-0 border transition-colors"
-                            :class="enc.has_plan ? 'border-orange-500/20' : 'border-white/5'"
-                        >
-                            <img
-                                v-if="enc.portrait"
-                                :src="enc.portrait"
-                                :alt="enc.name"
-                                class="w-full h-full object-cover"
-                            >
+            <div class="space-y-1">
+                <div v-for="enc in bosses" :key="enc.slug"
+                    class="bg-surface-container/60 border rounded-xl overflow-hidden transition-all"
+                    :class="expandedBoss === enc.slug ? 'border-orange-500/20' : enc.has_plan ? 'border-white/10' : 'border-white/5'">
+
+                    <!-- Boss row (clickable) -->
+                    <button @click="toggleBoss(enc.slug)"
+                        class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-colors text-left">
+                        <div class="w-9 h-9 rounded-lg overflow-hidden shrink-0 border"
+                            :class="enc.has_plan ? 'border-orange-500/20' : 'border-white/5'">
+                            <img v-if="enc.portrait" :src="enc.portrait" :alt="enc.name" class="w-full h-full object-cover">
                             <div v-else class="w-full h-full bg-white/5 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-2xl text-on-surface-variant/25">swords</span>
+                                <span class="material-symbols-outlined text-sm text-on-surface-variant/25">swords</span>
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-sm font-bold text-white group-hover:text-orange-300 transition-colors truncate">
-                                {{ enc.name }}
+                            <div class="text-xs font-bold text-white truncate">{{ enc.name }}</div>
+                        </div>
+                        <div v-if="(enc.plans || []).length > 0" class="flex items-center gap-1.5 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                            <span class="text-[9px] text-on-surface-variant/50">{{ (enc.plans || []).length }}</span>
+                        </div>
+                        <span class="material-symbols-outlined text-sm text-on-surface-variant/30 transition-transform"
+                            :class="expandedBoss === enc.slug ? 'rotate-180' : ''">expand_more</span>
+                    </button>
+
+                    <!-- Expanded plans area -->
+                    <div v-show="expandedBoss === enc.slug" class="border-t border-white/5">
+                        <!-- Plans -->
+                        <button v-for="(plan, pi) in (enc.plans || [])" :key="plan.id"
+                            @click="openEditorWithPlan(enc._index, pi)"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left border-b border-white/[0.03] last:border-0 group">
+                            <div class="w-6 h-6 rounded bg-orange-500/10 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-xs text-orange-400">map</span>
                             </div>
-                            <div v-if="enc.has_plan" class="mt-1.5 space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                                    <span class="text-[9px] text-on-surface-variant">
-                                        {{ enc.plan.steps?.length || 0 }} phase{{ (enc.plan.steps?.length || 0) !== 1 ? 's' : '' }}
-                                    </span>
-                                    <span class="text-[9px] text-orange-400/60 font-bold uppercase">{{ enc.plan.difficulty }}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-[11px] font-bold text-white truncate group-hover:text-orange-300 transition-colors">
+                                    {{ plan.title || enc.name }}
                                 </div>
-                                <div class="flex items-center gap-1 flex-wrap">
-                                    <div
-                                        v-for="(step, si) in (enc.plan.steps || []).slice(0, 4)"
-                                        :key="si"
-                                        class="px-1.5 py-0.5 rounded bg-white/5 text-[7px] font-bold text-on-surface-variant/50"
-                                    >
-                                        {{ step.label }} &middot; {{ (step.players || []).length }}p
-                                    </div>
-                                    <span
-                                        v-if="(enc.plan.steps || []).length > 4"
-                                        class="text-[7px] text-on-surface-variant/30"
-                                    >+{{ enc.plan.steps.length - 4 }}</span>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                        :class="{
+                                            'bg-orange-500/10 text-orange-400': plan.difficulty === 'mythic',
+                                            'bg-purple-500/10 text-purple-400': plan.difficulty === 'heroic',
+                                            'bg-green-500/10 text-green-400': plan.difficulty === 'normal',
+                                            'bg-blue-500/10 text-blue-400': plan.difficulty === 'raid_finder',
+                                        }">{{ plan.difficulty }}</span>
+                                    <span class="text-[8px] text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
                                 </div>
                             </div>
-                            <div v-else class="mt-1.5">
-                                <span class="text-[9px] text-on-surface-variant/30">No plan yet &mdash; click to create</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant/20 group-hover:text-orange-400/50">arrow_forward</span>
+                        </button>
+
+                        <!-- New plan button -->
+                        <div class="px-4 py-2.5 border-t border-white/[0.03]">
+                            <button v-if="canManage" @click.stop="createNewPlanForEncounter(enc._index)"
+                                class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-white/10 text-on-surface-variant/50 hover:text-orange-400 hover:border-orange-500/30 transition-all text-[9px] font-bold uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-xs">add</span>
+                                {{ __('New Plan') }}
+                            </button>
+                            <div v-else-if="(enc.plans || []).length === 0" class="text-center py-1">
+                                <span class="text-[9px] text-on-surface-variant/30">{{ __('No plans yet') }}</span>
                             </div>
                         </div>
                     </div>
-                </button>
+                </div>
             </div>
         </div>
     </div>
@@ -913,7 +956,7 @@ const plansCount = computed(() => encounters.value.filter(e => e.has_plan).lengt
                 class="fixed inset-0 z-[200] bg-[#0d0d0f] flex flex-col"
             >
                 <!-- Top bar -->
-                <div class="shrink-0 h-14 border-b border-white/10 bg-[#131315] flex items-center justify-between px-4 gap-4">
+                <div class="shrink-0 border-b border-white/10 bg-[#131315] flex items-center justify-between px-4 py-2 gap-4 relative">
                     <!-- Left: encounter name + tabs -->
                     <div class="flex items-center gap-4 min-w-0">
                         <div class="flex items-center gap-2.5 min-w-0">
@@ -923,25 +966,61 @@ const plansCount = computed(() => encounters.value.filter(e => e.has_plan).lengt
                                 class="w-8 h-8 rounded-lg object-cover border border-white/10 shrink-0"
                             >
                             <span v-else class="material-symbols-outlined text-lg text-orange-400">swords</span>
-                            <h2 class="text-sm font-black text-white uppercase tracking-tight font-headline truncate">
-                                {{ editorEncounter.name }}
-                            </h2>
+                            <div class="min-w-0">
+                                <h2 class="text-sm font-black text-white uppercase tracking-tight font-headline truncate">
+                                    {{ editorEncounter.name }}
+                                </h2>
+                                <div v-if="localPlan" class="flex items-center gap-2 mt-1">
+                                    <input v-if="canManage" v-model="localPlan.title" type="text" :placeholder="__('Plan name...')"
+                                        class="bg-white/5 border border-white/10 rounded-lg text-[10px] text-white px-2.5 h-7 focus:ring-1 focus:ring-orange-500 outline-none w-36">
+                                    <span v-else-if="localPlan.title" class="text-[10px] text-on-surface-variant">{{ localPlan.title }}</span>
+                                    <div v-if="canManage" class="relative" @click.stop>
+                                        <button type="button" @click="showDiffDropdown = !showDiffDropdown"
+                                            class="flex items-center gap-1.5 px-3 h-7 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest hover:border-white/10 transition-all"
+                                            :class="{ 'border-orange-500/50 ring-1 ring-orange-500/50': showDiffDropdown }">
+                                            <span :class="{
+                                                'text-orange-400': localPlan.difficulty === 'mythic',
+                                                'text-purple-400': localPlan.difficulty === 'heroic',
+                                                'text-green-400': localPlan.difficulty === 'normal',
+                                                'text-blue-400': localPlan.difficulty === 'raid_finder',
+                                            }">{{ { mythic: 'Mythic', heroic: 'Heroic', normal: 'Normal', raid_finder: 'LFR' }[localPlan.difficulty] }}</span>
+                                            <span class="material-symbols-outlined text-sm text-on-surface-variant transition-transform" :class="showDiffDropdown ? 'rotate-180' : ''">expand_more</span>
+                                        </button>
+                                        <div v-if="showDiffDropdown" class="absolute z-50 w-full mt-1 bg-surface-container-highest border border-white/5 rounded-lg shadow-2xl overflow-hidden">
+                                            <button v-for="d in diffOptions" :key="d.value" @click="localPlan.difficulty = d.value; showDiffDropdown = false"
+                                                class="w-full flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/5 transition-colors text-left"
+                                                :class="localPlan.difficulty === d.value ? 'bg-white/[0.03]' : ''">
+                                                <span class="w-1.5 h-1.5 rounded-full" :class="d.dot"></span>
+                                                <span class="font-headline text-[10px] font-bold uppercase tracking-widest" :class="d.color">{{ d.label }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-[10px] font-bold uppercase"
+                                        :class="{
+                                            'text-orange-400': localPlan.difficulty === 'mythic',
+                                            'text-purple-400': localPlan.difficulty === 'heroic',
+                                            'text-green-400': localPlan.difficulty === 'normal',
+                                            'text-blue-400': localPlan.difficulty === 'raid_finder',
+                                        }">{{ localPlan.difficulty }}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5">
+                        <!-- Centered tabs -->
+                        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5">
                             <button
                                 @click="editorTab = 'map'"
-                                class="px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
+                                class="px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
                                 :class="editorTab === 'map' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
-                                <span class="material-symbols-outlined text-xs align-middle mr-0.5">map</span> Map
+                                <span class="material-symbols-outlined text-xs align-middle mr-0.5">map</span> {{ __('Map') }}
                             </button>
                             <button
                                 @click="editorTab = 'cooldowns'"
-                                class="px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
+                                class="px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
                                 :class="editorTab === 'cooldowns' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
-                                <span class="material-symbols-outlined text-xs align-middle mr-0.5">timer</span> Cooldowns
+                                <span class="material-symbols-outlined text-xs align-middle mr-0.5">timer</span> {{ __('Cooldowns') }}
                             </button>
                         </div>
                     </div>

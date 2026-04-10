@@ -165,6 +165,8 @@ class BossPlannerService
                     $bossData['portraits'] ?? []
                 );
 
+                $bossPlans = $plans->filter(fn (RaidPlan $p) => $p->encounter_slug === $slug)->values();
+
                 $encounters[] = [
                     'slug' => $slug,
                     'name' => $bossName,
@@ -173,13 +175,21 @@ class BossPlannerService
                     'portrait' => $portraits[0] ?? null,
                     'portraits' => $portraits,
                     'abilities' => $bossData['abilities'] ?? [],
-                    'has_plan' => $plan !== null,
-                    'plan' => $plan ? [
-                        'id' => $plan->id,
-                        'title' => $plan->title,
-                        'steps' => $plan->steps,
-                        'difficulty' => $plan->difficulty,
-                        'updated_at' => $plan->updated_at->toIso8601String(),
+                    'has_plan' => $bossPlans->isNotEmpty(),
+                    'plans' => $bossPlans->map(fn (RaidPlan $p) => [
+                        'id' => $p->id,
+                        'title' => $p->title,
+                        'steps' => $p->steps,
+                        'difficulty' => $p->difficulty,
+                        'updated_at' => $p->updated_at->toIso8601String(),
+                    ])->toArray(),
+                    // Keep backward compat: first plan as 'plan'
+                    'plan' => $bossPlans->isNotEmpty() ? [
+                        'id' => $bossPlans->first()->id,
+                        'title' => $bossPlans->first()->title,
+                        'steps' => $bossPlans->first()->steps,
+                        'difficulty' => $bossPlans->first()->difficulty,
+                        'updated_at' => $bossPlans->first()->updated_at->toIso8601String(),
                     ] : null,
                 ];
             }
