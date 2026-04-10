@@ -8,6 +8,7 @@ use App\Enums\StaticGroup\SyncType;
 use App\Helpers\SyncIntervalHelper;
 use App\Jobs\Character\FetchBnetRawDataJob;
 use App\Jobs\Character\FetchRioRawDataJob;
+use App\Jobs\StaticGroup\RecalculateStaticProgressionJob;
 use App\Models\StaticGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -59,6 +60,9 @@ class UnifiedSyncOrchestratorService
             $this->markStaticAsSynced($static->id, SyncType::BNET);
             $this->markStaticAsSynced($static->id, SyncType::RIO);
             $this->markStaticAsSynced($static->id, SyncType::WCL);
+
+            RecalculateStaticProgressionJob::dispatch($static->id)
+                ->delay(now()->addMinutes(3));
 
             $messages[] = sprintf(
                 'Dispatched bnet+rio sync for %d character(s) in static: %s (ID: %d)',

@@ -4,7 +4,7 @@ namespace App\Services\StaticGroup;
 
 use App\Services\StaticGroup\RosterService;
 use App\Services\StaticGroup\TreasuryService;
-use App\Services\Roster\InstanceDataService;
+use App\Services\StaticGroup\StaticProgressionService;
 
 use App\Enums\StaticGroup\SyncType;
 use App\Helpers\SyncIntervalHelper;
@@ -15,10 +15,10 @@ use App\Helpers\CurrencyHelper;
 class DashboardService
 {
     public function __construct(
-        protected RosterService       $rosterService,
-        protected ConsumableService   $consumableService,
-        protected TreasuryService     $treasuryService,
-        protected InstanceDataService $instanceDataService
+        protected RosterService             $rosterService,
+        protected ConsumableService         $consumableService,
+        protected TreasuryService           $treasuryService,
+        protected StaticProgressionService  $progressionService
     ) {}
 
     /**
@@ -71,74 +71,11 @@ class DashboardService
     }
 
     /**
-     * Aggregate cumulative raid boss kills across the static's roster.
-     * A boss counts as killed at a difficulty if >= 60% of the roster has killed it.
+     * Get persisted raid progression for the static from the database.
      */
     public function getStaticRaidProgression(StaticGroup $static): array
     {
-        $characters = $static->characters()->with(['serviceRawData' => function ($q) {
-            $q->select('id', 'character_id', 'bnet_raid');
-        }])->get();
-        $rosterSize = $characters->count();
-
-        if ($rosterSize === 0) {
-            return [];
-        }
-
-        $threshold   = (int) ceil($rosterSize * 0.6);
-        $difficulties = ['LFR', 'N', 'H', 'M'];
-        $counters    = []; // [instance][bossName][difficulty] => kill count
-
-        $this->instanceDataService->setRegion($static->region ?? 'eu');
-
-        foreach ($characters as $character) {
-            $raidData = $character->serviceRawData?->bnet_raid ?? [];
-            if ($raidData === []) {
-                continue;
-            }
-
-            $charProgression = $this->instanceDataService->resolveRaids($raidData);
-            if ($charProgression === null) {
-                continue;
-            }
-
-            foreach ($charProgression as $instance => $bosses) {
-                foreach ($bosses as $boss) {
-                    foreach ($difficulties as $diff) {
-                        if ($boss[$diff] ?? false) {
-                            $counters[$instance][$boss['name']][$diff]
-                                = ($counters[$instance][$boss['name']][$diff] ?? 0) + 1;
-                        }
-                    }
-                }
-            }
-        }
-
-        $result = [];
-        $instances = config('wow_season.current_raid_instances', []);
-
-        foreach ($instances as $instanceName => $configBosses) {
-            $bosses = [];
-            foreach ($configBosses as $bossName) {
-                $best = null;
-                foreach ($difficulties as $diff) {
-                    $count = $counters[$instanceName][$bossName][$diff] ?? 0;
-                    if ($count >= $threshold) {
-                        $best = $diff;
-                    }
-                }
-                $bosses[] = [
-                    'name'       => $bossName,
-                    'difficulty' => $best,
-                ];
-            }
-            $result[] = [
-                'instance' => $instanceName,
-                'bosses'   => $bosses,
-            ];
-        }
-
-        return $result;
+        return $this->progressionService->getProgression($static->id);
     }
 
     /**

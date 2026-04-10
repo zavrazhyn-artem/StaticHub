@@ -29,13 +29,33 @@
                         <td
                             v-for="boss in allBosses"
                             :key="boss.name"
-                            class="p-3 text-center border-l border-white/5 first:border-l-0"
+                            class="p-3 text-center border-l border-white/5 first:border-l-0 relative"
+                            @mouseenter="hoveredBoss = boss.name"
+                            @mouseleave="hoveredBoss = null"
                         >
                             <span
                                 v-if="boss.difficulty"
-                                :class="['font-bold font-mono text-sm', diffColors[boss.difficulty]]"
+                                :class="['font-bold font-mono text-sm cursor-default', diffColors[boss.difficulty]]"
                             >{{ boss.difficulty }}</span>
                             <span v-else class="text-gray-800">-</span>
+
+                            <Transition name="tooltip">
+                                <div
+                                    v-if="hoveredBoss === boss.name && boss.history?.length"
+                                    class="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none"
+                                >
+                                    <div class="tooltip-glass border border-white/10 px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap">
+                                        <div
+                                            v-for="entry in sortedHistory(boss.history)"
+                                            :key="entry.difficulty"
+                                            class="flex items-center gap-2 text-[10px] font-bold tracking-wide"
+                                        >
+                                            <span :class="diffColors[entry.difficulty]">{{ entry.difficulty }}</span>
+                                            <span class="text-gray-400">{{ formatDate(entry.achieved_at) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Transition>
                         </td>
                     </tr>
                 </tbody>
@@ -49,11 +69,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
     raidProgression: { type: Array, default: () => [] },
 })
+
+const hoveredBoss = ref(null)
 
 const diffColors = {
     M:   'text-orange-400',
@@ -62,5 +84,37 @@ const diffColors = {
     LFR: 'text-green-400',
 }
 
+const diffRank = { LFR: 1, N: 2, H: 3, M: 4 }
+
 const allBosses = computed(() => props.raidProgression.flatMap(w => w.bosses))
+
+function sortedHistory(history) {
+    return [...history].sort((a, b) => (diffRank[a.difficulty] ?? 0) - (diffRank[b.difficulty] ?? 0))
+}
+
+function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
 </script>
+
+<style scoped>
+.tooltip-glass {
+    background: rgba(23, 23, 23, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.tooltip-enter-active {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tooltip-leave-active {
+    transition: all 0.15s ease-in;
+}
+.tooltip-enter-from,
+.tooltip-leave-to {
+    opacity: 0;
+    transform: scale(0.92);
+}
+</style>
