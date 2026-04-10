@@ -5,6 +5,7 @@ import RaidCells from './Cells/RaidCells.vue';
 import GearCells from './Cells/GearCells.vue';
 import VaultCells from './Cells/VaultCells.vue';
 import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
+import GearSpecSwitcher from '@/Components/Roster/GearSpecSwitcher.vue';
 
 const { proxy } = getCurrentInstance();
 const __ = (key, replace = {}) => proxy.__(key, replace);
@@ -43,6 +44,23 @@ const props = defineProps({
 const rowHeights = inject('rowHeights');
 const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
+const { getSpecData, selectSpec, getSpecOptions, getActiveSpec } = inject('specSwitch');
+const effectiveChar = computed(() => getSpecData(props.char));
+
+/** The spec object for the currently displayed spec (for icon). */
+const currentSpecObj = computed(() => {
+    const active = getActiveSpec(props.char);
+    if (!active) {
+        // Fallback to main_spec
+        return props.char?.main_spec ? {
+            name: props.char.main_spec.name,
+            icon_url: props.char.main_spec.icon_url,
+        } : null;
+    }
+    const allSpecs = props.char?.all_specs ?? [];
+    return allSpecs.find(s => s.name === active) ?? { name: active, icon_url: props.char?.main_spec?.icon_url };
+});
+
 const emit = defineEmits([
     'toggle-expand',
     'update-access-role',
@@ -61,10 +79,10 @@ const emit = defineEmits([
         <!-- Character identity -->
         <td :class="[rh, isAlt ? 'pl-5' : 'p-2']">
             <div :class="[
-                'flex flex-col justify-center h-full',
-                isAlt ? 'items-start pl-1' : 'items-start pl-4 gap-1'
+                'flex items-center justify-between h-full',
+                isAlt ? 'pl-1' : 'pl-4'
             ]">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 min-w-0">
                     <div class="relative shrink-0">
                         <img v-if="char?.avatar_url"
                              :src="char.avatar_url"
@@ -84,14 +102,6 @@ const emit = defineEmits([
                                   :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[12px]' : 'text-[16px]']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
-                            <img v-if="char?.main_spec?.icon_url"
-                                 :src="char.main_spec.icon_url"
-                                 :class="isAlt ? 'w-2.5 h-2.5 opacity-80' : 'w-4 h-4 opacity-90 rounded'"
-                                 :title="char.main_spec.name">
-                            <img v-else-if="char?.main_spec?.role"
-                                 :src="roleIconSrc(char.main_spec.role)"
-                                 :class="isAlt ? 'w-2.5 h-2.5 opacity-80' : 'w-3 h-3 opacity-80'"
-                                 :title="char.main_spec.role">
                             <span v-if="isAlt" class="text-[8px] text-on-surface-variant font-bold uppercase">{{ char?.class ?? '' }}</span>
 
                             <button v-if="!isAlt && (member.alts || []).length > 0"
@@ -107,12 +117,22 @@ const emit = defineEmits([
                         </div>
                     </div>
                 </div>
+
+                <!-- Spec switcher (right-aligned) -->
+                <GearSpecSwitcher
+                    :availableSpecs="getSpecOptions(char)"
+                    :activeSpec="getActiveSpec(char)"
+                    :mainSpecName="char?.main_spec?.name"
+                    :currentSpec="currentSpecObj"
+                    :size="isAlt ? 'xs' : 'sm'"
+                    @select="selectSpec(char?.id, $event)"
+                />
             </div>
         </td>
 
         <!-- Summary Tab Cells -->
         <template v-if="activeTab === 'summary'">
-            <SummaryCells :char="char"
+            <SummaryCells :char="effectiveChar"
                           :tier-colors="tierColors"
                           :tier-count="tierCount"
                           :is-alt="isAlt" />
@@ -120,7 +140,7 @@ const emit = defineEmits([
 
         <!-- Raid Tab Cells -->
         <template v-if="activeTab === 'raids'">
-            <RaidCells :char="char"
+            <RaidCells :char="effectiveChar"
                        :grouped-roster="groupedRoster"
                        :raid-columns="raidColumns"
                        :selected-difficulty="selectedDifficulty"
@@ -130,27 +150,27 @@ const emit = defineEmits([
 
         <!-- Gear Tab Cells -->
         <template v-if="activeTab === 'gear'">
-            <GearCells :char="char"
+            <GearCells :char="effectiveChar"
                        :is-alt="isAlt"
                        :has-audit-issues="hasAuditIssues"
                        :audit-title="auditTitle"
-                       @audit-click="emit('open-audit-modal', char)" />
+                       @audit-click="emit('open-audit-modal', effectiveChar)" />
         </template>
 
         <!-- Vault Tab Cells -->
         <template v-if="activeTab === 'vault'">
-            <VaultCells :char="char" :is-alt="isAlt" />
+            <VaultCells :char="effectiveChar" :is-alt="isAlt" />
         </template>
 
         <!-- Audit badge (summary only) -->
         <template v-if="activeTab === 'summary'">
             <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
-                <span v-if="hasAuditIssues(char)"
-                      @click="emit('open-audit-modal', char)"
+                <span v-if="hasAuditIssues(effectiveChar)"
+                      @click="emit('open-audit-modal', effectiveChar)"
                       :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
-                      :title="auditTitle(char)">
+                      :title="auditTitle(effectiveChar)">
                     <span class="material-symbols-outlined text-[12px]">warning</span>
-                    {{ (char.missing_enchants_slots?.length ?? 0) + (char.low_quality_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
+                    {{ (effectiveChar.missing_enchants_slots?.length ?? 0) + (effectiveChar.low_quality_enchants_slots?.length ?? 0) + (effectiveChar.empty_sockets_count ?? 0) }}
                 </span>
                 <span v-else class="text-gray-600 text-[10px]">✓</span>
             </td>

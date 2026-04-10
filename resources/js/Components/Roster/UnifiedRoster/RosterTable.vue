@@ -2,6 +2,7 @@
 import { ref, computed, nextTick, provide } from 'vue';
 import RosterRow from './RosterRow.vue';
 import InfoTooltip from '@/Components/UI/InfoTooltip.vue';
+import { useGearSpecSwitch } from '@/composables/useGearSpecSwitch';
 
 // ── Row height tokens (single source of truth) ──
 const ROW_HEIGHTS = {
@@ -9,6 +10,14 @@ const ROW_HEIGHTS = {
     alt:  'h-[42px]',
 };
 provide('rowHeights', ROW_HEIGHTS);
+
+const refreshWowheadLinks = () => {
+    if (window.$WowheadPower?.refreshLinks) {
+        window.$WowheadPower.refreshLinks();
+    }
+};
+const specSwitch = useGearSpecSwitch(refreshWowheadLinks);
+provide('specSwitch', specSwitch);
 
 const searchQuery = ref('');
 const showSearch = ref(false);

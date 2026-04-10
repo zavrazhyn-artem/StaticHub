@@ -45,6 +45,7 @@ div[id^="wowhead-tooltip"] {
     position: fixed !important;
 }
 
+
 /* Прибираємо стрілочки для Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

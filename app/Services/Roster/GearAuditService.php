@@ -332,14 +332,6 @@ final class GearAuditService
         }
 
         $result     = [];
-        $rioSlotMap = [
-            'HEAD' => 'head', 'NECK' => 'neck', 'SHOULDER' => 'shoulder',
-            'CHEST' => 'chest', 'WAIST' => 'waist', 'LEGS' => 'legs',
-            'FEET' => 'feet', 'WRIST' => 'wrist', 'HANDS' => 'hands',
-            'FINGER_1' => 'finger1', 'FINGER_2' => 'finger2',
-            'TRINKET_1' => 'trinket1', 'TRINKET_2' => 'trinket2',
-            'BACK' => 'back', 'MAIN_HAND' => 'mainhand', 'OFF_HAND' => 'offhand',
-        ];
 
         foreach ($equippedItems as $item) {
             $slotType = strtoupper((string) ($item['slot']['type'] ?? ''));
@@ -348,13 +340,6 @@ final class GearAuditService
 
             if ($itemId === 0 || $ilvl === 0) {
                 continue;
-            }
-
-            $rioSlotName = $rioSlotMap[$slotType] ?? null;
-            $iconName    = null;
-
-            if ($rioSlotName && $rawData && isset($rawData->rio_profile)) {
-                $iconName = data_get($rawData->rio_profile, "gear.items.{$rioSlotName}.icon");
             }
 
             $bonuses = $item['bonus_list'] ?? [];
@@ -373,7 +358,6 @@ final class GearAuditService
                 'bonus_ids'    => $bonuses,
                 'upgrade'      => $this->resolveUpgradeTrack($bonuses),
                 'socket_count' => count($item['sockets'] ?? []),
-                'icon'         => $iconName,
                 'is_crafted'   => $isCrafted,
                 'is_set_piece' => isset($item['set']),
             ];

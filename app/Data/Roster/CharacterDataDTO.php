@@ -54,5 +54,9 @@ final readonly class CharacterDataDTO
         // Crafting extras
         public ?array  $embellished_items,
         public ?array  $spark_gear,
+        // Per-spec gear data
+        public ?array  $equipment_by_spec,
+        public ?array  $ilvl_by_spec,
+        public ?array  $gear_audit_by_spec,
     ) {}
 }

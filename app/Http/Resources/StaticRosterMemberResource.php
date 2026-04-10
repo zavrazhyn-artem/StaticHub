@@ -63,14 +63,63 @@ class StaticRosterMemberResource extends JsonResource
         $charData   = $character->character_data ?? [];
         $weeklyData = $this->weeklyOverrides[$character->id] ?? $character->character_weekly_data ?? [];
 
+        $mainSpec     = $character->getAttribute('main_spec');
+        $mainSpecName = $mainSpec['name'] ?? null;
+
+        // Overlay main spec gear as top-level defaults
+        if ($mainSpecName !== null) {
+            $charData = $this->overlayMainSpecGear($charData, $mainSpecName);
+        }
+
+        // Build available gear specs list for frontend switcher
+        $equipmentBySpec = $charData['equipment_by_spec'] ?? [];
+        $availableGearSpecs = array_keys($equipmentBySpec);
+
         return array_merge(
             $charData,
             $weeklyData,
             [
-                'id'        => $character->id,
-                'name'      => $character->name,
-                'main_spec' => $character->getAttribute('main_spec'),
+                'id'                  => $character->id,
+                'name'                => $character->name,
+                'main_spec'           => $mainSpec,
+                'all_specs'           => $character->getAttribute('all_specs') ?? [],
+                'available_gear_specs' => $availableGearSpecs,
             ]
         );
+    }
+
+    private function overlayMainSpecGear(array $charData, string $specName): array
+    {
+        $equipmentBySpec = $charData['equipment_by_spec'] ?? [];
+        $auditBySpec     = $charData['gear_audit_by_spec'] ?? [];
+        $ilvlBySpec      = $charData['ilvl_by_spec'] ?? [];
+
+        if (!isset($equipmentBySpec[$specName])) {
+            return $charData;
+        }
+
+        $charData['equipment']    = $equipmentBySpec[$specName];
+        $charData['equipped_ilvl'] = $ilvlBySpec[$specName] ?? $charData['equipped_ilvl'] ?? null;
+
+        $specAudit = $auditBySpec[$specName] ?? [];
+        $auditKeys = [
+            'missing_enchants_slots',
+            'low_quality_enchants_slots',
+            'empty_sockets_count',
+            'upgrades_missing',
+            'sparks_equipped',
+            'tier_pieces',
+            'tier_ilvls',
+            'embellished_items',
+            'spark_gear',
+        ];
+
+        foreach ($auditKeys as $key) {
+            if (array_key_exists($key, $specAudit)) {
+                $charData[$key] = $specAudit[$key];
+            }
+        }
+
+        return $charData;
     }
 }

@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, onUpdated } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useGearSpecSwitch } from '@/composables/useGearSpecSwitch';
 import GearCell from './GearCell.vue';
+import GearSpecSwitcher from './GearSpecSwitcher.vue';
 
 const { __ } = useTranslation();
 
@@ -42,6 +44,12 @@ const refreshTooltips = () => {
 
 onMounted(refreshTooltips);
 onUpdated(refreshTooltips);
+
+// ---------------------------------------------------------------------------
+// Per-character spec switching
+// ---------------------------------------------------------------------------
+
+const { getSpecData, selectSpec, getSpecOptions, getActiveSpec } = useGearSpecSwitch(refreshTooltips);
 
 // ---------------------------------------------------------------------------
 // Config
@@ -164,22 +172,31 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                 <span class="text-[10px] text-white/20">?</span>
                                             </div>
                                         </div>
-                                        <!-- Name / spec -->
+                                        <!-- Name / spec + switcher -->
                                         <div class="min-w-0">
                                             <div class="font-bold text-sm truncate"
                                                  :class="CLASS_COLORS[member.main_character.class] ?? 'text-white'">
                                                 {{ member.main_character.name ?? member.name }}
                                             </div>
-                                            <div class="text-[9px] text-gray-500 uppercase font-medium">
-                                                {{ member.main_character.main_spec?.name ?? '—' }}
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[9px] text-gray-500 uppercase font-medium">
+                                                    {{ getActiveSpec(member.main_character) ?? '—' }}
+                                                </span>
+                                                <GearSpecSwitcher
+                                                    :availableSpecs="getSpecOptions(member.main_character)"
+                                                    :activeSpec="getActiveSpec(member.main_character)"
+                                                    :mainSpecName="member.main_character.main_spec?.name"
+                                                    size="sm"
+                                                    @select="selectSpec(member.main_character.id, $event)"
+                                                />
                                             </div>
                                         </div>
                                     </div>
                                     <!-- ilvl -->
                                     <div class="text-right shrink-0 pr-1">
                                         <span class="text-xs font-mono font-bold text-cyan-400">
-                                            {{ member.main_character.equipped_ilvl != null
-                                                ? Number(member.main_character.equipped_ilvl).toFixed(1)
+                                            {{ getSpecData(member.main_character).equipped_ilvl != null
+                                                ? Number(getSpecData(member.main_character).equipped_ilvl).toFixed(1)
                                                 : 'N/A' }}
                                         </span>
                                     </div>
@@ -188,23 +205,23 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
 
                             <!-- Audit: enchants -->
                             <td class="p-2 text-center font-mono text-sm border-l border-white/5">
-                                <span v-if="(member.main_character.missing_enchants_slots?.length ?? 0) + (member.main_character.low_quality_enchants_slots?.length ?? 0) > 0"
+                                <span v-if="(getSpecData(member.main_character).missing_enchants_slots?.length ?? 0) + (getSpecData(member.main_character).low_quality_enchants_slots?.length ?? 0) > 0"
                                       class="font-bold"
-                                      :class="(member.main_character.missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500' : 'text-amber-400'"
+                                      :class="(getSpecData(member.main_character).missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500' : 'text-amber-400'"
                                       :title="[
-                                          (member.main_character.missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + member.main_character.missing_enchants_slots.join(', ') : ''),
-                                          (member.main_character.low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + member.main_character.low_quality_enchants_slots.join(', ') : ''),
+                                          (getSpecData(member.main_character).missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + getSpecData(member.main_character).missing_enchants_slots.join(', ') : ''),
+                                          (getSpecData(member.main_character).low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + getSpecData(member.main_character).low_quality_enchants_slots.join(', ') : ''),
                                       ].filter(Boolean).join(' | ')">
-                                    {{ (member.main_character.missing_enchants_slots?.length ?? 0) + (member.main_character.low_quality_enchants_slots?.length ?? 0) }}
+                                    {{ (getSpecData(member.main_character).missing_enchants_slots?.length ?? 0) + (getSpecData(member.main_character).low_quality_enchants_slots?.length ?? 0) }}
                                 </span>
                                 <span v-else class="text-gray-600 text-xs">✓</span>
                             </td>
 
                             <!-- Audit: empty sockets -->
                             <td class="p-2 text-center font-mono text-sm">
-                                <span v-if="(member.main_character.empty_sockets_count ?? 0) > 0"
+                                <span v-if="(getSpecData(member.main_character).empty_sockets_count ?? 0) > 0"
                                       class="text-red-500 font-bold">
-                                    {{ member.main_character.empty_sockets_count }}
+                                    {{ getSpecData(member.main_character).empty_sockets_count }}
                                 </span>
                                 <span v-else class="text-gray-600 text-xs">✓</span>
                             </td>
@@ -213,11 +230,11 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                             <td v-for="slot in GEAR_SLOTS" :key="slot.key" class="p-1 text-center">
                                 <div class="flex justify-center">
                                     <GearCell
-                                        :item="toSlotMap(member.main_character.equipment)[slot.key] ?? null"
+                                        :item="toSlotMap(getSpecData(member.main_character).equipment)[slot.key] ?? null"
                                         :slotName="slot.key"
                                         :classId="member.main_character.class_id"
                                         :specId="member.main_character.spec_id"
-                                        :setItemIds="getSetItemIds(member.main_character.equipment)" />
+                                        :setItemIds="getSetItemIds(getSpecData(member.main_character).equipment)" />
                                 </div>
                             </td>
                         </tr>
@@ -248,15 +265,24 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                      :class="CLASS_COLORS[alt?.class] ?? 'text-white'">
                                                     {{ alt?.name ?? 'Unknown' }}
                                                 </div>
-                                                <div class="text-[8px] text-gray-500 uppercase font-medium">
-                                                    {{ alt?.main_spec?.name ?? '—' }}
+                                                <div class="flex items-center gap-1">
+                                                    <span class="text-[8px] text-gray-500 uppercase font-medium">
+                                                        {{ getActiveSpec(alt) ?? '—' }}
+                                                    </span>
+                                                    <GearSpecSwitcher
+                                                        :availableSpecs="getSpecOptions(alt)"
+                                                        :activeSpec="getActiveSpec(alt)"
+                                                        :mainSpecName="alt?.main_spec?.name"
+                                                        size="xs"
+                                                        @select="selectSpec(alt.id, $event)"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 pr-1">
                                             <span class="text-[10px] font-mono font-bold text-cyan-400/70">
-                                                {{ alt?.equipped_ilvl != null
-                                                    ? Number(alt.equipped_ilvl).toFixed(1)
+                                                {{ getSpecData(alt)?.equipped_ilvl != null
+                                                    ? Number(getSpecData(alt).equipped_ilvl).toFixed(1)
                                                     : 'N/A' }}
                                             </span>
                                         </div>
@@ -265,23 +291,23 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
 
                                 <!-- Alt audit: enchants -->
                                 <td class="p-2 text-center font-mono text-xs border-l border-white/5">
-                                    <span v-if="(alt?.missing_enchants_slots?.length ?? 0) + (alt?.low_quality_enchants_slots?.length ?? 0) > 0"
+                                    <span v-if="(getSpecData(alt)?.missing_enchants_slots?.length ?? 0) + (getSpecData(alt)?.low_quality_enchants_slots?.length ?? 0) > 0"
                                           class="font-bold"
-                                          :class="(alt?.missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500/70' : 'text-amber-400/70'"
+                                          :class="(getSpecData(alt)?.missing_enchants_slots?.length ?? 0) > 0 ? 'text-red-500/70' : 'text-amber-400/70'"
                                           :title="[
-                                              (alt?.missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + alt.missing_enchants_slots.join(', ') : ''),
-                                              (alt?.low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + alt.low_quality_enchants_slots.join(', ') : ''),
+                                              (getSpecData(alt)?.missing_enchants_slots?.length > 0 ? __('Missing:') + ' ' + getSpecData(alt).missing_enchants_slots.join(', ') : ''),
+                                              (getSpecData(alt)?.low_quality_enchants_slots?.length > 0 ? __('Low quality:') + ' ' + getSpecData(alt).low_quality_enchants_slots.join(', ') : ''),
                                           ].filter(Boolean).join(' | ')">
-                                        {{ (alt?.missing_enchants_slots?.length ?? 0) + (alt?.low_quality_enchants_slots?.length ?? 0) }}
+                                        {{ (getSpecData(alt)?.missing_enchants_slots?.length ?? 0) + (getSpecData(alt)?.low_quality_enchants_slots?.length ?? 0) }}
                                     </span>
                                     <span v-else class="text-gray-700 text-[10px]">✓</span>
                                 </td>
 
                                 <!-- Alt audit: gems -->
                                 <td class="p-2 text-center font-mono text-xs">
-                                    <span v-if="(alt?.empty_sockets_count ?? 0) > 0"
+                                    <span v-if="(getSpecData(alt)?.empty_sockets_count ?? 0) > 0"
                                           class="text-red-500/70 font-bold">
-                                        {{ alt.empty_sockets_count }}
+                                        {{ getSpecData(alt).empty_sockets_count }}
                                     </span>
                                     <span v-else class="text-gray-700 text-[10px]">✓</span>
                                 </td>
@@ -290,11 +316,11 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                 <td v-for="slot in GEAR_SLOTS" :key="'alt-' + slot.key" class="p-1 text-center opacity-75">
                                     <div class="flex justify-center">
                                         <GearCell
-                                            :item="toSlotMap(alt?.equipment)?.[slot.key] ?? null"
+                                            :item="toSlotMap(getSpecData(alt)?.equipment)?.[slot.key] ?? null"
                                             :slotName="slot.key"
                                             :classId="alt?.class_id"
                                             :specId="alt?.spec_id"
-                                            :setItemIds="getSetItemIds(alt?.equipment)" />
+                                            :setItemIds="getSetItemIds(getSpecData(alt)?.equipment)" />
                                     </div>
                                 </td>
                             </tr>

@@ -95,6 +95,8 @@ final class RosterCompilerService
         $mounts    = $rawData->bnet_mounts ?? [];
         $pets      = $rawData->bnet_pets ?? [];
 
+        $equipmentBySpec = $rawData->bnet_equipment_by_spec ?? [];
+
         $equippedItems = $equipment['equipped_items'] ?? [];
         $rioItems      = $rio['gear']['items'] ?? [];
 
@@ -105,6 +107,11 @@ final class RosterCompilerService
         $weeklyQuests = $this->progression->resolveWeeklyQuests($completedQuestIds);
 
         $weekRegularMythic = $this->vaultData->resolveWeekRegularMythicDungeons($achStatsIndex);
+
+        // Compile gear per spec
+        [$compiledEquipmentBySpec, $ilvlBySpec, $gearAuditBySpec] = $this->compilePerSpecGear(
+            $equipmentBySpec
+        );
 
         $charData = new CharacterDataDTO(
             avatar_url:             $this->resolveAvatarUrl($media),
@@ -140,6 +147,9 @@ final class RosterCompilerService
             renown:                 $this->collection->resolveRenown($reps),
             embellished_items:      $this->gearAudit->resolveEmbellishedItems($equippedItems),
             spark_gear:             $this->gearAudit->resolveSparkGear($equippedItems),
+            equipment_by_spec:      $compiledEquipmentBySpec ?: null,
+            ilvl_by_spec:           $ilvlBySpec ?: null,
+            gear_audit_by_spec:     $gearAuditBySpec ?: null,
         );
 
         $weeklyData = new CharacterWeeklyDataDTO(
@@ -236,6 +246,81 @@ final class RosterCompilerService
         }
 
         return $this->deriveRoleFromSpecName($specName);
+    }
+
+    /**
+     * @return array{array, array, array} [equipmentBySpec, ilvlBySpec, gearAuditBySpec]
+     */
+    private function compilePerSpecGear(array $equipmentBySpec): array
+    {
+        $compiledEquipment = [];
+        $ilvlBySpec        = [];
+        $gearAuditBySpec   = [];
+
+        foreach ($equipmentBySpec as $specName => $specEquipmentRaw) {
+            $specItems = $specEquipmentRaw['equipped_items'] ?? [];
+            if ($specItems === []) {
+                continue;
+            }
+
+            $compiledEquipment[$specName] = $this->gearAudit->resolveEquipment($specItems);
+            $ilvlBySpec[$specName]        = $this->resolveEquippedIlvlFromItems($specItems);
+            $gearAuditBySpec[$specName]   = [
+                'missing_enchants_slots'     => $this->gearAudit->resolveMissingEnchants($specItems),
+                'low_quality_enchants_slots' => $this->gearAudit->resolveLowQualityEnchants($specItems),
+                'empty_sockets_count'        => $this->gearAudit->resolveEmptySockets($specItems),
+                'upgrades_missing'           => $this->gearAudit->resolveTotalUpgradesMissing($specItems),
+                'sparks_equipped'            => $this->gearAudit->resolveSparksEquipped($specItems),
+                'tier_pieces'                => $this->gearAudit->resolveTierPieces($specItems),
+                'tier_ilvls'                 => $this->gearAudit->resolveTierIlvls($specItems),
+                'embellished_items'          => $this->gearAudit->resolveEmbellishedItems($specItems),
+                'spark_gear'                 => $this->gearAudit->resolveSparkGear($specItems),
+            ];
+        }
+
+        return [$compiledEquipment, $ilvlBySpec, $gearAuditBySpec];
+    }
+
+    private function resolveEquippedIlvlFromItems(array $equippedItems): ?float
+    {
+        if ($equippedItems === []) {
+            return null;
+        }
+
+        $totalIlvl  = 0;
+        $slotCount  = 0;
+        $hasTwoHand = false;
+
+        foreach ($equippedItems as $item) {
+            $ilvl = (int) ($item['level']['value'] ?? 0);
+            if ($ilvl === 0) {
+                continue;
+            }
+
+            $slotType = strtoupper((string) ($item['slot']['type'] ?? ''));
+
+            // Skip shirt and tabard
+            if (in_array($slotType, ['SHIRT', 'TABARD'], true)) {
+                continue;
+            }
+
+            $invType = strtoupper((string) ($item['inventory_type']['type'] ?? ''));
+            if ($invType === 'TWOHWEAPON') {
+                $hasTwoHand = true;
+                // 2H counts as two slots
+                $totalIlvl += $ilvl * 2;
+                $slotCount += 2;
+            } else {
+                $totalIlvl += $ilvl;
+                $slotCount++;
+            }
+        }
+
+        if ($slotCount === 0) {
+            return null;
+        }
+
+        return round($totalIlvl / max($slotCount, 16), 2);
     }
 
     private function deriveRoleFromSpecName(string $specName): string

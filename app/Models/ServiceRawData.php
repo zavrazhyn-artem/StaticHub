@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
  * @property int          $character_id
  * @property array|null   $bnet_profile
  * @property array|null   $bnet_equipment
+ * @property array|null   $bnet_equipment_by_spec
  * @property array|null   $bnet_media
  * @property array|null   $bnet_mplus
  * @property array|null   $bnet_raid
@@ -45,6 +46,7 @@ class ServiceRawData extends Model
         'character_id',
         'bnet_profile',
         'bnet_equipment',
+        'bnet_equipment_by_spec',
         'bnet_media',
         'bnet_mplus',
         'bnet_raid',
@@ -62,6 +64,7 @@ class ServiceRawData extends Model
     protected $casts = [
         'bnet_profile'                 => 'array',
         'bnet_equipment'               => 'array',
+        'bnet_equipment_by_spec'       => 'array',
         'bnet_media'                   => 'array',
         'bnet_mplus'                   => 'array',
         'bnet_raid'                    => 'array',

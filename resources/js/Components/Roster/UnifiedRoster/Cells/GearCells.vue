@@ -1,7 +1,9 @@
 <script setup>
 import { inject, computed } from 'vue';
+import { useWowheadIcons } from '@/composables/useWowheadIcons';
 
 const rowHeights = inject('rowHeights');
+const { getIconUrl } = useWowheadIcons();
 
 
 const props = defineProps({
@@ -125,16 +127,17 @@ const ilvlColorClass = (item) => {
                 {{ getItem(slot).ilvl }}
             </div>
 
-            <a :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
-               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors flex items-center justify-center group', getQualityClass(getItem(slot).quality)]"
+            <a :key="getItem(slot).id"
+               :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
+               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', getQualityClass(getItem(slot).quality)]"
                target="_blank"
                :data-wowhead="getWowheadData(getItem(slot))">
-                <img v-if="getItem(slot).icon"
-                     :src="`https://wow.zamimg.com/images/wow/icons/large/${getItem(slot).icon}.jpg`"
+                <img v-if="getIconUrl(getItem(slot).id)"
+                     :src="getIconUrl(getItem(slot).id)"
                      class="w-full h-full object-cover rounded"
                      :alt="getItem(slot).name" />
-                <span v-else class="text-[6px] text-gray-500 font-bold uppercase">
-                    {{ getItem(slot).slot ? getItem(slot).slot.substring(0,2) : '??' }}
+                <span v-else class="flex items-center justify-center w-full h-full text-[6px] text-gray-500 font-bold uppercase">
+                    {{ slot.substring(0, 2) }}
                 </span>
             </a>
 

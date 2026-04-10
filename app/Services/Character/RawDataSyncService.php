@@ -86,6 +86,17 @@ class RawDataSyncService
                 $updates,
             );
 
+            // Merge equipment into per-spec dictionary
+            if (isset($updates['bnet_equipment'])) {
+                $specName = $this->resolveActiveSpecName($updates['bnet_profile'] ?? null, $character);
+
+                if ($specName !== null) {
+                    $existingSpecs = $rawData->bnet_equipment_by_spec ?? [];
+                    $existingSpecs[$specName] = $updates['bnet_equipment'];
+                    $rawData->update(['bnet_equipment_by_spec' => $existingSpecs]);
+                }
+            }
+
             if (isset($updates['bnet_achievement_statistics'])) {
                 $this->updateVaultSnapshot($rawData, $updates['bnet_achievement_statistics'], $region);
             }
@@ -204,6 +215,29 @@ class RawDataSyncService
                 'exception' => $e->getMessage(),
             ]);
         }
+    }
+
+    private function resolveActiveSpecName(?array $bnetProfile, Character $character): ?string
+    {
+        if ($bnetProfile !== null) {
+            $specName = is_array($bnetProfile['active_spec'] ?? null)
+                ? ($bnetProfile['active_spec']['name'] ?? null)
+                : ($bnetProfile['active_spec'] ?? null);
+
+            if ($specName === null) {
+                $specName = is_array($bnetProfile['active_specialization'] ?? null)
+                    ? ($bnetProfile['active_specialization']['name'] ?? null)
+                    : ($bnetProfile['active_specialization'] ?? null);
+            }
+
+            if ($specName !== null && $specName !== '') {
+                return $specName;
+            }
+        }
+
+        $activeSpec = $character->active_spec;
+
+        return ($activeSpec !== null && $activeSpec !== '') ? $activeSpec : null;
     }
 
     private function fetchRioProfile(string $region, string $realm, string $name): ?array

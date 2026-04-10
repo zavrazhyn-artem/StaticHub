@@ -44,25 +44,38 @@ class RosterService
             $currentUserAccess = 'leader';
         }
 
-        // Pre-load main specs for all characters in this static (one query, no N+1).
+        // Pre-load all specs for all characters in this static (one query, no N+1).
         $allCharacterIds = $members->flatMap(fn (User $u) => $u->characters->pluck('id'));
-        $mainSpecRecords = CharacterStaticSpec::whereIn('character_id', $allCharacterIds)
+        $allSpecRecords = CharacterStaticSpec::whereIn('character_id', $allCharacterIds)
             ->where('static_id', $static->id)
-            ->where('is_main', true)
             ->with('specialization')
             ->get()
-            ->keyBy('character_id');
+            ->groupBy('character_id');
 
-        // Attach main_spec attribute to each character so the resource can include it.
-        $members->each(function (User $user) use ($mainSpecRecords) {
-            $user->characters->each(function ($char) use ($mainSpecRecords) {
-                $spec = $mainSpecRecords->get($char->id)?->specialization;
-                $char->setAttribute('main_spec', $spec ? [
-                    'id'       => $spec->id,
-                    'name'     => $spec->name,
-                    'role'     => $spec->role,
-                    'icon_url' => $spec->icon_url,
+        // Attach main_spec + all_specs attributes to each character.
+        $members->each(function (User $user) use ($allSpecRecords) {
+            $user->characters->each(function ($char) use ($allSpecRecords) {
+                $charSpecs = $allSpecRecords->get($char->id, collect());
+
+                $mainRecord = $charSpecs->firstWhere('is_main', true);
+                $mainSpec = $mainRecord?->specialization;
+                $char->setAttribute('main_spec', $mainSpec ? [
+                    'id'       => $mainSpec->id,
+                    'name'     => $mainSpec->name,
+                    'role'     => $mainSpec->role,
+                    'icon_url' => $mainSpec->icon_url,
                 ] : null);
+
+                $char->setAttribute('all_specs', $charSpecs
+                    ->map(fn ($record) => $record->specialization ? [
+                        'id'       => $record->specialization->id,
+                        'name'     => $record->specialization->name,
+                        'role'     => $record->specialization->role,
+                        'icon_url' => $record->specialization->icon_url,
+                    ] : null)
+                    ->filter()
+                    ->values()
+                    ->toArray());
             });
         });
 
