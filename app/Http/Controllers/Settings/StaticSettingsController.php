@@ -160,4 +160,22 @@ class StaticSettingsController extends Controller
 
         return response()->json(['success' => $success]);
     }
+
+    public function testNotificationChannel(StaticGroup $static): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $result = $this->service->executeNotificationChannelTest($static);
+
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    public function deleteNotificationChannelMessage(StaticGroup $static, string $messageId): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        $success = $this->service->executeNotificationChannelMessageDelete($static, $messageId);
+
+        return response()->json(['success' => $success]);
+    }
 }

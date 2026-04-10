@@ -15,6 +15,26 @@ class JoinStaticService
     ) {}
 
     /**
+     * Get public preview data for the join landing page (no auth required).
+     */
+    public function buildPublicPreview(string $token): array
+    {
+        $static = $this->fetchStaticByToken($token);
+        $static->loadCount('members');
+        $static->load('owner:id,battletag,avatar');
+
+        return [
+            'staticName' => $static->name,
+            'region' => strtoupper($static->region),
+            'memberCount' => $static->members_count,
+            'ownerName' => $static->owner->battletag ?? $static->owner->name,
+            'ownerAvatar' => $static->owner->avatar,
+            'raidDays' => $static->getRaidDaysArray(),
+            'token' => $token,
+        ];
+    }
+
+    /**
      * Get the data required for the join page.
      */
     public function buildJoinPayload(string $token, int $userId): array

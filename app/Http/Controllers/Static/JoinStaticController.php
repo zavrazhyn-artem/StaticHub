@@ -19,13 +19,23 @@ class JoinStaticController extends Controller
     ) {}
 
     /**
-     * Show the join page for a static group.
+     * Show public landing page for an invite link.
+     * If user is already authenticated and has statics, redirect to legacy join flow.
      */
-    public function showJoinPage(string $token): View
+    public function showLanding(string $token): View|RedirectResponse
     {
-        $data = $this->joinStaticService->buildJoinPayload($token, (int) Auth::id());
+        // If already logged in, store token and redirect to onboarding
+        if (Auth::check()) {
+            session(['pending_join_token' => $token]);
+            return redirect()->route('onboarding.index');
+        }
 
-        return view('statics.join', $data);
+        $data = $this->joinStaticService->buildPublicPreview($token);
+
+        // Store token in session so it persists through Battle.net auth
+        session(['pending_join_token' => $token]);
+
+        return view('statics.join-landing', $data);
     }
 
     /**

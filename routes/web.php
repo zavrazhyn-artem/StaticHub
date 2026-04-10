@@ -67,6 +67,8 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/statics/{static}/settings/discord/test-channel', [StaticSettingsController::class, 'testDiscordChannel'])->name('statics.settings.discord.test-channel');
     Route::delete('/statics/{static}/settings/discord/channel-message/{messageId}', [StaticSettingsController::class, 'deleteChannelMessage'])->name('statics.settings.discord.channel-message.delete');
     Route::delete('/statics/{static}/settings/discord/message/{messageId}', [StaticSettingsController::class, 'deleteWebhookMessage'])->name('statics.settings.discord.message.delete');
+    Route::post('/statics/{static}/settings/discord/test-notification-channel', [StaticSettingsController::class, 'testNotificationChannel'])->name('statics.settings.discord.test-notification-channel');
+    Route::delete('/statics/{static}/settings/discord/notification-channel-message/{messageId}', [StaticSettingsController::class, 'deleteNotificationChannelMessage'])->name('statics.settings.discord.notification-channel-message.delete');
     Route::get('/statics/{static}/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
     Route::post('/statics/{static}/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
     Route::post('/statics/{static}/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
@@ -108,6 +110,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Discord linking
+    Route::get('/discord/bot-invited', fn () => view('discord.bot-invited'))->name('discord.bot-invited');
     Route::get('/profile/discord/link', [DiscordLinkController::class, 'link'])->name('profile.discord.link');
     Route::get('/profile/discord/callback', [DiscordLinkController::class, 'callback'])->name('profile.discord.callback');
     Route::post('/profile/discord/unlink', [DiscordLinkController::class, 'unlink'])->name('profile.discord.unlink');
@@ -130,10 +133,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/sync-characters', [OnboardingController::class, 'syncCharacters'])->name('onboarding.sync-characters');
     Route::post('/onboarding/save-participation', [OnboardingController::class, 'saveParticipation'])->name('onboarding.save-participation');
 
-    // Join static (legacy link support — redirects to onboarding)
-    Route::get('/join/{token}', [JoinStaticController::class, 'showJoinPage'])->name('statics.join');
+    // Join static (authenticated — process join)
     Route::post('/join/{token}', [JoinStaticController::class, 'processJoin'])->name('statics.join.process');
 });
+
+// Join static — public landing page (no auth required)
+Route::get('/join/{token}', [JoinStaticController::class, 'showLanding'])->name('statics.join');
 
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');

@@ -22,24 +22,65 @@ class OnboardingService
 
     /**
      * Build the onboarding payload for the stepper page.
+     * If a pending join token exists, auto-join and skip to character step.
      */
     public function buildOnboardingPayload(User $user): array
     {
         $pendingJoinToken = session('pending_join_token');
-        $pendingJoinStatic = null;
 
+        // Auto-join: execute join immediately and skip to character selection
         if ($pendingJoinToken) {
-            $pendingJoinStatic = $this->resolveTokenPreview($pendingJoinToken);
+            $autoJoinResult = $this->tryAutoJoin($pendingJoinToken, $user);
+            if ($autoJoinResult) {
+                return [
+                    'onboarding' => true,
+                    'pendingJoinToken' => '',
+                    'pendingJoinStatic' => null,
+                    'autoJoinResult' => $autoJoinResult,
+                    'isGuildMaster' => false,
+                    'guildName' => null,
+                    'csrfToken' => csrf_token(),
+                ];
+            }
         }
 
         return [
             'onboarding' => true,
-            'pendingJoinToken' => $pendingJoinToken,
-            'pendingJoinStatic' => $pendingJoinStatic,
+            'pendingJoinToken' => '',
+            'pendingJoinStatic' => null,
+            'autoJoinResult' => null,
             'isGuildMaster' => $user->getGuildMasterCharacter() !== null,
             'guildName' => $user->getGuildMasterCharacter()?->guild_name ?? null,
             'csrfToken' => csrf_token(),
         ];
+    }
+
+    /**
+     * Try to auto-join a static via pending token. Returns join result or null on failure.
+     */
+    private function tryAutoJoin(string $token, User $user): ?array
+    {
+        try {
+            $result = $this->executeJoin($token, $user);
+
+            return [
+                'static' => [
+                    'id' => $result['static']->id,
+                    'name' => $result['static']->name,
+                    'region' => $result['static']->region,
+                ],
+                'characterData' => $result['characterData'],
+            ];
+        } catch (\Exception $e) {
+            Log::warning('Auto-join failed, falling back to manual onboarding', [
+                'user_id' => $user->id,
+                'token' => $token,
+                'error' => $e->getMessage(),
+            ]);
+            session()->forget('pending_join_token');
+
+            return null;
+        }
     }
 
     /**

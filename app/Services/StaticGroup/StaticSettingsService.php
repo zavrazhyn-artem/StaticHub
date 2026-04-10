@@ -28,7 +28,7 @@ class StaticSettingsService
         $timezones = timezone_identifiers_list();
 
         $clientId    = config('services.discord.client_id');
-        $redirectUri = urlencode(config('services.discord.redirect', ''));
+        $redirectUri = urlencode(route('discord.bot-invited'));
         $discordInviteUrl = "https://discord.com/oauth2/authorize?client_id={$clientId}&permissions=117760&response_type=code&redirect_uri={$redirectUri}&integration_type=0&scope=bot+applications.commands+guilds";
 
         $scheduleData = [
@@ -58,7 +58,7 @@ class StaticSettingsService
         $context = $this->resolveDiscordGuildContext($static);
 
         $clientId    = config('services.discord.client_id');
-        $redirectUri = urlencode(config('services.discord.redirect', ''));
+        $redirectUri = urlencode(route('discord.bot-invited'));
         $discordInviteUrl = "https://discord.com/oauth2/authorize?client_id={$clientId}&permissions=117760&response_type=code&redirect_uri={$redirectUri}&integration_type=0&scope=bot+applications.commands+guilds";
 
         $webhookChannel = null;
@@ -261,6 +261,24 @@ class StaticSettingsService
         return $this->discordMessageService->deleteChannelMessage($static->discord_channel_id, $messageId);
     }
 
+    public function executeNotificationChannelTest(StaticGroup $static): array
+    {
+        if (empty($static->notification_channel_id)) {
+            return ['success' => false, 'error' => 'No notification channel configured.'];
+        }
+
+        return $this->discordMessageService->sendTestMessageToChannel($static->notification_channel_id);
+    }
+
+    public function executeNotificationChannelMessageDelete(StaticGroup $static, string $messageId): bool
+    {
+        if (empty($static->notification_channel_id)) {
+            return false;
+        }
+
+        return $this->discordMessageService->deleteChannelMessage($static->notification_channel_id, $messageId);
+    }
+
     public function executeWebhookTest(StaticGroup $static): array
     {
         $messageId = $this->discordWebhookService->sendTestMessage($static);
@@ -301,10 +319,6 @@ class StaticSettingsService
             : [];
 
         $discordGuildId = $static->discord_guild_id;
-
-        if (empty($discordGuildId) && count($botGuilds) === 1) {
-            $discordGuildId = $botGuilds[0]['id'];
-        }
 
         $discordChannels = [];
         $discordRoles = [];

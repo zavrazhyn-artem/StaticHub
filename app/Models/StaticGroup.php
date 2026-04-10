@@ -98,6 +98,7 @@ class StaticGroup extends Model
         'raid_end_time',
         'timezone',
         'discord_channel_id',
+        'notification_channel_id',
         'discord_guild_id',
         'discord_webhook_url',
         'automation_settings',

@@ -50,17 +50,23 @@ class DiscordApiService
 
     public function getGuilds(): array
     {
-        return $this->makeRequest('GET', '/users/@me/guilds') ?? [];
+        $result = $this->makeRequest('GET', '/users/@me/guilds');
+
+        return is_array($result) ? $result : [];
     }
 
     public function getChannels(string $guildId): array
     {
-        return $this->makeRequest('GET', "/guilds/{$guildId}/channels") ?? [];
+        $result = $this->makeRequest('GET', "/guilds/{$guildId}/channels");
+
+        return is_array($result) ? $result : [];
     }
 
     public function getRoles(string $guildId): array
     {
-        return $this->makeRequest('GET', "/guilds/{$guildId}/roles") ?? [];
+        $result = $this->makeRequest('GET', "/guilds/{$guildId}/roles");
+
+        return is_array($result) ? $result : [];
     }
 
     public function getGuildMember(string $guildId, string $userId): ?array
@@ -72,7 +78,9 @@ class DiscordApiService
 
     public function sendMessage(string $channelId, array $payload): ?array
     {
-        return $this->makeRequest('POST', "/channels/{$channelId}/messages", $payload);
+        $result = $this->makeRequest('POST', "/channels/{$channelId}/messages", $payload);
+
+        return is_array($result) ? $result : null;
     }
 
     /**

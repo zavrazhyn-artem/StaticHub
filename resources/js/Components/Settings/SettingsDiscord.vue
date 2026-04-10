@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import SettingsTabs from './SettingsTabs.vue';
 import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
@@ -15,14 +15,18 @@ const props = defineProps({
     discordGuildId:   { type: String,  default: '' },
     discordChannelId: { type: String,  default: '' },
     discordRoleId:    { type: String,  default: '' },
+    notificationMethod:   { type: String,  default: 'webhook' },
+    notificationChannelId:{ type: String,  default: '' },
     webhookUrl:       { type: String,  default: '' },
     webhookChannel:   { type: Object,  default: null },
     webhookMuted:     { type: Boolean, default: false },
     updateUrl:        { type: String,  required: true },
     testUrl:                { type: String,  required: true },
     testChannelUrl:         { type: String,  required: true },
+    testNotificationChannelUrl:    { type: String,  required: true },
     deleteMessageUrl:       { type: String,  required: true },
     deleteChannelMessageUrl:{ type: String,  required: true },
+    deleteNotificationChannelMessageUrl: { type: String, required: true },
     inviteUrl:        { type: String,  required: true },
     profileTabUrl:    { type: String,  required: true },
     scheduleTabUrl:   { type: String,  required: true },
@@ -37,10 +41,38 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
 const selectedGuildId   = ref(props.discordGuildId);
 const selectedChannelId = ref(props.discordChannelId);
 const selectedRoleId    = ref(props.discordRoleId);
+const notifMethod              = ref(props.notificationMethod);
+const selectedNotifChannelId   = ref(props.notificationChannelId);
 const webhookUrlInput   = ref(props.webhookUrl);
 const resolvedChannel   = ref(props.webhookChannel);
 const notifMuted        = ref(props.webhookMuted);
 const showHelpModal     = ref(false);
+let inviteCheckInterval = null;
+
+function openInvitePopup() {
+    const popup = window.open(props.inviteUrl, 'discord_invite', 'width=500,height=800');
+    if (!popup) return;
+
+    clearInterval(inviteCheckInterval);
+    inviteCheckInterval = setInterval(() => {
+        if (popup.closed) {
+            clearInterval(inviteCheckInterval);
+            window.location.reload();
+            return;
+        }
+        try {
+            if (popup.location.origin === window.location.origin) {
+                popup.close();
+                clearInterval(inviteCheckInterval);
+                window.location.reload();
+            }
+        } catch {
+            // cross-origin — still on Discord, keep waiting
+        }
+    }, 500);
+}
+
+onBeforeUnmount(() => clearInterval(inviteCheckInterval));
 
 const channels        = ref([...props.discordChannels]);
 const roles           = ref([...props.discordRoles]);
@@ -62,6 +94,12 @@ const channelTestState     = ref('idle'); // idle | loading | success | error
 const channelTestMessageId = ref(null);
 const channelTestError     = ref('');
 const deletingChannelMsg   = ref(false);
+
+// Test notification channel (bot API)
+const notifChannelTestState     = ref('idle');
+const notifChannelTestMessageId = ref(null);
+const notifChannelTestError     = ref('');
+const deletingNotifChannelMsg   = ref(false);
 
 // Toast
 const toastShow    = ref(false);
@@ -155,12 +193,29 @@ watch(notifMuted, (val) => {
     saveField({ 'automation_settings[webhook_muted]': val });
 });
 
+watch(notifMethod, (val) => {
+    if (val === 'webhook') {
+        if (!webhookUrlInput.value) return;
+        saveField({ discord_webhook_url: webhookUrlInput.value, 'automation_settings[notification_method]': 'webhook' });
+    } else {
+        if (!selectedNotifChannelId.value) return;
+        saveField({ notification_channel_id: selectedNotifChannelId.value, 'automation_settings[notification_method]': 'channel' });
+    }
+});
+
+watch(selectedNotifChannelId, (val) => {
+    if (!selectedGuildId.value) return;
+    saveField({ notification_channel_id: val || null, 'automation_settings[notification_method]': 'channel' });
+});
+
 // --- Webhook URL debounce ---
 let webhookDebounce = null;
 watch(webhookUrlInput, (val) => {
     resolvedChannel.value = null;
     clearTimeout(webhookDebounce);
-    webhookDebounce = setTimeout(() => saveField({ discord_webhook_url: val || null }), 800);
+    webhookDebounce = setTimeout(() => {
+        saveField({ discord_webhook_url: val || null, 'automation_settings[notification_method]': 'webhook' });
+    }, 800);
 });
 
 // --- Test webhook (always works, ignores mute) ---
@@ -273,6 +328,61 @@ async function deleteChannelTestMessage() {
     }
 }
 
+// --- Test notification channel (bot API) ---
+async function testNotificationChannel() {
+    notifChannelTestState.value     = 'loading';
+    notifChannelTestMessageId.value = null;
+    notifChannelTestError.value     = '';
+
+    try {
+        const res  = await fetch(props.testNotificationChannelUrl, {
+            method:  'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            notifChannelTestState.value     = 'success';
+            notifChannelTestMessageId.value = data.message_id || null;
+        } else {
+            notifChannelTestState.value = 'error';
+            notifChannelTestError.value = data.error || __('Unknown error');
+            setTimeout(() => { notifChannelTestState.value = 'idle'; notifChannelTestError.value = ''; }, 8000);
+        }
+    } catch {
+        notifChannelTestState.value = 'error';
+        notifChannelTestError.value = __('Network error. Please try again.');
+        setTimeout(() => { notifChannelTestState.value = 'idle'; notifChannelTestError.value = ''; }, 8000);
+    }
+}
+
+async function deleteNotifChannelTestMessage() {
+    if (!notifChannelTestMessageId.value) return;
+    deletingNotifChannelMsg.value = true;
+
+    const url = props.deleteNotificationChannelMessageUrl.replace(':messageId', notifChannelTestMessageId.value);
+
+    try {
+        const res  = await fetch(url, {
+            method:  'DELETE',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            notifChannelTestMessageId.value = null;
+            notifChannelTestState.value     = 'idle';
+            showToast(__('Test message deleted.'));
+        } else {
+            showToast(__('Could not delete the message.'), true);
+        }
+    } catch {
+        showToast(__('Could not delete the message.'), true);
+    } finally {
+        deletingNotifChannelMsg.value = false;
+    }
+}
+
 const noChannelsError = () =>
     selectedGuildId.value &&
     !channelsLoading.value &&
@@ -364,13 +474,8 @@ const noChannelsError = () =>
                             :empty-text="__('No servers found.')"
                             accent-color="#5865F2"
                         />
-                        <div v-else>
-                            <input type="text" :value="selectedGuildId" placeholder="e.g. 123456789012345678"
-                                class="block w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all outline-none">
-                            <p class="mt-1 text-[9px] text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px]">warning</span>
-                                {{ __('Bot is not in any servers or token is missing.') }}
-                            </p>
+                        <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic min-h-[48px] flex items-center">
+                            {{ __('Invite the bot to a server first') }}
                         </div>
                         <p v-if="botGuilds.length" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
                     </div>
@@ -378,11 +483,12 @@ const noChannelsError = () =>
                     <!-- Invite bot -->
                     <div class="space-y-2">
                         <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest invisible select-none">{{ __('Bot') }}</label>
-                        <a :href="inviteUrl" target="_blank" rel="noopener noreferrer"
+                        <button type="button"
+                           @click="openInvitePopup"
                            class="flex w-full justify-center items-center gap-2 py-3 bg-surface-container-highest border border-white/5 hover:border-[#5865F2]/50 hover:bg-[#5865F2]/10 text-on-surface-variant hover:text-[#5865F2] rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest transition-all">
                             <span class="material-symbols-outlined text-sm">smart_toy</span>
                             {{ __('Invite Bot to Server') }}
-                        </a>
+                        </button>
                         <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('The bot must be in your server to manage channels and roles.') }}</p>
                     </div>
                 </div>
@@ -550,98 +656,208 @@ const noChannelsError = () =>
                 <!-- Body — dimmed when muted -->
                 <div :class="['space-y-3 transition-opacity duration-200', notifMuted ? 'opacity-40 pointer-events-none select-none' : '']">
 
-                    <!-- Two columns, equal height -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-stretch">
-
-                        <!-- Left: webhook URL input with integrated test button -->
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Webhook URL') }}</label>
-                                <template v-if="fieldIcon('discord_webhook_url')">
-                                    <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_webhook_url').cls]">{{ fieldIcon('discord_webhook_url').icon }}</span>
-                                </template>
-                            </div>
-
-                            <!-- Input with button inside — flex-1 so it stretches to match right column -->
-                            <div class="relative group flex-1 flex items-center">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-                                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#5865F2] transition-colors text-lg">link</span>
-                                </span>
-                                <input
-                                    v-model="webhookUrlInput"
-                                    type="url"
-                                    placeholder="https://discord.com/api/webhooks/..."
-                                    class="block w-full h-full min-h-[48px] pl-12 pr-[88px] py-2 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-xs font-bold text-white tracking-wider focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all outline-none placeholder:text-on-surface-variant/30"
-                                />
-                                <!-- Integrated send button -->
-                                <button
-                                    type="button"
-                                    :disabled="!webhookUrlInput || testState === 'loading'"
-                                    @click="testWebhook"
-                                    :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed',
-                                             testState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
-                                             testState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
-                                                                       'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
-                                    <span :class="['material-symbols-outlined text-base leading-none', testState === 'loading' ? 'animate-spin' : '']">
-                                        {{ testState === 'loading' ? 'sync' : testState === 'success' ? 'check_circle' : testState === 'error' ? 'error' : 'send' }}
-                                    </span>
-                                    <span>{{ __('Test') }}</span>
-                                </button>
-                            </div>
-
-                            <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
-                                {{ __('Paste the webhook URL copied from Discord.') }}
-                            </p>
-                        </div>
-
-                        <!-- Right: resolved channel display -->
-                        <div class="flex flex-col gap-2">
-                            <div>
-                                <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Posts To') }}</label>
-                            </div>
-
-                            <!-- Channel block — flex-1 to match input height -->
-                            <div class="flex-1">
-                                <!-- Resolved -->
-                                <div v-if="resolvedChannel"
-                                     class="flex items-center gap-3 h-full min-h-[48px] px-4 py-2 bg-surface-container-highest border border-[#5865F2]/20 rounded-lg">
-                                    <span class="material-symbols-outlined text-[#5865F2] text-lg flex-shrink-0">tag</span>
-                                    <p class="font-headline text-sm font-bold text-white truncate"># {{ resolvedChannel.channel_name }}</p>
-                                </div>
-                                <!-- Not configured -->
-                                <div v-else
-                                     class="flex items-center gap-3 h-full min-h-[48px] px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg">
-                                    <span class="material-symbols-outlined text-on-surface-variant/40 text-lg flex-shrink-0">tag</span>
-                                    <p class="font-headline text-xs font-bold text-on-surface-variant/40 italic tracking-widest">
-                                        {{ webhookUrlInput ? __('Verifying...') : __('No channel configured') }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
-                                {{ __('Resolved from the webhook URL after saving.') }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Delete test message banner -->
-                    <div v-if="testMessageId"
-                         class="flex items-center gap-3 p-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
-                        <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
-                        <p class="text-[10px] text-on-surface-variant font-medium flex-1">
-                            {{ __('Test message sent! You can delete it from Discord now.') }}
-                        </p>
-                        <button
-                            type="button"
-                            :disabled="deletingMsg"
-                            @click="deleteTestMessage"
-                            class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
-                            <span :class="['material-symbols-outlined text-sm', deletingMsg ? 'animate-spin' : '']">
-                                {{ deletingMsg ? 'sync' : 'delete' }}
-                            </span>
-                            {{ __('Delete message') }}
+                    <!-- ── Delivery method switch ── -->
+                    <div class="flex items-center gap-1 p-1 bg-surface-container-highest rounded-lg w-full md:w-[calc(50%-0.5rem)]">
+                        <button type="button"
+                                @click="notifMethod = 'channel'"
+                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-headline text-[10px] font-bold uppercase tracking-widest transition-all',
+                                         notifMethod === 'channel'
+                                           ? 'bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30 shadow-sm'
+                                           : 'text-on-surface-variant hover:text-white border border-transparent']">
+                            <span class="material-symbols-outlined text-sm">smart_toy</span>
+                            {{ __('Bot Channel') }}
                         </button>
+                        <button type="button"
+                                @click="notifMethod = 'webhook'"
+                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-headline text-[10px] font-bold uppercase tracking-widest transition-all',
+                                         notifMethod === 'webhook'
+                                           ? 'bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30 shadow-sm'
+                                           : 'text-on-surface-variant hover:text-white border border-transparent']">
+                            <span class="material-symbols-outlined text-sm">link</span>
+                            {{ __('Webhook') }}
+                        </button>
+                        <template v-if="fieldIcon('automation_settings[notification_method]')">
+                            <span :class="['material-symbols-outlined text-sm ml-1', fieldIcon('automation_settings[notification_method]').cls]">
+                                {{ fieldIcon('automation_settings[notification_method]').icon }}
+                            </span>
+                        </template>
                     </div>
+
+                    <!-- ── Channel mode ── -->
+                    <template v-if="notifMethod === 'channel'">
+                        <div>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notification Channel') }}</label>
+                                    <template v-if="fieldIcon('notification_channel_id')">
+                                        <span :class="['material-symbols-outlined text-sm', fieldIcon('notification_channel_id').cls]">{{ fieldIcon('notification_channel_id').icon }}</span>
+                                    </template>
+                                </div>
+                                <div :class="['relative', selectedNotifChannelId ? 'notif-channel-test-group' : '']">
+                                    <SearchableSelect
+                                        v-if="selectedGuildId"
+                                        v-model="selectedNotifChannelId"
+                                        :options="channels"
+                                        input-name="notification_channel_id"
+                                        icon="chat"
+                                        prefix="# "
+                                        :placeholder="channelsLoading ? __('Loading channels...') : __('Select a channel...')"
+                                        :search-placeholder="__('Search channel...')"
+                                        :empty-text="__('No channels found.')"
+                                        :loading="channelsLoading"
+                                        :disabled="noChannelsError()"
+                                        accent-color="#5865F2"
+                                        drop-up
+                                    />
+                                    <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
+                                        {{ __('Select Server first...') }}
+                                    </div>
+                                    <button
+                                        v-if="selectedNotifChannelId"
+                                        type="button"
+                                        :disabled="notifChannelTestState === 'loading'"
+                                        @click="testNotificationChannel"
+                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
+                                                 notifChannelTestState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
+                                                 notifChannelTestState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
+                                                                                       'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
+                                        <span :class="['material-symbols-outlined text-base leading-none', notifChannelTestState === 'loading' ? 'animate-spin' : '']">
+                                            {{ notifChannelTestState === 'loading' ? 'sync' : notifChannelTestState === 'success' ? 'check_circle' : notifChannelTestState === 'error' ? 'error' : 'send' }}
+                                        </span>
+                                        <span>{{ __('Test') }}</span>
+                                    </button>
+                                </div>
+                                <p v-if="!selectedGuildId" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                    {{ __('Select a server above to see available channels.') }}
+                                </p>
+                                <p v-else-if="noChannelsError()" class="text-[9px] text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[11px]">error</span>
+                                    {{ __('Bot has no access or no text channels found in this server.') }}
+                                </p>
+                                <p v-else class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                    {{ __('Service notifications will be posted to this channel via bot.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Notification channel test success banner -->
+                        <div v-if="notifChannelTestMessageId"
+                             class="flex items-center gap-3 p-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
+                            <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
+                            <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                                {{ __('Test message sent! Check your Discord channel.') }}
+                            </p>
+                            <button
+                                type="button"
+                                :disabled="deletingNotifChannelMsg"
+                                @click="deleteNotifChannelTestMessage"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                                <span :class="['material-symbols-outlined text-sm', deletingNotifChannelMsg ? 'animate-spin' : '']">
+                                    {{ deletingNotifChannelMsg ? 'sync' : 'delete' }}
+                                </span>
+                                {{ __('Delete message') }}
+                            </button>
+                        </div>
+
+                        <!-- Notification channel test error banner -->
+                        <div v-if="notifChannelTestState === 'error' && notifChannelTestError"
+                             class="flex items-center gap-3 p-4 rounded-lg bg-error-neon/5 border border-error-neon/20">
+                            <span class="material-symbols-outlined text-error-neon text-lg flex-shrink-0">error</span>
+                            <div class="flex-1">
+                                <p class="text-[10px] font-headline font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
+                                <p class="text-[10px] text-on-surface-variant font-medium mt-1">{{ notifChannelTestError }}</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- ── Webhook mode ── -->
+                    <template v-else>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-stretch">
+                            <!-- Left: webhook URL input with integrated test button -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Webhook URL') }}</label>
+                                    <template v-if="fieldIcon('discord_webhook_url')">
+                                        <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_webhook_url').cls]">{{ fieldIcon('discord_webhook_url').icon }}</span>
+                                    </template>
+                                </div>
+
+                                <div class="relative group flex-1 flex items-center">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                                        <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#5865F2] transition-colors text-lg">link</span>
+                                    </span>
+                                    <input
+                                        v-model="webhookUrlInput"
+                                        type="url"
+                                        placeholder="https://discord.com/api/webhooks/..."
+                                        class="block w-full h-full min-h-[48px] pl-12 pr-[88px] py-2 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-xs font-bold text-white tracking-wider focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all outline-none placeholder:text-on-surface-variant/30"
+                                    />
+                                    <button
+                                        type="button"
+                                        :disabled="!webhookUrlInput || testState === 'loading'"
+                                        @click="testWebhook"
+                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                                 testState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
+                                                 testState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
+                                                                           'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
+                                        <span :class="['material-symbols-outlined text-base leading-none', testState === 'loading' ? 'animate-spin' : '']">
+                                            {{ testState === 'loading' ? 'sync' : testState === 'success' ? 'check_circle' : testState === 'error' ? 'error' : 'send' }}
+                                        </span>
+                                        <span>{{ __('Test') }}</span>
+                                    </button>
+                                </div>
+
+                                <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                    {{ __('Paste the webhook URL copied from Discord.') }}
+                                </p>
+                            </div>
+
+                            <!-- Right: resolved channel display -->
+                            <div class="flex flex-col gap-2">
+                                <div>
+                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Posts To') }}</label>
+                                </div>
+
+                                <div class="flex-1">
+                                    <div v-if="resolvedChannel"
+                                         class="flex items-center gap-3 h-full min-h-[48px] px-4 py-2 bg-surface-container-highest border border-[#5865F2]/20 rounded-lg">
+                                        <span class="material-symbols-outlined text-[#5865F2] text-lg flex-shrink-0">tag</span>
+                                        <p class="font-headline text-sm font-bold text-white truncate"># {{ resolvedChannel.channel_name }}</p>
+                                    </div>
+                                    <div v-else
+                                         class="flex items-center gap-3 h-full min-h-[48px] px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg">
+                                        <span class="material-symbols-outlined text-on-surface-variant/40 text-lg flex-shrink-0">tag</span>
+                                        <p class="font-headline text-xs font-bold text-on-surface-variant/40 italic tracking-widest">
+                                            {{ webhookUrlInput ? __('Verifying...') : __('No channel configured') }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                    {{ __('Resolved from the webhook URL after saving.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Delete test message banner -->
+                        <div v-if="testMessageId"
+                             class="flex items-center gap-3 p-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
+                            <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
+                            <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                                {{ __('Test message sent! You can delete it from Discord now.') }}
+                            </p>
+                            <button
+                                type="button"
+                                :disabled="deletingMsg"
+                                @click="deleteTestMessage"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                                <span :class="['material-symbols-outlined text-sm', deletingMsg ? 'animate-spin' : '']">
+                                    {{ deletingMsg ? 'sync' : 'delete' }}
+                                </span>
+                                {{ __('Delete message') }}
+                            </button>
+                        </div>
+                    </template>
 
                 </div>
             </div>
@@ -652,13 +868,15 @@ const noChannelsError = () =>
 
 <style scoped>
 /* When test button is overlaid, adjust the SearchableSelect trigger */
-.channel-test-group :deep(> div > div:first-child) {
+.channel-test-group :deep(> div > div:first-child),
+.notif-channel-test-group :deep(> div > div:first-child) {
     padding-right: 88px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
 /* Shift the clear/chevron icons left so they don't overlap the test button */
-.channel-test-group :deep(> div > div:first-child > span:last-of-type) {
+.channel-test-group :deep(> div > div:first-child > span:last-of-type),
+.notif-channel-test-group :deep(> div > div:first-child > span:last-of-type) {
     right: 96px;
 }
 </style>

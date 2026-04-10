@@ -110,6 +110,7 @@ const { __ } = useTranslation();
 const props = defineProps({
     pendingJoinToken: { type: String, default: '' },
     pendingJoinStatic: { type: Object, default: null },
+    autoJoinResult: { type: Object, default: null },
     isGuildMaster: { type: Boolean, default: false },
     guildName: { type: String, default: '' },
     csrfToken: { type: String, required: true },
@@ -122,18 +123,21 @@ const steps = [
     { label: 'Done', icon: 'check_circle' },
 ];
 
-const currentStep = ref(props.pendingJoinToken ? 1 : 0);
+// If auto-join succeeded, skip directly to character selection (step 2)
+const hasAutoJoin = !!props.autoJoinResult;
+
+const currentStep = ref(hasAutoJoin ? 2 : (props.pendingJoinToken ? 1 : 0));
 const choice = ref(props.pendingJoinToken ? 'join' : null);
 const showHelp = ref(false);
 const showInviteModal = ref(false);
 const inviteCode = ref('');
 const transitionName = ref('slide-left');
 
-// Data passed between steps
-const characters = ref([]);
-const specializations = ref([]);
-const staticId = ref(null);
-const staticName = ref('');
+// Data passed between steps — pre-fill from auto-join if available
+const characters = ref(hasAutoJoin ? props.autoJoinResult.characterData.characters : []);
+const specializations = ref(hasAutoJoin ? props.autoJoinResult.characterData.specializations : []);
+const staticId = ref(hasAutoJoin ? props.autoJoinResult.static.id : null);
+const staticName = ref(hasAutoJoin ? props.autoJoinResult.static.name : '');
 
 function stepCircleClass(index) {
     if (index < currentStep.value) {

@@ -15,6 +15,7 @@ const props = defineProps({
     accentColor:       { type: String, default: '#a78bfa' }, // matches --color-primary
     useSearch:         { type: Boolean, default: true },
     compact:           { type: Boolean, default: false },
+    dropUp:            { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -39,12 +40,17 @@ const filtered = computed(() => {
 function updateDropdownPosition() {
     if (!triggerRef.value) return;
     const rect = triggerRef.value.getBoundingClientRect();
-    dropdownStyle.value = {
+    const style = {
         position: 'fixed',
-        top: `${rect.bottom + 8}px`,
         left: `${rect.left}px`,
         width: `${rect.width}px`,
     };
+    if (props.dropUp) {
+        style.bottom = `${window.innerHeight - rect.top + 8}px`;
+    } else {
+        style.top = `${rect.bottom + 8}px`;
+    }
+    dropdownStyle.value = style;
 }
 
 const toggle = () => {
@@ -90,7 +96,7 @@ defineExpose({ close });
             @click="toggle"
             class="relative w-full bg-surface-container-highest border border-white/5 font-headline font-bold tracking-widest transition-all flex items-center justify-between"
             :class="[
-                compact ? 'rounded pl-6 pr-5 py-1 text-[9px]' : 'rounded-lg pl-10 pr-8 py-3 text-sm',
+                compact ? 'rounded pl-6 pr-5 py-1 text-[9px]' : 'rounded-lg pl-10 pr-8 py-3 text-sm min-h-[48px]',
                 loading || disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : 'cursor-pointer hover:border-white/20',

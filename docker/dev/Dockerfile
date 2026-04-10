@@ -42,4 +42,6 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
 COPY docker/production/worker/supervisord.conf /etc/supervisor/conf.d/worker.conf
 
+COPY docker/dev/php-dev.ini /usr/local/etc/php/conf.d/zz-dev.ini
+
 WORKDIR /var/www/html
