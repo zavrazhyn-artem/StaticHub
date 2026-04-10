@@ -413,6 +413,182 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Boss room map images for the raid planner
+    |--------------------------------------------------------------------------
+    | Keyed by encounter slug (Str::slug of boss name).
+    | Each entry has a list of map variants.
+    */
+    /*
+    |--------------------------------------------------------------------------
+    | Encounter boss data for the raid planner
+    |--------------------------------------------------------------------------
+    | portraits: NPC IDs (first = main boss portrait)
+    | abilities: spell icon filenames used in encounter
+    */
+    'encounter_bosses' => [
+        'imperator-averzian' => [
+            'portraits' => [137457, 136444, 137402, 129818, 75493, 137668, 138029],
+            'abilities' => [
+                'spell_shadow_antishadow', 'ability_creature_cursed_03', 'inv_soulbarrier',
+                'spell_fire_twilightflamebolt', 'spell_shadow_summonvoidwalker',
+                'spell_holy_circleofrenewal_shadow', 'sha_ability_rogue_envelopingshadows_nightborne',
+                'ability_butcher_gushingwounds', 'inv_cosmicvoid_buff', 'spell_arcane_arcaneresilience',
+                'ability_mage_incantersabsorbtion', 'spell_arcane_arcanetorrent', 'spell_priest_void-blast',
+                'ability_priest_voidentropy', 'inv_nullstone_void', 'spell_arcane_arcanepotency_nightborne',
+                'achievement_boss_triumvirate_voidbrokenbrute',
+            ],
+        ],
+        'vorasius' => [
+            'portraits' => [131605, 128548],
+            'abilities' => [
+                'inv_cosmicvoid_missile', 'inv_voidcreepermount_blue', 'ability_argus_soulburst',
+                'inv_cosmicvoid_nova', 'inv_misc_rylakclaw', 'ability_earthen_pillar',
+                'inv_10_enchanting_crystal_color3', 'ability_racial_flayer', 'spell_nature_earthquake',
+                'inv_misc_bone_humanskull_01', 'spell_fire_twilightflamebreath', 'inv_cosmicvoid_groundsate',
+            ],
+        ],
+        'fallen-king-salhadaar' => [
+            'portraits' => [131634, 139277, 139278],
+            'abilities' => [
+                'inv_112_raiddimensius_gravity', 'inv_cosmicvoid_wave', 'inv_enchant_essencecosmicgreater',
+                'inv_112_etherealwraps_empowered_blue', 'inv_112_raiddimensius_supernova',
+                'inv_cosmicvoid_groundsate', 'inv_cosmicvoid_beam', 'inv_mace_2h_etherealking_d_01',
+                'spell_priest_mindspike', 'inv_112_raidtrinkets_netheroverlaymatrix', 'inv_netherportal',
+                'inv_cosmicvoid_debuff', 'inv_artifact_powerofthedarkside', 'inv_cosmicvoid_orb',
+                'inv_cosmicvoid_missile', 'spell_shadow_twistedfaith',
+            ],
+        ],
+        'vaelgor-ezzorak' => [
+            'portraits' => [131632, 131633],
+            'abilities' => [
+                'ability_rogue_envelopingshadows', 'ability_ironmaidens_convulsiveshadows',
+                'warlock_curse_shadow', 'warlock_curse_shadow_aura', 'spell_priest_void-blast',
+                'ability_priest_surgeofdarkness', 'inv12_ability_priest_voidvolley', 'inv_icon_wing07c',
+                'ability_racial_tailswipe', 'inv_cosmicvoid_orb', 'inv_cosmicvoid_missile',
+                'inv_cosmicvoid_nova', 'inv_cosmicvoid_debuff', 'inv_nullstone_void',
+                'inv_cosmicvoid_groundsate', 'inv_misc_rubysanctum4', 'inv_10_skinning_dragonscales_void',
+                'inv_misc_head_dragon_black', 'inv_cosmicdragonmount', 'inv_120_raid_voidspire_dragonduo',
+                'ability_warrior_focusedrage', 'inv_cosmicvoid_buff',
+                'inv_ability_voidweaverpriest_entropicrift', 'spell_holy_blessedresillience',
+                'spell_nzinsanity_chasedbyshadows', 'sha_ability_rogue_sturdyrecuperate_nightborne',
+                'spell_holy_searinglightpriest',
+            ],
+        ],
+        'lightblinded-vanguard' => [
+            'portraits' => [131523, 131501, 131527],
+            'abilities' => [
+                'spell_holy_sealofwrath', 'spell_holy_innerfire', 'spell_paladin_executionsentence',
+                'spell_holy_removecurse', 'ability_bastion_paladin', 'ability_paladin_divinestorm',
+                'ability_paladin_judgementred', 'spell_paladin_templarsverdict', 'spell_holy_devotionaura',
+                'inv_ability_paladin_divinetoll', 'spell_holy_avengersshield', 'spell_holy_auramastery',
+                'ability_paladin_judgementblue', 'ability_paladin_shieldofvengeance', 'spell_holy_silence',
+                'inv_ability_holyfire_debuff', 'inv_ability_holyfire_buff', 'inv_ability_holyfire_missile',
+                'ability_paladin_blessedmending', 'spell_holy_searinglight', 'spell_holy_crusade',
+            ],
+        ],
+        'crown-of-the-cosmos' => [
+            'portraits' => [129430, 92689, 131373, 136883, 136680, 124154, 124152, 124155],
+            'abilities' => [
+                'inv_ammo_arrow_03', 'ability_monk_forcesphere', 'inv_shadowelementalmount',
+                'inv_artifact_powerofthedarkside', 'inv_nullstone_void', 'inv_icon_shadowcouncilorb_purple',
+                'inv_cosmicvoid_groundsate', 'spell_priest_burningwill_shadow', 'ability_creature_disease_05',
+                'ability_warlock_voidzone', 'ability_priest_surgeofdarkness', 'ability_warlock_soulswap',
+                'inv_elemental_primal_shadow', 'spell_priest_divinestar_shadow', 'ability_shootwand',
+                'inv_enchant_voidsphere', 'ability_warlock_burningembersblue', 'spell_holy_hopeandgrace',
+                'inv_ammo_arrow_02', 'ability_ironmaidens_convulsiveshadows', 'inv_cosmicvoid_debuff',
+                'inv_cosmicvoid_missile', 'spell_priest_void-flay', 'inv_cosmicvoid_nova',
+                'inv_cosmicvoid_buff', 'spell_priest_mindspike', 'inv_ability_voidweaverpriest_entropicrift',
+                'inv_cosmicvoid_orb', 'spell_warlock_demonsoul', 'spell_holy_circleofrenewal_shadow',
+                'inv_icon_feather01d', 'inv_azeritefireball', 'ability_warlock_fireandbrimstonegreen',
+                'inv__azerite-empowered-state', 'inv__azerite-area-denial', 'ability_druid_challangingroar',
+                'ability_golemthunderclap', 'spell_shadow_deathscream', 'inv__azerite-explosion',
+                'spell_shadow_lifedrain', 'ability_racial_cannibalize', 'sha_spell_warlock_demonsoul',
+                'spell_azerite_essence_16', 'spell_azerite_essence01', 'inv_ability_poison_orb',
+                'spell_druid_bloodythrash', 'ability_earthen_azeritesurge', 'ability_warrior_shieldbreak',
+                'ability_warrior_endlessrage', 'spell_azerite_essence02', 'ability_earthen_pillar',
+                'spell_nature_elementalshields',
+            ],
+        ],
+        'chimaerus-the-undreamt-god' => [
+            'portraits' => [131605],
+            'abilities' => [],
+        ],
+        'beloren-child-of-alar' => [
+            'portraits' => [130007, 128558, 128559],
+            'abilities' => [
+                'inv_darkwellphoenixmount', 'inv_icon_feather01c', 'inv_icon_feather01d',
+                'inv_ridingphoenix2', 'inv_misc_pheonixpet_01', 'inv_phoenix2pet_yellow',
+                'inv_ability_holyfire_groundstate', 'spell_holy_holybolt', 'inv_ability_holyfire_nova',
+                'inv_misc_herb_flamecap', 'inv_phoenix2pet', 'inv_cosmicvoid_groundsate',
+                'inv_cosmicvoid_orb', 'inv_cosmicvoid_nova', 'spell_holy_summonlightwell',
+                'inv_ability_holyfire_orb', 'inv_nullstone_cosmicvoid', 'inv__azerite-explosion',
+                'spell_holy_serendipity', 'ability_priest_cascade', 'ability_priest_cascade_shadow',
+                'ability_priest_innerlightandshadow', 'spell_frost_manaburn', 'inv_ability_holyfire_buff',
+                'inv_cosmicvoid_buff', 'ability_evoker_azurestrike', 'inv_ability_holyfire_missile',
+                'inv_cosmicvoid_missile', 'inv_phoenix2mount_blue', 'inv_enchanting_dust',
+                'spell_azerite_essence06',
+            ],
+        ],
+        'midnight-falls' => [
+            'portraits' => [129561, 136356, 136357, 138946],
+            'abilities' => [
+                'inv_120_raid_marchonqueldanas_lura', 'inv_10_inscription_vantusrune_color1',
+                'inv_11_0_arathordungeon_bell_color4', 'inv_112_raiddimensius_supernova',
+                'inv_112_raidtrinkets_voidprism', 'inv_shield_1h_etherealraid_d_01', 'inv_pet_naaru',
+                'inv_ability_spellslingermage_splintersblue', 'inv_elemental_crystal_fire',
+                'spell_shadow_psychicscream', 'inv_jewelcrafting_dawnstone_02',
+                'spell_holy_powerwordbarrier', 'spell_holy_purifyingpower', 'inv_ability_holyfire_nova',
+                'inv_glaive_1h_darknaaru_d_01', 'inv_chest_armor_voidelf_d_01',
+                'spell_shadow_focusedpower', 'spell_holy_elunesgrace', 'ability_druid_cresentburn',
+                'inv_112_raidtrinkets_omnidpstrinket', 'inv_112_raiddimensius_gammaburst',
+                'inv_cosmicvoid_orb', 'inv_cosmicvoid_groundsate', 'ability_priest_darkarchangel',
+                'inv_cosmicvoid_wave', 'ability_demonhunter_darkness', 'inv_torch_thrown',
+                'inv_112_raiddimensius_devour', 'inv_112_raiddimensius_blackhole',
+                'spell_shaman_blessingoftheeternals', 'ability_druid_starfall',
+                'icon_7fx_nightborn_astromancer_blue', 'inv_cosmicvoid_nova',
+            ],
+        ],
+    ],
+
+    'encounter_maps' => [
+        'imperator-averzian' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/01.averzian-main.jpg'],
+            ['label' => 'Alt',  'url' => '/images/raidplan/01.averzian-alt.jpg'],
+        ],
+        'vorasius' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/02.vorasius-main.jpg'],
+            ['label' => 'Alt',  'url' => '/images/raidplan/02.vorasius-alt.jpg'],
+        ],
+        'fallen-king-salhadaar' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/03.salhadaar-main.jpg'],
+            ['label' => 'Alt',  'url' => '/images/raidplan/03.salhadaar-alt.jpg'],
+        ],
+        'vaelgor-ezzorak' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/04.dragons-main.jpg'],
+            ['label' => 'Alt',  'url' => '/images/raidplan/04.dragons-alt.jpg'],
+        ],
+        'lightblinded-vanguard' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/05.vanguard-main.jpg'],
+            ['label' => 'Alt',  'url' => '/images/raidplan/05.vanguard-alt.jpg'],
+        ],
+        'crown-of-the-cosmos' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/06.crown-main.jpg'],
+        ],
+        'chimaerus-the-undreamt-god' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/01.chimaerus-main.jpg'],
+        ],
+        'beloren-child-of-alar' => [
+            ['label' => 'Full',   'url' => '/images/raidplan/01.beloren-full.jpg'],
+            ['label' => 'Center', 'url' => '/images/raidplan/01.beloren-center.jpg'],
+            ['label' => 'Top',    'url' => '/images/raidplan/01.beloren-top.jpg'],
+        ],
+        'midnight-falls' => [
+            ['label' => 'Main', 'url' => '/images/raidplan/02.midnightfalls-main.jpg'],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Spark label for this season
     |--------------------------------------------------------------------------
     | Matches the name_description.display_string of crafted items.

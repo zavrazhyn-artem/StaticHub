@@ -12,6 +12,11 @@
             :main-roster="{{ json_encode($mainRoster) }}"
             :absent-roster="{{ $absentRoster->toJson() }}"
             :character-specs="{{ json_encode($characterSpecs ?? []) }}"
+            :encounters="{{ json_encode($encounters ?? []) }}"
+            :encounter-rosters="{{ json_encode($encounterRosters ?? []) }}"
+            :planner-data="{{ json_encode($plannerData ?? []) }}"
+            :planning-stats="{{ json_encode($planningStats ?? []) }}"
+            boss-planner-url="{{ $bossPlannerUrl ?? '' }}"
             :auth-user-id="{{ Auth::user()->id }}"
             :can-manage-schedule="{{ $canManageSchedule ? 'true' : 'false' }}"
             :can-announce-to-discord="{{ $canAnnounceToDiscord ? 'true' : 'false' }}"
@@ -22,6 +27,9 @@
                 'announce' => route('schedule.announce', $event),
                 'update'   => route('schedule.event.update', $event),
                 'destroy'  => route('schedule.event.destroy', $event),
+                'encounterRoster' => route('schedule.event.encounter-roster.update', $event),
+                'encounterAssign' => route('schedule.event.encounter-roster.assign', $event),
+                'encounterRemove' => route('schedule.event.encounter-roster.remove', $event),
             ]) }}"
             success-message="{{ session('success') }}"
             :errors="{{ $errors->any() ? json_encode($errors->toArray()) : '{}' }}"

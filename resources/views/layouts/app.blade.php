@@ -240,6 +240,13 @@
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
             </a>
 
+            <a href="{{ route('statics.boss-planner', $static->id) }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.boss-planner*') ? 'bg-[#262528] text-white border-l-4 border-orange-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('statics.boss-planner*') ? 'text-orange-500' : 'group-hover:text-orange-500 transition-colors' }}">map</span>
+                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Boss Planner') }}</span>
+            </a>
+
             <a href="{{ route('statics.treasury', $static->id) }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span

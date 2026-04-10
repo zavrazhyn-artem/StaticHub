@@ -16,8 +16,18 @@ use Illuminate\Support\Str;
 class EventPayloadService
 {
     public function __construct(
-        protected RaidAttendanceService $attendanceService
+        protected RaidAttendanceService $attendanceService,
+        protected EncounterRosterService $encounterRosterService,
+        protected BossPlannerService $bossPlannerService,
     ) {}
+
+    /**
+     * Build the boss planner URL for the event's static group.
+     */
+    public function buildBossPlannerUrl(Event $event): string
+    {
+        return route('statics.boss-planner', $event->static_id);
+    }
 
     /**
      * Build payload for displaying a raid event.
@@ -127,6 +137,11 @@ class EventPayloadService
                 ])->values()];
         });
 
+        $encounterData = $this->encounterRosterService->buildEncounterRosterPayload($event);
+        $plannerData = $this->bossPlannerService->buildPlannerPayload($event->static_id, $event->id);
+        $planningStats = $this->encounterRosterService->calculatePlanningStats($event->static_id, $event->id);
+        $bossPlannerUrl = $this->buildBossPlannerUrl($event);
+
         return [
             'event'               => $event,
             'mainRoster'          => $mainRosterEnhanced,
@@ -135,6 +150,11 @@ class EventPayloadService
             'currentAttendance'   => $currentAttendance,
             'selectedCharacterId' => $selectedCharacterId,
             'characterSpecs'      => $characterSpecs,
+            'encounters'          => $encounterData['encounters'],
+            'encounterRosters'    => $encounterData['encounterRosters'],
+            'plannerData'         => $plannerData,
+            'planningStats'       => $planningStats,
+            'bossPlannerUrl'      => $bossPlannerUrl,
         ];
     }
 

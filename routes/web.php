@@ -9,6 +9,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Profile\DiscordLinkController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\StaticMembershipController;
+use App\Http\Controllers\Raid\BossPlannerController;
 use App\Http\Controllers\Raid\EventController;
 use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
@@ -91,6 +92,18 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/schedule/event/{event}/rsvp', [EventController::class, 'rsvp'])->name('schedule.event.rsvp');
     Route::post('/schedule/event/{event}/announce', [EventController::class, 'announceToDiscord'])->name('schedule.announce');
 
+    // Event Encounter Roster
+    Route::post('/schedule/event/{event}/encounter-roster', [EventController::class, 'updateEncounterRoster'])->name('schedule.event.encounter-roster.update');
+    Route::post('/schedule/event/{event}/encounter-roster/assign', [EventController::class, 'assignEncounterCharacter'])->name('schedule.event.encounter-roster.assign');
+    Route::delete('/schedule/event/{event}/encounter-roster/remove', [EventController::class, 'removeEncounterCharacter'])->name('schedule.event.encounter-roster.remove');
+
+    // Boss Planner (standalone section)
+    Route::get('/statics/{static}/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');
+    Route::post('/statics/{static}/boss-planner/save', [BossPlannerController::class, 'save'])->name('statics.boss-planner.save');
+    Route::delete('/statics/{static}/boss-planner/{raidPlan}', [BossPlannerController::class, 'destroy'])->name('statics.boss-planner.destroy');
+    Route::post('/statics/{static}/boss-planner/{raidPlan}/share', [BossPlannerController::class, 'share'])->name('statics.boss-planner.share');
+    Route::post('/statics/{static}/boss-planner/{raidPlan}/unshare', [BossPlannerController::class, 'unshare'])->name('statics.boss-planner.unshare');
+
     // Discord Guild API
     Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
     Route::get('/api/discord/guilds/{guildId}/roles', [DiscordGuildController::class, 'roles']);
@@ -139,6 +152,7 @@ Route::middleware('auth')->group(function () {
 
 // Join static — public landing page (no auth required)
 Route::get('/join/{token}', [JoinStaticController::class, 'showLanding'])->name('statics.join');
+Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('plan.shared');
 
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');

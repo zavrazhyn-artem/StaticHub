@@ -11,6 +11,9 @@ const props = defineProps({
     canAnnounceToDiscord: { type: Boolean, default: false },
     csrfToken: { type: String, required: true },
     routes: { type: Object, required: true },
+    difficulty: { type: Object, default: () => ({ label: 'Mythic', color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/30' }) },
+    status: { type: Object, default: () => ({ label: 'Planned', icon: 'event', color: 'text-blue-400' }) },
+    isOptional: { type: Boolean, default: false },
 });
 const emit = defineEmits(['rsvp', 'edit', 'delete']);
 
@@ -31,6 +34,7 @@ const { formatDate, formatTime } = useTimeFormatter();
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 w-full">
 
             <div class="flex flex-wrap items-center gap-3">
+                <!-- Date/Time chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
                     <div class="flex items-center gap-2 text-white font-headline text-[11px] font-black uppercase tracking-widest leading-none">
                         <span class="material-symbols-outlined text-sm text-primary">calendar_today</span>
@@ -44,16 +48,42 @@ const { formatDate, formatTime } = useTimeFormatter();
                     </div>
                 </div>
 
+                <!-- Difficulty badge -->
+                <div
+                    class="h-10 px-3 rounded-xl border flex items-center gap-1.5"
+                    :class="[difficulty.bg, difficulty.border]"
+                >
+                    <span class="material-symbols-outlined text-sm" :class="difficulty.color">shield</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest" :class="difficulty.color">{{ difficulty.label }}</span>
+                </div>
+
+                <!-- Status badge -->
+                <div class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm" :class="status.color">{{ status.icon }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest" :class="status.color">{{ status.label }}</span>
+                </div>
+
+                <!-- Optional badge -->
+                <div
+                    v-if="isOptional"
+                    class="h-10 px-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-1.5"
+                >
+                    <span class="material-symbols-outlined text-sm text-yellow-400">info</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400">Optional</span>
+                </div>
+
+                <!-- Role counts chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
-                    <div v-for="status in raidStatus" :key="status.label" class="flex items-center gap-1.5">
-                        <img :src="'/images/roles/' + status.label" class="w-4 h-4 opacity-90" :alt="status.label">
-                        <span class="text-[11px] font-black tracking-tight leading-none" :class="status.color">
-                            {{ status.count }}/{{ status.limit }}
+                    <div v-for="s in raidStatus" :key="s.label" class="flex items-center gap-1.5">
+                        <img :src="'/images/roles/' + s.label" class="w-4 h-4 opacity-90" :alt="s.label">
+                        <span class="text-[11px] font-black tracking-tight leading-none" :class="s.color">
+                            {{ s.count }}/{{ s.limit }}
                         </span>
                     </div>
                 </div>
             </div>
 
+            <!-- Joined as display -->
             <div
                 v-if="currentAttendance && currentAttendance.status !== 'pending' && joinedCharacter"
                 class="flex-1 flex items-center justify-center px-4 h-10 bg-surface-container-high border border-white/10 rounded-xl glassmorphism backdrop-blur-md shadow-2xl"
@@ -65,6 +95,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                 </div>
             </div>
 
+            <!-- Action buttons -->
             <div v-if="!event.raid_started" class="flex items-center gap-2 h-10 shrink-0">
 
                 <button
