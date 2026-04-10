@@ -13,24 +13,15 @@ return new class extends Migration
             $table->json('bnet_equipment_by_spec')->nullable()->after('bnet_equipment');
         });
 
-        // Seed from existing bnet_equipment + character.active_spec
-        DB::table('services_raw_data')
-            ->join('characters', 'characters.id', '=', 'services_raw_data.character_id')
-            ->whereNotNull('services_raw_data.bnet_equipment')
-            ->whereNotNull('characters.active_spec')
-            ->where('characters.active_spec', '!=', '')
-            ->orderBy('services_raw_data.id')
-            ->chunk(100, function ($rows) {
-                foreach ($rows as $row) {
-                    DB::table('services_raw_data')
-                        ->where('id', $row->id)
-                        ->update([
-                            'bnet_equipment_by_spec' => json_encode([
-                                $row->active_spec => json_decode($row->bnet_equipment, true),
-                            ]),
-                        ]);
-                }
-            });
+        // Seed from existing bnet_equipment + character.active_spec using pure SQL
+        DB::statement("
+            UPDATE services_raw_data srd
+            JOIN characters c ON c.id = srd.character_id
+            SET srd.bnet_equipment_by_spec = JSON_OBJECT(c.active_spec, srd.bnet_equipment)
+            WHERE srd.bnet_equipment IS NOT NULL
+              AND c.active_spec IS NOT NULL
+              AND c.active_spec != ''
+        ");
     }
 
     public function down(): void
