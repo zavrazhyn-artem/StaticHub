@@ -14,6 +14,7 @@ COPY vite.config.js tailwind.config.js postcss.config.js ./
 COPY resources/ resources/
 COPY public/ public/
 
+ENV NODE_OPTIONS="--max-old-space-size=512"
 RUN npm run build
 
 # =============================================================================
@@ -59,7 +60,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" \
+    && docker-php-ext-install -j2 \
         pdo_mysql \
         bcmath \
         gd \

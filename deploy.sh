@@ -16,7 +16,18 @@ git pull
 echo "📦 2. Збираємо імейджі..."
 # Docker розумний: якщо package.json чи composer.json не змінились,
 # він використає кеш і проскочить цей крок за 2 секунди.
-docker compose -f docker-compose.prod.yml build
+# Обмежуємо паралелізм BuildKit щоб не вичерпати RAM на сервері.
+
+# Створюємо BuildKit builder з обмеженим паралелізмом (якщо ще не існує)
+if ! docker buildx inspect blastr-builder >/dev/null 2>&1; then
+  docker buildx create --name blastr-builder \
+    --config docker/production/buildkitd.toml \
+    --use
+else
+  docker buildx use blastr-builder
+fi
+
+COMPOSE_PARALLEL_LIMIT=1 docker compose -f docker-compose.prod.yml build
 
 echo "🛑 3. Оновлюємо волюмі з залежностями..."
 docker compose -f docker-compose.prod.yml down
