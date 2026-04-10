@@ -51,6 +51,14 @@ const trackColorMap = {
     Adventurer: 'text-gray-400'
 };
 
+const trackBorderMap = {
+    Myth: 'border-yellow-400',
+    Hero: 'border-purple-500',
+    Champion: 'border-blue-500',
+    Veteran: 'border-green-500',
+    Adventurer: 'border-gray-500'
+};
+
 const getWowheadData = (item) => {
     if (!item) return '';
     const parts = [`item=${item.id}`];
@@ -91,16 +99,29 @@ const getQualityClass = (quality) => {
 };
 
 const craftedColorClass = (ilvl) => {
-    if (ilvl >= 275) return 'text-orange-400';
+    if (ilvl >= 275) return 'text-yellow-400';
     if (ilvl >= 262) return 'text-purple-400';
     if (ilvl >= 246) return 'text-green-400';
     return 'text-gray-400';
+};
+
+const craftedBorderClass = (ilvl) => {
+    if (ilvl >= 275) return 'border-yellow-400';
+    if (ilvl >= 262) return 'border-purple-500';
+    if (ilvl >= 246) return 'border-green-500';
+    return 'border-gray-500';
 };
 
 const ilvlColorClass = (item) => {
     if (item.is_crafted) return craftedColorClass(item.ilvl);
     if (item.upgrade?.track) return trackColorMap[item.upgrade.track] || 'text-gray-400';
     return 'text-gray-400';
+};
+
+const borderClass = (item) => {
+    if (item.is_crafted) return craftedBorderClass(item.ilvl);
+    if (item.upgrade?.track) return trackBorderMap[item.upgrade.track] || 'border-gray-500';
+    return getQualityClass(item.quality);
 };
 </script>
 
@@ -129,7 +150,7 @@ const ilvlColorClass = (item) => {
 
             <a :key="getItem(slot).id"
                :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
-               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', getQualityClass(getItem(slot).quality)]"
+               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', borderClass(getItem(slot))]"
                target="_blank"
                :data-wowhead="getWowheadData(getItem(slot))">
                 <img v-if="getIconUrl(getItem(slot).id)"
