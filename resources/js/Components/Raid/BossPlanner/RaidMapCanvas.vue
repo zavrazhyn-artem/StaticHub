@@ -108,6 +108,7 @@ const selectedMapIndex = ref(0);
 const currentMapUrl = computed(() => props.maps[selectedMapIndex.value]?.url || props.maps[0]?.url || null);
 
 // ─── Interaction state ───
+let prevDragPointer = null;
 const dragging = ref(null);
 const dragOffset = ref({ x: 0, y: 0 });
 const groupDragStartPositions = ref([]);
@@ -554,6 +555,20 @@ const handleMouseDown = (e) => {
 };
 
 const handleMouseMove = (e) => {
+    // Dispatch drag position so floating panels can dodge out of the way
+    if (dragging.value || resizing.value || rotating.value) {
+        const now = performance.now();
+        let dx = 0, dy = 0;
+        if (prevDragPointer && now - prevDragPointer.t < 150) {
+            dx = e.clientX - prevDragPointer.x;
+            dy = e.clientY - prevDragPointer.y;
+        }
+        prevDragPointer = { x: e.clientX, y: e.clientY, t: now };
+        window.dispatchEvent(new CustomEvent('bossplanner-drag-pointer', {
+            detail: { x: e.clientX, y: e.clientY, dx, dy },
+        }));
+    }
+
     // Pan
     if (isPanning.value) { movePan(e); return; }
 

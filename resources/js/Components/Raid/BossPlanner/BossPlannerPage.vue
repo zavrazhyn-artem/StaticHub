@@ -6,6 +6,7 @@ import RaidMapCanvas from './RaidMapCanvas.vue';
 import MapToolbar from './MapToolbar.vue';
 import StepNavigator from './StepNavigator.vue';
 import PlayerPalette from './PlayerPalette.vue';
+import { useDodgePanel } from '@/composables/useDodgePanel';
 
 const props = defineProps({
     plannerData: { type: Object, required: true },
@@ -436,6 +437,20 @@ if (typeof window !== 'undefined') {
     window.addEventListener('mouseup', origUp);
 }
 
+// Dodge refs
+const selectionWindowRef = ref(null);
+const editWindowRef = ref(null);
+const { isDodging: selectionDodging } = useDodgePanel({
+    elementRef: selectionWindowRef,
+    position: selectionPos,
+    enabled: () => !isDraggingSel.value && !!currentSelection.value && editorOpen.value,
+});
+const { isDodging: editDodging } = useDodgePanel({
+    elementRef: editWindowRef,
+    position: editPos,
+    enabled: () => !isDraggingEdit.value && !!editSel.value && editorOpen.value,
+});
+
 const currentStep = computed(() => {
     if (!localPlan.value?.steps?.length) return null;
     return localPlan.value.steps[currentStepIndex.value] || localPlan.value.steps[0];
@@ -624,7 +639,12 @@ const savePlan = async () => {
             const enc = encounters.value[editorEncounterIndex.value];
             if (enc) {
                 enc.has_plan = true;
-                enc.plan = { ...localPlan.value, updated_at: new Date().toISOString() };
+                const updatedPlan = JSON.parse(JSON.stringify({ ...localPlan.value, updated_at: new Date().toISOString() }));
+                enc.plan = updatedPlan;
+                if (!Array.isArray(enc.plans)) enc.plans = [];
+                const idx = enc.plans.findIndex(p => p.id === updatedPlan.id);
+                if (idx >= 0) enc.plans[idx] = updatedPlan;
+                else enc.plans.push(updatedPlan);
             }
             saveSuccess.value = true;
             setTimeout(() => { saveSuccess.value = false; }, 2000);
@@ -1119,8 +1139,12 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                     :boss-portraits="editorEncounter?.portraits || []"
                                     :roster="roster"
                                     :groups="currentGroups"
+                                    :can-undo="undoStack.length > 0"
+                                    :can-redo="redoStack.length > 0"
                                     @select-tool="(t) => { activeTool = t; if (t === 'select') clearSelection(); }"
                                     @select-icon="handleSelectIcon"
+                                    @undo="undo"
+                                    @redo="redo"
                                 />
                                 <div class="h-6 w-px bg-white/10"></div>
                                 <StepNavigator
@@ -1210,7 +1234,9 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
     <Teleport to="body">
         <div
             v-if="currentSelection && editorOpen"
+            ref="selectionWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+            :class="selectionDodging ? 'panel-dodging' : ''"
             :style="{ left: selectionPos.x + 'px', top: selectionPos.y + 'px' }"
             @mousedown.stop @click.stop
         >
@@ -1316,7 +1342,9 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
     <Teleport to="body">
         <div
             v-if="editSel && editElement && editorOpen"
+            ref="editWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+            :class="editDodging ? 'panel-dodging' : ''"
             :style="{ left: editPos.x + 'px', top: editPos.y + 'px' }"
             @mousedown.stop @click.stop
         >
@@ -1663,5 +1691,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 .editor-leave-to {
     opacity: 0;
     transform: scale(0.97);
+}
+</style>
+
+<style>
+.panel-dodging {
+    transition: left 0.3s cubic-bezier(.4, .9, .35, 1), top 0.3s cubic-bezier(.4, .9, .35, 1);
 }
 </style>

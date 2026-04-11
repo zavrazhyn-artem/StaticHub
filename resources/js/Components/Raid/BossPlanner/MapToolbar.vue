@@ -7,8 +7,10 @@ const props = defineProps({
     bossPortraits: { type: Array, default: () => [] },
     roster: { type: Array, default: () => [] },
     groups: { type: Object, default: () => ({}) },
+    canUndo: { type: Boolean, default: false },
+    canRedo: { type: Boolean, default: false },
 });
-const emit = defineEmits(['select-tool', 'select-icon']);
+const emit = defineEmits(['select-tool', 'select-icon', 'undo', 'redo']);
 
 const markerTypes = [
     { id: 'skull', img: '/images/raidplan/raid-markers/skull.png' },
@@ -79,8 +81,76 @@ const onMouseMove = (e) => {
     }
 };
 const onMouseUp = () => { draggingPanel.value = null; };
-onMounted(() => { window.addEventListener('mousemove', onMouseMove); window.addEventListener('mouseup', onMouseUp); });
-onUnmounted(() => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); });
+
+// ─── Dodge logic: panels flee from canvas drag ───
+const PANEL_W = 320, PANEL_H = 420, DODGE_MARGIN = 30;
+const dodgingPanels = ref(new Set());
+let prevPointer = null;
+let prevPointerClearTimer = null;
+
+const handleDragPointer = (e) => {
+    const { x, y } = e.detail;
+    const dx = prevPointer ? x - prevPointer.x : 0;
+    const dy = prevPointer ? y - prevPointer.y : 0;
+    prevPointer = { x, y };
+    clearTimeout(prevPointerClearTimer);
+    prevPointerClearTimer = setTimeout(() => { prevPointer = null; }, 150);
+
+    for (const panelId of openPanels.value) {
+        if (draggingPanel.value === panelId) continue;
+        const pos = panelPositions.value[panelId];
+        const left = pos.x, top = pos.y, right = pos.x + PANEL_W, bottom = pos.y + PANEL_H;
+        const hit = x >= left - DODGE_MARGIN && x <= right + DODGE_MARGIN &&
+                    y >= top - DODGE_MARGIN && y <= bottom + DODGE_MARGIN;
+        if (!hit) continue;
+
+        const cx = pos.x + PANEL_W / 2, cy = pos.y + PANEL_H / 2;
+        let nx, ny;
+        const mag = Math.hypot(dx, dy);
+        if (mag > 0.5) { nx = dx / mag; ny = dy / mag; }
+        else {
+            const vx = cx - x, vy = cy - y;
+            const vm = Math.hypot(vx, vy) || 1;
+            nx = vx / vm; ny = vy / vm;
+        }
+
+        const pushDist = Math.max(PANEL_W, PANEL_H) + 60;
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const clamp = (nxCandidate, nyCandidate) => ({
+            x: Math.max(10, Math.min(vw - PANEL_W - 10, nxCandidate)),
+            y: Math.max(10, Math.min(vh - PANEL_H - 10, nyCandidate)),
+        });
+
+        let next = clamp(pos.x + nx * pushDist, pos.y + ny * pushDist);
+        const stillHit = x >= next.x - DODGE_MARGIN && x <= next.x + PANEL_W + DODGE_MARGIN &&
+                         y >= next.y - DODGE_MARGIN && y <= next.y + PANEL_H + DODGE_MARGIN;
+        if (stillHit) {
+            next = clamp(pos.x - ny * pushDist, pos.y + nx * pushDist);
+        }
+
+        panelPositions.value[panelId] = next;
+        const s = new Set(dodgingPanels.value);
+        s.add(panelId);
+        dodgingPanels.value = s;
+        setTimeout(() => {
+            const ns = new Set(dodgingPanels.value);
+            ns.delete(panelId);
+            dodgingPanels.value = ns;
+        }, 350);
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('bossplanner-drag-pointer', handleDragPointer);
+});
+onUnmounted(() => {
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+    window.removeEventListener('bossplanner-drag-pointer', handleDragPointer);
+    clearTimeout(prevPointerClearTimer);
+});
 
 // Roster items
 const rosterItems = computed(() => {
@@ -170,13 +240,21 @@ const colorClasses = {
 
 <template>
     <div class="flex items-center gap-1 flex-wrap relative">
-        <!-- Select tool -->
+        <!-- Undo / Redo -->
         <div class="flex items-center gap-0.5 bg-surface-container/60 border border-white/5 rounded-xl p-1 backdrop-blur-sm">
-            <button @click="emit('select-tool', 'select')"
+            <button @click="emit('undo')"
+                :disabled="!canUndo"
                 class="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
-                :class="activeTool === 'select' ? 'bg-primary/20 text-primary' : 'text-on-surface-variant hover:text-white hover:bg-white/5'"
-                title="Select & Move">
-                <span class="material-symbols-outlined text-lg">arrow_selector_tool</span>
+                :class="canUndo ? 'text-on-surface-variant hover:text-white hover:bg-white/5' : 'text-on-surface-variant/25 cursor-not-allowed'"
+                title="Undo (Ctrl+Z)">
+                <span class="material-symbols-outlined text-lg">undo</span>
+            </button>
+            <button @click="emit('redo')"
+                :disabled="!canRedo"
+                class="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
+                :class="canRedo ? 'text-on-surface-variant hover:text-white hover:bg-white/5' : 'text-on-surface-variant/25 cursor-not-allowed'"
+                title="Redo (Ctrl+Shift+Z)">
+                <span class="material-symbols-outlined text-lg">redo</span>
             </button>
         </div>
 
@@ -202,6 +280,7 @@ const colorClasses = {
         <template v-for="panelId in openPanels" :key="panelId">
             <div
                 class="fixed z-[250] w-[320px] max-h-[420px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+                :class="dodgingPanels.has(panelId) ? 'panel-dodging' : ''"
                 :style="{ left: panelPositions[panelId].x + 'px', top: panelPositions[panelId].y + 'px' }"
                 @mousedown.stop @click.stop>
                 <!-- Header -->
@@ -295,6 +374,9 @@ const colorClasses = {
 </template>
 
 <style scoped>
+.panel-dodging {
+    transition: left 0.3s cubic-bezier(.4, .9, .35, 1), top 0.3s cubic-bezier(.4, .9, .35, 1);
+}
 .text-wow-warrior      { color: #C69B6D; }
 .text-wow-paladin      { color: #F48CBA; }
 .text-wow-hunter       { color: #ABD473; }
