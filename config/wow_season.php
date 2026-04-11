@@ -13,6 +13,14 @@ return [
     'first_period'  => 1052,
 
     /*
+    | Cooldown timeline pipeline — auto-seeded boss ability timings.
+    | current_season is the identifier stored in `boss_ability_timings.season`.
+    | wcl_zone_id is the WCL zone covering all current-season raids.
+    */
+    'current_season' => 'midnight-s1',
+    'wcl_zone_id'    => 46,
+
+    /*
     | Season start date (UTC) — the first weekly reset of the season.
     | Used to generate the full list of weeks for the roster week selector.
     */

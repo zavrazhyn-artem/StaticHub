@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $difficulty
  * @property string|null $title
  * @property array $steps
+ * @property array|null $timeline
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Event|null $event
@@ -30,10 +31,12 @@ class RaidPlan extends Model
         'title',
         'steps',
         'share_token',
+        'timeline',
     ];
 
     protected $casts = [
         'steps' => 'array',
+        'timeline' => 'array',
     ];
 
     public function newEloquentBuilder($query): RaidPlanBuilder

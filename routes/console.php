@@ -26,6 +26,9 @@ Schedule::command('weekly:reset us')->weeklyOn(2, '15:01'); // Tuesday   15:01 U
 Schedule::command('weekly:reset kr')->weeklyOn(3, '02:01'); // Wednesday 02:01 UTC
 Schedule::command('weekly:reset tw')->weeklyOn(3, '02:01'); // Wednesday 02:01 UTC
 
+// Weekly cooldown timeline reseed — Tuesday 06:00 UTC (after US reset, before EU reset)
+Schedule::command('cooldowns:seed-season')->weeklyOn(2, '06:00');
+
 Schedule::command('backup:run --only-db')->daily()->at('03:00');
 
 // Очищуємо старі бекапи (rotation), щоб не закінчилося місце

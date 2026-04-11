@@ -13,6 +13,7 @@
             :routes="{{ json_encode([
                 'save' => route('statics.boss-planner.save', $static->id),
                 'shareBase' => url('/statics/' . $static->id . '/boss-planner'),
+                'cooldownToggleBase' => url('/statics/' . $static->id . '/boss-planner/character'),
             ]) }}"
         ></boss-planner-page>
     </div>

@@ -133,4 +133,80 @@ GQL;
             }
 GQL;
     }
+
+    /**
+     * Fetch fights + master data (actors + abilities) for a single report.
+     * Used to locate the boss actor ID for a given encounter before querying cast events.
+     */
+    public static function buildReportFightsAndActorsQuery(): string
+    {
+        return <<<'GQL'
+        query ($reportId: String!) {
+          reportData {
+            report(code: $reportId) {
+              title
+              phases {
+                encounterID
+                phases { id name isIntermission }
+              }
+              fights {
+                id name difficulty kill encounterID
+                startTime endTime
+                phaseTransitions { id startTime }
+              }
+              masterData {
+                actors { id name type subType gameID }
+                abilities { gameID name icon type }
+              }
+            }
+          }
+        }
+GQL;
+    }
+
+    /**
+     * Fetch enemy cast events for a specific fight, filtered to boss sources.
+     * WCL events are paginated — caller should loop using nextPageTimestamp.
+     */
+    public static function buildBossCastEventsQuery(): string
+    {
+        return self::buildBossEventStreamQuery('Casts');
+    }
+
+    /**
+     * Fetch enemy buff events (apply/refresh/remove) — used to compute boss
+     * ability duration by matching apply ↔ remove pairs.
+     */
+    public static function buildBossBuffEventsQuery(): string
+    {
+        return self::buildBossEventStreamQuery('Buffs');
+    }
+
+    public static function buildBossDebuffEventsQuery(): string
+    {
+        return self::buildBossEventStreamQuery('Debuffs');
+    }
+
+    private static function buildBossEventStreamQuery(string $dataType): string
+    {
+        return <<<GQL
+        query (\$reportId: String!, \$fightId: Int!, \$startTime: Float!, \$endTime: Float!) {
+          reportData {
+            report(code: \$reportId) {
+              events(
+                dataType: {$dataType}
+                hostilityType: Enemies
+                fightIDs: [\$fightId]
+                startTime: \$startTime
+                endTime: \$endTime
+                limit: 10000
+              ) {
+                data
+                nextPageTimestamp
+              }
+            }
+          }
+        }
+GQL;
+    }
 }

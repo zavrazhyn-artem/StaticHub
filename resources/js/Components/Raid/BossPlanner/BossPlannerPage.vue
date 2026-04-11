@@ -6,6 +6,7 @@ import RaidMapCanvas from './RaidMapCanvas.vue';
 import MapToolbar from './MapToolbar.vue';
 import StepNavigator from './StepNavigator.vue';
 import PlayerPalette from './PlayerPalette.vue';
+import TimelineTab from './TimelineTab.vue';
 import { useDodgePanel } from '@/composables/useDodgePanel';
 
 const props = defineProps({
@@ -456,6 +457,28 @@ const currentStep = computed(() => {
     return localPlan.value.steps[currentStepIndex.value] || localPlan.value.steps[0];
 });
 
+// Pick the boss ability list matching the current plan's difficulty.
+// Backend now returns nested { encounter_slug: { mythic: [...], heroic: [...], normal: [...] } }.
+const bossAbilitiesForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.boss_ability_timings || {};
+    if (Array.isArray(byDiff)) return byDiff; // backward compat (flat array)
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
+// Phase segments for the current plan's difficulty — used as defaults when a plan
+// doesn't yet have its own saved phase_segments.
+const phaseSegmentsForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.phase_segments || {};
+    if (Array.isArray(byDiff)) return byDiff;
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
 // Current step groups (backward compat: default to empty)
 const currentGroups = computed(() => {
     return currentStep.value?.groups || {};
@@ -491,6 +514,7 @@ const createNewPlanForEncounter = (encIndex) => {
         id: null,
         title: null,
         steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
+        timeline: null,
         difficulty: 'mythic',
     };
     currentStepIndex.value = 0;
@@ -531,6 +555,7 @@ const createPlan = () => {
         id: null,
         title: null,
         steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
+        timeline: null,
         difficulty: 'mythic',
     };
 };
@@ -628,6 +653,7 @@ const savePlan = async () => {
                 encounter_slug: editorEncounter.value.slug,
                 title: localPlan.value.title,
                 steps: localPlan.value.steps,
+                timeline: localPlan.value.timeline || null,
                 difficulty: localPlan.value.difficulty || 'mythic',
                 plan_id: localPlan.value.id || null,
             }),
@@ -729,6 +755,11 @@ const reorderSteps = ({ from, to }) => {
 const updateStepData = (data) => {
     if (!localPlan.value) return;
     localPlan.value.steps[currentStepIndex.value] = { ...localPlan.value.steps[currentStepIndex.value], ...data };
+};
+
+const updateTimelineData = (data) => {
+    if (!localPlan.value) return;
+    localPlan.value.timeline = data;
 };
 const handlePlayerDrop = (player) => {
     if (!currentStep.value) return;
@@ -1201,29 +1232,19 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </template>
                     </div>
 
-                    <!-- Cooldowns placeholder -->
-                    <div v-show="editorTab === 'cooldowns'" class="h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <span class="material-symbols-outlined text-6xl text-on-surface-variant/10">timer</span>
-                            <p class="text-lg font-black text-on-surface-variant/20 uppercase tracking-widest mt-4">Cooldown Planner</p>
-                            <p class="text-xs text-on-surface-variant/20 mt-2 max-w-md mx-auto">
-                                Assign healing and defensive cooldowns to boss ability timelines. Coming in Phase 2.
-                            </p>
-                            <div class="mt-6 flex items-center justify-center gap-3 opacity-20">
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-blue-400">shield</span>
-                                    <span class="text-[9px] font-bold text-on-surface-variant">Defensives</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-green-400">healing</span>
-                                    <span class="text-[9px] font-bold text-on-surface-variant">Healing CDs</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-red-400">local_fire_department</span>
-                                    <span class="text-[9px] font-bold text-on-surface-variant">DPS CDs</span>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Cooldowns tab -->
+                    <div v-show="editorTab === 'cooldowns'" class="h-full">
+                        <TimelineTab
+                            :timeline="localPlan.timeline || {}"
+                            :boss-abilities="bossAbilitiesForCurrentPlan"
+                            :default-phase-segments="phaseSegmentsForCurrentPlan"
+                            :roster="roster"
+                            :player-cooldowns="plannerData.player_cooldowns || {}"
+                            :can-manage="canManage"
+                            :cooldown-toggle-base="routes.cooldownToggleBase || ''"
+                            :csrf-token="csrfToken"
+                            @update="updateTimelineData"
+                        />
                     </div>
                 </div>
             </div>

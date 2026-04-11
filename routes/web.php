@@ -104,6 +104,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::delete('/statics/{static}/boss-planner/{raidPlan}', [BossPlannerController::class, 'destroy'])->name('statics.boss-planner.destroy');
     Route::post('/statics/{static}/boss-planner/{raidPlan}/share', [BossPlannerController::class, 'share'])->name('statics.boss-planner.share');
     Route::post('/statics/{static}/boss-planner/{raidPlan}/unshare', [BossPlannerController::class, 'unshare'])->name('statics.boss-planner.unshare');
+    Route::post('/statics/{static}/boss-planner/character/{character}/cooldown-toggle', [BossPlannerController::class, 'toggleCharacterCooldown'])->name('statics.boss-planner.character.cooldown-toggle');
 
     // Discord Guild API
     Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
