@@ -58,41 +58,6 @@
                 spec-save-route="{{ route('characters.specs.update') }}"
                 csrf-token="{{ csrf_token() }}"
             ></characters-page>
-
-            <!-- Section: Analytics & Balance -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-24">
-                <div class="bg-surface-container-high p-8 rounded-xl relative overflow-hidden group border border-white/5">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32"></div>
-                    <h3 class="font-headline text-primary text-xs font-bold uppercase tracking-[0.3em] mb-8">{{ __('Tactical Analytics') }}</h3>
-                    <div class="flex gap-16">
-                        <div>
-                            <div class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-1">{{ __('Average iLevel') }}</div>
-                            <div class="text-4xl font-headline font-black text-white">
-                                {{ number_format($characters->avg('equipped_item_level') ?: 0, 1) }}
-                            </div>
-                        </div>
-                        <div>
-                            <div class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-1">{{ __('Alt Synergy') }}</div>
-                            <div class="text-4xl font-headline font-black text-white">84%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-surface-container-high p-8 rounded-xl relative overflow-hidden group border border-white/5">
-                    <h3 class="font-headline text-on-surface text-xs font-bold uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-                        {{ __('Roster Balance') }}
-                        <span class="w-12 h-0.5 bg-white/10 rounded-full"></span>
-                    </h3>
-                    <p class="text-on-surface-variant text-xs font-medium max-w-sm leading-relaxed mb-6">
-                        {{ __('Your current selection provides coverage for 4 major roles across different armor types.') }}
-                    </p>
-                    <div class="flex gap-2">
-                        <div class="w-10 h-10 rounded-full bg-[#fa7902] flex items-center justify-center font-headline font-bold text-xs text-white shadow-[0_0_15px_rgba(250,121,2,0.3)]">D</div>
-                        <div class="w-10 h-10 rounded-full bg-[#fffadf] flex items-center justify-center font-headline font-bold text-xs text-[#4c4800] shadow-[0_0_15px_rgba(255,250,223,0.3)]">R</div>
-                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-headline font-bold text-xs text-on-primary shadow-[0_0_15px_rgba(79,211,247,0.3)]">M</div>
-                    </div>
-                </div>
-            </div>
         @endif
     </div>
 </x-app-layout>

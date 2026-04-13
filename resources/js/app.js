@@ -29,6 +29,7 @@ import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue'
 import CharactersPage from './Components/Character/CharactersPage.vue';
 import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
 import AlertBanner from './Components/UI/AlertBanner.vue';
+import LandingPage from './Components/Landing/LandingPage.vue';
 
 
 
@@ -88,6 +89,7 @@ app.component('character-spec-picker', CharacterSpecPicker);
 app.component('characters-page', CharactersPage);
 app.component('onboarding-stepper', OnboardingStepper);
 app.component('alert-banner', AlertBanner);
+app.component('landing-page', LandingPage);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

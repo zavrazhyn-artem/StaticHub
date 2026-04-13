@@ -193,23 +193,6 @@ const activePersonalReport = computed(() => {
                     <!-- Sidebar: Execution Metrics + Mission Summary -->
                     <div class="space-y-8">
                         <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
-                            <h3 class="text-white font-headline text-[10px] font-black uppercase tracking-widest opacity-40">{{ __('Execution Metrics') }}</h3>
-                            <div class="space-y-6">
-                                <div v-for="metric in report.execution_metrics" :key="metric.label" class="space-y-2">
-                                    <div class="flex justify-between items-end">
-                                        <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">{{ __(metric.label) }}</span>
-                                        <span class="text-lg font-black" :class="metric.color">{{ metric.value }}%</span>
-                                    </div>
-                                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div class="h-full rounded-full" :class="metric.bar_class"
-                                             :style="{ width: metric.value + '%' }"></div>
-                                    </div>
-                                    <p v-if="metric.note" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider opacity-60">{{ __(metric.note) }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
                             <h3 class="text-white font-headline text-[10px] font-black uppercase tracking-widest opacity-40">{{ __('Mission Summary') }}</h3>
                             <div class="space-y-4">
                                 <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
