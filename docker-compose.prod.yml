@@ -19,6 +19,7 @@
 #   docker compose exec app php artisan migrate --seed
 
 x-app-defaults: &app-defaults
+  image: blastr-app:latest
   build:
     context: .
     dockerfile: docker/production/Dockerfile
