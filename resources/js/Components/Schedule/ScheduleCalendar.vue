@@ -45,6 +45,13 @@ const selectedEndTime = ref(props.defaultRaidEndTime);
 const defaultTimezone = props.staticTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 const selectedTimezone = ref(defaultTimezone);
 const selectedDescription = ref('');
+const selectedDifficulty = ref('mythic');
+
+const difficulties = [
+    { value: 'mythic', label: 'Mythic', color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/30' },
+    { value: 'heroic', label: 'Heroic', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/30' },
+    { value: 'normal', label: 'Normal', color: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/30' },
+];
 
 // Picker coordination refs
 const startPickerRef = ref(null);
@@ -233,6 +240,23 @@ const closeModal = () => { showModal.value = false; };
                     <div class="flex items-center gap-2 px-3 py-2.5 bg-surface-container-highest border border-white/5 rounded-lg text-white font-headline text-sm font-bold tracking-tight">
                         <span class="material-symbols-outlined text-[16px] text-fuchsia-400">calendar_today</span>
                         {{ selectedDate }}
+                    </div>
+                </div>
+
+                <!-- Difficulty -->
+                <div class="space-y-1.5">
+                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Difficulty') }}</label>
+                    <input type="hidden" name="difficulty" :value="selectedDifficulty">
+                    <div class="flex gap-2">
+                        <button
+                            v-for="d in difficulties" :key="d.value"
+                            type="button"
+                            @click="selectedDifficulty = d.value"
+                            class="flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all text-center"
+                            :class="selectedDifficulty === d.value
+                                ? `${d.bg} ${d.border} ${d.color}`
+                                : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
+                        >{{ d.label }}</button>
                     </div>
                 </div>
 

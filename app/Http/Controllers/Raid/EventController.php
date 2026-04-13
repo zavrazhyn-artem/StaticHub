@@ -185,6 +185,8 @@ class EventController extends Controller
             'boss_roster_enabled' => 'sometimes|boolean',
             'split_enabled' => 'sometimes|boolean',
             'split_count' => 'sometimes|integer|min:1|max:4',
+            'locked_encounters' => 'sometimes|nullable|array',
+            'locked_encounters.*' => 'string',
         ]);
 
         $event->update($validated);

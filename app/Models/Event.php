@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_optional
  * @property array|null $encounter_order
  * @property array|null $selected_encounters
+ * @property array|null $locked_encounters
  * @property bool $boss_roster_enabled
  * @property bool $split_enabled
  * @property int $split_count
@@ -70,6 +71,7 @@ class Event extends Model
         'is_optional',
         'encounter_order',
         'selected_encounters',
+        'locked_encounters',
         'boss_roster_enabled',
         'split_enabled',
         'split_count',
@@ -88,6 +90,7 @@ class Event extends Model
         'is_optional' => 'boolean',
         'encounter_order' => 'array',
         'selected_encounters' => 'array',
+        'locked_encounters' => 'array',
         'boss_roster_enabled' => 'boolean',
         'split_enabled' => 'boolean',
         'split_count' => 'integer',

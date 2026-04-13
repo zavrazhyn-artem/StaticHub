@@ -16,6 +16,7 @@ import CommentModal from './CommentModal.vue';
 import EncounterSidebar from './EncounterSidebar.vue';
 import SplitRaidCanvas from './SplitRaidCanvas.vue';
 import EventPlanSelector from './EventPlanSelector.vue';
+import SharedPlanView from './BossPlanner/SharedPlanView.vue';
 
 const props = defineProps({
     event: { type: Object, required: true },
@@ -54,6 +55,7 @@ const commentModalData = ref({ characterName: '', comment: '' });
 const showCharacterDetail = ref(false);
 const selectedCharacter = ref(null);
 const showAuditModal = ref(false);
+const showPlanViewer = ref(false);
 
 const openComment = (data) => {
     commentModalData.value = data;
@@ -295,6 +297,7 @@ const moveCharacterStatus = (characterId, newStatus) => {
     }
 
     // 2. Propagate to saved encounter rosters — skip LOCKED bosses
+    let propagated = false;
     for (const [slug, roster] of Object.entries(localEncounterRosters.value)) {
         if (lockedBosses.value.has(slug)) continue;
         if (!roster.selected && !roster.queued) continue;
@@ -306,6 +309,7 @@ const moveCharacterStatus = (characterId, newStatus) => {
                 entry.selection_status = 'queued';
                 if (!roster.queued) roster.queued = [];
                 roster.queued.push(entry);
+                propagated = true;
             }
         } else {
             const qIdx = (roster.queued || []).findIndex(e => e.character_id === characterId);
@@ -314,9 +318,46 @@ const moveCharacterStatus = (characterId, newStatus) => {
                 entry.selection_status = 'selected';
                 if (!roster.selected) roster.selected = [];
                 roster.selected.push(entry);
+                propagated = true;
             }
         }
     }
+
+    // 3. Persist encounter rosters if any were changed
+    if (propagated) {
+        persistEncounterRosters();
+    }
+};
+
+// Debounced persist for all encounter rosters
+let encounterPersistTimer = null;
+const persistEncounterRosters = () => {
+    clearTimeout(encounterPersistTimer);
+    encounterPersistTimer = setTimeout(async () => {
+        const allAssignments = [];
+        for (const [slug, groups] of Object.entries(localEncounterRosters.value)) {
+            for (const status of ['selected', 'queued', 'benched']) {
+                for (const entry of (groups[status] || [])) {
+                    allAssignments.push({
+                        encounter_slug: slug,
+                        character_id: entry.character_id,
+                        selection_status: status,
+                        position_order: entry.position_order || 0,
+                    });
+                }
+            }
+        }
+        if (allAssignments.length === 0) return;
+        try {
+            await fetch(props.routes.encounterRoster, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+                body: JSON.stringify({ assignments: allAssignments }),
+            });
+        } catch (e) {
+            console.error('Failed to persist encounter rosters:', e);
+        }
+    }, 500);
 };
 
 const updateAttendanceStatus = async (characterId, status) => {
@@ -488,14 +529,26 @@ const modifyEncounterRoster = async (slug, characterId, targetStatus, newSpec = 
         }
     }
 
-    // Persist
+    // Persist full roster for this boss (not just one character)
     try {
-        const persistPayload = { encounter_slug: slug, character_id: characterId };
-        if (targetStatus) persistPayload.selection_status = targetStatus;
-        await fetch(props.routes.encounterAssign, {
+        const allAssignments = [];
+        // Collect ALL encounter rosters (this boss + others) for bulk save
+        for (const [s, groups] of Object.entries(localEncounterRosters.value)) {
+            for (const status of ['selected', 'queued', 'benched']) {
+                for (const entry of (groups[status] || [])) {
+                    allAssignments.push({
+                        encounter_slug: s,
+                        character_id: entry.character_id,
+                        selection_status: status,
+                        position_order: entry.position_order || 0,
+                    });
+                }
+            }
+        }
+        await fetch(props.routes.encounterRoster, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify(persistPayload),
+            body: JSON.stringify({ assignments: allAssignments }),
         });
     } catch (e) {
         console.error('Failed to modify encounter roster:', e);
@@ -616,6 +669,30 @@ const selectedEncounterName = computed(() => {
     const enc = props.encounters.find(e => e.slug === selectedEncounter.value);
     return enc?.name || selectedEncounter.value;
 });
+
+// Assigned plan for current boss
+const selectedEncounterPlan = computed(() => {
+    if (!selectedEncounter.value) return null;
+    const planId = (props.event.assigned_plans || {})[selectedEncounter.value];
+    if (!planId) return null;
+    const encounters = props.plannerData?.encounters || [];
+    const enc = encounters.find(e => e.slug === selectedEncounter.value);
+    return enc?.plans?.find(p => p.id === planId) || null;
+});
+
+const selectedEncounterData = computed(() => {
+    if (!selectedEncounter.value) return null;
+    return (props.plannerData?.encounters || []).find(e => e.slug === selectedEncounter.value) || null;
+});
+
+const selectedEncounterMaps = computed(() => {
+    return selectedEncounterData.value?.maps || [];
+});
+
+const selectedEncounterPortrait = computed(() => {
+    return selectedEncounterData.value?.portrait || '';
+});
+
 
 // Sidebar collapsed state (mobile)
 const sidebarOpen = ref(false);
@@ -749,7 +826,7 @@ const persistSelectedEncounters = () => {
 const localEncounterRosters = ref({ ...props.encounterRosters });
 
 // Locked bosses: Set of slugs. Locked = frozen, no cross-boss propagation.
-const lockedBosses = ref(new Set());
+const lockedBosses = ref(new Set(props.event.locked_encounters || []));
 
 const toggleBossLock = (slug) => {
     const newSet = new Set(lockedBosses.value);
@@ -791,7 +868,18 @@ const toggleBossLock = (slug) => {
         }
         newSet.add(slug);
     }
+    const isLocking = newSet.has(slug);
     lockedBosses.value = newSet;
+
+    // Persist lock state
+    fetch(props.routes.eventSettings, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({ locked_encounters: [...newSet] }),
+    }).catch(e => console.error('Failed to save lock state:', e));
+
+    // If locking, also persist the materialized roster
+    if (isLocking) persistEncounterRosters();
 };
 
 
@@ -1087,8 +1175,8 @@ const activeRosterClasses = computed(() => {
         </div>
 
 
-        <!-- Main tab bar -->
-        <div class="flex items-center justify-between border-b border-white/10">
+        <!-- Main tab bar (only when boss roster enabled) -->
+        <div v-if="bossRosterEnabled" class="flex items-center justify-between border-b border-white/10">
             <div class="flex items-center gap-1">
                 <button
                     @click="activeTab = 'roster'"
@@ -1154,6 +1242,7 @@ const activeRosterClasses = computed(() => {
                         :selected-encounter="selectedEncounter"
                         :selected-encounters="localSelectedEncounters"
                         :locked-bosses="lockedBosses"
+                        :assigned-plans="event.assigned_plans || {}"
                         :can-manage="canManageSchedule"
                         :difficulty="event.difficulty"
                         :main-roster-count="mainRosterPresentCount"
@@ -1167,8 +1256,8 @@ const activeRosterClasses = computed(() => {
 
             <!-- Main content area -->
             <div class="flex-1 min-w-0">
-                <!-- ═══ ROSTER TAB ═══ -->
-                <div v-show="activeTab === 'roster'">
+                <!-- ═══ ROSTER (always visible when not on Plans tab) ═══ -->
+                <div v-show="activeTab === 'roster' || !bossRosterEnabled">
                     <!-- Split mode: full canvas -->
                     <SplitRaidCanvas
                         v-if="splitEnabled"
@@ -1184,7 +1273,7 @@ const activeRosterClasses = computed(() => {
                     />
                     <!-- Normal mode: compact grid -->
                     <CompactRosterGrid
-                        v-else
+                        v-if="!splitEnabled"
                         :main-roster="activeMainRoster"
                         :absent-roster="activeAbsentRoster"
                         :role-limits="effectiveRoleLimits"
@@ -1201,8 +1290,8 @@ const activeRosterClasses = computed(() => {
                     />
                 </div>
 
-                <!-- ═══ PLANS TAB ═══ -->
-                <div v-show="activeTab === 'planner'">
+                <!-- ═══ PLANS TAB (only with boss roster) ═══ -->
+                <div v-if="bossRosterEnabled" v-show="activeTab === 'planner'">
                     <EventPlanSelector
                         :planner-data="plannerData"
                         :boss-planner-url="bossPlannerUrl"
@@ -1211,6 +1300,7 @@ const activeRosterClasses = computed(() => {
                         :can-manage="canManageSchedule"
                         :csrf-token="csrfToken"
                         :assign-url="routes.assignPlan"
+                        @view-plan="(plan) => { showPlanViewer = true; }"
                     />
                 </div>
             </div>
@@ -1291,5 +1381,24 @@ const activeRosterClasses = computed(() => {
             @swap-character="handleSwapCharacter"
             @change-spec="handleChangeSpec"
         />
+
+        <!-- Plan Viewer Modal -->
+        <GlassModal :show="showPlanViewer" max-width="max-w-5xl" @close="showPlanViewer = false">
+            <div v-if="selectedEncounterPlan" class="p-2">
+                <div class="flex justify-end mb-2">
+                    <button @click="showPlanViewer = false" class="text-on-surface-variant hover:text-white p-1">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <SharedPlanView
+                    :plan="selectedEncounterPlan"
+                    :boss-name="selectedEncounterName"
+                    :maps="selectedEncounterMaps"
+                    :portrait="selectedEncounterPortrait"
+                    :static-name="event.static?.name || ''"
+                    :my-character-ids="userCharacters.map(c => c.id)"
+                />
+            </div>
+        </GlassModal>
     </div>
 </template>

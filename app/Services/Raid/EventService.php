@@ -105,6 +105,7 @@ class EventService
             'start_time' => $startTime,
             'end_time' => $endTime,
             'timezone' => $timezone,
+            'difficulty' => $data['difficulty'] ?? 'mythic',
             'description' => $data['description'] ?? null,
         ]);
     }
@@ -211,12 +212,18 @@ class EventService
             $endTime->addDay();
         }
 
-        $event->update([
+        $updateData = [
             'start_time' => $startTime,
             'end_time' => $endTime,
             'timezone' => $timezone,
             'description' => $data['description'] ?? $event->description,
-        ]);
+        ];
+
+        if (isset($data['difficulty'])) {
+            $updateData['difficulty'] = $data['difficulty'];
+        }
+
+        $event->update($updateData);
 
         return $event;
     }

@@ -16,6 +16,13 @@ const selectedTimezone = ref(props.event.timezone || props.event.static?.timezon
 const startTime = ref(props.event.start_time_formatted || '20:00');
 const endTime = ref(props.event.end_time_formatted || '23:00');
 const eventDescription = ref(props.event.description || '');
+const difficulty = ref(props.event.difficulty || 'mythic');
+
+const difficulties = [
+    { value: 'mythic', label: 'Mythic', color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/30' },
+    { value: 'heroic', label: 'Heroic', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/30' },
+    { value: 'normal', label: 'Normal', color: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/30' },
+];
 
 const startPickerRef = ref(null);
 const endPickerRef = ref(null);
@@ -52,6 +59,23 @@ const isOvernight = computed(() => {
             <input type="hidden" name="_method" value="PATCH">
             <input type="hidden" name="static_id" :value="event.static_id">
             <input type="hidden" name="date" :value="event.start_time_date">
+
+            <!-- Difficulty -->
+            <div class="space-y-1.5">
+                <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Difficulty') }}</label>
+                <input type="hidden" name="difficulty" :value="difficulty">
+                <div class="flex gap-2">
+                    <button
+                        v-for="d in difficulties" :key="d.value"
+                        type="button"
+                        @click="difficulty = d.value"
+                        class="flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all text-center"
+                        :class="difficulty === d.value
+                            ? `${d.bg} ${d.border} ${d.color}`
+                            : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
+                    >{{ d.label }}</button>
+                </div>
+            </div>
 
             <!-- Timezone -->
             <div class="space-y-1.5">

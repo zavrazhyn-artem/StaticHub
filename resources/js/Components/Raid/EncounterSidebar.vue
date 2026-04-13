@@ -9,6 +9,7 @@ const props = defineProps({
     selectedEncounter: { type: String, default: null },
     selectedEncounters: { type: Array, default: null }, // null = all selected
     lockedBosses: { type: Set, default: () => new Set() },
+    assignedPlans: { type: Object, default: () => ({}) },
     canManage: { type: Boolean, default: false },
     difficulty: { type: String, default: 'mythic' },
     mainRosterCount: { type: Number, default: 0 },
@@ -133,7 +134,10 @@ const onToggleAll = (event) => {
                 </div>
 
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] font-bold leading-tight truncate">{{ encounter.name }}</div>
+                    <div class="text-[11px] font-bold leading-tight truncate flex items-center gap-1">
+                        {{ encounter.name }}
+                        <span v-if="assignedPlans[encounter.slug]" class="material-symbols-outlined text-[11px] text-orange-400" title="Plan assigned">map</span>
+                    </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span
                             v-if="!isEncounterChecked(encounter.slug)"

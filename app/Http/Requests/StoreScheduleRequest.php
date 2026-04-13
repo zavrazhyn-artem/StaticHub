@@ -22,6 +22,7 @@ class StoreScheduleRequest extends FormRequest
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'description' => 'nullable|string',
+            'difficulty' => 'nullable|in:mythic,heroic,normal,raid_finder',
             'timezone' => 'required|string',
         ];
     }

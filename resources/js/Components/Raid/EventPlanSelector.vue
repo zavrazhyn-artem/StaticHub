@@ -13,6 +13,8 @@ const props = defineProps({
     assignUrl: { type: String, default: '' },
 });
 
+const emit = defineEmits(['view-plan']);
+
 const encounters = computed(() => props.plannerData.encounters || []);
 
 const currentEncounter = computed(() => {
@@ -108,11 +110,18 @@ const unassignPlan = async () => {
                             </div>
                         </div>
                     </div>
-                    <button v-if="canManage" @click="unassignPlan"
-                        class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-bold hover:bg-red-500/20 transition-all">
-                        <span class="material-symbols-outlined text-xs">close</span>
-                        {{ __('Remove') }}
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <button @click="emit('view-plan', assignedPlan)"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[9px] font-bold hover:bg-orange-500/20 transition-all">
+                            <span class="material-symbols-outlined text-xs">visibility</span>
+                            {{ __('View') }}
+                        </button>
+                        <button v-if="canManage" @click="unassignPlan"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-bold hover:bg-red-500/20 transition-all">
+                            <span class="material-symbols-outlined text-xs">close</span>
+                            {{ __('Remove') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
