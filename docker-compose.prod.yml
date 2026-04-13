@@ -20,10 +20,6 @@
 
 x-app-defaults: &app-defaults
   image: blastr-app:latest
-  build:
-    context: .
-    dockerfile: docker/production/Dockerfile
-    target: production
   restart: unless-stopped
   env_file: .env
   depends_on:
@@ -70,6 +66,10 @@ services:
   # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+      target: production
     healthcheck:
       test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
       interval: 30s
