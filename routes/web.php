@@ -18,6 +18,7 @@ use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
 use App\Http\Controllers\Settings\StaticSettingsController;
+use App\Http\Controllers\Gear\GearController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
@@ -58,6 +59,9 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::patch('/statics/{static}/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
     Route::patch('/statics/{static}/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
+    // Gear Management
+    Route::get('/statics/{static}/gear', [GearController::class, 'index'])->name('statics.gear');
+
     // Settings
     Route::get('/statics/{static}/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
@@ -97,6 +101,10 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/schedule/event/{event}/encounter-roster/assign', [EventController::class, 'assignEncounterCharacter'])->name('schedule.event.encounter-roster.assign');
     Route::delete('/schedule/event/{event}/encounter-roster/remove', [EventController::class, 'removeEncounterCharacter'])->name('schedule.event.encounter-roster.remove');
     Route::post('/schedule/event/{event}/assign-plan', [EventController::class, 'assignPlan'])->name('schedule.event.assign-plan');
+    Route::post('/schedule/event/{event}/toggle-encounter', [EventController::class, 'toggleEncounter'])->name('schedule.event.toggle-encounter');
+    Route::post('/schedule/event/{event}/settings', [EventController::class, 'updateSettings'])->name('schedule.event.settings');
+    Route::post('/schedule/event/{event}/override-attendance', [EventController::class, 'overrideAttendance'])->name('schedule.event.override-attendance');
+    Route::post('/schedule/event/{event}/save-splits', [EventController::class, 'saveSplitAssignments'])->name('schedule.event.save-splits');
 
     // Boss Planner (standalone section)
     Route::get('/statics/{static}/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');

@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     allSpecs:        { type: Array,  required: true },
@@ -14,7 +16,7 @@ const classSpecs = computed(() =>
     props.allSpecs.filter(s => s.class_name === props.characterClass)
 );
 
-const roleLabel = { tank: 'Tank', heal: 'Heal', mdps: 'Melee', rdps: 'Ranged' };
+const roleLabel = { tank: __('Tank'), heal: __('Heal'), mdps: __('Melee'), rdps: __('Ranged') };
 
 const roleBadgeClass = {
     tank: 'bg-blue-500/20 text-blue-300 border-blue-500/30',

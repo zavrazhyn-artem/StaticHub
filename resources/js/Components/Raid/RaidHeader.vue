@@ -23,7 +23,7 @@ const { formatDate, formatTime } = useTimeFormatter();
 <template>
     <div class="space-y-4">
         <div class="flex items-center gap-3">
-            <a :href="routes.index" class="text-on-surface-variant hover:text-primary transition-colors">
+            <a :href="routes.index" class="text-on-surface-variant hover:text-fuchsia-400 transition-colors">
                 <span class="material-symbols-outlined text-xl">arrow_back</span>
             </a>
             <h1 class="text-3xl font-black text-white uppercase tracking-tighter font-headline leading-none">
@@ -37,11 +37,11 @@ const { formatDate, formatTime } = useTimeFormatter();
                 <!-- Date/Time chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
                     <div class="flex items-center gap-2 text-white font-headline text-[11px] font-black uppercase tracking-widest leading-none">
-                        <span class="material-symbols-outlined text-sm text-primary">calendar_today</span>
+                        <span class="material-symbols-outlined text-sm text-fuchsia-400">calendar_today</span>
                         <span>{{ formatDate(event.start_time) }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-white font-headline text-[11px] font-black uppercase tracking-widest leading-none border-l border-white/10 pl-4">
-                        <span class="material-symbols-outlined text-sm text-primary">schedule</span>
+                        <span class="material-symbols-outlined text-sm text-fuchsia-400">schedule</span>
                         <span>{{ formatTime(event.start_time) }}</span>
                         <span class="text-on-surface-variant">-</span>
                         <span>{{ formatTime(event.end_time) }}</span>
@@ -89,9 +89,9 @@ const { formatDate, formatTime } = useTimeFormatter();
                 class="flex-1 flex items-center justify-center px-4 h-10 bg-surface-container-high border border-white/10 rounded-xl glassmorphism backdrop-blur-md shadow-2xl"
             >
                 <div class="text-white font-headline text-[11px] font-black uppercase tracking-[0.15em] leading-none opacity-80 truncate">
-                    {{ __('Joined as') }} <span class="text-primary">{{ joinedCharacter?.name }}</span>
+                    {{ __('Joined as') }} <span class="text-fuchsia-400">{{ joinedCharacter?.name }}</span>
                     &bull;
-                    <span class="text-primary">{{ joinedRoleLabel }}</span>
+                    <span class="text-fuchsia-400">{{ joinedRoleLabel }}</span>
                 </div>
             </div>
 

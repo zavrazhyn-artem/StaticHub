@@ -18,6 +18,7 @@ import SettingsLogs from './Components/Settings/SettingsLogs.vue';
 import SettingsSchedule from './Components/Settings/SettingsSchedule.vue';
 import SettingsDiscord from './Components/Settings/SettingsDiscord.vue';
 import SettingsProfile from './Components/Settings/SettingsProfile.vue';
+import GearManagement from './Components/Gear/GearManagement.vue';
 import StaticSetup from './Components/Statics/StaticSetup.vue';
 import ConsumablesPlanner from './Components/Treasury/ConsumablesPlanner.vue';
 import TransactionHistory from './Components/Treasury/TransactionHistory.vue';
@@ -76,6 +77,7 @@ app.component('settings-logs', SettingsLogs);
 app.component('settings-schedule', SettingsSchedule);
 app.component('settings-discord', SettingsDiscord);
 app.component('settings-profile', SettingsProfile);
+app.component('gear-management', GearManagement);
 app.component('static-setup', StaticSetup);
 app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
@@ -91,6 +93,11 @@ app.component('alert-banner', AlertBanner);
 if (document.getElementById('app')) {
     app.mount('#app');
 }
+
+// Force reload on bfcache restore (prevents stale Vue state on browser back)
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) window.location.reload();
+});
 
 import Alpine from 'alpinejs';
 

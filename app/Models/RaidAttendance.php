@@ -38,6 +38,7 @@ class RaidAttendance extends Pivot
         'status',
         'comment',
         'spec_id',
+        'split_group',
     ];
 
     public function newEloquentBuilder($query): RaidAttendanceBuilder

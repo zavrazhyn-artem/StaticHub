@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 import RaidMapCanvas from './RaidMapCanvas.vue';
 import StepNavigator from './StepNavigator.vue';
 
@@ -49,7 +51,7 @@ const currentGroups = computed(() => currentStep.value?.groups || {});
 
         <!-- Footer -->
         <div class="text-center text-[10px] text-on-surface-variant/40">
-            Shared raid plan &mdash; read-only view
+            {{ __('Shared raid plan') }} &mdash; {{ __('read-only view') }}
         </div>
     </div>
 </template>

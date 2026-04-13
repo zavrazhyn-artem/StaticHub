@@ -166,7 +166,7 @@ function mainSpecName(charId) {
                             {{ char.name }}
                             <span
                                 v-if="isMain(char.id)"
-                                class="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[8px] uppercase tracking-widest font-black"
+                                class="px-1.5 py-0.5 rounded-full bg-teal-400/20 text-teal-400 border border-teal-400/30 text-[8px] uppercase tracking-widest font-black"
                             >{{ __('Main') }}</span>
                         </div>
                         <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-2">
@@ -200,8 +200,8 @@ function mainSpecName(charId) {
                             @change="setMain(char.id)"
                             class="peer sr-only"
                         >
-                        <div class="w-5 h-5 rounded-full border-2 border-white/10 peer-checked:border-primary peer-checked:bg-primary/20 transition-all"></div>
-                        <div class="absolute w-2 h-2 rounded-full bg-primary opacity-0 peer-checked:opacity-100 transition-all"></div>
+                        <div class="w-5 h-5 rounded-full border-2 border-white/10 peer-checked:border-teal-400 peer-checked:bg-teal-400/20 transition-all"></div>
+                        <div class="absolute w-2 h-2 rounded-full bg-teal-400 opacity-0 peer-checked:opacity-100 transition-all"></div>
                     </label>
                 </div>
 

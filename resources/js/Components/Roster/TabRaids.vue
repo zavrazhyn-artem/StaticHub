@@ -119,7 +119,7 @@ const getWeeklyProgression = (char) => {
             </template>
           </tr>
           <!-- Boss name headers -->
-          <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/40 text-emerald-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
             <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center border-l border-white/5">{{ __('Prog') }}</th>
             <th v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5 text-[9px] min-w-[80px]">

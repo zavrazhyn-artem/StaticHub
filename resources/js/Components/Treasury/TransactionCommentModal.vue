@@ -36,11 +36,11 @@ const emit = defineEmits(['close']);
             <div class="space-y-1">
                 <label for="edit_description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Comment') }}</label>
                 <textarea name="description" id="edit_description" rows="4" v-model="transaction.description" :placeholder="__('Optional notes...')"
-                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none"></textarea>
+                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none"></textarea>
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
+                <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
                     {{ __('Save Comment') }}
                 </button>
             </div>

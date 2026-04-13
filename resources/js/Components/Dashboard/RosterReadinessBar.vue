@@ -7,7 +7,7 @@
                 :style="{ width: percent(role) + '%' }"
             ></div>
             <div class="relative z-10 flex items-center gap-2 h-full px-3">
-                <img :src="`/images/roles/${role.icon}.svg`" class="w-4 h-4 opacity-90" :alt="role.label">
+                <img :src="`/images/roles/${role.icon}.svg`" class="w-4 h-4 opacity-90" :alt="__(role.label)">
                 <span class="text-xs font-black text-white leading-none">{{ roleCounts[role.key] ?? 0 }}</span>
                 <span class="text-[9px] font-bold text-white/40">/ {{ role.max }}</span>
             </div>
@@ -16,6 +16,9 @@
 </template>
 
 <script setup>
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
+
 const props = defineProps({
     roleCounts: { type: Object, default: () => ({}) },
 })

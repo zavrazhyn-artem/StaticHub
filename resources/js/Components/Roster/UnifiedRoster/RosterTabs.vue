@@ -34,7 +34,7 @@ const difficulties = [
                     @click="emit('update:activeTab', tab.id)"
                     class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
                     :class="activeTab === tab.id
-                        ? 'bg-primary text-white shadow-lg'
+                        ? 'bg-emerald-400 text-white shadow-lg'
                         : 'text-on-surface-variant hover:bg-white/5 hover:text-white'">
                 <span class="material-symbols-outlined text-sm">{{ tab.icon }}</span>
                 {{ __(tab.labelKey) }}

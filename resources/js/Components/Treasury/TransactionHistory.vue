@@ -65,7 +65,7 @@
                                 {{ tx.description || '—' }}
                             </td>
                             <td v-if="canManageTreasury" class="px-4 py-4 text-center">
-                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-primary transition-colors">
+                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-yellow-500 transition-colors">
                                     <span class="material-symbols-outlined text-lg">{{ tx.description ? 'edit_note' : 'add_comment' }}</span>
                                 </button>
                             </td>

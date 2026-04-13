@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useWowClasses } from '../../composables/useWowClasses.js';
+import { useTranslation } from '@/composables/useTranslation';
+
+const { __ } = useTranslation();
 
 const props = defineProps({
     encounterSlug: { type: String, default: null },
@@ -9,24 +12,84 @@ const props = defineProps({
     mainRoster: { type: Object, required: true },
     absentRoster: { type: Array, default: () => [] },
     planningStats: { type: Object, default: () => ({}) },
+    roleLimits: { type: Object, default: () => ({}) },
+    encounters: { type: Array, default: () => [] },
     canManage: { type: Boolean, default: false },
     csrfToken: { type: String, required: true },
     routes: { type: Object, required: true },
 });
 
-const emit = defineEmits(['assign', 'remove']);
+const emit = defineEmits(['assign', 'remove', 'bulk-assign']);
 
 const { getClassColor } = useWowClasses();
 
+// Build a virtual roster from mainRoster (present/late players) respecting role limits
+const defaultRosterFromMain = computed(() => {
+    const tankLimit = props.roleLimits.tank ?? 2;
+    const healMax = props.roleLimits.heal?.max ?? 4;
+    const total = props.roleLimits.total ?? 20;
+    const roleLimitsMap = { tank: tankLimit, heal: healMax };
+
+    const selected = [];
+    const queued = [];
+    let filled = 0;
+
+    for (const role of ['tank', 'heal', 'mdps', 'rdps']) {
+        const chars = (props.mainRoster[role] || []).filter(
+            c => c.pivot?.status === 'present' || c.pivot?.status === 'late'
+        );
+        const limit = roleLimitsMap[role] ?? Infinity;
+
+        for (let i = 0; i < chars.length; i++) {
+            const entry = {
+                character_id: chars[i].id,
+                character_name: chars[i].name,
+                class_name: chars[i].playable_class,
+                role: chars[i].assigned_role || chars[i].main_spec?.role || role,
+                spec: chars[i].main_spec || null,
+                selection_status: 'selected',
+                position_order: selected.length + queued.length,
+            };
+
+            if (i >= limit || filled >= total) {
+                entry.selection_status = 'queued';
+                queued.push(entry);
+            } else {
+                selected.push(entry);
+                filled++;
+            }
+        }
+    }
+    return { selected, queued, benched: [] };
+});
+
+const savedRoster = computed(() => {
+    if (!props.encounterSlug) return null;
+    return props.encounterRosters[props.encounterSlug] || null;
+});
+
+const hasSavedRoster = computed(() => {
+    return savedRoster.value &&
+        (savedRoster.value.selected.length > 0 ||
+         savedRoster.value.queued.length > 0);
+});
+
 const currentRoster = computed(() => {
     if (!props.encounterSlug) return null;
-    return props.encounterRosters[props.encounterSlug] || { selected: [], queued: [], benched: [] };
+    // If saved assignments exist, use those; otherwise fall back to main roster
+    if (hasSavedRoster.value) return savedRoster.value;
+    return defaultRosterFromMain.value;
 });
 
 const hasEncounterRoster = computed(() => {
     return props.encounterSlug && currentRoster.value &&
         (currentRoster.value.selected.length > 0 ||
          currentRoster.value.queued.length > 0);
+});
+
+// Whether we're showing inherited (unsaved) roster
+const isInheritedRoster = computed(() => {
+    return props.encounterSlug && !hasSavedRoster.value && hasEncounterRoster.value;
 });
 
 // All available characters from main + absent roster for assignment
@@ -93,6 +156,81 @@ const removeCharacter = (characterId) => {
         character_id: characterId,
     });
 };
+
+// Auto-fill from "All Encounters" main roster
+const autoFillFromRoster = () => {
+    const tankLimit = props.roleLimits.tank ?? 2;
+    const healMax = props.roleLimits.heal?.max ?? 4;
+    const total = props.roleLimits.total ?? 20;
+
+    let filled = 0;
+    const roleLimitsMap = { tank: tankLimit, heal: healMax };
+    const assignments = [];
+
+    for (const role of ['tank', 'heal', 'mdps', 'rdps']) {
+        const chars = (props.mainRoster[role] || []).filter(
+            c => c.pivot?.status === 'present' || c.pivot?.status === 'late'
+        );
+        const limit = roleLimitsMap[role] ?? (total - filled);
+
+        for (let i = 0; i < chars.length && filled < total; i++) {
+            if (roleLimitsMap[role] && i >= limit) {
+                assignments.push({
+                    encounter_slug: props.encounterSlug,
+                    character_id: chars[i].id,
+                    selection_status: 'queued',
+                    position_order: assignments.length,
+                });
+            } else {
+                assignments.push({
+                    encounter_slug: props.encounterSlug,
+                    character_id: chars[i].id,
+                    selection_status: 'selected',
+                    position_order: assignments.length,
+                });
+                filled++;
+            }
+        }
+    }
+
+    if (assignments.length > 0) {
+        emit('bulk-assign', assignments);
+    }
+};
+
+// Copy roster from previous boss
+const copyFromPreviousBoss = () => {
+    if (!props.encounterSlug || !props.encounters.length) return;
+    const currentIdx = props.encounters.findIndex(e => e.slug === props.encounterSlug);
+    if (currentIdx <= 0) return;
+
+    const prevSlug = props.encounters[currentIdx - 1].slug;
+    const prevRoster = props.encounterRosters[prevSlug];
+    if (!prevRoster) return;
+
+    const assignments = [];
+    for (const status of ['selected', 'queued']) {
+        for (const entry of (prevRoster[status] || [])) {
+            assignments.push({
+                encounter_slug: props.encounterSlug,
+                character_id: entry.character_id,
+                selection_status: status,
+                position_order: assignments.length,
+            });
+        }
+    }
+
+    if (assignments.length > 0) {
+        emit('bulk-assign', assignments);
+    }
+};
+
+const previousBossName = computed(() => {
+    if (!props.encounterSlug || !props.encounters.length) return null;
+    const idx = props.encounters.findIndex(e => e.slug === props.encounterSlug);
+    if (idx <= 0) return null;
+    return props.encounters[idx - 1].name;
+});
 </script>
 
 <template>
@@ -100,19 +238,40 @@ const removeCharacter = (characterId) => {
         <!-- Encounter header -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-xl text-primary">swords</span>
+                <span class="material-symbols-outlined text-xl text-fuchsia-400">swords</span>
                 <h3 class="text-sm font-black uppercase tracking-widest text-white">{{ encounterName }}</h3>
+                <span
+                    v-if="isInheritedRoster"
+                    class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400"
+                >{{ __('From Roster') }}</span>
             </div>
-            <div v-if="encounterSlug && canManage" class="flex items-center gap-2">
+            <div v-if="encounterSlug && canManage" class="flex items-center gap-1.5">
+                <button
+                    v-if="isInheritedRoster"
+                    @click="autoFillFromRoster"
+                    class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest bg-fuchsia-400/10 text-fuchsia-400 border border-fuchsia-400/30 hover:bg-fuchsia-400/20 transition-all"
+                    :title="__('Save this roster for this boss')"
+                >
+                    <span class="material-symbols-outlined text-xs">save</span>
+                    {{ __('Save') }}
+                </button>
+                <button
+                    v-if="previousBossName"
+                    @click="copyFromPreviousBoss"
+                    class="flex items-center gap-1 px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest bg-white/5 text-on-surface-variant hover:text-white border border-white/10 transition-all"
+                    :title="'Copy from ' + previousBossName"
+                >
+                    <span class="material-symbols-outlined text-xs">content_copy</span>
+                </button>
                 <button
                     @click="showAssignPanel = !showAssignPanel"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                    class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all"
                     :class="showAssignPanel
-                        ? 'bg-primary/20 text-primary border border-primary/30'
+                        ? 'bg-fuchsia-400/20 text-fuchsia-400 border border-fuchsia-400/30'
                         : 'bg-white/5 text-on-surface-variant hover:text-white border border-white/10'"
                 >
-                    <span class="material-symbols-outlined text-sm">person_add</span>
-                    Assign
+                    <span class="material-symbols-outlined text-xs">person_add</span>
+                    {{ __('Assign') }}
                 </button>
             </div>
         </div>
@@ -154,8 +313,8 @@ const removeCharacter = (characterId) => {
                             </div>
                             <div class="flex items-center gap-2">
                                 <div v-if="getStatForChar(entry.character_id)" class="text-[8px] text-on-surface-variant">
-                                    <span class="text-primary font-bold">{{ getStatForChar(entry.character_id).percentage }}%</span>
-                                    <span class="opacity-60 ml-0.5">attendance</span>
+                                    <span class="text-fuchsia-400 font-bold">{{ getStatForChar(entry.character_id).percentage }}%</span>
+                                    <span class="opacity-60 ml-0.5">{{ __('attendance') }}</span>
                                 </div>
                                 <button
                                     v-if="canManage"
@@ -174,7 +333,7 @@ const removeCharacter = (characterId) => {
             <div v-if="queuedChars.length > 0" class="bg-surface-container/60 border border-yellow-500/10 rounded-xl overflow-hidden">
                 <div class="px-3 py-1.5 border-b border-yellow-500/10 flex items-center gap-2 bg-yellow-500/[0.03]">
                     <span class="material-symbols-outlined text-sm text-yellow-500/70">hourglass_top</span>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-yellow-500/70">Queued</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-yellow-500/70">{{ __('Queued') }}</span>
                     <span class="text-[9px] font-bold text-on-surface-variant ml-auto">{{ queuedChars.length }}</span>
                 </div>
                 <div class="p-1.5 space-y-0.5">
@@ -198,7 +357,7 @@ const removeCharacter = (characterId) => {
                                 v-if="canManage"
                                 @click="assignCharacter(entry.character_id, 'selected')"
                                 class="opacity-0 group-hover:opacity-100 text-green-400 hover:text-green-300 transition-all p-0.5"
-                                title="Promote to selected"
+                                :title="__('Promote to selected')"
                             >
                                 <span class="material-symbols-outlined text-sm">arrow_upward</span>
                             </button>
@@ -215,24 +374,16 @@ const removeCharacter = (characterId) => {
             </div>
         </div>
 
-        <!-- No encounter selected or no assignments: show info -->
+        <!-- No roster at all (no one signed up) -->
         <div v-else-if="encounterSlug && !hasEncounterRoster" class="text-center py-8">
             <span class="material-symbols-outlined text-3xl text-on-surface-variant/30">assignment</span>
-            <p class="text-xs text-on-surface-variant/50 mt-2">No roster assignments for this encounter</p>
-            <button
-                v-if="canManage"
-                @click="showAssignPanel = true"
-                class="mt-3 px-4 py-2 rounded-xl bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all"
-            >
-                <span class="material-symbols-outlined text-sm align-middle mr-1">add</span>
-                Assign Players
-            </button>
+            <p class="text-xs text-on-surface-variant/50 mt-2">{{ __('No players in roster yet') }}</p>
         </div>
 
         <!-- Assignment panel (slide in) -->
         <div v-if="showAssignPanel && encounterSlug" class="bg-surface-container-high/80 border border-white/10 rounded-xl p-3 space-y-2">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">Available Players</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Available Players') }}</span>
                 <button @click="showAssignPanel = false" class="text-on-surface-variant hover:text-white">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>
@@ -257,12 +408,12 @@ const removeCharacter = (characterId) => {
                     <button
                         @click.stop="assignCharacter(char.id, 'queued')"
                         class="opacity-0 group-hover:opacity-100 text-yellow-400 text-[8px] font-bold px-2 py-0.5 rounded bg-yellow-400/10 border border-yellow-400/20 hover:bg-yellow-400/20 transition-all"
-                    >Queue</button>
+                    >{{ __('Queue') }}</button>
                     <span class="material-symbols-outlined text-sm text-green-400 opacity-0 group-hover:opacity-100">add_circle</span>
                 </div>
             </div>
             <div v-if="unassignedCharacters.length === 0" class="text-center py-3">
-                <span class="text-[9px] text-on-surface-variant/50">All players assigned</span>
+                <span class="text-[9px] text-on-surface-variant/50">{{ __('All players assigned') }}</span>
             </div>
         </div>
     </div>

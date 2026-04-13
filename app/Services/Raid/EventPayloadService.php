@@ -12,6 +12,7 @@ use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use App\Models\StaticGroup;
 
 class EventPayloadService
 {
@@ -51,9 +52,10 @@ class EventPayloadService
 
         $rosterData = $this->attendanceService->getGroupedRoster($event);
 
-        $event->start_time_formatted = $event->start_time->format('H:i');
-        $event->end_time_formatted = $event->end_time?->format('H:i');
-        $event->start_time_date = $event->start_time->format('Y-m-d');
+        $tz = $event->timezone ?? $event->static?->timezone ?? 'UTC';
+        $event->start_time_formatted = $event->start_time->copy()->setTimezone($tz)->format('H:i');
+        $event->end_time_formatted = $event->end_time?->copy()->setTimezone($tz)->format('H:i');
+        $event->start_time_date = $event->start_time->copy()->setTimezone($tz)->format('Y-m-d');
 
         $aiAnalysis = $event->ai_analysis;
         $event->ai_analysis_html = [
@@ -142,6 +144,19 @@ class EventPayloadService
         $planningStats = $this->encounterRosterService->calculatePlanningStats($event->static_id, $event->id);
         $bossPlannerUrl = $this->buildBossPlannerUrl($event);
 
+        // Build buff/utility coverage from present roster classes
+        $buffConfig = config('wow_buffs');
+        $roleLimits = $buffConfig['role_limits'] ?? [];
+
+        // All user alts in this static (for character swap feature)
+        $allStaticAlts = $this->buildAllUserAlts($event->static_id, $resolvedCharacters ?? collect());
+
+        // Weekly raid lockout data per character
+        $weeklyRaidData = $this->buildWeeklyRaidData($allRosterCharIds);
+
+        // Bench history: count how many of last N raids each character was benched
+        $benchHistory = $this->buildBenchHistory($event->static_id, $event->id);
+
         return [
             'event'               => $event,
             'mainRoster'          => $mainRosterEnhanced,
@@ -155,6 +170,15 @@ class EventPayloadService
             'plannerData'         => $plannerData,
             'planningStats'       => $planningStats,
             'bossPlannerUrl'      => $bossPlannerUrl,
+            'buffConfig'          => [
+                'buffs_debuffs' => $buffConfig['buffs_debuffs'] ?? [],
+                'utility'       => $buffConfig['utility'] ?? [],
+            ],
+            'roleLimits'          => $roleLimits[$event->difficulty] ?? $roleLimits['mythic'],
+            'allStaticAlts'       => $allStaticAlts,
+            'weeklyRaidData'      => $weeklyRaidData,
+            'benchHistory'        => $benchHistory,
+            'splitAssignments'    => $this->buildSplitAssignments($event),
         ];
     }
 
@@ -185,5 +209,114 @@ class EventPayloadService
             fn ($char) => $char->statics->contains(fn ($s) => $s->pivot->role === 'main')
         );
         return $mainCharacter ? $mainCharacter->id : $userCharacters->first()->id;
+    }
+
+    /**
+     * Get all split assignments for an event: { character_id: split_group }
+     */
+    private function buildSplitAssignments(Event $event): array
+    {
+        return RaidAttendance::where('event_id', $event->id)
+            ->whereNotNull('split_group')
+            ->pluck('split_group', 'character_id')
+            ->toArray();
+    }
+
+    /**
+     * Build all user alts in this static, keyed by user_id.
+     * Each user maps to an array of their characters with specs.
+     */
+    private function buildAllUserAlts(int $staticId, Collection $resolvedCharacters): array
+    {
+        $userIds = User::query()
+            ->whereHas('statics', fn ($q) => $q->where('statics.id', $staticId))
+            ->pluck('id');
+
+        $characters = Character::query()
+            ->whereIn('user_id', $userIds)
+            ->whereHas('statics', fn ($q) => $q->where('statics.id', $staticId))
+            ->with(['statics' => fn ($q) => $q->where('statics.id', $staticId)])
+            ->get();
+
+        $specMap = CharacterStaticSpec::whereIn('character_id', $characters->pluck('id'))
+            ->where('static_id', $staticId)
+            ->with('specialization')
+            ->get()
+            ->groupBy('character_id');
+
+        return $characters->groupBy('user_id')
+            ->map(fn (Collection $chars) => $chars->map(function (Character $c) use ($specMap) {
+                $specs = $specMap->get($c->id, collect());
+                $mainSpec = $specs->firstWhere('is_main', true)?->specialization;
+
+                return [
+                    'id'             => $c->id,
+                    'name'           => $c->name,
+                    'playable_class' => $c->playable_class,
+                    'item_level'     => $c->equipped_item_level ?? $c->item_level,
+                    'avatar_url'     => $c->avatar_url,
+                    'role'           => $c->statics->first()?->pivot->role ?? 'alt',
+                    'main_spec'      => $mainSpec ? [
+                        'id'       => $mainSpec->id,
+                        'name'     => $mainSpec->name,
+                        'role'     => $mainSpec->role,
+                        'icon_url' => $mainSpec->icon_url,
+                    ] : null,
+                    'specs' => $specs->filter(fn ($r) => $r->specialization)->map(fn ($r) => [
+                        'id'       => $r->specialization->id,
+                        'name'     => $r->specialization->name,
+                        'role'     => $r->specialization->role,
+                        'icon_url' => $r->specialization->icon_url,
+                        'is_main'  => (bool) $r->is_main,
+                    ])->values(),
+                ];
+            })->values())
+            ->toArray();
+    }
+
+    /**
+     * Build weekly raid lockout data for characters.
+     * Returns { character_id => { "Instance Name" => [ { name, LFR, N, H, M } ] } }
+     */
+    private function buildWeeklyRaidData(Collection $characterIds): array
+    {
+        return Character::whereIn('id', $characterIds)
+            ->whereNotNull('character_weekly_data')
+            ->pluck('character_weekly_data', 'id')
+            ->map(fn ($data) => is_string($data) ? json_decode($data, true) : $data)
+            ->map(fn ($data) => $data['raids'] ?? [])
+            ->filter()
+            ->toArray();
+    }
+
+    /**
+     * Build bench history: count how many of the last 5 raids each character was absent/benched.
+     */
+    private function buildBenchHistory(int $staticId, int $currentEventId): array
+    {
+        $recentEventIds = Event::query()
+            ->forStatic($staticId)
+            ->where('start_time', '<', now())
+            ->where('id', '!=', $currentEventId)
+            ->orderByDesc('start_time')
+            ->limit(5)
+            ->pluck('id');
+
+        if ($recentEventIds->isEmpty()) {
+            return [];
+        }
+
+        $totalEvents = $recentEventIds->count();
+
+        return RaidAttendance::whereIn('event_id', $recentEventIds)
+            ->whereIn('status', ['absent', 'tentative'])
+            ->groupBy('character_id')
+            ->selectRaw('character_id, COUNT(*) as bench_count')
+            ->pluck('bench_count', 'character_id')
+            ->map(fn (int $count) => [
+                'bench_count'  => $count,
+                'total_events' => $totalEvents,
+            ])
+            ->toArray();
     }
 }

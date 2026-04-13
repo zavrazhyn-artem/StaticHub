@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, reactive, watch } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     step: { type: Object, default: null },
@@ -976,7 +978,7 @@ defineExpose({ svgRef });
                 <div class="w-px h-4 bg-white/10 mx-0.5"></div>
             </template>
             <span class="text-[9px] font-bold text-on-surface-variant/50 px-1 min-w-[36px] text-center">{{ zoomLevel }}%</span>
-            <button @click="resetView" class="w-6 h-6 rounded flex items-center justify-center text-on-surface-variant/50 hover:text-white hover:bg-white/10 transition-all" title="Reset zoom">
+            <button @click="resetView" class="w-6 h-6 rounded flex items-center justify-center text-on-surface-variant/50 hover:text-white hover:bg-white/10 transition-all" :title="__('Reset zoom')">
                 <span class="material-symbols-outlined text-sm">fit_screen</span>
             </button>
         </div>
@@ -1201,7 +1203,7 @@ defineExpose({ svgRef });
             <!-- Empty state -->
             <text v-if="!players.length && !markers.length && !shapes.length && !arrows.length && !textLabels.length && !groupTokens.length"
                 :x="canvasWidth/2" :y="canvasHeight/2" text-anchor="middle" dominant-baseline="middle"
-                fill="rgba(255,255,255,0.08)" font-size="20" font-weight="700" style="font-family: system-ui;">Drag players here or use tools to draw</text>
+                fill="rgba(255,255,255,0.08)" font-size="20" font-weight="700" style="font-family: system-ui;">{{ __('Drag players here or use tools to draw') }}</text>
         </svg>
     </div>
 
@@ -1215,7 +1217,7 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-blue-400 hover:bg-blue-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">link</span>
-                    <span class="text-[10px] font-bold">Group Selected</span>
+                    <span class="text-[10px] font-bold">{{ __('Group Selected') }}</span>
                 </div>
                 <span class="text-[8px] text-on-surface-variant/40 font-mono">Ctrl+G</span>
             </button>
@@ -1224,7 +1226,7 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-orange-400 hover:bg-orange-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">link_off</span>
-                    <span class="text-[10px] font-bold">Ungroup</span>
+                    <span class="text-[10px] font-bold">{{ __('Ungroup') }}</span>
                 </div>
             </button>
             <!-- Lock/Unlock -->
@@ -1232,7 +1234,7 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-on-surface-variant hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">{{ ctxElementLocked ? 'lock_open' : 'lock' }}</span>
-                    <span class="text-[10px] font-bold">{{ ctxElementLocked ? 'Unlock' : 'Lock' }}</span>
+                    <span class="text-[10px] font-bold">{{ ctxElementLocked ? __('Unlock') : __('Lock') }}</span>
                 </div>
             </button>
             <!-- Delete -->
@@ -1240,7 +1242,7 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-red-400 hover:bg-red-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span>
-                    <span class="text-[10px] font-bold">{{ multiSel.length > 1 ? `Delete ${multiSel.length} items` : 'Delete' }}</span>
+                    <span class="text-[10px] font-bold">{{ multiSel.length > 1 ? __('Delete') + ` ${multiSel.length} ` + __('items') : __('Delete') }}</span>
                 </div>
                 <span class="text-[8px] text-on-surface-variant/40 font-mono">Del</span>
             </button>

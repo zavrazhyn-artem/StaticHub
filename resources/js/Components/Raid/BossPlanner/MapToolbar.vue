@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     activeTool: { type: String, default: 'select' },
@@ -23,26 +25,26 @@ const markerTypes = [
     { id: 'star', img: '/images/raidplan/raid-markers/star.png' },
 ];
 
-const classIcons = [
-    { id: 'deathknight', label: 'Death Knight' }, { id: 'demonhunter', label: 'Demon Hunter' },
-    { id: 'druid', label: 'Druid' }, { id: 'evoker', label: 'Evoker' },
-    { id: 'hunter', label: 'Hunter' }, { id: 'mage', label: 'Mage' },
-    { id: 'monk', label: 'Monk' }, { id: 'paladin', label: 'Paladin' },
-    { id: 'priest', label: 'Priest' }, { id: 'rogue', label: 'Rogue' },
-    { id: 'shaman', label: 'Shaman' }, { id: 'warlock', label: 'Warlock' },
-    { id: 'warrior', label: 'Warrior' },
-];
+const classIcons = computed(() => [
+    { id: 'deathknight', label: __('Death Knight') }, { id: 'demonhunter', label: __('Demon Hunter') },
+    { id: 'druid', label: __('Druid') }, { id: 'evoker', label: __('Evoker') },
+    { id: 'hunter', label: __('Hunter') }, { id: 'mage', label: __('Mage') },
+    { id: 'monk', label: __('Monk') }, { id: 'paladin', label: __('Paladin') },
+    { id: 'priest', label: __('Priest') }, { id: 'rogue', label: __('Rogue') },
+    { id: 'shaman', label: __('Shaman') }, { id: 'warlock', label: __('Warlock') },
+    { id: 'warrior', label: __('Warrior') },
+]);
 
-const shapeTools = [
-    { id: 'circle', icon: 'circle', label: 'Circle' },
-    { id: 'rect', icon: 'rectangle', label: 'Rectangle' },
-    { id: 'triangle', icon: 'play_arrow', label: 'Triangle' },
-    { id: 'arrow', icon: 'arrow_right_alt', label: 'Arrow' },
-    { id: 'line', icon: 'horizontal_rule', label: 'Line' },
-    { id: 'cone', icon: 'sector_svg', label: 'Sector' },
-    { id: 'text', icon: 'text_fields', label: 'Text' },
-    { id: 'waypoint', icon: 'route', label: 'Path' },
-];
+const shapeTools = computed(() => [
+    { id: 'circle', icon: 'circle', label: __('Circle') },
+    { id: 'rect', icon: 'rectangle', label: __('Rectangle') },
+    { id: 'triangle', icon: 'play_arrow', label: __('Triangle') },
+    { id: 'arrow', icon: 'arrow_right_alt', label: __('Arrow') },
+    { id: 'line', icon: 'horizontal_rule', label: __('Line') },
+    { id: 'cone', icon: 'sector_svg', label: __('Sector') },
+    { id: 'text', icon: 'text_fields', label: __('Text') },
+    { id: 'waypoint', icon: 'route', label: __('Path') },
+]);
 
 // ─── Multi-window panel state ───
 const openPanels = ref(new Set());
@@ -168,43 +170,43 @@ const playerItems = computed(() => props.roster.map(c => ({
 
 // Panel definitions
 const panelDefs = computed(() => ({
-    markers: { title: 'Raid Markers', sections: [
-        { id: 'raid', label: 'Raid Markers', items: markerTypes.map(m => ({ ...m, type: 'marker', label: '' })) },
+    markers: { title: __('Raid Markers'), sections: [
+        { id: 'raid', label: __('Raid Markers'), items: markerTypes.map(m => ({ ...m, type: 'marker', label: '' })) },
     ]},
-    shapes: { title: 'Shapes & Lines', sections: [
-        { id: 'shapes', label: 'Shapes & Lines', items: shapeTools.map(s => ({ ...s, type: 'shape', label: '' })) },
+    shapes: { title: __('Shapes & Lines'), sections: [
+        { id: 'shapes', label: __('Shapes & Lines'), items: shapeTools.value.map(s => ({ ...s, type: 'shape', label: '' })) },
     ]},
-    abilities: { title: 'Abilities', sections: [
-        { id: 'class_abilities', label: 'Class Abilities', items: [
+    abilities: { title: __('Abilities'), sections: [
+        { id: 'class_abilities', label: __('Class Abilities'), items: [
             { id: 'warlock-gateway', type: 'ability', img: '/images/raidplan/stickers/gateway-fs8.png', label: '' },
         ]},
-        { id: 'boss', label: 'Boss Abilities', items: props.abilities.map(a => ({
+        { id: 'boss', label: __('Boss Abilities'), items: props.abilities.map(a => ({
             id: a, type: 'ability', img: `/images/raidplan/icons/${a}.png`, label: '',
         })) },
     ]},
-    icons: { title: 'Icons', sections: [
-        { id: 'roles', label: 'Roles', items: [
-            { id: 'role-tank', type: 'class', img: '/images/raidplan/role/tank.svg', label: '', displayName: 'Tank' },
-            { id: 'role-healer', type: 'class', img: '/images/raidplan/role/healer.svg', label: '', displayName: 'Healer' },
-            { id: 'role-mdps', type: 'class', img: '/images/raidplan/role/mdps.svg', label: '', displayName: 'Melee DPS' },
-            { id: 'role-rdps', type: 'class', img: '/images/raidplan/role/rdps.svg', label: '', displayName: 'Ranged DPS' },
+    icons: { title: __('Icons'), sections: [
+        { id: 'roles', label: __('Roles'), items: [
+            { id: 'role-tank', type: 'class', img: '/images/raidplan/role/tank.svg', label: '', displayName: __('Tank') },
+            { id: 'role-healer', type: 'class', img: '/images/raidplan/role/healer.svg', label: '', displayName: __('Healer') },
+            { id: 'role-mdps', type: 'class', img: '/images/raidplan/role/mdps.svg', label: '', displayName: __('Melee DPS') },
+            { id: 'role-rdps', type: 'class', img: '/images/raidplan/role/rdps.svg', label: '', displayName: __('Ranged DPS') },
         ]},
-        { id: 'class', label: 'Classes', items: classIcons.map(c => ({ ...c, type: 'class', img: `/images/raidplan/class/${c.id}.png`, label: '' })) },
-        ...(props.bossPortraits.length ? [{ id: 'portraits', label: 'Boss Portraits', items: props.bossPortraits.map((url, i) => ({
+        { id: 'class', label: __('Classes'), items: classIcons.value.map(c => ({ ...c, type: 'class', img: `/images/raidplan/class/${c.id}.png`, label: '' })) },
+        ...(props.bossPortraits.length ? [{ id: 'portraits', label: __('Boss Portraits'), items: props.bossPortraits.map((url, i) => ({
             id: `portrait-${i}`, type: 'portrait', img: url, label: '',
         })) }] : []),
     ]},
-    roster: { title: 'Roster', sections: [
-        ...(rosterItems.value.length ? [{ id: 'groups', label: 'Groups', items: rosterItems.value }] : []),
-        { id: 'players', label: 'Players', items: playerItems.value },
+    roster: { title: __('Roster'), sections: [
+        ...(rosterItems.value.length ? [{ id: 'groups', label: __('Groups'), items: rosterItems.value }] : []),
+        { id: 'players', label: __('Players'), items: playerItems.value },
     ]},
-    emoji: { title: 'Emoji', sections: (() => {
+    emoji: { title: __('Emoji'), sections: (() => {
         const mk = (arr) => arr.map(e => ({ id: 'e-' + e, type: 'emoji', emoji: e, label: '' }));
         return [
-            { id: 'arrows', label: 'Arrows & Direction', items: mk(['⬆','⬇','⬅','➡','↗','↘','↙','↖','⤴','⤵','🔄']) },
-            { id: 'warning', label: 'Warning & Status', items: mk(['⚠','❌','✅','❓','❗','⛔','🚫','💀','☠','🔥','💥','⚡','🛡','⚔','💣','🎯']) },
-            { id: 'shapes_e', label: 'Shapes & Colors', items: mk(['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔶','🔷','🔸','🔹','💠']) },
-            { id: 'misc', label: 'Misc', items: mk(['⭐','💎','👑','🏴','🚩','📍','📌','🎪','🌀','💫','🌟','✨','🔮','🧿','👁','🫧']) },
+            { id: 'arrows', label: __('Arrows & Direction'), items: mk(['⬆','⬇','⬅','➡','↗','↘','↙','↖','⤴','⤵','🔄']) },
+            { id: 'warning', label: __('Warning & Status'), items: mk(['⚠','❌','✅','❓','❗','⛔','🚫','💀','☠','🔥','💥','⚡','🛡','⚔','💣','🎯']) },
+            { id: 'shapes_e', label: __('Shapes & Colors'), items: mk(['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔶','🔷','🔸','🔹','💠']) },
+            { id: 'misc', label: __('Misc'), items: mk(['⭐','💎','👑','🏴','🚩','📍','📌','🎪','🌀','💫','🌟','✨','🔮','🧿','👁','🫧']) },
         ];
     })() },
 }));
@@ -220,14 +222,14 @@ const addCustomEmoji = () => {
 
 const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
 
-const panelButtons = [
-    { id: 'markers', icon: null, img: '/images/raidplan/raid-markers/skull.png', label: 'Markers', color: 'orange' },
-    { id: 'shapes', icon: 'shapes', label: 'Shapes', color: 'blue' },
-    { id: 'abilities', icon: 'auto_fix_high', label: 'Abilities', color: 'purple', needAbilities: true },
-    { id: 'icons', icon: 'palette', label: 'Icons', color: 'cyan' },
-    { id: 'roster', icon: 'groups', label: 'Roster', color: 'green' },
-    { id: 'emoji', emoji: '😀', label: 'Emoji', color: 'yellow' },
-];
+const panelButtons = computed(() => [
+    { id: 'markers', icon: null, img: '/images/raidplan/raid-markers/skull.png', label: __('Markers'), color: 'orange' },
+    { id: 'shapes', icon: 'shapes', label: __('Shapes'), color: 'blue' },
+    { id: 'abilities', icon: 'auto_fix_high', label: __('Abilities'), color: 'purple', needAbilities: true },
+    { id: 'icons', icon: 'palette', label: __('Icons'), color: 'cyan' },
+    { id: 'roster', icon: 'groups', label: __('Roster'), color: 'green' },
+    { id: 'emoji', emoji: '😀', label: __('Emoji'), color: 'yellow' },
+]);
 const colorClasses = {
     orange: { active: 'bg-orange-500/20 text-orange-400', hover: 'hover:bg-white/5' },
     blue:   { active: 'bg-blue-500/20 text-blue-400',   hover: 'hover:bg-white/5' },
@@ -246,14 +248,14 @@ const colorClasses = {
                 :disabled="!canUndo"
                 class="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
                 :class="canUndo ? 'text-on-surface-variant hover:text-white hover:bg-white/5' : 'text-on-surface-variant/25 cursor-not-allowed'"
-                title="Undo (Ctrl+Z)">
+                :title="__('Undo') + ' (Ctrl+Z)'">
                 <span class="material-symbols-outlined text-lg">undo</span>
             </button>
             <button @click="emit('redo')"
                 :disabled="!canRedo"
                 class="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
                 :class="canRedo ? 'text-on-surface-variant hover:text-white hover:bg-white/5' : 'text-on-surface-variant/25 cursor-not-allowed'"
-                title="Redo (Ctrl+Shift+Z)">
+                :title="__('Redo') + ' (Ctrl+Shift+Z)'">
                 <span class="material-symbols-outlined text-lg">redo</span>
             </button>
         </div>
@@ -354,10 +356,10 @@ const colorClasses = {
                     <!-- Custom emoji input -->
                     <div v-if="panelId === 'emoji'" class="px-1 pt-1 border-t border-white/5">
                         <div class="px-1 pb-1">
-                            <span class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Custom Emoji</span>
+                            <span class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Custom Emoji') }}</span>
                         </div>
                         <div class="flex gap-1">
-                            <input v-model="customEmoji" type="text" placeholder="Paste emoji..."
+                            <input v-model="customEmoji" type="text" :placeholder="__('Paste emoji...')"
                                 class="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-sm text-center focus:ring-1 focus:ring-yellow-500 outline-none"
                                 @keydown.enter="addCustomEmoji">
                             <button @click="addCustomEmoji"

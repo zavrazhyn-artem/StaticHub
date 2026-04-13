@@ -127,10 +127,17 @@ class DiscordMessageService
         $rosterData = $this->attendanceService->getGroupedRoster($event);
         $payload = DiscordMessageBuilder::buildRaidMessage($event, $rosterData);
 
-        // Add Mention if configured
+        // Add Mention(s) if configured
         $automation = $event->static->automation_settings ?? [];
-        if (!empty($automation['ping_role_id'])) {
-            $payload['content'] = "<@&{$automation['ping_role_id']}>";
+        $roleIds = $automation['ping_role_ids'] ?? [];
+
+        // Legacy: support single ping_role_id
+        if (empty($roleIds) && !empty($automation['ping_role_id'])) {
+            $roleIds = [$automation['ping_role_id']];
+        }
+
+        if (!empty($roleIds)) {
+            $payload['content'] = implode(' ', array_map(fn($id) => "<@&{$id}>", $roleIds));
         }
 
         if (!$event->discord_message_id) {

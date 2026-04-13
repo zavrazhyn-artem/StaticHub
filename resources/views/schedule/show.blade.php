@@ -17,6 +17,12 @@
             :planner-data="{{ json_encode($plannerData ?? []) }}"
             :planning-stats="{{ json_encode($planningStats ?? []) }}"
             boss-planner-url="{{ $bossPlannerUrl ?? '' }}"
+            :buff-config="{{ json_encode($buffConfig ?? []) }}"
+            :role-limits="{{ json_encode($roleLimits ?? []) }}"
+            :all-static-alts="{{ json_encode($allStaticAlts ?? []) }}"
+            :weekly-raid-data="{{ json_encode($weeklyRaidData ?? []) }}"
+            :bench-history="{{ json_encode($benchHistory ?? []) }}"
+            :split-assignments="{{ json_encode($splitAssignments ?? []) }}"
             :auth-user-id="{{ Auth::user()->id }}"
             :can-manage-schedule="{{ $canManageSchedule ? 'true' : 'false' }}"
             :can-announce-to-discord="{{ $canAnnounceToDiscord ? 'true' : 'false' }}"
@@ -31,6 +37,10 @@
                 'encounterAssign' => route('schedule.event.encounter-roster.assign', $event),
                 'encounterRemove' => route('schedule.event.encounter-roster.remove', $event),
                 'assignPlan' => route('schedule.event.assign-plan', $event),
+                'toggleEncounter' => route('schedule.event.toggle-encounter', $event),
+                'overrideAttendance' => route('schedule.event.override-attendance', $event),
+                'eventSettings' => route('schedule.event.settings', $event),
+                'saveSplits' => route('schedule.event.save-splits', $event),
             ]) }}"
             success-message="{{ session('success') }}"
             :errors="{{ $errors->any() ? json_encode($errors->toArray()) : '{}' }}"

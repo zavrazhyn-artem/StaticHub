@@ -42,6 +42,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     nextRaid: { type: Object, default: null },

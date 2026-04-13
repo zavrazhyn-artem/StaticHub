@@ -143,7 +143,7 @@ const unassignPlan = async () => {
                             </div>
                         </div>
                         <button v-if="canManage" @click="assignPlan(plan.id)"
-                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[9px] font-bold hover:bg-primary/20 transition-all shrink-0">
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-fuchsia-400/10 border border-fuchsia-400/20 text-fuchsia-400 text-[9px] font-bold hover:bg-fuchsia-400/20 transition-all shrink-0">
                             <span class="material-symbols-outlined text-xs">add_circle</span>
                             {{ __('Assign') }}
                         </button>

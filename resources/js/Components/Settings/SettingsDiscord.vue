@@ -14,7 +14,7 @@ const props = defineProps({
     discordRoles:     { type: Array,   default: () => [] },
     discordGuildId:   { type: String,  default: '' },
     discordChannelId: { type: String,  default: '' },
-    discordRoleId:    { type: String,  default: '' },
+    discordRoleIds:   { type: Array,   default: () => [] },
     notificationMethod:   { type: String,  default: 'webhook' },
     notificationChannelId:{ type: String,  default: '' },
     webhookUrl:       { type: String,  default: '' },
@@ -40,13 +40,15 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
 // --- State ---
 const selectedGuildId   = ref(props.discordGuildId);
 const selectedChannelId = ref(props.discordChannelId);
-const selectedRoleId    = ref(props.discordRoleId);
+const selectedRoleIds   = ref([...props.discordRoleIds]);
 const notifMethod              = ref(props.notificationMethod);
 const selectedNotifChannelId   = ref(props.notificationChannelId);
 const webhookUrlInput   = ref(props.webhookUrl);
 const resolvedChannel   = ref(props.webhookChannel);
 const notifMuted        = ref(props.webhookMuted);
 const showHelpModal     = ref(false);
+const showRolesModal    = ref(false);
+const maxVisibleRoles   = 2;
 let inviteCheckInterval = null;
 
 function openInvitePopup() {
@@ -116,8 +118,8 @@ const showToast = (msg, error = false) => {
 };
 
 // --- Auto-save ---
-async function saveField(fields) {
-    const key = Object.keys(fields)[0];
+async function saveField(fields, trackKey = null) {
+    const key = trackKey || Object.keys(fields)[0];
     saving.value = { ...saving.value, [key]: true };
 
     try {
@@ -147,15 +149,15 @@ async function saveField(fields) {
 }
 
 function fieldIcon(key) {
-    if (saving.value[key]) return { icon: 'sync',         cls: 'text-on-surface-variant animate-spin' };
-    if (saved.value[key])  return { icon: 'check_circle', cls: 'text-success-neon' };
-    return null;
+    if (saving.value[key]) return { icon: 'sync',         cls: 'text-on-surface-variant animate-spin', visible: true };
+    if (saved.value[key])  return { icon: 'check_circle', cls: 'text-success-neon', visible: true };
+    return { icon: 'check_circle', cls: '', visible: false };
 }
 
 // --- Guild watcher ---
 watch(selectedGuildId, async (newGuildId) => {
     selectedChannelId.value = '';
-    selectedRoleId.value    = '';
+    selectedRoleIds.value   = [];
     channels.value          = [];
     roles.value             = [];
     fetchedGuildId.value    = '';
@@ -185,27 +187,27 @@ watch(selectedChannelId, (val) => {
     if (fetchedGuildId.value) saveField({ discord_channel_id: val || null });
 });
 
-watch(selectedRoleId, (val) => {
-    if (selectedGuildId.value) saveField({ 'automation_settings[ping_role_id]': val || null });
-});
+watch(selectedRoleIds, (val) => {
+    if (selectedGuildId.value) saveField({ automation_settings: { ping_role_ids: val } }, 'ping_role_ids');
+}, { deep: true });
 
 watch(notifMuted, (val) => {
-    saveField({ 'automation_settings[webhook_muted]': val });
+    saveField({ automation_settings: { webhook_muted: val } }, 'webhook_muted');
 });
 
 watch(notifMethod, (val) => {
     if (val === 'webhook') {
         if (!webhookUrlInput.value) return;
-        saveField({ discord_webhook_url: webhookUrlInput.value, 'automation_settings[notification_method]': 'webhook' });
+        saveField({ discord_webhook_url: webhookUrlInput.value, automation_settings: { notification_method: 'webhook' } }, 'notification_method');
     } else {
         if (!selectedNotifChannelId.value) return;
-        saveField({ notification_channel_id: selectedNotifChannelId.value, 'automation_settings[notification_method]': 'channel' });
+        saveField({ notification_channel_id: selectedNotifChannelId.value, automation_settings: { notification_method: 'channel' } }, 'notification_method');
     }
 });
 
 watch(selectedNotifChannelId, (val) => {
     if (!selectedGuildId.value) return;
-    saveField({ notification_channel_id: val || null, 'automation_settings[notification_method]': 'channel' });
+    saveField({ notification_channel_id: val || null, automation_settings: { notification_method: 'channel' } }, 'notification_method');
 });
 
 // --- Webhook URL debounce ---
@@ -214,7 +216,7 @@ watch(webhookUrlInput, (val) => {
     resolvedChannel.value = null;
     clearTimeout(webhookDebounce);
     webhookDebounce = setTimeout(() => {
-        saveField({ discord_webhook_url: val || null, 'automation_settings[notification_method]': 'webhook' });
+        saveField({ discord_webhook_url: val || null, automation_settings: { notification_method: 'webhook' } }, 'notification_method');
     }, 800);
 });
 
@@ -435,6 +437,38 @@ const noChannelsError = () =>
         </div>
     </GlassModal>
 
+    <!-- ── Selected Roles Modal ─────────────────────────────────────── -->
+    <GlassModal :show="showRolesModal" max-width="max-w-sm" @close="showRolesModal = false">
+        <div class="px-6 py-4 border-b border-white/5 bg-gradient-to-r from-surface-container-high to-surface-container flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-[#a78bfa]/20 flex items-center justify-center text-[#a78bfa]">
+                    <span class="material-symbols-outlined text-[18px]">groups</span>
+                </div>
+                <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">{{ __('Mention Roles') }}</h3>
+            </div>
+            <button @click="showRolesModal = false" class="text-on-surface-variant hover:text-white transition-colors p-1 hover:bg-white/5 rounded-md">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-4 space-y-2">
+            <div
+                v-for="roleId in selectedRoleIds"
+                :key="roleId"
+                class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface-container-highest/50 border border-white/5"
+            >
+                <span class="text-xs font-bold text-[#a78bfa] uppercase tracking-widest">@ {{ roles.find(r => r.id === roleId)?.name || roleId }}</span>
+                <button
+                    type="button"
+                    @click="selectedRoleIds = selectedRoleIds.filter(id => id !== roleId)"
+                    class="text-on-surface-variant hover:text-error transition-colors p-0.5 hover:bg-white/5 rounded"
+                >
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+            </div>
+            <p v-if="!selectedRoleIds.length" class="text-center text-xs text-on-surface-variant/50 py-4 italic">{{ __('No roles selected.') }}</p>
+        </div>
+    </GlassModal>
+
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
             <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Static Settings') }}</h1>
@@ -459,9 +493,7 @@ const noChannelsError = () =>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Discord Server (Guild)') }}</label>
-                            <template v-if="fieldIcon('discord_guild_id')">
-                                <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_guild_id').cls]">{{ fieldIcon('discord_guild_id').icon }}</span>
-                            </template>
+                            <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_guild_id').cls, fieldIcon('discord_guild_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_guild_id').icon }}</span>
                         </div>
                         <SearchableSelect
                             v-if="botGuilds.length"
@@ -508,9 +540,7 @@ const noChannelsError = () =>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Announcement Channel') }}</label>
-                            <template v-if="fieldIcon('discord_channel_id')">
-                                <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_channel_id').cls]">{{ fieldIcon('discord_channel_id').icon }}</span>
-                            </template>
+                            <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_channel_id').cls, fieldIcon('discord_channel_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_channel_id').icon }}</span>
                         </div>
                         <div :class="['relative', selectedChannelId ? 'channel-test-group' : '']">
                             <SearchableSelect
@@ -553,32 +583,57 @@ const noChannelsError = () =>
                         <p v-else class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Raid announcements and RSVP posts will appear here.') }}</p>
                     </div>
 
-                    <!-- Role to Mention -->
+                    <!-- Roles to Mention -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Role to Mention') }}</label>
-                            <template v-if="fieldIcon('automation_settings[ping_role_id]')">
-                                <span :class="['material-symbols-outlined text-sm', fieldIcon('automation_settings[ping_role_id]').cls]">{{ fieldIcon('automation_settings[ping_role_id]').icon }}</span>
-                            </template>
+                            <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Roles to Mention') }}</label>
+                            <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('ping_role_ids').cls, fieldIcon('ping_role_ids').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('ping_role_ids').icon }}</span>
                         </div>
-                        <SearchableSelect
-                            v-if="selectedGuildId"
-                            v-model="selectedRoleId"
-                            :options="roles"
-                            input-name="automation_settings[ping_role_id]"
-                            icon="groups"
-                            prefix="@ "
-                            :placeholder="rolesLoading ? __('Loading roles...') : __('No mention')"
-                            :search-placeholder="__('Search role...')"
-                            :empty-text="__('No roles found.')"
-                            :loading="rolesLoading"
-                            :disabled="!roles.length && !rolesLoading"
-                            accent-color="#a78bfa"
-                        />
+                        <template v-if="selectedGuildId">
+                            <!-- Add role dropdown -->
+                            <SearchableSelect
+                                :model-value="''"
+                                @update:model-value="(val) => { if (val && !selectedRoleIds.includes(val)) selectedRoleIds = [...selectedRoleIds, val]; }"
+                                :options="roles.filter(r => !selectedRoleIds.includes(r.id))"
+                                icon="groups"
+                                prefix="@ "
+                                :placeholder="rolesLoading ? __('Loading roles...') : (selectedRoleIds.length ? __('Add another role...') : __('No mention'))"
+                                :search-placeholder="__('Search role...')"
+                                :empty-text="__('No more roles.')"
+                                :loading="rolesLoading"
+                                :disabled="!roles.length && !rolesLoading"
+                                accent-color="#a78bfa"
+                            />
+                            <!-- Selected roles chips below -->
+                            <div v-if="selectedRoleIds.length" class="flex items-center gap-1.5 mt-2">
+                                <span
+                                    v-for="roleId in selectedRoleIds.slice(0, maxVisibleRoles)"
+                                    :key="roleId"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[9px] font-bold text-[#a78bfa] uppercase tracking-widest shrink-0"
+                                >
+                                    @ {{ roles.find(r => r.id === roleId)?.name || roleId }}
+                                    <button
+                                        type="button"
+                                        @click="selectedRoleIds = selectedRoleIds.filter(id => id !== roleId)"
+                                        class="ml-0.5 hover:text-white transition-colors"
+                                    >
+                                        <span class="material-symbols-outlined text-[10px]">close</span>
+                                    </button>
+                                </span>
+                                <button
+                                    v-if="selectedRoleIds.length > maxVisibleRoles"
+                                    type="button"
+                                    @click="showRolesModal = true"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-bold text-on-surface-variant uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors shrink-0"
+                                >
+                                    +{{ selectedRoleIds.length - maxVisibleRoles }}
+                                </button>
+                            </div>
+                        </template>
                         <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
                             {{ __('Select Server first...') }}
                         </div>
-                        <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('This role will be pinged when a raid announcement is posted.') }}</p>
+                        <p v-if="!selectedRoleIds.length" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('These roles will be pinged when a raid announcement is posted.') }}</p>
                     </div>
                 </div>
 
@@ -645,11 +700,7 @@ const noChannelsError = () =>
                             <div :class="['absolute top-0.5 w-5 h-5 rounded-full transition-all shadow-sm',
                                          notifMuted ? 'left-0.5 bg-on-surface-variant/50' : 'left-5 bg-[#5865F2]']"></div>
                         </div>
-                        <template v-if="fieldIcon('automation_settings[webhook_muted]')">
-                            <span :class="['material-symbols-outlined text-sm', fieldIcon('automation_settings[webhook_muted]').cls]">
-                                {{ fieldIcon('automation_settings[webhook_muted]').icon }}
-                            </span>
-                        </template>
+                        <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('webhook_muted').cls, fieldIcon('webhook_muted').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('webhook_muted').icon }}</span>
                     </label>
                 </div>
 
@@ -676,11 +727,7 @@ const noChannelsError = () =>
                             <span class="material-symbols-outlined text-sm">link</span>
                             {{ __('Webhook') }}
                         </button>
-                        <template v-if="fieldIcon('automation_settings[notification_method]')">
-                            <span :class="['material-symbols-outlined text-sm ml-1', fieldIcon('automation_settings[notification_method]').cls]">
-                                {{ fieldIcon('automation_settings[notification_method]').icon }}
-                            </span>
-                        </template>
+                        <span :class="['material-symbols-outlined text-sm w-5 text-center ml-1 transition-opacity', fieldIcon('notification_method').cls, fieldIcon('notification_method').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('notification_method').icon }}</span>
                     </div>
 
                     <!-- ── Channel mode ── -->
@@ -689,9 +736,7 @@ const noChannelsError = () =>
                             <div class="flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
                                     <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notification Channel') }}</label>
-                                    <template v-if="fieldIcon('notification_channel_id')">
-                                        <span :class="['material-symbols-outlined text-sm', fieldIcon('notification_channel_id').cls]">{{ fieldIcon('notification_channel_id').icon }}</span>
-                                    </template>
+                                    <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('notification_channel_id').cls, fieldIcon('notification_channel_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('notification_channel_id').icon }}</span>
                                 </div>
                                 <div :class="['relative', selectedNotifChannelId ? 'notif-channel-test-group' : '']">
                                     <SearchableSelect
@@ -777,9 +822,7 @@ const noChannelsError = () =>
                             <div class="flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
                                     <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Webhook URL') }}</label>
-                                    <template v-if="fieldIcon('discord_webhook_url')">
-                                        <span :class="['material-symbols-outlined text-sm', fieldIcon('discord_webhook_url').cls]">{{ fieldIcon('discord_webhook_url').icon }}</span>
-                                    </template>
+                                    <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_webhook_url').cls, fieldIcon('discord_webhook_url').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_webhook_url').icon }}</span>
                                 </div>
 
                                 <div class="relative group flex-1 flex items-center">

@@ -50,14 +50,14 @@ const handleGroupDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffe
 
 const assignToGroup = (charId, groupId) => { emit('assign-group', { characterId: charId, groupId }); };
 
-const formations = [
-    { id: 'spread', label: 'Spread (circle)', icon: 'radio_button_unchecked' },
-    { id: 'stack', label: 'Stack (tight)', icon: 'fiber_manual_record' },
-    { id: 'line', label: 'Line', icon: 'horizontal_rule' },
-    { id: 'vline', label: 'Column', icon: 'drag_handle' },
-    { id: 'triangle', label: 'Triangle', icon: 'change_history' },
-    { id: 'tworows', label: 'Two rows', icon: 'view_week' },
-];
+const formations = computed(() => [
+    { id: 'spread', label: __('Spread (circle)'), icon: 'radio_button_unchecked' },
+    { id: 'stack', label: __('Stack (tight)'), icon: 'fiber_manual_record' },
+    { id: 'line', label: __('Line'), icon: 'horizontal_rule' },
+    { id: 'vline', label: __('Column'), icon: 'drag_handle' },
+    { id: 'triangle', label: __('Triangle'), icon: 'change_history' },
+    { id: 'tworows', label: __('Two rows'), icon: 'view_week' },
+]);
 
 const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
 </script>
@@ -70,7 +70,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
             <button
                 v-if="canManage && Object.keys(groups).length < 6"
                 @click="addGroup"
-                class="text-primary hover:text-white transition-colors" title="Add Group"
+                class="text-orange-500 hover:text-white transition-colors" :title="__('Add Group')"
             >
                 <span class="material-symbols-outlined text-sm">add</span>
             </button>
@@ -86,7 +86,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                     <span class="text-[9px] font-black uppercase tracking-widest text-white flex-1">{{ group.label }}</span>
                     <span class="text-[8px] text-on-surface-variant/50">{{ (group.members || []).length }}</span>
                     <button v-if="canManage" @click.stop="emit('remove-group', group.id)"
-                        class="text-on-surface-variant/30 hover:text-red-400 transition-colors" title="Remove group">
+                        class="text-on-surface-variant/30 hover:text-red-400 transition-colors" :title="__('Remove group')">
                         <span class="material-symbols-outlined text-xs">close</span>
                     </button>
                     <span class="material-symbols-outlined text-xs text-on-surface-variant/30 transition-transform"
@@ -143,7 +143,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                             <button v-for="g in groupEntries" :key="g.id"
                                 @click.stop="assignToGroup(char.id, g.id)"
                                 class="w-4 h-4 rounded-sm flex items-center justify-center text-[7px] font-black text-white hover:scale-110 transition-transform"
-                                :style="{ backgroundColor: g.color + '80' }" :title="'Assign to ' + g.label">{{ g.id }}</button>
+                                :style="{ backgroundColor: g.color + '80' }" :title="__('Assign to') + ' ' + g.label">{{ g.id }}</button>
                         </div>
                     </div>
                     <div v-if="unassignedCharacters.length === 0" class="py-2 text-center">

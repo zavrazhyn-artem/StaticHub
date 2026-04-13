@@ -78,6 +78,7 @@ class RaidAttendanceService
                     $resolved['status'],
                     $resolved['comment'],
                     $resolved['spec_id'],
+                    $resolved['split_group'] ?? null,
                 );
 
                 $resolvedCharacters->push($character);
@@ -130,10 +131,11 @@ class RaidAttendanceService
 
         if ($userAttendance && $selectedCharacter) {
             return [
-                'character' => $selectedCharacter,
-                'status'    => $userAttendance->status,
-                'comment'   => $userAttendance->comment,
-                'spec_id'   => $userAttendance->spec_id,
+                'character'   => $selectedCharacter,
+                'status'      => $userAttendance->status,
+                'comment'     => $userAttendance->comment,
+                'spec_id'     => $userAttendance->spec_id,
+                'split_group' => $userAttendance->split_group,
             ];
         }
 
@@ -144,10 +146,11 @@ class RaidAttendanceService
 
         if ($mainCharacter) {
             return [
-                'character' => $mainCharacter,
-                'status'    => 'pending',
-                'comment'   => null,
-                'spec_id'   => null,
+                'character'   => $mainCharacter,
+                'status'      => 'pending',
+                'comment'     => null,
+                'spec_id'     => null,
+                'split_group' => null,
             ];
         }
 
@@ -163,13 +166,15 @@ class RaidAttendanceService
         string $status,
         ?string $comment,
         ?int $specId = null,
+        ?int $splitGroup = null,
     ): void {
         $character->setRelation('pivot', new RaidAttendance([
             'status'        => $status,
             'comment'       => $comment,
             'spec_id'       => $specId,
+            'split_group'   => $splitGroup,
             'character_id'  => $character->id,
-            'event_id' => $eventId,
+            'event_id'      => $eventId,
         ]));
     }
 

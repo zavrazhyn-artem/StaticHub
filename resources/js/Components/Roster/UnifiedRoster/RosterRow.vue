@@ -73,7 +73,7 @@ const emit = defineEmits([
 <template>
     <tr :class="[
             isAlt ? 'bg-black/40 border-b border-white/5 text-[11px]' : 'border-b border-gray-800 hover:bg-gray-800/40 transition-all group/row',
-            !isAlt && expanded ? 'bg-primary/5' : ''
+            !isAlt && expanded ? 'bg-emerald-400/5' : ''
         ]">
 
         <!-- Character identity -->

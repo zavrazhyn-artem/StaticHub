@@ -9,6 +9,8 @@
             static-name="{{ $static->name }}"
             :can-manage-schedule="{{ $canManageSchedule ? 'true' : 'false' }}"
             default-raid-time="{{ $static->raid_start_time ? \Carbon\Carbon::parse($static->raid_start_time)->format('H:i') : '20:00' }}"
+            default-raid-end-time="{{ $static->raid_end_time ? \Carbon\Carbon::parse($static->raid_end_time)->format('H:i') : '23:00' }}"
+            static-timezone="{{ $static->timezone ?? 'UTC' }}"
             current-month-name="{{ $current_date->format('F Y') }}"
             prev-month-url="{{ route('schedule.index', ['year' => $prev_month->year, 'month' => $prev_month->month]) }}"
             next-month-url="{{ route('schedule.index', ['year' => $next_month->year, 'month' => $next_month->month]) }}"

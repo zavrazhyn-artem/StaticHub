@@ -39,7 +39,7 @@ const runsColorClass = (count) => {
 </script>
 
 <template>
-    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center font-mono font-bold text-cyan-400 border-l border-white/5']">
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center font-mono font-bold text-emerald-400 border-l border-white/5']">
         {{ char?.equipped_ilvl != null
         ? Number(char.equipped_ilvl).toFixed(1)
         : 'N/A' }}
