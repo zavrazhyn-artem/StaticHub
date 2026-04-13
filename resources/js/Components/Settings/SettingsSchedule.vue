@@ -107,13 +107,13 @@ watch(reminderHoursBefore, (val) => {
 });
 
 const days = {
-    mon: 'Monday',
-    tue: 'Tuesday',
-    wed: 'Wednesday',
-    thu: 'Thursday',
-    fri: 'Friday',
-    sat: 'Saturday',
-    sun: 'Sunday',
+    mon: __('Monday'),
+    tue: __('Tuesday'),
+    wed: __('Wednesday'),
+    thu: __('Thursday'),
+    fri: __('Friday'),
+    sat: __('Saturday'),
+    sun: __('Sunday'),
 };
 </script>
 
@@ -137,14 +137,14 @@ const days = {
             <div class="space-y-8">
                 <!-- Raid Days -->
                 <div class="space-y-4">
-                    <label class="block font-headline text-xs font-bold text-primary uppercase tracking-[0.2em]">{{ __('Raid Days') }}</label>
+                    <label class="block font-headline text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">{{ __('Raid Days') }}</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <label v-for="(label, key) in days" :key="key"
                                class="flex items-center gap-3 p-4 rounded-lg bg-surface-container-highest border border-white/5 cursor-pointer hover:bg-white/5 transition-colors group">
                             <input type="checkbox" :value="key"
                                 :checked="raidDays.includes(key)"
                                 @change="toggleDay(key)"
-                                class="w-4 h-4 rounded border-outline-variant bg-black/40 text-primary focus:ring-primary focus:ring-offset-0 focus:ring-offset-transparent">
+                                class="w-4 h-4 rounded border-outline-variant bg-black/40 text-slate-400 focus:ring-slate-400 focus:ring-offset-0 focus:ring-offset-transparent">
                             <span class="font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant group-hover:text-white transition-colors">{{ __(label) }}</span>
                         </label>
                     </div>
@@ -152,18 +152,18 @@ const days = {
 
                 <!-- Schedule Parameters -->
                 <div class="space-y-4">
-                    <label class="block font-headline text-xs font-bold text-primary uppercase tracking-[0.2em]">{{ __('Schedule Parameters') }}</label>
+                    <label class="block font-headline text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">{{ __('Schedule Parameters') }}</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Start Time -->
                         <div class="space-y-2">
                             <label for="raid_start_time" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Start Time') }}</label>
                             <div class="relative group">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors text-lg">schedule</span>
+                                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-slate-400 transition-colors text-lg">schedule</span>
                                 </span>
                                 <input type="time" id="raid_start_time"
                                     v-model="raidStartTime"
-                                    class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none">
+                                    class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all outline-none">
                             </div>
                         </div>
 
@@ -172,11 +172,11 @@ const days = {
                             <label for="raid_end_time" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('End Time') }}</label>
                             <div class="relative group">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors text-lg">timer_off</span>
+                                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-slate-400 transition-colors text-lg">timer_off</span>
                                 </span>
                                 <input type="time" id="raid_end_time"
                                     v-model="raidEndTime"
-                                    class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none">
+                                    class="block w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all outline-none">
                             </div>
                         </div>
 

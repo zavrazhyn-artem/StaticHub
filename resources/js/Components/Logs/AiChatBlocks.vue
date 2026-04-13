@@ -1,4 +1,7 @@
 <script setup>
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
+
 const props = defineProps({
     blocks: { type: Array, default: () => [] },
 });
@@ -71,7 +74,7 @@ function colorClasses(color) {
         <!-- Fallback if blocks is empty -->
         <p v-if="!blocks || blocks.length === 0"
            class="text-xs text-on-surface-variant italic">
-            No response data.
+            {{ __('No response data.') }}
         </p>
     </div>
 </template>

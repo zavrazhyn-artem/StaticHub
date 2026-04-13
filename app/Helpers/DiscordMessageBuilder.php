@@ -101,45 +101,41 @@ class DiscordMessageBuilder
             $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', [$event->static->id, $event->tacticalReport->id]) . ")";
         }
 
-        $fields = [
-            [
-                'name'   => IconHelper::roleEmoji('tank') . ' Tanks',
-                'value'  => self::formatRosterField($mainRoster['tank']),
-                'inline' => true,
-            ],
-            [
-                'name'   => IconHelper::roleEmoji('heal') . ' Healers',
-                'value'  => self::formatRosterField($mainRoster['heal']),
-                'inline' => true,
-            ],
-            ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true],
-            [
-                'name'   => IconHelper::roleEmoji('melee') . ' Melee DPS',
-                'value'  => self::formatRosterField($mainRoster['mdps']),
-                'inline' => true,
-            ],
-            [
-                'name'   => IconHelper::roleEmoji('range') . ' Ranged DPS',
-                'value'  => self::formatRosterField($mainRoster['rdps']),
-                'inline' => true,
-            ],
-            ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true],
+        $fields = [];
+
+        // Inline role fields — each role group gets chunked if needed
+        $inlineRoles = [
+            ['emoji' => IconHelper::roleEmoji('tank'),  'label' => 'Tanks',      'roster' => $mainRoster['tank']],
+            ['emoji' => IconHelper::roleEmoji('heal'),  'label' => 'Healers',    'roster' => $mainRoster['heal']],
+            null, // spacer
+            ['emoji' => IconHelper::roleEmoji('melee'), 'label' => 'Melee DPS',  'roster' => $mainRoster['mdps']],
+            ['emoji' => IconHelper::roleEmoji('range'), 'label' => 'Ranged DPS', 'roster' => $mainRoster['rdps']],
+            null, // spacer
         ];
 
-        if ($absentRoster->isNotEmpty()) {
-            $fields[] = [
-                'name'   => '❌ Absent',
-                'value'  => self::formatRosterField($absentRoster),
-                'inline' => false,
-            ];
+        foreach ($inlineRoles as $role) {
+            if ($role === null) {
+                $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
+                continue;
+            }
+            $chunks = self::formatRosterChunks($role['roster']);
+            $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'], 'value' => $chunks[0], 'inline' => true];
+            for ($i = 1; $i < count($chunks); $i++) {
+                $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'] . ' (cont.)', 'value' => $chunks[$i], 'inline' => true];
+            }
         }
 
-        if ($pendingRoster->isNotEmpty()) {
-            $fields[] = [
-                'name'   => '⏳ Pending',
-                'value'  => self::formatRosterField($pendingRoster),
-                'inline' => false,
-            ];
+        // Absent & Pending — two columns each
+        foreach ([['❌ Absent', $absentRoster], ['⏳ Pending', $pendingRoster]] as [$label, $roster]) {
+            if ($roster->isEmpty()) continue;
+
+            $half = (int) ceil($roster->count() / 2);
+            $col1 = self::formatRosterChunks($roster->slice(0, $half)->values());
+            $col2 = self::formatRosterChunks($roster->slice($half)->values());
+
+            $fields[] = ['name' => $label, 'value' => $col1[0], 'inline' => true];
+            $fields[] = ['name' => "\u{200B}", 'value' => $col2[0], 'inline' => true];
+            $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
         }
 
         $fields[] = [
@@ -250,13 +246,18 @@ class DiscordMessageBuilder
         ];
     }
 
-    private static function formatRosterField(Collection $characters): string
+    /**
+     * Format roster into chunks that fit Discord's 1024-char field limit.
+     *
+     * @return array<int, string>
+     */
+    private static function formatRosterChunks(Collection $characters): array
     {
         if ($characters->isEmpty()) {
-            return '*None*';
+            return ['*None*'];
         }
 
-        return $characters->map(function ($char) {
+        $lines = $characters->map(function ($char) {
             $statusEmoji = match ($char->pivot->status ?? 'pending') {
                 'present'  => '✅',
                 'late'     => '⏰',
@@ -268,6 +269,25 @@ class DiscordMessageBuilder
             $classEmoji = IconHelper::classEmoji($char->playable_class);
 
             return "{$statusEmoji} {$classEmoji} **{$char->name}**";
-        })->implode("\n");
+        })->all();
+
+        $chunks = [];
+        $current = '';
+
+        foreach ($lines as $line) {
+            $append = $current === '' ? $line : "\n{$line}";
+            if (mb_strlen($current . $append) > 1024) {
+                $chunks[] = $current;
+                $current = $line;
+            } else {
+                $current .= $append;
+            }
+        }
+
+        if ($current !== '') {
+            $chunks[] = $current;
+        }
+
+        return $chunks;
     }
 }

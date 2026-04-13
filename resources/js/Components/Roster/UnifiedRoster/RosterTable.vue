@@ -132,7 +132,7 @@ const slotLabels = {
                 </tr>
 
                 <!-- Column sub-header row -->
-                <tr class="bg-[#111111] text-cyan-400 text-[9px] uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#111111] text-emerald-400 text-[9px] uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="px-4 py-1 w-[200px] min-w-[200px]">
                         <div class="flex items-center gap-1">
                             <template v-if="showSearch">
@@ -151,7 +151,7 @@ const slotLabels = {
                             <template v-else>
                                 <span>{{ __('Name') }}</span>
                                 <span class="flex-1"></span>
-                                <button @click="toggleSearch" class="text-gray-500 hover:text-cyan-400 transition-colors">
+                                <button @click="toggleSearch" class="text-gray-500 hover:text-emerald-400 transition-colors">
                                     <span class="material-symbols-outlined text-[14px]">search</span>
                                 </button>
                             </template>
@@ -218,7 +218,7 @@ const slotLabels = {
                     <!-- Role group separator row -->
                     <tr v-if="members.length > 0 && roleKey !== 'unknown'"
                         class="bg-gray-800/80 border-y border-gray-700">
-                        <td colspan="100%" class="py-1 px-4 text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+                        <td colspan="100%" class="py-1 px-4 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
                             <div class="flex items-center gap-2">
                                 <img :src="roleIconSrc(roleKey)" class="w-3 h-3 opacity-80" :alt="roleKey">
                                 <span>{{ __(roles.find(r => r.id === roleKey)?.labelKey || roleKey) }} ({{ members.length }})</span>

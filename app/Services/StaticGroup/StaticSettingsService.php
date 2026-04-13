@@ -303,6 +303,13 @@ class StaticSettingsService
      */
     public function updateSettings(StaticGroup $static, array $data): void
     {
+        if (isset($data['automation_settings'])) {
+            $data['automation_settings'] = array_merge(
+                $static->automation_settings ?? [],
+                $data['automation_settings'],
+            );
+        }
+
         $static->update($data);
     }
 

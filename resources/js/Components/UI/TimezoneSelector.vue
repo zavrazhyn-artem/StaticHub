@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     modelValue: { type: String, required: true },
@@ -112,7 +114,7 @@ defineExpose({ close });
                 <!-- Options -->
                 <div class="max-h-60 overflow-y-auto custom-scrollbar p-1">
                     <div v-if="filteredTimezones.length === 0" class="py-4 text-center text-xs text-on-surface-variant">
-                        No timezones found
+                        {{ __('No timezones found') }}
                     </div>
                     <button
                         v-for="tz in filteredTimezones"

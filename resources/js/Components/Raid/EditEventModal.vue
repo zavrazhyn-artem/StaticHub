@@ -12,7 +12,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['close']);
 
-const selectedTimezone = ref(props.event.static?.timezone || props.event.timezone || 'UTC');
+const selectedTimezone = ref(props.event.timezone || props.event.static?.timezone || 'UTC');
 const startTime = ref(props.event.start_time_formatted || '20:00');
 const endTime = ref(props.event.end_time_formatted || '23:00');
 const eventDescription = ref(props.event.description || '');
@@ -33,7 +33,7 @@ const isOvernight = computed(() => {
         <!-- Modal header -->
         <div class="px-6 py-4 border-b border-white/5 bg-gradient-to-r from-surface-container-high to-surface-container flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                <div class="w-8 h-8 rounded-lg bg-fuchsia-400/20 flex items-center justify-center text-fuchsia-400">
                     <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
                 </div>
                 <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">{{ __('Edit Raid Event') }}</h3>
@@ -98,7 +98,7 @@ const isOvernight = computed(() => {
                     name="description"
                     rows="3"
                     v-model="eventDescription"
-                    class="w-full bg-surface-container-highest border border-white/5 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary outline-none resize-none"
+                    class="w-full bg-surface-container-highest border border-white/5 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-fuchsia-400 outline-none resize-none"
                 ></textarea>
             </div>
 
@@ -111,7 +111,7 @@ const isOvernight = computed(() => {
                 >{{ __('Cancel') }}</button>
                 <button
                     type="submit"
-                    class="px-6 py-2.5 bg-primary text-on-primary rounded-lg font-headline text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
+                    class="px-6 py-2.5 bg-fuchsia-400 text-black rounded-lg font-headline text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
                 >{{ __('Save Changes') }}</button>
             </div>
         </form>

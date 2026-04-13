@@ -287,11 +287,11 @@ const auditTitle = (char) => {
     if (!char) return '';
     const parts = [];
     if (char.missing_enchants_slots?.length > 0)
-        parts.push(`Missing enchants: ${char.missing_enchants_slots.join(', ')}`);
+        parts.push(__('Missing enchants:') + ` ${char.missing_enchants_slots.join(', ')}`);
     if (char.low_quality_enchants_slots?.length > 0)
-        parts.push(`Low quality enchants: ${char.low_quality_enchants_slots.join(', ')}`);
+        parts.push(__('Low quality enchants:') + ` ${char.low_quality_enchants_slots.join(', ')}`);
     if (char.empty_sockets_count > 0)
-        parts.push(`Empty sockets: ${char.empty_sockets_count}`);
+        parts.push(__('Empty sockets:') + ` ${char.empty_sockets_count}`);
     return parts.join(' | ');
 };
 
@@ -429,7 +429,7 @@ const kickMember = async (member) => {
                     <span class="material-symbols-outlined text-sm text-amber-400">history</span>
                     <span class="text-[11px] font-black uppercase tracking-widest text-amber-400">{{ __('Week') }} {{ weekNumber(selectedWeek) }}</span>
                 </template>
-                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-primary ml-1">sync</span>
+                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-emerald-400 ml-1">sync</span>
             </div>
 
             <!-- Role counts (center) -->
@@ -463,7 +463,7 @@ const kickMember = async (member) => {
 
         <!-- ── Loading ──────────────────────────────────────────────────── -->
         <div v-if="loading" class="flex justify-center p-12">
-            <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+            <span class="material-symbols-outlined animate-spin text-4xl text-emerald-400">sync</span>
         </div>
 
         <!-- ── Content ──────────────────────────────────────────────────── -->
@@ -571,7 +571,7 @@ const kickMember = async (member) => {
                     <!-- Spark Gear -->
                     <div v-if="(selectedAuditChar?.sparks_equipped ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-sm text-cyan-400">flash_on</span>
+                            <span class="material-symbols-outlined text-sm text-emerald-400">flash_on</span>
                             <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">

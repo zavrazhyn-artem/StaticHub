@@ -8,6 +8,8 @@ import SyncStatusWidget from './Components/UI/SyncStatusWidget.vue';
 import TreasuryDashboard from './Components/Treasury/TreasuryDashboard.vue';
 import ScheduleCalendar from './Components/Schedule/ScheduleCalendar.vue';
 import EventDetails from './Components/Raid/EventDetails.vue';
+import BossPlannerPage from './Components/Raid/BossPlanner/BossPlannerPage.vue';
+import SharedPlanView from './Components/Raid/BossPlanner/SharedPlanView.vue';
 import JoinStatic from './Components/Statics/JoinStatic.vue';
 import LogsIndex from './Components/Logs/LogsIndex.vue';
 import LogShow from './Components/Logs/LogShow.vue';
@@ -16,6 +18,7 @@ import SettingsLogs from './Components/Settings/SettingsLogs.vue';
 import SettingsSchedule from './Components/Settings/SettingsSchedule.vue';
 import SettingsDiscord from './Components/Settings/SettingsDiscord.vue';
 import SettingsProfile from './Components/Settings/SettingsProfile.vue';
+import GearManagement from './Components/Gear/GearManagement.vue';
 import StaticSetup from './Components/Statics/StaticSetup.vue';
 import ConsumablesPlanner from './Components/Treasury/ConsumablesPlanner.vue';
 import TransactionHistory from './Components/Treasury/TransactionHistory.vue';
@@ -26,6 +29,7 @@ import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue'
 import CharactersPage from './Components/Character/CharactersPage.vue';
 import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
 import AlertBanner from './Components/UI/AlertBanner.vue';
+import LandingPage from './Components/Landing/LandingPage.vue';
 
 
 
@@ -64,6 +68,8 @@ app.component('sync-status-widget', SyncStatusWidget);
 app.component('treasury-dashboard', TreasuryDashboard);
 app.component('schedule-calendar', ScheduleCalendar);
 app.component('event-details', EventDetails);
+app.component('boss-planner-page', BossPlannerPage);
+app.component('shared-plan-view', SharedPlanView);
 app.component('join-static', JoinStatic);
 app.component('logs-index', LogsIndex);
 app.component('log-show', LogShow);
@@ -72,6 +78,7 @@ app.component('settings-logs', SettingsLogs);
 app.component('settings-schedule', SettingsSchedule);
 app.component('settings-discord', SettingsDiscord);
 app.component('settings-profile', SettingsProfile);
+app.component('gear-management', GearManagement);
 app.component('static-setup', StaticSetup);
 app.component('consumables-planner', ConsumablesPlanner);
 app.component('consumable-card', ConsumableCard);
@@ -82,11 +89,17 @@ app.component('character-spec-picker', CharacterSpecPicker);
 app.component('characters-page', CharactersPage);
 app.component('onboarding-stepper', OnboardingStepper);
 app.component('alert-banner', AlertBanner);
+app.component('landing-page', LandingPage);
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {
     app.mount('#app');
 }
+
+// Force reload on bfcache restore (prevents stale Vue state on browser back)
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) window.location.reload();
+});
 
 import Alpine from 'alpinejs';
 

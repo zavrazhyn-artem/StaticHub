@@ -110,7 +110,7 @@ const getRaidProgression = (char) => {
             <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
           </tr>
           <!-- Sub Header -->
-          <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/40 text-emerald-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
             <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center">{{ __('Avg') }}</th>
 
@@ -169,7 +169,7 @@ const getRaidProgression = (char) => {
               </td>
 
               <!-- iLvL -->
-              <td class="p-4 text-center font-mono font-bold text-cyan-400 border-l border-white/5">
+              <td class="p-4 text-center font-mono font-bold text-emerald-400 border-l border-white/5">
                 {{ char.equipped_ilvl ? Number(char.equipped_ilvl).toFixed(0) : '-' }}
               </td>
 
@@ -243,7 +243,7 @@ const getRaidProgression = (char) => {
                 </div>
               </td>
 
-              <td class="p-4 text-center font-mono text-xs text-cyan-400/70 border-l border-white/5">
+              <td class="p-4 text-center font-mono text-xs text-emerald-400/70 border-l border-white/5">
                 {{ alt.equipped_ilvl ? Number(alt.equipped_ilvl).toFixed(0) : '-' }}
               </td>
 

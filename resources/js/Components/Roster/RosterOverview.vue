@@ -37,13 +37,13 @@ const activeComponent = computed(() => {
         :key="tab.id"
         @click="activeTab = tab.id"
         class="pb-4 text-sm font-medium transition-colors relative"
-        :class="activeTab === tab.id ? 'text-cyan-400' : 'text-gray-400 hover:text-gray-200'"
+        :class="activeTab === tab.id ? 'text-emerald-400' : 'text-gray-400 hover:text-gray-200'"
       >
         {{ tab.name }}
         <!-- Active Indicator -->
         <span
           v-if="activeTab === tab.id"
-          class="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.4)]"
+          class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_rgba(34,211,238,0.4)]"
         ></span>
       </button>
     </div>
@@ -63,7 +63,7 @@ const activeComponent = computed(() => {
           <span class="text-white">Blast</span><span class="text-blue-500">R<span class="text-xs opacity-70 ml-1">r<span class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
         </div>
       </div>
-      <h3 class="text-lg font-medium text-white mb-2 italic uppercase tracking-widest">Blast Your Raid</h3>
+      <h3 class="text-lg font-medium text-white mb-2 italic uppercase tracking-widest">{{ __('Blast Your Raid') }}</h3>
       <p class="text-gray-400 max-w-sm">
         {{ __("We couldn't find any main characters in this raid group.") }}
         {{ __('Make sure characters are assigned as Main in the Tactical Roster.') }}

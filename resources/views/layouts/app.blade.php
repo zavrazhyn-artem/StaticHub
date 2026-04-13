@@ -226,32 +226,46 @@
             </a>
 
             <a href="{{ route('statics.roster', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-emerald-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">groups</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-emerald-400' : 'group-hover:text-emerald-400 transition-colors' }}">groups</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Roster') }}</span>
             </a>
 
 
             <a href="{{ route('schedule.index') }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('schedule.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('schedule.*') ? 'bg-[#262528] text-white border-l-4 border-fuchsia-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('schedule.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">calendar_month</span>
+                    class="material-symbols-outlined {{ request()->routeIs('schedule.*') ? 'text-fuchsia-400' : 'group-hover:text-fuchsia-400 transition-colors' }}">calendar_month</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
             </a>
 
-            <a href="{{ route('statics.treasury', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.boss-planner', $static->id) }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.boss-planner*') ? 'bg-[#262528] text-white border-l-4 border-orange-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">payments</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.boss-planner*') ? 'text-orange-500' : 'group-hover:text-orange-500 transition-colors' }}">map</span>
+                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Boss Planner') }}</span>
+            </a>
+
+            <a href="{{ route('statics.treasury', $static->id) }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-yellow-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-yellow-500' : 'group-hover:text-yellow-500 transition-colors' }}">payments</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Treasury') }}</span>
             </a>
 
             <a href="{{ route('statics.logs.index', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-amber-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-indigo-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-amber-500' : 'group-hover:text-amber-500 transition-colors' }}">terminal</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors' }}">terminal</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Intelligence') }}</span>
+            </a>
+
+            <a href="{{ route('statics.gear', $static->id) }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.gear') ? 'bg-[#262528] text-white border-l-4 border-rose-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('statics.gear') ? 'text-rose-400' : 'group-hover:text-rose-400 transition-colors' }}">shield</span>
+                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Gear Management') }}</span>
             </a>
 
             <div class="pt-4 pb-2 px-4">
@@ -259,16 +273,16 @@
             </div>
 
             <a href="{{ route('characters.index') }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('characters.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('characters.*') ? 'bg-[#262528] text-white border-l-4 border-teal-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('characters.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">person</span>
+                    class="material-symbols-outlined {{ request()->routeIs('characters.*') ? 'text-teal-400' : 'group-hover:text-teal-400 transition-colors' }}">person</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('My Characters') }}</span>
             </a>
 
             <a href="{{ route('statics.settings.profile', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-slate-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-slate-400' : 'group-hover:text-slate-400 transition-colors' }}">settings</span>
                 <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
                 @unless(Auth::user()->discord_id)
                     <span class="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse-dot shadow-[0_0_8px_rgba(239,68,68,0.6)] shrink-0"></span>

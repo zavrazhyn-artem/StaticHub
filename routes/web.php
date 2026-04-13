@@ -9,6 +9,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Profile\DiscordLinkController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\StaticMembershipController;
+use App\Http\Controllers\Raid\BossPlannerController;
 use App\Http\Controllers\Raid\EventController;
 use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
 use App\Http\Controllers\Settings\StaticSettingsController;
+use App\Http\Controllers\Gear\GearController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
@@ -57,6 +59,9 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::patch('/statics/{static}/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
     Route::patch('/statics/{static}/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
+    // Gear Management
+    Route::get('/statics/{static}/gear', [GearController::class, 'index'])->name('statics.gear');
+
     // Settings
     Route::get('/statics/{static}/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
     Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
@@ -90,6 +95,23 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::get('/schedule/event/{event}', [EventController::class, 'show'])->name('schedule.event.show');
     Route::post('/schedule/event/{event}/rsvp', [EventController::class, 'rsvp'])->name('schedule.event.rsvp');
     Route::post('/schedule/event/{event}/announce', [EventController::class, 'announceToDiscord'])->name('schedule.announce');
+
+    // Event Encounter Roster
+    Route::post('/schedule/event/{event}/encounter-roster', [EventController::class, 'updateEncounterRoster'])->name('schedule.event.encounter-roster.update');
+    Route::post('/schedule/event/{event}/encounter-roster/assign', [EventController::class, 'assignEncounterCharacter'])->name('schedule.event.encounter-roster.assign');
+    Route::delete('/schedule/event/{event}/encounter-roster/remove', [EventController::class, 'removeEncounterCharacter'])->name('schedule.event.encounter-roster.remove');
+    Route::post('/schedule/event/{event}/assign-plan', [EventController::class, 'assignPlan'])->name('schedule.event.assign-plan');
+    Route::post('/schedule/event/{event}/toggle-encounter', [EventController::class, 'toggleEncounter'])->name('schedule.event.toggle-encounter');
+    Route::post('/schedule/event/{event}/settings', [EventController::class, 'updateSettings'])->name('schedule.event.settings');
+    Route::post('/schedule/event/{event}/override-attendance', [EventController::class, 'overrideAttendance'])->name('schedule.event.override-attendance');
+    Route::post('/schedule/event/{event}/save-splits', [EventController::class, 'saveSplitAssignments'])->name('schedule.event.save-splits');
+
+    // Boss Planner (standalone section)
+    Route::get('/statics/{static}/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');
+    Route::post('/statics/{static}/boss-planner/save', [BossPlannerController::class, 'save'])->name('statics.boss-planner.save');
+    Route::delete('/statics/{static}/boss-planner/{raidPlan}', [BossPlannerController::class, 'destroy'])->name('statics.boss-planner.destroy');
+    Route::post('/statics/{static}/boss-planner/{raidPlan}/share', [BossPlannerController::class, 'share'])->name('statics.boss-planner.share');
+    Route::post('/statics/{static}/boss-planner/{raidPlan}/unshare', [BossPlannerController::class, 'unshare'])->name('statics.boss-planner.unshare');
 
     // Discord Guild API
     Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
@@ -139,6 +161,7 @@ Route::middleware('auth')->group(function () {
 
 // Join static — public landing page (no auth required)
 Route::get('/join/{token}', [JoinStaticController::class, 'showLanding'])->name('statics.join');
+Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('plan.shared');
 
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');

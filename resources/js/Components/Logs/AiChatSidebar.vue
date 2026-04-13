@@ -124,9 +124,9 @@ async function sendMessage() {
 
             <!-- Member notice -->
             <div v-if="!canViewGlobalReport"
-                 class="mx-4 mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-start gap-3">
-                <span class="material-symbols-outlined text-amber-500 text-sm mt-0.5 flex-shrink-0">lock</span>
-                <p class="text-[10px] text-amber-400/80 font-bold uppercase tracking-wider leading-relaxed">
+                 class="mx-4 mt-4 px-4 py-3 bg-indigo-400/5 border border-indigo-400/20 rounded-xl flex items-start gap-3">
+                <span class="material-symbols-outlined text-indigo-400 text-sm mt-0.5 flex-shrink-0">lock</span>
+                <p class="text-[10px] text-indigo-300/80 font-bold uppercase tracking-wider leading-relaxed">
                     {{ __('Personal mode — you can only ask about your own tactical report.') }}
                 </p>
             </div>

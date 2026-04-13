@@ -6,7 +6,7 @@
         :discord-roles='@json($discordRoles ?? [])'
         discord-guild-id="{{ $discordGuildId ?? '' }}"
         discord-channel-id="{{ $static->discord_channel_id ?? '' }}"
-        discord-role-id="{{ $static->automation_settings['ping_role_id'] ?? '' }}"
+        :discord-role-ids='@json($static->automation_settings["ping_role_ids"] ?? ($static->automation_settings["ping_role_id"] ?? null ? [$static->automation_settings["ping_role_id"]] : []))'
         notification-method="{{ $static->automation_settings['notification_method'] ?? 'webhook' }}"
         notification-channel-id="{{ $static->notification_channel_id ?? '' }}"
         webhook-url="{{ $static->discord_webhook_url ?? '' }}"

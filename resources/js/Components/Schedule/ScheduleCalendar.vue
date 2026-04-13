@@ -13,6 +13,8 @@ const props = defineProps({
     staticName: { type: String, required: true },
     canManageSchedule: { type: Boolean, default: false },
     defaultRaidTime: { type: String, default: '20:00' },
+    defaultRaidEndTime: { type: String, default: '23:00' },
+    staticTimezone: { type: String, default: '' },
     currentMonthName: { type: String, required: true },
     prevMonthUrl: { type: String, required: true },
     nextMonthUrl: { type: String, required: true },
@@ -39,8 +41,9 @@ const updateEventRoute = ref('');
 // Form field state
 const selectedDate = ref('');
 const selectedDateTime = ref(props.defaultRaidTime);
-const selectedEndTime = ref('23:00');
-const selectedTimezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+const selectedEndTime = ref(props.defaultRaidEndTime);
+const defaultTimezone = props.staticTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+const selectedTimezone = ref(defaultTimezone);
 const selectedDescription = ref('');
 
 // Picker coordination refs
@@ -55,14 +58,26 @@ const isOvernight = computed(() => {
     return eh < sh || (eh === sh && em < sm);
 });
 
+const formatInTimezone = (isoString, timezone) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const date = new Date(isoString);
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: timezone,
+    }).formatToParts(date);
+    const h = parts.find(p => p.type === 'hour')?.value || '00';
+    const m = parts.find(p => p.type === 'minute')?.value || '00';
+    return `${h}:${m}`;
+};
+
 const openCreateModal = (date, defaultTime) => {
     isEditing.value = false;
     editingEventId.value = null;
     updateEventRoute.value = '';
     selectedDate.value = date;
     selectedDateTime.value = defaultTime;
-    selectedEndTime.value = '23:00';
+    selectedEndTime.value = props.defaultRaidEndTime;
     selectedDescription.value = '';
+    selectedTimezone.value = defaultTimezone;
 
     // Close any open sub-dropdowns
     startPickerRef.value?.close();
@@ -79,13 +94,11 @@ const openEditModal = (event, date) => {
     selectedDate.value = date;
     selectedDescription.value = event.description || '';
 
-    const pad = (n) => String(n).padStart(2, '0');
-    const start = new Date(event.start_time);
-    const end = event.end_time ? new Date(event.end_time) : null;
+    const tz = event.timezone || defaultTimezone;
+    selectedTimezone.value = tz;
 
-    selectedDateTime.value = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
-    selectedEndTime.value = end ? `${pad(end.getHours())}:${pad(end.getMinutes())}` : '23:00';
-    selectedTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    selectedDateTime.value = formatInTimezone(event.start_time, tz);
+    selectedEndTime.value = event.end_time ? formatInTimezone(event.end_time, tz) : '23:00';
 
     // Close any open sub-dropdowns
     startPickerRef.value?.close();
@@ -142,16 +155,16 @@ const closeModal = () => { showModal.value = false; };
                     class="min-h-[100px] bg-surface-container-lowest p-2 transition-colors relative group flex flex-col"
                     :class="[
                         canManageSchedule && day.events.length === 0 ? 'cursor-pointer hover:bg-white/[0.02]' : '',
-                        day.is_today ? 'ring-1 ring-inset ring-primary/30' : '',
+                        day.is_today ? 'ring-1 ring-inset ring-fuchsia-400/30' : '',
                     ]"
                 >
                     <div class="flex justify-between items-start shrink-0">
                         <span
                             class="font-headline font-bold text-sm"
-                            :class="!day.is_current_month ? 'text-white/20' : (day.is_today ? 'text-primary' : 'text-on-surface-variant')"
+                            :class="!day.is_current_month ? 'text-white/20' : (day.is_today ? 'text-fuchsia-400' : 'text-on-surface-variant')"
                         >{{ day.day_number }}</span>
                         <div v-if="canManageSchedule && day.events.length === 0" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span class="material-symbols-outlined text-on-surface-variant hover:text-primary text-lg">add_circle</span>
+                            <span class="material-symbols-outlined text-on-surface-variant hover:text-fuchsia-400 text-lg">add_circle</span>
                         </div>
                     </div>
 
@@ -160,10 +173,10 @@ const closeModal = () => { showModal.value = false; };
                             <div v-for="event in day.events" :key="event.id" class="relative group/event">
                                 <a
                                     :href="event.show_url"
-                                    class="block w-full bg-surface-container-high border border-white/5 rounded-md px-2 py-5 hover:border-primary/40 transition-all shadow-md"
+                                    class="block w-full bg-surface-container-high border border-white/5 rounded-md px-2 py-5 hover:border-fuchsia-400/40 transition-all shadow-md"
                                 >
                                     <div class="flex items-center justify-between text-[10px] font-bold tracking-widest uppercase">
-                                        <div class="text-primary">{{ formatRange(event.start_time, event.end_time) }}</div>
+                                        <div class="text-fuchsia-400">{{ formatRange(event.start_time, event.end_time) }}</div>
                                         <div class="text-on-surface-variant flex items-center gap-0.5 shrink-0">
                                             <span class="material-symbols-outlined text-[12px]">group</span>
                                             {{ event.characters_count ?? 0 }}/20
@@ -182,7 +195,7 @@ const closeModal = () => { showModal.value = false; };
             <!-- Modal header -->
             <div class="px-6 py-4 border-b border-white/5 bg-gradient-to-r from-surface-container-high to-surface-container flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                    <div class="w-8 h-8 rounded-lg bg-fuchsia-400/20 flex items-center justify-center text-fuchsia-400">
                         <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'edit_calendar' : 'event_available' }}</span>
                     </div>
                     <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">
@@ -218,7 +231,7 @@ const closeModal = () => { showModal.value = false; };
                 <div class="space-y-1.5">
                     <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Selected Date') }}</label>
                     <div class="flex items-center gap-2 px-3 py-2.5 bg-surface-container-highest border border-white/5 rounded-lg text-white font-headline text-sm font-bold tracking-tight">
-                        <span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
+                        <span class="material-symbols-outlined text-[16px] text-fuchsia-400">calendar_today</span>
                         {{ selectedDate }}
                     </div>
                 </div>
@@ -279,7 +292,7 @@ const closeModal = () => { showModal.value = false; };
                             rows="2"
                             :placeholder="__('Any specific requirements?')"
                             v-model="selectedDescription"
-                            class="w-full bg-surface-container-highest border border-white/5 rounded-lg pl-9 pr-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-white/20 resize-none"
+                            class="w-full bg-surface-container-highest border border-white/5 rounded-lg pl-9 pr-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-fuchsia-400 focus:border-fuchsia-400 outline-none transition-all placeholder:text-white/20 resize-none"
                         ></textarea>
                         <span class="material-symbols-outlined absolute left-3 top-3 text-[16px] text-on-surface-variant pointer-events-none">notes</span>
                     </div>
@@ -289,7 +302,7 @@ const closeModal = () => { showModal.value = false; };
                 <div class="pt-2">
                     <button
                         type="submit"
-                        class="w-full bg-primary text-on-primary py-3.5 rounded-lg font-headline text-xs font-black uppercase tracking-[0.2em] hover:brightness-110 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        class="w-full bg-fuchsia-400 text-black py-3.5 rounded-lg font-headline text-xs font-black uppercase tracking-[0.2em] hover:brightness-110 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
                         <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add_task' }}</span>
                         {{ isEditing ? __('Update Event') : __('Publish Event') }}

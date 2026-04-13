@@ -11,7 +11,7 @@
             <div v-if="canManageTreasury" class="flex items-center gap-2">
                 <button
                     @click="openTransactionModal('deposit')"
-                    class="bg-primary text-on-primary hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                    class="bg-yellow-500 text-black hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">add_circle</span>
                     {{ __('Record Deposit') }}
@@ -29,7 +29,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">savings</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">savings</span>
                 </div>
                 <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Total Reserves') }}</h3>
                 <div class="flex items-baseline gap-2">
@@ -40,7 +40,7 @@
 
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">payments</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">payments</span>
                 </div>
 
                 <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Required Weekly Tax') }}</h3>
@@ -62,7 +62,7 @@
 
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">analytics</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">analytics</span>
                 </div>
                 <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Financial Health') }}</h3>
                 <div class="flex items-baseline gap-2">
@@ -107,7 +107,7 @@
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
-                    <a :href="`/statics/${staticId}/treasury/history`" class="text-[10px] font-bold text-primary hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+                    <a :href="`/statics/${staticId}/treasury/history`" class="text-[10px] font-bold text-yellow-500 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
                         {{ __('View All') }}
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
@@ -136,7 +136,7 @@
                   </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-full">
+                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-yellow-500 transition-colors flex items-center justify-center w-full">
                                     <span class="material-symbols-outlined text-lg">{{ tx.description ? 'chat_bubble' : 'add_comment' }}</span>
                                 </button>
                             </td>
@@ -175,7 +175,7 @@
                 <div v-if="taxSaveError" class="text-[10px] text-error font-bold uppercase tracking-wider">{{ taxSaveError }}</div>
                 <div class="pt-2">
                     <button @click="saveTax" :disabled="taxSaving"
-                            class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                            class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                         <span v-if="taxSaving" class="material-symbols-outlined text-lg animate-spin">sync</span>
                         <span v-else class="material-symbols-outlined text-lg">save</span>
                         {{ taxSaving ? __('Saving...') : __('Save') }}

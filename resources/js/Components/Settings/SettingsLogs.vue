@@ -229,8 +229,8 @@ async function disconnectGuild() {
             <!-- ═══ AI Tactical Analyst ═══ -->
             <div class="space-y-6 pt-8 border-t border-white/5">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                        <span class="material-symbols-outlined text-primary">psychology</span>
+                    <div class="w-12 h-12 rounded-xl bg-slate-400/10 flex items-center justify-center border border-slate-400/20">
+                        <span class="material-symbols-outlined text-slate-400">psychology</span>
                     </div>
                     <div>
                         <h3 class="text-white font-headline text-sm font-black uppercase tracking-widest">{{ __('AI Tactical Analyst') }}</h3>

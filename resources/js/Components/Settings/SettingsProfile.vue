@@ -116,7 +116,7 @@ const unlinkDiscord = async () => {
                 discord.connected ? 'border border-white/5' : 'border-2 animate-pulse-border-cyan'
             ]">
                 <div class="flex items-center gap-3 mb-6">
-                    <span class="material-symbols-outlined text-primary text-xl">link</span>
+                    <span class="material-symbols-outlined text-slate-400 text-xl">link</span>
                     <h2 class="font-headline text-sm font-bold text-white uppercase tracking-[0.2em]">{{ __('Integrations') }}</h2>
                 </div>
 
@@ -161,7 +161,7 @@ const unlinkDiscord = async () => {
             <!-- Static Group -->
             <div v-if="statics.length" class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
                 <div class="flex items-center gap-3 mb-6">
-                    <span class="material-symbols-outlined text-primary text-xl">groups</span>
+                    <span class="material-symbols-outlined text-slate-400 text-xl">groups</span>
                     <h2 class="font-headline text-sm font-bold text-white uppercase tracking-[0.2em]">{{ __('Static Group') }}</h2>
                 </div>
 

@@ -1,471 +1,575 @@
 {
-    "class": "Druid",
-    "crests": {
-        "hero": 520,
-        "myth": 370,
-        "veteran": 1170,
-        "champion": 710,
-        "adventurer": 1180
-    },
-    "renown": {
-        "harati": 18,
-        "amani_tribe": 18,
-        "the_singularity": 19,
-        "silvermoon_court": 20
-    },
-    "equipment": [
-        {
-            "id": 250024,
-            "icon": "inv_helm_leather_raiddruidmidnight_d_01",
-            "ilvl": 266,
-            "name": "Branches of the Luminous Bloom",
-            "slot": "HEAD",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 3,
-                "track": "Hero"
+    "success": true,
+    "plan": {
+        "id": 1,
+        "event_id": null,
+        "static_id": 1,
+        "encounter_slug": "imperator-averzian",
+        "difficulty": "mythic",
+        "title": "\u0442\u0435\u0441\u0442",
+        "steps": [
+            {
+                "label": "Phase 1",
+                "arrows": [],
+                "groups": {
+                    "1": {
+                        "color": "#3B82F6",
+                        "label": "G1",
+                        "members": [
+                            177564539,
+                            188814457
+                        ]
+                    },
+                    "2": {
+                        "color": "#EF4444",
+                        "label": "G2",
+                        "members": [
+                            189361660
+                        ]
+                    }
+                },
+                "labels": [],
+                "shapes": [],
+                "markers": [
+                    {
+                        "x": 472.0686326794772,
+                        "y": 270.2796439567173,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/123\/177564539-avatar.jpg",
+                        "type": "icon",
+                        "label": "Zavrikk",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775856237348,
+                        "playerData": {
+                            "id": 177564539,
+                            "name": "Zavrikk",
+                            "role": "tank",
+                            "className": "Druid"
+                        },
+                        "showDirection": false
+                    },
+                    {
+                        "x": 474.1605511992345,
+                        "y": 270.7052624221135,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/terokkar\/121\/188814457-avatar.jpg",
+                        "type": "icon",
+                        "label": "Marihoha",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775856237348,
+                        "playerData": {
+                            "id": 188814457,
+                            "name": "Marihoha",
+                            "role": "heal",
+                            "className": "Druid"
+                        },
+                        "showDirection": false
+                    },
+                    {
+                        "x": 559.7153024911031,
+                        "y": 188.38739290085687,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/123\/177564539-avatar.jpg",
+                        "type": "icon",
+                        "label": "Zavrikk",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775888781803,
+                        "playerData": {
+                            "id": 177564539,
+                            "name": "Zavrikk",
+                            "role": "tank",
+                            "className": "Druid"
+                        },
+                        "showDirection": false
+                    },
+                    {
+                        "x": 559.7153024911031,
+                        "y": 223.38739290085687,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/terokkar\/121\/188814457-avatar.jpg",
+                        "type": "icon",
+                        "label": "Marihoha",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775888781803,
+                        "playerData": {
+                            "id": 188814457,
+                            "name": "Marihoha",
+                            "role": "heal",
+                            "className": "Druid"
+                        },
+                        "showDirection": false
+                    },
+                    {
+                        "x": 503.914590747331,
+                        "y": 113.0232558139535,
+                        "type": "emoji",
+                        "emoji": "\u2b05",
+                        "label": null,
+                        "scale": 1.41,
+                        "rotation": 0,
+                        "showDirection": false
+                    }
+                ],
+                "players": []
             },
-            "bonus_ids": [
-                13334,
-                6652,
-                12667,
-                13338,
-                13575,
-                12795
-            ],
-            "enchant_id": 7959,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 151309,
-            "icon": "inv_7_0raid_necklace_06d",
-            "ilvl": 269,
-            "name": "Necklace of the Twisting Void",
-            "slot": "NECK",
-            "gem_ids": [
-                240971
-            ],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 4,
-                "track": "Hero"
+            {
+                "label": "Phase 1 (copy)",
+                "arrows": [],
+                "groups": {
+                    "1": {
+                        "color": "#3B82F6",
+                        "label": "G1",
+                        "members": [
+                            177564539,
+                            188814457
+                        ]
+                    },
+                    "2": {
+                        "color": "#EF4444",
+                        "label": "G2",
+                        "members": [
+                            189361660
+                        ]
+                    }
+                },
+                "labels": [],
+                "shapes": [],
+                "markers": [
+                    {
+                        "x": 378.6030713395867,
+                        "y": 386.85673347839105,
+                        "type": "group-token",
+                        "color": "#EF4444",
+                        "label": "G2",
+                        "scale": 1,
+                        "groupId": 2,
+                        "rotation": 43,
+                        "groupLabel": "G2",
+                        "showDirection": true
+                    },
+                    {
+                        "x": 482.7451394887569,
+                        "y": 332.22387318202993,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/123\/177564539-avatar.jpg",
+                        "type": "icon",
+                        "label": "Zavrikk",
+                        "scale": 1.74,
+                        "rotation": 351,
+                        "playerData": {
+                            "id": 177564539,
+                            "name": "Zavrikk",
+                            "role": "tank",
+                            "className": "Druid"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 594.0920048054802,
+                        "y": 371.1404312013557,
+                        "type": "group-token",
+                        "color": "#3B82F6",
+                        "label": "G1",
+                        "scale": 1,
+                        "groupId": 1,
+                        "rotation": 332,
+                        "groupLabel": "G1",
+                        "showDirection": true
+                    },
+                    {
+                        "x": 304.358160609765,
+                        "y": 208.099608681188,
+                        "src": "\/images\/raidplan\/icons\/inv_soulbarrier.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 434.8570087383914,
+                        "y": 199.43757882908676,
+                        "src": "\/images\/raidplan\/icons\/ability_mage_incantersabsorbtion.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 375.8347081324981,
+                        "y": 330.6054594466193,
+                        "src": "\/images\/raidplan\/icons\/spell_priest_void-blast.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 530.7005610984199,
+                        "y": 164.1707430026747,
+                        "src": "\/images\/raidplan\/icons\/spell_arcane_arcanepotency_nightborne.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 308.1485835844554,
+                        "y": 306.47551914433734,
+                        "src": "\/images\/raidplan\/stickers\/gateway-fs8.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 507.9580232502775,
+                        "y": 259.453071375788,
+                        "src": "\/images\/raidplan\/stickers\/gateway-fs8.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": true,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 263.74648588093936,
+                        "y": 276.77713107999034,
+                        "src": "\/images\/raidplan\/role\/rdps.svg",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 396.4112899951031,
+                        "y": 185.82581763292777,
+                        "src": "\/images\/raidplan\/role\/rdps.svg",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 396.95277899148743,
+                        "y": 115.91086239811084,
+                        "src": "\/images\/raidplan\/class\/warlock.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 432.14956375646966,
+                        "y": 101.68038478394456,
+                        "src": "\/images\/raidplan\/class\/mage.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 550.7356539646405,
+                        "y": 102.917817619959,
+                        "src": "\/images\/raidplan\/class\/shaman.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 338.4719673819785,
+                        "y": 172.2140564367687,
+                        "src": "\/images\/raidplan\/portraits\/137668.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 367.1708841903486,
+                        "y": 242.12901167158557,
+                        "src": "\/images\/raidplan\/portraits\/137457.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 415.90489386493937,
+                        "y": 249.55360868767232,
+                        "src": "\/images\/raidplan\/portraits\/137457.png",
+                        "type": "icon",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "isAbility": false,
+                        "showDirection": true
+                    },
+                    {
+                        "x": 346.59430232774366,
+                        "y": 264.4028027198458,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/252\/189361660-avatar.jpg",
+                        "type": "icon",
+                        "label": "Flavreus",
+                        "scale": 1,
+                        "rotation": 0,
+                        "playerData": {
+                            "id": 189361660,
+                            "name": "Flavreus",
+                            "role": "rdps",
+                            "className": "Demon Hunter"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 310.31453956999275,
+                        "y": 364.6348624370169,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/123\/177564539-avatar.jpg",
+                        "type": "icon",
+                        "label": "Zavrikk",
+                        "scale": 1,
+                        "rotation": 0,
+                        "playerData": {
+                            "id": 177564539,
+                            "name": "Zavrikk",
+                            "role": "tank",
+                            "className": "Druid"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 535.0324730694946,
+                        "y": 236.5605639095205,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/terokkar\/121\/188814457-avatar.jpg",
+                        "type": "icon",
+                        "label": "Marihoha",
+                        "scale": 1,
+                        "rotation": 0,
+                        "playerData": {
+                            "id": 188814457,
+                            "name": "Marihoha",
+                            "role": "heal",
+                            "className": "Druid"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 569.1462798417082,
+                        "y": 203.14987733713016,
+                        "type": "group-token",
+                        "color": "#EF4444",
+                        "label": null,
+                        "scale": 1,
+                        "groupId": 2,
+                        "rotation": 0,
+                        "groupLabel": "G2",
+                        "showDirection": true
+                    },
+                    {
+                        "x": 285.94753473269736,
+                        "y": 215.5242056972747,
+                        "type": "group-token",
+                        "color": "#3B82F6",
+                        "label": null,
+                        "scale": 1,
+                        "groupId": 1,
+                        "rotation": 0,
+                        "groupLabel": "G1",
+                        "showDirection": true
+                    },
+                    {
+                        "x": 193.8944053473592,
+                        "y": 284.82044451408433,
+                        "type": "emoji",
+                        "emoji": "\u2705",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "showDirection": false
+                    },
+                    {
+                        "x": 258.8730849134802,
+                        "y": 214.28677286126023,
+                        "type": "emoji",
+                        "emoji": "\ud83d\udeab",
+                        "label": null,
+                        "scale": 1,
+                        "rotation": 0,
+                        "showDirection": false
+                    }
+                ],
+                "players": []
             },
-            "bonus_ids": [
-                13440,
-                6652,
-                13668,
-                12699,
-                12796
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 1
-        },
-        {
-            "id": 250022,
-            "icon": "inv_shoulder_leather_raiddruidmidnight_d_01",
-            "ilvl": 266,
-            "name": "Seedpods of the Luminous Bloom",
-            "slot": "SHOULDER",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 3,
-                "track": "Hero"
+            {
+                "label": "Phase 3",
+                "arrows": [],
+                "groups": {
+                    "1": {
+                        "color": "#3B82F6",
+                        "label": "G1",
+                        "members": [
+                            177564539,
+                            189361660,
+                            188814457
+                        ]
+                    }
+                },
+                "labels": [],
+                "shapes": [],
+                "markers": [
+                    {
+                        "x": 479.424049919412,
+                        "y": 206.9340024956477,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/123\/177564539-avatar.jpg",
+                        "type": "icon",
+                        "label": "Zavrikk",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775856249226,
+                        "playerData": {
+                            "id": 177564539,
+                            "name": "Zavrikk",
+                            "role": "tank",
+                            "className": "Druid"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 527.9214725313406,
+                        "y": 290.9340024956477,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/tarren-mill\/252\/189361660-avatar.jpg",
+                        "type": "icon",
+                        "label": "Flavreus",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775856249226,
+                        "playerData": {
+                            "id": 189361660,
+                            "name": "Flavreus",
+                            "role": "rdps",
+                            "className": "Demon Hunter"
+                        },
+                        "showDirection": true
+                    },
+                    {
+                        "x": 430.9266273074835,
+                        "y": 290.9340024956477,
+                        "src": "https:\/\/render.worldofwarcraft.com\/eu\/character\/terokkar\/121\/188814457-avatar.jpg",
+                        "type": "icon",
+                        "label": "Marihoha",
+                        "scale": 1,
+                        "rotation": 0,
+                        "linkGroup": 1775856249226,
+                        "playerData": {
+                            "id": 188814457,
+                            "name": "Marihoha",
+                            "role": "heal",
+                            "className": "Druid"
+                        },
+                        "showDirection": true
+                    }
+                ],
+                "players": []
             },
-            "bonus_ids": [
-                6652,
-                12795,
-                13440,
-                13340,
-                13574,
-                3151
-            ],
-            "enchant_id": 8031,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 98084,
-            "icon": null,
-            "ilvl": 1,
-            "name": "Ooze-Soaked Shirt",
-            "slot": "SHIRT",
-            "gem_ids": [],
-            "quality": "RARE",
-            "upgrade": null,
-            "bonus_ids": [],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 250027,
-            "icon": "inv_chest_leather_raiddruidmidnight_d_01",
-            "ilvl": 272,
-            "name": "Trunk of the Luminous Bloom",
-            "slot": "CHEST",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 1,
-                "track": "Myth"
+            {
+                "label": "Phase 4",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                13336,
-                12801,
-                13440,
-                6652,
-                13575
-            ],
-            "enchant_id": 7985,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 249374,
-            "icon": "inv_belt_leather_raidmonkmidnight_d_01",
-            "ilvl": 263,
-            "name": "Scorn-Scarred Shul'ka's Belt",
-            "slot": "WAIST",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 2,
-                "track": "Hero"
+            {
+                "label": "Phase 5",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                6652,
-                12667,
-                13577,
-                13334,
-                12794
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 250023,
-            "icon": "inv_pant_leather_raiddruidmidnight_d_01",
-            "ilvl": 276,
-            "name": "Phloemwraps of the Luminous Bloom",
-            "slot": "LEGS",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 2,
-                "track": "Myth"
+            {
+                "label": "Phase 6",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                6652,
-                13440,
-                13339,
-                13575,
-                12802
-            ],
-            "enchant_id": 8159,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 249334,
-            "icon": "inv_boot_leather_raiddemonhuntermidnight_d_01",
-            "ilvl": 269,
-            "name": "Void-Claimed Shinkickers",
-            "slot": "FEET",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 4,
-                "track": "Hero"
+            {
+                "label": "Phase 7",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                42,
-                13577,
-                13334,
-                12796
-            ],
-            "enchant_id": 7963,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 250020,
-            "icon": "inv_bracer_leather_raiddruidmidnight_d_01",
-            "ilvl": 266,
-            "name": "Bindings of the Luminous Bloom",
-            "slot": "WRIST",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 3,
-                "track": "Hero"
+            {
+                "label": "Phase 8",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                6652,
-                12667,
-                12795,
-                13440,
-                3151
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 250025,
-            "icon": "inv_glove_leather_raiddruidmidnight_d_01",
-            "ilvl": 269,
-            "name": "Arbortenders of the Luminous Bloom",
-            "slot": "HANDS",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 4,
-                "track": "Hero"
+            {
+                "label": "Phase 9",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                6652,
-                13440,
-                13337,
-                13574,
-                12796
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 251093,
-            "icon": "inv_12_trinket_devouring_host_currency1_silver",
-            "ilvl": 269,
-            "name": "Omission of Light",
-            "slot": "FINGER_1",
-            "gem_ids": [
-                240916
-            ],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 4,
-                "track": "Hero"
+            {
+                "label": "Phase 10",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
             },
-            "bonus_ids": [
-                13440,
-                6652,
-                13668,
-                12699,
-                12796
-            ],
-            "enchant_id": 8027,
-            "is_crafted": false,
-            "socket_count": 1
-        },
-        {
-            "id": 151311,
-            "icon": "inv_70_dungeon_ring2b",
-            "ilvl": 276,
-            "name": "Band of the Triumvirate",
-            "slot": "FINGER_2",
-            "gem_ids": [
-                240916
-            ],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 6,
-                "track": "Hero"
-            },
-            "bonus_ids": [
-                13440,
-                6652,
-                13668,
-                12699,
-                12798
-            ],
-            "enchant_id": 8027,
-            "is_crafted": false,
-            "socket_count": 1
-        },
-        {
-            "id": 249339,
-            "icon": "inv_12_trinket_raid_voidspire_tank1_smolderinggloomscale",
-            "ilvl": 276,
-            "name": "Gloom-Spattered Dreadscale",
-            "slot": "TRINKET_1",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 6,
-                "track": "Hero"
-            },
-            "bonus_ids": [
-                6652,
-                13334,
-                12798
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 250256,
-            "icon": "inv_10_jewelcrafting3_soulcage_air",
-            "ilvl": 276,
-            "name": "Heart of Wind",
-            "slot": "TRINKET_2",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 6,
-                "track": "Hero"
-            },
-            "bonus_ids": [
-                13440,
-                6652,
-                12699,
-                12798
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 193712,
-            "icon": "inv_leather_dragondungeon_c_01_cape",
-            "ilvl": 269,
-            "name": "Potion-Stained Cloak",
-            "slot": "BACK",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": {
-                "max": 6,
-                "level": 4,
-                "track": "Hero"
-            },
-            "bonus_ids": [
-                13440,
-                6652,
-                13577,
-                12699,
-                12796
-            ],
-            "enchant_id": null,
-            "is_crafted": false,
-            "socket_count": 0
-        },
-        {
-            "id": 237848,
-            "icon": "mace_2h_blacksmithing_d_04_icon",
-            "ilvl": 285,
-            "name": "Blood Knight's Mercy",
-            "slot": "MAIN_HAND",
-            "gem_ids": [],
-            "quality": "EPIC",
-            "upgrade": null,
-            "bonus_ids": [
-                12214,
-                12497,
-                12066,
-                13640,
-                8960,
-                8792,
-                13622,
-                13667
-            ],
-            "enchant_id": 8009,
-            "is_crafted": true,
-            "socket_count": 0
-        }
-    ],
-    "avatar_url": "https://render.worldofwarcraft.com/eu/character/tarren-mill/123/177564539-avatar.jpg",
-    "spark_gear": {
-        "main_hand": {
-            "id": 237848,
-            "ilvl": 285,
-            "name": "Blood Knight's Mercy"
-        }
-    },
-    "tier_ilvls": {
-        "C": 272,
-        "G": 269,
-        "H": 266,
-        "L": 276,
-        "S": 266
-    },
-    "coffer_keys": 227,
-    "combat_role": "TANK",
-    "honor_level": 20,
-    "lvl_25_pets": 64,
-    "tier_pieces": {
-        "C": "Myth",
-        "G": "Hero",
-        "H": "Hero",
-        "L": "Myth",
-        "S": "Hero"
-    },
-    "unique_pets": 482,
-    "cutting_edge": 0,
-    "mounts_count": 707,
-    "pvp_brackets": {
-        "2v2": {
-            "rating": 0,
-            "week_played": 0,
-            "season_played": 0
-        },
-        "3v3": {
-            "rating": 0,
-            "week_played": 0,
-            "season_played": 0
-        },
-        "rbg": {
-            "rating": 0,
-            "week_played": 0,
-            "season_played": 0
-        },
-        "shuffle": {
-            "rating": 0,
-            "week_played": 0,
-            "season_played": 0
-        }
-    },
-    "titles_count": 183,
-    "equipped_ilvl": 272,
-    "mythic_rating": 2633.0952,
-    "season_delves": 251,
-    "honorable_kills": 8685,
-    "sparks_equipped": 2,
-    "upgrades_missing": 32,
-    "embellished_items": [
-        {
-            "id": 237848,
-            "ilvl": 285,
-            "name": "Blood Knight's Mercy",
-            "spell_id": 1245052,
-            "spell_name": "Void"
-        }
-    ],
-    "highest_ilvl_ever": null,
-    "achievement_points": 36645,
-    "ahead_of_the_curve": 0,
-    "empty_sockets_count": 0,
-    "missing_enchants_slots": [],
-    "season_heroic_dungeons": 36,
-    "low_quality_enchants_slots": [
-        "HEAD"
-    ]
+            {
+                "label": "Phase 11",
+                "arrows": [],
+                "groups": [],
+                "labels": [],
+                "shapes": [],
+                "markers": [],
+                "players": []
+            }
+        ],
+        "share_token": "9f48d3c44c6f9fad791faec3b8d074d0",
+        "created_at": "2026-04-10T13:56:16.000000Z",
+        "updated_at": "2026-04-11T07:11:16.000000Z"
+    }
 }

@@ -105,8 +105,8 @@ export default {
         <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center">
             <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Consumables Planning') }}</h3>
             <div v-show="isSaving" class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                <span class="text-[9px] text-primary font-bold uppercase tracking-widest">{{ __('Saving...') }}</span>
+                <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                <span class="text-[9px] text-yellow-500 font-bold uppercase tracking-widest">{{ __('Saving...') }}</span>
             </div>
         </div>
 
@@ -116,15 +116,15 @@ export default {
                 <div class="bg-surface-container-lowest/50 p-3 rounded-lg border border-white/5">
                     <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Raid Days') }}</div>
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xs">calendar_month</span>
+                        <span class="material-symbols-outlined text-yellow-500 text-xs">calendar_month</span>
                         <span>{{ raidDays }}</span>
-                        <a v-if="settingsScheduleUrl" :href="settingsScheduleUrl" class="ml-auto text-[8px] text-primary hover:underline uppercase tracking-widest">{{ __('Edit') }}</a>
+                        <a v-if="settingsScheduleUrl" :href="settingsScheduleUrl" class="ml-auto text-[8px] text-yellow-500 hover:underline uppercase tracking-widest">{{ __('Edit') }}</a>
                     </div>
                 </div>
                 <div class="bg-surface-container-lowest/50 p-3 rounded-lg border border-white/5">
                     <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Total Members') }}</div>
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xs">groups</span>
+                        <span class="material-symbols-outlined text-yellow-500 text-xs">groups</span>
                         <span>{{ totalMembers }}/20</span>
                     </div>
                 </div>

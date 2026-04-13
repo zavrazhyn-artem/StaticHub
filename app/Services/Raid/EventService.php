@@ -104,6 +104,7 @@ class EventService
             'static_id' => $data['static_id'],
             'start_time' => $startTime,
             'end_time' => $endTime,
+            'timezone' => $timezone,
             'description' => $data['description'] ?? null,
         ]);
     }
@@ -122,6 +123,55 @@ class EventService
             $userId,
             $staticId
         );
+    }
+
+    /**
+     * Toggle a single encounter selection for an event.
+     * null selected_encounters means "all selected" (default).
+     */
+    public function toggleEncounterSelection(Event $event, string $encounterSlug, bool $selected): void
+    {
+        $allSlugs = $this->getAllEncounterSlugs();
+        $current = $event->selected_encounters ?? $allSlugs;
+
+        if ($selected) {
+            $current = array_values(array_unique(array_merge($current, [$encounterSlug])));
+        } else {
+            $current = array_values(array_filter($current, fn ($s) => $s !== $encounterSlug));
+        }
+
+        // If all are selected, store null (default state)
+        $event->update([
+            'selected_encounters' => count($current) === count($allSlugs) ? null : $current,
+        ]);
+    }
+
+    /**
+     * Bulk save selected encounters. null = all, [] = none, [...slugs] = specific.
+     */
+    public function saveSelectedEncounters(Event $event, ?array $slugs): void
+    {
+        $allSlugs = $this->getAllEncounterSlugs();
+
+        if ($slugs === null || count($slugs) === count($allSlugs)) {
+            $event->update(['selected_encounters' => null]);
+        } else {
+            $event->update(['selected_encounters' => array_values($slugs)]);
+        }
+    }
+
+    /**
+     * Get all encounter slugs from config.
+     */
+    private function getAllEncounterSlugs(): array
+    {
+        $slugs = [];
+        foreach (config('wow_season.current_raid_instances', []) as $bosses) {
+            foreach ($bosses as $bossName) {
+                $slugs[] = \Illuminate\Support\Str::slug($bossName);
+            }
+        }
+        return $slugs;
     }
 
     // -----------------------------------------------------------------------
@@ -164,6 +214,7 @@ class EventService
         $event->update([
             'start_time' => $startTime,
             'end_time' => $endTime,
+            'timezone' => $timezone,
             'description' => $data['description'] ?? $event->description,
         ]);
 

@@ -68,7 +68,7 @@ const activePersonalReport = computed(() => {
 
             <!-- Breadcrumbs & Back -->
             <div class="mb-8 flex items-center justify-between">
-                <a :href="logsIndexUrl" class="flex items-center gap-2 text-on-surface-variant hover:text-amber-500 transition-colors text-[10px] font-black uppercase tracking-widest group">
+                <a :href="logsIndexUrl" class="flex items-center gap-2 text-on-surface-variant hover:text-indigo-400 transition-colors text-[10px] font-black uppercase tracking-widest group">
                     <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
                     {{ __('Return to Archives') }}
                 </a>
@@ -83,7 +83,7 @@ const activePersonalReport = computed(() => {
             <!-- Mission Header -->
             <div class="mb-12">
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                    <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-[10px] font-black text-indigo-400 uppercase tracking-widest">
                         {{ __('Report ID:') }} {{ report.wcl_report_id }}
                     </span>
                     <span class="text-on-surface-variant opacity-20">•</span>
@@ -96,11 +96,11 @@ const activePersonalReport = computed(() => {
                 </h1>
                 <div class="flex items-center gap-6">
                     <div v-if="report.duration_hours" class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-amber-500 text-sm">schedule</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-sm">schedule</span>
                         <span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{{ report.duration_hours }} {{ __('Hours Duration') }}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-amber-500 text-sm">terminal</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-sm">terminal</span>
                         <span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{{ __('Tactical Intelligence') }}</span>
                     </div>
                 </div>
@@ -109,7 +109,7 @@ const activePersonalReport = computed(() => {
             <!-- Member view: Personal Report only (no tabs, no global data) -->
             <template v-if="!canViewGlobalReport">
                 <div v-if="personalReport" class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="bg-amber-500/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
+                    <div class="bg-indigo-400/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div :class="`w-10 h-10 rounded-xl bg-${personalReport.char_class_css}/20 flex items-center justify-center border border-${personalReport.char_class_css}/30`">
                                 <span :class="`material-symbols-outlined text-${personalReport.char_class_css}`">person</span>
@@ -123,7 +123,7 @@ const activePersonalReport = computed(() => {
                                 </p>
                             </div>
                         </div>
-                        <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                        <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-[9px] font-black text-indigo-400 uppercase tracking-widest">
                             {{ __('Your personal Report') }}
                         </span>
                     </div>
@@ -143,13 +143,13 @@ const activePersonalReport = computed(() => {
                 <div class="flex items-center border-b border-white/5 pb-px">
                     <div class="flex gap-4">
                         <button @click="activeTab = 'global'"
-                                :class="activeTab === 'global' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
+                                :class="activeTab === 'global' ? 'text-indigo-400 border-indigo-400' : 'text-on-surface-variant border-transparent hover:text-white'"
                                 class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">public</span>
                             {{ __('Global Report') }}
                         </button>
                         <button @click="activeTab = 'roster'"
-                                :class="activeTab === 'roster' ? 'text-amber-500 border-amber-500' : 'text-on-surface-variant border-transparent hover:text-white'"
+                                :class="activeTab === 'roster' ? 'text-indigo-400 border-indigo-400' : 'text-on-surface-variant border-transparent hover:text-white'"
                                 class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">person</span>
                             {{ __('Personal Report') }}
@@ -173,15 +173,15 @@ const activePersonalReport = computed(() => {
                     <!-- AI Summary -->
                     <div class="lg:col-span-2 space-y-8">
                         <section class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                            <div class="bg-amber-500/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
-                                <h2 class="text-amber-500 font-headline text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3">
+                            <div class="bg-indigo-400/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
+                                <h2 class="text-indigo-400 font-headline text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3">
                                     <span class="material-symbols-outlined text-lg">psychology</span>
                                     {{ __('AI Tactical Review') }}
                                 </h2>
                                 <div class="flex gap-1">
-                                    <div class="w-2 h-2 rounded-full bg-amber-500/20"></div>
-                                    <div class="w-2 h-2 rounded-full bg-amber-500/40"></div>
-                                    <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                    <div class="w-2 h-2 rounded-full bg-indigo-400/20"></div>
+                                    <div class="w-2 h-2 rounded-full bg-indigo-400/40"></div>
+                                    <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
                                 </div>
                             </div>
                             <div class="p-8">
@@ -192,23 +192,6 @@ const activePersonalReport = computed(() => {
 
                     <!-- Sidebar: Execution Metrics + Mission Summary -->
                     <div class="space-y-8">
-                        <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
-                            <h3 class="text-white font-headline text-[10px] font-black uppercase tracking-widest opacity-40">{{ __('Execution Metrics') }}</h3>
-                            <div class="space-y-6">
-                                <div v-for="metric in report.execution_metrics" :key="metric.label" class="space-y-2">
-                                    <div class="flex justify-between items-end">
-                                        <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">{{ __(metric.label) }}</span>
-                                        <span class="text-lg font-black" :class="metric.color">{{ metric.value }}%</span>
-                                    </div>
-                                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div class="h-full rounded-full" :class="metric.bar_class"
-                                             :style="{ width: metric.value + '%' }"></div>
-                                    </div>
-                                    <p v-if="metric.note" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider opacity-60">{{ __(metric.note) }}</p>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
                             <h3 class="text-white font-headline text-[10px] font-black uppercase tracking-widest opacity-40">{{ __('Mission Summary') }}</h3>
                             <div class="space-y-4">
@@ -229,7 +212,7 @@ const activePersonalReport = computed(() => {
                 <div v-show="activeTab === 'roster'" class="space-y-6">
                     <!-- Personal report found -->
                     <div v-if="activePersonalReport" class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                        <div class="bg-amber-500/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
+                        <div class="bg-indigo-400/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <div :class="`w-10 h-10 rounded-xl bg-${activePersonalReport.char_class_css}/20 flex items-center justify-center border border-${activePersonalReport.char_class_css}/30`">
                                     <span :class="`material-symbols-outlined text-${activePersonalReport.char_class_css}`">person</span>
@@ -243,7 +226,7 @@ const activePersonalReport = computed(() => {
                                     </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                            <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-[9px] font-black text-indigo-400 uppercase tracking-widest">
                                 {{ personalReport && activePersonalReport.id === personalReport.id ? __('Your personal Report') : __('Personal Report') }}
                             </span>
                         </div>
@@ -264,9 +247,9 @@ const activePersonalReport = computed(() => {
             <!-- No AI analysis yet -->
             <div v-else class="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl">
                 <div class="relative inline-block mb-6">
-                    <span class="material-symbols-outlined text-8xl text-amber-500/10">psychology</span>
+                    <span class="material-symbols-outlined text-8xl text-indigo-400/10">psychology</span>
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-4xl text-amber-500 animate-pulse">hourglass_empty</span>
+                        <span class="material-symbols-outlined text-4xl text-indigo-400 animate-pulse">hourglass_empty</span>
                     </div>
                 </div>
                 <h3 class="text-2xl font-black text-white uppercase tracking-widest">{{ __('Analysis in Progress') }}</h3>

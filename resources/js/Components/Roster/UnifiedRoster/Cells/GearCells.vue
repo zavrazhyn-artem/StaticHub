@@ -1,6 +1,9 @@
 <script setup>
-import { inject, computed } from 'vue';
+import { inject, computed, getCurrentInstance } from 'vue';
 import { useWowheadIcons } from '@/composables/useWowheadIcons';
+
+const { proxy } = getCurrentInstance();
+const __ = (key, replace = {}) => proxy.__(key, replace);
 
 const rowHeights = inject('rowHeights');
 const { getIconUrl } = useWowheadIcons();
@@ -166,7 +169,7 @@ const borderClass = (item) => {
             <div v-if="!isAlt" class="mt-0.5 h-[12px] flex items-center">
                 <div v-if="getItem(slot).is_crafted"
                      :class="['font-black text-[9px] uppercase tracking-wide', craftedColorClass(getItem(slot).ilvl)]">
-                    CRAFT
+                    {{ __('CRAFT') }}
                 </div>
                 <div v-else-if="getItem(slot).upgrade"
                      :class="['font-bold text-[10px]', trackColorMap[getItem(slot).upgrade.track] || 'text-gray-400']">

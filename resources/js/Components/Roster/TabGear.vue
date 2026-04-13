@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUpdated } from 'vue';
+import { ref, computed, onMounted, onUpdated } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { useGearSpecSwitch } from '@/composables/useGearSpecSwitch';
 import GearCell from './GearCell.vue';
@@ -55,24 +55,24 @@ const { getSpecData, selectSpec, getSpecOptions, getActiveSpec } = useGearSpecSw
 // Config
 // ---------------------------------------------------------------------------
 
-const GEAR_SLOTS = [
-    { key: 'HEAD',      label: 'Head'      },
-    { key: 'NECK',      label: 'Neck'      },
-    { key: 'SHOULDER',  label: 'Shoulders' },
-    { key: 'BACK',      label: 'Cloak'     },
-    { key: 'CHEST',     label: 'Chest'     },
-    { key: 'WRIST',     label: 'Wrist'     },
-    { key: 'HANDS',     label: 'Hands'     },
-    { key: 'WAIST',     label: 'Waist'     },
-    { key: 'LEGS',      label: 'Legs'      },
-    { key: 'FEET',      label: 'Feet'      },
-    { key: 'FINGER_1',  label: 'Ring'    },
-    { key: 'FINGER_2',  label: 'Ring'    },
-    { key: 'TRINKET_1', label: 'Trinket' },
-    { key: 'TRINKET_2', label: 'Trinket' },
-    { key: 'MAIN_HAND', label: 'Main Hand' },
-    { key: 'OFF_HAND',  label: 'Off Hand'  },
-];
+const GEAR_SLOTS = computed(() => [
+    { key: 'HEAD',      label: __('Head')      },
+    { key: 'NECK',      label: __('Neck')      },
+    { key: 'SHOULDER',  label: __('Shoulders') },
+    { key: 'BACK',      label: __('Cloak')     },
+    { key: 'CHEST',     label: __('Chest')     },
+    { key: 'WRIST',     label: __('Wrist')     },
+    { key: 'HANDS',     label: __('Hands')     },
+    { key: 'WAIST',     label: __('Waist')     },
+    { key: 'LEGS',      label: __('Legs')      },
+    { key: 'FEET',      label: __('Feet')      },
+    { key: 'FINGER_1',  label: __('Ring')    },
+    { key: 'FINGER_2',  label: __('Ring')    },
+    { key: 'TRINKET_1', label: __('Trinket') },
+    { key: 'TRINKET_2', label: __('Trinket') },
+    { key: 'MAIN_HAND', label: __('Main Hand') },
+    { key: 'OFF_HAND',  label: __('Off Hand')  },
+]);
 
 const CLASS_COLORS = {
     'Death Knight': 'text-[#C41F3B]', 'Demon Hunter': 'text-[#A330C9]',
@@ -122,7 +122,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">{{ __('Equipment') }}</th>
                     </tr>
                     <!-- Column sub-headers -->
-                    <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/40 text-emerald-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
                         <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                             <div class="flex justify-between items-center pr-2">
                                 <span>{{ __('Name') }}</span>
@@ -133,7 +133,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <th class="p-2 text-center text-[9px]">{{ __('Gems') }}</th>
                         <th v-for="slot in GEAR_SLOTS" :key="slot.key"
                             class="p-1 min-w-[42px] text-center text-[9px]">
-                            {{ __(slot.label) }}
+                            {{ slot.label }}
                         </th>
                     </tr>
                 </thead>
@@ -194,7 +194,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                     </div>
                                     <!-- ilvl -->
                                     <div class="text-right shrink-0 pr-1">
-                                        <span class="text-xs font-mono font-bold text-cyan-400">
+                                        <span class="text-xs font-mono font-bold text-emerald-400">
                                             {{ getSpecData(member.main_character).equipped_ilvl != null
                                                 ? Number(getSpecData(member.main_character).equipped_ilvl).toFixed(1)
                                                 : 'N/A' }}
@@ -280,7 +280,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 pr-1">
-                                            <span class="text-[10px] font-mono font-bold text-cyan-400/70">
+                                            <span class="text-[10px] font-mono font-bold text-emerald-400/70">
                                                 {{ getSpecData(alt)?.equipped_ilvl != null
                                                     ? Number(getSpecData(alt).equipped_ilvl).toFixed(1)
                                                     : 'N/A' }}
