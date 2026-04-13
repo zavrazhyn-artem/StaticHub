@@ -113,6 +113,7 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --innodb-buffer-pool-size=256M
       - --sort-buffer-size=4M
+      - --skip-log-bin
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
