@@ -52,9 +52,12 @@ class RosterService
             ->get()
             ->groupBy('character_id');
 
+        // Pre-load all specializations for resolving off-spec icons from gear data.
+        $specLookup = Specialization::all()->keyBy(fn ($s) => "{$s->name}|{$s->class_name}");
+
         // Attach main_spec + all_specs attributes to each character.
-        $members->each(function (User $user) use ($allSpecRecords) {
-            $user->characters->each(function ($char) use ($allSpecRecords) {
+        $members->each(function (User $user) use ($allSpecRecords, $specLookup) {
+            $user->characters->each(function ($char) use ($allSpecRecords, $specLookup) {
                 $charSpecs = $allSpecRecords->get($char->id, collect());
 
                 $mainRecord = $charSpecs->firstWhere('is_main', true);
@@ -66,7 +69,7 @@ class RosterService
                     'icon_url' => $mainSpec->icon_url,
                 ] : null);
 
-                $char->setAttribute('all_specs', $charSpecs
+                $allSpecs = $charSpecs
                     ->map(fn ($record) => $record->specialization ? [
                         'id'       => $record->specialization->id,
                         'name'     => $record->specialization->name,
@@ -75,7 +78,30 @@ class RosterService
                     ] : null)
                     ->filter()
                     ->values()
-                    ->toArray());
+                    ->toArray();
+
+                // Add specs from gear data that aren't in character_static_specs
+                $knownSpecNames = collect($allSpecs)->pluck('name')->flip();
+                $gearSpecNames = array_keys($char->character_data['equipment_by_spec'] ?? []);
+                $className = $char->playable_class;
+
+                foreach ($gearSpecNames as $specName) {
+                    if (isset($knownSpecNames[$specName])) {
+                        continue;
+                    }
+
+                    $spec = $specLookup["{$specName}|{$className}"] ?? null;
+                    if ($spec) {
+                        $allSpecs[] = [
+                            'id'       => $spec->id,
+                            'name'     => $spec->name,
+                            'role'     => $spec->role,
+                            'icon_url' => $spec->icon_url,
+                        ];
+                    }
+                }
+
+                $char->setAttribute('all_specs', $allSpecs);
             });
         });
 
