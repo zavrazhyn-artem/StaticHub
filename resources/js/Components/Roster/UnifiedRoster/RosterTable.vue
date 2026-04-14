@@ -32,6 +32,41 @@ const toggleSearch = () => {
     }
 };
 
+// ── Compare mode ──
+const compareMode = ref(false);
+const selectedIds = ref(new Set());
+const isolated = ref(false);
+
+const toggleCompareMode = () => {
+    compareMode.value = !compareMode.value;
+    if (!compareMode.value) {
+        selectedIds.value = new Set();
+        isolated.value = false;
+    }
+};
+
+const toggleMemberSelection = (id) => {
+    const next = new Set(selectedIds.value);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    selectedIds.value = next;
+    if (isolated.value && next.size === 0) {
+        isolated.value = false;
+    }
+};
+
+const clearSelection = () => {
+    selectedIds.value = new Set();
+    isolated.value = false;
+};
+
+const toggleIsolate = () => {
+    if (selectedIds.value.size === 0) return;
+    isolated.value = !isolated.value;
+};
+
+const selectedCount = computed(() => selectedIds.value.size);
+
 const props = defineProps({
     groupedRoster: { type: Object, required: true },
     activeTab: { type: String, required: true },
@@ -68,10 +103,15 @@ const slots = [
 
 const filteredRoster = computed(() => {
     const q = searchQuery.value.toLowerCase().trim();
-    if (!q) return props.groupedRoster;
+    const isolating = isolated.value && selectedIds.value.size > 0;
+    if (!q && !isolating) return props.groupedRoster;
     const result = {};
     for (const [roleKey, members] of Object.entries(props.groupedRoster)) {
-        result[roleKey] = members.filter(m => m.main_character?.name?.toLowerCase().includes(q));
+        result[roleKey] = members.filter(m => {
+            if (q && !m.main_character?.name?.toLowerCase().includes(q)) return false;
+            if (isolating && !selectedIds.value.has(m.id)) return false;
+            return true;
+        });
     }
     return result;
 });
@@ -84,12 +124,14 @@ const slotLabels = {
 </script>
 
 <template>
+    <div class="relative w-full">
     <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[55vh] overflow-y-auto overflow-x-auto roster-scroll">
         <table class="text-left text-[11px] border-collapse w-full">
             <!-- thead ──────────────────────────────────────── -->
             <thead class="sticky top-0 z-20">
                 <!-- Group header row -->
                 <tr class="bg-[#1a1a1a] text-gray-500 text-[8px] uppercase tracking-widest font-bold h-8" style="box-shadow: inset 0 -1px 0 #222">
+                    <th class="compare-col" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'"></th>
                     <th class="p-2 pl-4 w-[200px] min-w-[200px]">{{ __('Character') }}</th>
 
                     <template v-if="activeTab === 'summary'">
@@ -133,6 +175,9 @@ const slotLabels = {
 
                 <!-- Column sub-header row -->
                 <tr class="bg-[#111111] text-emerald-400 text-[9px] uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                    <th class="compare-col text-center" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'">
+                        <span class="material-symbols-outlined text-[14px] text-emerald-400 compare-col-content">compare_arrows</span>
+                    </th>
                     <th class="px-4 py-1 w-[200px] min-w-[200px]">
                         <div class="flex items-center gap-1">
                             <template v-if="showSearch">
@@ -151,6 +196,11 @@ const slotLabels = {
                             <template v-else>
                                 <span>{{ __('Name') }}</span>
                                 <span class="flex-1"></span>
+                                <button @click="toggleCompareMode"
+                                        :class="['transition-colors', compareMode ? 'text-emerald-400' : 'text-gray-500 hover:text-emerald-400']"
+                                        :title="__('Compare players')">
+                                    <span class="material-symbols-outlined text-[14px]">compare_arrows</span>
+                                </button>
                                 <button @click="toggleSearch" class="text-gray-500 hover:text-emerald-400 transition-colors">
                                     <span class="material-symbols-outlined text-[14px]">search</span>
                                 </button>
@@ -247,6 +297,10 @@ const slotLabels = {
                                 :tier-count="tierCount"
                                 :has-audit-issues="hasAuditIssues"
                                 :audit-title="auditTitle"
+                                :compare-mode="compareMode"
+                                :compare-selected="selectedIds.has(member.id)"
+                                :compare-isolated="isolated"
+                                @toggle-compare="toggleMemberSelection(member.id)"
                                 @open-audit-modal="(c) => emit('open-audit-modal', c)"
                                 @toggle-expand="(id) => emit('toggle-row', id)"
                                 @update-access-role="(m, r) => emit('update-access-role', m, r)"
@@ -263,6 +317,7 @@ const slotLabels = {
                                     :char="alt"
                                     :grouped-roster="groupedRoster"
                                     :is-alt="true"
+                                    :compare-mode="compareMode"
                                     :active-tab="activeTab"
                                     :selected-difficulty="selectedDifficulty"
                                     :class-colors="classColors"
@@ -288,7 +343,106 @@ const slotLabels = {
             </tbody>
         </table>
     </div>
+
+    <!-- Floating compare action bar -->
+    <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 translate-y-3"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 translate-y-3"
+    >
+        <div v-if="compareMode"
+             class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-surface-container-high/95 backdrop-blur border border-white/10 shadow-2xl">
+            <div class="flex items-center gap-2 pr-3 border-r border-white/10">
+                <span class="material-symbols-outlined text-emerald-400 text-[18px]">compare_arrows</span>
+                <span class="text-[11px] uppercase tracking-wider font-bold text-on-surface-variant">
+                    {{ __('Selected') }}:
+                </span>
+                <span class="text-[13px] font-bold text-white tabular-nums min-w-[1.5ch] text-center">
+                    {{ selectedCount }}
+                </span>
+            </div>
+
+            <button
+                @click="toggleIsolate"
+                :disabled="selectedCount === 0"
+                :class="[
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+                    selectedCount === 0
+                        ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+                        : isolated
+                            ? 'bg-emerald-400 text-gray-900 hover:bg-emerald-300'
+                            : 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 hover:bg-emerald-400/20'
+                ]"
+            >
+                <span class="material-symbols-outlined text-[14px]">
+                    {{ isolated ? 'visibility' : 'filter_list' }}
+                </span>
+                {{ isolated ? __('Show all') : __('Isolate') }}
+            </button>
+
+            <button
+                @click="clearSelection"
+                :disabled="selectedCount === 0"
+                :class="[
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+                    selectedCount === 0
+                        ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+                        : 'bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-white'
+                ]"
+            >
+                <span class="material-symbols-outlined text-[14px]">restart_alt</span>
+                {{ __('Clear') }}
+            </button>
+
+            <button
+                @click="toggleCompareMode"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all"
+                :title="__('Exit compare mode')"
+            >
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+    </transition>
+    </div>
 </template>
+
+<style>
+/* Compare column animated expand/collapse (unscoped so it applies to RosterRow too) */
+.compare-col {
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 220ms ease, min-width 220ms ease, max-width 220ms ease, padding 220ms ease;
+}
+.compare-col-open {
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.compare-col-closed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.compare-col-content {
+    display: inline-flex;
+    transition: opacity 180ms ease, transform 220ms ease;
+}
+.compare-col-closed .compare-col-content {
+    opacity: 0;
+    transform: scale(0.5);
+}
+.compare-col-open .compare-col-content {
+    opacity: 1;
+    transform: scale(1);
+}
+</style>
 
 <style scoped>
 /* Dark scrollbar matching rounded-2xl container */
@@ -322,4 +476,5 @@ const slotLabels = {
 thead th {
     background: inherit;
 }
+
 </style>

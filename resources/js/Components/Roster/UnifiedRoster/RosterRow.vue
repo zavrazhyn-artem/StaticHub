@@ -39,6 +39,9 @@ const props = defineProps({
     tierCount: { type: Function, required: true },
     hasAuditIssues: { type: Function, required: true },
     auditTitle: { type: Function, required: true },
+    compareMode: { type: Boolean, default: false },
+    compareSelected: { type: Boolean, default: false },
+    compareIsolated: { type: Boolean, default: false },
 });
 
 const rowHeights = inject('rowHeights');
@@ -66,15 +69,32 @@ const emit = defineEmits([
     'update-access-role',
     'update-roster-status',
     'kick-member',
-    'open-audit-modal'
+    'open-audit-modal',
+    'toggle-compare'
 ]);
 </script>
 
 <template>
     <tr :class="[
             isAlt ? 'bg-black/40 border-b border-white/5 text-[11px]' : 'border-b border-gray-800 hover:bg-gray-800/40 transition-all group/row',
-            !isAlt && expanded ? 'bg-emerald-400/5' : ''
+            !isAlt && expanded ? 'bg-emerald-400/5' : '',
+            !isAlt && compareMode && compareSelected && !compareIsolated ? '!bg-emerald-400/10' : ''
         ]">
+
+        <!-- Compare checkbox column -->
+        <td :class="[rh, 'compare-col text-center align-middle', compareMode ? 'compare-col-open' : 'compare-col-closed']">
+            <label v-if="!isAlt" class="compare-col-content inline-flex items-center justify-center cursor-pointer select-none">
+                <input
+                    type="checkbox"
+                    :checked="compareSelected"
+                    @change="emit('toggle-compare')"
+                    class="peer sr-only"
+                />
+                <span class="w-4 h-4 rounded border border-white/20 bg-white/5 flex items-center justify-center transition-all peer-checked:bg-emerald-400 peer-checked:border-emerald-400 peer-hover:border-emerald-400/60">
+                    <span v-if="compareSelected" class="material-symbols-outlined text-gray-900 text-[14px] leading-none">check</span>
+                </span>
+            </label>
+        </td>
 
         <!-- Character identity -->
         <td :class="[rh, isAlt ? 'pl-5' : 'p-2']">
