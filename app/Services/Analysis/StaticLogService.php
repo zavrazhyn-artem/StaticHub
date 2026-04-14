@@ -178,7 +178,10 @@ class StaticLogService
                 ? $report->event->start_time->diffInHours($report->event->end_time)
                 : null,
             'wcl_url'           => 'https://www.warcraftlogs.com/reports/' . $report->wcl_report_id,
-            'execution_metrics' => $executionMetrics,
+            'model'              => $report->model,
+            'chat_available'     => $report->isCacheActive(),
+            'chat_expires_at'    => $report->gemini_cache_expires_at?->toIso8601String(),
+            'execution_metrics'  => $executionMetrics,
         ];
 
         // Chat history

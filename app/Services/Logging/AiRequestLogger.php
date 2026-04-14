@@ -37,6 +37,7 @@ class AiRequestLogger
 
         try {
             $tokens = $this->extractTokenUsage($responseData);
+            $tokens['model'] = $model;
 
             AiRequestLog::create([
                 'provider' => $provider,
@@ -80,16 +81,20 @@ class AiRequestLogger
             return null;
         }
 
-        // Gemini 2.5 Flash pricing (per 1M tokens) — update as needed
+        // Gemini pricing per 1M tokens — update as needed
         $rates = [
-            'gemini' => ['input' => 0.15, 'output' => 0.60],
+            'gemini-2.5-flash' => ['input' => 0.15, 'output' => 0.60],
+            'gemini-2.5-pro'   => ['input' => 1.25, 'output' => 10.00],
         ];
 
-        if (!isset($rates[$provider])) {
+        // Try model-specific rate first, fall back to provider default
+        $modelName = $tokens['model'] ?? null;
+        $rate = $rates[$modelName] ?? $rates['gemini-2.5-flash'] ?? null;
+
+        if (!$rate) {
             return null;
         }
 
-        $rate = $rates[$provider];
         $inputCost = ($tokens['input'] ?? 0) * $rate['input'] / 1_000_000;
         $outputCost = ($tokens['output'] ?? 0) * $rate['output'] / 1_000_000;
 

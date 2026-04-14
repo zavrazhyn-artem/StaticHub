@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import AiChatSidebar from './AiChatSidebar.vue';
 import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
@@ -21,6 +21,47 @@ const props = defineProps({
 
 const activeTab = ref('global');
 const chatOpen = ref(false);
+
+// Chat availability timer
+const chatTimeRemaining = ref('');
+const chatExpired = ref(!props.report.chat_available);
+
+let chatTimer = null;
+
+function updateChatTimer() {
+    if (!props.report.chat_expires_at) {
+        chatExpired.value = true;
+        chatTimeRemaining.value = '';
+        return;
+    }
+    const now = new Date();
+    const expires = new Date(props.report.chat_expires_at);
+    const diff = expires - now;
+
+    if (diff <= 0) {
+        chatExpired.value = true;
+        chatTimeRemaining.value = '';
+        if (chatTimer) clearInterval(chatTimer);
+        return;
+    }
+
+    chatExpired.value = false;
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    chatTimeRemaining.value = `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+}
+
+onMounted(() => {
+    updateChatTimer();
+    chatTimer = setInterval(updateChatTimer, 1000);
+});
+
+onUnmounted(() => {
+    if (chatTimer) clearInterval(chatTimer);
+});
+
+const canChat = computed(() => props.canUseAiChat && !chatExpired.value);
 
 // Character selector for leaders/officers on Personal Report tab
 const selectedReportId = ref(props.personalReport?.id ? String(props.personalReport.id) : '');
@@ -45,7 +86,7 @@ const activePersonalReport = computed(() => {
 <template>
     <div class="relative">
         <AiChatSidebar
-            v-if="canUseAiChat"
+            v-if="canChat"
             :open="chatOpen"
             :report-id="report.id"
             :report-title="report.title"
@@ -57,11 +98,18 @@ const activePersonalReport = computed(() => {
         />
 
         <!-- Floating Chat Toggle -->
-        <button v-if="canUseAiChat && !chatOpen" @click="chatOpen = true"
+        <button v-if="canChat && !chatOpen" @click="chatOpen = true"
             class="fixed bottom-8 right-8 z-40 bg-primary hover:bg-primary-dim text-on-primary-fixed p-4 rounded-full shadow-[0_0_20px_rgba(79,211,247,0.4)] transition-all hover:scale-110 flex items-center gap-3 group">
-            <span class="text-[10px] font-black uppercase tracking-widest overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ __('Tactical Analysis') }}</span>
+            <span v-if="chatTimeRemaining" class="text-[9px] font-black uppercase tracking-widest overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ chatTimeRemaining }}</span>
             <span class="material-symbols-outlined">psychology</span>
         </button>
+
+        <!-- Chat Expired Badge -->
+        <div v-if="canUseAiChat && chatExpired && !chatOpen"
+            class="fixed bottom-8 right-8 z-40 bg-surface-container-high text-on-surface-variant p-4 rounded-full opacity-50 cursor-not-allowed flex items-center gap-3">
+            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('Chat expired') }}</span>
+            <span class="material-symbols-outlined">psychology</span>
+        </div>
 
         <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,6 +138,12 @@ const activePersonalReport = computed(() => {
                     <span class="text-on-surface-variant font-headline text-[10px] font-black uppercase tracking-widest">
                         {{ __('Executed:') }} {{ report.created_at }}
                     </span>
+                    <template v-if="report.model">
+                        <span class="text-on-surface-variant opacity-20">•</span>
+                        <span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 rounded text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                            {{ report.model }}
+                        </span>
+                    </template>
                 </div>
                 <h1 class="text-6xl font-black text-white uppercase tracking-tighter font-headline leading-none mb-4">
                     {{ report.title }}
@@ -201,7 +255,12 @@ const activePersonalReport = computed(() => {
                                 </div>
                                 <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                     <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{{ __('Analyzed By') }}</span>
-                                    <span class="text-[10px] font-black text-white uppercase tracking-wider">Gemini 2.5 Flash</span>
+                                    <span class="text-[10px] font-black text-white uppercase tracking-wider">{{ report.model || 'Gemini 2.5 Flash' }}</span>
+                                </div>
+                                <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
+                                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{{ __('AI Chat') }}</span>
+                                    <span v-if="!chatExpired" class="text-[10px] font-black text-success-neon uppercase tracking-wider">{{ chatTimeRemaining }}</span>
+                                    <span v-else class="text-[10px] font-black text-error uppercase tracking-wider">{{ __('Expired') }}</span>
                                 </div>
                             </div>
                         </div>

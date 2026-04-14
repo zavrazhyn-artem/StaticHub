@@ -212,6 +212,66 @@ class WclReportParserHelper
         return stripos($name, 'Potion') !== false || stripos($name, 'Healthstone') !== false;
     }
 
+    /**
+     * Parse DamageDone entries (per-player) into boss vs add damage breakdown.
+     * Uses each player's `targets` array from standard DamageDone table.
+     *
+     * Returns: [
+     *   'adds'       => [ addName => ['total' => int, 'top_sources' => [playerName => int]] ],
+     *   'per_player' => [ playerName => ['boss_damage' => int, 'add_damage' => int, 'add_pct' => float] ]
+     * ]
+     */
+    public static function parseTargetDamage(array $damageDoneEntries, array $rosterNames = []): array
+    {
+        $perPlayer = [];
+        $addTotals = []; // addName => [playerName => damage]
+
+        foreach ($damageDoneEntries as $entry) {
+            if (($entry['type'] ?? '') === 'NPC') continue;
+            $playerName = $entry['name'] ?? '';
+            if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
+
+            $bossDmg = 0;
+            $addDmg = 0;
+
+            foreach ($entry['targets'] ?? [] as $target) {
+                $targetName = $target['name'] ?? '';
+                $targetType = $target['type'] ?? '';
+                $dmg = $target['total'] ?? 0;
+
+                if ($targetType === 'Boss') {
+                    $bossDmg += $dmg;
+                } elseif ($targetType === 'NPC') {
+                    $addDmg += $dmg;
+                    $addTotals[$targetName][$playerName] = ($addTotals[$targetName][$playerName] ?? 0) + $dmg;
+                }
+            }
+
+            $total = $bossDmg + $addDmg;
+            $perPlayer[$playerName] = [
+                'boss_damage' => $bossDmg,
+                'add_damage'  => $addDmg,
+                'add_pct'     => $total > 0 ? round($addDmg / $total * 100, 1) : 0,
+            ];
+        }
+
+        // Build add summary sorted by total damage
+        $adds = [];
+        foreach ($addTotals as $addName => $sources) {
+            arsort($sources);
+            $adds[$addName] = [
+                'total'       => array_sum($sources),
+                'top_sources' => array_slice($sources, 0, 5, true),
+            ];
+        }
+        uasort($adds, fn($a, $b) => $b['total'] <=> $a['total']);
+
+        return [
+            'adds'       => $adds,
+            'per_player' => $perPlayer,
+        ];
+    }
+
     public static function calculatePerformanceMetrics(
         array $damageEntries,
         array $healingEntries,
@@ -461,7 +521,7 @@ class WclReportParserHelper
         }
 
         $consumableKeywords = ['Flask', 'Phial', 'Well Fed', 'Hearty', 'Augmentation', 'Vantus Rune'];
-        $result = [];
+        $aggregated = [];
 
         foreach ($buffsData['auras'] ?? [] as $aura) {
             $name = $aura['name'] ?? '';
@@ -474,12 +534,19 @@ class WclReportParserHelper
             }
             if (!$isConsumable) continue;
 
-            $uptime   = $aura['totalUptime'] ?? 0;
-            $uses     = $aura['totalUses'] ?? 0;
+            // Aggregate duplicate buff names (WCL splits by spell ID)
+            if (!isset($aggregated[$name])) {
+                $aggregated[$name] = ['uptime' => 0, 'uses' => 0];
+            }
+            $aggregated[$name]['uptime'] = max($aggregated[$name]['uptime'], $aura['totalUptime'] ?? 0);
+            $aggregated[$name]['uses'] += $aura['totalUses'] ?? 0;
+        }
 
+        $result = [];
+        foreach ($aggregated as $name => $data) {
             $result[$name] = [
-                'uptime_pct'           => round($uptime / $totalTime * 100, 1),
-                'avg_players_per_fight' => round($uses / $fightCount, 1),
+                'uptime_pct'            => round($data['uptime'] / $totalTime * 100, 1),
+                'avg_players_per_fight' => round($data['uses'] / $fightCount, 1),
             ];
         }
 

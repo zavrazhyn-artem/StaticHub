@@ -56,11 +56,20 @@ class TacticalReport extends Model
         'title',
         'difficulties',
         'ai_analysis',
+        'model',
+        'gemini_cache_id',
+        'gemini_cache_expires_at',
     ];
 
     protected $casts = [
-        'difficulties' => 'array',
+        'difficulties'            => 'array',
+        'gemini_cache_expires_at' => 'datetime',
     ];
+
+    public function isCacheActive(): bool
+    {
+        return $this->gemini_cache_id && $this->gemini_cache_expires_at?->isFuture();
+    }
 
     public function staticGroup(): BelongsTo
     {

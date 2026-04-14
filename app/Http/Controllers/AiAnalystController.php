@@ -22,9 +22,18 @@ class AiAnalystController extends Controller
         $static = $report->staticGroup;
         $user   = auth()->user();
 
+        // Check if chat is available (cache still active)
+        if (!$this->aiAnalystService->isChatAvailable($report)) {
+            return response()->json([
+                'reply' => json_encode(['blocks' => [
+                    ['type' => 'alert', 'level' => 'warning', 'content' => 'Chat session has expired. The AI context for this report is no longer available.'],
+                ]]),
+            ]);
+        }
+
         // Leaders and officers get full log context
         if ($user->can('canViewGlobalReport', $static)) {
-            $reply = $this->aiAnalystService->analyze($reportId, $message, $user->id);
+            $reply = $this->aiAnalystService->analyze($reportId, $message, $user, $static);
 
             return response()->json(['reply' => $reply]);
         }
@@ -40,7 +49,7 @@ class AiAnalystController extends Controller
             ], 403);
         }
 
-        $reply = $this->aiAnalystService->analyzePersonal($reportId, $message, $characterIds->all(), $user->id);
+        $reply = $this->aiAnalystService->analyzePersonal($reportId, $message, $characterIds->all(), $user, $static);
 
         return response()->json(['reply' => $reply]);
     }

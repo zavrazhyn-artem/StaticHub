@@ -192,6 +192,16 @@ class WclService
             $rosterNames
         );
 
+        // Interrupts
+        $interruptEntries = $tablesData['interrupts']['data']['entries'][0]['entries'] ?? [];
+        $interrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
+
+        // Damage done by target (boss vs adds breakdown) — parsed from standard DamageDone
+        $targetDamage = WclReportParserHelper::parseTargetDamage(
+            $tablesData['damageDone']['data']['entries'] ?? [],
+            $rosterNames
+        );
+
         // Player details (gear, ilvl, trinkets, stats)
         $playerDetailsRaw = $tablesData['playerDetails'] ?? null;
         $playerDetails    = WclReportParserHelper::parsePlayerDetails($playerDetailsRaw, $rosterNames);
@@ -232,22 +242,24 @@ class WclService
         }
 
         return [
-            'raid_title'         => $initialData['title'] ?? 'Raid Analysis',
-            'difficulties'       => $difficulties,
-            'has_kills'          => $hasKills,
-            'fight_durations'    => $durations,
-            'phase_summary'      => $phaseSummary,
-            'players'            => $cleanPlayers,
-            'player_details'     => $playerDetails,
-            'deaths'             => $cleanDeaths,
-            'major_damage_taken' => array_slice($cleanDamageTaken, 0, 15),
-            'casts_summary'      => $castsAndConsumables['casts'],
-            'consumables_used'   => $consumables,
-            'dispels'            => $cleanDispels,
-            'consumable_buffs'   => $consumableBuffs,
-            'buff_uptime'        => $buffUptime,
-            'debuff_uptime'      => $debuffUptime,
-            'resource_waste'     => $resourceWaste,
+            'raid_title'          => $initialData['title'] ?? 'Raid Analysis',
+            'difficulties'        => $difficulties,
+            'has_kills'           => $hasKills,
+            'fight_durations'     => $durations,
+            'phase_summary'       => $phaseSummary,
+            'players'             => $cleanPlayers,
+            'player_details'      => $playerDetails,
+            'deaths'              => $cleanDeaths,
+            'major_damage_taken'  => array_slice($cleanDamageTaken, 0, 15),
+            'target_damage'       => $targetDamage,
+            'interrupts'          => $interrupts,
+            'casts_summary'       => $castsAndConsumables['casts'],
+            'consumables_used'    => $consumables,
+            'dispels'             => $cleanDispels,
+            'consumable_buffs'    => $consumableBuffs,
+            'buff_uptime'         => array_slice($buffUptime, 0, 30, true),
+            'debuff_uptime'       => $debuffUptime,
+            'resource_waste'      => $resourceWaste,
             'performance_metrics' => $performanceMetrics,
         ];
     }

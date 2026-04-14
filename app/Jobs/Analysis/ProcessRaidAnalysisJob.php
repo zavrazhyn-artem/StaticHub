@@ -18,8 +18,10 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $timeout = 300;
-    public int $uniqueFor = 300;
+    public int $timeout = 600;
+    public int $uniqueFor = 900;
+    public int $tries = 1;
+    public int $backoff = 60;
 
     public TacticalReport $report;
 
@@ -57,8 +59,20 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             // Будуємо локалізаційний блок
             $localization = $this->buildLocalization($static, $logData['players'] ?? []);
 
-            // Відправляємо в Gemini (без поля difficulties — AI воно не потрібне)
-            $aiJsonResponse = $geminiService->analyzeTacticalData(json_encode($logData), $localization);
+            // Визначаємо імена босів для завантаження тактик
+            $bossNames = array_keys($logData['phase_summary'] ?? []);
+
+            // Двоетапний pipeline: Flash preprocessing → Pro report generation
+            $aiResult = $geminiService->analyzeTacticalDataTwoStage(
+                json_encode($logData),
+                $localization,
+                $bossNames
+            );
+
+            $aiJsonResponse = $aiResult['response'];
+            $reportModel = $aiResult['model'];
+            $cacheId = $aiResult['cache_id'] ?? null;
+            $cacheExpiresAt = $aiResult['cache_expires_at'] ?? null;
 
             // Розбираємо отриманий JSON
             $parsedData = json_decode($aiJsonResponse, true);
@@ -70,9 +84,12 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 
             // 1. Зберігаємо загальний звіт та мета-поля
             $this->report->update([
-                'title'        => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
-                'difficulties' => $difficulties,
-                'ai_analysis'  => $parsedData['main'] ?? 'Analysis not generated.',
+                'title'                  => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
+                'difficulties'           => $difficulties,
+                'ai_analysis'            => $parsedData['main'] ?? 'Analysis not generated.',
+                'model'                  => $reportModel,
+                'gemini_cache_id'        => $cacheId,
+                'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
             ]);
 
             // 2. Зберігаємо особисті звіти тільки для учасників рейду з ростеру

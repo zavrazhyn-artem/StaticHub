@@ -65,11 +65,11 @@ class StaticLogsController extends Controller
      */
     public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
-        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
-
-        if ($cooldownState['on_cooldown']) {
-            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
-        }
+//        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
+//
+//        if ($cooldownState['on_cooldown']) {
+//            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
+//        }
 
         $report = $this->logAnalysisService->processManualLogSubmission(
             $request->input('wcl_url'),
