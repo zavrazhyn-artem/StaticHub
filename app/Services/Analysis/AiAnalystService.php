@@ -138,7 +138,7 @@ class AiAnalystService
             . "Respond in the user's language. Return a JSON object with a 'blocks' array.";
 
         $url = $this->geminiService->buildModelUrl(
-            config('services.gemini.pro_model', 'gemini-2.5-pro')
+            config('services.gemini.pro_model', 'gemini-2.5-flash')
         );
 
         $rawResponse = $this->geminiService->executeWithCache(

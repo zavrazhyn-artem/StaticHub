@@ -30,7 +30,7 @@ class GeminiService
             self::BASE_API_URL . 'gemini-2.5-flash:generateContent'
         );
         $this->flashModel = (string) config('services.gemini.flash_model', 'gemini-2.5-flash');
-        $this->proModel = (string) config('services.gemini.pro_model', 'gemini-2.5-pro');
+        $this->proModel = (string) config('services.gemini.pro_model', 'gemini-2.5-flash');
     }
 
     public function buildModelUrl(string $model): string
