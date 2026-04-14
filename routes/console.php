@@ -15,7 +15,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(FetchAuctionsCommand::class)->everyFifteenMinutes();
+Schedule::command(FetchAuctionsCommand::class)->hourly();
 Schedule::command(ProcessDiscordAutomations::class)->everyMinute();
 Schedule::command(SyncAllStaticsCommand::class)->everyMinute();
 Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00');

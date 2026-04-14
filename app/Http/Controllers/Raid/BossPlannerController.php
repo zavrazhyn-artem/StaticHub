@@ -157,7 +157,12 @@ class BossPlannerController extends Controller
         $members = $static->members()
             ->with(['characters' => function ($q) use ($static) {
                 $q->whereHas('statics', fn ($sq) => $sq->where('statics.id', $static->id))
-                    ->with(['statics' => fn ($sq) => $sq->where('statics.id', $static->id)]);
+                    ->with([
+                        'statics' => fn ($sq) => $sq->where('statics.id', $static->id),
+                        'characterStaticSpecs' => fn ($sq) => $sq->where('static_id', $static->id)
+                            ->where('is_main', true)
+                            ->with('specialization'),
+                    ]);
             }])
             ->get();
 
@@ -168,12 +173,15 @@ class BossPlannerController extends Controller
             ) ?? $user->characters->first();
 
             if ($mainChar) {
+                $mainSpec = $mainChar->characterStaticSpecs->first();
+                $role = $mainSpec?->specialization?->role ?? 'rdps';
+
                 $characters[] = [
                     'id' => $mainChar->id,
                     'name' => $mainChar->name,
                     'playable_class' => $mainChar->playable_class,
                     'avatar_url' => $mainChar->avatar_url,
-                    'assigned_role' => $mainChar->getCombatRoleInStatic($static->id),
+                    'assigned_role' => $role,
                 ];
             }
         }

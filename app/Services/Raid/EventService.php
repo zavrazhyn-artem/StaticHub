@@ -11,6 +11,7 @@ use App\Models\Character;
 use App\Services\StaticGroup\StaticService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class EventService
 {
@@ -76,7 +77,7 @@ class EventService
         $static = StaticGroup::findOrFail($data['static_id']);
 
         if (!$static->hasMember($userId)) {
-            throw new \Exception('Unauthorized', 403);
+            abort(403);
         }
 
         $timezone = $data['timezone'] ?? 'UTC';
@@ -93,7 +94,9 @@ class EventService
             ->exists();
 
         if ($exists) {
-            throw new \Exception('На цей день вже заплановано івент.', 422);
+            throw ValidationException::withMessages([
+                'date' => __('На цей день вже заплановано івент.'),
+            ]);
         }
 
         if ($endTime && $endTime->lessThan($startTime)) {
