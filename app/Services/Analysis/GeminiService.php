@@ -255,50 +255,64 @@ class GeminiService
     }
 
     /**
-     * Analyze tactical data for raid reports (legacy single-model path).
-     */
-    public function analyzeTacticalData(string $wclJsonData, array $localization = []): string
-    {
-        Log::info('Starting AI Tactical Analysis');
-
-        $prompt = GeminiPromptBuilder::buildTacticalAnalysisPrompt($wclJsonData, $localization);
-        $rawResponse = $this->executeRequest($prompt, 180, 1, true);
-        $cleanedText = GeminiResponseFormatter::cleanMarkdown($rawResponse);
-
-        Log::info('AI Tactical Analysis completed successfully');
-
-        return $cleanedText;
-    }
-
-    /**
-     * Stage 1: Preprocess raw WCL data using Flash model.
-     * Cross-references log data with boss tactics to produce structured analysis JSON.
+     * Generate the human-readable raid report from the deterministic PHP-preprocessed JSON.
+     * Wraps the existing generateReportWithPro path with cache creation.
      *
-     * @param string $wclJsonData   Raw WCL log data as JSON string
-     * @param array  $localization  Raid leader + participant locales
-     * @param array  $bossNames     Boss names from phase_summary keys
-     * @return string  Structured analysis JSON from Flash
+     * @param string $preprocessedJson  Output of TacticalDataAnalyzer::analyze()
+     * @return array{response: string, model: string, cache_id: string|null, cache_expires_at: string|null}
      */
-    public function preprocessWithFlash(string $wclJsonData, array $localization, array $bossNames): string
+    public function generateReportFromPreprocessed(string $preprocessedJson): array
     {
-        Log::info('Stage 1: Flash preprocessing started', ['bosses' => $bossNames]);
+        // Cache the preprocessed data so the chat (and any retries) can reuse without re-uploading
+        $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
+            . "produced by a deterministic PHP analyzer. Use this data to answer questions and generate "
+            . "reports as instructed in each request.\n\n"
+            . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
 
-        $prompt = GeminiPromptBuilder::buildPreprocessingPrompt($wclJsonData, $localization, $bossNames);
-        $url = $this->buildModelUrl($this->flashModel);
+        $cache = $this->createCachedContext($cacheContent, $this->proModel, 10800);
+        $cacheId = $cache['cache_id'] ?? null;
+        $cacheExpiresAt = $cache['expires_at'] ?? null;
 
-        $rawResponse = $this->executeRequestWithModel($prompt, $url, 300, 1, true);
-        $cleanedText = GeminiResponseFormatter::cleanMarkdown($rawResponse);
+        try {
+            if ($cacheId) {
+                Log::info('Generating report with cached context', ['cache_id' => $cacheId]);
+                $reportInstructions = file_get_contents(resource_path('prompts/gemini_report_generation.txt'));
+                $url = $this->buildModelUrl($this->proModel);
+                $rawResponse = $this->executeWithCache(
+                    $cacheId,
+                    $reportInstructions . "\n\nGenerate the report now using the PRE-ANALYZED RAID DATA from the cached context. Output strictly raw JSON.",
+                    $url,
+                    300,
+                    true
+                );
+                $response = GeminiResponseFormatter::cleanMarkdown($rawResponse);
+            } else {
+                Log::warning('Cache creation failed, generating report without cache');
+                $response = $this->generateReportWithPro($preprocessedJson);
+            }
 
-        Log::info('Stage 1: Flash preprocessing completed');
-
-        return $cleanedText;
+            return [
+                'response'         => $response,
+                'model'            => $this->proModel,
+                'cache_id'         => $cacheId,
+                'cache_expires_at' => $cacheExpiresAt,
+            ];
+        } catch (\Exception $e) {
+            Log::warning('Pro report generation failed, falling back to Flash', ['error' => $e->getMessage()]);
+            return [
+                'response'         => $this->generateReportWithFlashFallback($preprocessedJson),
+                'model'            => $this->flashModel . ' (pro fallback)',
+                'cache_id'         => $cacheId,
+                'cache_expires_at' => $cacheExpiresAt,
+            ];
+        }
     }
 
     /**
      * Execute a request against a specific model URL (for multi-model pipeline).
      * Retries on 503/429 with exponential backoff before giving up.
      */
-    public function executeRequestWithModel(string $promptText, string $modelUrl, int $timeout = 120, int $maxRetries = 3, bool $jsonMode = false): string
+    public function executeRequestWithModel(string $promptText, string $modelUrl, int $timeout = 120, int $maxRetries = 3, bool $jsonMode = false, int $maxOutputTokens = 32768): string
     {
         $payload = [
             'contents' => [
@@ -308,10 +322,13 @@ class GeminiService
                     ],
                 ],
             ],
+            'generationConfig' => [
+                'maxOutputTokens' => $maxOutputTokens,
+            ],
         ];
 
         if ($jsonMode) {
-            $payload['generationConfig'] = ['responseMimeType' => 'application/json'];
+            $payload['generationConfig']['responseMimeType'] = 'application/json';
         }
 
         $modelName = 'unknown';
@@ -354,6 +371,7 @@ class GeminiService
 
                 $responseData = $response->json();
                 $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                $finishReason = $responseData['candidates'][0]['finishReason'] ?? null;
 
                 $this->aiLogger->logRequest(
                     'gemini', $modelName, $modelUrl,
@@ -362,6 +380,13 @@ class GeminiService
 
                 if (!$text) {
                     Log::warning('Gemini API returned empty response', ['model' => $modelName, 'response' => $responseData]);
+                }
+
+                if ($finishReason === 'MAX_TOKENS') {
+                    Log::warning('Gemini API hit MAX_TOKENS — output truncated', [
+                        'model' => $modelName,
+                        'output_length' => strlen((string) $text),
+                    ]);
                 }
 
                 return (string) ($text ?? '');
@@ -405,94 +430,6 @@ class GeminiService
         Log::info('Stage 2: Pro report generation completed');
 
         return $cleanedText;
-    }
-
-    /**
-     * Two-stage tactical analysis pipeline with context caching:
-     * 1. Flash preprocessing → structured analysis JSON
-     * 2. Create Gemini cached context (preprocessed data for Pro model)
-     * 3. Pro report generation using cached context
-     *
-     * @return array{response: string, model: string, cache_id: string|null, cache_expires_at: string|null}
-     */
-    public function analyzeTacticalDataTwoStage(string $wclJsonData, array $localization, array $bossNames): array
-    {
-        // Stage 1: Flash preprocessing
-        $preprocessedJson = $this->preprocessWithFlash($wclJsonData, $localization, $bossNames);
-
-        // Validate Flash output
-        $parsed = json_decode($preprocessedJson, true);
-        if (!$parsed || !is_array($parsed)) {
-            Log::error('Flash preprocessing returned invalid JSON, falling back to legacy single-model');
-            return [
-                'response'         => $this->analyzeTacticalData($wclJsonData, $localization),
-                'model'            => $this->flashModel . ' (legacy fallback)',
-                'cache_id'         => null,
-                'cache_expires_at' => null,
-            ];
-        }
-
-        // Stage 2: Create cached context for Pro model (DATA ONLY — no prompt instructions)
-        // Cache contains preprocessed analysis + raw supplementary data for chat queries.
-        // Prompts are sent per-request so the same cache works for report generation and chat.
-        $rawData = json_decode($wclJsonData, true);
-        $supplementaryData = json_encode([
-            'casts_summary'  => $rawData['casts_summary'] ?? [],
-            'interrupts'     => $rawData['interrupts'] ?? [],
-            'player_details' => $rawData['player_details'] ?? [],
-        ], JSON_UNESCAPED_UNICODE);
-
-        $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
-            . "that has been cross-referenced with boss tactics, plus raw supplementary data "
-            . "for detailed queries. Use this data to answer questions "
-            . "and generate reports as instructed in each request.\n\n"
-            . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson
-            . "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryData;
-
-        $cache = $this->createCachedContext($cacheContent, $this->proModel, 10800);
-
-        $cacheId = $cache['cache_id'] ?? null;
-        $cacheExpiresAt = $cache['expires_at'] ?? null;
-
-        // Stage 3: Pro report generation (using cache if available, with Flash fallback)
-        try {
-            if ($cacheId) {
-                Log::info('Stage 3: Pro report generation with cached context', ['cache_id' => $cacheId]);
-                $reportPrompt = GeminiPromptBuilder::buildReportGenerationPrompt($preprocessedJson);
-                // Replace data in prompt with reference to cache (prompt already has instructions)
-                $reportInstructions = file_get_contents(resource_path('prompts/gemini_report_generation.txt'));
-                $url = $this->buildModelUrl($this->proModel);
-                $rawResponse = $this->executeWithCache(
-                    $cacheId,
-                    $reportInstructions . "\n\nGenerate the report now using the PRE-ANALYZED RAID DATA from the cached context. Output strictly raw JSON.",
-                    $url,
-                    300,
-                    true
-                );
-                $response = GeminiResponseFormatter::cleanMarkdown($rawResponse);
-                Log::info('Stage 3: Pro report generation with cache completed');
-            } else {
-                Log::warning('Cache creation failed, generating report without cache');
-                $response = $this->generateReportWithPro($preprocessedJson);
-            }
-
-            return [
-                'response'         => $response,
-                'model'            => $this->proModel,
-                'cache_id'         => $cacheId,
-                'cache_expires_at' => $cacheExpiresAt,
-            ];
-        } catch (\Exception $e) {
-            Log::warning('Pro model unavailable, falling back to Flash for report generation', [
-                'error' => $e->getMessage(),
-            ]);
-            return [
-                'response'         => $this->generateReportWithFlashFallback($preprocessedJson),
-                'model'            => $this->flashModel . ' (pro fallback)',
-                'cache_id'         => $cacheId,
-                'cache_expires_at' => $cacheExpiresAt,
-            ];
-        }
     }
 
     /**

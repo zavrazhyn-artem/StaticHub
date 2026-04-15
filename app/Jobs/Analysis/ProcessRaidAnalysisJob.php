@@ -6,9 +6,10 @@ use App\Enums\Locale;
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
-use App\Services\Discord\DiscordWebhookService;
 use App\Services\Analysis\GeminiService;
+use App\Services\Analysis\TacticalDataAnalyzer;
 use App\Services\Analysis\WclService;
+use App\Services\Discord\DiscordWebhookService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -36,38 +37,36 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         return (string) $this->report->id;
     }
 
-    public function handle(WclService $wclService, GeminiService $geminiService, DiscordWebhookService $webhookService): void
-    {
+    public function handle(
+        WclService $wclService,
+        TacticalDataAnalyzer $analyzer,
+        GeminiService $geminiService,
+        DiscordWebhookService $webhookService
+    ): void {
         if (!$this->report->wcl_report_id) return;
 
         try {
             $static = $this->report->staticGroup;
-
-            // Завантажуємо characters з user для locale + members для лідера
             $static->load('characters.user', 'members');
-
-            // Отримуємо масив імен з бази
             $rosterNames = $static->characters->pluck('name')->toArray();
 
-            // Передаємо ростер для жорсткої фільтрації
+            // Stage 1: WCL fetch (with roster filter)
             $logData = $wclService->getLogSummary($this->report->wcl_report_id, $rosterNames);
-
-            // Зберігаємо складності одразу — вони вже відомі з WCL
             $difficulties = $logData['difficulties'] ?? null;
-            unset($logData['difficulties']);
 
-            // Будуємо локалізаційний блок
             $localization = $this->buildLocalization($static, $logData['players'] ?? []);
 
-            // Визначаємо імена босів для завантаження тактик
-            $bossNames = array_keys($logData['phase_summary'] ?? []);
-
-            // Двоетапний pipeline: Flash preprocessing → Pro report generation
-            $aiResult = $geminiService->analyzeTacticalDataTwoStage(
-                json_encode($logData),
+            // Stage 2: PHP TacticalDataAnalyzer (deterministic preprocessing — replaces Flash)
+            $preprocessed = $analyzer->analyze(
+                $logData,
                 $localization,
-                $bossNames
+                $rosterNames,
+                $this->report->wcl_report_id
             );
+            $preprocessedJson = json_encode($preprocessed, JSON_UNESCAPED_UNICODE);
+
+            // Stage 3: Pro report generation (with cache)
+            $aiResult = $geminiService->generateReportFromPreprocessed($preprocessedJson);
 
             $aiJsonResponse = $aiResult['response'];
             $reportModel = $aiResult['model'];

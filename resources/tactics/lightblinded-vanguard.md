@@ -1,3 +1,121 @@
+---
+boss: Lightblinded Vanguard
+wcl_encounter_id: 3180
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  - name: Searing Radiance
+    type: raid_damage
+    ability_ids: [1255739, 1278092, 1255738, 1276639]
+    description: Raid-wide pulsing damage for 15 seconds. On Mythic, damage increases by 10% per second.
+  - name: Exorcism
+    type: tankbuster
+    ability_ids: [1246745]
+    description: Single large holy damage hit on current tank. Requires active mitigation or defensive.
+  - name: Judgment + Shield of the Righteous
+    type: tank_swap
+    ability_ids: [1251857, 1246736, 1251859]
+    description: Two-part attack. Judgment applies debuff increasing Shield of the Righteous damage by 500%. Tanks must swap between the two hits.
+  - name: Divine Storm
+    type: dodge
+    ability_ids: [1246765]
+    description: 8-yard AoE around Lightblood. Melee must step out. On Mythic, spawns tornadoes that travel inward.
+  - name: Avenger's Shield
+    type: positioning
+    ability_ids: [1246497, 1246487]
+    description: Shields thrown at marked players applying a dispellable DoT. Spread and dispel quickly. On Mythic, targets all players.
+  - name: Sacred Toll
+    type: raid_damage
+    ability_ids: [1246749]
+    description: Large burst raid-wide damage. Dangerous when overlapping with Searing Radiance.
+  - name: Consecration
+    type: puddle_placement
+    ability_ids: [1256133]
+    description: Persistent puddle left after each Aura channel (Heroic+). On Mythic, also pacifies and increases damage taken 100%.
+  - name: Divine Toll
+    type: dodge
+    ability_ids: [1248644]
+    description: Traveling shield waves for 18 seconds. Hit players take damage and are silenced for 6 seconds.
+  - name: Execution Sentence
+    type: soak
+    ability_ids: [1250839]
+    description: Marked circles must be soaked by multiple players (one per set). Spinning hammers emerge after soak and must be dodged.
+  - name: Light Infused
+    type: enrage_mechanic
+    ability_ids: [1258662, 1258659]
+    description: Constant ticking raid damage that increases 25% per Aura cast, creating a soft enrage.
+  - name: Aura of Wrath
+    type: energy_ramp
+    ability_ids: [1248450, 1246165]
+    description: Lightblood at 100 energy buffs allied boss damage by 100% within 40 yards for 15 seconds.
+  - name: Aura of Peace
+    type: energy_ramp
+    ability_ids: [1248449]
+    description: Senn at 100 energy pacifies players dealing damage to any Vanguard within 40 yards.
+  - name: Aura of Devotion
+    type: energy_ramp
+    ability_ids: [1248451, 1248452]
+    description: Bellamy at 100 energy reduces damage taken by allied bosses within 40 yards by 75%.
+  - name: Sacred Shield (Elekk Charge)
+    type: dodge
+    ability_ids: [1248674, 1249130]
+    description: Senn gains absorb shield and charges forward on an elekk, damaging all players in the path.
+  - name: Final Verdict
+    type: raid_damage
+    ability_ids: [1251812]
+    description: Additional damaging cast cycled by the bosses; healers should mitigate.
+  - name: Zealous Spirit (Mythic)
+    type: add_management
+    ability_ids: [1276713, 1272425, 1276476, 1276719, 1272380, 1272423]
+    description: Spirit rotates between bosses, increasing damage 30% and empowering one ability while forcing dangerous overlaps.
+  - name: Tyr's Wrath (Mythic)
+    type: raid_damage
+    ability_ids: [1248710, 1272484, 1248721]
+    description: Mythic-only damaging cast that overlaps with other mechanics depending on which boss the Spirit empowers.
+  - name: Divine Shield + Mass Dispel
+    type: shield_interrupt
+    ability_ids: [1246384, 1246385, 456779]
+    description: All three bosses apply Divine Shield immunity when Bloodlust is used. Priest must Mass Dispel immediately.
+avoidable_abilities:
+  - ability_id: 1246765
+    name: Divine Storm
+    note: Melee must step out of 8-yard AoE around Lightblood.
+  - ability_id: 1248644
+    name: Divine Toll
+    note: Dodge traveling shield waves for 18 seconds to avoid silence.
+  - ability_id: 1248674
+    name: Sacred Shield (Elekk Charge)
+    note: Move out of Senn's charge path.
+  - ability_id: 1256133
+    name: Consecration
+    note: Do not stand in ground puddles left after Aura channels.
+  - ability_id: 1250839
+    name: Execution Sentence
+    note: Soak only one circle per set, then dodge spinning hammers.
+  - ability_id: 1246497
+    name: Avenger's Shield
+    note: Spread out before impact to avoid cleaving DoT to allies.
+role_mechanics:
+  tank:
+    - Swap on Judgment (1251857) so the debuffed tank avoids Shield of the Righteous (1251859) with 500% increased damage.
+    - Use active mitigation or defensives for Exorcism (1246745).
+    - Position bosses more than 40 yards apart to prevent Aura cross-buffing (1248450, 1248449, 1248451).
+    - Plan Consecration (1256133) puddle placement on Heroic+ to preserve platform space.
+    - Track boss energy bars to anticipate Aura casts and reposition in advance.
+  healer:
+    - Assign cooldown rotation for Searing Radiance (1255739) 15-second channel.
+    - Prepare for Sacred Toll (1246749) overlaps with other damage events.
+    - Dispel Avenger's Shield (1246497) DoT quickly to prevent stacking damage.
+    - Save strongest cooldowns for later Light Infused (1258662) stacks as damage scales.
+    - On Mythic, empowered Searing Radiance (1278092) requires stacked cooldowns due to 10%/sec escalation.
+  dps:
+    - Keep all three bosses within 2-3% HP to prevent enrage.
+    - Stop attacking and move out during Aura of Peace (1248449) to avoid Pacify.
+    - Avoid wasting cooldowns on bosses inside Aura of Devotion (1248451) 75% damage reduction.
+    - Dodge Divine Toll (1248644) shield waves to avoid 6-second silence.
+    - On Mythic, track Zealous Spirit (1276713) target to anticipate empowered abilities.
+    - Interrupt or help Mass Dispel (456779) Divine Shield (1246384) immediately after Bloodlust.
+---
+
 # Lightblinded Vanguard
 
 ## Overview

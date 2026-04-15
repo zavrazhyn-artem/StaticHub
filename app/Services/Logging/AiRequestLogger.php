@@ -85,6 +85,7 @@ class AiRequestLogger
         $rates = [
             'gemini-2.5-flash' => ['input' => 0.15, 'output' => 0.60],
             'gemini-2.5-pro'   => ['input' => 1.25, 'output' => 10.00],
+            'gemini-3-flash'   => ['input' => 0.30, 'output' => 2.50],
         ];
 
         // Try model-specific rate first, fall back to provider default

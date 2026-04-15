@@ -1,3 +1,93 @@
+---
+boss: Imperator Averzian
+wcl_encounter_id: 3176
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  - name: "Shadow's Advance"
+    type: add_management
+    ability_ids: [1251361, 1262776]
+    add_npcs: ["Abyssal Voidshaper", "Voidmaw"]
+    severity: critical
+    description: "Summons 3 Abyssal Voidshapers that channel Void Rupture to claim board spaces. Raid must kill 2 of 3 per cycle to prevent 3-in-a-row."
+  - name: "Umbral Collapse"
+    type: soak
+    ability_ids: [1249265, 1249266, 1260206]
+    expected_soakers: 4
+    severity: critical
+    description: "Marked player positions soak circle on priority Voidshaper to remove its 99% damage reduction. Raid stacks to share damage."
+  - name: "Cosmic Shell"
+    type: shield_interrupt
+    ability_ids: [1280035]
+    protects_ability: "Abyssal Voidshaper damage immunity"
+    mythic_only: true
+    severity: critical
+    description: "Mythic only. Voidshapers spawn with 2 stacks of immunity. Dispel debuffed players near the add to remove stacks before DPS."
+  - name: "Void Rupture"
+    type: dodge
+    ability_ids: [1261249, 1262036]
+    severity: major
+    description: "Voidshaper channel that claims a space. On completion, 12-yard explosion plus outward beams from the claimed space."
+  - name: "Imperator's Glory"
+    type: positioning
+    ability_ids: [1270853]
+    severity: critical
+    description: "Boss gains 75% increased damage dealt and 99% damage reduction within 10 yards of claimed spaces (and adds on Heroic+). Tanks must reposition."
+  - name: "Dark Upheaval"
+    type: raid_damage
+    ability_ids: [1249251]
+    severity: major
+    description: "Raid-wide burst damage followed by a ticking DOT on the whole raid. Primary healing check."
+  - name: "Oblivion's Wrath"
+    type: dodge
+    ability_ids: [1260712, 1260718]  # 1260712 = cast, 1260718 = damage
+    severity: major
+    description: "Void beam spears shoot outward from Averzian in multiple directions, dealing damage and knocking players back."
+  - name: "Void Fall"
+    type: dodge
+    ability_ids: [1258880]
+    severity: major
+    description: "Knocks players back and spawns ground void zones that must be avoided."
+  - name: "Shadow Phalanx"
+    type: dodge
+    ability_ids: [1249321]
+    severity: critical
+    description: "Untargetable troops march across arena dealing massive damage. Raid must move through the safe corridor between formations."
+  - name: "Blackening Wounds"
+    type: tank_swap
+    ability_ids: [1265540]
+    stack_swap_threshold: 3
+    critical_death_stacks: 6
+    severity: critical
+    description: "Tank melee debuff reduces max HP by 4% per stack (20s duration). Adds fixate the highest-stack tank on Shadow's Advance, forcing a swap."
+avoidable_abilities:
+  - {name: "Void Rupture", source_mechanic: "Shadow's Advance"}
+  - {name: "Oblivion's Wrath", source_mechanic: "Oblivion's Wrath"}
+  - {name: "Void Fall", source_mechanic: "Void Fall"}
+  - {name: "Shadow Phalanx", source_mechanic: "Shadow Phalanx"}
+  - {name: "Umbral Collapse", source_mechanic: "Umbral Collapse"}
+  - {name: "Umbral Barrier", source_mechanic: "Shadow's Advance"}
+  - {name: "Dark Barrage", source_mechanic: "Shadow's Advance"}
+  - {name: "Lingering Darkness", source_mechanic: "Void Fall"}
+role_mechanics:
+  tank:
+    - "Blackening Wounds"
+    - "Imperator's Glory"
+    - "Shadow's Advance"
+  healer:
+    - "Dark Upheaval"
+    - "Umbral Collapse"
+    - "Cosmic Shell"
+    - "Blackening Wounds"
+  dps:
+    - "Shadow's Advance"
+    - "Umbral Collapse"
+    - "Cosmic Shell"
+    - "Void Rupture"
+    - "Shadow Phalanx"
+    - "Oblivion's Wrath"
+    - "Void Fall"
+---
+
 # Imperator Averzian
 
 ## Overview

@@ -1,3 +1,106 @@
+---
+boss: Vaelgor & Ezzorak
+wcl_encounter_id: 3178
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  - name: Vaelwing
+    type: tank_swap
+    ability_ids: [1265131, 1265146]
+    severity: high
+    description: Stacking tank buff on Vaelgor that increases melee damage dealt; requires tank swap before stacks become lethal.
+  - name: Rakfang
+    type: tank_swap
+    ability_ids: [1245645, 1264892]
+    severity: high
+    description: Tank swap debuff applied by Ezzorak that leaves a lingering vulnerability; swap tanks to let it fall off.
+  - name: Twilight Bond
+    type: tether
+    severity: high
+    description: Invisible health bond between Vaelgor and Ezzorak; if their HP differs by more than 10%, the lower boss heals and the raid takes escalating damage. Balance DPS between both bosses.
+  - name: Nullzone
+    type: positioning
+    ability_ids: [1244672, 1252157]
+    severity: moderate
+    description: Ground zones that must be avoided or used to break tethers depending on assignment; coordinate with Nullbeam soakers.
+  - name: Nullbeam
+    type: soak
+    ability_ids: [1262651, 1262623]
+    severity: high
+    description: Targeted beam that must be soaked by an assigned tank or immune player to prevent raid-wide damage.
+  - name: Dread Breath
+    type: fear
+    ability_ids: [1244221, 1255979, 1255612]  # cast + 2 fear debuffs
+    severity: high
+    description: Frontal fear cone from Ezzorak; face the boss away from the raid and use fear immunities or trinkets.
+  - name: Gloom
+    type: soak
+    ability_ids: [1245391]
+    severity: high
+    description: Stacking soak mechanic that applies Gloomtouched vulnerability; rotate soakers to avoid lethal stacks.
+  - name: Void Howl
+    type: orb_management
+    ability_ids: [1244917]
+    severity: high
+    description: Spawns void orbs that must be managed and soaked or kited by assigned players before they reach the boss.
+  - name: Voidbolt
+    type: interrupt
+    ability_ids: [1245175]
+    severity: high
+    description: Cast by Ezzorak and must be interrupted on rotation; missed interrupts cause heavy raid damage.
+  - name: Midnight Manifestation
+    type: add_management
+    ability_ids: [1258744, 1255763]
+    severity: moderate
+    description: Persistent DoT and intermission add that must be handled by the raid; cleave down or kite per assignment.
+  - name: Tail Lash
+    type: dodge
+    ability_ids: [1264467]
+    severity: moderate
+    description: Rear cone melee swipe from Vaelgor; melee must stay out of the tail arc.
+  - name: Midnight Flames
+    type: intermission
+    ability_ids: [1249748]
+    severity: high
+    description: Triggers the intermission at 100 energy; raid must burn the Unbound Shadow add while surviving Midnight Flames raid damage.
+  - name: Radiant Barrier
+    type: shield_interrupt
+    ability_ids: [1249595]
+    severity: high
+    description: Protective barrier cast during intermission that must be broken with coordinated burst or shield interrupts to allow damage to the add.
+  - name: Cosmosis
+    type: raid_damage
+    ability_ids: [1263623, 1263626]
+    severity: high
+    description: Mythic-only cross-realm raid damage that requires precise positioning and cooldown rotations to survive.
+avoidable_abilities:
+  - Tail Lash
+  - Dread Breath
+  - Nullzone
+  - Midnight Flames
+  - Void Howl
+role_mechanics:
+  tank:
+    - Vaelwing
+    - Rakfang
+    - Nullbeam
+    - Impale
+    - Shadowmark
+    - Twilight Bond
+  healer:
+    - Gloom
+    - Midnight Flames
+    - Dread Breath
+    - Cosmosis
+    - Twilight Bond
+  dps:
+    - Voidbolt
+    - Void Howl
+    - Midnight Manifestation
+    - Radiant Barrier
+    - Gloom
+    - Tail Lash
+---
+
 # Vaelgor & Ezzorak
 
 ## Overview

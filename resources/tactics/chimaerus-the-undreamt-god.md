@@ -1,3 +1,142 @@
+---
+boss: Chimaerus the Undreamt God
+wcl_encounter_id: 3306
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  - name: Alndust Upheaval
+    ability_ids: [1262289]
+    type: soak
+    description: Soak circle on tank; soakers are sent to the Rift realm. Two groups alternate to manage Rift Vulnerability on Heroic+.
+  - name: Rending Tear
+    ability_ids: [1272689]
+    type: positioning
+    description: Frontal cone dealing heavy physical damage plus bleed and knockback. Tank faces boss away from raid.
+  - name: Caustic Phlegm
+    ability_ids: [1246621, 1246653]
+    type: raid_damage
+    description: Raid-wide nature DoT lasting 12 seconds. Healers ramp throughput; defensives if overlapping.
+  - name: Rift Sickness
+    ability_ids: [1250953]
+    type: absorb_shield
+    description: Per-add raid-wide healing absorb. Kill adds quickly to prevent stacking absorbs.
+  - name: Alnshroud
+    ability_ids: [1245727, 1245698]
+    type: shield_interrupt
+    description: Manifestation add absorb shield. Break in Rift, finish add in Reality. Leaves puddle on break.
+  - name: Consume
+    ability_ids: [1245396, 1245844, 1252863, 1252956]
+    type: phase_transition
+    description: At 100 energy, 10s channel of raid-wide pulsing damage; all surviving adds are eaten, empowering the boss.
+  - name: Corrupted Devastation
+    ability_ids: [1252933]
+    type: dodge
+    description: Boss soars across a marked line, stunning and damaging players hit, spawning adds and puddles.
+  - name: Consuming Miasma
+    ability_ids: [1258192]
+    type: puddle_placement
+    description: Heroic+ dispellable debuff creating 10-yard explosions that destroy nearby puddles. Dispel on puddles.
+  - name: Ravenous Dive
+    ability_ids: [1245396]
+    type: phase_transition
+    description: Boss smashes down dealing raid damage, eating remaining adds, and restarting Stage 1.
+  - name: Dissonance
+    ability_ids: [1252933]
+    type: realm_split
+    description: Mythic only. Players pulse massive damage to nearby allies in the opposite realm. Maintain permanent realm separation.
+  - name: Rift Madness
+    ability_ids: [1264756]
+    type: tank_swap
+    description: Mythic only. Two Rift players (one always a healer) take escalating damage until Reality players physically rescue them by standing on them to trigger a realm swap.
+  - name: Colossal Strikes
+    ability_ids: [1262053, 1262059, 1262020]
+    type: tankbuster
+    description: Three-hit tankbuster from Colossal Horror adds dealing heavy physical and nature damage. Requires active mitigation.
+  - name: Discordant Roar
+    ability_ids: [1249207]
+    type: add_management
+    description: Raid-wide physical damage on Colossal Horror spawn with stacking 10% per-stack damage amp on subsequent Roars.
+  - name: Essence Bolt
+    ability_ids: [1261997]
+    type: interrupt
+    description: Single-target nature damage from Haunting Essences. Interrupt priority when Fearsome Cry is not up.
+  - name: Fearsome Cry
+    ability_ids: [1261997]
+    type: interrupt
+    description: Haunting Essence raid-wide fear and nature damage. Must be interrupted every cast.
+  - name: Rift Vulnerability
+    ability_ids: [1253744]
+    type: energy_ramp
+    description: Heroic+ stacking debuff from Alndust Upheaval soaks causing 600% increased soak damage. Rotate two groups strictly.
+avoidable_abilities:
+  - ability_id: 1272689
+    name: Rending Tear
+    notes: Frontal cone; only the tank should be hit.
+  - ability_id: 1252933
+    name: Corrupted Devastation
+    notes: Marked beam line; dodge the flight path.
+  - ability_id: 1258192
+    name: Lingering Miasma
+    notes: Puddles left by broken Alnshroud shields and Corrupted Devastation.
+  - ability_id: 1262289
+    name: Alndust Upheaval
+    notes: Only the designated soak group should enter the circle; others stay clear.
+  - ability_id: 1253744
+    name: Rift Vulnerability
+    notes: Heroic+ -- same group must not soak twice in a row while debuff is active.
+  - ability_id: 1264756
+    name: Rift Madness
+    notes: Mythic -- debuffed players must be rescued quickly; untouched escalation is fatal.
+role_mechanics:
+  tank:
+    - ability_id: 1272689
+      name: Rending Tear
+      action: Face boss away from raid; use active mitigation.
+    - ability_ids: [1262053, 1262059, 1262020]
+      name: Colossal Strikes
+      action: Active mitigation on the three-hit combo from Colossal Horror adds.
+    - ability_id: 1245727
+      name: Alnshroud
+      action: Pick up Manifestation adds when they teleport to Reality after shield break.
+    - ability_id: 1262289
+      name: Alndust Upheaval
+      action: Position for the soak circle; coordinate realm responsibilities on Mythic.
+  healer:
+    - ability_ids: [1246621, 1246653]
+      name: Caustic Phlegm
+      action: Ramp throughput for the 12s raid DoT; stack defensives on overlaps.
+    - ability_id: 1245396
+      name: Consume
+      action: Assign cooldowns across the 10s pulsing channel.
+    - ability_id: 1250953
+      name: Rift Sickness
+      action: Track healing absorb stacks; push healing or prioritize add deaths.
+    - ability_id: 1258192
+      name: Consuming Miasma
+      action: Heroic+ -- dispel afflicted players ON puddles to clear them.
+    - ability_id: 1264756
+      name: Rift Madness
+      action: Mythic -- one healer is always targeted; pre-assign rescue partners.
+  dps:
+    - ability_id: 1245727
+      name: Alnshroud
+      action: Break Manifestation shields fast in the Rift realm.
+    - ability_id: 1245396
+      name: Consume
+      action: Kill all adds before the 100-energy transition so the boss does not empower.
+    - ability_id: 1261997
+      name: Fearsome Cry / Essence Bolt
+      action: Interrupt Fearsome Cry on every cast; interrupt Essence Bolt when available.
+    - ability_id: 1252933
+      name: Corrupted Devastation
+      action: Dodge the beam and swap to spawned adds immediately.
+    - ability_id: 1249207
+      name: Discordant Roar
+      action: Burst Colossal Horror adds down before stacks amplify further Roars.
+    - ability_id: 1264756
+      name: Rift Madness
+      action: Mythic Reality-side DPS execute rescue assignments on debuffed Rift players.
+---
+
 # Chimaerus the Undreamt God
 
 ## Overview

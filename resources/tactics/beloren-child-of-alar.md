@@ -1,3 +1,116 @@
+---
+boss: "Belo'ren, Child of Al'ar"
+wcl_encounter_id: null
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  - name: "Voidlight Convergence"
+    type: color_assignment
+    severity: high
+    description: "Assigns every player either a light or void color. The assigned color reduces damage from matching-color mechanics by 50%. Players must track their color for all subsequent mechanics."
+  - name: "Light Dive / Void Dive"
+    type: soak
+    severity: high
+    description: "Marks a player with a colored soak circle dealing split damage, causing knockback, and leaving a permanent puddle. Matching-color players stack to soak; puddles placed at room edges."
+    soak_role: "matching-color players"
+  - name: "Light Dive / Void Dive (puddle)"
+    type: puddle_placement
+    severity: medium
+    description: "Dive leaves a permanent ground puddle. Soak target must drop it at room edges to preserve space."
+  - name: "Infused Quills"
+    type: soak
+    severity: high
+    description: "Heroic/Mythic only. Marks players and fires opposite-colored quills at them. A different matching-color player must intercept each quill. On Mythic, splash damage requires spread positioning."
+    difficulty: "heroic, mythic"
+    soak_role: "matching-color ally (not original target)"
+  - name: "Guardian's Edict"
+    type: tankbuster
+    severity: critical
+    description: "Boss fires a series of colored frontal cones. Tanks must soak only matching-color cones. Wrong-color soak or unsoaked cone causes boss enrage. Final cone splits between both tanks."
+  - name: "Guardian's Edict (tank swap)"
+    type: tank_swap
+    severity: medium
+    description: "Tanks may need to swap between Edict combos depending on debuff stacks and color rotation."
+  - name: "Radiant Echoes"
+    type: positioning
+    severity: medium
+    description: "Light and void orbs float across the room. Players collide with matching-color orbs to clear space. On Mythic, orbs explode if they touch the boss."
+  - name: "Light Eruption / Void Eruption"
+    type: interrupt
+    severity: critical
+    description: "Bird adds cast Eruption dealing lethal raid-wide damage if it completes. Only matching-color players can interrupt. This is a color-locked interrupt."
+    interrupt_role: "matching-color DPS only"
+  - name: "Light Blast / Void Blast"
+    type: interrupt
+    severity: medium
+    description: "Secondary bird add cast. Any player can interrupt regardless of color."
+  - name: "Rebirth"
+    type: rebirth
+    severity: high
+    description: "When bird adds die they become eggs. Egg must be killed within 15 seconds or the add respawns at full HP. Burning Heart damage intensifies during this window."
+    timer_seconds: 15
+  - name: "Rebirth (add management)"
+    type: add_management
+    severity: high
+    description: "Immediate target switch to eggs on bird death. Hard DPS check to prevent respawn cascade."
+  - name: "Death Drop"
+    type: raid_damage
+    severity: high
+    description: "Phase transition. When boss reaches 0 HP it smashes into center dealing knockback damage reduced by distance. Players must spread from center before transition."
+  - name: "Burning Heart"
+    type: raid_damage
+    severity: medium
+    description: "Constant pulsing raid-wide damage throughout the fight. Damage intensifies during Rebirth windows."
+  - name: "Eternal Burns"
+    type: absorb_shield
+    severity: high
+    description: "Places an absorb shield and a DoT debuff on random players. DoT persists until the absorb is fully healed through. Healers must prioritize absorb targets."
+  - name: "Eternal Burns (shield heal)"
+    type: shield_interrupt
+    severity: high
+    description: "Healing through the absorb shield is the only way to remove the paired DoT. Not removable by dispel."
+  - name: "Incubation of Flames"
+    type: burn_phase
+    severity: critical
+    description: "Phase 2. Room splits into colored cone zones and the boss becomes an egg. Players have a 30-second window to damage the egg. Move to matching-color zone; burst with cooldowns."
+    duration_seconds: 30
+  - name: "Incubation of Flames (positioning)"
+    type: dodge
+    severity: high
+    description: "Wrong-color zone standing deals damage. Players must remain in their assigned-color zone during the burn window."
+  - name: "Ashen Benediction"
+    type: energy_ramp
+    severity: critical
+    description: "Fires a burst of fire damage and applies a stacking 10% healing reduction debuff after each Phase 2 cycle. Persists for remainder of fight. Drives soft enrage."
+avoidable_abilities:
+  - "Guardian's Edict (non-tanks must avoid frontal cones entirely)"
+  - "Radiant Echoes (opposite-color orbs)"
+  - "Light Dive / Void Dive puddles (post-placement)"
+  - "Incubation of Flames wrong-color zones"
+  - "Light Blast / Void Blast (interruptible avoidable damage)"
+  - "Infused Quills splash (Mythic — spread from soakers)"
+  - "Death Drop center proximity damage"
+role_mechanics:
+  tanks:
+    - "Guardian's Edict: solo soak only matching-color frontal cones; wrong-color soak enrages boss"
+    - "Final Edict cone splits between both tanks — coordinate positioning"
+    - "Keep boss positioned so frontal cones do not clip raid"
+    - "Active mitigation for Edict cones and Death Drop"
+    - "Tank swap between Edict combos based on debuff stacks"
+    - "Mythic: manage Radiant Echoes orb paths so they do not collide with boss"
+  healers:
+    - "Eternal Burns: heal through absorb shields to remove paired DoTs (not dispellable)"
+    - "Burning Heart: steady throughput; ramp cooldowns during Rebirth windows"
+    - "Ashen Benediction: escalating cooldown usage as stacks accumulate"
+    - "Coordinate raid cooldowns for Death Drop phase transitions"
+    - "Plan healing for Rebirth-intensified Burning Heart pulses"
+  dps:
+    - "Target priority: Eruption interrupt > kill birds > kill Rebirth eggs (15s timer) > boss"
+    - "Color-matched players must be ready to interrupt Eruption — it is lethal if it completes"
+    - "Save major cooldowns for Phase 2 Incubation of Flames 30-second burn windows"
+    - "Know color assignment for Dive soaks, Quill soaks (Heroic+), Eruption interrupts, Radiant Echo orbs"
+    - "Immediate switch to Rebirth eggs on bird death — hard 15s DPS check"
+---
+
 # Belo'ren Child of Al'ar
 
 ## Overview

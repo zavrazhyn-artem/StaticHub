@@ -1,3 +1,192 @@
+---
+boss: Crown of the Cosmos
+wcl_encounter_id: 3181
+difficulty_variants: [normal, heroic, mythic]
+phases:
+  - id: phase_1
+    name: "Phase 1: Sentinels"
+    type: add_management
+    summary: "Three Undying Sentinels with death immunity removed via Silverstrike Arrows; lieutenants Morium, Demiar, Vorelus active."
+  - id: intermission_1
+    name: "Intermission 1: Platform Fracture"
+    type: intermission
+    summary: "Stellar Emission pull with stacking raid damage; dodge Silverstrike Barrage; arrows clear stacks."
+  - id: phase_2
+    name: "Phase 2: Void Clone"
+    type: burn_phase
+    summary: "Void clone shares Alleria's health pool; keep bosses 30+ yards apart; manage puddles and ricochet adds."
+  - id: intermission_2
+    name: "Intermission 2: Full Platform Split"
+    type: intermission
+    summary: "Rotating orbs instead of stationary; platform splits into three separate sections after."
+  - id: phase_3
+    name: "Phase 3: Final Burn"
+    type: burn_phase
+    summary: "Kill Alleria before 3 Devouring Cosmos casts; grab feathers to cross platforms; manage Aspect of the End tethers."
+mechanics:
+  silverstrike_arrow:
+    name: Silverstrike Arrow
+    ability_ids: [1233602]
+    type: positioning
+    phase: all
+    description: "Piercing arrow used to remove death immunity from adds and clear stacks from allies."
+  grasp_of_emptiness:
+    name: Grasp of Emptiness
+    ability_ids: [1260026, 1260027]
+    type: positioning
+    phase: all
+    description: "Targeted blue circle with obelisk beams; target angles beams away from raid, others clear out."
+  corrupting_essence:
+    name: Corrupting Essence
+    ability_ids: [1261531]
+    type: add_management
+    phase: phase_1
+    description: "Void Droplet death splash applies 30% increased damage taken; kill near Sentinels for amp."
+  void_expulsion:
+    name: Void Expulsion
+    ability_ids: [1233819]
+    type: puddle_placement
+    phase: [phase_2]
+    description: "Orbs spawn on ranged, explode, leave persistent puddles; consolidate in dead zones."
+  stellar_emission:
+    name: Stellar Emission
+    ability_ids: [1234570]
+    type: raid_damage
+    phase: [intermission_1, intermission_2]
+    description: "Pull toward center with stacking raid damage every 2s; arrows remove stacks."
+  silverstrike_barrage:
+    name: Silverstrike Barrage
+    ability_ids: [1243981]
+    type: dodge
+    phase: [intermission_1, intermission_2]
+    description: "Waves of arrows; on Heroic applies 800% arrow vulnerability for 8s — alternate soaking/dodging."
+  dimensional_slash:
+    name: Dimensional Slash
+    ability_ids: [1260482, 1260427, 1260448]  # cast variants only — WCL doesn't attribute damage under this spell ID
+    severity: minor  # downgraded — pure positional dodge, damage attributed under other spells in WCL
+    type: dodge
+    phase: phase_2
+    description: "Cleave/slash pattern from the void clone; sidestep telegraphed arcs."
+  voidstalker_sting:
+    name: Voidstalker Sting
+    ability_ids: [1237035, 1237038]
+    type: raid_damage
+    phase: [phase_2, phase_3]
+    description: "Stacking DoT on multiple players; cleanse via arrows in P2, heal through in P3."
+  dark_hand:
+    name: Dark Hand
+    ability_ids: [1233787]
+    type: tankbuster
+    phase: phase_1
+    description: "Morium tank buster with knockback; use defensives and mind positioning."
+  ravenous_abyss:
+    name: Ravenous Abyss
+    ability_ids: [1243753]
+    type: dodge
+    phase: phase_1
+    description: "Vorelus 15yd AoE applying 70% damage reduction debuff; clear out immediately."
+  null_corona:
+    name: Null Corona
+    ability_ids: [1233865]
+    type: absorb_shield
+    phase: all
+    description: "Random player absorb shield; heal through, do NOT dispel (transfers to another player)."
+  rift_slash:
+    name: Rift Slash
+    ability_ids: [1246461, 1246462]
+    type: tank_swap
+    phase: phase_2
+    description: "Clone tank buster applying stacking 10% stat reduction; swap at ~3 stacks."
+  umbral_tether:
+    name: Umbral Tether
+    ability_ids: [1237844, 1233470]
+    type: tether
+    phase: phase_2
+    description: "Tethers between players must be managed via positioning to avoid snap damage."
+  ranger_captains_mark:
+    name: Ranger Captain's Mark
+    ability_ids: [1259856, 1259861]  # cast + debuff on player
+    type: positioning
+    phase: phase_2
+    description: "Marks players for Silverstrike Ricochet; coordinate positioning to bounce arrow through adds."
+  echoing_darkness:
+    name: Echoing Darkness
+    ability_ids: [1233778]
+    type: energy_ramp
+    phase: [phase_2, phase_3]
+    description: "Stacking buff on boss/adds that ramps damage — burn priority target to prevent overrun."
+  void_barrage:
+    name: Void Barrage
+    ability_ids: [1260000]
+    type: dodge
+    phase: phase_2
+    description: "Clone barrage pattern; dodge telegraphed projectile spread."
+  empowering_darkness:
+    name: Empowering Darkness
+    ability_ids: [1237251, 1281454]
+    type: shield_interrupt
+    phase: phase_2
+    description: "Cosmic Barrier / empowering cast — DPS switch to shield break."
+  cosmic_barrier:
+    name: Cosmic Barrier
+    ability_ids: [1261287]
+    type: absorb_shield
+    phase: phase_2
+    description: "15% health shield on clone that pulses raid damage until broken; full DPS swap."
+  cosmic_radiation:
+    name: Cosmic Radiation
+    ability_ids: [1260766]
+    type: raid_damage
+    phase: phase_3
+    description: "Pulsing raid-wide damage during the final burn; healer cooldown rotation."
+  aspect_of_the_end:
+    name: Aspect of the End
+    ability_ids: [1239080, 1239111]
+    type: tether
+    phase: phase_3
+    description: "Tethers multiple players (one always on tank) with stacking healing reduction; break sequentially with tank swaps."
+  devouring_cosmos:
+    name: Devouring Cosmos
+    ability_ids: [1238843]
+    type: phase_transition
+    phase: phase_3
+    description: "Consumes platform; grab a feather to jump to next section. 3 casts = soft enrage."
+  berserk:
+    name: Berserk
+    ability_ids: [27680]
+    type: raid_damage
+    phase: phase_3
+    description: "Hard enrage — unrecoverable raid-wide damage if boss is not killed in time."
+avoidable_abilities:
+  - silverstrike_barrage
+  - grasp_of_emptiness
+  - void_expulsion
+  - ravenous_abyss
+  - dimensional_slash
+  - void_barrage
+  - devouring_cosmos
+  - corrupting_essence
+role_mechanics:
+  tanks:
+    - dark_hand
+    - rift_slash
+    - aspect_of_the_end
+  healers:
+    - null_corona
+    - voidstalker_sting
+    - stellar_emission
+    - cosmic_radiation
+    - cosmic_barrier
+  dps:
+    - silverstrike_arrow
+    - corrupting_essence
+    - empowering_darkness
+    - cosmic_barrier
+    - ranger_captains_mark
+    - echoing_darkness
+    - devouring_cosmos
+---
+
 # Crown of the Cosmos
 
 ## Overview

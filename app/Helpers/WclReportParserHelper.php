@@ -35,11 +35,12 @@ class WclReportParserHelper
                 : $timestampMs;
 
             return [
-                'player'          => $d['name'] ?? 'Unknown',
-                'fight_id'        => $fightId,
-                'killing_blow'    => $d['killingBlow']['name'] ?? 'Unknown Ability',
-                'time_into_fight' => self::msToFightTime($relativeMs),
-                '_relative_ms'    => $relativeMs,
+                'player'            => $d['name'] ?? 'Unknown',
+                'fight_id'          => $fightId,
+                'killing_blow'      => $d['killingBlow']['name'] ?? 'Unknown Ability',
+                'killing_blow_guid' => $d['killingBlow']['guid'] ?? null,
+                'time_into_fight'   => self::msToFightTime($relativeMs),
+                '_relative_ms'      => $relativeMs,
             ];
         }, $entries));
 
@@ -134,10 +135,11 @@ class WclReportParserHelper
 
             foreach ($playerData['abilities'] ?? [] as $ability) {
                 $abilityName = $ability['name'] ?? 'Unknown';
+                $abilityGuid = $ability['guid'] ?? null;
                 if (in_array($abilityName, ['Melee', 'Attack', 'Auto Attack', 'Stagger', 'Burning Rush'])) continue;
 
                 if (!isset($abilityDamageMap[$abilityName])) {
-                    $abilityDamageMap[$abilityName] = ['total_damage_to_raid' => 0, 'victims' => []];
+                    $abilityDamageMap[$abilityName] = ['guid' => $abilityGuid, 'total_damage_to_raid' => 0, 'victims' => []];
                 }
                 $abilityDamageMap[$abilityName]['total_damage_to_raid'] += $ability['total'] ?? 0;
                 $abilityDamageMap[$abilityName]['victims'][$playerName] =
@@ -149,9 +151,10 @@ class WclReportParserHelper
         foreach ($abilityDamageMap as $abilityName => $data) {
             arsort($data['victims']);
             $cleanDamageTaken[] = [
-                'ability'             => $abilityName,
+                'ability'              => $abilityName,
+                'ability_guid'         => $data['guid'],
                 'total_damage_to_raid' => $data['total_damage_to_raid'],
-                'biggest_victims'     => array_slice($data['victims'], 0, 3, true),
+                'biggest_victims'      => array_slice($data['victims'], 0, 5, true),
             ];
         }
 
@@ -667,6 +670,564 @@ class WclReportParserHelper
         }
 
         return $summary;
+    }
+
+    /**
+     * Parse debuff stack events into per-player max stack statistics.
+     * Useful for analyzing tank swap mechanics where stack count indicates swap failure.
+     *
+     * @param array $events    Events from getDebuffStackEvents
+     * @param array $actorMap  Actor ID → name map (for resolving targetID to player name)
+     * @return array [
+     *   'max_stacks_per_player' => [playerName => max_stack],
+     *   'stacks_at_death_per_player' => [playerName => [fight_id => last_stack_before_death]],
+     *   'total_applications' => count,
+     * ]
+     */
+    public static function parseDebuffStacks(array $events, array $actorMap, array $deathEvents = []): array
+    {
+        $maxStacks = [];
+        $maxPerFight = []; // [targetID_fightId => max_stack_in_fight]
+        $currentStacks = []; // [targetID_fightId => current_stack]
+        $applyTimestamps = []; // [targetID_fightId => apply_timestamp]
+        $durations = []; // list of ms durations for avg calculation
+        $totalApplications = 0;
+
+        foreach ($events as $event) {
+            $type = $event['type'] ?? '';
+            $targetId = $event['targetID'] ?? null;
+            $fightId = $event['fight'] ?? null;
+            if (!$targetId || !$fightId) continue;
+
+            $playerName = $actorMap[$targetId] ?? null;
+            if (!$playerName) continue;
+
+            $stackKey = "{$targetId}_{$fightId}";
+
+            $timestamp = $event['timestamp'] ?? 0;
+
+            if ($type === 'applydebuff') {
+                $currentStacks[$stackKey] = 1;
+                $applyTimestamps[$stackKey] = $timestamp;
+                $totalApplications++;
+            } elseif ($type === 'applydebuffstack') {
+                $currentStacks[$stackKey] = $event['stack'] ?? 1;
+            } elseif ($type === 'removedebuff') {
+                if (isset($applyTimestamps[$stackKey])) {
+                    $durations[] = $timestamp - $applyTimestamps[$stackKey];
+                    unset($applyTimestamps[$stackKey]);
+                }
+                $currentStacks[$stackKey] = 0;
+            }
+
+            // Track max seen per player across all fights
+            $current = $currentStacks[$stackKey] ?? 0;
+            if ($current > ($maxStacks[$playerName] ?? 0)) {
+                $maxStacks[$playerName] = $current;
+            }
+            // Track max seen per player per fight (for death correlation)
+            if ($current > ($maxPerFight[$stackKey] ?? 0)) {
+                $maxPerFight[$stackKey] = $current;
+            }
+        }
+
+        // Correlate deaths with max stacks seen in that fight.
+        // Uses max-in-fight rather than stack-at-exact-death-timestamp because
+        // removedebuff sometimes fires milliseconds before death, hiding the real stack count.
+        $stacksAtDeath = [];
+        foreach ($deathEvents as $death) {
+            $deathTargetId = $death['targetID'] ?? $death['id'] ?? null;
+            $deathFightId = $death['fight'] ?? null;
+            $killingBlow = $death['killingBlow']['name'] ?? '';
+            if (!$deathTargetId || !$deathFightId) continue;
+
+            $playerName = $actorMap[$deathTargetId] ?? $death['name'] ?? null;
+            if (!$playerName) continue;
+
+            $stackKey = "{$deathTargetId}_{$deathFightId}";
+            $maxInFight = $maxPerFight[$stackKey] ?? 0;
+            if ($maxInFight <= 0) continue;
+
+            $stacksAtDeath[$playerName][] = [
+                'fight_id'     => $deathFightId,
+                'max_stacks'   => $maxInFight,
+                'killing_blow' => $killingBlow,
+            ];
+        }
+
+        arsort($maxStacks);
+
+        $avgDurationMs = !empty($durations) ? (int) round(array_sum($durations) / count($durations)) : null;
+
+        // Tank swap timing: for each pair of (removedebuff on tank A → next applydebuff on tank B)
+        // Calculate the gap. Short gap (<1s) = crisp swap. Long gap (>3s) = boss sat on same tank too long.
+        // Only meaningful if debuff appears on 2+ different players (tank swap mechanic).
+        $swapTiming = null;
+        if (count($maxStacks) >= 2) {
+            $swapTiming = self::calculateSwapTiming($events, $actorMap);
+        }
+
+        return [
+            'max_stacks_per_player'      => $maxStacks,
+            'stacks_at_death_per_player' => $stacksAtDeath,
+            'total_applications'         => $totalApplications,
+            'avg_duration_ms'            => $avgDurationMs,
+            'swap_timing'                => $swapTiming,
+        ];
+    }
+
+    /**
+     * Calculate tank swap gaps from debuff events.
+     * A "swap" = removedebuff on tank A immediately followed by applydebuff on tank B within a fight.
+     *
+     * Returns: [
+     *   'avg_gap_ms' => int,
+     *   'min_gap_ms' => int,
+     *   'max_gap_ms' => int,
+     *   'late_swaps' => int (count of swaps with gap > 3000ms),
+     *   'total_swaps' => int,
+     * ]
+     */
+    private static function calculateSwapTiming(array $events, array $actorMap): array
+    {
+        // Group events by fight
+        $byFight = [];
+        foreach ($events as $e) {
+            $fightId = $e['fight'] ?? null;
+            if (!$fightId) continue;
+            $byFight[$fightId][] = $e;
+        }
+
+        $gaps = [];
+
+        foreach ($byFight as $fightId => $fightEvents) {
+            usort($fightEvents, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
+
+            $lastRemoval = null; // ['target' => id, 'time' => ts]
+            foreach ($fightEvents as $event) {
+                $type = $event['type'] ?? '';
+                $targetId = $event['targetID'] ?? null;
+                $ts = $event['timestamp'] ?? 0;
+
+                if ($type === 'removedebuff') {
+                    $lastRemoval = ['target' => $targetId, 'time' => $ts];
+                } elseif ($type === 'applydebuff' && $lastRemoval !== null) {
+                    if ($targetId !== $lastRemoval['target']) {
+                        $gap = $ts - $lastRemoval['time'];
+                        if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
+                            $gaps[] = $gap;
+                        }
+                        $lastRemoval = null;
+                    }
+                }
+            }
+        }
+
+        if (empty($gaps)) {
+            return [
+                'avg_gap_ms' => null,
+                'min_gap_ms' => null,
+                'max_gap_ms' => null,
+                'late_swaps' => 0,
+                'total_swaps' => 0,
+            ];
+        }
+
+        return [
+            'avg_gap_ms'  => (int) round(array_sum($gaps) / count($gaps)),
+            'min_gap_ms'  => min($gaps),
+            'max_gap_ms'  => max($gaps),
+            'late_swaps'  => count(array_filter($gaps, fn($g) => $g > 3000)),
+            'total_swaps' => count($gaps),
+        ];
+    }
+
+    /**
+     * Parse summon events into add-spawn waves per fight.
+     * Groups summon timestamps that are close together (<5s gap) into waves.
+     *
+     * Returns: [
+     *   fight_id => [
+     *     'total_summons' => int,
+     *     'wave_count' => int,
+     *     'waves' => [ ['wave' => 1, 'time_into_fight' => 'M:SS', 'adds_per_ability' => [abilityName => count]] ],
+     *     'adds_by_ability' => [abilityName => total_across_waves],
+     *   ]
+     * ]
+     *
+     * @param array $events       Summon events
+     * @param array $fightStarts  [fight_id => start_timestamp_ms]
+     * @param array $abilityMap   Optional [abilityGameID => name] for labeling. If missing, uses ID as string.
+     */
+    public static function parseSummonWaves(array $events, array $fightStarts = [], array $abilityMap = []): array
+    {
+        // Group events by fight
+        $byFight = [];
+        foreach ($events as $e) {
+            $fightId = $e['fight'] ?? null;
+            if (!$fightId) continue;
+            $byFight[$fightId][] = $e;
+        }
+
+        $result = [];
+
+        foreach ($byFight as $fightId => $fightEvents) {
+            usort($fightEvents, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
+
+            $fightStart = $fightStarts[$fightId] ?? 0;
+            $waves = [];
+            $currentWave = [];
+            $lastTs = null;
+            $waveNum = 0;
+            $adds_by_ability = [];
+
+            foreach ($fightEvents as $event) {
+                $ts = $event['timestamp'] ?? 0;
+                $abilityId = $event['abilityGameID'] ?? 0;
+                $label = $abilityMap[$abilityId] ?? "ability_{$abilityId}";
+
+                $adds_by_ability[$label] = ($adds_by_ability[$label] ?? 0) + 1;
+
+                // Start new wave if >5s gap OR first event
+                if ($lastTs === null || ($ts - $lastTs) > 5000) {
+                    if (!empty($currentWave)) {
+                        $waves[] = $currentWave;
+                    }
+                    $waveNum++;
+                    $relativeMs = $ts - $fightStart;
+                    $currentWave = [
+                        'wave' => $waveNum,
+                        'time_into_fight' => self::msToFightTime($relativeMs),
+                        'adds_per_ability' => [],
+                    ];
+                }
+
+                $currentWave['adds_per_ability'][$label] =
+                    ($currentWave['adds_per_ability'][$label] ?? 0) + 1;
+
+                $lastTs = $ts;
+            }
+
+            if (!empty($currentWave)) {
+                $waves[] = $currentWave;
+            }
+
+            $result[$fightId] = [
+                'total_summons'  => count($fightEvents),
+                'wave_count'     => count($waves),
+                'waves'          => $waves,
+                'adds_by_ability' => $adds_by_ability,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse enemy death events to detect orb kill staggering (overlaps within 1s).
+     *
+     * @param array $deathEvents  Enemy death events
+     * @param array $npcMap       [actorID => npcName]
+     * @param array $fightStarts  [fight_id => start_timestamp_ms]
+     */
+    public static function parseOrbStaggering(array $deathEvents, array $npcMap, array $fightStarts = []): array
+    {
+        $byAddInFight = [];
+        foreach ($deathEvents as $e) {
+            $tid = $e['targetID'] ?? null;
+            $fightId = $e['fight'] ?? null;
+            if (!$tid || !$fightId) continue;
+
+            $addName = $npcMap[$tid] ?? "npc_{$tid}";
+            $key = "{$addName}|{$fightId}";
+            $byAddInFight[$key][] = $e;
+        }
+
+        $result = [];
+
+        foreach ($byAddInFight as $key => $events) {
+            [$addName, $fightId] = explode('|', $key);
+            usort($events, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
+
+            if (!isset($result[$addName])) {
+                $result[$addName] = [
+                    'total_deaths'      => 0,
+                    'overlapping_kills' => 0,
+                    'intervals_ms'      => [],
+                    'kill_clusters'     => [],
+                ];
+            }
+
+            $result[$addName]['total_deaths'] += count($events);
+
+            $clusterStart = null;
+            $clusterSize = 0;
+            $prevTs = null;
+            foreach ($events as $event) {
+                $ts = $event['timestamp'] ?? 0;
+                if ($prevTs !== null) {
+                    $interval = $ts - $prevTs;
+                    $result[$addName]['intervals_ms'][] = $interval;
+                    if ($interval < 1000) {
+                        if ($clusterSize === 0) {
+                            $clusterStart = $prevTs;
+                            $clusterSize = 2;
+                        } else {
+                            $clusterSize++;
+                        }
+                    } else {
+                        if ($clusterSize >= 2) {
+                            $fightStart = $fightStarts[$fightId] ?? 0;
+                            $result[$addName]['kill_clusters'][] = [
+                                'fight_id'     => (int) $fightId,
+                                'time'         => self::msToFightTime($clusterStart - $fightStart),
+                                'cluster_size' => $clusterSize,
+                            ];
+                            $result[$addName]['overlapping_kills'] += $clusterSize;
+                            $clusterSize = 0;
+                        }
+                    }
+                }
+                $prevTs = $ts;
+            }
+            if ($clusterSize >= 2) {
+                $fightStart = $fightStarts[$fightId] ?? 0;
+                $result[$addName]['kill_clusters'][] = [
+                    'fight_id'     => (int) $fightId,
+                    'time'         => self::msToFightTime($clusterStart - $fightStart),
+                    'cluster_size' => $clusterSize,
+                ];
+                $result[$addName]['overlapping_kills'] += $clusterSize;
+            }
+        }
+
+        foreach ($result as &$data) {
+            $intervals = $data['intervals_ms'];
+            $data['avg_interval_ms'] = !empty($intervals) ? (int) round(array_sum($intervals) / count($intervals)) : null;
+            $data['min_interval_ms'] = !empty($intervals) ? min($intervals) : null;
+            unset($data['intervals_ms']);
+        }
+        unset($data);
+
+        return $result;
+    }
+
+    /**
+     * Cross-reference cast events with shield buff windows to detect casts on shielded targets.
+     */
+    public static function parseShieldedCasts(array $castEvents, array $shieldEvents, array $actorMap = [], array $fightStarts = []): array
+    {
+        $windows = [];
+        foreach ($shieldEvents as $e) {
+            $type = $e['type'] ?? '';
+            $tid = $e['targetID'] ?? null;
+            $instance = $e['targetInstance'] ?? 1;
+            $fight = $e['fight'] ?? null;
+            $ts = $e['timestamp'] ?? 0;
+            if (!$tid || !$fight) continue;
+
+            $key = "{$tid}_{$instance}_{$fight}";
+            if ($type === 'applybuff') {
+                $windows[$key][] = ['start' => $ts, 'end' => PHP_INT_MAX, 'fight' => $fight];
+            } elseif ($type === 'removebuff' && !empty($windows[$key])) {
+                $idx = count($windows[$key]) - 1;
+                $windows[$key][$idx]['end'] = $ts;
+            }
+        }
+
+        $total = count($castEvents);
+        $onShielded = 0;
+        $shieldedDetails = [];
+
+        foreach ($castEvents as $cast) {
+            // For enemy casts (boss clones), the caster is sourceID — match it with shield TARGET
+            $casterId = $cast['sourceID'] ?? null;
+            $casterInstance = $cast['sourceInstance'] ?? 1;
+            $fight = $cast['fight'] ?? null;
+            $ts = $cast['timestamp'] ?? 0;
+            if (!$casterId || !$fight) continue;
+
+            $key = "{$casterId}_{$casterInstance}_{$fight}";
+            $wasShielded = false;
+            foreach ($windows[$key] ?? [] as $w) {
+                if ($ts >= $w['start'] && $ts <= $w['end']) {
+                    $wasShielded = true;
+                    break;
+                }
+            }
+
+            if ($wasShielded) {
+                $onShielded++;
+                $fightStart = $fightStarts[$fight] ?? 0;
+                $shieldedDetails[] = [
+                    'fight'           => $fight,
+                    'time'            => self::msToFightTime($ts - $fightStart),
+                    'clone_id'        => $casterId,
+                    'clone_instance'  => $casterInstance,
+                ];
+            }
+        }
+
+        return [
+            'casts_total'       => $total,
+            'casts_on_shielded' => $onShielded,
+            'casts_on_clear'    => $total - $onShielded,
+            'shielded_details'  => array_slice($shieldedDetails, 0, 10),
+        ];
+    }
+
+    /**
+     * Parse boss cast events with coordinates into positioning timeline.
+     */
+    public static function parseBossPositions(array $castEvents, array $fightStarts = []): array
+    {
+        $positions = [];
+        $xs = [];
+        $ys = [];
+
+        foreach ($castEvents as $cast) {
+            $x = $cast['x'] ?? null;
+            $y = $cast['y'] ?? null;
+            $fight = $cast['fight'] ?? null;
+            $ts = $cast['timestamp'] ?? 0;
+
+            if ($x === null || $y === null) continue;
+            $xs[] = $x;
+            $ys[] = $y;
+
+            $fightStart = $fightStarts[$fight] ?? 0;
+            $positions[] = [
+                'fight' => $fight,
+                'time'  => self::msToFightTime($ts - $fightStart),
+                'x'     => $x,
+                'y'     => $y,
+            ];
+        }
+
+        return [
+            'casts_with_coords' => count($positions),
+            'positions'         => array_slice($positions, 0, 20),
+            'avg_x'             => !empty($xs) ? (int) round(array_sum($xs) / count($xs)) : null,
+            'avg_y'             => !empty($ys) ? (int) round(array_sum($ys) / count($ys)) : null,
+        ];
+    }
+
+    /**
+     * Correlate debuff removal events with nearby player cast events to extract x,y coords.
+     * For each removal timestamp, find the closest cast event (within ±3s) from the same player.
+     *
+     * @param array $removals       [ {timestamp, targetID (player), fight} ]
+     * @param array $castSnapshots  Player cast events with x, y
+     * @param array $playerMap      [actorID => name]
+     * @param array $fightStarts    [fight_id => start_ms]
+     *
+     * @return array [
+     *   'applications_with_coords' => int,
+     *   'applications_total'       => int,
+     *   'per_player_avg_distance_from_group' => [playerName => distance_units],
+     *   'positions_sample'         => [ {player, fight, time, x, y} ],
+     *   'group_center'             => {avg_x, avg_y},
+     *   'outlier_count'            => int (positions >30% away from group center)
+     * ]
+     */
+    public static function correlatePlayerCoordsWithEvents(array $removals, array $castSnapshots, array $playerMap, array $fightStarts = []): array
+    {
+        if (empty($castSnapshots)) {
+            return [
+                'applications_with_coords' => 0,
+                'applications_total'       => count($removals),
+                'positions_sample'         => [],
+                'group_center'             => null,
+                'outlier_count'            => 0,
+                'per_player_avg_distance_from_group' => [],
+            ];
+        }
+
+        // Index cast events by (playerID, fight) for fast lookup
+        $castsByPlayer = [];
+        foreach ($castSnapshots as $c) {
+            $pid = $c['sourceID'] ?? null;
+            $fight = $c['fight'] ?? null;
+            if (!$pid || !$fight) continue;
+            $castsByPlayer[$pid][$fight][] = $c;
+        }
+
+        $positions = [];
+
+        foreach ($removals as $r) {
+            $ts = $r['timestamp'] ?? 0;
+            $pid = $r['targetID'] ?? null;
+            $fight = $r['fight'] ?? null;
+            if (!$pid || !$fight) continue;
+
+            $candidates = $castsByPlayer[$pid][$fight] ?? [];
+            if (empty($candidates)) continue;
+
+            // Find nearest cast event within 3000ms
+            $best = null;
+            $bestDt = PHP_INT_MAX;
+            foreach ($candidates as $c) {
+                $dt = abs(($c['timestamp'] ?? 0) - $ts);
+                if ($dt < $bestDt && $dt < 3000) {
+                    $bestDt = $dt;
+                    $best = $c;
+                }
+            }
+
+            if ($best) {
+                $fightStart = $fightStarts[$fight] ?? 0;
+                $positions[] = [
+                    'player' => $playerMap[$pid] ?? "player_{$pid}",
+                    'fight'  => $fight,
+                    'time'   => self::msToFightTime($ts - $fightStart),
+                    'x'      => $best['x'],
+                    'y'      => $best['y'],
+                    'match_delta_ms' => $bestDt,
+                ];
+            }
+        }
+
+        // Compute group center (average of all positions)
+        if (empty($positions)) {
+            return [
+                'applications_with_coords' => 0,
+                'applications_total'       => count($removals),
+                'positions_sample'         => [],
+                'group_center'             => null,
+                'outlier_count'            => 0,
+                'per_player_avg_distance_from_group' => [],
+            ];
+        }
+
+        $avgX = array_sum(array_column($positions, 'x')) / count($positions);
+        $avgY = array_sum(array_column($positions, 'y')) / count($positions);
+
+        // Per-player avg distance from group center
+        $byPlayer = [];
+        foreach ($positions as $p) {
+            $d = sqrt(pow($p['x'] - $avgX, 2) + pow($p['y'] - $avgY, 2));
+            $byPlayer[$p['player']][] = $d;
+        }
+        $perPlayerAvg = [];
+        foreach ($byPlayer as $name => $dists) {
+            $perPlayerAvg[$name] = (int) round(array_sum($dists) / count($dists));
+        }
+        arsort($perPlayerAvg);
+
+        // Outliers: positions > 30% above average distance
+        $allDists = array_merge(...array_values($byPlayer));
+        $avgDist = array_sum($allDists) / count($allDists);
+        $outlierThreshold = $avgDist * 1.3;
+        $outlierCount = count(array_filter($allDists, fn($d) => $d > $outlierThreshold));
+
+        return [
+            'applications_with_coords' => count($positions),
+            'applications_total'       => count($removals),
+            'positions_sample'         => array_slice($positions, 0, 15),
+            'group_center'             => ['avg_x' => (int) $avgX, 'avg_y' => (int) $avgY],
+            'outlier_count'            => $outlierCount,
+            'per_player_avg_distance_from_group' => $perPlayerAvg,
+        ];
     }
 
     /**

@@ -1,3 +1,109 @@
+---
+boss: Vorasius
+wcl_encounter_id: 3177
+difficulty_variants: [normal, heroic, mythic]
+
+mechanics:
+  - name: "Shadowclaw Slam"
+    type: soak
+    ability_ids: [1272329, 1241692, 1241769, 1241768, 1241686, 1244097]
+    vulnerability_debuff: "Smashed"
+    vulnerability_ability_ids: [1241844]
+    stack_swap_threshold: 2
+    spawns_walls: true
+    severity: critical
+    description: "Tank-soaked circle applying 150% physical vulnerability (Smashed). Swap after 2 soaks. Creates Aftershock expanding rings and spawns Void Crystal Walls."
+
+  - name: "Aftershock"
+    type: dodge
+    aliases: ["Shadowclaw Slam", "Aftershock"]
+    severity: major
+    description: "Expanding rings erupt outward after Shadowclaw Slam. All players dodge outward pulses (damage shares the same ability IDs as Shadowclaw Slam)."
+
+  - name: "Blisterburst"
+    type: add_management
+    ability_ids: [1259186]
+    add_npc: "Blistercreep"
+    kill_priority: high
+    severity: critical
+    description: "Spawns Blistercreep adds that fixate players. Kill next to Crystal Walls so explosions break walls before Void Breath."
+
+  - name: "Creep Spit"
+    type: raid_damage
+    ability_ids: [1272527, 1273159]
+    caster_name: "Blistercreep"
+    dispellable_slow: true
+    severity: minor
+    description: "Debuff applied by Blistercreep on fixated targets. Dispel the slow promptly."
+
+  - name: "Fixate"
+    type: add_management
+    ability_ids: [1254113, 1254112, 1265018]
+    caster_name: "Blistercreep"
+    severity: major
+    description: "Blistercreep locks onto a random raid member. Fixated player kites the add to a Crystal Wall."
+
+  - name: "Primordial Roar"
+    type: knockback
+    ability_ids: [1260052]
+    platform_fall_risk: true
+    severity: critical
+    description: "Channel pulls all players toward boss then knocks back with raid damage. Pre-position away from edges."
+
+  - name: "Void Breath"
+    type: raid_damage
+    ability_ids: [1256855, 1257629]
+    duration_s: 15
+    requires_walls_broken: true
+    severity: critical
+    description: "Slow deadly beam sweeps across the room for 15s. Hide behind destroyed Crystal Walls on the opposite side."
+
+  - name: "Primordial Power"
+    type: raid_damage
+    ability_ids: [1272937]
+    severity: minor
+    description: "Boss self-buff gained during Void Breath — increases ongoing damage output."
+
+  - name: "Parasite Expulsion"
+    type: raid_damage
+    ability_ids: [1254199]
+    severity: minor
+    description: "Periodic raid-wide damage pulse. Healers maintain raid health."
+
+  - name: "Overpowering Pulse"
+    type: tankbuster
+    ability_ids: []
+    requires_melee_presence: true
+    severity: critical
+    description: "Passive wipe check — if no player is in melee range of boss, the entire raid dies. Tank must stay in melee at all times."
+
+avoidable_abilities:
+  - "Aftershock"
+  - "Void Breath"
+  - "Blisterburst explosion"
+  - "Creep Spit ground AoE"
+  - "Primordial Roar knockback (platform fall)"
+
+role_mechanics:
+  tank:
+    - "Shadowclaw Slam"
+    - "Aftershock"
+    - "Overpowering Pulse"
+    - "Primordial Roar"
+  healer:
+    - "Creep Spit"
+    - "Primordial Roar"
+    - "Void Breath"
+    - "Parasite Expulsion"
+    - "Shadowclaw Slam"
+  dps:
+    - "Blisterburst"
+    - "Fixate"
+    - "Aftershock"
+    - "Void Breath"
+    - "Primordial Roar"
+---
+
 # Vorasius
 
 ## Overview

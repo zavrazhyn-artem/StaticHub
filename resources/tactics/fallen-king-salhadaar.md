@@ -1,3 +1,111 @@
+---
+boss: Fallen-King Salhadaar
+wcl_encounter_id: 3179
+difficulty_variants: [normal, heroic, mythic]
+
+mechanics:
+  - name: "Destabilizing Strikes"
+    type: tank_swap
+    ability_ids: [1271579, 1271577]
+    stack_swap_threshold: 6
+    critical_death_stacks: 10
+    severity: critical
+    description: "Stacking debuff on active tank. Swap at 5-7 stacks."
+
+  - name: "Shadow Fracture"
+    type: interrupt
+    ability_ids: [1254088]
+    caster_name: "Fractured Image"
+    miss_threshold_pct: 5
+    severity: critical
+    description: "Cast by clones of Fractured Projection. Must be interrupted."
+
+  - name: "Nexus Shield"
+    type: shield_interrupt
+    ability_ids: [1275056]
+    protects_ability: "Shadow Fracture"
+    severity: critical
+    mythic_only: true
+    description: "Buffs clones — wasted interrupts hit shield. Only unshielded clone is interruptible."
+
+  - name: "Despotic Command"
+    type: absorb_shield
+    ability_ids: [1260823, 1248697]
+    natural_duration_ms: 12000
+    expected_clear_ms: 4000
+    puddle_drop: true
+    puddle_ability: "Dark Radiation"
+    severity: major
+    description: "Healing absorb debuff on random players. Healers must clear. On expire, drops Dark Radiation puddle."
+
+  - name: "Entropic Unraveling"
+    type: burn_phase
+    ability_ids: [1246175, 1260030]  # Umbral Beams (1260030) is the actual damage during burn
+    aliases: ["Umbral Beams"]
+    energy_trigger: 100
+    duration_s: 20
+    beam_ability: "Umbral Beams"
+    severity: critical
+    description: "100-energy burst window with 25% damage taken. Dodge Umbral Beams during the window."
+
+  - name: "Shattering Twilight"
+    type: positioning
+    ability_ids: [1253032]
+    spike_ability: "Twilight Spikes"
+    spike_ability_ids: [1251213]
+    severity: major
+    description: "Tank must position boss away from raid during cast. Spikes fire in lines."
+
+  - name: "Twisting Obscurity"
+    type: raid_damage
+    ability_ids: [1250686]
+    duration_ms: 23000
+    severity: major
+    description: "23s raid-wide DoT. Healers pop cooldowns."
+
+  - name: "Void Convergence"
+    type: orb_management
+    ability_ids: [1243453]
+    orb_npcs: ["Concentrated Void", "Enduring Void"]
+    stagger_interval_ms: 5000
+    severity: critical
+    description: "Orbs spawn and advance to boss — wipe if contact. Kill staggered to avoid DoT stacks."
+
+  - name: "Void Exposure"
+    type: proximity_damage
+    ability_ids: [1250828]
+    severity: minor
+    description: "Damage taken from standing too close to orbs."
+
+  - name: "Torturous Extract"
+    type: raid_damage
+    ability_ids: [1245592]
+    severity: major
+    description: "High-tick damage on players during fight cycles."
+
+avoidable_abilities:
+  - {name: "Dark Radiation", source_mechanic: "Despotic Command"}
+  - {name: "Umbral Beams", source_mechanic: "Entropic Unraveling"}
+  - {name: "Twilight Spikes", source_mechanic: "Shattering Twilight"}
+  - {name: "Void Exposure", source_mechanic: "Void Convergence"}
+  - {name: "Void Infusion", source_mechanic: "Void Convergence"}
+  - {name: "Shadow Fracture", source_mechanic: "Fractured Projection"}
+
+role_mechanics:
+  tank:
+    - "Destabilizing Strikes"
+    - "Shattering Twilight"
+  healer:
+    - "Despotic Command"
+    - "Twisting Obscurity"
+    - "Torturous Extract"
+  dps:
+    - "Shadow Fracture"
+    - "Nexus Shield"
+    - "Void Convergence"
+    - "Entropic Unraveling"
+---
+
 # Fallen King Salhadaar
 
 ## Overview

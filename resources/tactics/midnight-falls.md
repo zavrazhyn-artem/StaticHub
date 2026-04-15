@@ -1,3 +1,125 @@
+---
+boss: Midnight Falls
+wcl_encounter_id: null
+difficulty_variants: [normal, heroic, mythic]
+mechanics:
+  phase_1:
+    - name: Heaven's Lance
+      slug: heavens_lance
+      type: tank_swap
+      description: 5-hit tankbuster sequence applying stacking Impaled debuff (+50% Heaven's Lance damage taken, 25s). Tanks swap after each cast.
+    - name: Death's Dirge
+      slug: deaths_dirge
+      type: memory_game
+      description: L'ura flashes a sequence of runes, then marks players with runes. A clockwise laser destroys runes in the order touched. Marked players must form a semicircle matching the displayed sequence.
+    - name: Safeguard Matrix
+      slug: safeguard_matrix
+      type: interrupt
+      description: Three adds spawn with Safeguard stacks reducing boss damage taken 33% each. Stacks are stripped via interrupts until adds die.
+    - name: Midnight Crystal / Cosmic Fracture
+      slug: midnight_crystal_cosmic_fracture
+      type: add_management
+      description: Enemy Midnight Crystals spawn and cast Cosmic Fracture (wipe). DPS must burn them down before the cast completes.
+    - name: Dusk to Dawn Crystal
+      slug: dusk_to_dawn_crystal
+      type: crystal_management
+      description: Friendly Dusk Crystals spawn alongside Midnight Crystals. Healers heal them to full to transform them into Dawn Crystals, which players pick up via Extra Action Button. Crystals left on the ground >3s pulse massive raid damage. Carriers take DOT damage. Crystals must be carried into Phase 3.
+    - name: Heaven's Glaives
+      slug: heavens_glaives
+      type: dodge
+      description: Glaives shoot from the boss and bounce around the room continuously throughout Phase 1. Players dodge persistently while handling other mechanics.
+    - name: Dark Quasar
+      slug: dark_quasar
+      type: dodge
+      description: Beams shoot out of the central Darkwell and spin clockwise. Darkwell itself instantly kills on contact. Dodge the rotating beams.
+    - name: Shattered Sky
+      slug: shattered_sky
+      type: raid_damage
+      description: Continuous raid-wide rot damage throughout Phase 1. Healers pace cooldowns and maintain throughput.
+  intermission:
+    - name: Total Eclipse
+      slug: total_eclipse
+      type: intermission
+      description: Darkwell remains lethal. Stationary beams shoot outward. Players are continually marked emitting beams from their characters. All players gain a stacking healing absorb every second. Avoid beams and spread to prevent overlapping player beams; healers rotate cooldowns to burn through absorbs.
+    - name: Phase Transition to Darkwell
+      slug: phase_1_to_2_transition
+      type: phase_transition
+      description: After the intermission, players are pulled into the Darkwell for Phase 2.
+  phase_2:
+    - name: Iris of Oblivion
+      slug: iris_of_oblivion
+      type: positioning
+      description: Crossing the room boundary inside the Darkwell is instant death. Stay within arena boundaries at all times.
+    - name: Galvanize
+      slug: galvanize
+      type: soak
+      description: Players receive a targeted line ability aimed at Void Cores orbiting the perimeter to destroy them. On Heroic+, Galvanize is also a high-damage line soak requiring pre-assigned groups; crystal holders must drop Dawn Crystals before soaking.
+    - name: Cosmic Fission
+      slug: cosmic_fission
+      type: dodge
+      description: When Void Cores are destroyed, players are briefly pulled inward and L'ura absorbs planets along marked paths, dealing massive damage to anyone standing in a path. Reposition to a safe spot away from planet absorption lanes.
+    - name: Abyssal Pool
+      slug: abyssal_pool
+      type: raid_damage
+      description: Continuous raid-wide rot damage throughout Phase 2. Healers pace cooldowns across the phase.
+    - name: Phase Transition to Midnight Darkness
+      slug: phase_2_to_3_transition
+      type: phase_transition
+      description: Phase ends when all Void Cores have been absorbed by L'ura, transitioning into Phase 3.
+  phase_3:
+    - name: Torchbearer
+      slug: torchbearer
+      type: crystal_management
+      description: Dawn Crystal holders emit a light aura that protects nearby players from Midnight darkness. Entire raid must stack within the light radius; holders position centrally.
+    - name: Dark Archangel
+      slug: dark_archangel
+      type: shield_interrupt
+      description: L'ura fires a deadly blast that leaves behind a damaging darkness zone. A Dawn Crystal holder activates their Extra Action Button shield to protect the raid; all players then exit the darkness zone quickly.
+    - name: Dark Constellation
+      slug: dark_constellation
+      type: dodge
+      description: Star orbs land on the platform dealing massive impact damage, then connect with damaging light beams. Move away from landing zones and position in safe spaces between stars, avoiding connecting beams.
+    - name: Light Siphon
+      slug: light_siphon
+      type: soak
+      description: Soak circles spawn and must be drained by players standing inside. Undrained circles explode and wipe the raid.
+    - name: Tears of L'ura
+      slug: tears_of_lura
+      type: soak
+      description: Heroic+ only. When Dawn Crystals are hit by Cosmic damage, soak circles spawn near them. Each must be caught by a player. Crystal holders must drop crystals before Cosmic damage or avoid soaking.
+avoidable_abilities:
+  - Dark Quasar
+  - Heaven's Glaives
+  - Darkwell (instant death)
+  - Iris of Oblivion (boundary, instant death)
+  - Cosmic Fission (planet paths)
+  - Dark Constellation (star landings and connecting beams)
+  - Total Eclipse beams (stationary + player-emitted)
+  - Dark Archangel darkness zone (post-blast)
+role_mechanics:
+  tanks:
+    - Swap on every Heaven's Lance cast to prevent Impaled stack accumulation
+    - Position boss away from the central Darkwell
+    - In Phase 3, maintain position within Dawn Crystal holder light aura while facing boss away from raid
+    - Use active mitigation for every Heaven's Lance cast
+  healers:
+    - Sustain through Shattered Sky (P1) and Abyssal Pool (P2) raid rot damage
+    - Heal Dusk Crystals to full to generate Dawn Crystals in Phase 1
+    - Support Dawn Crystal carriers through carrier DOT
+    - Rotate cooldowns against stacking absorb shields during Total Eclipse intermission
+    - Coordinate cooldowns for Dark Archangel and Light Siphon overlaps in Phase 3
+    - Heroic+: assigned to Tears of L'ura soak circles near Dawn Crystals
+  dps:
+    - Kill Midnight Crystals before Cosmic Fracture cast completes (wipe check)
+    - Interrupt Safeguard Matrix adds on rotation to remove boss damage reduction
+    - Dodge Heaven's Glaives continuously while maintaining uptime
+    - Aim Galvanize lines accurately at Void Cores in Phase 2
+    - Avoid Cosmic Fission planet paths after Void Core destruction
+    - Prioritize Light Siphon soaks over boss damage in Phase 3
+    - Maintain tight positioning near crystal holders (Torchbearer) in Phase 3
+    - Track Dark Constellation star landings and beam connections
+---
+
 # Midnight Falls
 
 ## Overview
