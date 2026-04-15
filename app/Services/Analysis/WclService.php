@@ -345,7 +345,7 @@ class WclService
             'consumables_used'    => $consumables,
             'dispels'             => $cleanDispels,
             'consumable_buffs'    => $consumableBuffs,
-            'buff_uptime'         => array_slice($buffUptime, 0, 30, true),
+            'buff_uptime'         => array_slice($buffUptime, 0, 100, true),
             'debuff_uptime'       => $debuffUptime,
             'resource_waste'      => $resourceWaste,
             'performance_metrics' => $performanceMetrics,
@@ -996,6 +996,210 @@ class WclService
         } while (true);
 
         return $all;
+    }
+
+    /**
+     * Per-player consumable buff coverage — checks which players had each buff at any point.
+     * Iterates over consumable buff aura events and returns a per-player audit.
+     *
+     * @return array [
+     *   'players_with' => [buffName => [playerName, ...]],
+     *   'players_without' => [buffName => [playerName, ...]],
+     *   'raid_size' => int,
+     * ]
+     */
+    public function getPerPlayerConsumableAudit(string $reportId, array $fightIds, array $cleanPlayers, array $consumableBuffs): array
+    {
+        $playerNames = array_column($cleanPlayers, 'name');
+        $playerIds = array_column($cleanPlayers, 'id');
+        $playerMap = array_combine($playerIds, $playerNames);
+
+        $playersWith = [];
+        $playersWithout = [];
+
+        foreach ($consumableBuffs as $buffName => $data) {
+            $guid = null;
+            // Find the guid by querying buffs table again (cheap — we have it cached for raid)
+            // Use existing extractor approach: query enemy/friendly buff events for this ability.
+            // Simpler: rely on totalUses + bands to detect presence per actor via events query.
+            // For minimum cost, skip if this buff was applied to the entire raid (avg_players >= raid_size * 0.95)
+            $rs = count($playerNames);
+            $avg = $data['avg_players_per_fight'] ?? 0;
+            if ($rs > 0 && $avg >= $rs * 0.95) {
+                $playersWith[$buffName] = $playerNames;
+                $playersWithout[$buffName] = [];
+                continue;
+            }
+
+            // Otherwise: query buff events to find unique target players
+            $q = 'query ($reportId: String!, $fightIds: [Int]!, $abilityName: String!) {
+              reportData { report(code: $reportId) {
+                events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, filterExpression: $abilityName, hostilityType: Friendlies, limit: 2000) {
+                  data
+                }
+              } }
+            }';
+            try {
+                $r = $this->executeGraphql($q, [
+                    'reportId' => $reportId,
+                    'fightIds' => $fightIds,
+                    'abilityName' => 'ability.name = "' . str_replace('"', '\\"', $buffName) . '"',
+                ]);
+                $events = $r['reportData']['report']['events']['data'] ?? [];
+                $with = [];
+                foreach ($events as $e) {
+                    if (($e['type'] ?? '') !== 'applybuff') continue;
+                    $tid = $e['targetID'] ?? null;
+                    if ($tid && isset($playerMap[$tid])) {
+                        $with[$playerMap[$tid]] = true;
+                    }
+                }
+                $playersWith[$buffName] = array_keys($with);
+                $playersWithout[$buffName] = array_values(array_diff($playerNames, array_keys($with)));
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return [
+            'players_with'    => $playersWith,
+            'players_without' => $playersWithout,
+            'raid_size'       => count($playerNames),
+        ];
+    }
+
+    /**
+     * Per-player buff uptime for a specific aura.
+     * Calculates uptime % for each player based on applybuff/removebuff events.
+     *
+     * @return array [playerName => ['uptime_pct' => float, 'uses' => int, 'total_uptime_ms' => int]]
+     */
+    public function getPerPlayerBuffUptime(string $reportId, array $fightIds, int $abilityId, int $totalDurationMs, array $cleanPlayers = []): array
+    {
+        if ($totalDurationMs <= 0) return [];
+
+        $playerMap = [];
+        foreach ($cleanPlayers as $p) {
+            if (isset($p['id'], $p['name'])) $playerMap[$p['id']] = $p['name'];
+        }
+
+        $query = 'query ($reportId: String!, $fightIds: [Int]!, $abilityId: Float!, $startTime: Float) {
+          reportData { report(code: $reportId) {
+            events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, abilityID: $abilityId, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+              data
+              nextPageTimestamp
+            }
+          } }
+        }';
+
+        try {
+            $events = $this->paginateEvents($query, [
+                'reportId' => $reportId,
+                'fightIds' => $fightIds,
+                'abilityId' => (float) $abilityId,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        // Compute uptime per player
+        $current = []; // playerId => apply_timestamp
+        $totals = []; // playerId => sum_uptime_ms
+        $uses = [];
+
+        foreach ($events as $e) {
+            $type = $e['type'] ?? '';
+            $tid = $e['targetID'] ?? null;
+            $ts = $e['timestamp'] ?? 0;
+            if (!$tid || !isset($playerMap[$tid])) continue;
+
+            if ($type === 'applybuff') {
+                $current[$tid] = $ts;
+                $uses[$tid] = ($uses[$tid] ?? 0) + 1;
+            } elseif ($type === 'removebuff' && isset($current[$tid])) {
+                $totals[$tid] = ($totals[$tid] ?? 0) + ($ts - $current[$tid]);
+                unset($current[$tid]);
+            } elseif ($type === 'refreshbuff') {
+                // refresh extends — keep current apply timestamp
+            }
+        }
+
+        $result = [];
+        foreach ($totals as $tid => $totalMs) {
+            $name = $playerMap[$tid];
+            $result[$name] = [
+                'uptime_pct'      => round($totalMs / $totalDurationMs * 100, 1),
+                'uses'            => $uses[$tid] ?? 0,
+                'total_uptime_ms' => $totalMs,
+            ];
+        }
+        uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
+        return $result;
+    }
+
+    /**
+     * Per-encounter aggregated stats — casts/buffs/dispels/interrupts/debuffs/consumables
+     * scoped to a specific boss's fight IDs. Used to populate encounters[].player_stats.
+     *
+     * @return array{casts_summary: array, consumables_used: array, buff_uptime: array, debuff_uptime: array, dispels: array, interrupts: array}
+     */
+    public function getPerEncounterStats(string $reportId, array $fightIds, array $rosterNames = [], int $totalDurationMs = 0): array
+    {
+        $query = WclQueryBuilder::buildPerEncounterStatsQuery();
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId' => $reportId,
+                'fightIds' => $fightIds,
+            ]);
+        } catch (\Exception $e) {
+            return [
+                'casts_summary' => [],
+                'consumables_used' => [],
+                'buff_uptime' => [],
+                'debuff_uptime' => [],
+                'dispels' => [],
+                'interrupts' => [],
+            ];
+        }
+
+        $report = $data['reportData']['report'] ?? [];
+
+        // Casts + consumables (re-uses existing parser)
+        $castEntries = $report['casts']['data']['entries'] ?? [];
+        $castsAndConsumables = WclReportParserHelper::parseCastsAndConsumables($castEntries, $rosterNames);
+
+        // Buff uptime — top 100 most-frequent buffs in this fight
+        $buffsTotalTime = $report['buffs']['data']['totalTime'] ?? $totalDurationMs;
+        $buffUptime = WclReportParserHelper::parseBuffUptime(
+            $report['buffs']['data'] ?? [],
+            $buffsTotalTime ?: 1
+        );
+        $buffUptime = array_slice($buffUptime, 0, 100, true);
+
+        // Debuffs (top 30)
+        $debuffUptime = WclReportParserHelper::parseDebuffUptime(
+            $report['debuffs']['data'] ?? [],
+            $buffsTotalTime ?: 1,
+            $rosterNames
+        );
+        $debuffUptime = array_slice($debuffUptime, 0, 30, true);
+
+        // Dispels
+        $dispelEntries = $report['dispels']['data']['entries'][0]['entries'] ?? [];
+        $dispels = WclReportParserHelper::parseDispels($dispelEntries, $rosterNames);
+
+        // Interrupts
+        $interruptEntries = $report['interrupts']['data']['entries'][0]['entries'] ?? [];
+        $interrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
+
+        return [
+            'casts_summary'    => $castsAndConsumables['casts'],
+            'consumables_used' => $castsAndConsumables['consumables'],
+            'buff_uptime'      => $buffUptime,
+            'debuff_uptime'    => $debuffUptime,
+            'dispels'          => $dispels,
+            'interrupts'       => $interrupts,
+        ];
     }
 
     /**

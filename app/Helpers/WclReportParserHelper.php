@@ -175,14 +175,17 @@ class WclReportParserHelper
 
             $isConsumable = self::isConsumableAbility($abilityName, $abilityData['abilityIcon'] ?? '');
 
-            // WCL viewBy: Ability returns player data in subentries (complete) or sources (top 5 only)
-            $actors       = $abilityData['subentries'] ?? $abilityData['entries'] ?? $abilityData['details'] ?? $abilityData['sources'] ?? [];
-            $useActorName = isset($abilityData['subentries']);
+            // Walk WCL nested subentries to find actual player actors (actorName / actorType).
+            // Multi-school spells (Frostbolt etc.) wrap actors inside a second-level subentries[].
+            $actors = self::flattenCastActors($abilityData);
 
             foreach ($actors as $actor) {
-                $playerName = $useActorName ? ($actor['actorName'] ?? $actor['name'] ?? 'Unknown') : ($actor['name'] ?? 'Unknown');
+                $playerName = $actor['actorName'] ?? null;
+                $actorType  = $actor['actorType'] ?? null;
                 $totalCasts = $actor['total'] ?? 0;
 
+                if (!$playerName || !$actorType) continue;
+                if (in_array($actorType, ['NPC', 'Pet', 'Boss', 'Unknown'], true)) continue;
                 if (!empty($rosterNames) && !in_array($playerName, $rosterNames)) continue;
 
                 if ($isConsumable) {
@@ -199,6 +202,25 @@ class WclReportParserHelper
             'casts'       => $castsSummary,
             'consumables' => $cleanConsumables,
         ];
+    }
+
+    /**
+     * Recursively walk WCL ability entry's `subentries` to collect leaf actor records
+     * (those with `actorName` + `actorType` fields).
+     */
+    private static function flattenCastActors(array $node): array
+    {
+        if (isset($node['actorName']) && isset($node['actorType'])) {
+            return [$node];
+        }
+        $children = $node['subentries'] ?? [];
+        if (empty($children)) return [];
+        $out = [];
+        foreach ($children as $c) {
+            if (!is_array($c)) continue;
+            $out = array_merge($out, self::flattenCastActors($c));
+        }
+        return $out;
     }
 
     /**

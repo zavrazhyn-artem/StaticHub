@@ -65,8 +65,13 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             );
             $preprocessedJson = json_encode($preprocessed, JSON_UNESCAPED_UNICODE);
 
-            // Stage 3: Pro report generation (with cache)
-            $aiResult = $geminiService->generateReportFromPreprocessed($preprocessedJson);
+            // Player details + raid-wide consumables stay raid-wide (don't change per encounter)
+            $supplementary = json_encode([
+                'player_details' => $logData['player_details'] ?? [],
+            ], JSON_UNESCAPED_UNICODE);
+
+            // Stage 3: Pro report generation (with cache; per-encounter stats are inside preprocessed.encounters[])
+            $aiResult = $geminiService->generateReportFromPreprocessed($preprocessedJson, $supplementary);
 
             $aiJsonResponse = $aiResult['response'];
             $reportModel = $aiResult['model'];

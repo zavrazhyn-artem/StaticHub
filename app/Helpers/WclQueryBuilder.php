@@ -143,6 +143,27 @@ GQL;
     }
 
     /**
+     * Per-encounter player stats — casts/buffs/dispels/interrupts/consumables/debuffs
+     * scoped to a specific set of fight IDs (one boss).
+     */
+    public static function buildPerEncounterStatsQuery(): string
+    {
+        return <<<'GQL'
+        query ($reportId: String!, $fightIds: [Int]!) {
+          reportData {
+            report(code: $reportId) {
+              casts:    table(dataType: Casts, fightIDs: $fightIds, killType: Encounters, viewBy: Ability)
+              buffs:    table(dataType: Buffs, fightIDs: $fightIds, killType: Encounters)
+              dispels:  table(dataType: Dispels, fightIDs: $fightIds, killType: Encounters)
+              interrupts: table(dataType: Interrupts, fightIDs: $fightIds, killType: Encounters)
+              debuffs:  table(dataType: Debuffs, fightIDs: $fightIds, killType: Encounters)
+            }
+          }
+        }
+GQL;
+    }
+
+    /**
      * Per-boss damage_done by target — for proper per-boss add identification.
      */
     public static function buildBossAddsQuery(): string

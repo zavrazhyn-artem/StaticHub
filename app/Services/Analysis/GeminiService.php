@@ -261,13 +261,19 @@ class GeminiService
      * @param string $preprocessedJson  Output of TacticalDataAnalyzer::analyze()
      * @return array{response: string, model: string, cache_id: string|null, cache_expires_at: string|null}
      */
-    public function generateReportFromPreprocessed(string $preprocessedJson): array
+    public function generateReportFromPreprocessed(string $preprocessedJson, ?string $supplementaryJson = null): array
     {
         // Cache the preprocessed data so the chat (and any retries) can reuse without re-uploading
         $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
-            . "produced by a deterministic PHP analyzer. Use this data to answer questions and generate "
-            . "reports as instructed in each request.\n\n"
+            . "produced by a deterministic PHP analyzer plus raw supplementary log data for chat queries. "
+            . "Use the PRE-ANALYZED section for failures/performance summaries; use the RAW SUPPLEMENTARY "
+            . "section for per-player details (cast counts, buff uptimes, dispel counts, gear, "
+            . "consumables, etc.) when the user asks specific stats questions.\n\n"
             . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
+
+        if ($supplementaryJson) {
+            $cacheContent .= "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryJson;
+        }
 
         $cache = $this->createCachedContext($cacheContent, $this->proModel, 10800);
         $cacheId = $cache['cache_id'] ?? null;

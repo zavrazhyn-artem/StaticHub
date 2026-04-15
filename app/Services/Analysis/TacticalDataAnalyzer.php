@@ -52,9 +52,32 @@ class TacticalDataAnalyzer
             $encounters[] = $this->analyzeEncounter($bossName, $difficulty, $logData, $playerNames, $rosterNames, $reportId);
         }
 
+        // Per-player consumable audit (who used flask/food/augment rune)
+        if ($reportId && !empty($players)) {
+            $allRaidFightIds = [];
+            foreach ($logData['phase_summary'] ?? [] as $bossTries) {
+                foreach ($bossTries as $t) {
+                    if (isset($t['fight_id'])) $allRaidFightIds[] = $t['fight_id'];
+                }
+            }
+            try {
+                $logData['per_player_consumable_audit'] = $this->wclService->getPerPlayerConsumableAudit(
+                    $reportId,
+                    $allRaidFightIds,
+                    $players,
+                    $logData['consumable_buffs'] ?? []
+                );
+            } catch (\Exception $e) {
+                // non-fatal
+            }
+        }
+
         $raidSummary = $this->buildRaidSummary($logData, $difficulty, $encounters);
         $perPlayerData = $this->buildPerPlayerData($logData, $encounters, $players);
         $consumableAudit = $this->buildConsumableAudit($logData, count($playerNames));
+        if (isset($logData['per_player_consumable_audit'])) {
+            $consumableAudit['per_player'] = $logData['per_player_consumable_audit'];
+        }
 
         return [
             'raid_summary'     => $raidSummary,
@@ -109,6 +132,21 @@ class TacticalDataAnalyzer
             $bossAdds = $this->wclService->getBossAdds($reportId, $bossFightIds, $rosterNames);
         }
 
+        // Per-encounter stats (casts/buffs/dispels/interrupts/debuffs scoped to this boss only)
+        $perEncounterStats = [];
+        if ($reportId && !empty($bossFightIds)) {
+            $bossDurationMs = 0;
+            foreach ($tries as $t) {
+                $bossDurationMs += ($t['duration_s'] ?? 0) * 1000;
+            }
+            $perEncounterStats = $this->wclService->getPerEncounterStats(
+                $reportId,
+                $bossFightIds,
+                $rosterNames,
+                $bossDurationMs
+            );
+        }
+
         $kills = count(array_filter($tries, fn($t) => ($t['outcome'] ?? '') === 'kill'));
         $wipes = count($tries) - $kills;
         $bestWipe = null;
@@ -125,6 +163,12 @@ class TacticalDataAnalyzer
         $orbStaggering = $this->filterOrbStaggering($logData['orb_staggering'] ?? [], $bossFightIdsLookup);
         $shieldedCasts = $this->filterShieldedCasts($logData['shielded_casts'] ?? [], $bossFightIdsLookup);
         $debuffStacks = $this->filterDebuffStacks($logData['debuff_stacks'] ?? [], $bossFightIdsLookup);
+
+        // Build interrupters map BEFORE mechanic_failures so shield_interrupt case can use it.
+        $this->interruptsByAbility = [];
+        foreach ($logData['interrupts'] ?? [] as $intr) {
+            $this->interruptsByAbility[$intr['enemy_ability'] ?? ''] = $intr['interrupted_by'] ?? [];
+        }
 
         $mechanicFailures = $this->detectMechanicFailures(
             $tactics,
@@ -147,12 +191,6 @@ class TacticalDataAnalyzer
             $shieldedCasts,
             $playerNames
         );
-
-        // Build map ability => interrupters for shield_interrupt mechanic to reference.
-        $this->interruptsByAbility = [];
-        foreach ($logData['interrupts'] ?? [] as $intr) {
-            $this->interruptsByAbility[$intr['enemy_ability'] ?? ''] = $intr['interrupted_by'] ?? [];
-        }
 
         $addPerformance = $this->buildAddPerformance(
             $tactics,
@@ -185,6 +223,8 @@ class TacticalDataAnalyzer
             'healing_analysis'  => $healingAnalysis,
             'top_performers'    => $topPerformers,
             'worst_performers'  => $worstPerformers,
+            // Per-encounter raw stats (scoped to this boss's fights — replaces global supplementary)
+            'player_stats'      => $perEncounterStats,
         ];
     }
 
@@ -485,10 +525,17 @@ class TacticalDataAnalyzer
                         $entry['notes'][] = "Clone shielded during {$sc['casts_on_shielded']}/{$sc['casts_total']} casts — identify unshielded target first.";
                     }
                 }
-                // Augment with interrupt contribution (which players were active interrupters of the protected ability).
+                // List active interrupters of the protected ability (these players had the chance to waste interrupts on shield).
                 if ($protects && !empty($this->interruptsByAbility[$protects] ?? [])) {
-                    foreach ($this->interruptsByAbility[$protects] as $player => $count) {
+                    $interrupters = $this->interruptsByAbility[$protects];
+                    arsort($interrupters);
+                    $list = [];
+                    foreach ($interrupters as $player => $count) {
                         $entry['players'][$player] = ($entry['players'][$player] ?? 0) + 1;
+                        $list[] = "{$player}({$count})";
+                    }
+                    if (!empty($list)) {
+                        $entry['notes'][] = "Active {$protects} interrupters who may have wasted attempts on shield: " . implode(', ', $list);
                     }
                 }
                 break;
@@ -925,9 +972,32 @@ class TacticalDataAnalyzer
                     'is_top_victim' => array_key_first($dt['biggest_victims']) === $name,
                 ];
             }
-            // Sort by damage desc, cap
-            usort($avoidable, fn($a, $b) => $b['total'] <=> $a['total']);
-            $avoidable = array_slice($avoidable, 0, 10);
+            // Also pull from encounters[].mechanic_failures — these include targeted_damage with
+            // precise per-ability hits (where Zavrikk may not be in major_damage_taken top-5).
+            foreach ($encounters as $enc) {
+                foreach ($enc['mechanic_failures'] ?? [] as $mf) {
+                    foreach ($mf['players'] ?? [] as $p) {
+                        if (($p['name'] ?? '') !== $name) continue;
+                        $existsAlready = false;
+                        foreach ($avoidable as $av) {
+                            if (stripos($av['ability'] ?? '', $mf['mechanic_name']) !== false) {
+                                $existsAlready = true;
+                                break;
+                            }
+                        }
+                        if (!$existsAlready) {
+                            $avoidable[] = [
+                                'ability' => $mf['mechanic_name'],
+                                'boss'    => $enc['boss'],
+                                'failures' => $p['failures'] ?? 1,
+                                'evidence' => $mf['evidence'] ?? [],
+                            ];
+                        }
+                    }
+                }
+            }
+            usort($avoidable, fn($a, $b) => ($b['total'] ?? 0) <=> ($a['total'] ?? 0));
+            $avoidable = array_slice($avoidable, 0, 15);
 
             // Interrupt contribution
             $interruptContrib = [];
@@ -947,11 +1017,13 @@ class TacticalDataAnalyzer
                 if (count($buffNotes) >= 5) break;
             }
 
-            $perPlayer[$name] = [
+            $entry = [
                 'role' => $details['role'] ?? null,
                 'class' => $details['class'] ?? null,
                 'spec' => $details['spec'] ?? null,
                 'ilvl' => $details['avg_ilvl'] ?? null,
+                'trinkets' => $details['trinkets'] ?? [],
+                'stats' => $details['stats'] ?? [],
                 'parse_pct' => $perf['parse_pct'] ?? null,
                 'parse_today_pct' => $perf['parse_today_pct'] ?? null,
                 'dps' => $perf['dps'] ?? null,
@@ -970,6 +1042,21 @@ class TacticalDataAnalyzer
                 'resource_waste_pct' => $resourceWaste[$name]['waste_pct'] ?? null,
                 'buff_uptime_snippet' => $buffNotes,
             ];
+
+            // Only include players who had actual activity in this report (took damage,
+            // dealt damage, died, or have player_details). Skip empty placeholder entries.
+            $hasActivity = !empty($details)
+                || $entry['total_deaths'] > 0
+                || $entry['boss_damage']
+                || $entry['add_damage']
+                || $entry['hps']
+                || $entry['dps']
+                || !empty($entry['avoidable_damage_taken'])
+                || !empty($entry['interrupt_contribution']);
+
+            if ($hasActivity) {
+                $perPlayer[$name] = $entry;
+            }
         }
 
         return $perPlayer;
@@ -980,6 +1067,7 @@ class TacticalDataAnalyzer
     private function buildConsumableAudit(array $logData, int $raidSize): array
     {
         $buffs = $logData['consumable_buffs'] ?? [];
+        $perPlayer = $logData['per_player_consumable_audit'] ?? null;
 
         $flasks = [];
         $foods = [];
@@ -1070,13 +1158,27 @@ class TacticalDataAnalyzer
         foreach ($tries as $t) {
             $phase = $t['last_phase'] ?? 'Unknown';
             if (!isset($progression[$phase])) {
-                $progression[$phase] = ['phase' => $phase, 'wipes_here' => 0, 'best_attempt_pct' => 100];
+                $progression[$phase] = [
+                    'phase' => $phase,
+                    'wipes_here' => 0,
+                    'best_attempt_pct' => 100,
+                    'best_attempt_fight_id' => null,
+                    'best_attempt_try_index' => null,
+                ];
             }
             if (($t['outcome'] ?? '') === 'wipe') {
                 $progression[$phase]['wipes_here']++;
                 $bossPct = $t['boss_pct'] ?? 100;
                 if ($bossPct < $progression[$phase]['best_attempt_pct']) {
                     $progression[$phase]['best_attempt_pct'] = $bossPct;
+                    $progression[$phase]['best_attempt_fight_id'] = $t['fight_id'] ?? null;
+                    // Find the try index (1-based) by matching fight_id position in the tries list
+                    foreach ($tries as $idx => $try) {
+                        if (($try['fight_id'] ?? null) === ($t['fight_id'] ?? null)) {
+                            $progression[$phase]['best_attempt_try_index'] = $idx + 1;
+                            break;
+                        }
+                    }
                 }
             }
         }
