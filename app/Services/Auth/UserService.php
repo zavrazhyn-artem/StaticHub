@@ -74,6 +74,16 @@ class UserService
     }
 
     /**
+     * Update the user's privacy preferences.
+     */
+    public function updatePrivacyPreferences(User $user, array $data): void
+    {
+        $user->update([
+            'hide_battletag' => (bool) ($data['hide_battletag'] ?? false),
+        ]);
+    }
+
+    /**
      * Update the user's locale preference.
      */
     public function updateLocale(User $user, string $locale): void

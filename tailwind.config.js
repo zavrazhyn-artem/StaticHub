@@ -81,10 +81,10 @@ export default {
                 "success-neon": "#39FF14"
             },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
                 "headline": ["Space Grotesk"],
-                "body": ["Manrope"],
-                "label": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"],
                 "slogan": ["Orbitron", "sans-serif"]
             },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},

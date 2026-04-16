@@ -43,7 +43,7 @@ class StaticRosterMemberResource extends JsonResource
 
         return [
             'id'             => $this->id,
-            'name'           => $this->name,
+            'name'           => $this->getDisplayName($this->staticId),
             'access_role'    => $this->pivot->access_role  ?? 'member',
             'roster_status'  => $this->pivot->roster_status ?? 'bench',
             'main_character' => $mainCharacter ? $this->formatCharacter($mainCharacter) : null,

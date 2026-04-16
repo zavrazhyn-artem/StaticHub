@@ -1005,5 +1005,12 @@
     "landing.cta_final_title_2": "оптимізувати",
     "landing.cta_final_title_3": "свій рейд?",
     "landing.cta_final_desc": "Приєднуйтесь до статіків, які вже використовують BlastR для управління ростером, аналізу логів та планування тактик.",
-    "landing.footer": "BLASTR_SYSTEMS // PROTOCOL_V1"
+    "landing.footer": "BLASTR_SYSTEMS // PROTOCOL_V1",
+    "Privacy": "Приватність",
+    "Hide BattleTag": "Приховати BattleTag",
+    "Hide your BattleTag from other members.": "Приховати ваш BattleTag від інших учасників.",
+    "Privacy preferences updated.": "Налаштування приватності оновлено.",
+    "Failed to update privacy settings": "Не вдалося оновити налаштування приватності",
+    "Enabled": "Увімкнено",
+    "Disabled": "Вимкнено"
 }

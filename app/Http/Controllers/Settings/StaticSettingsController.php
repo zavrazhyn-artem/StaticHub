@@ -42,6 +42,10 @@ class StaticSettingsController extends Controller
                 'isOwner' => $s->owner_id === $user->id,
             ])->values(),
             'transferData' => $payload['transferData'],
+            'privacy'     => [
+                'hideBattletag' => (bool) $user->hide_battletag,
+                'updateUrl'     => route('profile.privacy.update'),
+            ],
         ]);
     }
 

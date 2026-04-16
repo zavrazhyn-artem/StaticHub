@@ -4,6 +4,7 @@
         :discord='@json($discord)'
         :statics='@json($statics)'
         :transfer-data='@json($transferData)'
+        :privacy='@json($privacy)'
         discord-link-url="{{ route('profile.discord.link') }}"
         discord-unlink-url="{{ route('profile.discord.unlink') }}"
         leave-static-url="{{ route('profile.static.leave') }}"

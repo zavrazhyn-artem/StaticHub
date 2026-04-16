@@ -18,8 +18,25 @@ const CLASS_BG_COLORS = {
     'Evoker': 'bg-[#33937F]',
 };
 
+const CLASS_HEX_COLORS = {
+    'Warrior': '#C69B6D',
+    'Paladin': '#F48CBA',
+    'Hunter': '#ABD473',
+    'Rogue': '#FFF468',
+    'Priest': '#FFFFFF',
+    'Death Knight': '#C41F3B',
+    'Shaman': '#0070DD',
+    'Mage': '#3FC7EB',
+    'Warlock': '#8788EE',
+    'Monk': '#00FF98',
+    'Druid': '#FF7C0A',
+    'Demon Hunter': '#A330C9',
+    'Evoker': '#33937F',
+};
+
 export function useWowClasses() {
     const getClassColor = (playableClass) => CLASS_BG_COLORS[playableClass] || 'bg-white/20';
+    const getClassTextColor = (playableClass) => CLASS_HEX_COLORS[playableClass] || '#ffffff';
 
     const getSpecName = (character) => {
         // Prefer the raid/roster-specific spec (set by backend from RSVP or main spec in static).
@@ -35,5 +52,5 @@ export function useWowClasses() {
         return displaySpec || character.playable_class;
     };
 
-    return { getClassColor, getSpecName };
+    return { getClassColor, getClassTextColor, getSpecName };
 }

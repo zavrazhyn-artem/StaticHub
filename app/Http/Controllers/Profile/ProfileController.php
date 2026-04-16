@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Profile;
 use App\Http\Controllers\Controller;
 
 use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\ProfilePrivacyRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\Auth\UserService;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,16 @@ class ProfileController extends Controller
         $this->userService->executeUpdateProfile($request->user(), $request->validated());
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the user's privacy preferences.
+     */
+    public function updatePrivacy(ProfilePrivacyRequest $request): RedirectResponse
+    {
+        $this->userService->updatePrivacyPreferences($request->user(), $request->validated());
+
+        return Redirect::route('profile.edit')->with('status', 'privacy-updated');
     }
 
     /**

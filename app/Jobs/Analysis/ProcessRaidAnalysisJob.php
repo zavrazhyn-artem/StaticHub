@@ -45,6 +45,16 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
     ): void {
         if (!$this->report->wcl_report_id) return;
 
+        // Guard against duplicate runs — if the report already has AI analysis + valid cache,
+        // treat subsequent dispatches as no-ops instead of re-running the full pipeline.
+        $this->report->refresh();
+        if ($this->report->ai_analysis && $this->report->isCacheActive()) {
+            Log::info("ProcessRaidAnalysisJob skipped — report already processed", [
+                'report_id' => $this->report->id,
+            ]);
+            return;
+        }
+
         try {
             $static = $this->report->staticGroup;
             $static->load('characters.user', 'members');

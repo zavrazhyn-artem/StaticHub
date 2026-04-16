@@ -9,6 +9,52 @@
                 </div>
             @endif
 
+            @if(session('status') === 'privacy-updated')
+                <div class="p-4 bg-success-neon/10 border border-success-neon/30 rounded-xl flex items-center gap-3">
+                    <span class="material-symbols-outlined text-success-neon">check_circle</span>
+                    <p class="text-xs font-bold text-success-neon uppercase tracking-widest">{{ __('Privacy preferences updated.') }}</p>
+                </div>
+            @endif
+
+            <!-- Privacy Section -->
+            <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
+                <div class="max-w-xl">
+                    <header class="mb-6">
+                        <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
+                            {{ __('Privacy') }}
+                        </h2>
+                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                            {{ __('Control how your identity is shown to other members.') }}
+                        </p>
+                    </header>
+
+                    <form method="POST" action="{{ route('profile.privacy.update') }}">
+                        @csrf
+                        @method('patch')
+
+                        <label class="flex items-start justify-between gap-4 p-4 bg-surface-container-lowest border border-white/5 rounded-lg cursor-pointer hover:bg-surface-container-low transition-all">
+                            <div class="flex-1">
+                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">
+                                    {{ __('Hide BattleTag') }}
+                                </div>
+                                <div class="text-[11px] text-gray-500 font-medium mt-1 leading-relaxed">
+                                    {{ __('When enabled, other members will see your main character name instead of your BattleTag.') }}
+                                </div>
+                            </div>
+                            <input type="hidden" name="hide_battletag" value="0">
+                            <input
+                                type="checkbox"
+                                name="hide_battletag"
+                                value="1"
+                                onchange="this.form.submit()"
+                                @checked(old('hide_battletag', $user->hide_battletag))
+                                class="mt-1 w-5 h-5 rounded border-white/20 bg-surface-container-lowest text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                            />
+                        </label>
+                    </form>
+                </div>
+            </div>
+
             <!-- Integrations Section -->
             <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
                 <div class="max-w-xl">

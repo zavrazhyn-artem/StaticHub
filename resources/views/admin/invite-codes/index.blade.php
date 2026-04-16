@@ -67,7 +67,7 @@
                         </td>
                         <td>
                             @if($code->usedBy)
-                                {{ $code->usedBy->battletag ?? $code->usedBy->name }}
+                                {{ $code->usedBy->getDisplayName() }}
                             @else
                                 <span style="color: #555;">-</span>
                             @endif

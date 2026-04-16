@@ -87,10 +87,13 @@
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Tax Tracking') }}</h3>
                 </div>
                 <div class="p-4 space-y-2 overflow-y-auto custom-scrollbar max-h-[468px]">
-                    <div v-for="status in weeklyStatus" :key="status.name" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
+                    <div v-for="status in weeklyStatus" :key="status.user_id" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full" :class="status.is_paid ? 'bg-success-neon shadow-[0_0_8px_rgba(0,255,153,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(255,68,68,0.5)]'"></div>
-                            <span class="text-sm font-medium text-white">{{ status.name }}</span>
+                            <span class="text-sm font-medium"
+                                  :style="{ color: getClassTextColor(status.playable_class) }">
+                                {{ status.display_name }}
+                            </span>
                         </div>
                         <div class="text-right">
                             <span class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-error'">
@@ -128,7 +131,10 @@
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold text-white">{{ tx.user.name }}</span>
+                                <span class="text-xs font-bold"
+                                      :style="{ color: getClassTextColor(tx.playable_class) }">
+                                    {{ tx.display_name }}
+                                </span>
                             </td>
                             <td class="px-4 py-4 text-right">
                   <span class="text-sm font-black font-headline tracking-tight" :class="tx.type === 'deposit' ? 'text-[#FFD700]' : 'text-error'">
@@ -206,10 +212,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useWowClasses } from '@/composables/useWowClasses';
 import GlassModal from '@/Components/UI/GlassModal.vue';
 import TransactionCommentModal from './TransactionCommentModal.vue';
 import TransactionFormModal from './TransactionFormModal.vue';
 const { __ } = useTranslation();
+const { getClassTextColor } = useWowClasses();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -299,7 +307,7 @@ const openEditModal = (tx) => {
     editingTransaction.value = {
         id: tx.id,
         description: tx.description || '',
-        member: tx.user.name,
+        member: tx.display_name,
         date: formatDate(tx.created_at),
         amount: formatGold(tx.amount),
         type: tx.type

@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 
-#[Fillable(['name', 'email', 'locale', 'password', 'battlenet_id', 'battletag', 'avatar', 'discord_id', 'discord_username'])]
+#[Fillable(['name', 'email', 'locale', 'password', 'battlenet_id', 'battletag', 'hide_battletag', 'avatar', 'discord_id', 'discord_username'])]
 #[Hidden(['password', 'remember_token'])]
 /**
  * @property int $id
@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string|null $password
  * @property string|null $battlenet_id
  * @property string|null $battletag
+ * @property bool $hide_battletag
  * @property string|null $avatar
  * @property string|null $discord_id
  * @property string|null $discord_username
@@ -138,6 +139,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'hide_battletag' => 'boolean',
         ];
     }
     public function transactions(): HasMany
@@ -175,6 +177,32 @@ class User extends Authenticatable
                 $query->where('character_static.role', 'main');
             })
             ->first() ?? $this->characters()->first();
+    }
+
+    /**
+     * Public-facing display name.
+     * When the user opted to hide their BattleTag, return their main character name
+     * (per-static when provided, otherwise any main they have). Falls back to battletag/name.
+     */
+    public function getDisplayName(?int $staticId = null): string
+    {
+        if ($this->hide_battletag) {
+            $main = $this->getMainCharacterForStatic($staticId);
+            if ($main && $main->name) {
+                return $main->name;
+            }
+        }
+
+        return $this->battletag ?? $this->name;
+    }
+
+    /**
+     * Playable class of the user's main character (per-static when provided).
+     * Used to colour display names in UI.
+     */
+    public function getDisplayClass(?int $staticId = null): ?string
+    {
+        return $this->getMainCharacterForStatic($staticId)?->playable_class;
     }
 
     /**

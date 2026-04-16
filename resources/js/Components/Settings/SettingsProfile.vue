@@ -12,6 +12,7 @@ const props = defineProps({
     discord:        { type: Object,  required: true },
     statics:        { type: Array,   default: () => [] },
     transferData:   { type: Array,   default: () => [] },
+    privacy:        { type: Object,  required: true },
     discordLinkUrl:   { type: String, required: true },
     discordUnlinkUrl: { type: String, required: true },
     leaveStaticUrl:   { type: String, required: true },
@@ -58,6 +59,32 @@ const leaveStatic = async () => {
     } catch (e) {
         showToast(e.message || __('Failed to leave static group'), true);
         leaveLoading.value = false;
+    }
+};
+
+// Privacy — hide battletag
+const hideBattletag = ref(!!props.privacy.hideBattletag);
+const privacySaving = ref(false);
+
+const togglePrivacy = async () => {
+    privacySaving.value = true;
+    const next = !hideBattletag.value;
+    try {
+        const form = new FormData();
+        form.append('_method', 'PATCH');
+        form.append('hide_battletag', next ? '1' : '0');
+        const res = await fetch(props.privacy.updateUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: form,
+        });
+        if (!res.ok) throw new Error();
+        hideBattletag.value = next;
+        showToast(__('Privacy preferences updated.'));
+    } catch {
+        showToast(__('Failed to update privacy settings'), true);
+    } finally {
+        privacySaving.value = false;
     }
 };
 
@@ -110,6 +137,47 @@ const unlinkDiscord = async () => {
         </div>
 
         <div class="space-y-4">
+            <!-- Privacy -->
+            <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-slate-400 text-xl">shield_person</span>
+                    <h2 class="font-headline text-sm font-bold text-white uppercase tracking-[0.2em]">{{ __('Privacy') }}</h2>
+                </div>
+
+                <label :class="[
+                    'flex items-center justify-between p-4 bg-surface-container-highest border border-white/5 rounded-lg transition-colors group',
+                    privacySaving ? 'opacity-60 pointer-events-none' : 'cursor-pointer hover:bg-white/5'
+                ]">
+                    <div class="flex items-center gap-4">
+                        <div :class="[
+                            'w-10 h-10 flex items-center justify-center rounded-lg transition-all',
+                            hideBattletag
+                                ? 'bg-slate-400/10 text-slate-400 group-hover:bg-slate-400/20'
+                                : 'bg-black/40 text-on-surface-variant group-hover:text-slate-400'
+                        ]">
+                            <span class="material-symbols-outlined text-xl">
+                                {{ hideBattletag ? 'visibility_off' : 'visibility' }}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">
+                                {{ __('Hide BattleTag') }}
+                            </div>
+                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
+                                {{ hideBattletag ? __('Enabled') : __('Disabled') }}
+                            </div>
+                        </div>
+                    </div>
+                    <input
+                        type="checkbox"
+                        :checked="hideBattletag"
+                        :disabled="privacySaving"
+                        @change="togglePrivacy"
+                        class="w-5 h-5 rounded border-white/10 bg-black/40 text-slate-400 focus:ring-slate-400 focus:ring-offset-0 focus:ring-offset-transparent transition-all cursor-pointer"
+                    />
+                </label>
+            </div>
+
             <!-- Integrations -->
             <div :class="[
                 'bg-surface-container-low rounded-xl p-8 shadow-2xl backdrop-blur-sm',

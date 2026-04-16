@@ -132,7 +132,7 @@ const emit = defineEmits([
                                 </span>
                             </button>
                         </div>
-                        <div v-if="!isAlt" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight">
+                        <div v-if="!isAlt && member.name !== char?.name" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight">
                             {{ member.name }}
                         </div>
                     </div>

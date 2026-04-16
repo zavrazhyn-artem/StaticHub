@@ -45,7 +45,10 @@
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold text-white">{{ tx.user.name }}</span>
+                                <span class="text-xs font-bold"
+                                      :style="{ color: getClassTextColor(tx.playable_class) }">
+                                    {{ tx.display_name }}
+                                </span>
                             </td>
                             <td class="px-4 py-4">
                                 <span
@@ -93,10 +96,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useWowClasses } from '@/composables/useWowClasses';
 import SelectUserWithMain from '@/Components/UI/SelectUserWithMain.vue';
 import TransactionCommentModal from './TransactionCommentModal.vue';
 
 const { __ } = useTranslation();
+const { getClassTextColor } = useWowClasses();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -136,7 +141,7 @@ const openEditModal = (tx) => {
     editingTransaction.value = {
         id: tx.id,
         description: tx.description || '',
-        member: tx.user.name,
+        member: tx.display_name,
         date: formatDate(tx.created_at),
         amount: formatGold(tx.amount),
         type: tx.type,

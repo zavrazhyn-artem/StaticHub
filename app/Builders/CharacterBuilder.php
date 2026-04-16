@@ -4,6 +4,7 @@ namespace App\Builders;
 
 use App\Models\Character;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class CharacterBuilder extends Builder
 {
@@ -136,5 +137,23 @@ class CharacterBuilder extends Builder
     public function findById(int $id): ?Character
     {
         return $this->find($id);
+    }
+
+    /**
+     * Return each given user's main character in the static, keyed by user_id.
+     */
+    public function mainsForUsersInStatic(array $userIds, int $staticId): Collection
+    {
+        if (empty($userIds)) {
+            return collect();
+        }
+
+        return $this->whereIn('characters.user_id', $userIds)
+            ->join('character_static', 'characters.id', '=', 'character_static.character_id')
+            ->where('character_static.static_id', $staticId)
+            ->where('character_static.role', 'main')
+            ->select('characters.*')
+            ->get()
+            ->keyBy('user_id');
     }
 }

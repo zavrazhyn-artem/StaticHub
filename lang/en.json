@@ -995,5 +995,12 @@
     "landing.cta_final_title_2": "optimize",
     "landing.cta_final_title_3": "your raid?",
     "landing.cta_final_desc": "Join the statics already using BlastR to manage their roster, analyze logs, and plan tactics.",
-    "landing.footer": "BLASTR_SYSTEMS // PROTOCOL_V1"
+    "landing.footer": "BLASTR_SYSTEMS // PROTOCOL_V1",
+    "Privacy": "Privacy",
+    "Hide BattleTag": "Hide BattleTag",
+    "Hide your BattleTag from other members.": "Hide your BattleTag from other members.",
+    "Privacy preferences updated.": "Privacy preferences updated.",
+    "Failed to update privacy settings": "Failed to update privacy settings",
+    "Enabled": "Enabled",
+    "Disabled": "Disabled"
 }

@@ -33,7 +33,7 @@
                             :key="'paid-' + i"
                             class="h-1.5 rounded-full"
                             :class="status.is_paid ? 'bg-success-neon shadow-[0_0_5px_rgba(0,255,153,0.3)]' : 'bg-white/10'"
-                            :title="status.name + ': ' + (status.is_paid ? __('Paid') : __('Pending'))"
+                            :title="status.display_name + ': ' + (status.is_paid ? __('Paid') : __('Pending'))"
                         ></div>
                         <div
                             v-for="i in emptySlots"
