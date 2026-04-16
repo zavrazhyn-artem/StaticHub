@@ -76,14 +76,14 @@ const warnings = computed(() => {
         <div
             v-for="(warn, i) in warnings"
             :key="i"
-            class="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold border"
+            class="flex items-center gap-1 px-2 py-1 rounded-lg text-4xs font-bold border"
             :class="{
                 'bg-red-500/10 border-red-500/20 text-red-400': warn.type === 'error',
                 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400': warn.type === 'warning',
                 'bg-blue-500/10 border-blue-500/20 text-blue-400': warn.type === 'info',
             }"
         >
-            <span class="material-symbols-outlined text-[12px]">{{ warn.icon }}</span>
+            <span class="material-symbols-outlined text-xs">{{ warn.icon }}</span>
             <span>{{ warn.text }}</span>
         </div>
     </div>

@@ -3,14 +3,14 @@
         <div class="mb-8">
             <button
                 @click="$emit('back')"
-                class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-headline text-[10px] font-bold uppercase tracking-[0.15em] mb-6"
+                class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-3xs font-bold uppercase tracking-[0.15em] mb-6"
             >
                 <span class="material-symbols-outlined text-sm">arrow_back</span>
                 {{ __('Back') }}
             </button>
 
             <div class="text-center">
-                <span class="text-primary font-headline text-[10px] font-bold uppercase tracking-[0.3em] mb-2 block">
+                <span class="text-primary text-3xs font-bold uppercase tracking-[0.3em] mb-2 block">
                     {{ __('— Step 2') }}
                 </span>
                 <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
@@ -26,7 +26,7 @@
             <div class="bg-surface-container-high p-8 rounded-xl border border-white/5">
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-2">
+                        <label class="block text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-2">
                             {{ __('Team Name') }}
                         </label>
                         <input
@@ -39,7 +39,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mb-2">
+                        <label class="block text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-2">
                             {{ __('Region') }}
                         </label>
                         <SearchableSelect

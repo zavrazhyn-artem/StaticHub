@@ -973,11 +973,11 @@ defineExpose({ svgRef });
             <!-- Map variants -->
             <template v-if="maps.length > 1">
                 <button v-for="(m, i) in maps" :key="i" @click="selectedMapIndex = i"
-                    class="px-2 py-0.5 rounded text-[8px] font-bold transition-all"
+                    class="px-2 py-0.5 rounded text-5xs font-bold transition-all"
                     :class="selectedMapIndex === i ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant/40 hover:text-white'">{{ m.label }}</button>
                 <div class="w-px h-4 bg-white/10 mx-0.5"></div>
             </template>
-            <span class="text-[9px] font-bold text-on-surface-variant/50 px-1 min-w-[36px] text-center">{{ zoomLevel }}%</span>
+            <span class="text-4xs font-bold text-on-surface-variant/50 px-1 min-w-[36px] text-center">{{ zoomLevel }}%</span>
             <button @click="resetView" class="w-6 h-6 rounded flex items-center justify-center text-on-surface-variant/50 hover:text-white hover:bg-white/10 transition-all" :title="__('Reset zoom')">
                 <span class="material-symbols-outlined text-sm">fit_screen</span>
             </button>
@@ -1217,16 +1217,16 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-blue-400 hover:bg-blue-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">link</span>
-                    <span class="text-[10px] font-bold">{{ __('Group Selected') }}</span>
+                    <span class="text-3xs font-bold">{{ __('Group Selected') }}</span>
                 </div>
-                <span class="text-[8px] text-on-surface-variant/40 font-mono">Ctrl+G</span>
+                <span class="text-5xs text-on-surface-variant/40 font-mono">Ctrl+G</span>
             </button>
             <!-- Ungroup -->
             <button v-if="ctxSelectedHasLinkGroup" @click="ungroupFromCtx"
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-orange-400 hover:bg-orange-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">link_off</span>
-                    <span class="text-[10px] font-bold">{{ __('Ungroup') }}</span>
+                    <span class="text-3xs font-bold">{{ __('Ungroup') }}</span>
                 </div>
             </button>
             <!-- Lock/Unlock -->
@@ -1234,7 +1234,7 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-on-surface-variant hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">{{ ctxElementLocked ? 'lock_open' : 'lock' }}</span>
-                    <span class="text-[10px] font-bold">{{ ctxElementLocked ? __('Unlock') : __('Lock') }}</span>
+                    <span class="text-3xs font-bold">{{ ctxElementLocked ? __('Unlock') : __('Lock') }}</span>
                 </div>
             </button>
             <!-- Delete -->
@@ -1242,9 +1242,9 @@ defineExpose({ svgRef });
                 class="w-full flex items-center justify-between px-3 py-1.5 text-left text-red-400 hover:bg-red-500/10 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span>
-                    <span class="text-[10px] font-bold">{{ multiSel.length > 1 ? __('Delete') + ` ${multiSel.length} ` + __('items') : __('Delete') }}</span>
+                    <span class="text-3xs font-bold">{{ multiSel.length > 1 ? __('Delete') + ` ${multiSel.length} ` + __('items') : __('Delete') }}</span>
                 </div>
-                <span class="text-[8px] text-on-surface-variant/40 font-mono">Del</span>
+                <span class="text-5xs text-on-surface-variant/40 font-mono">Del</span>
             </button>
         </div>
     </Teleport>

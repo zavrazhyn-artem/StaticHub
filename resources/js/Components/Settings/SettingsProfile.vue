@@ -160,10 +160,10 @@ const unlinkDiscord = async () => {
                             </span>
                         </div>
                         <div>
-                            <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">
+                            <div class="text-3xs font-bold text-white uppercase tracking-widest">
                                 {{ __('Hide BattleTag') }}
                             </div>
-                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
+                            <div class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
                                 {{ hideBattletag ? __('Enabled') : __('Disabled') }}
                             </div>
                         </div>
@@ -198,7 +198,7 @@ const unlinkDiscord = async () => {
                                 </svg>
                             </div>
                             <div>
-                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">Discord</div>
+                                <div class="text-3xs font-bold text-white uppercase tracking-widest">Discord</div>
                                 <template v-if="discord.connected">
                                     <div class="flex items-center gap-2 mt-0.5">
                                         <span class="text-xs font-bold text-success-neon">{{ discord.username }}</span>
@@ -206,7 +206,7 @@ const unlinkDiscord = async () => {
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
+                                    <div class="text-3xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
                                 </template>
                             </div>
                         </div>
@@ -214,12 +214,12 @@ const unlinkDiscord = async () => {
                         <button v-if="discord.connected"
                                 @click="unlinkDiscord"
                                 :disabled="unlinkLoading"
-                                class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 disabled:opacity-50">
+                                class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 disabled:opacity-50">
                             {{ unlinkLoading ? __('Unlinking...') : __('Unlink') }}
                         </button>
                         <a v-else
                            :href="discordLinkUrl"
-                           class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
+                           class="bg-[#5865F2] hover:bg-[#4752C4] text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
                             {{ __('Link Account') }}
                         </a>
                     </div>
@@ -233,13 +233,13 @@ const unlinkDiscord = async () => {
                     <h2 class="font-headline text-sm font-bold text-white uppercase tracking-[0.2em]">{{ __('Static Group') }}</h2>
                 </div>
 
-                <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider mb-4">{{ __('Manage your static group membership.') }}</p>
+                <p class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider mb-4">{{ __('Manage your static group membership.') }}</p>
 
                 <div v-for="s in statics" :key="s.id" class="space-y-4 mb-4">
                     <div class="flex items-center justify-between p-4 bg-surface-container-highest border border-white/5 rounded-lg">
                         <div>
-                            <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">{{ s.name }}</div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                            <div class="text-3xs font-bold text-white uppercase tracking-widest">{{ s.name }}</div>
+                            <div class="text-3xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">
                                 {{ s.isOwner ? __('Owner') : __('Member') }}
                             </div>
                         </div>
@@ -247,10 +247,10 @@ const unlinkDiscord = async () => {
                         <button v-if="!s.isOwner"
                                 @click="leaveStatic"
                                 :disabled="leaveLoading"
-                                class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 disabled:opacity-50">
+                                class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 disabled:opacity-50">
                             {{ leaveLoading ? __('Leaving...') : __('Leave') }}
                         </button>
-                        <span v-else class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
+                        <span v-else class="text-3xs text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
                     </div>
 
                     <!-- Transfer ownership -->

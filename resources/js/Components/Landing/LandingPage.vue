@@ -136,7 +136,7 @@ const features = computed(() => [
 
         <!-- Footer -->
         <footer class="py-8 text-center">
-            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ new Date().getFullYear() }} {{ __('landing.footer') }}</p>
+            <p class="text-4xs font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ new Date().getFullYear() }} {{ __('landing.footer') }}</p>
         </footer>
     </div>
 </template>

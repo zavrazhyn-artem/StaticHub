@@ -43,13 +43,13 @@ const difficulties = [
 
         <!-- ── Difficulty toggle (Raids tab only) ───────────────── -->
         <div v-if="activeTab === 'raids'" class="flex items-center gap-3">
-            <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">
+            <span class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest">
                 {{ __('Viewing:') }}
             </span>
             <div class="flex gap-1 bg-black/20 p-1 rounded-lg border border-white/5">
                 <button v-for="diff in difficulties" :key="diff.key"
                         @click="emit('update:selectedDifficulty', diff.key)"
-                        class="px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all"
+                        class="px-3 py-1 rounded text-3xs font-black uppercase tracking-wider transition-all"
                         :class="selectedDifficulty === diff.key
                             ? diff.activeClass
                             : 'text-on-surface-variant hover:text-white hover:bg-white/5'">

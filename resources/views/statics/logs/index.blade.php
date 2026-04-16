@@ -10,7 +10,7 @@
         :cooldown-state='@json($cooldownState)'
     ></logs-index>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+    <div class="max-w-9/10 mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {{ $logs->links() }}
     </div>
 </x-app-layout>

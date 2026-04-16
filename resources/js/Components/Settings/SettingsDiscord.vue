@@ -424,13 +424,13 @@ const noChannelsError = () =>
                     __('Choose the channel where service notifications should appear.'),
                     __('Click Copy Webhook URL and paste it into the field below.'),
                 ]" :key="i" class="flex items-start gap-4">
-                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center font-headline text-[10px] font-bold text-[#5865F2]">{{ i + 1 }}</span>
+                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center text-3xs font-bold text-[#5865F2]">{{ i + 1 }}</span>
                     <p class="text-sm text-on-surface-variant font-medium leading-relaxed pt-0.5">{{ step }}</p>
                 </li>
             </ol>
 
             <div class="pt-2 border-t border-white/5">
-                <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">
+                <p class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider">
                     {{ __('Service notifications include: AI raid analysis results, roster alerts, and similar automated messages.') }}
                 </p>
             </div>
@@ -442,7 +442,7 @@ const noChannelsError = () =>
         <div class="px-6 py-4 border-b border-white/5 bg-gradient-to-r from-surface-container-high to-surface-container flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-[#a78bfa]/20 flex items-center justify-center text-[#a78bfa]">
-                    <span class="material-symbols-outlined text-[18px]">groups</span>
+                    <span class="material-symbols-outlined text-lg">groups</span>
                 </div>
                 <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">{{ __('Mention Roles') }}</h3>
             </div>
@@ -462,7 +462,7 @@ const noChannelsError = () =>
                     @click="selectedRoleIds = selectedRoleIds.filter(id => id !== roleId)"
                     class="text-on-surface-variant hover:text-error transition-colors p-0.5 hover:bg-white/5 rounded"
                 >
-                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                    <span class="material-symbols-outlined text-base">delete</span>
                 </button>
             </div>
             <p v-if="!selectedRoleIds.length" class="text-center text-xs text-on-surface-variant/50 py-4 italic">{{ __('No roles selected.') }}</p>
@@ -492,7 +492,7 @@ const noChannelsError = () =>
                     <!-- Guild select -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Discord Server (Guild)') }}</label>
+                            <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Discord Server (Guild)') }}</label>
                             <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_guild_id').cls, fieldIcon('discord_guild_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_guild_id').icon }}</span>
                         </div>
                         <SearchableSelect
@@ -509,19 +509,19 @@ const noChannelsError = () =>
                         <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic min-h-[48px] flex items-center">
                             {{ __('Invite the bot to a server first') }}
                         </div>
-                        <p v-if="botGuilds.length" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
+                        <p v-if="botGuilds.length" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
                     </div>
 
                     <!-- Invite bot -->
                     <div class="space-y-2">
-                        <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest invisible select-none">{{ __('Bot') }}</label>
+                        <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest invisible select-none">{{ __('Bot') }}</label>
                         <button type="button"
                            @click="openInvitePopup"
-                           class="flex w-full justify-center items-center gap-2 py-3 bg-surface-container-highest border border-white/5 hover:border-[#5865F2]/50 hover:bg-[#5865F2]/10 text-on-surface-variant hover:text-[#5865F2] rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest transition-all">
+                           class="flex w-full justify-center items-center gap-2 py-3 bg-surface-container-highest border border-white/5 hover:border-[#5865F2]/50 hover:bg-[#5865F2]/10 text-on-surface-variant hover:text-[#5865F2] rounded-lg text-3xs font-bold uppercase tracking-widest transition-all">
                             <span class="material-symbols-outlined text-sm">smart_toy</span>
                             {{ __('Invite Bot to Server') }}
                         </button>
-                        <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('The bot must be in your server to manage channels and roles.') }}</p>
+                        <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('The bot must be in your server to manage channels and roles.') }}</p>
                     </div>
                 </div>
             </div>
@@ -539,7 +539,7 @@ const noChannelsError = () =>
                     <!-- Announcement Channel -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Announcement Channel') }}</label>
+                            <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Announcement Channel') }}</label>
                             <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_channel_id').cls, fieldIcon('discord_channel_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_channel_id').icon }}</span>
                         </div>
                         <div :class="['relative', selectedChannelId ? 'channel-test-group' : '']">
@@ -566,7 +566,7 @@ const noChannelsError = () =>
                                 type="button"
                                 :disabled="channelTestState === 'loading'"
                                 @click="testChannel"
-                                :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
+                                :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg text-3xs font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
                                          channelTestState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
                                          channelTestState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
                                                                            'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
@@ -576,17 +576,17 @@ const noChannelsError = () =>
                                 <span>{{ __('Test') }}</span>
                             </button>
                         </div>
-                        <p v-if="noChannelsError()" class="text-[9px] text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[11px]">error</span>
+                        <p v-if="noChannelsError()" class="text-4xs text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
+                            <span class="material-symbols-outlined text-2xs">error</span>
                             {{ __('Bot has no access or no text channels found in this server.') }}
                         </p>
-                        <p v-else class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Raid announcements and RSVP posts will appear here.') }}</p>
+                        <p v-else class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Raid announcements and RSVP posts will appear here.') }}</p>
                     </div>
 
                     <!-- Roles to Mention -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Roles to Mention') }}</label>
+                            <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Roles to Mention') }}</label>
                             <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('ping_role_ids').cls, fieldIcon('ping_role_ids').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('ping_role_ids').icon }}</span>
                         </div>
                         <template v-if="selectedGuildId">
@@ -609,7 +609,7 @@ const noChannelsError = () =>
                                 <span
                                     v-for="roleId in selectedRoleIds.slice(0, maxVisibleRoles)"
                                     :key="roleId"
-                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[9px] font-bold text-[#a78bfa] uppercase tracking-widest shrink-0"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-4xs font-bold text-[#a78bfa] uppercase tracking-widest shrink-0"
                                 >
                                     @ {{ roles.find(r => r.id === roleId)?.name || roleId }}
                                     <button
@@ -617,14 +617,14 @@ const noChannelsError = () =>
                                         @click="selectedRoleIds = selectedRoleIds.filter(id => id !== roleId)"
                                         class="ml-0.5 hover:text-white transition-colors"
                                     >
-                                        <span class="material-symbols-outlined text-[10px]">close</span>
+                                        <span class="material-symbols-outlined text-3xs">close</span>
                                     </button>
                                 </span>
                                 <button
                                     v-if="selectedRoleIds.length > maxVisibleRoles"
                                     type="button"
                                     @click="showRolesModal = true"
-                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-bold text-on-surface-variant uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors shrink-0"
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-4xs font-bold text-on-surface-variant uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors shrink-0"
                                 >
                                     +{{ selectedRoleIds.length - maxVisibleRoles }}
                                 </button>
@@ -633,7 +633,7 @@ const noChannelsError = () =>
                         <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
                             {{ __('Select Server first...') }}
                         </div>
-                        <p v-if="!selectedRoleIds.length" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('These roles will be pinged when a raid announcement is posted.') }}</p>
+                        <p v-if="!selectedRoleIds.length" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('These roles will be pinged when a raid announcement is posted.') }}</p>
                     </div>
                 </div>
 
@@ -641,14 +641,14 @@ const noChannelsError = () =>
                 <div v-if="channelTestMessageId"
                      class="flex items-center gap-3 p-4 mt-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
                     <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
-                    <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                    <p class="text-3xs text-on-surface-variant font-medium flex-1">
                         {{ __('Test message sent! Check your Discord channel.') }}
                     </p>
                     <button
                         type="button"
                         :disabled="deletingChannelMsg"
                         @click="deleteChannelTestMessage"
-                        class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
                         <span :class="['material-symbols-outlined text-sm', deletingChannelMsg ? 'animate-spin' : '']">
                             {{ deletingChannelMsg ? 'sync' : 'delete' }}
                         </span>
@@ -661,8 +661,8 @@ const noChannelsError = () =>
                      class="flex items-center gap-3 p-4 mt-4 rounded-lg bg-error-neon/5 border border-error-neon/20">
                     <span class="material-symbols-outlined text-error-neon text-lg flex-shrink-0">error</span>
                     <div class="flex-1">
-                        <p class="text-[10px] font-headline font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
-                        <p class="text-[10px] text-on-surface-variant font-medium mt-1">{{ channelTestError }}</p>
+                        <p class="text-3xs font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
+                        <p class="text-3xs text-on-surface-variant font-medium mt-1">{{ channelTestError }}</p>
                     </div>
                 </div>
             </div>
@@ -682,13 +682,13 @@ const noChannelsError = () =>
                         <!-- Help button -->
                         <button @click="showHelpModal = true" type="button"
                                 class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-on-surface-variant hover:text-white hover:border-white/40 transition-colors">
-                            <span class="material-symbols-outlined text-[12px]">question_mark</span>
+                            <span class="material-symbols-outlined text-xs">question_mark</span>
                         </button>
                     </div>
 
                     <!-- Active / Muted toggle -->
                     <label class="flex items-center gap-3 cursor-pointer">
-                        <span class="font-headline text-[10px] font-bold uppercase tracking-widest transition-colors"
+                        <span class="text-3xs font-bold uppercase tracking-widest transition-colors"
                               :class="notifMuted ? 'text-on-surface-variant' : 'text-[#5865F2]'">
                             {{ notifMuted ? __('Muted') : __('Active') }}
                         </span>
@@ -711,7 +711,7 @@ const noChannelsError = () =>
                     <div class="flex items-center gap-1 p-1 bg-surface-container-highest rounded-lg w-full md:w-[calc(50%-0.5rem)]">
                         <button type="button"
                                 @click="notifMethod = 'channel'"
-                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-headline text-[10px] font-bold uppercase tracking-widest transition-all',
+                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-3xs font-bold uppercase tracking-widest transition-all',
                                          notifMethod === 'channel'
                                            ? 'bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30 shadow-sm'
                                            : 'text-on-surface-variant hover:text-white border border-transparent']">
@@ -720,7 +720,7 @@ const noChannelsError = () =>
                         </button>
                         <button type="button"
                                 @click="notifMethod = 'webhook'"
-                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-headline text-[10px] font-bold uppercase tracking-widest transition-all',
+                                :class="['flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-3xs font-bold uppercase tracking-widest transition-all',
                                          notifMethod === 'webhook'
                                            ? 'bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30 shadow-sm'
                                            : 'text-on-surface-variant hover:text-white border border-transparent']">
@@ -735,7 +735,7 @@ const noChannelsError = () =>
                         <div>
                             <div class="flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notification Channel') }}</label>
+                                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notification Channel') }}</label>
                                     <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('notification_channel_id').cls, fieldIcon('notification_channel_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('notification_channel_id').icon }}</span>
                                 </div>
                                 <div :class="['relative', selectedNotifChannelId ? 'notif-channel-test-group' : '']">
@@ -762,7 +762,7 @@ const noChannelsError = () =>
                                         type="button"
                                         :disabled="notifChannelTestState === 'loading'"
                                         @click="testNotificationChannel"
-                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
+                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg text-3xs font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed z-10',
                                                  notifChannelTestState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
                                                  notifChannelTestState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
                                                                                        'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
@@ -772,14 +772,14 @@ const noChannelsError = () =>
                                         <span>{{ __('Test') }}</span>
                                     </button>
                                 </div>
-                                <p v-if="!selectedGuildId" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                <p v-if="!selectedGuildId" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">
                                     {{ __('Select a server above to see available channels.') }}
                                 </p>
-                                <p v-else-if="noChannelsError()" class="text-[9px] text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[11px]">error</span>
+                                <p v-else-if="noChannelsError()" class="text-4xs text-error-neon font-medium uppercase tracking-wider flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-2xs">error</span>
                                     {{ __('Bot has no access or no text channels found in this server.') }}
                                 </p>
-                                <p v-else class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                <p v-else class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">
                                     {{ __('Service notifications will be posted to this channel via bot.') }}
                                 </p>
                             </div>
@@ -789,14 +789,14 @@ const noChannelsError = () =>
                         <div v-if="notifChannelTestMessageId"
                              class="flex items-center gap-3 p-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
                             <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
-                            <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                            <p class="text-3xs text-on-surface-variant font-medium flex-1">
                                 {{ __('Test message sent! Check your Discord channel.') }}
                             </p>
                             <button
                                 type="button"
                                 :disabled="deletingNotifChannelMsg"
                                 @click="deleteNotifChannelTestMessage"
-                                class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
                                 <span :class="['material-symbols-outlined text-sm', deletingNotifChannelMsg ? 'animate-spin' : '']">
                                     {{ deletingNotifChannelMsg ? 'sync' : 'delete' }}
                                 </span>
@@ -809,8 +809,8 @@ const noChannelsError = () =>
                              class="flex items-center gap-3 p-4 rounded-lg bg-error-neon/5 border border-error-neon/20">
                             <span class="material-symbols-outlined text-error-neon text-lg flex-shrink-0">error</span>
                             <div class="flex-1">
-                                <p class="text-[10px] font-headline font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
-                                <p class="text-[10px] text-on-surface-variant font-medium mt-1">{{ notifChannelTestError }}</p>
+                                <p class="text-3xs font-bold text-error-neon uppercase tracking-widest">{{ __('Bot cannot post to this channel') }}</p>
+                                <p class="text-3xs text-on-surface-variant font-medium mt-1">{{ notifChannelTestError }}</p>
                             </div>
                         </div>
                     </template>
@@ -821,7 +821,7 @@ const noChannelsError = () =>
                             <!-- Left: webhook URL input with integrated test button -->
                             <div class="flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Webhook URL') }}</label>
+                                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Webhook URL') }}</label>
                                     <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_webhook_url').cls, fieldIcon('discord_webhook_url').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_webhook_url').icon }}</span>
                                 </div>
 
@@ -839,7 +839,7 @@ const noChannelsError = () =>
                                         type="button"
                                         :disabled="!webhookUrlInput || testState === 'loading'"
                                         @click="testWebhook"
-                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg font-headline text-[10px] font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                        :class="['absolute inset-y-0 right-0 px-4 flex items-center gap-1.5 rounded-r-lg text-3xs font-bold uppercase tracking-widest border-l transition-all disabled:opacity-40 disabled:cursor-not-allowed',
                                                  testState === 'success' ? 'text-success-neon border-success-neon/20 bg-success-neon/10' :
                                                  testState === 'error'   ? 'text-error-neon border-error-neon/20 bg-error-neon/10' :
                                                                            'text-[#5865F2] border-white/5 hover:bg-[#5865F2]/15']">
@@ -850,7 +850,7 @@ const noChannelsError = () =>
                                     </button>
                                 </div>
 
-                                <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">
                                     {{ __('Paste the webhook URL copied from Discord.') }}
                                 </p>
                             </div>
@@ -858,7 +858,7 @@ const noChannelsError = () =>
                             <!-- Right: resolved channel display -->
                             <div class="flex flex-col gap-2">
                                 <div>
-                                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Posts To') }}</label>
+                                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Posts To') }}</label>
                                 </div>
 
                                 <div class="flex-1">
@@ -876,7 +876,7 @@ const noChannelsError = () =>
                                     </div>
                                 </div>
 
-                                <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">
+                                <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">
                                     {{ __('Resolved from the webhook URL after saving.') }}
                                 </p>
                             </div>
@@ -886,14 +886,14 @@ const noChannelsError = () =>
                         <div v-if="testMessageId"
                              class="flex items-center gap-3 p-4 rounded-lg bg-success-neon/5 border border-success-neon/20">
                             <span class="material-symbols-outlined text-success-neon text-lg flex-shrink-0">check_circle</span>
-                            <p class="text-[10px] text-on-surface-variant font-medium flex-1">
+                            <p class="text-3xs text-on-surface-variant font-medium flex-1">
                                 {{ __('Test message sent! You can delete it from Discord now.') }}
                             </p>
                             <button
                                 type="button"
                                 :disabled="deletingMsg"
                                 @click="deleteTestMessage"
-                                class="flex items-center gap-2 px-4 py-2 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-widest border text-error-neon border-error-neon/30 bg-error-neon/5 hover:bg-error-neon/15 transition-all disabled:opacity-50 flex-shrink-0">
                                 <span :class="['material-symbols-outlined text-sm', deletingMsg ? 'animate-spin' : '']">
                                     {{ deletingMsg ? 'sync' : 'delete' }}
                                 </span>

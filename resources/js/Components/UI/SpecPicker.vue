@@ -80,7 +80,7 @@ function setMain(specId) {
                     :class="mainSpecId === spec.id ? 'text-yellow-400' : 'text-white/25 hover:text-yellow-300'"
                     :title="mainSpecId === spec.id ? __('Main spec') : __('Set as main')"
                 >
-                    <span class="material-symbols-outlined text-[13px]">star</span>
+                    <span class="material-symbols-outlined text-xs">star</span>
                 </button>
 
                 <!-- Spec icon -->
@@ -93,13 +93,13 @@ function setMain(specId) {
 
                 <!-- Spec name -->
                 <span
-                    class="text-[10px] font-bold leading-tight"
+                    class="text-3xs font-bold leading-tight"
                     :class="isSelected(spec.id) ? 'text-white' : 'text-on-surface-variant/60'"
                 >{{ spec.name }}</span>
 
                 <!-- Role badge -->
                 <span
-                    class="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
+                    class="text-5xs font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
                     :class="[
                         roleBadgeClass[spec.role] ?? 'bg-white/10 text-white/60 border-white/10',
                         !isSelected(spec.id) && 'opacity-40',

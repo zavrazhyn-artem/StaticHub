@@ -27,10 +27,10 @@ const emit = defineEmits(['confirm', 'close']);
                 </div>
             </div>
             <div class="flex justify-end gap-3">
-                <button @click="emit('close')" class="px-6 py-2.5 rounded-lg font-headline text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors">
+                <button @click="emit('close')" class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors">
                     {{ cancelLabel }}
                 </button>
-                <button @click="emit('confirm')" :disabled="loading" class="px-6 py-2.5 rounded-lg font-headline text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all text-white disabled:opacity-50" :class="variant === 'danger' ? 'bg-error-dim' : 'bg-amber-500'">
+                <button @click="emit('confirm')" :disabled="loading" class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-widest hover:brightness-110 transition-all text-white disabled:opacity-50" :class="variant === 'danger' ? 'bg-error-dim' : 'bg-amber-500'">
                     <span v-if="loading" class="material-symbols-outlined text-sm animate-spin mr-1">sync</span>
                     {{ confirmLabel }}
                 </button>

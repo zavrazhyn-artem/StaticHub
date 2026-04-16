@@ -79,7 +79,7 @@
                 </p>
 
                 <div class="mt-6">
-                    <label for="password" class="block font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1 sr-only">{{ __('Password') }}</label>
+                    <label for="password" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1 sr-only">{{ __('Password') }}</label>
                     <input id="password" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-3/4" name="password" type="password" placeholder="{{ __('Password') }}" />
                     @if ($errors->userDeletion->get('password'))
                         <ul class="text-sm text-red-600 space-y-1 mt-2">

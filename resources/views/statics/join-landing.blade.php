@@ -33,7 +33,7 @@
             {{-- Invite card --}}
             <div class="bg-surface-container-low border border-white/10 rounded-2xl p-8 backdrop-blur-md space-y-6">
                 <div class="space-y-2">
-                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-[0.2em]">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-3xs font-bold uppercase tracking-[0.2em]">
                         <span class="material-symbols-outlined text-sm">mail</span>
                         {{ __('Team Invitation') }}
                     </span>
@@ -49,7 +49,7 @@
                 <div class="grid grid-cols-2 gap-4 text-left">
                     {{-- Region --}}
                     <div class="bg-white/5 rounded-xl p-4 border border-white/5">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Region') }}</div>
+                        <div class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Region') }}</div>
                         <div class="text-white font-headline font-bold text-sm flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-base">public</span>
                             {{ $region }}
@@ -58,7 +58,7 @@
 
                     {{-- Members --}}
                     <div class="bg-white/5 rounded-xl p-4 border border-white/5">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Members') }}</div>
+                        <div class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Members') }}</div>
                         <div class="text-white font-headline font-bold text-sm flex items-center gap-2">
                             <span class="material-symbols-outlined text-cyan-400 text-base">groups</span>
                             {{ $memberCount }}
@@ -67,7 +67,7 @@
 
                     {{-- Owner --}}
                     <div class="bg-white/5 rounded-xl p-4 border border-white/5 col-span-2">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Invited by') }}</div>
+                        <div class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Invited by') }}</div>
                         <div class="text-white font-headline font-bold text-sm flex items-center gap-3">
                             @if($ownerAvatar)
                                 <img src="{{ $ownerAvatar }}" alt="" class="w-8 h-8 rounded-full border border-white/10">
@@ -87,7 +87,7 @@
                             ];
                         @endphp
                         <div class="bg-white/5 rounded-xl p-4 border border-white/5 col-span-2">
-                            <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ __('Raid Days') }}</div>
+                            <div class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ __('Raid Days') }}</div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($raidDays as $day)
                                     <span class="px-2 py-1 bg-primary/10 border border-primary/20 rounded text-primary text-xs font-bold uppercase">
@@ -106,7 +106,7 @@
                         <span class="material-symbols-outlined text-xl">login</span>
                         {{ __('Authorize Battle.net') }}
                     </a>
-                    <p class="text-[10px] text-on-surface-variant mt-3 uppercase tracking-wider">
+                    <p class="text-3xs text-on-surface-variant mt-3 uppercase tracking-wider">
                         {{ __('Sign in to select your character and join the team') }}
                     </p>
                 </div>
@@ -114,7 +114,7 @@
         </div>
 
         <footer class="fixed bottom-8 left-0 w-full text-center z-10">
-            <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ date('Y') }} BLASTR_SYSTEMS // PROTOCOL_V1</p>
+            <p class="text-4xs font-bold text-gray-600 uppercase tracking-[0.5em]">&copy; {{ date('Y') }} BLASTR_SYSTEMS // PROTOCOL_V1</p>
         </footer>
     </body>
 </html>

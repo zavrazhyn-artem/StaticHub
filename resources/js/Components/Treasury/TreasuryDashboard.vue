@@ -11,14 +11,14 @@
             <div v-if="canManageTreasury" class="flex items-center gap-2">
                 <button
                     @click="openTransactionModal('deposit')"
-                    class="bg-yellow-500 text-black hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                    class="bg-yellow-500 text-black hover:brightness-110 px-4 py-2 rounded-sm text-3xs font-bold uppercase tracking-widest transition-all flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">add_circle</span>
                     {{ __('Record Deposit') }}
                 </button>
                 <button
                     @click="openTransactionModal('withdrawal')"
-                    class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
+                    class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm text-3xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">remove_circle</span>
                     {{ __('Record Withdrawal') }}
@@ -31,7 +31,7 @@
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span class="material-symbols-outlined text-6xl text-yellow-500">savings</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Total Reserves') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-4">{{ __('Total Reserves') }}</h3>
                 <div class="flex items-baseline gap-2">
                     <span class="text-4xl font-black text-[#FFD700] tracking-tighter font-headline">{{ formatGold(reserves) }}</span>
                     <span class="text-xs font-bold text-[#FFD700]/60 uppercase tracking-widest">{{ __('Gold') }}</span>
@@ -43,7 +43,7 @@
                     <span class="material-symbols-outlined text-6xl text-yellow-500">payments</span>
                 </div>
 
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Required Weekly Tax') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-4">{{ __('Required Weekly Tax') }}</h3>
 
                 <div class="flex items-baseline gap-2">
                     <span class="text-4xl font-black text-white tracking-tighter font-headline">
@@ -52,7 +52,7 @@
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
                 </div>
 
-                <div class="mt-2 text-[10px] uppercase font-bold tracking-widest transition-colors" :class="taxClass">
+                <div class="mt-2 text-3xs uppercase font-bold tracking-widest transition-colors" :class="taxClass">
                     {{ taxDescription }}
                 </div>
                 <button v-if="canManageTreasury" @click="showTaxModal = true" class="absolute bottom-4 right-4 z-10 text-on-surface-variant hover:text-[#FFD700] transition-colors" :title="__('Edit Weekly Tax')">
@@ -64,14 +64,14 @@
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span class="material-symbols-outlined text-6xl text-yellow-500">analytics</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Financial Health') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-4">{{ __('Financial Health') }}</h3>
                 <div class="flex items-baseline gap-2">
           <span class="text-4xl font-black tracking-tighter font-headline" :class="autonomyClass">
             {{ autonomyValue }}
           </span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weeks of Autonomy') }}</span>
                 </div>
-                <div class="mt-2 text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">
+                <div class="mt-2 text-3xs text-on-surface-variant uppercase font-bold tracking-widest">
                     {{ __('Weekly Cost:') }} <span>{{ formatGold(dynamicWeeklyCost) }}</span> G
                 </div>
             </div>
@@ -99,7 +99,7 @@
                             <span class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-error'">
                                 {{ status.is_paid ? __('Covered') : __('Not Covered') }}
                             </span>
-                            <div class="text-[9px] text-on-surface-variant font-medium">
+                            <div class="text-4xs text-on-surface-variant font-medium">
                                 {{ __('Balance:') }} {{ formatGold(status.balance) }}g
                             </div>
                         </div>
@@ -110,7 +110,7 @@
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
-                    <a :href="`/statics/${staticId}/treasury/history`" class="text-[10px] font-bold text-yellow-500 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+                    <a :href="`/statics/${staticId}/treasury/history`" class="text-3xs font-bold text-yellow-500 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
                         {{ __('View All') }}
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
@@ -119,15 +119,15 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Date') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Member') }}</th>
-                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Amount') }}</th>
-                            <th class="px-4 py-3 text-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline w-10"></th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-right text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Amount') }}</th>
+                            <th class="px-4 py-3 text-center text-3xs font-bold text-on-surface-variant uppercase tracking-widest w-10"></th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                         <tr v-for="tx in recentTransactions" :key="tx.id" class="hover:bg-white/5 transition-colors group">
-                            <td class="px-4 py-4 text-[10px] text-on-surface-variant font-medium">
+                            <td class="px-4 py-4 text-3xs text-on-surface-variant font-medium">
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
@@ -168,7 +168,7 @@
             </div>
             <div class="p-6 space-y-4">
                 <div class="space-y-1">
-                    <label for="tax_amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weekly Tax Per Player (Gold)') }}</label>
+                    <label for="tax_amount" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weekly Tax Per Player (Gold)') }}</label>
                     <div class="relative group">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#FFD700] transition-colors text-lg">payments</span>
@@ -176,9 +176,9 @@
                         <input type="number" id="tax_amount" v-model.number="taxInputValue" min="0"
                                class="w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-sm font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-[#FFD700] focus:border-transparent transition-all outline-none">
                     </div>
-                    <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Amount of gold each raider is expected to contribute weekly.') }}</p>
+                    <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Amount of gold each raider is expected to contribute weekly.') }}</p>
                 </div>
-                <div v-if="taxSaveError" class="text-[10px] text-error font-bold uppercase tracking-wider">{{ taxSaveError }}</div>
+                <div v-if="taxSaveError" class="text-3xs text-error font-bold uppercase tracking-wider">{{ taxSaveError }}</div>
                 <div class="pt-2">
                     <button @click="saveTax" :disabled="taxSaving"
                             class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">

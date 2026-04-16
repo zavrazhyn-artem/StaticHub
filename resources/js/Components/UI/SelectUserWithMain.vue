@@ -80,22 +80,22 @@ defineExpose({ close });
                      class="w-6 h-6 rounded border border-white/10 shrink-0"
                      :alt="selectedMember.character.name">
                 <div v-else class="w-6 h-6 rounded bg-white/5 border border-white/10 shrink-0 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-gray-600 text-[10px]">person</span>
+                    <span class="material-symbols-outlined text-gray-600 text-3xs">person</span>
                 </div>
                 <div class="flex items-center gap-1.5 min-w-0">
                     <span class="font-headline text-xs font-bold truncate"
                           :style="{ color: getClassColor(selectedMember.character?.playable_class) }">
                         {{ selectedMember.character?.name || selectedMember.name }}
                     </span>
-                    <span v-if="selectedMember.character" class="text-[9px] text-gray-500 font-bold truncate">
+                    <span v-if="selectedMember.character" class="text-4xs text-gray-500 font-bold truncate">
                         ({{ selectedMember.name }})
                     </span>
                 </div>
             </template>
-            <span v-else class="text-[10px] text-on-surface-variant/50 italic font-bold tracking-widest">
+            <span v-else class="text-3xs text-on-surface-variant/50 italic font-bold tracking-widest">
                 {{ placeholder }}
             </span>
-            <span class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform ml-auto shrink-0"
+            <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform ml-auto shrink-0"
                   :class="open ? 'rotate-180' : ''">expand_more</span>
         </div>
 
@@ -113,7 +113,7 @@ defineExpose({ close });
                 <!-- Search -->
                 <div class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">search</span>
+                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant">search</span>
                         <input
                             ref="searchRef"
                             v-model="search"
@@ -154,12 +154,12 @@ defineExpose({ close });
                                  :style="{ color: getClassColor(member.character?.playable_class) }">
                                 {{ member.character?.name || member.name }}
                             </div>
-                            <div v-if="member.character" class="text-[9px] text-gray-500 font-bold uppercase tracking-widest truncate">
+                            <div v-if="member.character" class="text-4xs text-gray-500 font-bold uppercase tracking-widest truncate">
                                 {{ member.name }}
                             </div>
                         </div>
                         <span v-if="String(modelValue) === String(member.id)"
-                              class="material-symbols-outlined text-[16px] shrink-0"
+                              class="material-symbols-outlined text-base shrink-0"
                               :style="`color: ${accentColor}`">check</span>
                     </button>
                 </div>

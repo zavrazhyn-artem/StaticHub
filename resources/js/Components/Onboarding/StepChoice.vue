@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="text-center mb-10">
-            <span class="text-primary font-headline text-[10px] font-bold uppercase tracking-[0.3em] mb-2 block">
+            <span class="text-primary text-3xs font-bold uppercase tracking-[0.3em] mb-2 block">
                 {{ __('— Welcome to BlastR') }}
             </span>
             <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
@@ -33,7 +33,7 @@
                         {{ __('Start your own raid group. You\'ll be the team leader and can invite others.') }}
                     </p>
 
-                    <div class="mt-6 flex items-center gap-2 text-primary font-headline text-[10px] font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="mt-6 flex items-center gap-2 text-primary text-3xs font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
                         <span>{{ __('Get Started') }}</span>
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </div>
@@ -60,7 +60,7 @@
                         {{ __('Your Raid Leader sent you an invite link? Paste it here to join the team.') }}
                     </p>
 
-                    <div class="mt-6 flex items-center gap-2 text-cyan-400 font-headline text-[10px] font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="mt-6 flex items-center gap-2 text-cyan-400 text-3xs font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
                         <span>{{ __('Join Now') }}</span>
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </div>

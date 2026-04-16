@@ -71,7 +71,7 @@ const onToggleAll = (event) => {
             >
                 <span
                     v-if="allChecked"
-                    class="material-symbols-outlined text-[12px] font-bold"
+                    class="material-symbols-outlined text-xs font-bold"
                 >check</span>
             </div>
             <span class="material-symbols-outlined text-lg">groups</span>
@@ -90,7 +90,7 @@ const onToggleAll = (event) => {
                 v-if="index === 0 || encounter.instance !== encounters[index - 1]?.instance"
                 class="px-3 pt-3 pb-1"
             >
-                <span class="text-[8px] font-black uppercase tracking-[0.2em] text-on-surface-variant/60">
+                <span class="text-5xs font-black uppercase tracking-[0.2em] text-on-surface-variant/60">
                     {{ encounter.instance }}
                 </span>
             </div>
@@ -116,7 +116,7 @@ const onToggleAll = (event) => {
                 >
                     <span
                         v-if="isEncounterChecked(encounter.slug)"
-                        class="material-symbols-outlined text-[12px] font-bold"
+                        class="material-symbols-outlined text-xs font-bold"
                     >check</span>
                 </div>
 
@@ -134,21 +134,21 @@ const onToggleAll = (event) => {
                 </div>
 
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] font-bold leading-tight truncate flex items-center gap-1">
+                    <div class="text-2xs font-bold leading-tight truncate flex items-center gap-1">
                         {{ encounter.name }}
-                        <span v-if="assignedPlans[encounter.slug]" class="material-symbols-outlined text-[11px] text-orange-400" title="Plan assigned">map</span>
+                        <span v-if="assignedPlans[encounter.slug]" class="material-symbols-outlined text-2xs text-orange-400" title="Plan assigned">map</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span
                             v-if="!isEncounterChecked(encounter.slug)"
-                            class="text-[8px] font-black text-on-surface-variant/50"
+                            class="text-5xs font-black text-on-surface-variant/50"
                         >{{ __('Skipped') }}</span>
                         <span
                             v-else-if="getSelectedCount(encounter.slug) > 0"
-                            class="text-[8px] font-black"
+                            class="text-5xs font-black"
                             :class="hasSavedRoster(encounter.slug) ? 'text-fuchsia-400' : 'text-on-surface-variant/60'"
                         >{{ getSelectedCount(encounter.slug) }} {{ hasSavedRoster(encounter.slug) ? __('selected') : __('inherited') }}</span>
-                        <span v-else class="text-[8px] text-on-surface-variant/40">{{ __('No assignments') }}</span>
+                        <span v-else class="text-5xs text-on-surface-variant/40">{{ __('No assignments') }}</span>
                     </div>
                 </div>
 
@@ -162,7 +162,7 @@ const onToggleAll = (event) => {
                         : 'text-transparent group-hover:text-on-surface-variant/30 hover:!text-on-surface-variant/60'"
                     :title="lockedBosses.has(encounter.slug) ? __('Unlock roster') : __('Lock roster')"
                 >
-                    <span class="material-symbols-outlined text-[13px]">
+                    <span class="material-symbols-outlined text-xs">
                         {{ lockedBosses.has(encounter.slug) ? 'lock' : 'lock_open' }}
                     </span>
                 </div>

@@ -31,17 +31,17 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Date') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Member') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Type') }}</th>
-                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Amount') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Description') }}</th>
-                            <th v-if="canManageTreasury" class="px-4 py-3 text-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline w-10"></th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Type') }}</th>
+                            <th class="px-4 py-3 text-right text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Amount') }}</th>
+                            <th class="px-4 py-3 text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Description') }}</th>
+                            <th v-if="canManageTreasury" class="px-4 py-3 text-center text-3xs font-bold text-on-surface-variant uppercase tracking-widest w-10"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         <tr v-for="tx in transactions" :key="tx.id" class="hover:bg-white/5 transition-colors">
-                            <td class="px-4 py-4 text-[10px] text-on-surface-variant font-medium whitespace-nowrap">
+                            <td class="px-4 py-4 text-3xs text-on-surface-variant font-medium whitespace-nowrap">
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
@@ -52,7 +52,7 @@
                             </td>
                             <td class="px-4 py-4">
                                 <span
-                                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm"
+                                    class="inline-flex items-center gap-1 text-3xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm"
                                     :class="tx.type === 'deposit' ? 'bg-success-neon/10 text-success-neon' : 'bg-error/10 text-error'"
                                 >
                                     <span class="material-symbols-outlined text-xs">{{ tx.type === 'deposit' ? 'arrow_downward' : 'arrow_upward' }}</span>

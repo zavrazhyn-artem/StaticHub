@@ -136,7 +136,7 @@ async function disconnectGuild() {
                     </div>
                     <div>
                         <h3 class="text-white font-headline text-sm font-black uppercase tracking-widest">{{ __('Warcraft Logs Integration') }}</h3>
-                        <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Connect your guild to enable log fetching and AI analysis.') }}</p>
+                        <p class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Connect your guild to enable log fetching and AI analysis.') }}</p>
                     </div>
                 </div>
 
@@ -149,7 +149,7 @@ async function disconnectGuild() {
                                 <p class="text-sm text-white font-black uppercase tracking-tighter">
                                     {{ guild.name || 'Guild #' + guild.id }}
                                 </p>
-                                <p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
+                                <p class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
                                     {{ guild.server_name || guild.server_slug }}
                                     <span class="opacity-30 mx-1">•</span>
                                     {{ guild.region_name || guild.region_slug?.toUpperCase() }}
@@ -157,7 +157,7 @@ async function disconnectGuild() {
                             </div>
                         </div>
                         <button type="button" @click="showGuildModal = true"
-                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] text-on-surface-variant hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-black uppercase tracking-[0.15em] text-on-surface-variant hover:text-white hover:bg-white/5 transition-all border border-white/5">
                             <span class="material-symbols-outlined text-sm">swap_horiz</span>
                             {{ __('Change Guild') }}
                         </button>
@@ -169,7 +169,7 @@ async function disconnectGuild() {
                     <span class="material-symbols-outlined text-4xl text-white/10 mb-3">link_off</span>
                     <p class="text-sm text-on-surface-variant font-bold uppercase tracking-wider mb-4">{{ __('No guild connected') }}</p>
                     <button type="button" @click="showGuildModal = true"
-                            class="inline-flex items-center gap-2 bg-[#ff7d0a]/10 border border-[#ff7d0a]/30 hover:bg-[#ff7d0a] hover:text-black px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all text-[#ff7d0a]">
+                            class="inline-flex items-center gap-2 bg-[#ff7d0a]/10 border border-[#ff7d0a]/30 hover:bg-[#ff7d0a] hover:text-black px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-[0.2em] transition-all text-[#ff7d0a]">
                         <span class="material-symbols-outlined text-sm">link</span>
                         {{ __('Connect Guild') }}
                     </button>
@@ -184,12 +184,12 @@ async function disconnectGuild() {
                     </div>
                     <div class="flex-1">
                         <h3 class="text-white font-headline text-sm font-black uppercase tracking-widest">{{ __('Automatic Log Fetching') }}</h3>
-                        <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Automatically fetch and analyze logs from WCL after each raid ends.') }}</p>
+                        <p class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Automatically fetch and analyze logs from WCL after each raid ends.') }}</p>
                     </div>
                     <!-- Info button -->
                     <button @click="showInfoModal = true" type="button"
                             class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-on-surface-variant hover:text-white hover:border-white/40 transition-colors shrink-0">
-                        <span class="material-symbols-outlined text-[12px]">question_mark</span>
+                        <span class="material-symbols-outlined text-xs">question_mark</span>
                     </button>
                 </div>
 
@@ -211,7 +211,7 @@ async function disconnectGuild() {
                     </label>
 
                     <div v-if="autoFetch && guild" class="pl-9 space-y-2">
-                        <label for="auto_fetch_delay_minutes" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                        <label for="auto_fetch_delay_minutes" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">
                             {{ __('Fetch Delay (minutes)') }}
                         </label>
                         <div class="flex items-center gap-3">
@@ -219,9 +219,9 @@ async function disconnectGuild() {
                                    v-model.number="delayMinutes"
                                    min="5" max="120"
                                    class="w-24 bg-surface-container-highest border border-white/5 rounded-lg px-4 py-2.5 font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all outline-none">
-                            <span class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('minutes after raid ends') }}</span>
+                            <span class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('minutes after raid ends') }}</span>
                         </div>
-                        <p class="text-[9px] text-on-surface-variant/60 font-medium uppercase tracking-wider">{{ __('Allow enough time for the log uploader to finish uploading to WCL.') }}</p>
+                        <p class="text-4xs text-on-surface-variant/60 font-medium uppercase tracking-wider">{{ __('Allow enough time for the log uploader to finish uploading to WCL.') }}</p>
                     </div>
                 </div>
             </div>
@@ -234,7 +234,7 @@ async function disconnectGuild() {
                     </div>
                     <div>
                         <h3 class="text-white font-headline text-sm font-black uppercase tracking-widest">{{ __('AI Tactical Analyst') }}</h3>
-                        <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Automated performance reviews powered by Gemini Flash.') }}</p>
+                        <p class="text-3xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Automated performance reviews powered by Gemini Flash.') }}</p>
                     </div>
                 </div>
 
@@ -296,12 +296,12 @@ async function disconnectGuild() {
             </div>
 
             <div class="space-y-3">
-                <label for="guild_url" class="block text-[10px] font-black text-on-surface-variant uppercase tracking-widest">{{ __('WCL Guild URL') }}</label>
+                <label for="guild_url" class="block text-3xs font-black text-on-surface-variant uppercase tracking-widest">{{ __('WCL Guild URL') }}</label>
                 <input id="guild_url" type="text" v-model="guildUrl"
                        class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-[#ff7d0a]/50"
                        placeholder="https://www.warcraftlogs.com/guild/id/123456"
                        @keyup.enter="connectGuild">
-                <p class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
+                <p class="text-4xs text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
                     {{ __('Supports formats:') }} /guild/id/123456 {{ __('or') }} /guild/eu/server/name
                 </p>
             </div>
@@ -313,7 +313,7 @@ async function disconnectGuild() {
             <!-- Disconnect option -->
             <div v-if="guild" class="pt-2 border-t border-white/5">
                 <button type="button" @click="disconnectGuild(); showGuildModal = false"
-                        class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-error/60 hover:text-error transition-colors">
+                        class="flex items-center gap-2 text-3xs font-black uppercase tracking-widest text-error/60 hover:text-error transition-colors">
                     <span class="material-symbols-outlined text-sm">link_off</span>
                     {{ __('Disconnect Guild') }}
                 </button>
@@ -321,12 +321,12 @@ async function disconnectGuild() {
 
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" @click="showGuildModal = false"
-                        class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
+                        class="px-6 py-3 rounded-xl text-3xs font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
                     {{ __('Cancel') }}
                 </button>
                 <button type="button" @click="connectGuild"
                         :disabled="isConnecting || !guildUrl.trim()"
-                        class="bg-[#ff7d0a] hover:bg-[#ff7d0a]/80 text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+                        class="bg-[#ff7d0a] hover:bg-[#ff7d0a]/80 text-black px-8 py-3 rounded-xl text-3xs font-black uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
                     <span v-if="isConnecting" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                     <span v-else class="material-symbols-outlined text-sm">link</span>
                     {{ isConnecting ? __('Connecting...') : __('Connect') }}
@@ -352,31 +352,31 @@ async function disconnectGuild() {
             <div class="space-y-4">
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-[10px] font-black text-amber-500">1</span>
+                        <span class="text-3xs font-black text-amber-500">1</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('After your scheduled raid ends, the system waits the configured number of minutes for logs to be uploaded.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-[10px] font-black text-amber-500">2</span>
+                        <span class="text-3xs font-black text-amber-500">2</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('It then automatically searches your guild on Warcraft Logs for matching reports.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-[10px] font-black text-amber-500">3</span>
+                        <span class="text-3xs font-black text-amber-500">3</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('Found logs are linked to the raid event and sent for AI analysis.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-[10px] font-black text-amber-500">4</span>
+                        <span class="text-3xs font-black text-amber-500">4</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('Once analysis is complete, a notification is sent to your Discord notifications channel with a link to the report.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-[10px] font-black text-amber-500">5</span>
+                        <span class="text-3xs font-black text-amber-500">5</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('If no logs are found, a notification is sent with a link to upload logs manually.') }}</p>
                 </div>
@@ -384,7 +384,7 @@ async function disconnectGuild() {
 
             <div class="p-3 bg-white/5 border border-white/5 rounded-lg flex items-start gap-2.5">
                 <span class="material-symbols-outlined text-on-surface-variant text-base mt-0.5 shrink-0">info</span>
-                <p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
+                <p class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
                     {{ __('Make sure your Discord notifications webhook is configured in the Discord tab for notifications to work.') }}
                 </p>
             </div>

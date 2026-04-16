@@ -140,21 +140,21 @@ const wowheadData = computed(() => {
             </div>
 
             <!-- ilvl badge -->
-            <div class="absolute -top-1 -left-1 bg-black/80 px-0.5 text-[8px] font-bold leading-none rounded shadow-sm z-10"
+            <div class="absolute -top-1 -left-1 bg-black/80 px-0.5 text-5xs font-bold leading-none rounded shadow-sm z-10"
                  :class="qualityColor">
                 {{ item.ilvl }}
             </div>
 
             <!-- Upgrade track badge -->
             <div v-if="item.upgrade"
-                 class="absolute -bottom-1 -left-1 bg-black/90 px-0.5 text-[7px] font-bold tracking-tighter rounded shadow-sm z-10 text-green-400 border border-green-500/30">
+                 class="absolute -bottom-1 -left-1 bg-black/90 px-0.5 text-5xs font-bold tracking-tighter rounded shadow-sm z-10 text-green-400 border border-green-500/30">
                 {{ trackAbbreviations[item.upgrade.track] || item.upgrade.track }} {{ item.upgrade.level }}/{{ item.upgrade.max }}
             </div>
 
             <!-- Audit warning dot -->
             <div v-if="hasMissingOptimization"
                  class="absolute -top-1 -right-1 bg-red-600 rounded-full w-2.5 h-2.5 flex items-center justify-center border border-[#0e0e10] z-20 shadow-sm">
-                <span class="text-[7px] text-white font-black leading-none">!</span>
+                <span class="text-5xs text-white font-black leading-none">!</span>
             </div>
         </a>
 

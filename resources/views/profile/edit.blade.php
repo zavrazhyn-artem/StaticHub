@@ -34,10 +34,10 @@
 
                         <label class="flex items-start justify-between gap-4 p-4 bg-surface-container-lowest border border-white/5 rounded-lg cursor-pointer hover:bg-surface-container-low transition-all">
                             <div class="flex-1">
-                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">
+                                <div class="text-3xs font-bold text-white uppercase tracking-widest">
                                     {{ __('Hide BattleTag') }}
                                 </div>
-                                <div class="text-[11px] text-gray-500 font-medium mt-1 leading-relaxed">
+                                <div class="text-2xs text-gray-500 font-medium mt-1 leading-relaxed">
                                     {{ __('When enabled, other members will see your main character name instead of your BattleTag.') }}
                                 </div>
                             </div>
@@ -76,14 +76,14 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">Discord</div>
+                                    <div class="text-3xs font-bold text-white uppercase tracking-widest">Discord</div>
                                     @if(auth()->user()->discord_id)
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <span class="text-xs font-bold text-success-neon">{{ auth()->user()->discord_username }}</span>
                                             <span class="material-symbols-outlined text-success-neon text-sm">check_circle</span>
                                         </div>
                                     @else
-                                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
+                                        <div class="text-3xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -91,12 +91,12 @@
                             @if(auth()->user()->discord_id)
                                 <form method="POST" action="{{ route('profile.discord.unlink') }}">
                                     @csrf
-                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
+                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
                                         {{ __('Unlink') }}
                                     </button>
                                 </form>
                             @else
-                                <a href="{{ route('profile.discord.link') }}" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
+                                <a href="{{ route('profile.discord.link') }}" class="bg-[#5865F2] hover:bg-[#4752C4] text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
                                     {{ __('Link Account') }}
                                 </a>
                             @endif
@@ -122,8 +122,8 @@
                     <div class="space-y-4 mb-4">
                         <div class="flex items-center justify-between p-4 bg-surface-container-lowest border border-white/5 rounded-lg">
                             <div>
-                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">{{ $static->name }}</div>
-                                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                                <div class="text-3xs font-bold text-white uppercase tracking-widest">{{ $static->name }}</div>
+                                <div class="text-3xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">
                                     @if($static->owner_id === auth()->id())
                                         {{ __('Owner') }}
                                     @else
@@ -137,12 +137,12 @@
                                       onsubmit="return confirm('{{ __('Are you sure you want to leave this static group?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
+                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
                                         {{ __('Leave') }}
                                     </button>
                                 </form>
                             @else
-                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
+                                <span class="text-3xs text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
                             @endif
                         </div>
 

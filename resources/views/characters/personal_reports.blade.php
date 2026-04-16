@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-9/10 mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-white uppercase tracking-tighter font-headline leading-none mb-4">
                 {{ __('Personal Intelligence') }}
@@ -33,12 +33,12 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xl font-black text-white uppercase tracking-tight">{{ $report->character->name }}</h3>
-                                    <p class="text-[10px] font-black text-{{ $classColor }} uppercase tracking-[0.2em]">{{ $report->character->playable_class }}</p>
+                                    <p class="text-3xs font-black text-{{ $classColor }} uppercase tracking-[0.2em]">{{ $report->character->playable_class }}</p>
                                 </div>
                             </div>
                             <div class="flex flex-col md:items-end">
                                 <span class="text-xs font-black text-white uppercase tracking-widest">{{ $raidTitle }}</span>
-                                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{{ $date }}</span>
+                                <span class="text-3xs font-bold text-on-surface-variant uppercase tracking-wider">{{ $date }}</span>
                             </div>
                         </div>
                         <div class="p-8">
@@ -47,7 +47,7 @@
                             </div>
                         </div>
                         <div class="px-8 py-4 bg-black/20 border-t border-white/5 flex justify-end">
-                            <a href="{{ route('statics.logs.show', [$report->tacticalReport->static_id, $report->tacticalReport]) }}" class="text-[10px] font-black text-amber-500 uppercase tracking-widest hover:underline flex items-center gap-1">
+                            <a href="{{ route('statics.logs.show', [$report->tacticalReport->static_id, $report->tacticalReport]) }}" class="text-3xs font-black text-amber-500 uppercase tracking-widest hover:underline flex items-center gap-1">
                                 {{ __('View Full Tactical Report') }}
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </a>

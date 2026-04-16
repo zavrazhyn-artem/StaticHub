@@ -114,7 +114,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                 <!-- ── thead ───────────────────────────────────────────────── -->
                 <thead>
                     <!-- Group headers -->
-                    <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-widest font-bold border-b border-white/5">
                         <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[200px]">
                             {{ __('Character') }}
                         </th>
@@ -122,17 +122,17 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">{{ __('Equipment') }}</th>
                     </tr>
                     <!-- Column sub-headers -->
-                    <tr class="bg-black/40 text-emerald-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-widest font-bold border-b border-white/5">
                         <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                             <div class="flex justify-between items-center pr-2">
                                 <span>{{ __('Name') }}</span>
-                                <span class="text-gray-500 font-mono text-[9px]">{{ __('iLvL') }}</span>
+                                <span class="text-gray-500 font-mono text-4xs">{{ __('iLvL') }}</span>
                             </div>
                         </th>
-                        <th class="p-2 text-center text-[9px]">{{ __('Ench') }}</th>
-                        <th class="p-2 text-center text-[9px]">{{ __('Gems') }}</th>
+                        <th class="p-2 text-center text-4xs">{{ __('Ench') }}</th>
+                        <th class="p-2 text-center text-4xs">{{ __('Gems') }}</th>
                         <th v-for="slot in GEAR_SLOTS" :key="slot.key"
-                            class="p-1 min-w-[42px] text-center text-[9px]">
+                            class="p-1 min-w-[42px] text-center text-4xs">
                             {{ slot.label }}
                         </th>
                     </tr>
@@ -169,7 +169,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                  :alt="member.main_character.name ?? member.name"
                                                  class="w-full h-full object-cover" />
                                             <div v-else class="w-full h-full flex items-center justify-center">
-                                                <span class="text-[10px] text-white/20">?</span>
+                                                <span class="text-3xs text-white/20">?</span>
                                             </div>
                                         </div>
                                         <!-- Name / spec + switcher -->
@@ -179,7 +179,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                 {{ member.main_character.name ?? member.name }}
                                             </div>
                                             <div class="flex items-center gap-1.5">
-                                                <span class="text-[9px] text-gray-500 uppercase font-medium">
+                                                <span class="text-4xs text-gray-500 uppercase font-medium">
                                                     {{ getActiveSpec(member.main_character) ?? '—' }}
                                                 </span>
                                                 <GearSpecSwitcher
@@ -243,7 +243,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <template v-if="expandedRows.has(member.id)">
                             <tr v-for="(alt, index) in (member.alts || [])"
                                 :key="'alt-' + (alt?.id || index)"
-                                class="bg-black/40 hover:bg-white/[0.02] transition-colors text-[11px]">
+                                class="bg-black/40 hover:bg-white/[0.02] transition-colors text-2xs">
 
                                 <!-- Alt identity (sticky) -->
                                 <td class="p-2 sticky left-0 z-10 bg-[#0e0e10]/95 backdrop-blur-sm border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
@@ -257,7 +257,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                      :alt="alt.name"
                                                      class="w-full h-full object-cover" />
                                                 <div v-else class="w-full h-full flex items-center justify-center">
-                                                    <span class="text-[10px] text-white/20">?</span>
+                                                    <span class="text-3xs text-white/20">?</span>
                                                 </div>
                                             </div>
                                             <div class="min-w-0">
@@ -266,7 +266,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                     {{ alt?.name ?? 'Unknown' }}
                                                 </div>
                                                 <div class="flex items-center gap-1">
-                                                    <span class="text-[8px] text-gray-500 uppercase font-medium">
+                                                    <span class="text-5xs text-gray-500 uppercase font-medium">
                                                         {{ getActiveSpec(alt) ?? '—' }}
                                                     </span>
                                                     <GearSpecSwitcher
@@ -280,7 +280,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 pr-1">
-                                            <span class="text-[10px] font-mono font-bold text-emerald-400/70">
+                                            <span class="text-3xs font-mono font-bold text-emerald-400/70">
                                                 {{ getSpecData(alt)?.equipped_ilvl != null
                                                     ? Number(getSpecData(alt).equipped_ilvl).toFixed(1)
                                                     : 'N/A' }}
@@ -300,7 +300,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                           ].filter(Boolean).join(' | ')">
                                         {{ (getSpecData(alt)?.missing_enchants_slots?.length ?? 0) + (getSpecData(alt)?.low_quality_enchants_slots?.length ?? 0) }}
                                     </span>
-                                    <span v-else class="text-gray-700 text-[10px]">✓</span>
+                                    <span v-else class="text-gray-700 text-3xs">✓</span>
                                 </td>
 
                                 <!-- Alt audit: gems -->
@@ -309,7 +309,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                           class="text-red-500/70 font-bold">
                                         {{ getSpecData(alt).empty_sockets_count }}
                                     </span>
-                                    <span v-else class="text-gray-700 text-[10px]">✓</span>
+                                    <span v-else class="text-gray-700 text-3xs">✓</span>
                                 </td>
 
                                 <!-- Alt gear cells -->

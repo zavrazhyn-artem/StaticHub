@@ -71,11 +71,11 @@ defineExpose({ close });
         >
             <span>{{ modelValue }}</span>
             <span
-                class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform"
+                class="material-symbols-outlined text-base text-on-surface-variant transition-transform"
                 :class="{ 'rotate-180': showDropdown }"
             >expand_more</span>
         </div>
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none z-50">{{ icon }}</span>
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-on-surface-variant pointer-events-none z-50">{{ icon }}</span>
 
         <!-- Carousel dropdown -->
         <div

@@ -16,7 +16,7 @@ const emit = defineEmits(['close']);
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Comment from') }}</span>
+                    <span class="text-3xs font-black uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Comment from') }}</span>
                     <h2 class="text-lg font-black text-white uppercase tracking-tighter font-headline">{{ characterName }}</h2>
                 </div>
                 <button @click="emit('close')" class="text-on-surface-variant hover:text-white transition-colors">
@@ -31,7 +31,7 @@ const emit = defineEmits(['close']);
             <div class="mt-6 flex justify-end">
                 <button
                     @click="emit('close')"
-                    class="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-headline text-[10px] font-black uppercase tracking-widest transition-all"
+                    class="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-3xs font-black uppercase tracking-widest transition-all"
                 >
                     {{ __('Close') }}
                 </button>

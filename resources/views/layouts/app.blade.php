@@ -48,7 +48,7 @@
                 <span class="text-white">Blast</span><span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span
                         class="text-xs opacity-70 ml-0.5">r<span
-                            class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+                            class="text-3xs opacity-50 ml-0.5">r</span></span></span>
             </div>
         </div>
         @if($static && !$isOnboarding)
@@ -58,7 +58,7 @@
                         class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
                     <span class="material-symbols-outlined text-sm">person_add</span>
                     <span
-                        class="font-headline text-[10px] font-bold uppercase tracking-widest">{{ __("Invite to Group") }}</span>
+                        class="text-3xs font-bold uppercase tracking-widest">{{ __("Invite to Group") }}</span>
                 </button>
                 <div id="invite-toast"
                      class="hidden fixed bottom-6 right-6 bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce font-headline text-xs font-bold uppercase tracking-widest z-[100]">
@@ -103,9 +103,9 @@
             <div id="discord-link-banner"
                  class="hidden items-center gap-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm text-amber-400">
                 <span class="material-symbols-outlined text-base leading-none">link_off</span>
-                <span class="font-headline text-[10px] font-bold uppercase tracking-widest leading-none">{{ __('Link your Discord for bot commands, RSVP & notifications') }}</span>
+                <span class="text-3xs font-bold uppercase tracking-widest leading-none">{{ __('Link your Discord for bot commands, RSVP & notifications') }}</span>
                 <a href="{{ route('profile.discord.link') }}"
-                   class="ml-2 font-headline text-[10px] font-bold uppercase tracking-widest leading-none px-3 py-1.5 rounded-sm bg-amber-500 hover:bg-amber-400 text-black transition-all active:scale-95 flex items-center">
+                   class="ml-2 text-3xs font-bold uppercase tracking-widest leading-none px-3 py-1.5 rounded-sm bg-amber-500 hover:bg-amber-400 text-black transition-all active:scale-95 flex items-center">
                     {{ __('Link Discord') }}
                 </a>
                 <button onclick="dismissDiscordBanner()"
@@ -155,7 +155,7 @@
                     @foreach($availableLocales as $locale)
                         @php $info = $localeMap[$locale]; @endphp
                         <button name="locale" value="{{ $locale }}"
-                                class="flex items-center gap-3 w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
+                                class="flex items-center gap-3 w-full px-4 py-2 text-start text-3xs font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
                             <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}"
                                  class="w-5 h-auto rounded-sm">
                             {{ $info['label'] }}
@@ -193,14 +193,14 @@
                     <div class="px-4 py-2 border-b border-white/5">
                         <div
                             class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ Auth::user()->name }}</div>
-                        <div class="text-[10px] text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
+                        <div class="text-3xs text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
                     </div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <a href="{{ route('logout') }}"
                            onclick="event.preventDefault(); this.closest('form').submit();"
-                           class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors">
+                           class="block w-full px-4 py-2 text-start text-3xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors">
                             {{ __('Log Out') }}
                         </a>
                     </form>
@@ -298,7 +298,7 @@
             <div class="text-lg font-black uppercase tracking-tighter italic leading-none">
                 <span class="text-white">Blast</span><span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span
-                        class="text-[8px] opacity-70 ml-0.5">r<span class="text-[6px] opacity-50 ml-0.5">r</span></span></span>
+                        class="text-5xs opacity-70 ml-0.5">r<span class="text-5xs opacity-50 ml-0.5">r</span></span></span>
             </div>
         </div>
     @endif

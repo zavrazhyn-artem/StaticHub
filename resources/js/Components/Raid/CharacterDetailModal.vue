@@ -88,7 +88,7 @@ const countKills = (charId) => {
                         class="text-sm font-bold"
                         :class="'text-wow-' + (character.playable_class || '').toLowerCase().replace(/ /g, '-')"
                     >{{ character.name }}</div>
-                    <div class="text-[10px] text-on-surface-variant flex items-center gap-2">
+                    <div class="text-3xs text-on-surface-variant flex items-center gap-2">
                         <span v-if="character.main_spec?.name">{{ character.main_spec.name }}</span>
                         <span v-if="character.equipped_item_level || character.item_level" class="font-bold">
                             {{ character.equipped_item_level || character.item_level }} ilvl
@@ -106,17 +106,17 @@ const countKills = (charId) => {
             <div class="flex gap-3 mb-4">
                 <div v-if="charAttendance" class="bg-white/5 rounded-lg px-3 py-2 text-center">
                     <div class="text-xs font-black text-fuchsia-400">{{ charAttendance.percentage }}%</div>
-                    <div class="text-[8px] text-on-surface-variant uppercase tracking-wider">Attendance</div>
+                    <div class="text-5xs text-on-surface-variant uppercase tracking-wider">Attendance</div>
                 </div>
                 <div v-if="charBenchHistory" class="bg-orange-500/10 border border-orange-500/20 rounded-lg px-3 py-2 text-center">
                     <div class="text-xs font-black text-orange-400">{{ charBenchHistory.bench_count }}/{{ charBenchHistory.total_events }}</div>
-                    <div class="text-[8px] text-orange-400/70 uppercase tracking-wider">Benched recently</div>
+                    <div class="text-5xs text-orange-400/70 uppercase tracking-wider">Benched recently</div>
                 </div>
             </div>
 
             <!-- Spec selector (RL only, when character has multiple specs) -->
             <div v-if="canManage && currentCharSpecs.length > 1" class="mb-4">
-                <div class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
                     Specialization
                 </div>
                 <div class="flex flex-wrap gap-1.5">
@@ -135,8 +135,8 @@ const countKills = (charId) => {
                             class="w-5 h-5 rounded"
                         >
                         <div>
-                            <div class="text-[10px] font-bold text-white">{{ spec.name }}</div>
-                            <div class="text-[8px] text-on-surface-variant uppercase">{{ spec.role }}</div>
+                            <div class="text-3xs font-bold text-white">{{ spec.name }}</div>
+                            <div class="text-5xs text-on-surface-variant uppercase">{{ spec.role }}</div>
                         </div>
                         <span
                             v-if="spec.id === character.main_spec?.id"
@@ -148,19 +148,19 @@ const countKills = (charId) => {
 
             <!-- Lockout status -->
             <div v-if="currentCharLockouts.length" class="mb-4">
-                <div class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
                     Weekly Lockout ({{ diffLabel[difficulty] || difficulty }})
                 </div>
                 <div class="grid grid-cols-3 gap-1">
                     <div
                         v-for="boss in currentCharLockouts"
                         :key="boss.name"
-                        class="flex items-center gap-1 px-2 py-1 rounded text-[9px] border"
+                        class="flex items-center gap-1 px-2 py-1 rounded text-4xs border"
                         :class="boss.killed
                             ? 'bg-red-500/10 border-red-500/20 text-red-400'
                             : 'bg-green-500/10 border-green-500/20 text-green-400'"
                     >
-                        <span class="material-symbols-outlined text-[10px]">{{ boss.killed ? 'lock' : 'lock_open' }}</span>
+                        <span class="material-symbols-outlined text-3xs">{{ boss.killed ? 'lock' : 'lock_open' }}</span>
                         <span class="truncate font-bold">{{ boss.name }}</span>
                     </div>
                 </div>
@@ -168,7 +168,7 @@ const countKills = (charId) => {
 
             <!-- Alt swap (only for managers) -->
             <div v-if="canManage && userAlts.length > 1" class="border-t border-white/10 pt-4">
-                <div class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
                     Available Characters
                 </div>
                 <div class="space-y-1">
@@ -192,21 +192,21 @@ const countKills = (charId) => {
 
                         <div class="flex-1 min-w-0">
                             <div
-                                class="text-[11px] font-bold"
+                                class="text-2xs font-bold"
                                 :class="'text-wow-' + (alt.playable_class || '').toLowerCase().replace(/ /g, '-')"
                             >{{ alt.name }}</div>
-                            <div class="text-[9px] text-on-surface-variant flex items-center gap-1.5">
+                            <div class="text-4xs text-on-surface-variant flex items-center gap-1.5">
                                 <span v-if="alt.main_spec?.name">{{ alt.main_spec.name }}</span>
                                 <span class="font-bold">{{ alt.item_level }} ilvl</span>
                                 <span
                                     v-if="alt.role === 'main'"
-                                    class="text-[7px] font-black uppercase bg-fuchsia-400/20 text-fuchsia-400 px-1 rounded"
+                                    class="text-5xs font-black uppercase bg-fuchsia-400/20 text-fuchsia-400 px-1 rounded"
                                 >main</span>
                             </div>
                         </div>
 
                         <!-- Alt lockout summary -->
-                        <div v-if="weeklyRaidData[alt.id]" class="text-[9px] text-on-surface-variant/50 font-bold shrink-0">
+                        <div v-if="weeklyRaidData[alt.id]" class="text-4xs text-on-surface-variant/50 font-bold shrink-0">
                             {{ countKills(alt.id) }}/{{ currentCharLockouts.length }}
                         </div>
 

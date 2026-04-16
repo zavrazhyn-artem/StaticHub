@@ -20,7 +20,7 @@ const variantClasses = computed(() => {
 </script>
 
 <template>
-    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest" :class="variantClasses">
+    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-4xs font-bold uppercase tracking-widest" :class="variantClasses">
         <slot>{{ label }}</slot>
     </span>
 </template>

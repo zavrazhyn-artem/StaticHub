@@ -23,7 +23,7 @@
                         </div>
                         <!-- Label positioned absolutely so it doesn't affect flex layout -->
                         <span
-                            class="absolute top-full mt-2 font-headline text-[9px] font-bold uppercase tracking-[0.15em] transition-colors duration-300 whitespace-nowrap"
+                            class="absolute top-full mt-2 text-4xs font-bold uppercase tracking-[0.15em] transition-colors duration-300 whitespace-nowrap"
                             :class="index <= currentStep ? 'text-primary' : 'text-on-surface-variant/40'"
                         >
                             {{ __(step.label) }}

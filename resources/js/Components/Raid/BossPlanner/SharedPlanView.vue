@@ -54,13 +54,13 @@ const highlightedMarkerIds = computed(() => {
                 <img v-if="portrait" :src="portrait" class="w-10 h-10 rounded-lg border border-white/10 object-cover">
                 <div>
                     <h2 class="text-lg font-black text-white uppercase tracking-tight font-headline">{{ bossName }}</h2>
-                    <p class="text-[10px] text-on-surface-variant">{{ plan.title || plan.difficulty }}</p>
+                    <p class="text-3xs text-on-surface-variant">{{ plan.title || plan.difficulty }}</p>
                 </div>
             </div>
             <button
                 v-if="myCharacterIds.length"
                 @click="showingMe = !showingMe"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-widest border transition-all"
                 :class="showingMe
                     ? 'bg-cyan-400/10 border-cyan-400/30 text-cyan-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"

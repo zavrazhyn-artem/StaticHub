@@ -60,7 +60,7 @@ const activeComponent = computed(() => {
     <div v-else class="flex flex-col items-center justify-center py-20 text-center bg-[#0e0e10] border border-white/5 rounded-lg">
       <div class="mb-8">
         <div class="text-6xl font-extrabold tracking-tight">
-          <span class="text-white">Blast</span><span class="text-blue-500">R<span class="text-xs opacity-70 ml-1">r<span class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+          <span class="text-white">Blast</span><span class="text-blue-500">R<span class="text-xs opacity-70 ml-1">r<span class="text-3xs opacity-50 ml-0.5">r</span></span></span>
         </div>
       </div>
       <h3 class="text-lg font-medium text-white mb-2 italic uppercase tracking-widest">{{ __('Blast Your Raid') }}</h3>

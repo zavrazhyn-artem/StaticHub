@@ -13,7 +13,7 @@ const visible = ref(false);
     <span class="relative inline-flex items-center"
           @mouseenter="visible = true"
           @mouseleave="visible = false">
-        <span class="material-symbols-outlined text-[14px] text-on-surface-variant/50 cursor-help hover:text-on-surface-variant transition-colors leading-none">
+        <span class="material-symbols-outlined text-sm text-on-surface-variant/50 cursor-help hover:text-on-surface-variant transition-colors leading-none">
             info
         </span>
 
@@ -27,7 +27,7 @@ const visible = ref(false);
                      'left-full top-1/2 -translate-y-1/2 ml-2': position === 'right',
                  }">
                 <div class="tooltip-glass border border-white/10 px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap">
-                    <span class="text-[10px] font-bold text-gray-200 tracking-wide">{{ text }}</span>
+                    <span class="text-3xs font-bold text-gray-200 tracking-wide">{{ text }}</span>
                 </div>
             </div>
         </Transition>

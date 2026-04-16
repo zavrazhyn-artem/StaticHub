@@ -295,19 +295,19 @@ const removeSplit = (n) => {
         <!-- Header -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50">{{ __('Split Raid') }}</span>
+                <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50">{{ __('Split Raid') }}</span>
                 <button
                     v-if="localSplitCount < 4"
                     @click="addSplit"
-                    class="flex items-center gap-1 px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
+                    class="flex items-center gap-1 px-2 py-1 rounded text-5xs font-black uppercase tracking-widest bg-white/5 border border-white/10 text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
                 >
-                    <span class="material-symbols-outlined text-[12px]">add</span>
+                    <span class="material-symbols-outlined text-xs">add</span>
                     {{ __('Add Split') }}
                 </button>
             </div>
             <button
                 @click="saveSplits" :disabled="saving"
-                class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all"
+                class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-4xs font-black uppercase tracking-widest border transition-all"
                 :class="saved ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400 hover:bg-fuchsia-400/20'"
             >
                 <span class="material-symbols-outlined text-sm">{{ saved ? 'check' : 'save' }}</span>
@@ -324,7 +324,7 @@ const removeSplit = (n) => {
                 @dragover.prevent="onDragOver($event, 0)" @dragleave="onDragLeave" @drop="onDropWithPicker($event, 0)"
             >
                 <div class="px-3 py-2 border-b border-white/5 bg-white/[0.02]">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/60">
+                    <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/60">
                         {{ __('Roster') }} ({{ poolUsers.length }})
                     </span>
                 </div>
@@ -343,17 +343,17 @@ const removeSplit = (n) => {
                         >
                             <div class="w-1 h-6 rounded-full opacity-60" :class="'bg-wow-' + (user.mainClass || '').toLowerCase().replace(/ /g, '-')"></div>
                             <div class="flex-1 min-w-0">
-                                <div class="text-[10px] font-bold truncate" :class="'text-wow-' + (user.mainClass || '').toLowerCase().replace(/ /g, '-')">
+                                <div class="text-3xs font-bold truncate" :class="'text-wow-' + (user.mainClass || '').toLowerCase().replace(/ /g, '-')">
                                     {{ user.displayName }}
                                 </div>
-                                <div class="text-[8px] text-on-surface-variant/40">
+                                <div class="text-5xs text-on-surface-variant/40">
                                     {{ user.available.length }} char{{ user.available.length > 1 ? 's' : '' }}
                                     <template v-if="Object.keys(userSplitInfo(user)).length">
                                         · in {{ Object.keys(userSplitInfo(user)).map(s => splitLabels[s - 1]).join(', ') }}
                                     </template>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-[14px] text-on-surface-variant/30 transition-transform" :class="expandedUser === user.userId ? 'rotate-180' : ''">expand_more</span>
+                            <span class="material-symbols-outlined text-sm text-on-surface-variant/30 transition-transform" :class="expandedUser === user.userId ? 'rotate-180' : ''">expand_more</span>
                         </div>
 
                         <!-- Expanded: all available chars with specs -->
@@ -363,22 +363,22 @@ const removeSplit = (n) => {
                                 draggable="true"
                                 @dragstart.stop="onDragStart($event, char, user.userId, null, true)"
                                 @dragend="onDragEnd"
-                                class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/10 cursor-grab active:cursor-grabbing text-[9px]"
+                                class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/10 cursor-grab active:cursor-grabbing text-4xs"
                             >
                                 <img v-if="char.main_spec?.icon_url" :src="char.main_spec.icon_url" class="w-4 h-4 rounded">
                                 <span class="font-bold" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</span>
                                 <span class="text-on-surface-variant/40">{{ char.main_spec?.name }} · {{ char.item_level }}</span>
-                                <span v-if="char.role === 'main'" class="text-fuchsia-400 text-[7px]">★</span>
+                                <span v-if="char.role === 'main'" class="text-fuchsia-400 text-5xs">★</span>
                                 <!-- Specs badges -->
                                 <span
                                     v-for="spec in (getCharDetails(char.id)?.specs || []).filter(s => s.id !== char.main_spec?.id)"
                                     :key="spec.id"
-                                    class="text-[7px] text-on-surface-variant/30 px-1 border border-white/5 rounded"
+                                    class="text-5xs text-on-surface-variant/30 px-1 border border-white/5 rounded"
                                 >{{ spec.name }}</span>
                             </div>
                         </div>
                     </div>
-                    <div v-if="poolUsers.length === 0" class="text-center py-4 text-[9px] text-on-surface-variant/30 italic">{{ __('All assigned') }}</div>
+                    <div v-if="poolUsers.length === 0" class="text-center py-4 text-4xs text-on-surface-variant/30 italic">{{ __('All assigned') }}</div>
                 </div>
             </div>
 
@@ -391,24 +391,24 @@ const removeSplit = (n) => {
             >
                 <!-- Header: name + audit button + delete -->
                 <div class="px-3 py-2 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-fuchsia-400">
+                    <span class="text-4xs font-black uppercase tracking-widest text-fuchsia-400">
                         Split {{ splitLabels[splitNum - 1] }}
                     </span>
                     <div class="flex items-center gap-1.5">
                         <button
                             @click="auditSplit = splitNum"
-                            class="flex items-center gap-1 text-[9px] font-bold border rounded px-1.5 py-0.5 transition-all"
+                            class="flex items-center gap-1 text-4xs font-bold border rounded px-1.5 py-0.5 transition-all"
                             :class="splitWarningCount(splitNum) > 0
                                 ? 'bg-red-500/10 border-red-500/20 text-red-400'
                                 : 'bg-green-500/10 border-green-500/20 text-green-400'"
                         >
-                            <span class="material-symbols-outlined text-[11px]">{{ splitWarningCount(splitNum) > 0 ? 'warning' : 'check' }}</span>
+                            <span class="material-symbols-outlined text-2xs">{{ splitWarningCount(splitNum) > 0 ? 'warning' : 'check' }}</span>
                             {{ splitGroups[splitNum]?.total || 0 }}/{{ SPLIT_LIMIT }}
                         </button>
                         <button
                             v-if="localSplitCount > 2"
                             @click="removeSplit(splitNum)"
-                            class="material-symbols-outlined text-[14px] text-on-surface-variant/30 hover:text-red-400 transition-all"
+                            class="material-symbols-outlined text-sm text-on-surface-variant/30 hover:text-red-400 transition-all"
                             :title="__('Remove split')"
                         >delete</button>
                     </div>
@@ -420,7 +420,7 @@ const removeSplit = (n) => {
                         <div v-if="splitGroups[splitNum]?.[role]?.length > 0" class="mb-1">
                             <div class="flex items-center gap-1 px-1 mb-0.5">
                                 <img :src="'/images/roles/' + roleIcons[role]" class="w-3 h-3 opacity-50">
-                                <span class="text-[8px] font-black uppercase tracking-widest" :class="roleColors[role]">{{ splitGroups[splitNum][role].length }}</span>
+                                <span class="text-5xs font-black uppercase tracking-widest" :class="roleColors[role]">{{ splitGroups[splitNum][role].length }}</span>
                             </div>
                             <div class="space-y-0.5">
                                 <div
@@ -433,15 +433,15 @@ const removeSplit = (n) => {
                                 >
                                     <img v-if="char.main_spec?.icon_url" :src="char.main_spec.icon_url" class="w-5 h-5 rounded border border-white/10">
                                     <div class="flex-1 min-w-0">
-                                        <span class="text-[10px] font-bold truncate block" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</span>
-                                        <span class="text-[8px] text-on-surface-variant/40">{{ char.main_spec?.name }} · {{ getCharDetails(char.id)?.item_level || '' }}</span>
+                                        <span class="text-3xs font-bold truncate block" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</span>
+                                        <span class="text-5xs text-on-surface-variant/40">{{ char.main_spec?.name }} · {{ getCharDetails(char.id)?.item_level || '' }}</span>
                                     </div>
-                                    <button @click.stop="removeFromSplit(char.id)" class="material-symbols-outlined text-[11px] text-transparent group-hover:text-red-400 transition-all">close</button>
+                                    <button @click.stop="removeFromSplit(char.id)" class="material-symbols-outlined text-2xs text-transparent group-hover:text-red-400 transition-all">close</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div v-if="!splitGroups[splitNum]?.total" class="text-center py-6 text-[9px] text-on-surface-variant/20 italic">{{ __('Drop players here') }}</div>
+                    <div v-if="!splitGroups[splitNum]?.total" class="text-center py-6 text-4xs text-on-surface-variant/20 italic">{{ __('Drop players here') }}</div>
                 </div>
             </div>
         </div>
@@ -449,7 +449,7 @@ const removeSplit = (n) => {
         <!-- Character picker popup (when dropping user with multiple chars) -->
         <GlassModal :show="charPicker !== null" max-width="max-w-xs" @close="charPicker = null">
             <div v-if="charPicker" class="p-4">
-                <div class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/50 mb-3">
+                <div class="text-3xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-3">
                     {{ __('Choose character for Split') }} {{ splitLabels[(charPicker.targetSplit || 1) - 1] }}
                 </div>
                 <div class="space-y-1">
@@ -460,8 +460,8 @@ const removeSplit = (n) => {
                     >
                         <img v-if="char.main_spec?.icon_url" :src="char.main_spec.icon_url" class="w-6 h-6 rounded border border-white/10">
                         <div class="flex-1 min-w-0">
-                            <div class="text-[11px] font-bold" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</div>
-                            <div class="text-[9px] text-on-surface-variant/50">{{ char.main_spec?.name }} · {{ char.item_level }} ilvl
+                            <div class="text-2xs font-bold" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</div>
+                            <div class="text-4xs text-on-surface-variant/50">{{ char.main_spec?.name }} · {{ char.item_level }} ilvl
                                 <span v-if="char.role === 'main'" class="text-fuchsia-400">★ main</span>
                             </div>
                         </div>

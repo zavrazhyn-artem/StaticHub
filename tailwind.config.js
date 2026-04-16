@@ -87,6 +87,12 @@ export default {
                 "label": ["Inter"],
                 "slogan": ["Orbitron", "sans-serif"]
             },
+            fontSize: {
+                '5xs': ['0.5rem',    { lineHeight: '0.75rem' }],    // 8px
+                '4xs': ['0.5625rem', { lineHeight: '0.8125rem' }],  // 9px
+                '3xs': ['0.625rem',  { lineHeight: '0.875rem' }],   // 10px
+                '2xs': ['0.6875rem', { lineHeight: '1rem' }],       // 11px
+            },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
             typography: (theme) => ({
                 tactical: {

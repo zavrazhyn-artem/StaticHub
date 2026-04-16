@@ -130,14 +130,14 @@ const closeModal = () => { showModal.value = false; };
             </div>
 
             <div class="flex items-center gap-2">
-                <a :href="prevMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
+                <a :href="prevMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm text-3xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                     {{ __('Previous') }}
                 </a>
-                <a :href="todayUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors">
+                <a :href="todayUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm text-3xs font-bold uppercase tracking-widest transition-colors">
                     {{ __('Today') }}
                 </a>
-                <a :href="nextMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
+                <a :href="nextMonthUrl" class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm text-3xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
                     {{ __('Next') }}
                     <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </a>
@@ -149,7 +149,7 @@ const closeModal = () => { showModal.value = false; };
             <!-- Day-of-week header -->
             <div class="grid grid-cols-7 border-b border-white/5 bg-surface-container">
                 <div v-for="dayName in daysOfWeek" :key="dayName" class="py-3 text-center">
-                    <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-headline">{{ dayName }}</span>
+                    <span class="text-3xs uppercase tracking-widest text-on-surface-variant font-bold">{{ dayName }}</span>
                 </div>
             </div>
 
@@ -182,10 +182,10 @@ const closeModal = () => { showModal.value = false; };
                                     :href="event.show_url"
                                     class="block w-full bg-surface-container-high border border-white/5 rounded-md px-2 py-5 hover:border-fuchsia-400/40 transition-all shadow-md"
                                 >
-                                    <div class="flex items-center justify-between text-[10px] font-bold tracking-widest uppercase">
+                                    <div class="flex items-center justify-between text-3xs font-bold tracking-widest uppercase">
                                         <div class="text-fuchsia-400">{{ formatRange(event.start_time, event.end_time) }}</div>
                                         <div class="text-on-surface-variant flex items-center gap-0.5 shrink-0">
-                                            <span class="material-symbols-outlined text-[12px]">group</span>
+                                            <span class="material-symbols-outlined text-xs">group</span>
                                             {{ event.characters_count ?? 0 }}/20
                                         </div>
                                     </div>
@@ -203,7 +203,7 @@ const closeModal = () => { showModal.value = false; };
             <div class="px-6 py-4 border-b border-white/5 bg-gradient-to-r from-surface-container-high to-surface-container flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-fuchsia-400/20 flex items-center justify-center text-fuchsia-400">
-                        <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'edit_calendar' : 'event_available' }}</span>
+                        <span class="material-symbols-outlined text-lg">{{ isEditing ? 'edit_calendar' : 'event_available' }}</span>
                     </div>
                     <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest">
                         {{ isEditing ? __('Edit Raid Event') : __('Plan Raid Event') }}
@@ -225,10 +225,10 @@ const closeModal = () => { showModal.value = false; };
                 <div v-if="Object.keys(errors).length > 0" class="p-4 bg-error-dim/20 border border-error-dim/50 rounded-xl">
                     <div class="flex items-center gap-2 mb-2 text-error-dim">
                         <span class="material-symbols-outlined text-sm">error</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest">{{ __('Validation Errors') }}</span>
+                        <span class="text-3xs font-black uppercase tracking-widest">{{ __('Validation Errors') }}</span>
                     </div>
                     <ul class="space-y-1">
-                        <li v-for="(messages, field) in errors" :key="field" class="text-[10px] text-white/70 font-medium">
+                        <li v-for="(messages, field) in errors" :key="field" class="text-3xs text-white/70 font-medium">
                             &bull; {{ messages[0] }}
                         </li>
                     </ul>
@@ -236,23 +236,23 @@ const closeModal = () => { showModal.value = false; };
 
                 <!-- Date display -->
                 <div class="space-y-1.5">
-                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Selected Date') }}</label>
+                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Selected Date') }}</label>
                     <div class="flex items-center gap-2 px-3 py-2.5 bg-surface-container-highest border border-white/5 rounded-lg text-white font-headline text-sm font-bold tracking-tight">
-                        <span class="material-symbols-outlined text-[16px] text-fuchsia-400">calendar_today</span>
+                        <span class="material-symbols-outlined text-base text-fuchsia-400">calendar_today</span>
                         {{ selectedDate }}
                     </div>
                 </div>
 
                 <!-- Difficulty -->
                 <div class="space-y-1.5">
-                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Difficulty') }}</label>
+                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Difficulty') }}</label>
                     <input type="hidden" name="difficulty" :value="selectedDifficulty">
                     <div class="flex gap-2">
                         <button
                             v-for="d in difficulties" :key="d.value"
                             type="button"
                             @click="selectedDifficulty = d.value"
-                            class="flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all text-center"
+                            class="flex-1 px-3 py-2 rounded-lg text-3xs font-black uppercase tracking-widest border transition-all text-center"
                             :class="selectedDifficulty === d.value
                                 ? `${d.bg} ${d.border} ${d.color}`
                                 : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -262,7 +262,7 @@ const closeModal = () => { showModal.value = false; };
 
                 <!-- Timezone -->
                 <div class="space-y-1.5">
-                    <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Timezone') }}</label>
+                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Timezone') }}</label>
                     <TimezoneSelector
                         ref="timezoneSelectorRef"
                         v-model="selectedTimezone"
@@ -273,7 +273,7 @@ const closeModal = () => { showModal.value = false; };
                 <!-- Start / End Time -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
-                        <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                        <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">
                             {{ __('Start Time') }} <span class="text-error">*</span>
                         </label>
                         <TimePickerCarousel
@@ -286,7 +286,7 @@ const closeModal = () => { showModal.value = false; };
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                        <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">
                             {{ __('End Time') }} <span class="text-error">*</span>
                         </label>
                         <TimePickerCarousel
@@ -301,14 +301,14 @@ const closeModal = () => { showModal.value = false; };
                             :class="isOvernight ? 'opacity-100' : 'opacity-0 select-none pointer-events-none'"
                         >
                             <span class="material-symbols-outlined text-sm">event_repeat</span>
-                            <span class="text-[9px] font-black uppercase tracking-widest">{{ __('Ends on the next day') }}</span>
+                            <span class="text-4xs font-black uppercase tracking-widest">{{ __('Ends on the next day') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Notes -->
                 <div class="space-y-1.5">
-                    <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notes (Optional)') }}</label>
+                    <label for="description" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Notes (Optional)') }}</label>
                     <div class="relative">
                         <textarea
                             name="description"
@@ -318,7 +318,7 @@ const closeModal = () => { showModal.value = false; };
                             v-model="selectedDescription"
                             class="w-full bg-surface-container-highest border border-white/5 rounded-lg pl-9 pr-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-fuchsia-400 focus:border-fuchsia-400 outline-none transition-all placeholder:text-white/20 resize-none"
                         ></textarea>
-                        <span class="material-symbols-outlined absolute left-3 top-3 text-[16px] text-on-surface-variant pointer-events-none">notes</span>
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-base text-on-surface-variant pointer-events-none">notes</span>
                     </div>
                 </div>
 
@@ -328,7 +328,7 @@ const closeModal = () => { showModal.value = false; };
                         type="submit"
                         class="w-full bg-fuchsia-400 text-black py-3.5 rounded-lg font-headline text-xs font-black uppercase tracking-[0.2em] hover:brightness-110 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
-                        <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add_task' }}</span>
+                        <span class="material-symbols-outlined text-lg">{{ isEditing ? 'save' : 'add_task' }}</span>
                         {{ isEditing ? __('Update Event') : __('Publish Event') }}
                     </button>
                 </div>

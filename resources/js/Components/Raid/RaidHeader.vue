@@ -36,11 +36,11 @@ const { formatDate, formatTime } = useTimeFormatter();
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Date/Time chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
-                    <div class="flex items-center gap-2 text-white font-headline text-[11px] font-black uppercase tracking-widest leading-none">
+                    <div class="flex items-center gap-2 text-white font-headline text-2xs font-black uppercase tracking-widest leading-none">
                         <span class="material-symbols-outlined text-sm text-fuchsia-400">calendar_today</span>
                         <span>{{ formatDate(event.start_time) }}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-white font-headline text-[11px] font-black uppercase tracking-widest leading-none border-l border-white/10 pl-4">
+                    <div class="flex items-center gap-2 text-white font-headline text-2xs font-black uppercase tracking-widest leading-none border-l border-white/10 pl-4">
                         <span class="material-symbols-outlined text-sm text-fuchsia-400">schedule</span>
                         <span>{{ formatTime(event.start_time) }}</span>
                         <span class="text-on-surface-variant">-</span>
@@ -54,13 +54,13 @@ const { formatDate, formatTime } = useTimeFormatter();
                     :class="[difficulty.bg, difficulty.border]"
                 >
                     <span class="material-symbols-outlined text-sm" :class="difficulty.color">shield</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest" :class="difficulty.color">{{ difficulty.label }}</span>
+                    <span class="text-3xs font-black uppercase tracking-widest" :class="difficulty.color">{{ difficulty.label }}</span>
                 </div>
 
                 <!-- Status badge -->
                 <div class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-sm" :class="status.color">{{ status.icon }}</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest" :class="status.color">{{ status.label }}</span>
+                    <span class="text-3xs font-black uppercase tracking-widest" :class="status.color">{{ status.label }}</span>
                 </div>
 
                 <!-- Optional badge -->
@@ -69,14 +69,14 @@ const { formatDate, formatTime } = useTimeFormatter();
                     class="h-10 px-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-1.5"
                 >
                     <span class="material-symbols-outlined text-sm text-yellow-400">info</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400">Optional</span>
+                    <span class="text-3xs font-black uppercase tracking-widest text-yellow-400">Optional</span>
                 </div>
 
                 <!-- Role counts chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
                     <div v-for="s in raidStatus" :key="s.label" class="flex items-center gap-1.5">
                         <img :src="'/images/roles/' + s.label" class="w-4 h-4 opacity-90" :alt="s.label">
-                        <span class="text-[11px] font-black tracking-tight leading-none" :class="s.color">
+                        <span class="text-2xs font-black tracking-tight leading-none" :class="s.color">
                             {{ s.count }}/{{ s.limit }}
                         </span>
                     </div>
@@ -88,7 +88,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                 v-if="currentAttendance && currentAttendance.status !== 'pending' && joinedCharacter"
                 class="flex-1 flex items-center justify-center px-4 h-10 bg-surface-container-high border border-white/10 rounded-xl glassmorphism backdrop-blur-md shadow-2xl"
             >
-                <div class="text-white font-headline text-[11px] font-black uppercase tracking-[0.15em] leading-none opacity-80 truncate">
+                <div class="text-white font-headline text-2xs font-black uppercase tracking-[0.15em] leading-none opacity-80 truncate">
                     {{ __('Joined as') }} <span class="text-fuchsia-400">{{ joinedCharacter?.name }}</span>
                     &bull;
                     <span class="text-fuchsia-400">{{ joinedRoleLabel }}</span>
@@ -104,7 +104,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                     class="h-10 px-6 bg-green-500 text-black rounded-xl flex items-center justify-center gap-2 transition-all duration-300 group shadow-lg"
                     :title="__('Join Raid')"
                 >
-                    <span class="material-symbols-outlined text-[18px] font-bold group-hover:scale-110 transition-transform">person_add</span>
+                    <span class="material-symbols-outlined text-lg font-bold group-hover:scale-110 transition-transform">person_add</span>
                     <span class="font-headline text-xs font-black uppercase tracking-widest mt-[1px]">{{ __('Join') }}</span>
                 </button>
 

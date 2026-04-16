@@ -14,7 +14,7 @@ defineProps({
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <span class="material-symbols-outlined text-6xl" :class="iconColor">{{ icon }}</span>
         </div>
-        <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ label }}</h3>
+        <h3 class="text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-4">{{ label }}</h3>
         <div class="flex items-baseline gap-2">
             <span class="text-4xl font-black tracking-tighter font-headline" :class="valueColor">{{ value }}</span>
             <span v-if="subtext" class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ subtext }}</span>

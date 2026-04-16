@@ -87,7 +87,7 @@ const onDragEnd = () => { dragIndex.value = -1; dragOverIndex.value = -1; };
                         @keydown.enter="finishRename"
                         @keydown.escape="editingIndex = -1"
                         @mousedown.stop
-                        class="h-[30px] px-3 rounded-lg border border-orange-500/50 bg-white/10 text-[9px] font-black uppercase tracking-widest text-white outline-none w-24"
+                        class="h-[30px] px-3 rounded-lg border border-orange-500/50 bg-white/10 text-4xs font-black uppercase tracking-widest text-white outline-none w-24"
                     >
                     <button @click="finishRename" class="w-5 h-5 rounded bg-orange-500/80 text-white flex items-center justify-center hover:bg-orange-500 transition-all">
                         <span class="material-symbols-outlined text-xs">check</span>
@@ -105,14 +105,14 @@ const onDragEnd = () => { dragIndex.value = -1; dragOverIndex.value = -1; };
                 @dragleave="onDragLeave"
                 @drop="onDrop($event, i)"
                 @dragend="onDragEnd"
-                class="shrink-0 group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest transition-all"
+                class="shrink-0 group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-4xs font-black uppercase tracking-widest transition-all"
                 :class="[
                     currentIndex === i ? 'bg-white/10 border-white/20 text-white' : 'bg-white/[0.02] border-white/5 text-on-surface-variant hover:text-white hover:border-white/15',
                     dragOverIndex === i && dragIndex !== i ? 'border-orange-500 border-2' : '',
                     dragIndex === i ? 'opacity-40' : '',
                 ]"
             >
-                <span class="w-4 h-4 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-[8px] font-black">
+                <span class="w-4 h-4 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-5xs font-black">
                     {{ i + 1 }}
                 </span>
                 {{ step.label }}
@@ -148,12 +148,12 @@ const onDragEnd = () => { dragIndex.value = -1; dragOverIndex.value = -1; };
             <button @click="handleAdd"
                 class="w-full flex items-center gap-2 px-3 py-1.5 text-left text-on-surface-variant hover:bg-white/5 transition-colors">
                 <span class="material-symbols-outlined text-sm">add</span>
-                <span class="text-[10px] font-bold">{{ __('Create New') }}</span>
+                <span class="text-3xs font-bold">{{ __('Create New') }}</span>
             </button>
             <button @click="handleCopy"
                 class="w-full flex items-center gap-2 px-3 py-1.5 text-left text-on-surface-variant hover:bg-white/5 transition-colors">
                 <span class="material-symbols-outlined text-sm">content_copy</span>
-                <span class="text-[10px] font-bold">{{ __('Copy Current') }}</span>
+                <span class="text-3xs font-bold">{{ __('Copy Current') }}</span>
             </button>
         </div>
     </Teleport>

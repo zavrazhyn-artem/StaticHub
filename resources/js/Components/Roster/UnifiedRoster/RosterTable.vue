@@ -126,11 +126,11 @@ const slotLabels = {
 <template>
     <div class="relative w-full">
     <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[55vh] overflow-y-auto overflow-x-auto roster-scroll">
-        <table class="text-left text-[11px] border-collapse w-full">
+        <table class="text-left text-2xs border-collapse w-full">
             <!-- thead ──────────────────────────────────────── -->
             <thead class="sticky top-0 z-20">
                 <!-- Group header row -->
-                <tr class="bg-[#1a1a1a] text-gray-500 text-[8px] uppercase tracking-widest font-bold h-8" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#1a1a1a] text-gray-500 text-5xs uppercase tracking-widest font-bold h-8" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="compare-col" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'"></th>
                     <th class="p-2 pl-4 w-[200px] min-w-[200px]">{{ __('Character') }}</th>
 
@@ -174,9 +174,9 @@ const slotLabels = {
                 </tr>
 
                 <!-- Column sub-header row -->
-                <tr class="bg-[#111111] text-emerald-400 text-[9px] uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#111111] text-emerald-400 text-4xs uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="compare-col text-center" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'">
-                        <span class="material-symbols-outlined text-[14px] text-emerald-400 compare-col-content">compare_arrows</span>
+                        <span class="material-symbols-outlined text-sm text-emerald-400 compare-col-content">compare_arrows</span>
                     </th>
                     <th class="px-4 py-1 w-[200px] min-w-[200px]">
                         <div class="flex items-center gap-1">
@@ -184,13 +184,13 @@ const slotLabels = {
                                 <input
                                     v-model="searchQuery"
                                     type="text"
-                                    class="w-full bg-white/10 border border-white/10 rounded px-1.5 py-px text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 font-normal normal-case tracking-normal leading-tight h-5"
+                                    class="w-full bg-white/10 border border-white/10 rounded px-1.5 py-px text-3xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 font-normal normal-case tracking-normal leading-tight h-5"
                                     :placeholder="__('Search...')"
                                     @keydown.escape="toggleSearch"
                                     ref="searchInput"
                                 />
                                 <button @click="toggleSearch" class="text-gray-500 hover:text-white transition-colors shrink-0">
-                                    <span class="material-symbols-outlined text-[14px]">close</span>
+                                    <span class="material-symbols-outlined text-sm">close</span>
                                 </button>
                             </template>
                             <template v-else>
@@ -199,10 +199,10 @@ const slotLabels = {
                                 <button @click="toggleCompareMode"
                                         :class="['transition-colors', compareMode ? 'text-emerald-400' : 'text-gray-500 hover:text-emerald-400']"
                                         :title="__('Compare players')">
-                                    <span class="material-symbols-outlined text-[14px]">compare_arrows</span>
+                                    <span class="material-symbols-outlined text-sm">compare_arrows</span>
                                 </button>
                                 <button @click="toggleSearch" class="text-gray-500 hover:text-emerald-400 transition-colors">
-                                    <span class="material-symbols-outlined text-[14px]">search</span>
+                                    <span class="material-symbols-outlined text-sm">search</span>
                                 </button>
                             </template>
                         </div>
@@ -233,7 +233,7 @@ const slotLabels = {
                             <th v-for="bossName in raid.bosses" :key="bossName"
                                 class="px-1 py-1 align-middle border-l border-white/[0.04] text-center min-w-[60px]"
                                 :title="bossName">
-                                <div class="mx-auto text-[9px] text-on-surface-variant font-medium normal-case whitespace-normal break-words leading-tight">
+                                <div class="mx-auto text-4xs text-on-surface-variant font-medium normal-case whitespace-normal break-words leading-tight">
                                     {{ bossName }}
                                 </div>
                             </th>
@@ -242,8 +242,8 @@ const slotLabels = {
 
                     <template v-if="activeTab === 'gear'">
                         <th class="p-2 text-center border-l border-[#222] w-[100px]">{{ __('Issues') }}</th>
-                        <th class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
-                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-[7px] min-w-[52px]">
+                        <th class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
+                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">
                             {{ __(slotLabels[slot]) }}
                         </th>
                     </template>
@@ -268,7 +268,7 @@ const slotLabels = {
                     <!-- Role group separator row -->
                     <tr v-if="members.length > 0 && roleKey !== 'unknown'"
                         class="bg-gray-800/80 border-y border-gray-700">
-                        <td colspan="100%" class="py-1 px-4 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                        <td colspan="100%" class="py-1 px-4 text-3xs font-bold uppercase tracking-widest text-emerald-400">
                             <div class="flex items-center gap-2">
                                 <img :src="roleIconSrc(roleKey)" class="w-3 h-3 opacity-80" :alt="roleKey">
                                 <span>{{ __(roles.find(r => r.id === roleKey)?.labelKey || roleKey) }} ({{ members.length }})</span>
@@ -356,11 +356,11 @@ const slotLabels = {
         <div v-if="compareMode"
              class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-surface-container-high/95 backdrop-blur border border-white/10 shadow-2xl">
             <div class="flex items-center gap-2 pr-3 border-r border-white/10">
-                <span class="material-symbols-outlined text-emerald-400 text-[18px]">compare_arrows</span>
-                <span class="text-[11px] uppercase tracking-wider font-bold text-on-surface-variant">
+                <span class="material-symbols-outlined text-emerald-400 text-lg">compare_arrows</span>
+                <span class="text-2xs uppercase tracking-wider font-bold text-on-surface-variant">
                     {{ __('Selected') }}:
                 </span>
-                <span class="text-[13px] font-bold text-white tabular-nums min-w-[1.5ch] text-center">
+                <span class="text-xs font-bold text-white tabular-nums min-w-[1.5ch] text-center">
                     {{ selectedCount }}
                 </span>
             </div>
@@ -369,7 +369,7 @@ const slotLabels = {
                 @click="toggleIsolate"
                 :disabled="selectedCount === 0"
                 :class="[
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-bold uppercase tracking-wider transition-all',
                     selectedCount === 0
                         ? 'bg-white/5 text-gray-600 cursor-not-allowed'
                         : isolated
@@ -377,7 +377,7 @@ const slotLabels = {
                             : 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 hover:bg-emerald-400/20'
                 ]"
             >
-                <span class="material-symbols-outlined text-[14px]">
+                <span class="material-symbols-outlined text-sm">
                     {{ isolated ? 'visibility' : 'filter_list' }}
                 </span>
                 {{ isolated ? __('Show all') : __('Isolate') }}
@@ -387,13 +387,13 @@ const slotLabels = {
                 @click="clearSelection"
                 :disabled="selectedCount === 0"
                 :class="[
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-bold uppercase tracking-wider transition-all',
                     selectedCount === 0
                         ? 'bg-white/5 text-gray-600 cursor-not-allowed'
                         : 'bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-white'
                 ]"
             >
-                <span class="material-symbols-outlined text-[14px]">restart_alt</span>
+                <span class="material-symbols-outlined text-sm">restart_alt</span>
                 {{ __('Clear') }}
             </button>
 
@@ -402,7 +402,7 @@ const slotLabels = {
                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all"
                 :title="__('Exit compare mode')"
             >
-                <span class="material-symbols-outlined text-[18px]">close</span>
+                <span class="material-symbols-outlined text-lg">close</span>
             </button>
         </div>
     </transition>

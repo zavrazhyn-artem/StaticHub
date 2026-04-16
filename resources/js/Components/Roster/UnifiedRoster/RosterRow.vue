@@ -76,7 +76,7 @@ const emit = defineEmits([
 
 <template>
     <tr :class="[
-            isAlt ? 'bg-black/40 border-b border-white/5 text-[11px]' : 'border-b border-gray-800 hover:bg-gray-800/40 transition-all group/row',
+            isAlt ? 'bg-black/40 border-b border-white/5 text-2xs' : 'border-b border-gray-800 hover:bg-gray-800/40 transition-all group/row',
             !isAlt && expanded ? 'bg-emerald-400/5' : '',
             !isAlt && compareMode && compareSelected && !compareIsolated ? '!bg-emerald-400/10' : ''
         ]">
@@ -91,7 +91,7 @@ const emit = defineEmits([
                     class="peer sr-only"
                 />
                 <span class="w-4 h-4 rounded border border-white/20 bg-white/5 flex items-center justify-center transition-all peer-checked:bg-emerald-400 peer-checked:border-emerald-400 peer-hover:border-emerald-400/60">
-                    <span v-if="compareSelected" class="material-symbols-outlined text-gray-900 text-[14px] leading-none">check</span>
+                    <span v-if="compareSelected" class="material-symbols-outlined text-gray-900 text-sm leading-none">check</span>
                 </span>
             </label>
         </td>
@@ -100,7 +100,7 @@ const emit = defineEmits([
         <td :class="[rh, isAlt ? 'pl-5' : 'p-2']">
             <div :class="[
                 'flex items-center justify-between h-full',
-                isAlt ? 'pl-1' : 'pl-4'
+                isAlt ? 'px-2' : 'pl-4',
             ]">
                 <div class="flex items-center gap-2 min-w-0">
                     <div class="relative shrink-0">
@@ -112,41 +112,41 @@ const emit = defineEmits([
                             <span v-if="!isAlt" class="material-symbols-outlined text-gray-600 text-xs">person</span>
                         </div>
                         <div v-if="!isAlt && member.roster_status === 'bench'"
-                             class="absolute -top-1 -right-1 bg-error-dim text-[7px] font-bold px-1 rounded uppercase border border-error">
+                             class="absolute -top-1 -right-1 bg-error-dim text-5xs font-bold px-1 rounded uppercase border border-error">
                             {{ __('Bench') }}
                         </div>
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-1">
                             <span class="font-bold tracking-tight truncate"
-                                  :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-[12px]' : 'text-[16px]']">
+                                  :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-xs' : 'text-base']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
-                            <span v-if="isAlt" class="text-[8px] text-on-surface-variant font-bold uppercase">{{ char?.class ?? '' }}</span>
+                            <span v-if="isAlt" class="text-5xs text-on-surface-variant font-bold uppercase">{{ char?.class ?? '' }}</span>
 
                             <button v-if="!isAlt && (member.alts || []).length > 0"
                                     @click="emit('toggle-expand', member.id)"
                                     class="text-on-surface-variant hover:text-white transition-colors">
-                                <span class="material-symbols-outlined text-[10px]">
+                                <span class="material-symbols-outlined text-3xs">
                                     {{ expanded ? 'expand_less' : 'expand_more' }}
                                 </span>
                             </button>
                         </div>
-                        <div v-if="!isAlt && member.name !== char?.name" class="text-[9px] text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight">
+                        <div v-if="!isAlt && member.name !== char?.name" class="text-4xs text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight">
                             {{ member.name }}
                         </div>
                     </div>
                 </div>
 
                 <!-- Spec switcher (right-aligned) -->
-                <GearSpecSwitcher
-                    :availableSpecs="getSpecOptions(char)"
-                    :activeSpec="getActiveSpec(char)"
-                    :mainSpecName="char?.main_spec?.name"
-                    :currentSpec="currentSpecObj"
-                    :size="isAlt ? 'xs' : 'sm'"
-                    @select="selectSpec(char?.id, $event)"
-                />
+                    <GearSpecSwitcher
+                        :availableSpecs="getSpecOptions(char)"
+                        :activeSpec="getActiveSpec(char)"
+                        :mainSpecName="char?.main_spec?.name"
+                        :currentSpec="currentSpecObj"
+                        :size="isAlt ? 'xs' : 'sm'"
+                        @select="selectSpec(char?.id, $event)"
+                    />
             </div>
         </td>
 
@@ -187,12 +187,12 @@ const emit = defineEmits([
             <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
                 <span v-if="hasAuditIssues(effectiveChar)"
                       @click="emit('open-audit-modal', effectiveChar)"
-                      :class="[isAlt ? 'text-[8px] px-1' : 'text-[10px] px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
+                      :class="[isAlt ? 'text-5xs px-1' : 'text-3xs px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
                       :title="auditTitle(effectiveChar)">
-                    <span class="material-symbols-outlined text-[12px]">warning</span>
+                    <span class="material-symbols-outlined text-xs">warning</span>
                     {{ (effectiveChar.missing_enchants_slots?.length ?? 0) + (effectiveChar.low_quality_enchants_slots?.length ?? 0) + (effectiveChar.empty_sockets_count ?? 0) }}
                 </span>
-                <span v-else class="text-gray-600 text-[10px]">✓</span>
+                <span v-else class="text-gray-600 text-3xs">✓</span>
             </td>
 
             <!-- Role / Status selects (summary only, main character only) -->
@@ -212,7 +212,7 @@ const emit = defineEmits([
                         />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
+                        <span class="text-4xs font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.access_role }}
                         </span>
                     </div>
@@ -232,7 +232,7 @@ const emit = defineEmits([
                         />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
+                        <span class="text-4xs font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.roster_status }}
                         </span>
                     </div>

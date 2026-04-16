@@ -23,7 +23,7 @@ defineProps({
             <!-- Status badge -->
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
                 <span class="w-2 h-2 bg-success-neon rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">{{ __('landing.status') }}</span>
+                <span class="text-3xs font-bold uppercase tracking-[0.3em] text-on-surface-variant">{{ __('landing.status') }}</span>
             </div>
 
             <!-- Logo -->

@@ -74,11 +74,11 @@ defineExpose({ close });
             :class="{ 'ring-1 ring-primary border-primary': showDropdown }"
         >
             <div class="flex items-center gap-2 overflow-hidden">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none">public</span>
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-on-surface-variant pointer-events-none">public</span>
                 <span class="truncate">{{ modelValue }}</span>
             </div>
             <span
-                class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform"
+                class="material-symbols-outlined text-base text-on-surface-variant transition-transform"
                 :class="{ 'rotate-180': showDropdown }"
             >expand_more</span>
         </div>
@@ -99,7 +99,7 @@ defineExpose({ close });
                 <!-- Search -->
                 <div class="p-2 border-b border-white/5 sticky top-0 bg-surface-container-high z-10">
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">search</span>
+                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant">search</span>
                         <input
                             ref="searchInputRef"
                             type="text"
@@ -125,7 +125,7 @@ defineExpose({ close });
                         @click="select(tz)"
                     >
                         <span class="truncate">{{ tz }}</span>
-                        <span v-if="modelValue === tz" class="material-symbols-outlined text-[14px]">check</span>
+                        <span v-if="modelValue === tz" class="material-symbols-outlined text-sm">check</span>
                     </button>
                 </div>
             </div>

@@ -44,7 +44,7 @@ onMounted(() => {
                 <!-- Badge -->
                 <div v-if="badge" class="inline-flex self-start items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
                     <span class="material-symbols-outlined text-sm" :class="iconColor">{{ icon }}</span>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">{{ badge }}</span>
+                    <span class="text-3xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">{{ badge }}</span>
                 </div>
 
                 <h2 class="font-headline text-2xl md:text-4xl font-bold text-white leading-tight" v-html="title"></h2>

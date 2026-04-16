@@ -106,8 +106,8 @@ const getAttendance = (charId) => {
     <div class="space-y-2">
         <!-- Total count -->
         <div class="flex items-center justify-between px-1">
-            <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50">{{ __('Roster') }}</span>
-            <span class="text-[10px] font-black" :class="totalPresent >= totalLimit ? 'text-green-400' : 'text-on-surface-variant'">
+            <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50">{{ __('Roster') }}</span>
+            <span class="text-3xs font-black" :class="totalPresent >= totalLimit ? 'text-green-400' : 'text-on-surface-variant'">
                 {{ totalPresent }} / {{ totalLimit }}
             </span>
         </div>
@@ -122,11 +122,11 @@ const getAttendance = (charId) => {
             <div class="flex items-center justify-between px-3 py-1.5 border-b border-white/5">
                 <div class="flex items-center gap-1.5">
                     <img :src="'/images/roles/' + roles[roleKey].icon" class="w-3.5 h-3.5 opacity-70">
-                    <span class="text-[9px] font-black uppercase tracking-widest" :class="roles[roleKey].color">
+                    <span class="text-4xs font-black uppercase tracking-widest" :class="roles[roleKey].color">
                         {{ roles[roleKey].label }}
                     </span>
                 </div>
-                <span class="text-[9px] font-bold text-on-surface-variant/60">
+                <span class="text-4xs font-bold text-on-surface-variant/60">
                     {{ layoutData[roleKey].mainChars.length }}
                     <template v-if="roleLimit(roleKey)">/ {{ roleLimit(roleKey) }}</template>
                 </span>
@@ -154,7 +154,7 @@ const getAttendance = (charId) => {
                             class="w-6 h-6 rounded border border-white/10"
                         >
                         <div v-else class="w-6 h-6 rounded border border-white/10 flex items-center justify-center bg-white/5">
-                            <span class="material-symbols-outlined text-[12px] opacity-40">person</span>
+                            <span class="material-symbols-outlined text-xs opacity-40">person</span>
                         </div>
 
                         <!-- Status dot -->
@@ -170,21 +170,21 @@ const getAttendance = (charId) => {
 
                     <!-- Name -->
                     <span
-                        class="text-[10px] font-bold leading-tight truncate max-w-[70px]"
+                        class="text-3xs font-bold leading-tight truncate max-w-[70px]"
                         :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')"
                     >{{ char.name }}</span>
 
                     <!-- Lockout badge -->
                     <span
                         v-if="getBossLockout(char.id)"
-                        class="material-symbols-outlined text-[10px] text-yellow-500"
+                        class="material-symbols-outlined text-3xs text-yellow-500"
                         :title="__('Already killed this boss')"
                     >lock</span>
 
                     <!-- Comment indicator -->
                     <span
                         v-if="char.pivot?.comment"
-                        class="material-symbols-outlined text-[10px] text-yellow-400/70"
+                        class="material-symbols-outlined text-3xs text-yellow-400/70"
                     >chat_bubble</span>
 
                     <!-- Bench button (RL only, not when locked) -->
@@ -194,20 +194,20 @@ const getAttendance = (charId) => {
                         class="hidden group-hover:flex items-center justify-center w-4 h-4 rounded bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all"
                         :title="__('Move to bench')"
                     >
-                        <span class="material-symbols-outlined text-[11px] text-red-400">arrow_downward</span>
+                        <span class="material-symbols-outlined text-2xs text-red-400">arrow_downward</span>
                     </button>
 
                     <!-- Split badge + assign -->
                     <template v-if="splitEnabled">
                         <span
                             v-if="char.pivot?.split_group"
-                            class="text-[8px] font-black px-1 rounded bg-fuchsia-400/20 text-fuchsia-400 leading-none"
+                            class="text-5xs font-black px-1 rounded bg-fuchsia-400/20 text-fuchsia-400 leading-none"
                         >{{ splitLabels[(char.pivot.split_group || 1) - 1] }}</span>
                         <select
                             v-if="activeSplit === null"
                             @click.stop
                             @change.stop="emit('assign-split', char.id, Number($event.target.value) || null)"
-                            class="opacity-0 group-hover:opacity-100 w-5 h-5 bg-transparent text-[8px] cursor-pointer appearance-none text-center text-fuchsia-400"
+                            class="opacity-0 group-hover:opacity-100 w-5 h-5 bg-transparent text-5xs cursor-pointer appearance-none text-center text-fuchsia-400"
                             :value="char.pivot?.split_group || ''"
                             :title="__('Assign split')"
                         >
@@ -220,7 +220,7 @@ const getAttendance = (charId) => {
                 <!-- Empty state -->
                 <div
                     v-if="layoutData[roleKey].mainChars.length === 0 && layoutData[roleKey].absentChars.length === 0"
-                    class="text-[9px] text-on-surface-variant/30 px-2 py-1 italic"
+                    class="text-4xs text-on-surface-variant/30 px-2 py-1 italic"
                 >{{ __('No players') }}</div>
             </div>
 
@@ -245,17 +245,17 @@ const getAttendance = (charId) => {
                         class="w-5 h-5 rounded border border-white/10 grayscale"
                     >
                     <div v-else class="w-5 h-5 rounded border border-white/10 flex items-center justify-center bg-white/5 grayscale">
-                        <span class="material-symbols-outlined text-[10px] opacity-40">person</span>
+                        <span class="material-symbols-outlined text-3xs opacity-40">person</span>
                     </div>
 
-                    <span class="text-[9px] font-bold truncate max-w-[60px]"
+                    <span class="text-4xs font-bold truncate max-w-[60px]"
                         :class="isBenched(char.id) ? 'text-orange-400' : 'text-on-surface-variant/70'"
                     >{{ char.name }}</span>
 
                     <!-- Bench warning badge -->
                     <span
                         v-if="isBenched(char.id)"
-                        class="text-[7px] font-black px-1 rounded bg-orange-500/20 text-orange-400 leading-none whitespace-nowrap"
+                        class="text-5xs font-black px-1 rounded bg-orange-500/20 text-orange-400 leading-none whitespace-nowrap"
                     >{{ benchHistory[char.id]?.bench_count }}/{{ benchHistory[char.id]?.total_events }}</span>
 
                     <button
@@ -267,10 +267,10 @@ const getAttendance = (charId) => {
                             : 'hidden group-hover/abs:flex bg-green-500/20 border-green-500/30 hover:bg-green-500/30'"
                         :title="isBenched(char.id) ? __('Benched frequently! Move to roster') : __('Move to roster')"
                     >
-                        <span class="material-symbols-outlined text-[11px] text-green-400">arrow_upward</span>
+                        <span class="material-symbols-outlined text-2xs text-green-400">arrow_upward</span>
                     </button>
 
-                    <span v-if="!canManage" class="material-symbols-outlined text-[10px]" :class="statusIcons[char.pivot?.status]?.class">
+                    <span v-if="!canManage" class="material-symbols-outlined text-3xs" :class="statusIcons[char.pivot?.status]?.class">
                         {{ statusIcons[char.pivot?.status]?.icon }}
                     </span>
                 </button>

@@ -132,13 +132,13 @@ function closeModal() {
             v-else
             type="button"
             @click="openModal"
-            class="text-[10px] text-on-surface-variant italic hover:text-white transition-colors"
+            class="text-3xs text-on-surface-variant italic hover:text-white transition-colors"
         >{{ __('Not set') }}</button>
 
         <!-- Status indicators -->
-        <span v-if="saving" class="material-symbols-outlined text-[14px] text-on-surface-variant animate-spin ml-1">progress_activity</span>
-        <span v-else-if="savedFlash" class="text-[9px] text-green-400 font-bold ml-1">✓</span>
-        <span v-else-if="errorFlash" class="text-[9px] text-red-400 font-bold ml-1">✕</span>
+        <span v-if="saving" class="material-symbols-outlined text-sm text-on-surface-variant animate-spin ml-1">progress_activity</span>
+        <span v-else-if="savedFlash" class="text-4xs text-green-400 font-bold ml-1">✓</span>
+        <span v-else-if="errorFlash" class="text-4xs text-red-400 font-bold ml-1">✕</span>
     </div>
 
     <!-- ── Modal ─────────────────────────────────────────────────────────── -->
@@ -168,8 +168,8 @@ function closeModal() {
                         <div class="flex items-center gap-3">
                             <!-- Inline save status -->
                             <span v-if="saving" class="material-symbols-outlined text-sm text-on-surface-variant animate-spin">progress_activity</span>
-                            <span v-else-if="savedFlash" class="text-[10px] text-green-400 font-bold uppercase tracking-wider">{{ __('Saved!') }}</span>
-                            <span v-else-if="errorFlash" class="text-[10px] text-red-400 font-bold uppercase tracking-wider">{{ __('Error') }}</span>
+                            <span v-else-if="savedFlash" class="text-3xs text-green-400 font-bold uppercase tracking-wider">{{ __('Saved!') }}</span>
+                            <span v-else-if="errorFlash" class="text-3xs text-red-400 font-bold uppercase tracking-wider">{{ __('Error') }}</span>
 
                             <button
                                 type="button"
@@ -193,7 +193,7 @@ function closeModal() {
 
                     <!-- Footer: hint instead of buttons -->
                     <div class="px-5 py-3 border-t border-white/5 text-center">
-                        <p class="text-[9px] text-on-surface-variant/60 uppercase tracking-widest font-bold">
+                        <p class="text-4xs text-on-surface-variant/60 uppercase tracking-widest font-bold">
                             {{ __('Changes are saved automatically') }}
                         </p>
                     </div>

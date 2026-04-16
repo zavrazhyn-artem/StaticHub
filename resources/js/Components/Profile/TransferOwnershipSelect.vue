@@ -32,11 +32,11 @@ const submit = () => {
 
     <div class="p-4 bg-surface-container-lowest border border-amber-500/20 rounded-lg">
         <div class="mb-3">
-            <div class="font-headline text-[10px] font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
+            <div class="text-3xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">swap_horiz</span>
                 {{ __('Transfer Ownership') }}
             </div>
-            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+            <p class="text-4xs text-gray-500 font-bold uppercase tracking-widest mt-1">
                 {{ __('You will become an officer after transfer.') }}
             </p>
         </div>
@@ -56,7 +56,7 @@ const submit = () => {
                 type="button"
                 :disabled="!selectedId"
                 @click="submit"
-                class="bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-all active:scale-95 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+                class="bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white text-3xs font-bold uppercase tracking-widest py-2 px-4 rounded-lg transition-all active:scale-95 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
             >
                 {{ __('Transfer') }}
             </button>
