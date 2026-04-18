@@ -1210,7 +1210,7 @@ defineExpose({ svgRef });
     <!-- Context menu -->
     <Teleport to="body">
         <div v-if="ctxMenu.show"
-            class="fixed z-[300] bg-[#1e1e22] border border-white/10 rounded-lg shadow-2xl py-1 min-w-[160px]"
+            class="fixed z-[300] bg-[#1e1e22] border border-white/10 rounded-lg shadow-2xl py-1 min-w-40"
             :style="{ left: ctxMenu.x + 'px', top: ctxMenu.y + 'px' }">
             <!-- Group selected -->
             <button v-if="multiSel.length >= 2" @click="groupSelected(); ctxMenu.show = false"

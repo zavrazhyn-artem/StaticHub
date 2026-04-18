@@ -130,9 +130,9 @@ const slotLabels = {
             <!-- thead ──────────────────────────────────────── -->
             <thead class="sticky top-0 z-20">
                 <!-- Group header row -->
-                <tr class="bg-[#1a1a1a] text-gray-500 text-5xs uppercase tracking-wider font-semibold h-8" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#1a1a1a] text-gray-400 text-5xs uppercase tracking-wider font-semibold h-8" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="compare-col" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'"></th>
-                    <th class="p-2 pl-4 w-[200px] min-w-[200px]">{{ __('Character') }}</th>
+                    <th class="p-2 pl-4 w-[12.5rem] min-w-[12.5rem]">{{ __('Character') }}</th>
 
                     <template v-if="activeTab === 'summary'">
                         <th class="p-2 text-center border-l border-[#222] w-[60px]">{{ __('iLvL') }}</th>
@@ -178,7 +178,7 @@ const slotLabels = {
                     <th class="compare-col text-center" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'">
                         <span class="material-symbols-outlined text-sm text-emerald-400 compare-col-content">compare_arrows</span>
                     </th>
-                    <th class="px-4 py-1 w-[200px] min-w-[200px]">
+                    <th class="px-4 py-1 w-[12.5rem] min-w-[12.5rem]">
                         <div class="flex items-center gap-1">
                             <template v-if="showSearch">
                                 <input
@@ -189,7 +189,7 @@ const slotLabels = {
                                     @keydown.escape="toggleSearch"
                                     ref="searchInput"
                                 />
-                                <button @click="toggleSearch" class="text-gray-500 hover:text-white transition-colors shrink-0">
+                                <button @click="toggleSearch" class="text-gray-400 hover:text-white transition-colors shrink-0">
                                     <span class="material-symbols-outlined text-sm">close</span>
                                 </button>
                             </template>
@@ -197,11 +197,11 @@ const slotLabels = {
                                 <span>{{ __('Name') }}</span>
                                 <span class="flex-1"></span>
                                 <button @click="toggleCompareMode"
-                                        :class="['transition-colors', compareMode ? 'text-emerald-400' : 'text-gray-500 hover:text-emerald-400']"
+                                        :class="['transition-colors', compareMode ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-400']"
                                         :title="__('Compare players')">
                                     <span class="material-symbols-outlined text-sm">compare_arrows</span>
                                 </button>
-                                <button @click="toggleSearch" class="text-gray-500 hover:text-emerald-400 transition-colors">
+                                <button @click="toggleSearch" class="text-gray-400 hover:text-emerald-400 transition-colors">
                                     <span class="material-symbols-outlined text-sm">search</span>
                                 </button>
                             </template>
@@ -211,7 +211,7 @@ const slotLabels = {
                     <template v-if="activeTab === 'summary'">
                         <th class="px-2 py-2 text-center w-[60px]">{{ __('Avg') }}</th>
 
-                        <th class="p-2 text-center border-l border-[#222] w-[40px]">#</th>
+                        <th class="p-2 text-center border-l border-[#222] w-10">#</th>
                         <th v-for="slot in ['H','S','C','G','L']" :key="slot"
                             class="p-1 text-center text-on-surface-variant w-8">{{ slot }}</th>
                         <th class="px-2 py-2 border-l border-[#222]">
@@ -241,7 +241,7 @@ const slotLabels = {
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th class="p-2 text-center border-l border-[#222] w-[100px]">{{ __('Issues') }}</th>
+                        <th class="p-2 text-center border-l border-[#222] w-[6.25rem]">{{ __('Issues') }}</th>
                         <th class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
                         <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">
                             {{ __(slotLabels[slot]) }}
@@ -399,7 +399,7 @@ const slotLabels = {
 
             <button
                 @click="toggleCompareMode"
-                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
                 :title="__('Exit compare mode')"
             >
                 <span class="material-symbols-outlined text-lg">close</span>

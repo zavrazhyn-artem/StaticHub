@@ -1154,7 +1154,7 @@ const activeRosterClasses = computed(() => {
         <div v-if="canManageSchedule" class="flex items-center gap-3 flex-wrap">
             <button
                 @click="toggleFeature('boss_roster_enabled', !bossRosterEnabled)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-bold uppercase tracking-wider border transition-all"
                 :class="bossRosterEnabled
                     ? 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -1164,7 +1164,7 @@ const activeRosterClasses = computed(() => {
             </button>
             <button
                 @click="toggleFeature('split_enabled', !splitEnabled)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-bold uppercase tracking-wider border transition-all"
                 :class="splitEnabled
                     ? 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -1180,7 +1180,7 @@ const activeRosterClasses = computed(() => {
             <div class="flex items-center gap-1">
                 <button
                     @click="activeTab = 'roster'"
-                    class="pb-3 px-4 border-b-2 text-3xs font-black uppercase tracking-[0.15em] transition-all"
+                    class="pb-3 px-4 border-b-2 text-3xs font-bold uppercase tracking-[0.15em] transition-all"
                     :class="activeTab === 'roster'
                         ? 'border-fuchsia-400 text-fuchsia-400'
                         : 'border-transparent text-on-surface-variant hover:text-white'"
@@ -1190,7 +1190,7 @@ const activeRosterClasses = computed(() => {
                 </button>
                 <button
                     @click="activeTab = 'planner'"
-                    class="pb-3 px-4 border-b-2 text-3xs font-black uppercase tracking-[0.15em] transition-all"
+                    class="pb-3 px-4 border-b-2 text-3xs font-bold uppercase tracking-[0.15em] transition-all"
                     :class="activeTab === 'planner'
                         ? 'border-fuchsia-400 text-fuchsia-400'
                         : 'border-transparent text-on-surface-variant hover:text-white'"
@@ -1203,7 +1203,7 @@ const activeRosterClasses = computed(() => {
             <!-- Audit button -->
             <button
                 @click="showAuditModal = true"
-                class="flex items-center gap-1.5 px-3 py-1.5 mb-1 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 mb-1 rounded-lg text-4xs font-bold uppercase tracking-wider border transition-all"
                 :class="auditIssueCount > 0
                     ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
                     : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'"
@@ -1212,7 +1212,7 @@ const activeRosterClasses = computed(() => {
                 Audit
                 <span
                     v-if="auditIssueCount > 0"
-                    class="w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center text-5xs font-black"
+                    class="w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center text-5xs font-bold"
                 >{{ auditIssueCount }}</span>
             </button>
         </div>

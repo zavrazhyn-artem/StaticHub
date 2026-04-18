@@ -471,7 +471,7 @@ const noChannelsError = () =>
 
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Static Settings') }}</h1>
+            <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Static Settings') }}</h1>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
@@ -506,7 +506,7 @@ const noChannelsError = () =>
                             :empty-text="__('No servers found.')"
                             accent-color="#5865F2"
                         />
-                        <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic min-h-[48px] flex items-center">
+                        <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic min-h-12 flex items-center">
                             {{ __('Invite the bot to a server first') }}
                         </div>
                         <p v-if="botGuilds.length" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
@@ -833,7 +833,7 @@ const noChannelsError = () =>
                                         v-model="webhookUrlInput"
                                         type="url"
                                         placeholder="https://discord.com/api/webhooks/..."
-                                        class="block w-full h-full min-h-[48px] pl-12 pr-[88px] py-2 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-xs font-bold text-white tracking-wider focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all outline-none placeholder:text-on-surface-variant/30"
+                                        class="block w-full h-full min-h-12 pl-12 pr-[88px] py-2 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-xs font-bold text-white tracking-wider focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all outline-none placeholder:text-on-surface-variant/30"
                                     />
                                     <button
                                         type="button"
@@ -863,12 +863,12 @@ const noChannelsError = () =>
 
                                 <div class="flex-1">
                                     <div v-if="resolvedChannel"
-                                         class="flex items-center gap-3 h-full min-h-[48px] px-4 py-2 bg-surface-container-highest border border-[#5865F2]/20 rounded-lg">
+                                         class="flex items-center gap-3 h-full min-h-12 px-4 py-2 bg-surface-container-highest border border-[#5865F2]/20 rounded-lg">
                                         <span class="material-symbols-outlined text-[#5865F2] text-lg flex-shrink-0">tag</span>
                                         <p class="font-headline text-sm font-bold text-white truncate"># {{ resolvedChannel.channel_name }}</p>
                                     </div>
                                     <div v-else
-                                         class="flex items-center gap-3 h-full min-h-[48px] px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg">
+                                         class="flex items-center gap-3 h-full min-h-12 px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg">
                                         <span class="material-symbols-outlined text-on-surface-variant/40 text-lg flex-shrink-0">tag</span>
                                         <p class="font-headline text-xs font-bold text-on-surface-variant/40 italic tracking-widest">
                                             {{ webhookUrlInput ? __('Verifying...') : __('No channel configured') }}
