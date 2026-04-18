@@ -100,7 +100,7 @@ const getRaidProgression = (char) => {
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
           <!-- Group Header -->
-          <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
+          <tr class="bg-black/20 text-gray-400 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('iLvL') }}</th>
             <th colspan="6" class="p-2 text-center border-l border-white/5">{{ __('Tier Pieces') }}</th>
@@ -111,7 +111,7 @@ const getRaidProgression = (char) => {
           </tr>
           <!-- Sub Header -->
           <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
-            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
+            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[12.5rem] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center">{{ __('Avg') }}</th>
 
             <th class="p-4 text-center border-l border-white/5 w-10">#</th>

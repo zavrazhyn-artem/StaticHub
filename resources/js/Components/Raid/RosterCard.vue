@@ -68,7 +68,7 @@ const { getClassColor, getSpecName } = useWowClasses();
 
             <div class="flex flex-col justify-center">
                 <div
-                    class="text-2xs font-bold leading-none"
+                    class="text-2xs font-semibold leading-none"
                     :class="'text-wow-' + (character.playable_class || '').toLowerCase().replace(' ', '-')"
                 >{{ character.name }}</div>
 

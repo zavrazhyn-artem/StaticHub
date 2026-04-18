@@ -120,7 +120,7 @@ async function disconnectGuild() {
 <template>
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Static Settings') }}</h1>
+            <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Static Settings') }}</h1>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
@@ -157,7 +157,7 @@ async function disconnectGuild() {
                             </div>
                         </div>
                         <button type="button" @click="showGuildModal = true"
-                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-black uppercase tracking-[0.15em] text-on-surface-variant hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-[0.15em] text-on-surface-variant hover:text-white hover:bg-white/5 transition-all border border-white/5">
                             <span class="material-symbols-outlined text-sm">swap_horiz</span>
                             {{ __('Change Guild') }}
                         </button>
@@ -169,7 +169,7 @@ async function disconnectGuild() {
                     <span class="material-symbols-outlined text-4xl text-white/10 mb-3">link_off</span>
                     <p class="text-sm text-on-surface-variant font-bold uppercase tracking-wider mb-4">{{ __('No guild connected') }}</p>
                     <button type="button" @click="showGuildModal = true"
-                            class="inline-flex items-center gap-2 bg-[#ff7d0a]/10 border border-[#ff7d0a]/30 hover:bg-[#ff7d0a] hover:text-black px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-[0.2em] transition-all text-[#ff7d0a]">
+                            class="inline-flex items-center gap-2 bg-[#ff7d0a]/10 border border-[#ff7d0a]/30 hover:bg-[#ff7d0a] hover:text-black px-6 py-2.5 rounded-lg text-3xs font-bold uppercase tracking-[0.2em] transition-all text-[#ff7d0a]">
                         <span class="material-symbols-outlined text-sm">link</span>
                         {{ __('Connect Guild') }}
                     </button>
@@ -296,7 +296,7 @@ async function disconnectGuild() {
             </div>
 
             <div class="space-y-3">
-                <label for="guild_url" class="block text-3xs font-black text-on-surface-variant uppercase tracking-wider">{{ __('WCL Guild URL') }}</label>
+                <label for="guild_url" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-wider">{{ __('WCL Guild URL') }}</label>
                 <input id="guild_url" type="text" v-model="guildUrl"
                        class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-[#ff7d0a]/50"
                        placeholder="https://www.warcraftlogs.com/guild/id/123456"
@@ -313,7 +313,7 @@ async function disconnectGuild() {
             <!-- Disconnect option -->
             <div v-if="guild" class="pt-2 border-t border-white/5">
                 <button type="button" @click="disconnectGuild(); showGuildModal = false"
-                        class="flex items-center gap-2 text-3xs font-black uppercase tracking-wider text-error/60 hover:text-error transition-colors">
+                        class="flex items-center gap-2 text-3xs font-bold uppercase tracking-wider text-error/60 hover:text-error transition-colors">
                     <span class="material-symbols-outlined text-sm">link_off</span>
                     {{ __('Disconnect Guild') }}
                 </button>
@@ -321,12 +321,12 @@ async function disconnectGuild() {
 
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" @click="showGuildModal = false"
-                        class="px-6 py-3 rounded-xl text-3xs font-black uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
+                        class="px-6 py-3 rounded-xl text-3xs font-bold uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
                     {{ __('Cancel') }}
                 </button>
                 <button type="button" @click="connectGuild"
                         :disabled="isConnecting || !guildUrl.trim()"
-                        class="bg-[#ff7d0a] hover:bg-[#ff7d0a]/80 text-black px-8 py-3 rounded-xl text-3xs font-black uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+                        class="bg-[#ff7d0a] hover:bg-[#ff7d0a]/80 text-black px-8 py-3 rounded-xl text-3xs font-bold uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
                     <span v-if="isConnecting" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                     <span v-else class="material-symbols-outlined text-sm">link</span>
                     {{ isConnecting ? __('Connecting...') : __('Connect') }}
@@ -352,31 +352,31 @@ async function disconnectGuild() {
             <div class="space-y-4">
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-3xs font-black text-amber-500">1</span>
+                        <span class="text-3xs font-bold text-amber-500">1</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('After your scheduled raid ends, the system waits the configured number of minutes for logs to be uploaded.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-3xs font-black text-amber-500">2</span>
+                        <span class="text-3xs font-bold text-amber-500">2</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('It then automatically searches your guild on Warcraft Logs for matching reports.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-3xs font-black text-amber-500">3</span>
+                        <span class="text-3xs font-bold text-amber-500">3</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('Found logs are linked to the raid event and sent for AI analysis.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-3xs font-black text-amber-500">4</span>
+                        <span class="text-3xs font-bold text-amber-500">4</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('Once analysis is complete, a notification is sent to your Discord notifications channel with a link to the report.') }}</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <div class="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-3xs font-black text-amber-500">5</span>
+                        <span class="text-3xs font-bold text-amber-500">5</span>
                     </div>
                     <p class="text-sm text-on-surface-variant">{{ __('If no logs are found, a notification is sent with a link to upload logs manually.') }}</p>
                 </div>

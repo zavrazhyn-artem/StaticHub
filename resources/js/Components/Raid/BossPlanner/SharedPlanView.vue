@@ -60,7 +60,7 @@ const highlightedMarkerIds = computed(() => {
             <button
                 v-if="myCharacterIds.length"
                 @click="showingMe = !showingMe"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-bold uppercase tracking-wider border transition-all"
                 :class="showingMe
                     ? 'bg-cyan-400/10 border-cyan-400/30 text-cyan-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"

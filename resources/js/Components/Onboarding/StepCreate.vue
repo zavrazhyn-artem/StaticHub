@@ -13,7 +13,7 @@
                 <span class="text-primary text-3xs font-semibold uppercase tracking-[0.3em] mb-2 block">
                     {{ __('— Step 2') }}
                 </span>
-                <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
+                <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tight italic">
                     {{ __('Create Your Team') }}
                 </h2>
                 <p class="text-on-surface-variant text-sm mt-3 max-w-lg mx-auto">

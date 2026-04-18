@@ -106,8 +106,8 @@ const getAttendance = (charId) => {
     <div class="space-y-2">
         <!-- Total count -->
         <div class="flex items-center justify-between px-1">
-            <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50">{{ __('Roster') }}</span>
-            <span class="text-3xs font-black" :class="totalPresent >= totalLimit ? 'text-green-400' : 'text-on-surface-variant'">
+            <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50">{{ __('Roster') }}</span>
+            <span class="text-3xs font-bold" :class="totalPresent >= totalLimit ? 'text-green-400' : 'text-on-surface-variant'">
                 {{ totalPresent }} / {{ totalLimit }}
             </span>
         </div>
@@ -122,7 +122,7 @@ const getAttendance = (charId) => {
             <div class="flex items-center justify-between px-3 py-1.5 border-b border-white/5">
                 <div class="flex items-center gap-1.5">
                     <img :src="'/images/roles/' + roles[roleKey].icon" class="w-3.5 h-3.5 opacity-70">
-                    <span class="text-4xs font-black uppercase tracking-wider" :class="roles[roleKey].color">
+                    <span class="text-4xs font-bold uppercase tracking-wider" :class="roles[roleKey].color">
                         {{ roles[roleKey].label }}
                     </span>
                 </div>
@@ -201,7 +201,7 @@ const getAttendance = (charId) => {
                     <template v-if="splitEnabled">
                         <span
                             v-if="char.pivot?.split_group"
-                            class="text-5xs font-black px-1 rounded bg-fuchsia-400/20 text-fuchsia-400 leading-none"
+                            class="text-5xs font-bold px-1 rounded bg-fuchsia-400/20 text-fuchsia-400 leading-none"
                         >{{ splitLabels[(char.pivot.split_group || 1) - 1] }}</span>
                         <select
                             v-if="activeSplit === null"
@@ -255,7 +255,7 @@ const getAttendance = (charId) => {
                     <!-- Bench warning badge -->
                     <span
                         v-if="isBenched(char.id)"
-                        class="text-5xs font-black px-1 rounded bg-orange-500/20 text-orange-400 leading-none whitespace-nowrap"
+                        class="text-5xs font-bold px-1 rounded bg-orange-500/20 text-orange-400 leading-none whitespace-nowrap"
                     >{{ benchHistory[char.id]?.bench_count }}/{{ benchHistory[char.id]?.total_events }}</span>
 
                     <button

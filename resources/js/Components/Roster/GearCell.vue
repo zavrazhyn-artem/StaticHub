@@ -63,7 +63,7 @@ const trackAbbreviations = {
 // ---------------------------------------------------------------------------
 
 const qualityColor = computed(() =>
-    props.item ? (QUALITY_COLORS[props.item.quality] ?? 'text-white') : 'text-gray-500'
+    props.item ? (QUALITY_COLORS[props.item.quality] ?? 'text-white') : 'text-gray-400'
 );
 
 const isEnchantable = computed(() =>
@@ -154,7 +154,7 @@ const wowheadData = computed(() => {
             <!-- Audit warning dot -->
             <div v-if="hasMissingOptimization"
                  class="absolute -top-1 -right-1 bg-red-600 rounded-full w-2.5 h-2.5 flex items-center justify-center border border-[#0e0e10] z-20 shadow-sm">
-                <span class="text-5xs text-white font-black leading-none">!</span>
+                <span class="text-5xs text-white font-bold leading-none">!</span>
             </div>
         </a>
 

@@ -138,7 +138,7 @@ async function sendMessage() {
                         <div class="bg-primary/10 border border-primary/20 rounded-2xl rounded-tr-none p-4 max-w-[85%]">
                             <p class="text-xs text-on-surface font-medium leading-relaxed">{{ msg.text }}</p>
                         </div>
-                        <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant opacity-40">User &bull; {{ msg.time }}</span>
+                        <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-40">User &bull; {{ msg.time }}</span>
                     </div>
 
                     <div v-if="msg.role === 'ai'" class="flex flex-col items-start gap-2">
@@ -151,7 +151,7 @@ async function sendMessage() {
                                 <p v-else class="text-xs text-on-surface font-medium leading-relaxed">{{ msg.text }}</p>
                             </div>
                         </div>
-                        <span class="ml-11 text-4xs font-black uppercase tracking-wider text-primary opacity-60">AI Analyst &bull; {{ msg.time }}</span>
+                        <span class="ml-11 text-4xs font-bold uppercase tracking-wider text-primary opacity-60">AI Analyst &bull; {{ msg.time }}</span>
                     </div>
                 </div>
 
@@ -189,7 +189,7 @@ async function sendMessage() {
                 </form>
                 <div class="mt-4 flex items-center gap-2 px-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                    <p class="text-4xs font-black uppercase tracking-wider text-on-surface-variant opacity-60">
+                    <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60">
                         {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }}) {{ __('is loaded.') }}
                     </p>
                 </div>

@@ -16,7 +16,7 @@ defineProps({
         </div>
         <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ label }}</h3>
         <div class="flex items-baseline gap-2">
-            <span class="text-4xl font-black tracking-tighter font-headline" :class="valueColor">{{ value }}</span>
+            <span class="text-4xl font-black tracking-tight font-headline" :class="valueColor">{{ value }}</span>
             <span v-if="subtext" class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ subtext }}</span>
         </div>
         <slot />

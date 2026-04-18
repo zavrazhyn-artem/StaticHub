@@ -99,7 +99,7 @@ function setMain(specId) {
 
                 <!-- Role badge -->
                 <span
-                    class="text-5xs font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
+                    class="text-5xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
                     :class="[
                         roleBadgeClass[spec.role] ?? 'bg-white/10 text-white/60 border-white/10',
                         !isSelected(spec.id) && 'opacity-40',

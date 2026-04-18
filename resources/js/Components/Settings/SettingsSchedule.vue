@@ -127,7 +127,7 @@ const days = {
 
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Static Settings') }}</h1>
+            <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Static Settings') }}</h1>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ scheduleData.static_name }}</p>
         </div>
 

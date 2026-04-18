@@ -242,14 +242,14 @@ const previousBossName = computed(() => {
                 <h3 class="text-sm font-black uppercase tracking-widest text-white">{{ encounterName }}</h3>
                 <span
                     v-if="isInheritedRoster"
-                    class="text-5xs font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400"
+                    class="text-5xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400"
                 >{{ __('From Roster') }}</span>
             </div>
             <div v-if="encounterSlug && canManage" class="flex items-center gap-1.5">
                 <button
                     v-if="isInheritedRoster"
                     @click="autoFillFromRoster"
-                    class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-5xs font-black uppercase tracking-wider bg-fuchsia-400/10 text-fuchsia-400 border border-fuchsia-400/30 hover:bg-fuchsia-400/20 transition-all"
+                    class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-5xs font-bold uppercase tracking-wider bg-fuchsia-400/10 text-fuchsia-400 border border-fuchsia-400/30 hover:bg-fuchsia-400/20 transition-all"
                     :title="__('Save this roster for this boss')"
                 >
                     <span class="material-symbols-outlined text-xs">save</span>
@@ -258,14 +258,14 @@ const previousBossName = computed(() => {
                 <button
                     v-if="previousBossName"
                     @click="copyFromPreviousBoss"
-                    class="flex items-center gap-1 px-2 py-1 rounded-lg text-5xs font-black uppercase tracking-wider bg-white/5 text-on-surface-variant hover:text-white border border-white/10 transition-all"
+                    class="flex items-center gap-1 px-2 py-1 rounded-lg text-5xs font-bold uppercase tracking-wider bg-white/5 text-on-surface-variant hover:text-white border border-white/10 transition-all"
                     :title="'Copy from ' + previousBossName"
                 >
                     <span class="material-symbols-outlined text-xs">content_copy</span>
                 </button>
                 <button
                     @click="showAssignPanel = !showAssignPanel"
-                    class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-5xs font-black uppercase tracking-wider transition-all"
+                    class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-5xs font-bold uppercase tracking-wider transition-all"
                     :class="showAssignPanel
                         ? 'bg-fuchsia-400/20 text-fuchsia-400 border border-fuchsia-400/30'
                         : 'bg-white/5 text-on-surface-variant hover:text-white border border-white/10'"
@@ -285,7 +285,7 @@ const previousBossName = computed(() => {
                 <div v-if="group.chars.length > 0" class="bg-surface-container/60 border border-white/5 rounded-xl overflow-hidden">
                     <div class="px-3 py-1.5 border-b border-white/5 flex items-center gap-2 bg-white/[0.02]">
                         <img :src="'/images/roles/' + group.icon" class="w-3.5 h-3.5 opacity-80" :alt="group.label">
-                        <span class="text-4xs font-black uppercase tracking-wider" :class="group.color">{{ group.label }}</span>
+                        <span class="text-4xs font-bold uppercase tracking-wider" :class="group.color">{{ group.label }}</span>
                         <span class="text-4xs font-semibold text-on-surface-variant ml-auto">{{ group.chars.length }}</span>
                     </div>
                     <div class="p-1.5 space-y-0.5">
@@ -305,7 +305,7 @@ const previousBossName = computed(() => {
                                 >
                                 <div>
                                     <div
-                                        class="text-2xs font-bold leading-none"
+                                        class="text-2xs font-semibold leading-none"
                                         :class="'text-wow-' + (entry.class_name || '').toLowerCase().replace(' ', '-')"
                                     >{{ entry.character_name }}</div>
                                     <div class="text-5xs text-on-surface-variant mt-0.5">{{ entry.spec?.name || '' }}</div>
@@ -333,7 +333,7 @@ const previousBossName = computed(() => {
             <div v-if="queuedChars.length > 0" class="bg-surface-container/60 border border-yellow-500/10 rounded-xl overflow-hidden">
                 <div class="px-3 py-1.5 border-b border-yellow-500/10 flex items-center gap-2 bg-yellow-500/[0.03]">
                     <span class="material-symbols-outlined text-sm text-yellow-500/70">hourglass_top</span>
-                    <span class="text-4xs font-black uppercase tracking-wider text-yellow-500/70">{{ __('Queued') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-yellow-500/70">{{ __('Queued') }}</span>
                     <span class="text-4xs font-semibold text-on-surface-variant ml-auto">{{ queuedChars.length }}</span>
                 </div>
                 <div class="p-1.5 space-y-0.5">
@@ -347,7 +347,7 @@ const previousBossName = computed(() => {
                                 :class="getClassColor(entry.class_name)"></div>
                             <div>
                                 <div
-                                    class="text-2xs font-bold leading-none"
+                                    class="text-2xs font-semibold leading-none"
                                     :class="'text-wow-' + (entry.class_name || '').toLowerCase().replace(' ', '-')"
                                 >{{ entry.character_name }}</div>
                             </div>
@@ -383,7 +383,7 @@ const previousBossName = computed(() => {
         <!-- Assignment panel (slide in) -->
         <div v-if="showAssignPanel && encounterSlug" class="bg-surface-container-high/80 border border-white/10 rounded-xl p-3 space-y-2">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Available Players') }}</span>
+                <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Available Players') }}</span>
                 <button @click="showAssignPanel = false" class="text-on-surface-variant hover:text-white">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>

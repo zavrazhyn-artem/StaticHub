@@ -96,7 +96,7 @@ defineExpose({ close });
             @click="toggle"
             class="relative w-full bg-surface-container-highest border border-white/5 font-headline font-bold tracking-widest transition-all flex items-center justify-between"
             :class="[
-                compact ? 'rounded pl-6 pr-5 py-1 text-4xs' : 'rounded-lg pl-10 pr-8 py-3 text-sm min-h-[48px]',
+                compact ? 'rounded pl-6 pr-5 py-1 text-4xs' : 'rounded-lg pl-10 pr-8 py-3 text-sm min-h-12',
                 loading || disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : 'cursor-pointer hover:border-white/20',

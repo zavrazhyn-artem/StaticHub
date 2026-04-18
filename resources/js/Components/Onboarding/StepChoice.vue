@@ -4,7 +4,7 @@
             <span class="text-primary text-3xs font-semibold uppercase tracking-[0.3em] mb-2 block">
                 {{ __('— Welcome to BlastR') }}
             </span>
-            <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
+            <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tight italic">
                 {{ __('How would you like to start?') }}
             </h2>
             <p class="text-on-surface-variant text-sm mt-3 max-w-lg mx-auto">

@@ -66,7 +66,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
     <div class="h-full flex flex-col text-xs">
         <!-- Header -->
         <div class="shrink-0 px-3 py-2 border-b border-white/5 flex items-center justify-between">
-            <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Roster & Groups') }}</span>
+            <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Roster & Groups') }}</span>
             <button
                 v-if="canManage && Object.keys(groups).length < 6"
                 @click="addGroup"
@@ -83,7 +83,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                     @click="toggleCollapse(group.id)"
                     @drop="handleGroupDrop($event, group.id)" @dragover="handleGroupDragOver">
                     <div class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: group.color }"></div>
-                    <span class="text-4xs font-black uppercase tracking-wider text-white flex-1">{{ group.label }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-white flex-1">{{ group.label }}</span>
                     <span class="text-5xs text-on-surface-variant/50">{{ (group.members || []).length }}</span>
                     <button v-if="canManage" @click.stop="emit('remove-group', group.id)"
                         class="text-on-surface-variant/30 hover:text-red-400 transition-colors" :title="__('Remove group')">
@@ -127,7 +127,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
             <div>
                 <div class="px-3 py-1.5 flex items-center gap-2">
                     <span class="material-symbols-outlined text-xs text-on-surface-variant/40">person</span>
-                    <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
                     <span class="text-5xs text-on-surface-variant/30">{{ unassignedCharacters.length }}</span>
                 </div>
                 <div class="pb-1 px-1.5">
@@ -142,7 +142,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                             class="opacity-0 group-hover/member:opacity-100 flex items-center gap-0.5 transition-all">
                             <button v-for="g in groupEntries" :key="g.id"
                                 @click.stop="assignToGroup(char.id, g.id)"
-                                class="w-4 h-4 rounded-sm flex items-center justify-center text-5xs font-black text-white hover:scale-110 transition-transform"
+                                class="w-4 h-4 rounded-sm flex items-center justify-center text-5xs font-bold text-white hover:scale-110 transition-transform"
                                 :style="{ backgroundColor: g.color + '80' }" :title="__('Assign to') + ' ' + g.label">{{ g.id }}</button>
                         </div>
                     </div>

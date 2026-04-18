@@ -87,7 +87,7 @@
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Tax Tracking') }}</h3>
                 </div>
                 <div class="p-4 space-y-2 overflow-y-auto custom-scrollbar max-h-[468px]">
-                    <div v-for="status in weeklyStatus" :key="status.user_id" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
+                    <div v-for="status in sortedWeeklyStatus" :key="status.user_id" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full" :class="status.is_paid ? 'bg-success-neon shadow-[0_0_8px_rgba(0,255,153,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(255,68,68,0.5)]'"></div>
                             <span class="text-sm font-medium"
@@ -314,6 +314,13 @@ const openEditModal = (tx) => {
     };
     showEditModal.value = true;
 };
+
+const sortedWeeklyStatus = computed(() => {
+    return [...props.weeklyStatus].sort((a, b) => {
+        if (a.is_paid !== b.is_paid) return a.is_paid ? 1 : -1;
+        return (a.display_name || '').localeCompare(b.display_name || '');
+    });
+});
 
 const autonomyValue = computed(() => {
     if (dynamicWeeklyCost.value <= 0) return '∞';

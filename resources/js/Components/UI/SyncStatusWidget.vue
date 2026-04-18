@@ -130,7 +130,7 @@ const circumference = 2 * Math.PI * radius;
            @click="showModal = true">
 
         <!-- Service Label -->
-        <div class="text-5xs font-black text-on-surface-variant uppercase tracking-wider mb-2 group-hover:text-primary transition-colors">
+        <div class="text-5xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 group-hover:text-primary transition-colors">
           {{ service.name }}
         </div>
 
@@ -173,15 +173,15 @@ const circumference = 2 * Math.PI * radius;
             <!-- Center Content -->
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
               <template v-if="getNextRefreshParts(service.id).label">
-                <div class="text-3xs text-primary/60 font-black uppercase tracking-tighter leading-none">
+                <div class="text-3xs text-primary/60 font-bold uppercase tracking-tighter leading-none">
                   {{ getNextRefreshParts(service.id).label }}
                 </div>
               </template>
               <template v-else>
-                <div class="text-3xs text-primary/60 font-black uppercase tracking-tighter leading-none">
+                <div class="text-3xs text-primary/60 font-bold uppercase tracking-tighter leading-none">
                   {{ getNextRefreshParts(service.id).minutes }}
                 </div>
-                <div class="text-4xs text-primary/40 font-black uppercase tracking-tighter leading-none mt-0.5">
+                <div class="text-4xs text-primary/40 font-bold uppercase tracking-tighter leading-none mt-0.5">
                   {{ getNextRefreshParts(service.id).seconds }}
                 </div>
               </template>
@@ -204,7 +204,7 @@ const circumference = 2 * Math.PI * radius;
 
       <div class="grid grid-cols-3 gap-4">
         <div v-for="service in services" :key="'modal-' + service.id" class="flex flex-col items-center">
-          <div class="text-3xs font-black text-on-surface-variant uppercase tracking-wider mb-3">
+          <div class="text-3xs font-bold text-on-surface-variant uppercase tracking-wider mb-3">
             {{ service.name }}
           </div>
 

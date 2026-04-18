@@ -117,7 +117,7 @@ const unlinkDiscord = async () => {
 
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Static Settings') }}</h1>
+            <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Static Settings') }}</h1>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
         </div>
 
@@ -206,7 +206,7 @@ const unlinkDiscord = async () => {
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <div class="text-3xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">{{ __('Not Connected') }}</div>
+                                    <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">{{ __('Not Connected') }}</div>
                                 </template>
                             </div>
                         </div>
@@ -239,7 +239,7 @@ const unlinkDiscord = async () => {
                     <div class="flex items-center justify-between p-4 bg-surface-container-highest border border-white/5 rounded-lg">
                         <div>
                             <div class="text-3xs font-semibold text-white uppercase tracking-wider">{{ s.name }}</div>
-                            <div class="text-3xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">
+                            <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
                                 {{ s.isOwner ? __('Owner') : __('Member') }}
                             </div>
                         </div>
@@ -250,7 +250,7 @@ const unlinkDiscord = async () => {
                                 class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-semibold uppercase tracking-wider py-2 px-4 rounded-sm transition-all active:scale-95 disabled:opacity-50">
                             {{ leaveLoading ? __('Leaving...') : __('Leave') }}
                         </button>
-                        <span v-else class="text-3xs text-gray-500 font-semibold uppercase tracking-wider">{{ __('Owner') }}</span>
+                        <span v-else class="text-3xs text-gray-400 font-semibold uppercase tracking-wider">{{ __('Owner') }}</span>
                     </div>
 
                     <!-- Transfer ownership -->

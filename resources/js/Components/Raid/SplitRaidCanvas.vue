@@ -295,11 +295,11 @@ const removeSplit = (n) => {
         <!-- Header -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50">{{ __('Split Raid') }}</span>
+                <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50">{{ __('Split Raid') }}</span>
                 <button
                     v-if="localSplitCount < 4"
                     @click="addSplit"
-                    class="flex items-center gap-1 px-2 py-1 rounded text-5xs font-black uppercase tracking-wider bg-white/5 border border-white/10 text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
+                    class="flex items-center gap-1 px-2 py-1 rounded text-5xs font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
                 >
                     <span class="material-symbols-outlined text-xs">add</span>
                     {{ __('Add Split') }}
@@ -307,7 +307,7 @@ const removeSplit = (n) => {
             </div>
             <button
                 @click="saveSplits" :disabled="saving"
-                class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
+                class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-4xs font-bold uppercase tracking-wider border transition-all"
                 :class="saved ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400 hover:bg-fuchsia-400/20'"
             >
                 <span class="material-symbols-outlined text-sm">{{ saved ? 'check' : 'save' }}</span>
@@ -324,7 +324,7 @@ const removeSplit = (n) => {
                 @dragover.prevent="onDragOver($event, 0)" @dragleave="onDragLeave" @drop="onDropWithPicker($event, 0)"
             >
                 <div class="px-3 py-2 border-b border-white/5 bg-white/[0.02]">
-                    <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/60">
+                    <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/60">
                         {{ __('Roster') }} ({{ poolUsers.length }})
                     </span>
                 </div>
@@ -391,7 +391,7 @@ const removeSplit = (n) => {
             >
                 <!-- Header: name + audit button + delete -->
                 <div class="px-3 py-2 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                    <span class="text-4xs font-black uppercase tracking-wider text-fuchsia-400">
+                    <span class="text-4xs font-bold uppercase tracking-wider text-fuchsia-400">
                         Split {{ splitLabels[splitNum - 1] }}
                     </span>
                     <div class="flex items-center gap-1.5">
@@ -420,7 +420,7 @@ const removeSplit = (n) => {
                         <div v-if="splitGroups[splitNum]?.[role]?.length > 0" class="mb-1">
                             <div class="flex items-center gap-1 px-1 mb-0.5">
                                 <img :src="'/images/roles/' + roleIcons[role]" class="w-3 h-3 opacity-50">
-                                <span class="text-5xs font-black uppercase tracking-wider" :class="roleColors[role]">{{ splitGroups[splitNum][role].length }}</span>
+                                <span class="text-5xs font-bold uppercase tracking-wider" :class="roleColors[role]">{{ splitGroups[splitNum][role].length }}</span>
                             </div>
                             <div class="space-y-0.5">
                                 <div
@@ -449,7 +449,7 @@ const removeSplit = (n) => {
         <!-- Character picker popup (when dropping user with multiple chars) -->
         <GlassModal :show="charPicker !== null" max-width="max-w-xs" @close="charPicker = null">
             <div v-if="charPicker" class="p-4">
-                <div class="text-3xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-3">
+                <div class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant/50 mb-3">
                     {{ __('Choose character for Split') }} {{ splitLabels[(charPicker.targetSplit || 1) - 1] }}
                 </div>
                 <div class="space-y-1">
@@ -460,7 +460,7 @@ const removeSplit = (n) => {
                     >
                         <img v-if="char.main_spec?.icon_url" :src="char.main_spec.icon_url" class="w-6 h-6 rounded border border-white/10">
                         <div class="flex-1 min-w-0">
-                            <div class="text-2xs font-bold" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</div>
+                            <div class="text-2xs font-semibold" :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')">{{ char.name }}</div>
                             <div class="text-4xs text-on-surface-variant/50">{{ char.main_spec?.name }} · {{ char.item_level }} ilvl
                                 <span v-if="char.role === 'main'" class="text-fuchsia-400">★ main</span>
                             </div>

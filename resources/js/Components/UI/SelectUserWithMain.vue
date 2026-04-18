@@ -67,7 +67,7 @@ defineExpose({ close });
         <!-- Trigger -->
         <div
             @click="toggle"
-            class="relative z-50 w-full bg-surface-container-highest border border-white/10 rounded-lg px-3 py-2 transition-all flex items-center gap-3 min-h-[40px]"
+            class="relative z-50 w-full bg-surface-container-highest border border-white/10 rounded-lg px-3 py-2 transition-all flex items-center gap-3 min-h-10"
             :class="[
                 disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-white/20',
                 open ? 'ring-2 border-transparent' : '',
@@ -87,7 +87,7 @@ defineExpose({ close });
                           :style="{ color: getClassColor(selectedMember.character?.playable_class) }">
                         {{ selectedMember.character?.name || selectedMember.name }}
                     </span>
-                    <span v-if="selectedMember.character" class="text-4xs text-gray-500 font-semibold truncate">
+                    <span v-if="selectedMember.character" class="text-4xs text-gray-400 font-semibold truncate">
                         ({{ selectedMember.name }})
                     </span>
                 </div>
@@ -154,7 +154,7 @@ defineExpose({ close });
                                  :style="{ color: getClassColor(member.character?.playable_class) }">
                                 {{ member.character?.name || member.name }}
                             </div>
-                            <div v-if="member.character" class="text-4xs text-gray-500 font-semibold uppercase tracking-wider truncate">
+                            <div v-if="member.character" class="text-4xs text-gray-400 font-semibold uppercase tracking-wider truncate">
                                 {{ member.name }}
                             </div>
                         </div>

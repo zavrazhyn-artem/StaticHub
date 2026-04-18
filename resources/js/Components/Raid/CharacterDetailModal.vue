@@ -116,7 +116,7 @@ const countKills = (charId) => {
 
             <!-- Spec selector (RL only, when character has multiple specs) -->
             <div v-if="canManage && currentCharSpecs.length > 1" class="mb-4">
-                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Specialization
                 </div>
                 <div class="flex flex-wrap gap-1.5">
@@ -148,7 +148,7 @@ const countKills = (charId) => {
 
             <!-- Lockout status -->
             <div v-if="currentCharLockouts.length" class="mb-4">
-                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Weekly Lockout ({{ diffLabel[difficulty] || difficulty }})
                 </div>
                 <div class="grid grid-cols-3 gap-1">
@@ -168,7 +168,7 @@ const countKills = (charId) => {
 
             <!-- Alt swap (only for managers) -->
             <div v-if="canManage && userAlts.length > 1" class="border-t border-white/10 pt-4">
-                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Available Characters
                 </div>
                 <div class="space-y-1">
@@ -192,7 +192,7 @@ const countKills = (charId) => {
 
                         <div class="flex-1 min-w-0">
                             <div
-                                class="text-2xs font-bold"
+                                class="text-2xs font-semibold"
                                 :class="'text-wow-' + (alt.playable_class || '').toLowerCase().replace(/ /g, '-')"
                             >{{ alt.name }}</div>
                             <div class="text-4xs text-on-surface-variant flex items-center gap-1.5">
@@ -200,7 +200,7 @@ const countKills = (charId) => {
                                 <span class="font-bold">{{ alt.item_level }} ilvl</span>
                                 <span
                                     v-if="alt.role === 'main'"
-                                    class="text-5xs font-black uppercase bg-fuchsia-400/20 text-fuchsia-400 px-1 rounded"
+                                    class="text-5xs font-bold uppercase bg-fuchsia-400/20 text-fuchsia-400 px-1 rounded"
                                 >main</span>
                             </div>
                         </div>

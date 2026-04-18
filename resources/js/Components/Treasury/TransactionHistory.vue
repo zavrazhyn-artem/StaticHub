@@ -6,7 +6,7 @@
                     <a :href="treasuryUrl" class="text-on-surface-variant hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-xl">arrow_back</span>
                     </a>
-                    <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Transaction History') }}</h1>
+                    <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Transaction History') }}</h1>
                 </div>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs ml-9">
                     {{ staticName }} &bull; {{ __('Full Ledger') }}
@@ -64,7 +64,7 @@
                                     {{ tx.type === 'deposit' ? '+' : '-' }}{{ formatGold(tx.amount) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-xs text-on-surface-variant max-w-[200px] truncate">
+                            <td class="px-4 py-4 text-xs text-on-surface-variant max-w-[12.5rem] truncate">
                                 {{ tx.description || '—' }}
                             </td>
                             <td v-if="canManageTreasury" class="px-4 py-4 text-center">

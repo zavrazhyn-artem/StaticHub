@@ -36,7 +36,7 @@ const submit = () => {
                 <span class="material-symbols-outlined text-sm">swap_horiz</span>
                 {{ __('Transfer Ownership') }}
             </div>
-            <p class="text-4xs text-gray-500 font-semibold uppercase tracking-wider mt-1">
+            <p class="text-4xs text-gray-400 font-semibold uppercase tracking-wider mt-1">
                 {{ __('You will become an officer after transfer.') }}
             </p>
         </div>

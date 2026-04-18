@@ -23,7 +23,7 @@
                         <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
                             {{ __('Privacy') }}
                         </h2>
-                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             {{ __('Control how your identity is shown to other members.') }}
                         </p>
                     </header>
@@ -37,7 +37,7 @@
                                 <div class="text-3xs font-semibold text-white uppercase tracking-wider">
                                     {{ __('Hide BattleTag') }}
                                 </div>
-                                <div class="text-2xs text-gray-500 font-medium mt-1 leading-relaxed">
+                                <div class="text-2xs text-gray-400 font-medium mt-1 leading-relaxed">
                                     {{ __('When enabled, other members will see your main character name instead of your BattleTag.') }}
                                 </div>
                             </div>
@@ -62,7 +62,7 @@
                         <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
                             {{ __('Integrations') }}
                         </h2>
-                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             {{ __('Connect your external accounts for enhanced functionality.') }}
                         </p>
                     </header>
@@ -83,7 +83,7 @@
                                             <span class="material-symbols-outlined text-success-neon text-sm">check_circle</span>
                                         </div>
                                     @else
-                                        <div class="text-3xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">{{ __('Not Connected') }}</div>
+                                        <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">{{ __('Not Connected') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -113,7 +113,7 @@
                         <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
                             {{ __('Static Group') }}
                         </h2>
-                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             {{ __('Manage your static group membership.') }}
                         </p>
                     </header>
@@ -123,7 +123,7 @@
                         <div class="flex items-center justify-between p-4 bg-surface-container-lowest border border-white/5 rounded-lg">
                             <div>
                                 <div class="text-3xs font-semibold text-white uppercase tracking-wider">{{ $static->name }}</div>
-                                <div class="text-3xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">
+                                <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
                                     @if($static->owner_id === auth()->id())
                                         {{ __('Owner') }}
                                     @else
@@ -142,7 +142,7 @@
                                     </button>
                                 </form>
                             @else
-                                <span class="text-3xs text-gray-500 font-semibold uppercase tracking-wider">{{ __('Owner') }}</span>
+                                <span class="text-3xs text-gray-400 font-semibold uppercase tracking-wider">{{ __('Owner') }}</span>
                             @endif
                         </div>
 

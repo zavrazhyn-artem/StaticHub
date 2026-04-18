@@ -90,7 +90,7 @@ const onToggleAll = (event) => {
                 v-if="index === 0 || encounter.instance !== encounters[index - 1]?.instance"
                 class="px-3 pt-3 pb-1"
             >
-                <span class="text-5xs font-black uppercase tracking-[0.2em] text-on-surface-variant/60">
+                <span class="text-5xs font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">
                     {{ encounter.instance }}
                 </span>
             </div>
@@ -134,18 +134,18 @@ const onToggleAll = (event) => {
                 </div>
 
                 <div class="flex-1 min-w-0">
-                    <div class="text-2xs font-bold leading-tight truncate flex items-center gap-1">
+                    <div class="text-2xs font-semibold leading-tight truncate flex items-center gap-1">
                         {{ encounter.name }}
                         <span v-if="assignedPlans[encounter.slug]" class="material-symbols-outlined text-2xs text-orange-400" title="Plan assigned">map</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span
                             v-if="!isEncounterChecked(encounter.slug)"
-                            class="text-5xs font-black text-on-surface-variant/50"
+                            class="text-5xs font-bold text-on-surface-variant/50"
                         >{{ __('Skipped') }}</span>
                         <span
                             v-else-if="getSelectedCount(encounter.slug) > 0"
-                            class="text-5xs font-black"
+                            class="text-5xs font-bold"
                             :class="hasSavedRoster(encounter.slug) ? 'text-fuchsia-400' : 'text-on-surface-variant/60'"
                         >{{ getSelectedCount(encounter.slug) }} {{ hasSavedRoster(encounter.slug) ? __('selected') : __('inherited') }}</span>
                         <span v-else class="text-5xs text-on-surface-variant/40">{{ __('No assignments') }}</span>

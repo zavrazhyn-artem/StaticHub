@@ -42,7 +42,7 @@ const missingItems = computed(() => {
 <template>
     <div class="bg-surface-container/60 border border-white/5 rounded-xl p-3 backdrop-blur-sm">
         <div v-for="section in coverage" :key="section.label" class="mb-2 last:mb-0">
-            <div class="text-5xs font-black uppercase tracking-[0.15em] text-on-surface-variant/50 mb-1.5">{{ section.label }}</div>
+            <div class="text-5xs font-bold uppercase tracking-[0.15em] text-on-surface-variant/50 mb-1.5">{{ section.label }}</div>
             <div class="flex flex-wrap gap-1">
                 <div
                     v-for="item in section.items"

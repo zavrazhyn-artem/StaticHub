@@ -96,7 +96,7 @@ const unassignPlan = async () => {
                             <span class="material-symbols-outlined text-sm text-green-400">check_circle</span>
                         </div>
                         <div>
-                            <div class="text-4xs font-black uppercase tracking-wider text-green-400/60">{{ __('Assigned Plan') }}</div>
+                            <div class="text-4xs font-bold uppercase tracking-wider text-green-400/60">{{ __('Assigned Plan') }}</div>
                             <div class="text-xs font-bold text-white">{{ assignedPlan.title || currentEncounter?.name }}</div>
                             <div class="flex items-center gap-2 mt-0.5">
                                 <span class="text-5xs font-semibold uppercase px-1.5 py-0.5 rounded"
@@ -127,7 +127,7 @@ const unassignPlan = async () => {
 
             <!-- Plans list (select to assign) -->
             <div v-if="plans.length > 0" class="space-y-1.5">
-                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/40 px-1">
+                <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/40 px-1">
                     {{ assignedPlan ? __('Other Plans') : __('Select a plan to assign') }}
                 </div>
                 <template v-for="plan in plans" :key="plan.id">

@@ -166,7 +166,7 @@ function mainSpecName(charId) {
                             {{ char.name }}
                             <span
                                 v-if="isMain(char.id)"
-                                class="px-1.5 py-0.5 rounded-full bg-teal-400/20 text-teal-400 border border-teal-400/30 text-5xs uppercase tracking-wider font-black"
+                                class="px-1.5 py-0.5 rounded-full bg-teal-400/20 text-teal-400 border border-teal-400/30 text-5xs uppercase tracking-wider font-bold"
                             >{{ __('Main') }}</span>
                         </div>
                         <div class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider flex items-center gap-2">
@@ -179,7 +179,7 @@ function mainSpecName(charId) {
 
                 <!-- Item Level -->
                 <div class="col-span-2 text-center">
-                    <span class="font-headline font-black text-2xl tracking-tighter text-on-surface">
+                    <span class="font-headline font-black text-2xl tracking-tight text-on-surface">
                         {{ char.equipped_item_level ?? '?' }}
                     </span>
                 </div>
