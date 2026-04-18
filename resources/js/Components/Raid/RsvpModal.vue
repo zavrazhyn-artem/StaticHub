@@ -126,7 +126,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
                             :class="rsvpStatus === status
                                 ? 'bg-green-600/20 border-green-500 text-green-400'
                                 : 'bg-white/5 border-white/10 text-on-surface-variant'"
-                        >{{ status }}</button>
+                        >{{ __(status.charAt(0).toUpperCase() + status.slice(1)) }}</button>
                         <input type="hidden" name="status" :value="rsvpStatus">
                     </div>
                 </div>
