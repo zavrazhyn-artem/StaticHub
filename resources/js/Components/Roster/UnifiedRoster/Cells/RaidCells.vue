@@ -31,11 +31,11 @@ const getBossData = (raidName, bossName) => {
             :title="`${bossName} (${raid.name}) – ${getBossData(raid.name, bossName)?.[selectedDifficulty] ? __('Killed') : __('Not killed')} (${selectedDifficulty})`">
             <div class="flex items-center justify-center px-1" :class="isAlt ? 'py-0' : 'py-2.5'">
                 <span v-if="getBossData(raid.name, bossName)?.[selectedDifficulty]"
-                      class="font-black leading-none"
-                      :class="[killMarkClass, isAlt ? 'text-sm opacity-70' : 'text-base']">✔</span>
+                      class="material-symbols-outlined leading-none"
+                      :class="[killMarkClass, isAlt ? 'text-base opacity-70' : 'text-xl']">check</span>
                 <span v-else
-                      class="text-red-500 font-black leading-none"
-                      :class="isAlt ? 'text-sm opacity-30' : 'text-base opacity-50'">✖</span>
+                      class="material-symbols-outlined text-red-500 leading-none"
+                      :class="isAlt ? 'text-base opacity-30' : 'text-xl opacity-50'">close</span>
             </div>
         </td>
     </template>

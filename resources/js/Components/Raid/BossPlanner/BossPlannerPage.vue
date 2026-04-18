@@ -881,7 +881,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <!-- Page header -->
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-black text-white uppercase tracking-tighter font-headline leading-none">
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight">
                     {{ __('Boss Planner') }}
                 </h1>
                 <p class="text-xs text-on-surface-variant mt-1">
@@ -894,7 +894,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <!-- Encounter accordion -->
         <div v-for="(bosses, instanceName) in instanceGroups" :key="instanceName" class="space-y-2">
             <div class="px-1 flex items-center gap-2 mt-4">
-                <span class="text-4xs font-black uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
+                <span class="text-4xs font-bold uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
@@ -934,7 +934,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                 <span class="material-symbols-outlined text-xs text-orange-400">map</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="text-2xs font-bold text-white truncate group-hover:text-orange-300 transition-colors">
+                                <div class="text-2xs font-semibold text-white truncate group-hover:text-orange-300 transition-colors">
                                     {{ plan.title || enc.name }}
                                 </div>
                                 <div class="flex items-center gap-2 mt-0.5">
@@ -1030,14 +1030,14 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5">
                             <button
                                 @click="editorTab = 'map'"
-                                class="px-4 py-1.5 rounded-md text-4xs font-black uppercase tracking-wider transition-all"
+                                class="px-4 py-1.5 rounded-md text-4xs font-bold uppercase tracking-wider transition-all"
                                 :class="editorTab === 'map' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
                                 <span class="material-symbols-outlined text-xs align-middle mr-0.5">map</span> {{ __('Map') }}
                             </button>
                             <button
                                 @click="editorTab = 'cooldowns'"
-                                class="px-4 py-1.5 rounded-md text-4xs font-black uppercase tracking-wider transition-all"
+                                class="px-4 py-1.5 rounded-md text-4xs font-bold uppercase tracking-wider transition-all"
                                 :class="editorTab === 'cooldowns' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
                                 <span class="material-symbols-outlined text-xs align-middle mr-0.5">timer</span> {{ __('Cooldowns') }}
@@ -1051,7 +1051,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             v-if="canManage && localPlan"
                             @click="savePlan"
                             :disabled="saving"
-                            class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-3xs font-black uppercase tracking-wider transition-all"
+                            class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-3xs font-bold uppercase tracking-wider transition-all"
                             :class="saveSuccess
                                 ? 'bg-green-500/20 text-green-400'
                                 : saving
@@ -1065,7 +1065,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <button
                             v-if="myCharacterIds.length > 0 && localPlan"
                             @click="toggleShowMe"
-                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-3xs font-black uppercase tracking-wider transition-all"
+                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-3xs font-bold uppercase tracking-wider transition-all"
                             :class="showingMe ? 'bg-yellow-500/20 text-yellow-400 animate-pulse' : 'bg-white/5 text-on-surface-variant hover:text-white hover:bg-white/10'"
                             :title="__('Show Me')"
                         >
@@ -1121,7 +1121,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                 <button
                                     v-if="canManage"
                                     @click="createPlan"
-                                    class="mt-5 px-6 py-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-3xs font-black uppercase tracking-wider hover:bg-orange-500/20 transition-all"
+                                    class="mt-5 px-6 py-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-3xs font-bold uppercase tracking-wider hover:bg-orange-500/20 transition-all"
                                 >
                                     <span class="material-symbols-outlined text-sm align-middle mr-1">add</span>
                                     {{ __('Create Plan') }}
@@ -1245,7 +1245,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 @mousedown="startSelDrag">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-on-surface-variant/50">drag_indicator</span>
-                    <span class="text-4xs font-black uppercase tracking-wider text-orange-400">{{ __('Current Selection') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-orange-400">{{ __('Current Selection') }}</span>
                 </div>
                 <button @click="clearSelection" class="text-on-surface-variant/50 hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">close</span>
@@ -1279,7 +1279,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Label input (not for waypoint/path) -->
                 <div v-if="!(currentSelection.type === 'shape' && currentSelection.id === 'waypoint')" class="space-y-1">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Label (optional)') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Label (optional)') }}</label>
                     <input
                         v-model="selectionLabel"
                         type="text"
@@ -1290,7 +1290,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Direction toggle -->
                 <div v-if="canToggleDirection(currentSelection)" class="flex items-center justify-between">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
                     <button
                         @click="selectionShowDirection = !selectionShowDirection"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1303,7 +1303,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Fill toggle (circle, rect, cone) -->
                 <div v-if="canHaveFill(currentSelection)" class="flex items-center justify-between">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
                     <button
                         @click="selectionFilled = !selectionFilled"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1316,7 +1316,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Color picker (shapes & text only) -->
                 <div v-if="currentSelection.type === 'shape'" class="space-y-1.5">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                     <div class="flex items-center gap-1.5">
                         <button v-for="c in colorPresets" :key="c"
                             @click="selectionColor = c"
@@ -1353,7 +1353,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 @mousedown="startEditDrag">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-on-surface-variant/50">drag_indicator</span>
-                    <span class="text-4xs font-black uppercase tracking-wider text-orange-500">{{ __('Edit Element') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-orange-500">{{ __('Edit Element') }}</span>
                 </div>
                 <button @click="editSel = null" class="text-on-surface-variant/50 hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">close</span>
@@ -1375,7 +1375,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                     <!-- Direction toggle for all -->
                     <div class="flex items-center justify-between">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction All') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction All') }}</label>
                         <div class="flex gap-1">
                             <button @click="updateEditProp({ showDirection: true })"
                                 class="px-2 py-0.5 rounded text-5xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">{{ __('ON') }}</button>
@@ -1386,7 +1386,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                     <!-- Formation presets -->
                     <div class="space-y-1">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Formation') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Formation') }}</label>
                         <div class="grid grid-cols-3 gap-1">
                             <button v-for="f in groupFormations" :key="f.id"
                                 @click="rearrangeGroupFormation(f.id)"
@@ -1400,7 +1400,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                     <!-- Color for arrow groups -->
                     <div v-if="editSel.type === 'arrow'" class="space-y-1.5">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                         <div class="flex items-center gap-1.5">
                             <button v-for="c in colorPresets" :key="c"
                                 @click="updateEditProp({ color: c })"
@@ -1440,7 +1440,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                     <!-- Label edit -->
                     <div v-if="editSel.type === 'marker' || editSel.type === 'player'" class="space-y-1">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Label') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Label') }}</label>
                     <input
                         :value="editSel.type === 'player' ? (editElement.customLabel || '') : (editElement.label || '')"
                         @input="updateEditProp(editSel.type === 'player' ? { customLabel: $event.target.value } : { label: $event.target.value })"
@@ -1451,7 +1451,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Text edit (for text labels) -->
                 <div v-if="editSel.type === 'label'" class="space-y-1">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Text') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Text') }}</label>
                     <input
                         :value="editElement.text || ''"
                         @input="updateEditProp({ text: $event.target.value })"
@@ -1462,7 +1462,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Fill toggle (for shapes circle/rect/cone) -->
                 <div v-if="canEditFill(editSel.type, editElement)" class="flex items-center justify-between">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
                     <button
                         @click="updateEditProp({
                             filled: !(editElement.filled ?? true),
@@ -1478,7 +1478,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Direction toggle -->
                 <div v-if="canToggleDirectionForElement(editSel.type, editElement)" class="flex items-center justify-between">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
                     <button
                         @click="updateEditProp({ showDirection: !(editElement.showDirection ?? (editElement.playerData ? true : false)) })"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1492,7 +1492,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Font size (for text labels) -->
                 <div v-if="editSel.type === 'label'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Font Size') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Font Size') }}</label>
                         <span class="text-4xs font-semibold text-white">{{ editElement.fontSize || 14 }}px</span>
                     </div>
                     <input type="range" min="8" max="48" step="1"
@@ -1504,7 +1504,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Opacity (shapes and labels only) -->
                 <div v-if="editSel.type === 'shape' || editSel.type === 'label'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Opacity') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Opacity') }}</label>
                         <span class="text-4xs font-semibold text-white">{{ Math.round((editElement.opacity ?? 1) * 100) }}%</span>
                     </div>
                     <input type="range" min="10" max="100" step="5"
@@ -1516,7 +1516,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Cone angle (for sector shapes) -->
                 <div v-if="editSel.type === 'shape' && editElement.type === 'cone'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Spread') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Spread') }}</label>
                         <span class="text-4xs font-semibold text-white">{{ Math.round((editElement.spread ?? 0.5) * 180 / Math.PI) }}°</span>
                     </div>
                     <input type="range" min="10" max="180" step="5"
@@ -1527,7 +1527,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Color (for shapes, labels, arrows) -->
                 <div v-if="editSel.type === 'shape' || editSel.type === 'label' || editSel.type === 'arrow'" class="space-y-1.5">
-                    <label class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                     <div class="flex items-center gap-1.5">
                         <button v-for="c in colorPresets" :key="c"
                             @click="editSel.type === 'shape'
@@ -1549,7 +1549,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <div v-if="showSharePopup"
             class="fixed inset-0 z-[290] flex items-center justify-center bg-black/50"
             @click.self="showSharePopup = false" @mousedown.stop>
-            <div class="bg-[#1e1e22] border border-white/10 rounded-xl shadow-2xl p-5 w-[400px] space-y-4">
+            <div class="bg-[#1e1e22] border border-white/10 rounded-xl shadow-2xl p-5 w-[25rem] space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-black uppercase tracking-widest text-white">{{ __('Share Plan') }}</span>
                     <button @click="showSharePopup = false" class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-lg">close</span></button>
@@ -1584,7 +1584,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 space-y-4 text-2xs">
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Navigation') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Navigation') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Pan canvas') }}</span><span class="font-mono text-white/50">{{ __('Drag empty space') }}</span></div>
                             <div class="flex justify-between"><span>{{ __('Pan (always)') }}</span><span class="font-mono text-white/50">{{ __('Middle mouse drag') }}</span></div>
@@ -1593,7 +1593,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Selection') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Selection') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Select element') }}</span><span class="font-mono text-white/50">{{ __('Click') }}</span></div>
                             <div class="flex justify-between"><span>{{ __('Multi-select') }}</span><span class="font-mono text-white/50">Ctrl + {{ __('Click') }}</span></div>
@@ -1602,7 +1602,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Editing') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Editing') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Move element') }}</span><span class="font-mono text-white/50">{{ __('Drag') }}</span></div>
                             <div class="flex justify-between"><span>{{ __('Resize') }}</span><span class="font-mono text-white/50">{{ __('Drag blue corner handles') }}</span></div>
@@ -1612,7 +1612,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Shortcuts') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Shortcuts') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Undo') }}</span><span class="font-mono text-white/50">Ctrl + Z</span></div>
                             <div class="flex justify-between"><span>{{ __('Redo') }}</span><span class="font-mono text-white/50">Ctrl + Shift + Z</span></div>
@@ -1624,7 +1624,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Placing Elements') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Placing Elements') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Place icon/marker') }}</span><span class="font-mono text-white/50">{{ __('Select from panel') }} → {{ __('Click canvas') }}</span></div>
                             <div class="flex justify-between"><span>{{ __('Draw shape') }}</span><span class="font-mono text-white/50">{{ __('Select shape') }} → {{ __('Click & drag') }}</span></div>
@@ -1633,14 +1633,14 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Steps / Phases') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Steps / Phases') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div class="flex justify-between"><span>{{ __('Rename step') }}</span><span class="font-mono text-white/50">{{ __('Double-click tab') }}</span></div>
                             <div class="flex justify-between"><span>{{ __('Add step') }}</span><span class="font-mono text-white/50">{{ __('+ button') }} → {{ __('New / Copy') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-4xs font-black uppercase tracking-wider text-orange-500 mb-2">{{ __('Toolbar Panels') }}</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Toolbar Panels') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
                             <div>{{ __('Multiple panels can be open simultaneously. Each is draggable.') }}</div>
                             <div><span class="text-white font-bold">{{ __('Markers') }}</span> — {{ __('Raid markers (skull, cross, etc.)') }}</div>
@@ -1666,7 +1666,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 v-model="textPopupInput"
                 type="text"
                 :placeholder="__('Enter text...')"
-                class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:ring-1 focus:ring-orange-500 outline-none w-[160px]"
+                class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:ring-1 focus:ring-orange-500 outline-none w-40"
                 @keydown.enter="confirmTextPopup"
                 @keydown.escape="cancelTextPopup"
                 autofocus

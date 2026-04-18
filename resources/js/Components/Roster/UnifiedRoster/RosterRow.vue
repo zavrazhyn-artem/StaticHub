@@ -192,7 +192,7 @@ const emit = defineEmits([
                     <span class="material-symbols-outlined text-xs">warning</span>
                     {{ (effectiveChar.missing_enchants_slots?.length ?? 0) + (effectiveChar.low_quality_enchants_slots?.length ?? 0) + (effectiveChar.empty_sockets_count ?? 0) }}
                 </span>
-                <span v-else class="text-gray-600 text-3xs">✓</span>
+                <span v-else class="material-symbols-outlined text-gray-600 text-xs">check</span>
             </td>
 
             <!-- Role / Status selects (summary only, main character only) -->

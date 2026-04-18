@@ -12,7 +12,7 @@
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-md bg-surface-container-highest flex flex-col items-center justify-center border border-white/5 group-hover:border-primary/50 transition-colors">
                             <span class="text-5xs font-semibold text-on-surface-variant uppercase tracking-tighter leading-none">{{ event.month }}</span>
-                            <span class="text-sm font-black text-white leading-none">{{ event.day }}</span>
+                            <span class="text-sm font-black text-white leading-none tabular-nums">{{ event.day }}</span>
                         </div>
                         <div>
                             <div class="text-4xs font-semibold text-white uppercase tracking-wider">{{ event.dayOfWeek }}</div>
@@ -27,7 +27,7 @@
                             </div>
                         </div>
                     </div>
-                    <span class="bg-surface-container-highest group-hover:bg-primary/20 group-hover:text-primary text-on-surface-variant px-2 py-0.5 rounded text-5xs font-black uppercase tracking-wider transition-all">{{ __('INTEL') }}</span>
+                    <span class="bg-surface-container-highest group-hover:bg-primary/20 group-hover:text-primary text-on-surface-variant px-2 py-0.5 rounded text-5xs font-bold uppercase tracking-wider transition-all">{{ __('INTEL') }}</span>
                 </a>
             </template>
             <div v-else class="text-center py-3 text-on-surface-variant italic text-3xs border border-dashed border-white/5 rounded-lg">

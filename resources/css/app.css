@@ -1,6 +1,32 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource/orbitron/400.css';
+@import '@fontsource/orbitron/500.css';
+@import '@fontsource/orbitron/700.css';
+@import '@fontsource/orbitron/900.css';
+
+/* Material Symbols (self-hosted, replaces Google Fonts link) */
+@import 'material-symbols/outlined.css';
+
+@import '@fontsource-variable/exo-2';
+@import '@fontsource-variable/montserrat';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   FONT CONFIG — Single source of truth.
+   Change the variables below to swap a font across the entire app.
+   Before swapping, make sure the new font is @imported above.
+   ============================================================ */
+:root {
+    --font-body:     'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-headline: 'Montserrat Variable', 'Montserrat', sans-serif;
+    --font-nav:      'Exo 2 Variable', 'Exo 2', sans-serif;
+    --font-slogan:   'Orbitron', sans-serif;
+    --focus-ring:    #4fd3f7;
+}
 
 @layer base {
     html {
@@ -10,10 +36,30 @@
     }
     body {
         @apply bg-background text-on-background min-h-screen;
-        font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-family: var(--font-body);
         text-rendering: optimizeLegibility;
-        font-feature-settings: 'cv11', 'ss01', 'ss03';
+        font-feature-settings: 'cv11', 'ss01', 'ss03', 'ss08';
     }
+    table {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Keyboard-only focus outline (mouse clicks не показують).
+       Per-component focus:ring-* утиліти перекривають це завдяки вищій specificity. */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:not([tabindex="-1"]):focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+    }
+}
+
+@layer utilities {
+    .tabular { font-variant-numeric: tabular-nums; }
 }
 
 /* Subtle page scrollbar (Chrome, Edge, Safari) — only on html */

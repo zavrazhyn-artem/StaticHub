@@ -3,7 +3,7 @@
         <div class="flex justify-between items-end mb-4">
             <div>
                 <span class="text-cyan-400 font-headline text-xs font-bold uppercase tracking-[0.3em] mb-2 block">{{ __('— Strategic Command') }}</span>
-                <h2 class="font-headline text-4xl font-black text-white uppercase tracking-tighter italic">
+                <h2 class="font-headline text-4xl font-black text-white uppercase tracking-tight italic">
                     {{ __('Static Participation') }}
                 </h2>
                 <p class="text-on-surface-variant font-medium mt-2 max-w-2xl text-sm leading-relaxed">

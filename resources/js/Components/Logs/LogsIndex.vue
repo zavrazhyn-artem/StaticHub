@@ -153,11 +153,11 @@ const displayDifficultyText = computed(() => {
     <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <div class="flex items-center gap-3 mb-2 text-indigo-400 text-3xs font-black uppercase tracking-[0.3em]">
+                <div class="flex items-center gap-3 mb-2 text-indigo-400 text-3xs font-bold uppercase tracking-[0.3em]">
                     <span class="material-symbols-outlined text-lg">terminal</span>
                     {{ __('Mission Intelligence Hub') }}
                 </div>
-                <h1 class="text-5xl font-black text-white uppercase tracking-tighter font-headline leading-none">{{ __('Tactical Logs') }}</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight">{{ __('Tactical Logs') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-2 uppercase tracking-widest text-xs flex items-center gap-2">
                     {{ staticName }}
                     <span class="opacity-20">•</span>
@@ -235,7 +235,7 @@ const displayDifficultyText = computed(() => {
                 </form>
 
                 <button type="button" @click="showModal = true"
-                        class="flex items-center justify-center gap-2 bg-indigo-400/10 border border-indigo-400/30 hover:bg-indigo-400 hover:text-black px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-[0.2em] transition-all text-indigo-400 h-[42px] whitespace-nowrap w-full md:w-auto">
+                        class="flex items-center justify-center gap-2 bg-indigo-400/10 border border-indigo-400/30 hover:bg-indigo-400 hover:text-black px-6 py-2.5 rounded-lg text-3xs font-bold uppercase tracking-[0.2em] transition-all text-indigo-400 h-[42px] whitespace-nowrap w-full md:w-auto">
                     <span class="material-symbols-outlined text-sm">upload_file</span>
                     {{ __('Process Manual Log') }}
                 </button>
@@ -252,16 +252,16 @@ const displayDifficultyText = computed(() => {
                         <div>
                             <div class="space-y-1">
                                 <div class="flex justify-between">
-                                    <div class="text-3xs font-black text-on-surface-variant uppercase tracking-wider opacity-60">
+                                    <div class="text-3xs font-bold text-on-surface-variant uppercase tracking-wider opacity-60">
                                         {{ log.date }}
                                     </div>
                                     <span v-if="log.has_ai"
-                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-4xs font-black text-success-neon uppercase tracking-wider">
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-4xs font-bold text-success-neon uppercase tracking-wider">
                                     <span class="w-1 h-1 bg-success-neon rounded-full animate-pulse"></span>
                                     {{ __('Analyzed') }}
                                     </span>
                                     <span v-else
-                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded-full text-4xs font-black text-indigo-400 uppercase tracking-wider">
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded-full text-4xs font-bold text-indigo-400 uppercase tracking-wider">
                                     <span class="w-1 h-1 bg-indigo-400 rounded-full animate-pulse"></span>
                                     {{ __('Pending AI') }}
                                     </span>
@@ -282,12 +282,12 @@ const displayDifficultyText = computed(() => {
                         <div class="flex items-center justify-between pt-2">
                             <div class="flex gap-4">
                                 <div class="text-center">
-                                    <div class="text-3xs font-black text-white">WCL</div>
+                                    <div class="text-3xs font-bold text-white">WCL</div>
                                     <div class="text-5xs font-semibold text-on-surface-variant uppercase tracking-tighter opacity-60">{{ __('Report') }}</div>
                                 </div>
                             </div>
 
-                            <a :href="log.url" class="flex items-center gap-2 bg-white/5 hover:bg-indigo-400 hover:text-black px-4 py-2 rounded-lg text-3xs font-black uppercase tracking-[0.15em] transition-all group/btn">
+                            <a :href="log.url" class="flex items-center gap-2 bg-white/5 hover:bg-indigo-400 hover:text-black px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-[0.15em] transition-all group/btn">
                                 {{ __('Open Files') }}
                                 <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
                             </a>
@@ -331,7 +331,7 @@ const displayDifficultyText = computed(() => {
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-error text-xl">timer</span>
                                 <div>
-                                    <p class="text-3xs font-black text-error uppercase tracking-wider">{{ __('Cooldown Active') }}</p>
+                                    <p class="text-3xs font-bold text-error uppercase tracking-wider">{{ __('Cooldown Active') }}</p>
                                     <p class="text-on-surface-variant text-4xs font-semibold uppercase tracking-wider mt-0.5">
                                         {{ __('Next upload available in') }}
                                     </p>
@@ -347,7 +347,7 @@ const displayDifficultyText = computed(() => {
 
                             <div class="space-y-6">
                                 <div>
-                                    <label for="wcl_url" class="block text-indigo-400/60 uppercase tracking-wider text-3xs font-black mb-2">{{ __('WCL Report URL') }}</label>
+                                    <label for="wcl_url" class="block text-indigo-400/60 uppercase tracking-wider text-3xs font-bold mb-2">{{ __('WCL Report URL') }}</label>
                                     <input id="wcl_url" name="wcl_url" type="text" v-model="wclUrl"
                                            :disabled="isOnCooldown"
                                            class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-indigo-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -369,12 +369,12 @@ const displayDifficultyText = computed(() => {
 
                             <div class="mt-8 flex justify-end gap-3">
                                 <button type="button" @click="showModal = false"
-                                        class="px-6 py-3 rounded-xl text-3xs font-black uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
+                                        class="px-6 py-3 rounded-xl text-3xs font-bold uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
                                     {{ __('Cancel') }}
                                 </button>
                                 <button type="submit"
                                         :disabled="isOnCooldown"
-                                        class="bg-indigo-400 hover:bg-indigo-300 text-black px-8 py-3 rounded-xl text-3xs font-black uppercase tracking-[0.2em] shadow-lg shadow-indigo-400/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-400"
+                                        class="bg-indigo-400 hover:bg-indigo-300 text-black px-8 py-3 rounded-xl text-3xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-indigo-400/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-400"
                                         @click.prevent="submitManualLog">
                                     {{ __('Submit for Analysis') }}
                                 </button>

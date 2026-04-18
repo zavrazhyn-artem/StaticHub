@@ -11,12 +11,12 @@
                         </div>
                         <div>
                             <div class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider">{{ __('Guild Bank') }}</div>
-                            <div class="text-sm font-black text-[#FFD700]">{{ reserves }}</div>
+                            <div class="text-sm font-black text-[#FFD700] tabular-nums">{{ reserves }}</div>
                         </div>
                     </div>
                     <div class="text-right">
                         <div class="text-5xs text-on-surface-variant font-semibold uppercase tracking-[0.2em]">{{ __('Autonomy') }}</div>
-                        <div class="text-xs font-black" :class="autonomy > 2 ? 'text-success-neon' : 'text-error'">
+                        <div class="text-xs font-black tabular-nums" :class="autonomy > 2 ? 'text-success-neon' : 'text-error'">
                             {{ autonomy }} <span class="text-5xs font-normal opacity-60">{{ __('WK') }}</span>
                         </div>
                     </div>

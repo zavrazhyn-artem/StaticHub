@@ -30,7 +30,7 @@
                 </div>
                 <div class="flex items-baseline gap-2">
                     <span
-                        class="text-3xl font-black font-headline tracking-tighter"
+                        class="text-3xl font-black font-headline tracking-tight tabular-nums"
                         :class="taxStatus === 'danger' ? 'text-error' : taxStatus === 'warning' ? 'text-warning' : 'text-white'"
                     >{{ targetTax }}</span>
                     <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Gold / Player') }}</span>

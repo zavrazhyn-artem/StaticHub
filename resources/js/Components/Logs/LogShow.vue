@@ -100,14 +100,14 @@ const activePersonalReport = computed(() => {
         <!-- Floating Chat Toggle -->
         <button v-if="canChat && !chatOpen" @click="chatOpen = true"
             class="fixed bottom-8 right-8 z-40 bg-primary hover:bg-primary-dim text-on-primary-fixed p-4 rounded-full shadow-[0_0_20px_rgba(79,211,247,0.4)] transition-all hover:scale-110 flex items-center gap-3 group">
-            <span v-if="chatTimeRemaining" class="text-4xs font-black uppercase tracking-wider overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ chatTimeRemaining }}</span>
+            <span v-if="chatTimeRemaining" class="text-4xs font-bold uppercase tracking-wider overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ chatTimeRemaining }}</span>
             <span class="material-symbols-outlined">psychology</span>
         </button>
 
         <!-- Chat Expired Badge -->
         <div v-if="canUseAiChat && chatExpired && !chatOpen"
             class="fixed bottom-8 right-8 z-40 bg-surface-container-high text-on-surface-variant p-4 rounded-full opacity-50 cursor-not-allowed flex items-center gap-3">
-            <span class="text-4xs font-black uppercase tracking-wider">{{ __('Chat expired') }}</span>
+            <span class="text-4xs font-bold uppercase tracking-wider">{{ __('Chat expired') }}</span>
             <span class="material-symbols-outlined">psychology</span>
         </div>
 
@@ -116,13 +116,13 @@ const activePersonalReport = computed(() => {
 
             <!-- Breadcrumbs & Back -->
             <div class="mb-8 flex items-center justify-between">
-                <a :href="logsIndexUrl" class="flex items-center gap-2 text-on-surface-variant hover:text-indigo-400 transition-colors text-3xs font-black uppercase tracking-wider group">
+                <a :href="logsIndexUrl" class="flex items-center gap-2 text-on-surface-variant hover:text-indigo-400 transition-colors text-3xs font-bold uppercase tracking-wider group">
                     <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
                     {{ __('Return to Archives') }}
                 </a>
 
                 <a :href="report.wcl_url" target="_blank"
-                   class="flex items-center gap-2 bg-[#ff7d0a]/10 hover:bg-[#ff7d0a] hover:text-black text-[#ff7d0a] px-4 py-2 rounded-lg text-3xs font-black uppercase tracking-wider transition-all border border-[#ff7d0a]/20">
+                   class="flex items-center gap-2 bg-[#ff7d0a]/10 hover:bg-[#ff7d0a] hover:text-black text-[#ff7d0a] px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-wider transition-all border border-[#ff7d0a]/20">
                     <span class="material-symbols-outlined text-sm">open_in_new</span>
                     {{ __('Raw WCL Report') }}
                 </a>
@@ -131,21 +131,21 @@ const activePersonalReport = computed(() => {
             <!-- Mission Header -->
             <div class="mb-12">
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-3xs font-black text-indigo-400 uppercase tracking-wider">
+                    <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-3xs font-bold text-indigo-400 uppercase tracking-wider">
                         {{ __('Report ID:') }} {{ report.wcl_report_id }}
                     </span>
                     <span class="text-on-surface-variant opacity-20">•</span>
-                    <span class="text-on-surface-variant text-3xs font-black uppercase tracking-wider">
+                    <span class="text-on-surface-variant text-3xs font-bold uppercase tracking-wider">
                         {{ __('Executed:') }} {{ report.created_at }}
                     </span>
                     <template v-if="report.model">
                         <span class="text-on-surface-variant opacity-20">•</span>
-                        <span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 rounded text-3xs font-black text-emerald-400 uppercase tracking-wider">
+                        <span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 rounded text-3xs font-bold text-emerald-400 uppercase tracking-wider">
                             {{ report.model }}
                         </span>
                     </template>
                 </div>
-                <h1 class="text-6xl font-black text-white uppercase tracking-tighter font-headline leading-none mb-4">
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight mb-4">
                     {{ report.title }}
                 </h1>
                 <div class="flex items-center gap-6">
@@ -172,12 +172,12 @@ const activePersonalReport = computed(() => {
                                 <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1">
                                     {{ personalReport.char_name }}
                                 </h2>
-                                <p :class="`text-4xs font-black text-${personalReport.char_class_css} uppercase tracking-wider`">
+                                <p :class="`text-4xs font-bold text-${personalReport.char_class_css} uppercase tracking-wider`">
                                     {{ personalReport.char_class }}
                                 </p>
                             </div>
                         </div>
-                        <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-black text-indigo-400 uppercase tracking-wider">
+                        <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-bold text-indigo-400 uppercase tracking-wider">
                             {{ __('Your personal Report') }}
                         </span>
                     </div>
@@ -198,13 +198,13 @@ const activePersonalReport = computed(() => {
                     <div class="flex gap-4">
                         <button @click="activeTab = 'global'"
                                 :class="activeTab === 'global' ? 'text-indigo-400 border-indigo-400' : 'text-on-surface-variant border-transparent hover:text-white'"
-                                class="px-6 py-4 text-3xs font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
+                                class="px-6 py-4 text-3xs font-bold uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">public</span>
                             {{ __('Global Report') }}
                         </button>
                         <button @click="activeTab = 'roster'"
                                 :class="activeTab === 'roster' ? 'text-indigo-400 border-indigo-400' : 'text-on-surface-variant border-transparent hover:text-white'"
-                                class="px-6 py-4 text-3xs font-black uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
+                                class="px-6 py-4 text-3xs font-bold uppercase tracking-[0.2em] border-b-2 transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">person</span>
                             {{ __('Personal Report') }}
                         </button>
@@ -247,20 +247,20 @@ const activePersonalReport = computed(() => {
                     <!-- Sidebar: Execution Metrics + Mission Summary -->
                     <div class="space-y-8">
                         <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
-                            <h3 class="text-white text-3xs font-black uppercase tracking-wider opacity-40">{{ __('Mission Summary') }}</h3>
+                            <h3 class="text-white text-3xs font-bold uppercase tracking-wider opacity-40">{{ __('Mission Summary') }}</h3>
                             <div class="space-y-4">
                                 <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                     <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Status') }}</span>
-                                    <span class="text-3xs font-black text-success-neon uppercase tracking-wider">{{ __('COMPLETED') }}</span>
+                                    <span class="text-3xs font-bold text-success-neon uppercase tracking-wider">{{ __('COMPLETED') }}</span>
                                 </div>
                                 <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                     <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Analyzed By') }}</span>
-                                    <span class="text-3xs font-black text-white uppercase tracking-wider">{{ report.model || 'Gemini 2.5 Flash' }}</span>
+                                    <span class="text-3xs font-bold text-white uppercase tracking-wider">{{ report.model || 'Gemini 2.5 Flash' }}</span>
                                 </div>
                                 <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                     <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('AI Chat') }}</span>
-                                    <span v-if="!chatExpired" class="text-3xs font-black text-success-neon uppercase tracking-wider">{{ chatTimeRemaining }}</span>
-                                    <span v-else class="text-3xs font-black text-error uppercase tracking-wider">{{ __('Expired') }}</span>
+                                    <span v-if="!chatExpired" class="text-3xs font-bold text-success-neon uppercase tracking-wider">{{ chatTimeRemaining }}</span>
+                                    <span v-else class="text-3xs font-bold text-error uppercase tracking-wider">{{ __('Expired') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -280,12 +280,12 @@ const activePersonalReport = computed(() => {
                                     <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1">
                                         {{ activePersonalReport.char_name }}
                                     </h2>
-                                    <p :class="`text-4xs font-black text-${activePersonalReport.char_class_css} uppercase tracking-wider`">
+                                    <p :class="`text-4xs font-bold text-${activePersonalReport.char_class_css} uppercase tracking-wider`">
                                         {{ activePersonalReport.char_class }}
                                     </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-black text-indigo-400 uppercase tracking-wider">
+                            <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-bold text-indigo-400 uppercase tracking-wider">
                                 {{ personalReport && activePersonalReport.id === personalReport.id ? __('Your personal Report') : __('Personal Report') }}
                             </span>
                         </div>

@@ -104,7 +104,7 @@ function closeModal() {
             v-if="orderedSelectedSpecs.length > 0"
             type="button"
             @click="openModal"
-            class="flex items-center gap-1 flex-wrap hover:opacity-80 transition-opacity focus:outline-none"
+            class="flex items-center gap-1 flex-wrap hover:opacity-80 transition-opacity"
             :title="__('Edit specializations')"
         >
             <span
@@ -137,8 +137,8 @@ function closeModal() {
 
         <!-- Status indicators -->
         <span v-if="saving" class="material-symbols-outlined text-sm text-on-surface-variant animate-spin ml-1">progress_activity</span>
-        <span v-else-if="savedFlash" class="text-4xs text-green-400 font-semibold ml-1">✓</span>
-        <span v-else-if="errorFlash" class="text-4xs text-red-400 font-semibold ml-1">✕</span>
+        <span v-else-if="savedFlash" class="material-symbols-outlined text-sm text-green-400 ml-1">check</span>
+        <span v-else-if="errorFlash" class="material-symbols-outlined text-sm text-red-400 ml-1">close</span>
     </div>
 
     <!-- ── Modal ─────────────────────────────────────────────────────────── -->

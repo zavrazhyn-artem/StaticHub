@@ -114,8 +114,8 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                 <!-- ── thead ───────────────────────────────────────────────── -->
                 <thead>
                     <!-- Group headers -->
-                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
-                        <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[200px]">
+                    <tr class="bg-black/20 text-gray-400 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
+                        <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[12.5rem]">
                             {{ __('Character') }}
                         </th>
                         <th colspan="2" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
@@ -126,7 +126,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                             <div class="flex justify-between items-center pr-2">
                                 <span>{{ __('Name') }}</span>
-                                <span class="text-gray-500 font-mono text-4xs">{{ __('iLvL') }}</span>
+                                <span class="text-gray-400 font-mono text-4xs">{{ __('iLvL') }}</span>
                             </div>
                         </th>
                         <th class="p-2 text-center text-4xs">{{ __('Ench') }}</th>
@@ -179,7 +179,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                 {{ member.main_character.name ?? member.name }}
                                             </div>
                                             <div class="flex items-center gap-1.5">
-                                                <span class="text-4xs text-gray-500 uppercase font-medium">
+                                                <span class="text-4xs text-gray-400 uppercase font-medium">
                                                     {{ getActiveSpec(member.main_character) ?? '—' }}
                                                 </span>
                                                 <GearSpecSwitcher
@@ -214,7 +214,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                       ].filter(Boolean).join(' | ')">
                                     {{ (getSpecData(member.main_character).missing_enchants_slots?.length ?? 0) + (getSpecData(member.main_character).low_quality_enchants_slots?.length ?? 0) }}
                                 </span>
-                                <span v-else class="text-gray-600 text-xs">✓</span>
+                                <span v-else class="material-symbols-outlined text-gray-600 text-base">check</span>
                             </td>
 
                             <!-- Audit: empty sockets -->
@@ -223,7 +223,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                       class="text-red-500 font-bold">
                                     {{ getSpecData(member.main_character).empty_sockets_count }}
                                 </span>
-                                <span v-else class="text-gray-600 text-xs">✓</span>
+                                <span v-else class="material-symbols-outlined text-gray-600 text-base">check</span>
                             </td>
 
                             <!-- Gear cells -->
@@ -266,7 +266,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                                     {{ alt?.name ?? 'Unknown' }}
                                                 </div>
                                                 <div class="flex items-center gap-1">
-                                                    <span class="text-5xs text-gray-500 uppercase font-medium">
+                                                    <span class="text-5xs text-gray-400 uppercase font-medium">
                                                         {{ getActiveSpec(alt) ?? '—' }}
                                                     </span>
                                                     <GearSpecSwitcher
@@ -300,7 +300,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                           ].filter(Boolean).join(' | ')">
                                         {{ (getSpecData(alt)?.missing_enchants_slots?.length ?? 0) + (getSpecData(alt)?.low_quality_enchants_slots?.length ?? 0) }}
                                     </span>
-                                    <span v-else class="text-gray-700 text-3xs">✓</span>
+                                    <span v-else class="material-symbols-outlined text-gray-700 text-xs">check</span>
                                 </td>
 
                                 <!-- Alt audit: gems -->
@@ -309,7 +309,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                           class="text-red-500/70 font-bold">
                                         {{ getSpecData(alt).empty_sockets_count }}
                                     </span>
-                                    <span v-else class="text-gray-700 text-3xs">✓</span>
+                                    <span v-else class="material-symbols-outlined text-gray-700 text-xs">check</span>
                                 </td>
 
                                 <!-- Alt gear cells -->

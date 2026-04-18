@@ -146,21 +146,21 @@ export default {
                 <div class="grid grid-cols-3 gap-3">
                     <div class="flex flex-col">
                         <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Weekly Total') }}</div>
-                        <div class="text-lg font-headline font-black text-white mt-0.5 leading-none">
+                        <div class="text-lg font-headline font-black text-white mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(totalCost) }}</span>
                             <span class="text-tertiary-dim text-5xs uppercase">G</span>
                         </div>
                     </div>
                     <div class="border-x border-white/5 px-3 flex flex-col">
                         <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Tax/Raider') }}</div>
-                        <div class="text-md font-headline font-bold text-white mt-0.5 leading-none">
+                        <div class="text-md font-headline font-bold text-white mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(guildTaxPerRaider) }}</span>
                             <span class="text-tertiary-dim text-5xs">G</span>
                         </div>
                     </div>
                     <div class="flex flex-col">
                         <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant leading-tight">{{ __('AH Cost') }}</div>
-                        <div class="text-md font-headline font-bold text-error-dim mt-0.5 leading-none">
+                        <div class="text-md font-headline font-bold text-error-dim mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(individualCostPerRaider) }}</span>
                             <span class="text-tertiary-dim text-5xs">G</span>
                         </div>

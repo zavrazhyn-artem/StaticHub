@@ -14,7 +14,7 @@ defineProps({
         <header class="flex items-end justify-between border-b border-white/5 pb-4">
             <div>
                 <span class="text-on-surface-variant font-headline text-xs font-bold uppercase tracking-widest">{{ staticName }}</span>
-                <h1 class="font-headline text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                <h1 class="font-headline text-4xl font-black text-white uppercase tracking-tight leading-tight flex items-center gap-3">
                     <span class="material-symbols-outlined text-cyan-400">shield</span>
                     {{ __('Gear Management') }}
                 </h1>

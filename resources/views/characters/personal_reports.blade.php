@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="max-w-9/10 mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-12">
-            <h1 class="text-6xl font-black text-white uppercase tracking-tighter font-headline leading-none mb-4">
+            <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight mb-4">
                 {{ __('Personal Intelligence') }}
             </h1>
             <p class="text-on-surface-variant font-bold uppercase tracking-wider text-xs">
@@ -33,7 +33,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xl font-black text-white uppercase tracking-tight">{{ $report->character->name }}</h3>
-                                    <p class="text-3xs font-black text-{{ $classColor }} uppercase tracking-[0.2em]">{{ $report->character->playable_class }}</p>
+                                    <p class="text-3xs font-bold text-{{ $classColor }} uppercase tracking-[0.2em]">{{ $report->character->playable_class }}</p>
                                 </div>
                             </div>
                             <div class="flex flex-col md:items-end">
@@ -47,7 +47,7 @@
                             </div>
                         </div>
                         <div class="px-8 py-4 bg-black/20 border-t border-white/5 flex justify-end">
-                            <a href="{{ route('statics.logs.show', [$report->tacticalReport->static_id, $report->tacticalReport]) }}" class="text-3xs font-black text-amber-500 uppercase tracking-wider hover:underline flex items-center gap-1">
+                            <a href="{{ route('statics.logs.show', [$report->tacticalReport->static_id, $report->tacticalReport]) }}" class="text-3xs font-bold text-amber-500 uppercase tracking-wider hover:underline flex items-center gap-1">
                                 {{ __('View Full Tactical Report') }}
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </a>

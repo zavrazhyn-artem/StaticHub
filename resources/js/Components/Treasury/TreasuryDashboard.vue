@@ -2,7 +2,7 @@
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Guild Treasury') }}</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Guild Treasury') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">
                     {{ staticName }} • {{ __('Financial Ledger') }}
                 </p>
@@ -33,7 +33,7 @@
                 </div>
                 <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Total Reserves') }}</h3>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-[#FFD700] tracking-tighter font-headline">{{ formatGold(reserves) }}</span>
+                    <span class="text-4xl font-black text-[#FFD700] tracking-tight font-headline tabular-nums">{{ formatGold(reserves) }}</span>
                     <span class="text-xs font-bold text-[#FFD700]/60 uppercase tracking-widest">{{ __('Gold') }}</span>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Required Weekly Tax') }}</h3>
 
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-white tracking-tighter font-headline">
+                    <span class="text-4xl font-black text-white tracking-tight font-headline tabular-nums">
                       {{ formatGold(dynamicTargetTax) }}
                     </span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
@@ -66,13 +66,13 @@
                 </div>
                 <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Financial Health') }}</h3>
                 <div class="flex items-baseline gap-2">
-          <span class="text-4xl font-black tracking-tighter font-headline" :class="autonomyClass">
+          <span class="text-4xl font-black tracking-tight font-headline tabular-nums" :class="autonomyClass">
             {{ autonomyValue }}
           </span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weeks of Autonomy') }}</span>
                 </div>
                 <div class="mt-2 text-3xs text-on-surface-variant uppercase font-semibold tracking-wider">
-                    {{ __('Weekly Cost:') }} <span>{{ formatGold(dynamicWeeklyCost) }}</span> G
+                    {{ __('Weekly Cost:') }} <span class="tabular-nums">{{ formatGold(dynamicWeeklyCost) }}</span> G
                 </div>
             </div>
         </div>
@@ -99,7 +99,7 @@
                             <span class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-error'">
                                 {{ status.is_paid ? __('Covered') : __('Not Covered') }}
                             </span>
-                            <div class="text-4xs text-on-surface-variant font-medium">
+                            <div class="text-4xs text-on-surface-variant font-medium tabular-nums">
                                 {{ __('Balance:') }} {{ formatGold(status.balance) }}g
                             </div>
                         </div>

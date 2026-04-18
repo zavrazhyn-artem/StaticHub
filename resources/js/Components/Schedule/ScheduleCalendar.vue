@@ -123,7 +123,7 @@ const closeModal = () => { showModal.value = false; };
         <!-- Page header -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Raid Schedule') }}</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Raid Schedule') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">
                     {{ staticName }} &bull; {{ currentMonthName }}
                 </p>
@@ -225,7 +225,7 @@ const closeModal = () => { showModal.value = false; };
                 <div v-if="Object.keys(errors).length > 0" class="p-4 bg-error-dim/20 border border-error-dim/50 rounded-xl">
                     <div class="flex items-center gap-2 mb-2 text-error-dim">
                         <span class="material-symbols-outlined text-sm">error</span>
-                        <span class="text-3xs font-black uppercase tracking-wider">{{ __('Validation Errors') }}</span>
+                        <span class="text-3xs font-bold uppercase tracking-wider">{{ __('Validation Errors') }}</span>
                     </div>
                     <ul class="space-y-1">
                         <li v-for="(messages, field) in errors" :key="field" class="text-3xs text-white/70 font-medium">
@@ -252,7 +252,7 @@ const closeModal = () => { showModal.value = false; };
                             v-for="d in difficulties" :key="d.value"
                             type="button"
                             @click="selectedDifficulty = d.value"
-                            class="flex-1 px-3 py-2 rounded-lg text-3xs font-black uppercase tracking-wider border transition-all text-center"
+                            class="flex-1 px-3 py-2 rounded-lg text-3xs font-bold uppercase tracking-wider border transition-all text-center"
                             :class="selectedDifficulty === d.value
                                 ? `${d.bg} ${d.border} ${d.color}`
                                 : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -301,7 +301,7 @@ const closeModal = () => { showModal.value = false; };
                             :class="isOvernight ? 'opacity-100' : 'opacity-0 select-none pointer-events-none'"
                         >
                             <span class="material-symbols-outlined text-sm">event_repeat</span>
-                            <span class="text-4xs font-black uppercase tracking-wider">{{ __('Ends on the next day') }}</span>
+                            <span class="text-4xs font-bold uppercase tracking-wider">{{ __('Ends on the next day') }}</span>
                         </div>
                     </div>
                 </div>

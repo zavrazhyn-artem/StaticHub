@@ -138,7 +138,7 @@ const borderClass = (item) => {
             <span class="material-symbols-outlined text-xs">warning</span>
             {{ (char.missing_enchants_slots?.length ?? 0) + (char.low_quality_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
         </span>
-        <span v-else class="text-gray-600 text-3xs">✓</span>
+        <span v-else class="material-symbols-outlined text-gray-600 text-xs">check</span>
     </td>
     <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5 font-bold text-gray-300']">
         {{ char.upgrades_missing ?? 0 }}
@@ -153,14 +153,14 @@ const borderClass = (item) => {
 
             <a :key="getItem(slot).id"
                :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
-               :class="[isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', borderClass(getItem(slot))]"
+               :class="[isAlt ? 'w-5 h-5' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', borderClass(getItem(slot))]"
                target="_blank"
                :data-wowhead="getWowheadData(getItem(slot))">
                 <img v-if="getIconUrl(getItem(slot).id)"
                      :src="getIconUrl(getItem(slot).id)"
                      class="w-full h-full object-cover rounded"
                      :alt="getItem(slot).name" />
-                <span v-else class="flex items-center justify-center w-full h-full text-5xs text-gray-500 font-semibold uppercase">
+                <span v-else class="flex items-center justify-center w-full h-full text-5xs text-gray-400 font-semibold uppercase">
                     {{ slot.substring(0, 2) }}
                 </span>
             </a>
@@ -168,7 +168,7 @@ const borderClass = (item) => {
             <!-- Track / Craft badge below icon (main only) -->
             <div v-if="!isAlt" class="mt-0.5 h-[12px] flex items-center">
                 <div v-if="getItem(slot).is_crafted"
-                     :class="['font-black text-4xs uppercase tracking-wide', craftedColorClass(getItem(slot).ilvl)]">
+                     :class="['font-bold text-4xs uppercase tracking-wide', craftedColorClass(getItem(slot).ilvl)]">
                     {{ __('CRAFT') }}
                 </div>
                 <div v-else-if="getItem(slot).upgrade"
@@ -177,7 +177,7 @@ const borderClass = (item) => {
                 </div>
             </div>
         </div>
-        <div v-else :class="isAlt ? 'w-[20px] h-[20px]' : 'w-[34px] h-[34px]'" class="mx-auto rounded border border-white/5 bg-black/20 flex items-center justify-center" :title="slot">
+        <div v-else :class="isAlt ? 'w-5 h-5' : 'w-[34px] h-[34px]'" class="mx-auto rounded border border-white/5 bg-black/20 flex items-center justify-center" :title="slot">
             <span :class="isAlt ? 'text-5xs' : 'text-4xs'" class="text-gray-800 font-semibold uppercase">{{ slot.substring(0, 3) }}</span>
         </div>
     </td>

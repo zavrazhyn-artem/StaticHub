@@ -80,12 +80,15 @@ export default {
                 "warrior": "#C69B6D",
                 "success-neon": "#39FF14"
             },
+            // Font tokens reference CSS variables defined in app.css :root.
+            // To swap a font globally — edit the --font-* variables there, no config change needed.
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
-                "headline": ["Space Grotesk"],
-                "body": ["Inter"],
-                "label": ["Inter"],
-                "slogan": ["Orbitron", "sans-serif"]
+                sans:     ['var(--font-body)', ...defaultTheme.fontFamily.sans],
+                body:     ['var(--font-body)'],
+                label:    ['var(--font-body)'],
+                headline: ['var(--font-headline)'],
+                nav:      ['var(--font-nav)'],
+                slogan:   ['var(--font-slogan)'],
             },
             fontSize: {
                 '5xs': ['0.5rem',    { lineHeight: '0.75rem' }],    // 8px
