@@ -112,7 +112,7 @@ const emit = defineEmits([
                             <span v-if="!isAlt" class="material-symbols-outlined text-gray-600 text-xs">person</span>
                         </div>
                         <div v-if="!isAlt && member.roster_status === 'bench'"
-                             class="absolute -top-1 -right-1 bg-error-dim text-5xs font-bold px-1 rounded uppercase border border-error">
+                             class="absolute -top-1 -right-1 bg-error-dim text-5xs font-semibold px-1 rounded uppercase border border-error">
                             {{ __('Bench') }}
                         </div>
                     </div>
@@ -122,7 +122,7 @@ const emit = defineEmits([
                                   :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-xs' : 'text-base']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
-                            <span v-if="isAlt" class="text-5xs text-on-surface-variant font-bold uppercase">{{ char?.class ?? '' }}</span>
+                            <span v-if="isAlt" class="text-5xs text-on-surface-variant font-semibold uppercase">{{ char?.class ?? '' }}</span>
 
                             <button v-if="!isAlt && (member.alts || []).length > 0"
                                     @click="emit('toggle-expand', member.id)"
@@ -187,7 +187,7 @@ const emit = defineEmits([
             <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
                 <span v-if="hasAuditIssues(effectiveChar)"
                       @click="emit('open-audit-modal', effectiveChar)"
-                      :class="[isAlt ? 'text-5xs px-1' : 'text-3xs px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-bold cursor-pointer hover:bg-amber-400/20 transition-colors']"
+                      :class="[isAlt ? 'text-5xs px-1' : 'text-3xs px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-semibold cursor-pointer hover:bg-amber-400/20 transition-colors']"
                       :title="auditTitle(effectiveChar)">
                     <span class="material-symbols-outlined text-xs">warning</span>
                     {{ (effectiveChar.missing_enchants_slots?.length ?? 0) + (effectiveChar.low_quality_enchants_slots?.length ?? 0) + (effectiveChar.empty_sockets_count ?? 0) }}
@@ -212,7 +212,7 @@ const emit = defineEmits([
                         />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-4xs font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
+                        <span class="text-4xs font-semibold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.access_role }}
                         </span>
                     </div>
@@ -232,7 +232,7 @@ const emit = defineEmits([
                         />
                     </div>
                     <div v-else class="text-center">
-                        <span class="text-4xs font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
+                        <span class="text-4xs font-semibold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
                             {{ member.roster_status }}
                         </span>
                     </div>

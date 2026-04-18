@@ -130,7 +130,7 @@ const circumference = 2 * Math.PI * radius;
            @click="showModal = true">
 
         <!-- Service Label -->
-        <div class="text-5xs font-black text-on-surface-variant uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">
+        <div class="text-5xs font-black text-on-surface-variant uppercase tracking-wider mb-2 group-hover:text-primary transition-colors">
           {{ service.name }}
         </div>
 
@@ -204,7 +204,7 @@ const circumference = 2 * Math.PI * radius;
 
       <div class="grid grid-cols-3 gap-4">
         <div v-for="service in services" :key="'modal-' + service.id" class="flex flex-col items-center">
-          <div class="text-3xs font-black text-on-surface-variant uppercase tracking-widest mb-3">
+          <div class="text-3xs font-black text-on-surface-variant uppercase tracking-wider mb-3">
             {{ service.name }}
           </div>
 

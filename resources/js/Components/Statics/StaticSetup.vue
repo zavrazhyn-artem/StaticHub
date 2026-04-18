@@ -44,13 +44,13 @@ function handleInviteConfirmed(code) {
                 <input type="hidden" name="invite_code" :value="inviteCode">
 
                 <div class="space-y-2">
-                    <label for="name" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Static Name') }}</label>
+                    <label for="name" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Static Name') }}</label>
                     <input id="name" name="name" type="text" required
                         class="block w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none">
                 </div>
 
                 <div class="space-y-2">
-                    <label for="realm_slug" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Server') }}</label>
+                    <label for="realm_slug" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Server') }}</label>
                     <select id="realm_slug" name="realm_slug" required
                         class="block w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none appearance-none">
                         <option value="">{{ __('Select a Server') }}</option>
@@ -59,7 +59,7 @@ function handleInviteConfirmed(code) {
                 </div>
 
                 <div class="space-y-2">
-                    <label for="region" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Region') }}</label>
+                    <label for="region" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Region') }}</label>
                     <select id="region" name="region"
                         class="block w-full px-4 py-3 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none appearance-none">
                         <option value="eu">{{ __('Europe') }}</option>
@@ -94,7 +94,7 @@ function handleInviteConfirmed(code) {
                         <input type="hidden" name="realm_slug" :value="guild.realm_slug">
                         <input type="hidden" name="realm" :value="guild.realm">
                         <button type="submit"
-                            class="border border-white/20 text-on-surface-variant hover:border-primary hover:text-primary px-4 py-2 rounded text-3xs font-bold uppercase tracking-widest transition-all">
+                            class="border border-white/20 text-on-surface-variant hover:border-primary hover:text-primary px-4 py-2 rounded text-3xs font-semibold uppercase tracking-wider transition-all">
                             {{ __('Import Guild') }}
                         </button>
                     </form>

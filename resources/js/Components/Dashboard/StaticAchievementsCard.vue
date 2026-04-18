@@ -7,14 +7,14 @@
         <div v-if="raidProgression.length" class="bg-[#0e0e10] border border-white/5 rounded-lg overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
                         <template v-for="wing in raidProgression" :key="wing.instance">
                             <th :colspan="wing.bosses.length" class="p-2 text-center border-l border-white/5 first:border-l-0">
                                 {{ wing.instance }}
                             </th>
                         </template>
                     </tr>
-                    <tr class="bg-black/40 text-cyan-400 text-3xs uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/40 text-cyan-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
                         <th
                             v-for="boss in allBosses"
                             :key="boss.name"
@@ -48,7 +48,7 @@
                                         <div
                                             v-for="entry in sortedHistory(boss.history)"
                                             :key="entry.difficulty"
-                                            class="flex items-center gap-2 text-3xs font-bold tracking-wide"
+                                            class="flex items-center gap-2 text-3xs font-semibold tracking-wide"
                                         >
                                             <span :class="diffColors[entry.difficulty]">{{ entry.difficulty }}</span>
                                             <span class="text-gray-400">{{ formatDate(entry.achieved_at) }}</span>

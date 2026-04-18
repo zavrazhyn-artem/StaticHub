@@ -13,7 +13,7 @@
         @method('patch')
 
         <div>
-            <label for="name" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">{{ __('Name') }}</label>
+            <label for="name" class="block text-3xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">{{ __('Name') }}</label>
             <input id="name" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-full" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
             @if ($errors->get('name'))
                 <ul class="text-sm text-red-600 space-y-1 mt-2">
@@ -23,7 +23,7 @@
         </div>
 
         <div>
-            <label for="email" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">{{ __('Email') }}</label>
+            <label for="email" class="block text-3xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">{{ __('Email') }}</label>
             <input id="email" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-full" name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="username" />
             @if ($errors->get('email'))
                 <ul class="text-sm text-red-600 space-y-1 mt-2">

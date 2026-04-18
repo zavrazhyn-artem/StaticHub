@@ -111,7 +111,7 @@ const getWeeklyProgression = (char) => {
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
           <!-- Instance headers -->
-          <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('Weekly') }}</th>
             <template v-for="inst in raidInstances" :key="inst.name">
@@ -119,7 +119,7 @@ const getWeeklyProgression = (char) => {
             </template>
           </tr>
           <!-- Boss name headers -->
-          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center border-l border-white/5">{{ __('Prog') }}</th>
             <th v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5 text-4xs min-w-[80px]">
@@ -192,7 +192,7 @@ const getWeeklyProgression = (char) => {
               </td>
 
               <td class="p-4 text-center border-l border-white/5 opacity-80">
-                <span class="text-3xs font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getWeeklyProgression(alt) }}</span>
+                <span class="text-3xs font-semibold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getWeeklyProgression(alt) }}</span>
               </td>
 
               <td v-for="boss in allBosses" :key="'alt-'+boss" class="p-4 text-center border-l border-white/5 opacity-80">

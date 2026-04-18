@@ -76,7 +76,7 @@ const warnings = computed(() => {
         <div
             v-for="(warn, i) in warnings"
             :key="i"
-            class="flex items-center gap-1 px-2 py-1 rounded-lg text-4xs font-bold border"
+            class="flex items-center gap-1 px-2 py-1 rounded-lg text-4xs font-semibold border"
             :class="{
                 'bg-red-500/10 border-red-500/20 text-red-400': warn.type === 'error',
                 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400': warn.type === 'warning',

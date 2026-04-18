@@ -93,7 +93,7 @@ function setMain(specId) {
 
                 <!-- Spec name -->
                 <span
-                    class="text-3xs font-bold leading-tight"
+                    class="text-3xs font-semibold leading-tight"
                     :class="isSelected(spec.id) ? 'text-white' : 'text-on-surface-variant/60'"
                 >{{ spec.name }}</span>
 

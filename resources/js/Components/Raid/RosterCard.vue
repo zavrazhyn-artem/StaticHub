@@ -30,7 +30,7 @@ const { getClassColor, getSpecName } = useWowClasses();
                     class="absolute -top-1 -right-1 w-3 h-3 bg-success-neon rounded-full border border-surface-container flex items-center justify-center"
                     :title="__('Present')"
                 >
-                    <span class="material-symbols-outlined text-4xs text-black font-bold">check</span>
+                    <span class="material-symbols-outlined text-4xs text-black font-semibold">check</span>
                 </div>
 
                 <div
@@ -38,7 +38,7 @@ const { getClassColor, getSpecName } = useWowClasses();
                     class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border border-surface-container flex items-center justify-center"
                     :title="__('Late')"
                 >
-                    <span class="material-symbols-outlined text-4xs text-black font-bold">schedule</span>
+                    <span class="material-symbols-outlined text-4xs text-black font-semibold">schedule</span>
                 </div>
 
                 <div
@@ -46,7 +46,7 @@ const { getClassColor, getSpecName } = useWowClasses();
                     class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border border-surface-container flex items-center justify-center"
                     :title="__('Tentative')"
                 >
-                    <span class="material-symbols-outlined text-4xs text-black font-bold">question_mark</span>
+                    <span class="material-symbols-outlined text-4xs text-black font-semibold">question_mark</span>
                 </div>
 
                 <div
@@ -54,7 +54,7 @@ const { getClassColor, getSpecName } = useWowClasses();
                     class="absolute -top-1 -right-1 w-3 h-3 bg-error-dim rounded-full border border-surface-container flex items-center justify-center"
                     :title="__('Absent')"
                 >
-                    <span class="material-symbols-outlined text-4xs text-white font-bold">close</span>
+                    <span class="material-symbols-outlined text-4xs text-white font-semibold">close</span>
                 </div>
 
                 <div
@@ -62,7 +62,7 @@ const { getClassColor, getSpecName } = useWowClasses();
                     class="absolute -top-1 -right-1 w-3 h-3 bg-white/40 rounded-full border border-surface-container flex items-center justify-center"
                     :title="__('Pending')"
                 >
-                    <span class="material-symbols-outlined text-4xs text-white/70 font-bold">question_mark</span>
+                    <span class="material-symbols-outlined text-4xs text-white/70 font-semibold">question_mark</span>
                 </div>
             </div>
 

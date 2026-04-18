@@ -271,7 +271,7 @@ const colorClasses = {
                     <img v-if="btn.img" :src="btn.img" class="w-4 h-4">
                     <span v-else-if="btn.emoji" class="text-sm">{{ btn.emoji }}</span>
                     <span v-else class="material-symbols-outlined text-sm">{{ btn.icon }}</span>
-                    <span class="text-5xs font-bold uppercase hidden xl:inline">{{ btn.label }}</span>
+                    <span class="text-5xs font-semibold uppercase hidden xl:inline">{{ btn.label }}</span>
                 </button>
             </template>
         </div>
@@ -290,7 +290,7 @@ const colorClasses = {
                     @mousedown="startPanelDrag($event, panelId)">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm text-on-surface-variant/50">drag_indicator</span>
-                        <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant">{{ panelDefs[panelId]?.title }}</span>
+                        <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant">{{ panelDefs[panelId]?.title }}</span>
                     </div>
                     <button @click="closePanel(panelId)" class="text-on-surface-variant/50 hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-sm">close</span>
@@ -301,7 +301,7 @@ const colorClasses = {
                 <div class="flex-1 overflow-y-auto p-2 space-y-3 scrollbar-thin">
                     <div v-for="section in panelDefs[panelId]?.sections" :key="section.id">
                         <div class="px-1 pb-1">
-                            <span class="text-5xs font-black uppercase tracking-widest text-on-surface-variant/40">{{ section.label }}</span>
+                            <span class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ section.label }}</span>
                         </div>
                         <!-- Shapes: grid tiles -->
                         <div v-if="section.id === 'shapes'" class="grid grid-cols-4 gap-1">
@@ -314,7 +314,7 @@ const colorClasses = {
                                     <path d="M12 12 L12 3 A9 9 0 0 0 4.2 7.5 Z"/>
                                 </svg>
                                 <span v-else class="material-symbols-outlined text-xl">{{ item.icon }}</span>
-                                <span class="text-5xs font-bold uppercase">{{ item.label }}</span>
+                                <span class="text-5xs font-semibold uppercase">{{ item.label }}</span>
                             </button>
                         </div>
                         <!-- Groups -->
@@ -327,7 +327,7 @@ const colorClasses = {
                                     :style="{ borderColor: item.color, backgroundColor: item.color + '20' }">
                                     <span class="text-3xs font-black" :style="{ color: item.color }">{{ item.displayName || item.label }}</span>
                                 </div>
-                                <span class="text-5xs font-bold text-on-surface-variant/50">{{ item.count }}p</span>
+                                <span class="text-5xs font-semibold text-on-surface-variant/50">{{ item.count }}p</span>
                             </button>
                         </div>
                         <!-- Players -->
@@ -337,7 +337,7 @@ const colorClasses = {
                                 class="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all hover:bg-white/5 text-left">
                                 <img v-if="item.img" :src="item.img" class="w-6 h-6 rounded object-cover border border-white/10 shrink-0">
                                 <div class="min-w-0">
-                                    <div class="text-4xs font-bold truncate" :class="'text-wow-' + classSlug(item.className)">{{ item.label }}</div>
+                                    <div class="text-4xs font-semibold truncate" :class="'text-wow-' + classSlug(item.className)">{{ item.label }}</div>
                                 </div>
                             </button>
                         </div>
@@ -356,7 +356,7 @@ const colorClasses = {
                     <!-- Custom emoji input -->
                     <div v-if="panelId === 'emoji'" class="px-1 pt-1 border-t border-white/5">
                         <div class="px-1 pb-1">
-                            <span class="text-5xs font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Custom Emoji') }}</span>
+                            <span class="text-5xs font-black uppercase tracking-wider text-on-surface-variant/40">{{ __('Custom Emoji') }}</span>
                         </div>
                         <div class="flex gap-1">
                             <input v-model="customEmoji" type="text" :placeholder="__('Paste emoji...')"

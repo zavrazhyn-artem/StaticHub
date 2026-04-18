@@ -62,14 +62,14 @@ const isOvernight = computed(() => {
 
             <!-- Difficulty -->
             <div class="space-y-1.5">
-                <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Difficulty') }}</label>
+                <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Difficulty') }}</label>
                 <input type="hidden" name="difficulty" :value="difficulty">
                 <div class="flex gap-2">
                     <button
                         v-for="d in difficulties" :key="d.value"
                         type="button"
                         @click="difficulty = d.value"
-                        class="flex-1 px-3 py-2 rounded-lg text-3xs font-black uppercase tracking-widest border transition-all text-center"
+                        class="flex-1 px-3 py-2 rounded-lg text-3xs font-black uppercase tracking-wider border transition-all text-center"
                         :class="difficulty === d.value
                             ? `${d.bg} ${d.border} ${d.color}`
                             : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -79,14 +79,14 @@ const isOvernight = computed(() => {
 
             <!-- Timezone -->
             <div class="space-y-1.5">
-                <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Timezone') }}</label>
+                <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Timezone') }}</label>
                 <TimezoneSelector v-model="selectedTimezone" input-name="timezone" />
             </div>
 
             <!-- Start / End Time -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
-                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Start Time') }}</label>
+                    <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Start Time') }}</label>
                     <TimePickerCarousel
                         ref="startPickerRef"
                         v-model="startTime"
@@ -97,7 +97,7 @@ const isOvernight = computed(() => {
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('End Time') }}</label>
+                    <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('End Time') }}</label>
                     <TimePickerCarousel
                         ref="endPickerRef"
                         v-model="endTime"
@@ -110,14 +110,14 @@ const isOvernight = computed(() => {
                         :class="isOvernight ? 'opacity-100' : 'opacity-0 select-none pointer-events-none'"
                     >
                         <span class="material-symbols-outlined text-sm">event_repeat</span>
-                        <span class="text-4xs font-black uppercase tracking-widest">{{ __('Ends on the next day') }}</span>
+                        <span class="text-4xs font-black uppercase tracking-wider">{{ __('Ends on the next day') }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Description -->
             <div class="space-y-1.5">
-                <label class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Description') }}</label>
+                <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Description') }}</label>
                 <textarea
                     name="description"
                     rows="3"
@@ -131,11 +131,11 @@ const isOvernight = computed(() => {
                 <button
                     type="button"
                     @click="emit('close')"
-                    class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors"
+                    class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-wider text-on-surface-variant hover:text-white transition-colors"
                 >{{ __('Cancel') }}</button>
                 <button
                     type="submit"
-                    class="px-6 py-2.5 bg-fuchsia-400 text-black rounded-lg text-3xs font-black uppercase tracking-widest hover:brightness-110 transition-all"
+                    class="px-6 py-2.5 bg-fuchsia-400 text-black rounded-lg text-3xs font-black uppercase tracking-wider hover:brightness-110 transition-all"
                 >{{ __('Save Changes') }}</button>
             </div>
         </form>

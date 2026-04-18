@@ -43,7 +43,7 @@ const difficulties = [
 
         <!-- ── Difficulty toggle (Raids tab only) ───────────────── -->
         <div v-if="activeTab === 'raids'" class="flex items-center gap-3">
-            <span class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest">
+            <span class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider">
                 {{ __('Viewing:') }}
             </span>
             <div class="flex gap-1 bg-black/20 p-1 rounded-lg border border-white/5">

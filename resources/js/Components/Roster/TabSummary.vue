@@ -100,7 +100,7 @@ const getRaidProgression = (char) => {
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
           <!-- Group Header -->
-          <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('iLvL') }}</th>
             <th colspan="6" class="p-2 text-center border-l border-white/5">{{ __('Tier Pieces') }}</th>
@@ -110,7 +110,7 @@ const getRaidProgression = (char) => {
             <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Audit') }}</th>
           </tr>
           <!-- Sub Header -->
-          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center">{{ __('Avg') }}</th>
 
@@ -220,7 +220,7 @@ const getRaidProgression = (char) => {
                 <span v-else class="text-gray-600">-</span>
               </td>
               <td class="p-4 text-center">
-                <span class="text-3xs font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
+                <span class="text-3xs font-semibold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
                   {{ getRaidProgression(char) }}
                 </span>
               </td>
@@ -249,7 +249,7 @@ const getRaidProgression = (char) => {
 
               <td class="p-4 text-center text-sm font-bold text-white/70 border-l border-white/5">{{ getTierCount(alt) }}</td>
               <td v-for="slot in ['H', 'S', 'C', 'G', 'L']" :key="'alt-tier-'+slot" class="p-2 text-center">
-                <span v-if="hasTierSlot(alt, slot)" class="text-green-500/70 font-bold text-3xs">{{ slot }}</span>
+                <span v-if="hasTierSlot(alt, slot)" class="text-green-500/70 font-semibold text-3xs">{{ slot }}</span>
                 <span v-else class="text-gray-800 text-3xs">-</span>
               </td>
 
@@ -276,7 +276,7 @@ const getRaidProgression = (char) => {
                 <span v-else class="text-gray-800">-</span>
               </td>
               <td class="p-4 text-center">
-                <span class="text-4xs font-bold text-white/50 whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getRaidProgression(alt) }}</span>
+                <span class="text-4xs font-semibold text-white/50 whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getRaidProgression(alt) }}</span>
               </td>
             </tr>
           </template>

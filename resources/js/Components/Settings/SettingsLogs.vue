@@ -149,7 +149,7 @@ async function disconnectGuild() {
                                 <p class="text-sm text-white font-black uppercase tracking-tighter">
                                     {{ guild.name || 'Guild #' + guild.id }}
                                 </p>
-                                <p class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest mt-0.5">
+                                <p class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider mt-0.5">
                                     {{ guild.server_name || guild.server_slug }}
                                     <span class="opacity-30 mx-1">•</span>
                                     {{ guild.region_name || guild.region_slug?.toUpperCase() }}
@@ -211,7 +211,7 @@ async function disconnectGuild() {
                     </label>
 
                     <div v-if="autoFetch && guild" class="pl-9 space-y-2">
-                        <label for="auto_fetch_delay_minutes" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">
+                        <label for="auto_fetch_delay_minutes" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">
                             {{ __('Fetch Delay (minutes)') }}
                         </label>
                         <div class="flex items-center gap-3">
@@ -296,12 +296,12 @@ async function disconnectGuild() {
             </div>
 
             <div class="space-y-3">
-                <label for="guild_url" class="block text-3xs font-black text-on-surface-variant uppercase tracking-widest">{{ __('WCL Guild URL') }}</label>
+                <label for="guild_url" class="block text-3xs font-black text-on-surface-variant uppercase tracking-wider">{{ __('WCL Guild URL') }}</label>
                 <input id="guild_url" type="text" v-model="guildUrl"
                        class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-[#ff7d0a]/50"
                        placeholder="https://www.warcraftlogs.com/guild/id/123456"
                        @keyup.enter="connectGuild">
-                <p class="text-4xs text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
+                <p class="text-4xs text-on-surface-variant font-semibold uppercase tracking-wider opacity-40">
                     {{ __('Supports formats:') }} /guild/id/123456 {{ __('or') }} /guild/eu/server/name
                 </p>
             </div>
@@ -313,7 +313,7 @@ async function disconnectGuild() {
             <!-- Disconnect option -->
             <div v-if="guild" class="pt-2 border-t border-white/5">
                 <button type="button" @click="disconnectGuild(); showGuildModal = false"
-                        class="flex items-center gap-2 text-3xs font-black uppercase tracking-widest text-error/60 hover:text-error transition-colors">
+                        class="flex items-center gap-2 text-3xs font-black uppercase tracking-wider text-error/60 hover:text-error transition-colors">
                     <span class="material-symbols-outlined text-sm">link_off</span>
                     {{ __('Disconnect Guild') }}
                 </button>
@@ -321,7 +321,7 @@ async function disconnectGuild() {
 
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" @click="showGuildModal = false"
-                        class="px-6 py-3 rounded-xl text-3xs font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
+                        class="px-6 py-3 rounded-xl text-3xs font-black uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
                     {{ __('Cancel') }}
                 </button>
                 <button type="button" @click="connectGuild"
@@ -384,7 +384,7 @@ async function disconnectGuild() {
 
             <div class="p-3 bg-white/5 border border-white/5 rounded-lg flex items-start gap-2.5">
                 <span class="material-symbols-outlined text-on-surface-variant text-base mt-0.5 shrink-0">info</span>
-                <p class="text-3xs text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
+                <p class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider leading-relaxed">
                     {{ __('Make sure your Discord notifications webhook is configured in the Discord tab for notifications to work.') }}
                 </p>
             </div>

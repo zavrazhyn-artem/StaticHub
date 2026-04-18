@@ -3,14 +3,14 @@
         <div class="mb-8">
             <button
                 @click="$emit('back')"
-                class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-3xs font-bold uppercase tracking-[0.15em] mb-6"
+                class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-3xs font-semibold uppercase tracking-[0.15em] mb-6"
             >
                 <span class="material-symbols-outlined text-sm">arrow_back</span>
                 {{ __('Back') }}
             </button>
 
             <div class="text-center">
-                <span class="text-primary text-3xs font-bold uppercase tracking-[0.3em] mb-2 block">
+                <span class="text-primary text-3xs font-semibold uppercase tracking-[0.3em] mb-2 block">
                     {{ __('— Step 2') }}
                 </span>
                 <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
@@ -27,7 +27,7 @@
                 <div class="space-y-6">
                     <!-- Token input -->
                     <div>
-                        <label class="block text-on-surface-variant text-3xs font-bold uppercase tracking-widest mb-2">
+                        <label class="block text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-2">
                             {{ __('Invite Link') }}
                         </label>
                         <div class="relative">
@@ -46,7 +46,7 @@
                                 <span v-else-if="tokenInput && !validating && validationError" class="material-symbols-outlined text-error text-lg">error</span>
                             </div>
                         </div>
-                        <p v-if="validationError" class="text-error text-3xs font-bold mt-2">{{ validationError }}</p>
+                        <p v-if="validationError" class="text-error text-3xs font-semibold mt-2">{{ validationError }}</p>
                     </div>
 
                     <!-- Static preview -->
@@ -61,11 +61,11 @@
                                         {{ staticInfo.name }}
                                     </h4>
                                     <div class="flex items-center gap-3 mt-1">
-                                        <span class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant">
+                                        <span class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant">
                                             {{ staticInfo.region?.toUpperCase() }}
                                         </span>
                                         <span class="text-white/10">|</span>
-                                        <span class="text-3xs font-bold text-on-surface-variant">
+                                        <span class="text-3xs font-semibold text-on-surface-variant">
                                             {{ staticInfo.memberCount }} {{ __('members') }}
                                         </span>
                                     </div>

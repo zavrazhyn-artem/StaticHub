@@ -54,13 +54,13 @@ const { formatDate, formatTime } = useTimeFormatter();
                     :class="[difficulty.bg, difficulty.border]"
                 >
                     <span class="material-symbols-outlined text-sm" :class="difficulty.color">shield</span>
-                    <span class="text-3xs font-black uppercase tracking-widest" :class="difficulty.color">{{ difficulty.label }}</span>
+                    <span class="text-3xs font-black uppercase tracking-wider" :class="difficulty.color">{{ difficulty.label }}</span>
                 </div>
 
                 <!-- Status badge -->
                 <div class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-sm" :class="status.color">{{ status.icon }}</span>
-                    <span class="text-3xs font-black uppercase tracking-widest" :class="status.color">{{ status.label }}</span>
+                    <span class="text-3xs font-black uppercase tracking-wider" :class="status.color">{{ status.label }}</span>
                 </div>
 
                 <!-- Optional badge -->
@@ -69,7 +69,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                     class="h-10 px-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-1.5"
                 >
                     <span class="material-symbols-outlined text-sm text-yellow-400">info</span>
-                    <span class="text-3xs font-black uppercase tracking-widest text-yellow-400">Optional</span>
+                    <span class="text-3xs font-black uppercase tracking-wider text-yellow-400">Optional</span>
                 </div>
 
                 <!-- Role counts chip -->

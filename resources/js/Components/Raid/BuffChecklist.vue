@@ -47,7 +47,7 @@ const missingItems = computed(() => {
                 <div
                     v-for="item in section.items"
                     :key="item.name"
-                    class="flex items-center gap-1 px-1.5 py-0.5 rounded text-4xs font-bold border transition-colors"
+                    class="flex items-center gap-1 px-1.5 py-0.5 rounded text-4xs font-semibold border transition-colors"
                     :class="item.present
                         ? 'bg-green-500/10 border-green-500/20 text-green-400'
                         : 'bg-red-500/10 border-red-500/20 text-red-400'"

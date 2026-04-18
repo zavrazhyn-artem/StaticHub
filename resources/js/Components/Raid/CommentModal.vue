@@ -31,7 +31,7 @@ const emit = defineEmits(['close']);
             <div class="mt-6 flex justify-end">
                 <button
                     @click="emit('close')"
-                    class="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-3xs font-black uppercase tracking-widest transition-all"
+                    class="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-3xs font-black uppercase tracking-wider transition-all"
                 >
                     {{ __('Close') }}
                 </button>

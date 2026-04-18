@@ -50,7 +50,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
             </form>
 
             <div class="mt-8 pt-8 border-t border-white/5">
-                <p class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant/50">
+                <p class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant/50">
                     {{ __('Step 1: Join Group • Step 2: Select Character') }}
                 </p>
             </div>

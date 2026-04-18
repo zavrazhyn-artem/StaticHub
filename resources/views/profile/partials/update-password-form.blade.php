@@ -9,7 +9,7 @@
         @method('put')
 
         <div>
-            <label for="update_password_current_password" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">{{ __('Current Password') }}</label>
+            <label for="update_password_current_password" class="block text-3xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">{{ __('Current Password') }}</label>
             <input id="update_password_current_password" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-full" name="current_password" type="password" autocomplete="current-password" />
             @if ($errors->updatePassword->get('current_password'))
                 <ul class="text-sm text-red-600 space-y-1 mt-2">
@@ -19,7 +19,7 @@
         </div>
 
         <div>
-            <label for="update_password_password" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">{{ __('New Password') }}</label>
+            <label for="update_password_password" class="block text-3xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">{{ __('New Password') }}</label>
             <input id="update_password_password" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-full" name="password" type="password" autocomplete="new-password" />
             @if ($errors->updatePassword->get('password'))
                 <ul class="text-sm text-red-600 space-y-1 mt-2">
@@ -29,7 +29,7 @@
         </div>
 
         <div>
-            <label for="update_password_password_confirmation" class="block text-3xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">{{ __('Confirm Password') }}</label>
+            <label for="update_password_password_confirmation" class="block text-3xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">{{ __('Confirm Password') }}</label>
             <input id="update_password_password_confirmation" class="bg-surface-container-lowest border-none focus:ring-0 text-white font-bold border-b-2 border-transparent focus:border-primary transition-all p-3 rounded-sm mt-1 block w-full" name="password_confirmation" type="password" autocomplete="new-password" />
             @if ($errors->updatePassword->get('password_confirmation'))
                 <ul class="text-sm text-red-600 space-y-1 mt-2">

@@ -41,7 +41,7 @@ function colorClasses(color) {
             <!-- metric -->
             <div v-else-if="block.type === 'metric'"
                  class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-white/5">
-                <span class="text-3xs font-bold uppercase tracking-widest text-on-surface-variant">
+                <span class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     {{ block.label }}
                 </span>
                 <span :class="['text-sm font-black', colorClasses(block.color).text]">

@@ -25,7 +25,7 @@ const emit = defineEmits(['close']);
 
             <div class="p-3 rounded-lg bg-surface-container-highest border border-white/5 space-y-2">
                 <div class="flex justify-between items-center">
-                    <span class="text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ transaction.date }}</span>
+                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ transaction.date }}</span>
                     <span class="text-sm font-black font-headline tracking-tight" :class="transaction.type === 'deposit' ? 'text-[#FFD700]' : 'text-error'">
                         {{ (transaction.type === 'deposit' ? '+' : '-') + transaction.amount }}
                     </span>
@@ -34,7 +34,7 @@ const emit = defineEmits(['close']);
             </div>
 
             <div class="space-y-1">
-                <label for="edit_description" class="block text-3xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Comment') }}</label>
+                <label for="edit_description" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Comment') }}</label>
                 <textarea name="description" id="edit_description" rows="4" v-model="transaction.description" :placeholder="__('Optional notes...')"
                           class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none"></textarea>
             </div>

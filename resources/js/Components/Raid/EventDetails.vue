@@ -1154,7 +1154,7 @@ const activeRosterClasses = computed(() => {
         <div v-if="canManageSchedule" class="flex items-center gap-3 flex-wrap">
             <button
                 @click="toggleFeature('boss_roster_enabled', !bossRosterEnabled)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-widest border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
                 :class="bossRosterEnabled
                     ? 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -1164,7 +1164,7 @@ const activeRosterClasses = computed(() => {
             </button>
             <button
                 @click="toggleFeature('split_enabled', !splitEnabled)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-widest border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
                 :class="splitEnabled
                     ? 'bg-fuchsia-400/10 border-fuchsia-400/30 text-fuchsia-400'
                     : 'bg-white/5 border-white/10 text-on-surface-variant hover:text-white'"
@@ -1203,7 +1203,7 @@ const activeRosterClasses = computed(() => {
             <!-- Audit button -->
             <button
                 @click="showAuditModal = true"
-                class="flex items-center gap-1.5 px-3 py-1.5 mb-1 rounded-lg text-4xs font-black uppercase tracking-widest border transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 mb-1 rounded-lg text-4xs font-black uppercase tracking-wider border transition-all"
                 :class="auditIssueCount > 0
                     ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
                     : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'"

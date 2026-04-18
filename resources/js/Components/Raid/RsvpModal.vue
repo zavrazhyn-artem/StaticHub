@@ -64,7 +64,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
 
                 <!-- Character select -->
                 <div class="space-y-2">
-                    <label class="text-3xs font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Character') }}</label>
+                    <label class="text-3xs font-black uppercase tracking-wider text-on-surface-variant ml-2">{{ __('Character') }}</label>
                     <select
                         name="character_id"
                         v-model="rsvpCharacterId"
@@ -81,7 +81,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
 
                 <!-- Spec select (only if specs are available) -->
                 <div v-if="availableSpecs.length > 0" class="space-y-2">
-                    <label class="text-3xs font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Specialization') }}</label>
+                    <label class="text-3xs font-black uppercase tracking-wider text-on-surface-variant ml-2">{{ __('Specialization') }}</label>
                     <div class="grid grid-cols-3 gap-2">
                         <button
                             v-for="spec in availableSpecs"
@@ -103,7 +103,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
                             </span>
 
                             <img :src="spec.icon_url" :alt="spec.name" class="w-8 h-8 rounded-lg object-cover">
-                            <span class="text-4xs font-bold text-white">{{ spec.name }}</span>
+                            <span class="text-4xs font-semibold text-white">{{ spec.name }}</span>
                             <span
                                 class="text-5xs font-black uppercase tracking-wide px-1 py-0.5 rounded-full border"
                                 :class="roleBadgeClass[spec.role] ?? 'bg-white/10 text-white/60 border-white/10'"
@@ -115,14 +115,14 @@ watch(rsvpCharacterId, (newId, oldId) => {
 
                 <!-- Status selector -->
                 <div class="space-y-2">
-                    <label class="text-3xs font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Attendance Status') }}</label>
+                    <label class="text-3xs font-black uppercase tracking-wider text-on-surface-variant ml-2">{{ __('Attendance Status') }}</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button
                             type="button"
                             v-for="status in ['present', 'absent', 'tentative', 'late']"
                             :key="status"
                             @click="rsvpStatus = status"
-                            class="px-4 py-2 border rounded-xl text-3xs font-black uppercase tracking-widest transition-all"
+                            class="px-4 py-2 border rounded-xl text-3xs font-black uppercase tracking-wider transition-all"
                             :class="rsvpStatus === status
                                 ? 'bg-green-600/20 border-green-500 text-green-400'
                                 : 'bg-white/5 border-white/10 text-on-surface-variant'"
@@ -133,7 +133,7 @@ watch(rsvpCharacterId, (newId, oldId) => {
 
                 <!-- Comment -->
                 <div class="space-y-2">
-                    <label class="text-3xs font-black uppercase tracking-widest text-on-surface-variant ml-2">{{ __('Comment (Optional)') }}</label>
+                    <label class="text-3xs font-black uppercase tracking-wider text-on-surface-variant ml-2">{{ __('Comment (Optional)') }}</label>
                     <input
                         type="text"
                         name="comment"

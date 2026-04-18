@@ -45,7 +45,7 @@
                     @csrf
                     @foreach($availableLocales as $locale)
                         @php $info = $localeMap[$locale]; @endphp
-                        <button name="locale" value="{{ $locale }}" class="flex items-center gap-3 w-full px-4 py-2 text-start text-3xs font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
+                        <button name="locale" value="{{ $locale }}" class="flex items-center gap-3 w-full px-4 py-2 text-start text-3xs font-semibold uppercase tracking-wider text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
                             <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}" class="w-5 h-auto rounded-sm">
                             {{ $info['label'] }}
                         </button>

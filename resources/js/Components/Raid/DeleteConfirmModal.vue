@@ -25,14 +25,14 @@ const emit = defineEmits(['close']);
             <div class="flex justify-end gap-3">
                 <button
                     @click="emit('close')"
-                    class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors"
+                    class="px-6 py-2.5 rounded-lg text-3xs font-black uppercase tracking-wider text-on-surface-variant hover:text-white transition-colors"
                 >{{ __('Cancel') }}</button>
                 <form :action="destroyRoute" method="POST">
                     <input type="hidden" name="_token" :value="csrfToken">
                     <input type="hidden" name="_method" value="DELETE">
                     <button
                         type="submit"
-                        class="px-6 py-2.5 bg-error-dim text-white rounded-lg text-3xs font-black uppercase tracking-widest hover:brightness-110 transition-all"
+                        class="px-6 py-2.5 bg-error-dim text-white rounded-lg text-3xs font-black uppercase tracking-wider hover:brightness-110 transition-all"
                     >{{ __('Delete Forever') }}</button>
                 </form>
             </div>

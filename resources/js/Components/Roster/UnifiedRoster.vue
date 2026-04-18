@@ -522,11 +522,11 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.missing_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-red-400">auto_fix_high</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Missing Enchants') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Missing Enchants') }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span v-for="slot in selectedAuditChar.missing_enchants_slots" :key="slot"
-                                  class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-3xs font-bold text-red-300">
+                                  class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-3xs font-semibold text-red-300">
                                 {{ slot }}
                             </span>
                         </div>
@@ -536,11 +536,11 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.low_quality_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Low Quality Enchants') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Low Quality Enchants') }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span v-for="slot in selectedAuditChar.low_quality_enchants_slots" :key="slot"
-                                  class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-3xs font-bold text-amber-300">
+                                  class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-3xs font-semibold text-amber-300">
                                 {{ slot }}
                             </span>
                         </div>
@@ -550,7 +550,7 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.empty_sockets_count > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-amber-400">hexagon</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Empty Sockets') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Empty Sockets') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.empty_sockets_count }}
@@ -561,7 +561,7 @@ const kickMember = async (member) => {
                     <div v-if="(selectedAuditChar?.upgrades_missing ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-blue-400">upgrade</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Upgrades Missing') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Upgrades Missing') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.upgrades_missing }}
@@ -572,7 +572,7 @@ const kickMember = async (member) => {
                     <div v-if="(selectedAuditChar?.sparks_equipped ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-emerald-400">flash_on</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.sparks_equipped }}
@@ -583,7 +583,7 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.embellished_items?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-purple-400">diamond</span>
-                            <span class="text-3xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Embellished Items') }}</span>
+                            <span class="text-3xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Embellished Items') }}</span>
                         </div>
                         <div class="space-y-1">
                             <div v-for="(emb, i) in selectedAuditChar.embellished_items" :key="i"

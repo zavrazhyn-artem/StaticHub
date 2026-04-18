@@ -130,7 +130,7 @@ const slotLabels = {
             <!-- thead ──────────────────────────────────────── -->
             <thead class="sticky top-0 z-20">
                 <!-- Group header row -->
-                <tr class="bg-[#1a1a1a] text-gray-500 text-5xs uppercase tracking-widest font-bold h-8" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#1a1a1a] text-gray-500 text-5xs uppercase tracking-wider font-semibold h-8" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="compare-col" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'"></th>
                     <th class="p-2 pl-4 w-[200px] min-w-[200px]">{{ __('Character') }}</th>
 
@@ -174,7 +174,7 @@ const slotLabels = {
                 </tr>
 
                 <!-- Column sub-header row -->
-                <tr class="bg-[#111111] text-emerald-400 text-4xs uppercase tracking-widest font-bold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                <tr class="bg-[#111111] text-emerald-400 text-4xs uppercase tracking-wider font-semibold h-10" style="box-shadow: inset 0 -1px 0 #222">
                     <th class="compare-col text-center" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'">
                         <span class="material-symbols-outlined text-sm text-emerald-400 compare-col-content">compare_arrows</span>
                     </th>
@@ -268,7 +268,7 @@ const slotLabels = {
                     <!-- Role group separator row -->
                     <tr v-if="members.length > 0 && roleKey !== 'unknown'"
                         class="bg-gray-800/80 border-y border-gray-700">
-                        <td colspan="100%" class="py-1 px-4 text-3xs font-bold uppercase tracking-widest text-emerald-400">
+                        <td colspan="100%" class="py-1 px-4 text-3xs font-semibold uppercase tracking-wider text-emerald-400">
                             <div class="flex items-center gap-2">
                                 <img :src="roleIconSrc(roleKey)" class="w-3 h-3 opacity-80" :alt="roleKey">
                                 <span>{{ __(roles.find(r => r.id === roleKey)?.labelKey || roleKey) }} ({{ members.length }})</span>

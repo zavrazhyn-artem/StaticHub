@@ -114,7 +114,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                 <!-- ── thead ───────────────────────────────────────────────── -->
                 <thead>
                     <!-- Group headers -->
-                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/20 text-gray-500 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
                         <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)] min-w-[200px]">
                             {{ __('Character') }}
                         </th>
@@ -122,7 +122,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                         <th :colspan="GEAR_SLOTS.length" class="p-2 text-center border-l border-white/5">{{ __('Equipment') }}</th>
                     </tr>
                     <!-- Column sub-headers -->
-                    <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-widest font-bold border-b border-white/5">
+                    <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
                         <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                             <div class="flex justify-between items-center pr-2">
                                 <span>{{ __('Name') }}</span>
@@ -280,7 +280,7 @@ const linkedMembers = (members) => members.filter(m => m.main_character != null)
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 pr-1">
-                                            <span class="text-3xs font-mono font-bold text-emerald-400/70">
+                                            <span class="text-3xs font-mono font-semibold text-emerald-400/70">
                                                 {{ getSpecData(alt)?.equipped_ilvl != null
                                                     ? Number(getSpecData(alt).equipped_ilvl).toFixed(1)
                                                     : 'N/A' }}

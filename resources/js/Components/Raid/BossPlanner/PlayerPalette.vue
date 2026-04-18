@@ -66,7 +66,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
     <div class="h-full flex flex-col text-xs">
         <!-- Header -->
         <div class="shrink-0 px-3 py-2 border-b border-white/5 flex items-center justify-between">
-            <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant">{{ __('Roster & Groups') }}</span>
+            <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant">{{ __('Roster & Groups') }}</span>
             <button
                 v-if="canManage && Object.keys(groups).length < 6"
                 @click="addGroup"
@@ -83,7 +83,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                     @click="toggleCollapse(group.id)"
                     @drop="handleGroupDrop($event, group.id)" @dragover="handleGroupDragOver">
                     <div class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: group.color }"></div>
-                    <span class="text-4xs font-black uppercase tracking-widest text-white flex-1">{{ group.label }}</span>
+                    <span class="text-4xs font-black uppercase tracking-wider text-white flex-1">{{ group.label }}</span>
                     <span class="text-5xs text-on-surface-variant/50">{{ (group.members || []).length }}</span>
                     <button v-if="canManage" @click.stop="emit('remove-group', group.id)"
                         class="text-on-surface-variant/30 hover:text-red-400 transition-colors" :title="__('Remove group')">
@@ -100,7 +100,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                         draggable="true" @dragstart="handleDragStart($event, memberId)">
                         <div class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: group.color }"></div>
                         <img v-if="getChar(memberId)?.avatar_url" :src="getChar(memberId).avatar_url" class="w-4 h-4 rounded object-cover">
-                        <span class="text-4xs font-bold truncate flex-1"
+                        <span class="text-4xs font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(getChar(memberId)?.playable_class)">{{ getChar(memberId)?.name || memberId }}</span>
                         <button v-if="canManage" @click.stop="emit('remove-from-group', { characterId: memberId, groupId: group.id })"
                             class="opacity-0 group-hover/member:opacity-100 text-on-surface-variant/40 hover:text-red-400 transition-all">
@@ -127,7 +127,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
             <div>
                 <div class="px-3 py-1.5 flex items-center gap-2">
                     <span class="material-symbols-outlined text-xs text-on-surface-variant/40">person</span>
-                    <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
+                    <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
                     <span class="text-5xs text-on-surface-variant/30">{{ unassignedCharacters.length }}</span>
                 </div>
                 <div class="pb-1 px-1.5">
@@ -135,7 +135,7 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                         class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 cursor-grab transition-colors group/member"
                         draggable="true" @dragstart="handleDragStart($event, char.id)">
                         <img v-if="char.avatar_url" :src="char.avatar_url" class="w-4 h-4 rounded object-cover border border-white/10">
-                        <span class="text-4xs font-bold truncate flex-1"
+                        <span class="text-4xs font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(char.playable_class)">{{ char.name }}</span>
                         <!-- Quick-assign buttons -->
                         <div v-if="canManage && groupEntries.length > 0"

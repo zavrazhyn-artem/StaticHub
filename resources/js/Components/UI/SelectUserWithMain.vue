@@ -87,12 +87,12 @@ defineExpose({ close });
                           :style="{ color: getClassColor(selectedMember.character?.playable_class) }">
                         {{ selectedMember.character?.name || selectedMember.name }}
                     </span>
-                    <span v-if="selectedMember.character" class="text-4xs text-gray-500 font-bold truncate">
+                    <span v-if="selectedMember.character" class="text-4xs text-gray-500 font-semibold truncate">
                         ({{ selectedMember.name }})
                     </span>
                 </div>
             </template>
-            <span v-else class="text-3xs text-on-surface-variant/50 italic font-bold tracking-widest">
+            <span v-else class="text-3xs text-on-surface-variant/50 italic font-semibold tracking-wider">
                 {{ placeholder }}
             </span>
             <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform ml-auto shrink-0"
@@ -154,7 +154,7 @@ defineExpose({ close });
                                  :style="{ color: getClassColor(member.character?.playable_class) }">
                                 {{ member.character?.name || member.name }}
                             </div>
-                            <div v-if="member.character" class="text-4xs text-gray-500 font-bold uppercase tracking-widest truncate">
+                            <div v-if="member.character" class="text-4xs text-gray-500 font-semibold uppercase tracking-wider truncate">
                                 {{ member.name }}
                             </div>
                         </div>

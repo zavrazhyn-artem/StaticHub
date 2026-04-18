@@ -106,7 +106,7 @@ const getAttendance = (charId) => {
     <div class="space-y-2">
         <!-- Total count -->
         <div class="flex items-center justify-between px-1">
-            <span class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50">{{ __('Roster') }}</span>
+            <span class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50">{{ __('Roster') }}</span>
             <span class="text-3xs font-black" :class="totalPresent >= totalLimit ? 'text-green-400' : 'text-on-surface-variant'">
                 {{ totalPresent }} / {{ totalLimit }}
             </span>
@@ -122,11 +122,11 @@ const getAttendance = (charId) => {
             <div class="flex items-center justify-between px-3 py-1.5 border-b border-white/5">
                 <div class="flex items-center gap-1.5">
                     <img :src="'/images/roles/' + roles[roleKey].icon" class="w-3.5 h-3.5 opacity-70">
-                    <span class="text-4xs font-black uppercase tracking-widest" :class="roles[roleKey].color">
+                    <span class="text-4xs font-black uppercase tracking-wider" :class="roles[roleKey].color">
                         {{ roles[roleKey].label }}
                     </span>
                 </div>
-                <span class="text-4xs font-bold text-on-surface-variant/60">
+                <span class="text-4xs font-semibold text-on-surface-variant/60">
                     {{ layoutData[roleKey].mainChars.length }}
                     <template v-if="roleLimit(roleKey)">/ {{ roleLimit(roleKey) }}</template>
                 </span>
@@ -170,7 +170,7 @@ const getAttendance = (charId) => {
 
                     <!-- Name -->
                     <span
-                        class="text-3xs font-bold leading-tight truncate max-w-[70px]"
+                        class="text-3xs font-semibold leading-tight truncate max-w-[70px]"
                         :class="'text-wow-' + (char.playable_class || '').toLowerCase().replace(/ /g, '-')"
                     >{{ char.name }}</span>
 
@@ -248,7 +248,7 @@ const getAttendance = (charId) => {
                         <span class="material-symbols-outlined text-3xs opacity-40">person</span>
                     </div>
 
-                    <span class="text-4xs font-bold truncate max-w-[60px]"
+                    <span class="text-4xs font-semibold truncate max-w-[60px]"
                         :class="isBenched(char.id) ? 'text-orange-400' : 'text-on-surface-variant/70'"
                     >{{ char.name }}</span>
 

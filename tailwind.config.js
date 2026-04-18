@@ -93,6 +93,9 @@ export default {
                 '3xs': ['0.625rem',  { lineHeight: '0.875rem' }],   // 10px
                 '2xs': ['0.6875rem', { lineHeight: '1rem' }],       // 11px
             },
+            maxWidth: {
+                '8xl': '90rem',  // 1440px — main container
+            },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
             typography: (theme) => ({
                 tactical: {

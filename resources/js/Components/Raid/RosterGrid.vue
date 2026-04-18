@@ -82,7 +82,7 @@ const layoutData = computed(() => {
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <span v-if="layoutData[roleKey].absentChars.length" class="text-4xs font-black text-error-dim uppercase tracking-widest">
+                    <span v-if="layoutData[roleKey].absentChars.length" class="text-4xs font-black text-error-dim uppercase tracking-wider">
                         {{ layoutData[roleKey].absentChars.length }} {{ __('Absent') }}
                     </span>
                     <span class="bg-white/10 px-2 py-0.5 rounded text-3xs font-black text-white">
@@ -106,7 +106,7 @@ const layoutData = computed(() => {
                     :key="'empty-' + i"
                     class="flex items-center justify-center p-2 opacity-20 border border-dashed border-white/10 rounded min-h-[34px] col-span-1"
                 >
-                    <span class="text-5xs uppercase font-black tracking-widest text-on-surface-variant">{{ __('Empty') }}</span>
+                    <span class="text-5xs uppercase font-black tracking-wider text-on-surface-variant">{{ __('Empty') }}</span>
                 </div>
 
                 <div

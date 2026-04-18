@@ -116,7 +116,7 @@ const countKills = (charId) => {
 
             <!-- Spec selector (RL only, when character has multiple specs) -->
             <div v-if="canManage && currentCharSpecs.length > 1" class="mb-4">
-                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Specialization
                 </div>
                 <div class="flex flex-wrap gap-1.5">
@@ -135,7 +135,7 @@ const countKills = (charId) => {
                             class="w-5 h-5 rounded"
                         >
                         <div>
-                            <div class="text-3xs font-bold text-white">{{ spec.name }}</div>
+                            <div class="text-3xs font-semibold text-white">{{ spec.name }}</div>
                             <div class="text-5xs text-on-surface-variant uppercase">{{ spec.role }}</div>
                         </div>
                         <span
@@ -148,7 +148,7 @@ const countKills = (charId) => {
 
             <!-- Lockout status -->
             <div v-if="currentCharLockouts.length" class="mb-4">
-                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Weekly Lockout ({{ diffLabel[difficulty] || difficulty }})
                 </div>
                 <div class="grid grid-cols-3 gap-1">
@@ -168,7 +168,7 @@ const countKills = (charId) => {
 
             <!-- Alt swap (only for managers) -->
             <div v-if="canManage && userAlts.length > 1" class="border-t border-white/10 pt-4">
-                <div class="text-4xs font-black uppercase tracking-widest text-on-surface-variant/50 mb-2">
+                <div class="text-4xs font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
                     Available Characters
                 </div>
                 <div class="space-y-1">
@@ -206,7 +206,7 @@ const countKills = (charId) => {
                         </div>
 
                         <!-- Alt lockout summary -->
-                        <div v-if="weeklyRaidData[alt.id]" class="text-4xs text-on-surface-variant/50 font-bold shrink-0">
+                        <div v-if="weeklyRaidData[alt.id]" class="text-4xs text-on-surface-variant/50 font-semibold shrink-0">
                             {{ countKills(alt.id) }}/{{ currentCharLockouts.length }}
                         </div>
 

@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="text-center mb-8">
-            <span class="text-primary text-3xs font-bold uppercase tracking-[0.3em] mb-2 block">
+            <span class="text-primary text-3xs font-semibold uppercase tracking-[0.3em] mb-2 block">
                 {{ __('— Step 3') }}
             </span>
             <h2 class="font-headline text-3xl font-black text-white uppercase tracking-tighter italic">
@@ -22,7 +22,7 @@
         <div v-if="syncError" class="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-lg px-5 py-4 flex items-center gap-3">
             <span class="material-symbols-outlined text-amber-500">warning</span>
             <span class="text-amber-500 text-sm">{{ syncError }}</span>
-            <button @click="resync" class="ml-auto text-amber-500 hover:text-amber-300 text-3xs font-bold uppercase tracking-widest">
+            <button @click="resync" class="ml-auto text-amber-500 hover:text-amber-300 text-3xs font-semibold uppercase tracking-wider">
                 {{ __('Retry') }}
             </button>
         </div>
@@ -35,7 +35,7 @@
             <button
                 @click="resync"
                 :disabled="syncing"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/20 transition-all text-3xs font-bold uppercase tracking-[0.2em]"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/20 transition-all text-3xs font-semibold uppercase tracking-[0.2em]"
             >
                 <span class="material-symbols-outlined text-sm">sync</span>
                 {{ __('Sync from Battle.net') }}
@@ -46,7 +46,7 @@
         <div v-else-if="characterList.length > 0" class="space-y-6">
             <!-- Main Character Section -->
             <div>
-                <h3 class="text-3xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-3 flex items-center gap-2">
+                <h3 class="text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant mb-3 flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-primary">star</span>
                     {{ __('Main Character') }}
                     <span class="text-error">*</span>
@@ -105,7 +105,7 @@
 
             <!-- Alt Characters Section -->
             <div v-if="altCandidates.length > 0">
-                <h3 class="text-3xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-3 flex items-center gap-2">
+                <h3 class="text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant mb-3 flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-cyan-400">group</span>
                     {{ __('Alts for Raid') }}
                     <span class="text-on-surface-variant/40 font-normal normal-case tracking-normal">({{ __('optional') }})</span>
@@ -172,7 +172,7 @@
                 <button
                     @click="resync"
                     :disabled="syncing"
-                    class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-colors text-3xs font-bold uppercase tracking-[0.15em]"
+                    class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-colors text-3xs font-semibold uppercase tracking-[0.15em]"
                 >
                     <span class="material-symbols-outlined text-sm" :class="syncing ? 'animate-spin' : ''">sync</span>
                     {{ __('Re-sync from Battle.net') }}

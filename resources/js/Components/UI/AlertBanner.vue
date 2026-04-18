@@ -66,13 +66,13 @@ const handleAction = () => {
              :class="variantClasses[variant]">
             <span class="material-symbols-outlined text-base leading-none">{{ icon }}</span>
 
-            <span class="text-3xs font-bold uppercase tracking-widest leading-none">
+            <span class="text-3xs font-semibold uppercase tracking-wider leading-none">
                 <slot />
             </span>
 
             <button v-if="actionLabel"
                     @click="handleAction"
-                    class="ml-2 text-3xs font-bold uppercase tracking-widest leading-none px-3 py-1.5 rounded-sm transition-all active:scale-95 flex items-center"
+                    class="ml-2 text-3xs font-semibold uppercase tracking-wider leading-none px-3 py-1.5 rounded-sm transition-all active:scale-95 flex items-center"
                     :class="actionVariantClasses[variant]">
                 {{ actionLabel }}
             </button>

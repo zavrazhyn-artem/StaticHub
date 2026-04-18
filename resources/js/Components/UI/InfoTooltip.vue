@@ -27,7 +27,7 @@ const visible = ref(false);
                      'left-full top-1/2 -translate-y-1/2 ml-2': position === 'right',
                  }">
                 <div class="tooltip-glass border border-white/10 px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap">
-                    <span class="text-3xs font-bold text-gray-200 tracking-wide">{{ text }}</span>
+                    <span class="text-3xs font-semibold text-gray-200 tracking-wide">{{ text }}</span>
                 </div>
             </div>
         </Transition>
