@@ -40,7 +40,7 @@ class RosterTest extends TestCase
         $mainChar->statics()->attach($static, ['role' => 'main', 'combat_role' => 'tank']);
         $altChar->statics()->attach($static, ['role' => 'alt', 'combat_role' => 'rdps']);
 
-        $response = $this->actingAs($user)->get(route('statics.roster', $static->id));
+        $response = $this->actingAs($user)->get(route('statics.roster'));
 
         $response->assertStatus(200);
         $response->assertSee('Loot & Taxes');
@@ -63,12 +63,8 @@ class RosterTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response->assertStatus(302);
-        $response->assertRedirect(route('statics.dashboard', $static->id));
-
-        $response = $this->followRedirects($response);
         $response->assertStatus(200);
-        $response->assertSee(route('statics.roster', $static->id));
+        $response->assertSee(route('statics.roster'));
         $response->assertSee('Roster');
         $response->assertSee(route('characters.index'));
         $response->assertSee('Characters');
@@ -95,7 +91,7 @@ class RosterTest extends TestCase
             'playable_class' => 'Mage', 'playable_race' => 'Human', 'level' => 80,
         ]);
 
-        $response = $this->actingAs($user)->post(route('roster.updateParticipation', $static->id), [
+        $response = $this->actingAs($user)->post(route('roster.updateParticipation'), [
             'main_character_id' => $char1->id,
             'raiding_characters' => [$char1->id, $char2->id],
             'combat_roles' => [
@@ -119,7 +115,7 @@ class RosterTest extends TestCase
         ]);
 
         // Update again, removing char2 and changing role of char1
-        $response = $this->actingAs($user)->post(route('roster.updateParticipation', $static->id), [
+        $response = $this->actingAs($user)->post(route('roster.updateParticipation'), [
             'main_character_id' => $char1->id,
             'raiding_characters' => [$char1->id],
             'combat_roles' => [

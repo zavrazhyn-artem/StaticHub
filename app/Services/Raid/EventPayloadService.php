@@ -27,7 +27,7 @@ class EventPayloadService
      */
     public function buildBossPlannerUrl(Event $event): string
     {
-        return route('statics.boss-planner', $event->static_id);
+        return route('statics.boss-planner');
     }
 
     /**

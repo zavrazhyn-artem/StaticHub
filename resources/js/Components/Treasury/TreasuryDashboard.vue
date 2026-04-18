@@ -110,7 +110,7 @@
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
-                    <a :href="`/statics/${staticId}/treasury/history`" class="text-3xs font-semibold text-yellow-500 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1">
+                    <a href="/treasury/history" class="text-3xs font-semibold text-yellow-500 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1">
                         {{ __('View All') }}
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
@@ -259,7 +259,7 @@ const saveTax = async () => {
     taxSaving.value = true;
     taxSaveError.value = '';
     try {
-        const response = await fetch(`/statics/${props.staticId}/treasury-settings`, {
+        const response = await fetch(`/treasury-settings`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

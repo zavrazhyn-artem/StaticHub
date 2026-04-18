@@ -11,8 +11,8 @@
             :my-character-ids="{{ json_encode($myCharacterIds ?? []) }}"
             csrf-token="{{ csrf_token() }}"
             :routes="{{ json_encode([
-                'save' => route('statics.boss-planner.save', $static->id),
-                'shareBase' => url('/statics/' . $static->id . '/boss-planner'),
+                'save' => route('statics.boss-planner.save'),
+                'shareBase' => url('/boss-planner'),
             ]) }}"
         ></boss-planner-page>
     </div>

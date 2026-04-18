@@ -2,11 +2,11 @@
     <logs-index
         static-name="{{ $static->name }}"
         :logs='@json($logsData)'
-        filter-url="{{ route('statics.logs.index', $static) }}"
+        filter-url="{{ route('statics.logs.index') }}"
         current-difficulties="{{ $currentDifficulties ?? '' }}"
         current-from-date="{{ $currentFromDate ?? '' }}"
         current-to-date="{{ $currentToDate ?? '' }}"
-        manual-log-url="{{ route('statics.logs.manual.store', $static) }}"
+        manual-log-url="{{ route('statics.logs.manual.store') }}"
         :cooldown-state='@json($cooldownState)'
     ></logs-index>
 

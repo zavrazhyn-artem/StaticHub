@@ -20,7 +20,7 @@
             csrf-token="{{ csrf_token() }}"
             create-event-route="{{ route('schedule.store') }}"
             @if ($canManageSchedule)
-                settings-route="{{ route('statics.settings.schedule', $static) }}"
+                settings-route="{{ route('statics.settings.schedule') }}"
             @endif
         ></schedule-calendar>
     </div>

@@ -19,7 +19,7 @@ const emit = defineEmits(['close']);
             </button>
         </div>
 
-        <form :action="`/statics/${staticId}/treasury/${transaction.id}`" method="POST" class="p-6 space-y-4">
+        <form :action="`/treasury/${transaction.id}`" method="POST" class="p-6 space-y-4">
             <input type="hidden" name="_token" :value="csrfToken">
             <input type="hidden" name="_method" value="PATCH">
 

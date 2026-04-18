@@ -123,9 +123,9 @@ class DashboardService
             'syncData'      => $data['syncData'] ?? (object) [],
             'tickInterval'  => config('sync.widget_tick_ms', 1000),
             'routes' => [
-                'settings'  => route('statics.settings.schedule', $static->id),
+                'settings'  => route('statics.settings.schedule'),
                 'calendar'  => route('schedule.index'),
-                'treasury'  => route('statics.treasury', $static->id),
+                'treasury'  => route('statics.treasury'),
                 'eventShow' => route('schedule.event.show', '__ID__'),
             ],
         ];

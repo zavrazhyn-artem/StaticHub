@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Middleware\HasStatic;
 use App\Http\Middleware\EnsureUserHasStatic;
+use App\Http\Middleware\ResolveCurrentStatic;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'has_static' => HasStatic::class,
             'ensure_has_static' => EnsureUserHasStatic::class,
+            'resolve_current_static' => ResolveCurrentStatic::class,
             'admin_auth' => AdminAuthenticate::class,
         ]);
 

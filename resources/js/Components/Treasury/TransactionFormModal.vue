@@ -26,7 +26,7 @@ const selectedUserId = ref('');
             </button>
         </div>
 
-        <form :action="`/statics/${staticId}/treasury`" method="POST" class="p-6 space-y-4">
+        <form action="/treasury" method="POST" class="p-6 space-y-4">
             <input type="hidden" name="_token" :value="csrfToken">
             <input type="hidden" name="type" :value="transactionType">
 

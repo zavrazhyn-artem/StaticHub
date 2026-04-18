@@ -25,10 +25,10 @@
                 :total-members="{{ $static->members->count() }}"
                 :individual-potion-price="{{ $individualPotionPrice }}"
                 :individual-flask-price="{{ $individualFlaskPrice }}"
-                save-url="{{ route('consumables.store', $static) }}"
+                save-url="{{ route('consumables.store') }}"
                 :can-manage-treasury="{{ $canManageTreasury ? 'true' : 'false' }}"
                 @if ($canManageTreasury)
-                    settings-schedule-url="{{ route('statics.settings.schedule', $static) }}"
+                    settings-schedule-url="{{ route('statics.settings.schedule') }}"
                 @endif
                 csrf-token="{{ csrf_token() }}"
             />

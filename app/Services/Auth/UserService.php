@@ -24,7 +24,7 @@ class UserService
         $transferData = $ownedStatics->map(fn ($static) => [
             'id'      => $static->id,
             'name'    => $static->name,
-            'url'     => route('profile.static.transfer', $static),
+            'url'     => route('profile.static.transfer'),
             'members' => $static->members->map(fn ($member) => [
                 'id'        => $member->id,
                 'name'      => $member->name,

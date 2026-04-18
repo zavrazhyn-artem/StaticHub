@@ -30,11 +30,10 @@ Route::get('/', function () {
 
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
 
-Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () {
+Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'showFirst'])->name('dashboard');
-    Route::get('/statics/{static}/dashboard', [DashboardController::class, 'show'])->name('statics.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
     // Characters
     Route::get('/characters', [CharacterController::class, 'index'])->name('characters.index');
@@ -44,48 +43,48 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::get('/personal-reports', [CharacterController::class, 'personalReports'])->name('personal-reports');
 
     // Roster
-    Route::get('/statics/{static}/roster', [RosterController::class, 'index'])->name('statics.roster');
-    Route::get('/statics/{static}/roster/weekly-snapshot', [RosterController::class, 'weeklySnapshot'])->name('statics.roster.weekly-snapshot');
-    Route::get('/statics/{static}/roster/overview', [RosterController::class, 'overview'])->name('statics.roster.overview');
-    Route::patch('/statics/{static}/roster/{user}/access-role', [StaticRosterController::class, 'updateAccessRole'])->name('statics.roster.update-access');
-    Route::patch('/statics/{static}/roster/{user}/roster-status', [StaticRosterController::class, 'updateRosterStatus'])->name('statics.roster.update-status');
-    Route::delete('/statics/{static}/roster/{user}/kick', [StaticRosterController::class, 'kick'])->name('statics.roster.kick');
+    Route::get('/roster', [RosterController::class, 'index'])->name('statics.roster');
+    Route::get('/roster/weekly-snapshot', [RosterController::class, 'weeklySnapshot'])->name('statics.roster.weekly-snapshot');
+    Route::get('/roster/overview', [RosterController::class, 'overview'])->name('statics.roster.overview');
+    Route::patch('/roster/{user}/access-role', [StaticRosterController::class, 'updateAccessRole'])->name('statics.roster.update-access');
+    Route::patch('/roster/{user}/roster-status', [StaticRosterController::class, 'updateRosterStatus'])->name('statics.roster.update-status');
+    Route::delete('/roster/{user}/kick', [StaticRosterController::class, 'kick'])->name('statics.roster.kick');
 
     // Treasury
-    Route::get('/statics/{static}/treasury', [TreasuryController::class, 'index'])->name('statics.treasury');
-    Route::get('/statics/{static}/treasury/history', [TreasuryController::class, 'history'])->name('statics.treasury.history');
-    Route::post('/statics/{static}/treasury', [TreasuryController::class, 'store'])->name('statics.treasury.store');
-    Route::post('/statics/{static}/consumables', [TreasuryController::class, 'updateConsumables'])->name('consumables.store');
-    Route::patch('/statics/{static}/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
-    Route::patch('/statics/{static}/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
+    Route::get('/treasury', [TreasuryController::class, 'index'])->name('statics.treasury');
+    Route::get('/treasury/history', [TreasuryController::class, 'history'])->name('statics.treasury.history');
+    Route::post('/treasury', [TreasuryController::class, 'store'])->name('statics.treasury.store');
+    Route::post('/consumables', [TreasuryController::class, 'updateConsumables'])->name('consumables.store');
+    Route::patch('/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
+    Route::patch('/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
     // Gear Management
-    Route::get('/statics/{static}/gear', [GearController::class, 'index'])->name('statics.gear');
+    Route::get('/gear', [GearController::class, 'index'])->name('statics.gear');
 
     // Settings
-    Route::get('/statics/{static}/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
-    Route::get('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
-    Route::patch('/statics/{static}/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
-    Route::get('/statics/{static}/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
-    Route::patch('/statics/{static}/settings/discord', [StaticSettingsController::class, 'updateDiscord'])->name('statics.settings.discord.update');
-    Route::post('/statics/{static}/settings/discord/test', [StaticSettingsController::class, 'testDiscordWebhook'])->name('statics.settings.discord.test');
-    Route::post('/statics/{static}/settings/discord/test-channel', [StaticSettingsController::class, 'testDiscordChannel'])->name('statics.settings.discord.test-channel');
-    Route::delete('/statics/{static}/settings/discord/channel-message/{messageId}', [StaticSettingsController::class, 'deleteChannelMessage'])->name('statics.settings.discord.channel-message.delete');
-    Route::delete('/statics/{static}/settings/discord/message/{messageId}', [StaticSettingsController::class, 'deleteWebhookMessage'])->name('statics.settings.discord.message.delete');
-    Route::post('/statics/{static}/settings/discord/test-notification-channel', [StaticSettingsController::class, 'testNotificationChannel'])->name('statics.settings.discord.test-notification-channel');
-    Route::delete('/statics/{static}/settings/discord/notification-channel-message/{messageId}', [StaticSettingsController::class, 'deleteNotificationChannelMessage'])->name('statics.settings.discord.notification-channel-message.delete');
-    Route::get('/statics/{static}/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
-    Route::post('/statics/{static}/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
-    Route::post('/statics/{static}/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
-    Route::post('/statics/{static}/settings/logs/disconnect-guild', [StaticSettingsController::class, 'disconnectGuild'])->name('statics.settings.logs.disconnect-guild');
+    Route::get('/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
+    Route::get('/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
+    Route::patch('/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
+    Route::get('/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
+    Route::patch('/settings/discord', [StaticSettingsController::class, 'updateDiscord'])->name('statics.settings.discord.update');
+    Route::post('/settings/discord/test', [StaticSettingsController::class, 'testDiscordWebhook'])->name('statics.settings.discord.test');
+    Route::post('/settings/discord/test-channel', [StaticSettingsController::class, 'testDiscordChannel'])->name('statics.settings.discord.test-channel');
+    Route::delete('/settings/discord/channel-message/{messageId}', [StaticSettingsController::class, 'deleteChannelMessage'])->name('statics.settings.discord.channel-message.delete');
+    Route::delete('/settings/discord/message/{messageId}', [StaticSettingsController::class, 'deleteWebhookMessage'])->name('statics.settings.discord.message.delete');
+    Route::post('/settings/discord/test-notification-channel', [StaticSettingsController::class, 'testNotificationChannel'])->name('statics.settings.discord.test-notification-channel');
+    Route::delete('/settings/discord/notification-channel-message/{messageId}', [StaticSettingsController::class, 'deleteNotificationChannelMessage'])->name('statics.settings.discord.notification-channel-message.delete');
+    Route::get('/settings/logs', [StaticSettingsController::class, 'logs'])->name('statics.settings.logs');
+    Route::post('/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
+    Route::post('/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
+    Route::post('/settings/logs/disconnect-guild', [StaticSettingsController::class, 'disconnectGuild'])->name('statics.settings.logs.disconnect-guild');
 
     // Logs
-    Route::get('/statics/{static}/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');
-    Route::post('/statics/{static}/logs/manual', [StaticLogsController::class, 'storeManual'])->name('statics.logs.manual.store');
-    Route::get('/statics/{static}/logs/{report}', [StaticLogsController::class, 'show'])->name('statics.logs.show');
+    Route::get('/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');
+    Route::post('/logs/manual', [StaticLogsController::class, 'storeManual'])->name('statics.logs.manual.store');
+    Route::get('/logs/{report}', [StaticLogsController::class, 'show'])->name('statics.logs.show');
 
     // Static management
-    Route::post('/statics/{static}/invite', [StaticController::class, 'generateInvite'])->name('statics.invite.generate');
+    Route::post('/invite', [StaticController::class, 'generateInvite'])->name('statics.invite.generate');
 
     // Schedule & Events
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
@@ -107,24 +106,24 @@ Route::middleware(['auth', 'verified', 'ensure_has_static'])->group(function () 
     Route::post('/schedule/event/{event}/save-splits', [EventController::class, 'saveSplitAssignments'])->name('schedule.event.save-splits');
 
     // Boss Planner (standalone section)
-    Route::get('/statics/{static}/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');
-    Route::post('/statics/{static}/boss-planner/save', [BossPlannerController::class, 'save'])->name('statics.boss-planner.save');
-    Route::delete('/statics/{static}/boss-planner/{raidPlan}', [BossPlannerController::class, 'destroy'])->name('statics.boss-planner.destroy');
-    Route::post('/statics/{static}/boss-planner/{raidPlan}/share', [BossPlannerController::class, 'share'])->name('statics.boss-planner.share');
-    Route::post('/statics/{static}/boss-planner/{raidPlan}/unshare', [BossPlannerController::class, 'unshare'])->name('statics.boss-planner.unshare');
+    Route::get('/boss-planner', [BossPlannerController::class, 'index'])->name('statics.boss-planner');
+    Route::post('/boss-planner/save', [BossPlannerController::class, 'save'])->name('statics.boss-planner.save');
+    Route::delete('/boss-planner/{raidPlan}', [BossPlannerController::class, 'destroy'])->name('statics.boss-planner.destroy');
+    Route::post('/boss-planner/{raidPlan}/share', [BossPlannerController::class, 'share'])->name('statics.boss-planner.share');
+    Route::post('/boss-planner/{raidPlan}/unshare', [BossPlannerController::class, 'unshare'])->name('statics.boss-planner.unshare');
 
     // Discord Guild API
     Route::get('/api/discord/guilds/{guildId}/channels', [DiscordGuildController::class, 'channels']);
     Route::get('/api/discord/guilds/{guildId}/roles', [DiscordGuildController::class, 'roles']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'resolve_current_static'])->group(function () {
 
     // AI Analyst
     Route::post('/api/logs/analyze', [AiAnalystController::class, 'ask']);
 
     // Roster participation
-    Route::post('/statics/{static}/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
+    Route::post('/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -140,7 +139,7 @@ Route::middleware('auth')->group(function () {
 
     // Static membership
     Route::delete('/profile/static/leave', [StaticMembershipController::class, 'leaveStatic'])->name('profile.static.leave');
-    Route::post('/profile/static/{static}/transfer', [StaticMembershipController::class, 'transferOwnership'])->name('profile.static.transfer');
+    Route::post('/profile/static/transfer', [StaticMembershipController::class, 'transferOwnership'])->name('profile.static.transfer');
 
     // Static setup
     Route::get('/statics/setup', [StaticController::class, 'index'])->name('statics.setup');

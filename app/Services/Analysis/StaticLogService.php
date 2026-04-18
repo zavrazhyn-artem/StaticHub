@@ -201,7 +201,7 @@ class StaticLogService
             'canViewGlobalReport' => $canViewGlobalReport,
             'canUseAiChat'       => $canUseAiChat,
             'chatHistory'        => $chatHistory,
-            'logsIndexUrl'       => route('statics.logs.index', $static),
+            'logsIndexUrl'       => route('statics.logs.index'),
         ];
     }
 
@@ -243,7 +243,7 @@ class StaticLogService
             'difficulties' => $log->difficulties ?? [],
             'date'         => $log->created_at->format('M d, Y'),
             'has_ai'       => (bool) $log->ai_analysis,
-            'url'          => route('statics.logs.show', [$static, $log]),
+            'url'          => route('statics.logs.show', $log),
         ], $logs->items());
 
         return $logsData;

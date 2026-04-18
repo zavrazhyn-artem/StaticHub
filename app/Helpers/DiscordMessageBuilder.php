@@ -98,7 +98,7 @@ class DiscordMessageBuilder
 
         $analysisText = "";
         if ($event->tacticalReport && $event->tacticalReport->ai_analysis) {
-            $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', [$event->static->id, $event->tacticalReport->id]) . ")";
+            $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', $event->tacticalReport->id) . ")";
         }
 
         $fields = [];

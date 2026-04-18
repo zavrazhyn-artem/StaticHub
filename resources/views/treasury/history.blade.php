@@ -9,8 +9,8 @@
         :transactions='@json($transactions->items())'
         :members='@json($members)'
         selected-user-id="{{ $selectedUserId ?? '' }}"
-        filter-url="{{ route('statics.treasury.history', $static) }}"
-        treasury-url="{{ route('statics.treasury', $static) }}"
+        filter-url="{{ route('statics.treasury.history') }}"
+        treasury-url="{{ route('statics.treasury') }}"
         csrf-token="{{ csrf_token() }}"
     ></transaction-history>
 

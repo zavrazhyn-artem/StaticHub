@@ -8,7 +8,7 @@
                 </h2>
             </div>
             <div class="flex space-x-2">
-                <a href="{{ route('statics.roster', $static->id) }}" class="bg-surface-container-high text-on-surface-variant hover:text-primary px-4 py-2 rounded text-xs font-label uppercase tracking-widest transition-colors border border-white/5">
+                <a href="{{ route('statics.roster') }}" class="bg-surface-container-high text-on-surface-variant hover:text-primary px-4 py-2 rounded text-xs font-label uppercase tracking-widest transition-colors border border-white/5">
                     {{ __('Back to Tactical Roster') }}
                 </a>
             </div>

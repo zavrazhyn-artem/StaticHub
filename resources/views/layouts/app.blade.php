@@ -46,7 +46,7 @@
         @if($static && !$isOnboarding)
             @can('manage', $static)
             <div class="hidden md:flex items-center gap-4 ml-4">
-                <button onclick="handleInviteClick({{ $static->id }})"
+                <button onclick="handleInviteClick()"
                         class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
                     <span class="material-symbols-outlined text-sm">person_add</span>
                     <span
@@ -60,9 +60,9 @@
             @endcan
 
             <script>
-                async function handleInviteClick(staticId) {
+                async function handleInviteClick() {
                     try {
-                        const response = await fetch(`/statics/${staticId}/invite`, {
+                        const response = await fetch(`/invite`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -212,14 +212,14 @@
         </div>
 
         <div class="flex-1 overflow-y-auto px-3 space-y-1">
-            <a href="{{ route('statics.dashboard', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.dashboard') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('dashboard') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('dashboard') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.dashboard') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">dashboard</span>
+                    class="material-symbols-outlined {{ request()->routeIs('dashboard') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">dashboard</span>
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Dashboard') }}</span>
             </a>
 
-            <a href="{{ route('statics.roster', $static->id) }}"
+            <a href="{{ route('statics.roster') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-emerald-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-emerald-400' : 'group-hover:text-emerald-400 transition-colors' }}">groups</span>
@@ -234,28 +234,28 @@
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
             </a>
 
-            <a href="{{ route('statics.boss-planner', $static->id) }}"
+            <a href="{{ route('statics.boss-planner') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.boss-planner*') ? 'bg-[#262528] text-white border-l-4 border-orange-500' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.boss-planner*') ? 'text-orange-500' : 'group-hover:text-orange-500 transition-colors' }}">map</span>
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Boss Planner') }}</span>
             </a>
 
-            <a href="{{ route('statics.treasury', $static->id) }}"
+            <a href="{{ route('statics.treasury') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-yellow-500' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-yellow-500' : 'group-hover:text-yellow-500 transition-colors' }}">payments</span>
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Treasury') }}</span>
             </a>
 
-            <a href="{{ route('statics.logs.index', $static->id) }}"
+            <a href="{{ route('statics.logs.index') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-indigo-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors' }}">terminal</span>
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Intelligence') }}</span>
             </a>
 
-            <a href="{{ route('statics.gear', $static->id) }}"
+            <a href="{{ route('statics.gear') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.gear') ? 'bg-[#262528] text-white border-l-4 border-rose-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.gear') ? 'text-rose-400' : 'group-hover:text-rose-400 transition-colors' }}">shield</span>
@@ -273,7 +273,7 @@
                 <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('My Characters') }}</span>
             </a>
 
-            <a href="{{ route('statics.settings.profile', $static->id) }}"
+            <a href="{{ route('statics.settings.profile') }}"
                class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-slate-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-slate-400' : 'group-hover:text-slate-400 transition-colors' }}">settings</span>

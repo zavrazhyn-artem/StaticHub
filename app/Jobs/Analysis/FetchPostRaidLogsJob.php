@@ -120,7 +120,7 @@ class FetchPostRaidLogsJob implements ShouldQueue
     private function notifyNoLogFound(DiscordWebhookService $webhookService, Event $event, $static): void
     {
         $raidDate = $event->start_time->format('M d, Y @ H:i');
-        $manualUploadUrl = route('statics.logs.index', $static);
+        $manualUploadUrl = route('statics.logs.index');
 
         $payload = DiscordWebhookBuilder::buildNoLogFoundPayload($raidDate, $manualUploadUrl);
         $webhookService->sendNotification($static, $payload);

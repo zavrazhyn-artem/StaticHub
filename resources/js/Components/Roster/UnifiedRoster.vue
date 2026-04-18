@@ -145,7 +145,7 @@ const onWeekChange = async (week) => {
 
     weekLoading.value = true;
     try {
-        const { data } = await axios.get(`/statics/${props.staticId}/roster/weekly-snapshot`, {
+        const { data } = await axios.get(`/roster/weekly-snapshot`, {
             params: { week },
         });
         snapshotCache[week] = data.snapshot || {};
@@ -313,7 +313,7 @@ const fetchRoster = async () => {
     }
     loading.value = true;
     try {
-        const response          = await axios.get(`/statics/${props.staticId}/roster/data`);
+        const response          = await axios.get(`/roster/data`);
         roster.value            = response.data.roster ?? [];
         currentUserAccess.value = response.data.current_user_access ?? 'member';
 
@@ -334,9 +334,9 @@ onMounted(fetchRoster);
 watch(currentTab, (val) => {
     localStorage.setItem('rosterActiveTab', val);
     if (val === 'treasury') {
-        window.location.href = `/statics/${props.staticId}/treasury`;
+        window.location.href = `/treasury`;
     } else if (val === 'settings') {
-        window.location.href = `/statics/${props.staticId}/settings/schedule`;
+        window.location.href = `/settings/schedule`;
     }
 });
 watch(selectedDifficulty, val => localStorage.setItem('rosterSelectedDifficulty', val));
@@ -384,7 +384,7 @@ const toggleRow = (memberId) => {
 
 const updateAccessRole = async (member, newRole) => {
     try {
-        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/access-role`, { access_role: newRole });
+        await axios.patch(`/roster/${member.id}/access-role`, { access_role: newRole });
         member.access_role = newRole;
     } catch (err) {
         console.error('Failed to update access role:', err);
@@ -394,7 +394,7 @@ const updateAccessRole = async (member, newRole) => {
 
 const updateRosterStatus = async (member, newStatus) => {
     try {
-        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/roster-status`, { roster_status: newStatus });
+        await axios.patch(`/roster/${member.id}/roster-status`, { roster_status: newStatus });
         member.roster_status = newStatus;
     } catch (err) {
         console.error('Failed to update roster status:', err);
@@ -405,7 +405,7 @@ const updateRosterStatus = async (member, newStatus) => {
 const kickMember = async (member) => {
     if (!confirm(__('Remove {name} from this static?', { name: member.name }))) return;
     try {
-        await axios.delete(`/statics/${props.staticId}/roster/${member.id}/kick`);
+        await axios.delete(`/roster/${member.id}/kick`);
         roster.value = roster.value.filter(m => m.id !== member.id);
     } catch (err) {
         console.error('Failed to kick member:', err);

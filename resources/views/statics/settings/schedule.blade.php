@@ -1,11 +1,11 @@
 <x-app-layout>
     <settings-schedule
         :schedule-data='@json($scheduleData)'
-        update-url="{{ route('statics.settings.schedule.update', $static) }}"
-        profile-tab-url="{{ route('statics.settings.profile', $static) }}"
-        schedule-tab-url="{{ route('statics.settings.schedule', $static) }}"
-        discord-tab-url="{{ route('statics.settings.discord', $static) }}"
-        logs-tab-url="{{ route('statics.settings.logs', $static) }}"
+        update-url="{{ route('statics.settings.schedule.update') }}"
+        profile-tab-url="{{ route('statics.settings.profile') }}"
+        schedule-tab-url="{{ route('statics.settings.schedule') }}"
+        discord-tab-url="{{ route('statics.settings.discord') }}"
+        logs-tab-url="{{ route('statics.settings.logs') }}"
         :can-manage="true"
     ></settings-schedule>
 </x-app-layout>

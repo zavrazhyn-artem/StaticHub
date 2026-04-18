@@ -132,7 +132,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 
             // Send webhook notification that AI report is ready
             $reportTitle = $this->report->title ?? 'Raid Analysis';
-            $reportUrl = route('statics.logs.show', [$static, $this->report]);
+            $reportUrl = route('statics.logs.show', $this->report);
             $payload = DiscordWebhookBuilder::buildAnalysisReadyPayload($reportTitle, $reportUrl);
             $webhookService->sendNotification($static, $payload);
 

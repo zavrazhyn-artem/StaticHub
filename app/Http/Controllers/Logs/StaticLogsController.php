@@ -80,7 +80,7 @@ class StaticLogsController extends Controller
             return back()->with('error', __('Invalid Warcraft Logs URL. Could not extract Report ID.'));
         }
 
-        return redirect()->route('statics.logs.index', $static)
+        return redirect()->route('statics.logs.index')
             ->with('success', __('Log submitted for analysis. It will appear here shortly.'));
     }
 }
