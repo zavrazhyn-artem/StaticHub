@@ -1,0 +1,26 @@
+spec: Survival
+class: Hunter
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Kill Command'
+    ability_id: 259489
+    check: cast_efficiency
+    cooldown_seconds: 2.5
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Boomstick
+    ability_id: 1261193
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Takedown
+    ability_id: 1253859
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major

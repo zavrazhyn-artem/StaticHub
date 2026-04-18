@@ -1,0 +1,40 @@
+spec: Guardian
+class: Druid
+role: tank
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Berserk
+    ability_id: 50334
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Incarnation: Guardian of Ursoc'
+    ability_id: 102558
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Bristling Fur'
+    ability_id: 155835
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Lunar Beam'
+    ability_id: 204066
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Red Moon'
+    ability_id: 1252871
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major

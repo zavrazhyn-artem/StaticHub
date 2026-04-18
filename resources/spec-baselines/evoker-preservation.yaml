@@ -1,0 +1,33 @@
+spec: Preservation
+class: Evoker
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Reversion
+    ability_id: 366155
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.6
+    severity: major
+  -
+    ability: 'Temporal Anomaly'
+    ability_id: 373861
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Dream Flight'
+    ability_id: 359816
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Stasis
+    ability_id: 370537
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major

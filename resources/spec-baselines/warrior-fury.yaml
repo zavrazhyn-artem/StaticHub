@@ -1,0 +1,61 @@
+spec: Fury
+class: Warrior
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Raging Blow'
+    ability_id: 85288
+    check: cast_efficiency
+    cooldown_seconds: 8.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Crushing Blow'
+    ability_id: 335097
+    check: cast_efficiency
+    cooldown_seconds: 8.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Bloodthirst
+    ability_id: 23881
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Bloodbath
+    ability_id: 335096
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Rend
+    ability_id: 772
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Recklessness
+    ability_id: 1719
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Bladestorm
+    ability_id: 446035
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Avatar
+    ability_id: 107574
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major

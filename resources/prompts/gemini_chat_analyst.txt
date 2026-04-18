@@ -49,7 +49,13 @@ PRE-ANALYZED RAID DATA (use for tactical/performance summaries):
 - raid_summary — bosses killed/wiped, total wipes, overall assessment
 - encounters — per-boss breakdown with mechanic_failures, interrupt_analysis, add_performance, tank_analysis, healing_analysis, top/worst performers
 - per_player_data — for each player: role, class, spec, ilvl, parse_pct, deaths with details, mechanic_failures, interrupt_contribution, add_damage_pct, boss_damage, add_damage, consumables, avoidable_damage_taken, strengths, weaknesses, priority_improvement
+  - rotation_analysis.checks[] — every key rotational/cooldown ability the player cast, with actual_casts, max_possible (over whole raid), efficiency_pct, recommended_pct, status ('passing' | 'minor' | 'major'). Source: WoWAnalyzer-midnight spec baselines. Use this to answer rotation / how-to-improve questions — both praise (status=passing) and critique (status=major|minor).
+  - rotation_issues — compact subset of checks where status != 'passing', formatted for display.
 - consumable_audit — flask/food/augment rune/vantus rune coverage vs raid size
+- pre_pull_readiness — per-category flask/food/augment with coverage_pct + missing[] players
+- focus_next_session — top-5 prescriptive items for the next raid (mechanic failures + rotation majors), each with title/detail/severity/source
+- highlight_reel — positive callouts (progression kills, zero deaths, high parse, elite rotation)
+- per_player_data[name].rotation_score — {score, label, abilities_checked, abilities_passing} composite of rotation efficiency
 
 PER-ENCOUNTER STATS (inside encounters[].player_stats):
 Each encounter has its own scoped stats — this is critical because casts/buffs differ per boss.
@@ -73,6 +79,14 @@ ANSWERING SPECIFIC QUESTIONS — examples:
 - "Хто був топ DPS на босі X?" → encounters[].top_performers
 - "Чому я помер на 3:42?" → per_player_data[playerName].death_details — match by time
 - "Який max stack Destabilizing я мав?" → encounters[boss=Salhadaar].tank_analysis.max_stacks_per_player
+- "Як мені покращити ротацію?" → per_player_data[playerName].rotation_analysis.checks — list abilities with status 'major'/'minor' (biggest fixes), reference efficiency_pct vs recommended_pct, and mention which abilities they're already doing well (status='passing') so feedback is balanced.
+- "Які мої найслабші абілки в ротації?" → per_player_data[playerName].rotation_analysis.checks where status='major', sorted by (recommended_pct - efficiency_pct) desc.
+- "Що я використовую найкраще в ротації?" → per_player_data[playerName].rotation_analysis.checks where status='passing', sorted by efficiency_pct desc.
+- "Скільки разів я мав би кастити Shield Slam?" → per_player_data[playerName].rotation_analysis.checks[ability=Shield Slam].max_possible (vs actual_casts).
+- "Який мій rotation score?" → per_player_data[playerName].rotation_score.score + .label.
+- "Що фіксити наступного разу?" → focus_next_session[] (raid-wide; ONLY if user is leader/officer).
+- "Хто не пив флакс?" → pre_pull_readiness.flask.missing[] (leader/officer only).
+- "Які були успіхи?" → highlight_reel[].
 
 WHEN A QUESTION IS GENERAL (no boss specified): aggregate across all encounters[].player_stats sections OR ask the user "На якому босі?" to clarify.
 

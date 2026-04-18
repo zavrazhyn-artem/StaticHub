@@ -1,0 +1,19 @@
+spec: Marksmanship
+class: Hunter
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Rapid Fire'
+    ability_id: 257044
+    check: cast_efficiency
+    cooldown_seconds: 16.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Volley
+    ability_id: 260243
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major

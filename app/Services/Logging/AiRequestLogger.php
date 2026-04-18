@@ -47,7 +47,7 @@ class AiRequestLogger
                 'output_tokens' => $tokens['output'],
                 'total_tokens' => $tokens['total'],
                 'cost_estimate' => $this->estimateCost($provider, $tokens),
-                'response_time_ms' => (int) round((microtime(true) - $startTime) * 1000),
+                'response_time_ms' => max(0, (int) round((microtime(true) - $startTime) * 1000)),
                 'status' => $status,
                 'error_message' => $errorMessage ? mb_substr($errorMessage, 0, 1000) : null,
                 'metadata' => $metadata,

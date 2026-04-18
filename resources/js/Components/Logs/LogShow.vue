@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import AiChatSidebar from './AiChatSidebar.vue';
+import ReportBlocks from './ReportBlocks.vue';
 import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
 const { __ } = useTranslation();
 
@@ -73,9 +74,11 @@ const activePersonalReport = computed(() => {
     const id = selectedReportId.value;
     const member = props.rosterMembers.find(m => String(m.id) === id);
     if (!member) return props.personalReport;
-    const html = props.rosterReports[id];
+    const entry = props.rosterReports[id] || {};
     return {
-        html,
+        id,
+        blocks:         entry.blocks || null,
+        html:           entry.html || null,
         char_name:      member.character.name,
         char_class:     member.character.playable_class,
         char_class_css: member.character.playable_class.toLowerCase().replace(/ /g, '-'),
@@ -182,7 +185,8 @@ const activePersonalReport = computed(() => {
                         </span>
                     </div>
                     <div class="p-8">
-                        <div class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="personalReport.html"></div>
+                        <ReportBlocks v-if="personalReport.blocks" :blocks="personalReport.blocks" />
+                        <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="personalReport.html"></div>
                     </div>
                 </div>
                 <div v-else class="bg-surface-container-low border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
@@ -239,7 +243,8 @@ const activePersonalReport = computed(() => {
                                 </div>
                             </div>
                             <div class="p-8">
-                                <div class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
+                                <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" />
+                                <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
                             </div>
                         </section>
                     </div>
@@ -290,7 +295,8 @@ const activePersonalReport = computed(() => {
                             </span>
                         </div>
                         <div class="p-8">
-                            <div class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="activePersonalReport.html"></div>
+                            <ReportBlocks v-if="activePersonalReport.blocks" :blocks="activePersonalReport.blocks" />
+                            <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="activePersonalReport.html"></div>
                         </div>
                     </div>
 

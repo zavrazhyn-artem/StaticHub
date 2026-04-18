@@ -92,9 +92,10 @@ class StaticLogService
             ? $this->getUserCharacterForReport($user, $static, $report)
             : null;
 
-        // Render AI analysis markdown server-side
+        // Prefer structured blocks; fall back to legacy HTML/markdown for older reports.
+        $aiBlocks = $report->ai_blocks ?: null;
         $aiHtml = null;
-        if ($report->ai_analysis) {
+        if (!$aiBlocks && $report->ai_analysis) {
             $rawText = $report->ai_analysis;
             if (Str::startsWith($rawText, '"') && Str::endsWith($rawText, '"')) {
                 $rawText = json_decode($rawText);
@@ -136,7 +137,8 @@ class StaticLogService
             $char = $authUserReport->character;
             $personalData = [
                 'id'             => $authUserReport->id,
-                'html'           => Str::markdown($authUserReport->content),
+                'blocks'         => $authUserReport->ai_blocks ?: null,
+                'html'           => $authUserReport->ai_blocks ? null : ($authUserReport->content ? Str::markdown($authUserReport->content) : null),
                 'char_name'      => $char->name,
                 'char_class'     => $char->playable_class,
                 'char_class_css' => strtolower(str_replace(' ', '-', $char->playable_class)),
@@ -150,7 +152,10 @@ class StaticLogService
             $allPersonalReports = $report->personalReports()->with('character')->get();
 
             $rosterReports = $allPersonalReports->mapWithKeys(function ($pr) {
-                return [$pr->id => Str::markdown($pr->content)];
+                return [$pr->id => [
+                    'blocks' => $pr->ai_blocks ?: null,
+                    'html'   => $pr->ai_blocks ? null : ($pr->content ? Str::markdown($pr->content) : null),
+                ]];
             })->all();
 
             $rosterMembers = $allPersonalReports->map(function ($pr) {
@@ -172,7 +177,8 @@ class StaticLogService
             'title'             => $report->title ?? 'Manual Log Analysis',
             'wcl_report_id'     => $report->wcl_report_id,
             'created_at'        => $report->created_at->format('F d, Y @ H:i'),
-            'has_ai_analysis'   => (bool) $report->ai_analysis,
+            'has_ai_analysis'   => (bool) ($aiBlocks || $report->ai_analysis),
+            'ai_blocks'         => $aiBlocks,
             'ai_html'           => $aiHtml,
             'duration_hours'    => $report->event
                 ? $report->event->start_time->diffInHours($report->event->end_time)

@@ -1,0 +1,26 @@
+spec: BeastMastery
+class: Hunter
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Kill Command'
+    ability_id: 34026
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Barbed Shot'
+    ability_id: 217200
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Bestial Wrath'
+    ability_id: 19574
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major

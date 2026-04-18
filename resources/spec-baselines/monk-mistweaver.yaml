@@ -1,0 +1,47 @@
+spec: Mistweaver
+class: Monk
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Renewing Mist'
+    ability_id: 115151
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Jadefire Stomp'
+    ability_id: 457974
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Rising Sun Kick'
+    ability_id: 107428
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Rushing Wind Kick'
+    ability_id: 467307
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Thunder Focus Tea'
+    ability_id: 116680
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Celestial Conduit'
+    ability_id: 443028
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major

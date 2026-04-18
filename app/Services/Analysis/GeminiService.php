@@ -105,7 +105,7 @@ class GeminiService
      * Execute a Gemini request using a cached context.
      * The cached context provides the data, this call only sends the user prompt.
      */
-    public function executeWithCache(string $cacheId, string $promptText, string $modelUrl, int $timeout = 300, bool $jsonMode = false): string
+    public function executeWithCache(string $cacheId, string $promptText, string $modelUrl, int $timeout = 300, bool $jsonMode = false, int $maxOutputTokens = 65536): string
     {
         $payload = [
             'cachedContent' => $cacheId,
@@ -117,10 +117,13 @@ class GeminiService
                     ],
                 ],
             ],
+            'generationConfig' => [
+                'maxOutputTokens' => $maxOutputTokens,
+            ],
         ];
 
         if ($jsonMode) {
-            $payload['generationConfig'] = ['responseMimeType' => 'application/json'];
+            $payload['generationConfig']['responseMimeType'] = 'application/json';
         }
 
         $startTime = microtime(true);
@@ -311,6 +314,62 @@ class GeminiService
                 'cache_id'         => $cacheId,
                 'cache_expires_at' => $cacheExpiresAt,
             ];
+        }
+    }
+
+    /**
+     * Generate the block-based structured raid report from the deterministic PHP-preprocessed JSON.
+     * Returns a Gemini response whose JSON shape is: { title, main: [blocks], <PlayerName>: [blocks], ... }.
+     *
+     * @return array{response: string, model: string, cache_id: string|null, cache_expires_at: string|null}
+     */
+    public function generateBlocksFromPreprocessed(string $preprocessedJson, ?string $supplementaryJson = null): array
+    {
+        $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
+            . "produced by a deterministic PHP analyzer plus raw supplementary log data for chat queries. "
+            . "Use the PRE-ANALYZED section for failures/performance summaries; use the RAW SUPPLEMENTARY "
+            . "section for per-player details (cast counts, buff uptimes, dispel counts, gear, "
+            . "consumables, etc.) when the user asks specific stats questions.\n\n"
+            . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
+
+        if ($supplementaryJson) {
+            $cacheContent .= "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryJson;
+        }
+
+        $cache = $this->createCachedContext($cacheContent, $this->proModel, 10800);
+        $cacheId = $cache['cache_id'] ?? null;
+        $cacheExpiresAt = $cache['expires_at'] ?? null;
+
+        $reportInstructions = file_get_contents(resource_path('prompts/gemini_report_generation_blocks.txt'));
+        $url = $this->buildModelUrl($this->proModel);
+
+        try {
+            if ($cacheId) {
+                Log::info('Generating block report with cached context', ['cache_id' => $cacheId]);
+                $rawResponse = $this->executeWithCache(
+                    $cacheId,
+                    $reportInstructions . "\n\nGenerate the block-based report now using the PRE-ANALYZED RAID DATA from the cached context. Output strictly raw JSON matching the documented block schema.",
+                    $url,
+                    300,
+                    true
+                );
+            } else {
+                Log::warning('Cache creation failed, generating block report without cache');
+                $fullPrompt = $reportInstructions . "\n\n=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
+                $rawResponse = $this->executeRequestWithModel($fullPrompt, $url, 300, 3, true);
+            }
+
+            $response = GeminiResponseFormatter::cleanMarkdown($rawResponse);
+
+            return [
+                'response'         => $response,
+                'model'            => $this->proModel,
+                'cache_id'         => $cacheId,
+                'cache_expires_at' => $cacheExpiresAt,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Block report generation failed', ['error' => $e->getMessage()]);
+            throw $e;
         }
     }
 

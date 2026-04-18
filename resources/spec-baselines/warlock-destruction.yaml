@@ -1,0 +1,47 @@
+spec: Destruction
+class: Warlock
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Channel Demonfire'
+    ability_id: 196447
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Conflagrate
+    ability_id: 17962
+    check: cast_efficiency
+    cooldown_seconds: 6.5
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Soul Fire'
+    ability_id: 6353
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Havoc
+    ability_id: 80240
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Cataclysm
+    ability_id: 152108
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Malevolence
+    ability_id: 442726
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major

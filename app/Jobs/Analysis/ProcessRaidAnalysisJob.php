@@ -6,6 +6,7 @@ use App\Enums\Locale;
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
+use App\Services\Analysis\BlockSchema;
 use App\Services\Analysis\GeminiService;
 use App\Services\Analysis\TacticalDataAnalyzer;
 use App\Services\Analysis\WclService;
@@ -41,14 +42,16 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         WclService $wclService,
         TacticalDataAnalyzer $analyzer,
         GeminiService $geminiService,
+        BlockSchema $blockSchema,
         DiscordWebhookService $webhookService
     ): void {
         if (!$this->report->wcl_report_id) return;
 
-        // Guard against duplicate runs — if the report already has AI analysis + valid cache,
+        // Guard against duplicate runs — if the report already has AI output + valid cache,
         // treat subsequent dispatches as no-ops instead of re-running the full pipeline.
         $this->report->refresh();
-        if ($this->report->ai_analysis && $this->report->isCacheActive()) {
+        $hasOutput = $this->report->ai_blocks || $this->report->ai_analysis;
+        if ($hasOutput && $this->report->isCacheActive()) {
             Log::info("ProcessRaidAnalysisJob skipped — report already processed", [
                 'report_id' => $this->report->id,
             ]);
@@ -80,15 +83,14 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 'player_details' => $logData['player_details'] ?? [],
             ], JSON_UNESCAPED_UNICODE);
 
-            // Stage 3: Pro report generation (with cache; per-encounter stats are inside preprocessed.encounters[])
-            $aiResult = $geminiService->generateReportFromPreprocessed($preprocessedJson, $supplementary);
+            // Stage 3: Pro report generation — block-based output
+            $aiResult = $geminiService->generateBlocksFromPreprocessed($preprocessedJson, $supplementary);
 
             $aiJsonResponse = $aiResult['response'];
             $reportModel = $aiResult['model'];
             $cacheId = $aiResult['cache_id'] ?? null;
             $cacheExpiresAt = $aiResult['cache_expires_at'] ?? null;
 
-            // Розбираємо отриманий JSON
             $parsedData = json_decode($aiJsonResponse, true);
 
             if (!$parsedData || !is_array($parsedData)) {
@@ -96,17 +98,17 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
-            // 1. Зберігаємо загальний звіт та мета-поля
+            $mainBlocks = $blockSchema->sanitize($parsedData['main'] ?? []);
+
             $this->report->update([
                 'title'                  => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
                 'difficulties'           => $difficulties,
-                'ai_analysis'            => $parsedData['main'] ?? 'Analysis not generated.',
+                'ai_blocks'              => $mainBlocks,
                 'model'                  => $reportModel,
                 'gemini_cache_id'        => $cacheId,
                 'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
             ]);
 
-            // 2. Зберігаємо особисті звіти тільки для учасників рейду з ростеру
             $metaKeys = ['title', 'main'];
             $rosterCharacters = $static->characters;
             $actualParticipantNames = array_map('strtolower', array_column($logData['players'] ?? [], 'name'));
@@ -120,12 +122,13 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 });
 
                 if ($character && !empty($content)) {
+                    $playerBlocks = $blockSchema->sanitize($content);
                     PersonalTacticalReport::updateOrCreate(
                         [
                             'tactical_report_id' => $this->report->id,
                             'character_id' => $character->id,
                         ],
-                        ['content' => $content]
+                        ['ai_blocks' => $playerBlocks]
                     );
                 }
             }

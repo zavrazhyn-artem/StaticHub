@@ -1,0 +1,12 @@
+spec: Devastation
+class: Evoker
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Dragonrage
+    ability_id: 375087
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.95
+    severity: major

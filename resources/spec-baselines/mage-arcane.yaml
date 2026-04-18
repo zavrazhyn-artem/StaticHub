@@ -1,0 +1,40 @@
+spec: Arcane
+class: Mage
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Arcane Orb'
+    ability_id: 153626
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Touch of the Magi'
+    ability_id: 321507
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Arcane Surge'
+    ability_id: 365350
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Evocation
+    ability_id: 12051
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Presence of Mind'
+    ability_id: 205025
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.6
+    severity: major

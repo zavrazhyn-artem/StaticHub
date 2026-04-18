@@ -1,0 +1,33 @@
+spec: Restoration
+class: Druid
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Wild Growth'
+    ability_id: 48438
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Swiftmend
+    ability_id: 18562
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Ironbark
+    ability_id: 102342
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Incarnation: Tree of Life'
+    ability_id: 33891
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.8
+    severity: major

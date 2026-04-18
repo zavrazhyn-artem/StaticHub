@@ -1,0 +1,33 @@
+spec: Holy
+class: Priest
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Holy Word: Sanctify'
+    ability_id: 34861
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Holy Word: Serenity'
+    ability_id: 2050
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Halo
+    ability_id: 120517
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Apotheosis
+    ability_id: 200183
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.3
+    severity: major

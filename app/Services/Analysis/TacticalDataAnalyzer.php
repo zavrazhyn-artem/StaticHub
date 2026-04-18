@@ -23,6 +23,8 @@ class TacticalDataAnalyzer
     public function __construct(
         private readonly TacticsLoader $tacticsLoader,
         private readonly WclService $wclService,
+        private readonly RotationAnalyzer $rotationAnalyzer,
+        private readonly InsightsBuilder $insightsBuilder,
     ) {}
 
     /**
@@ -74,17 +76,33 @@ class TacticalDataAnalyzer
 
         $raidSummary = $this->buildRaidSummary($logData, $difficulty, $encounters);
         $perPlayerData = $this->buildPerPlayerData($logData, $encounters, $players);
+
+        // Enrich per-player data with rotation_analysis + rotation_issues
+        $totalDurationSeconds = (int) ($logData['fight_durations']['total_seconds'] ?? 0);
+        $this->rotationAnalyzer->apply($perPlayerData, $encounters, $totalDurationSeconds);
+
+        // Attach composite rotation_score (depends on rotation_analysis)
+        $this->insightsBuilder->attachRotationScores($perPlayerData);
+
         $consumableAudit = $this->buildConsumableAudit($logData, count($playerNames));
         if (isset($logData['per_player_consumable_audit'])) {
             $consumableAudit['per_player'] = $logData['per_player_consumable_audit'];
         }
 
+        // Secondary insights (depend on all above being populated)
+        $focusNextSession  = $this->insightsBuilder->buildFocusNextSession($encounters, $perPlayerData, $consumableAudit);
+        $prePullReadiness  = $this->insightsBuilder->buildPrePullReadiness($consumableAudit);
+        $highlightReel     = $this->insightsBuilder->buildHighlightReel($encounters, $perPlayerData, $raidSummary);
+
         return [
-            'raid_summary'     => $raidSummary,
-            'encounters'       => $encounters,
-            'per_player_data'  => $perPlayerData,
-            'consumable_audit' => $consumableAudit,
-            'localization'     => $localization,
+            'raid_summary'        => $raidSummary,
+            'encounters'          => $encounters,
+            'per_player_data'     => $perPlayerData,
+            'consumable_audit'    => $consumableAudit,
+            'focus_next_session'  => $focusNextSession,
+            'pre_pull_readiness'  => $prePullReadiness,
+            'highlight_reel'      => $highlightReel,
+            'localization'        => $localization,
         ];
     }
 

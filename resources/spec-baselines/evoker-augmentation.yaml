@@ -1,0 +1,54 @@
+spec: Augmentation
+class: Evoker
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Ebon Might'
+    ability_id: 395152
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Upheaval
+    ability_id: 408092
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Prescience
+    ability_id: 409311
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Blistering Scales'
+    ability_id: 360827
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Breath of Eons'
+    ability_id: 442204
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Time Skip'
+    ability_id: 404977
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Bestow Weyrnstone'
+    ability_id: 408233
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major

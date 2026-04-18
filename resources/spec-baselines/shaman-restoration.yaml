@@ -1,0 +1,68 @@
+spec: Restoration
+class: Shaman
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Riptide
+    ability_id: 61295
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Healing Stream Totem'
+    ability_id: 5394
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Stormstream Totem'
+    ability_id: 1267068
+    check: cast_efficiency
+    cooldown_seconds: 50.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Healing Rain'
+    ability_id: 73920
+    check: cast_efficiency
+    cooldown_seconds: 18.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Healing Rain'
+    ability_id: 456366
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Unleash Life'
+    ability_id: 73685
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.9
+    severity: minor
+  -
+    ability: 'Ancestral Swiftness'
+    ability_id: 443454
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Surging Totem'
+    ability_id: 444995
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Spirit Link Totem'
+    ability_id: 98008
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major

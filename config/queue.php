@@ -68,7 +68,10 @@ return [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
+            // Must be longer than the longest job timeout. ProcessRaidAnalysisJob has
+            // timeout=600s, so default 90s caused workers to re-release running jobs →
+            // MaxAttemptsExceededException despite successful completion.
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 900),
             'block_for' => null,
             'after_commit' => false,
         ],

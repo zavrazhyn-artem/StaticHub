@@ -1,0 +1,68 @@
+spec: Windwalker
+class: Monk
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Fists of Fury'
+    ability_id: 113656
+    check: cast_efficiency
+    cooldown_seconds: 24.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Rising Sun Kick'
+    ability_id: 107428
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Whirling Dragon Punch'
+    ability_id: 152175
+    check: cast_efficiency
+    cooldown_seconds: 35.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Expel Harm'
+    ability_id: 322101
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Chi Burst'
+    ability_id: 123986
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Slicing Winds'
+    ability_id: 1217413
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Zenith
+    ability_id: 1249625
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Strike of the Windlord'
+    ability_id: 392983
+    check: cast_efficiency
+    cooldown_seconds: 35.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Celestial Conduit'
+    ability_id: 1248989
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major

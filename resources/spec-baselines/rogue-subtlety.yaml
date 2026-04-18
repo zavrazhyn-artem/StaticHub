@@ -1,0 +1,40 @@
+spec: Subtlety
+class: Rogue
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Shadow Dance'
+    ability_id: 185313
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Shadow Blades'
+    ability_id: 121471
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Secret Technique'
+    ability_id: 280719
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Vanish
+    ability_id: 1856
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Shuriken Tornado'
+    ability_id: 1264764
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
