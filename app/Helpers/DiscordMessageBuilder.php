@@ -130,20 +130,21 @@ class DiscordMessageBuilder
             }
         }
 
-        // Absent & Pending — two columns each, status icon suppressed (redundant with section label)
+        // Alphabetical sort for Pending so the raid leader can scan by name.
+        $pendingRoster = $pendingRoster->sortBy(fn ($c) => mb_strtolower($c->name))->values();
+
+        $divider = '──────────────────────────';
+
+        // Absent & Pending — each preceded by a full-width divider line, two columns each.
         $sections = [
             ['label' => IconHelper::statusEmoji('absent')  . ' Absent',  'roster' => $absentRoster],
             ['label' => IconHelper::statusEmoji('pending') . ' Pending', 'roster' => $pendingRoster],
         ];
-        $firstSection = true;
         foreach ($sections as $section) {
             $roster = $section['roster'];
             if ($roster->isEmpty()) continue;
 
-            if (!$firstSection) {
-                $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
-            }
-            $firstSection = false;
+            $fields[] = ['name' => "\u{200B}", 'value' => $divider, 'inline' => false];
 
             $half = (int) ceil($roster->count() / 2);
             $col1 = self::formatRosterChunks($roster->slice(0, $half)->values(), suppressStatus: true, benchedIds: $benchedIds);
@@ -154,20 +155,17 @@ class DiscordMessageBuilder
             $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
         }
 
-        // Full-width break before Attendance summary
-        $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
-
         $fields[] = [
             'name'   => '📊 Attendance',
-            'value'  => $statsLine,
+            'value'  => '> ' . $statsLine,
             'inline' => false,
         ];
 
         $embed = [
-            'title'       => "📣 Raid Call",
+            'title'       => "📣 " . ($event->static?->name ?? 'Raid Call'),
             'description' => "🗓️ **Start:** <t:{$unixStart}:F>\n⏳ **Status:** <t:{$unixStart}:R>\n\n"
                 . $descriptionText
-                . "**Combat Roster:**" . $analysisText . "\n──────────────────────────",
+                . "**Combat Roster:**" . $analysisText . "\n{$divider}",
             'color'     => 0x00A3FF,
             'thumbnail' => ['url' => config('app.url') . '/images/logo.svg'],
             'image'     => ['url' => config('app.url') . '/images/spacer-365.png'],
