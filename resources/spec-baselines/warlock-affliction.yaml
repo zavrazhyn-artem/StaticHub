@@ -1,0 +1,33 @@
+spec: Affliction
+class: Warlock
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Haunt
+    ability_id: 48181
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Malevolence
+    ability_id: 442726
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Dark Harvest'
+    ability_id: 1257052
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Summon Darkglare'
+    ability_id: 205180
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.9
+    severity: major

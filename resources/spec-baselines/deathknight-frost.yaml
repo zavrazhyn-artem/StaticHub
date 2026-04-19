@@ -1,0 +1,12 @@
+spec: Frost
+class: DeathKnight
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Remorseless Winter'
+    ability_id: 196770
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.85
+    severity: major

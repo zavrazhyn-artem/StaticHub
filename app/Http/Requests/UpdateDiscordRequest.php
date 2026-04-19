@@ -18,7 +18,9 @@ class UpdateDiscordRequest extends FormRequest
             'discord_channel_id'  => 'sometimes|nullable|string|max:20',
             'notification_channel_id' => 'sometimes|nullable|string|max:20',
             'discord_webhook_url' => 'sometimes|nullable|url|max:500',
-            'automation_settings.ping_role_id'        => 'sometimes|nullable|string|max:20',
+            'automation_settings'                      => 'sometimes|array',
+            'automation_settings.ping_role_ids'        => 'sometimes|nullable|array',
+            'automation_settings.ping_role_ids.*'      => 'string|max:20',
             'automation_settings.webhook_muted'       => 'sometimes|nullable|boolean',
             'automation_settings.notification_method'  => 'sometimes|nullable|string|in:webhook,channel',
         ];

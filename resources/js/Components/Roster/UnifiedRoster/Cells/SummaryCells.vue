@@ -39,7 +39,7 @@ const runsColorClass = (count) => {
 </script>
 
 <template>
-    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center font-mono font-bold text-cyan-400 border-l border-white/5']">
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center font-mono font-bold text-emerald-400 border-l border-white/5']">
         {{ char?.equipped_ilvl != null
         ? Number(char.equipped_ilvl).toFixed(1)
         : 'N/A' }}
@@ -49,7 +49,7 @@ const runsColorClass = (count) => {
     </td>
     <td v-for="slot in ['H', 'S', 'C', 'G', 'L']" :key="'ms-' + slot"
         :class="[rh, isAlt ? 'px-0.5 py-0.5' : 'p-1.5']" class="text-center">
-        <span :class="trackColorMap[char?.tier_pieces?.[slot]] ?? tierColors[char?.tier_pieces?.[slot]] ?? 'text-gray-700'" class="text-[10px] font-bold">
+        <span :class="trackColorMap[char?.tier_pieces?.[slot]] ?? tierColors[char?.tier_pieces?.[slot]] ?? 'text-gray-700'" class="text-3xs font-semibold">
             {{ trackAbbrev(char?.tier_pieces?.[slot]) }}
         </span>
     </td>

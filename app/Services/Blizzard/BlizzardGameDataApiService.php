@@ -6,6 +6,8 @@ namespace App\Services\Blizzard;
 
 use App\Models\Item;
 use App\Services\Logging\ApiLogger;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Exception;
@@ -22,6 +24,9 @@ class BlizzardGameDataApiService
         $startTime = microtime(true);
         $response = Http::withToken($this->authService->getAccessToken())
             ->withHeaders($headers)
+            ->timeout(15)
+            ->retry(3, 1000, fn ($exception) => $exception instanceof ConnectionException
+                || ($exception instanceof RequestException && $exception->response->serverError()))
             ->get($url);
         $this->apiLogger->logApiCall('blizzard', $url, 'GET', $response, $startTime);
 
@@ -74,6 +79,9 @@ class BlizzardGameDataApiService
         $startTime = microtime(true);
         $response = Http::withToken($token)
             ->withHeaders(['Battlenet-Namespace' => "dynamic-{$region}"])
+            ->timeout(60)
+            ->retry(3, 2000, fn ($exception) => $exception instanceof ConnectionException
+                || ($exception instanceof RequestException && $exception->response->serverError()))
             ->withOptions(['stream' => true])
             ->get($url);
 

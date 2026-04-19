@@ -159,7 +159,12 @@ class BossPlannerController extends Controller
         $members = $static->members()
             ->with(['characters' => function ($q) use ($static) {
                 $q->whereHas('statics', fn ($sq) => $sq->where('statics.id', $static->id))
-                    ->with(['statics' => fn ($sq) => $sq->where('statics.id', $static->id)]);
+                    ->with([
+                        'statics' => fn ($sq) => $sq->where('statics.id', $static->id),
+                        'characterStaticSpecs' => fn ($sq) => $sq->where('static_id', $static->id)
+                            ->where('is_main', true)
+                            ->with('specialization'),
+                    ]);
             }])
             ->get();
 

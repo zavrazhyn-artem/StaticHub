@@ -1,0 +1,26 @@
+spec: Blood
+class: DeathKnight
+role: tank
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Blood Boil'
+    ability_id: 50842
+    check: cast_efficiency
+    cooldown_seconds: 3.75
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Dancing Rune Weapon'
+    ability_id: 49028
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Death and Decay'
+    ability_id: 43265
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: major

@@ -11,7 +11,7 @@ defineProps({
         <span v-if="icon" class="material-symbols-outlined text-primary">{{ icon }}</span>
         <div>
             <h2 class="font-headline text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ title }}</h2>
-            <p v-if="subtitle" class="text-[10px] text-on-surface-variant/60 uppercase tracking-wider mt-0.5">{{ subtitle }}</p>
+            <p v-if="subtitle" class="text-3xs text-on-surface-variant/60 uppercase tracking-wider mt-0.5">{{ subtitle }}</p>
         </div>
         <slot />
     </div>

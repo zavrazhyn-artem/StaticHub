@@ -444,6 +444,10 @@ GQL;
 
     public function getLogSummary(string $reportId, array $rosterNames = []): array
     {
+        // Large Mythic reports with many boss tries can exceed PHP's 128M default.
+        // Bump to 1G for the duration of this call; reverted implicitly on CLI exit.
+        @ini_set('memory_limit', '1024M');
+
         // --- Query 1: fights + phases + masterData ---
         $fightsQuery = WclQueryBuilder::buildFightsQuery();
         $initialData = $this->executeGraphql($fightsQuery, ['reportId' => $reportId])['reportData']['report'] ?? [];
@@ -471,11 +475,12 @@ GQL;
             'fightIds' => $fightIds,
         ])['reportData']['report'] ?? [];
 
-        // Roster: filter to known players
+        // Roster: filter to known players (exclude NPCs/Pets)
         $allActors    = $initialData['masterData']['actors'] ?? [];
         $cleanPlayers = array_values(array_filter(
             $allActors,
-            fn($a) => empty($rosterNames) || in_array($a['name'], $rosterNames)
+            fn($a) => ($a['type'] ?? '') === 'Player'
+                && (empty($rosterNames) || in_array($a['name'], $rosterNames))
         ));
 
         // Fight durations (for CPM support)
@@ -558,6 +563,93 @@ GQL;
             $rosterNames
         );
 
+        // Interrupts
+        $interruptEntries = $tablesData['interrupts']['data']['entries'][0]['entries'] ?? [];
+        $interrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
+
+        // Debuff stacks for stacking debuffs (tank swaps, soak vulnerabilities)
+        $debuffStacks = $this->extractDebuffStacks(
+            $reportId,
+            $fightIds,
+            $tablesData['debuffs']['data']['auras'] ?? [],
+            $tablesData['deaths']['data']['entries'] ?? [],
+            $cleanPlayers
+        );
+
+
+        // Build NPC actor map (needed for multiple advanced analyses)
+        $npcMap = [];
+        foreach ($allActors as $a) {
+            if (($a['type'] ?? '') === 'NPC' && isset($a['id'], $a['name'])) {
+                $npcMap[$a['id']] = $a['name'];
+            }
+        }
+
+        // Orb staggering analysis (detects overlapping orb kills that cause DoT stack wipes)
+        $orbStaggering = $this->extractOrbStaggering($reportId, $fightIds, $npcMap, $fightStartTimes);
+
+        // Fetch enemy casts + enemy buffs tables (needed for Nexus Shield / boss positioning)
+        $enemyAuxQuery = 'query ($reportId: String!, $fightIds: [Int]!) {
+          reportData { report(code: $reportId) {
+            enemyCasts: table(dataType: Casts, fightIDs: $fightIds, killType: Encounters, hostilityType: Enemies, viewBy: Ability)
+            enemyBuffs: table(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, hostilityType: Enemies)
+          } }
+        }';
+        $enemyAux = [];
+        try {
+            $enemyAux = $this->executeGraphql($enemyAuxQuery, ['reportId' => $reportId, 'fightIds' => $fightIds])['reportData']['report'] ?? [];
+        } catch (\Exception $e) {
+            $enemyAux = [];
+        }
+        $enemyCastEntries = $enemyAux['enemyCasts']['data']['entries'] ?? [];
+        $enemyBuffAuras = $enemyAux['enemyBuffs']['data']['auras'] ?? [];
+
+        // Enemy buff stacks (Vaelwing, Primordial Power, etc.)
+        $enemyBuffStacks = $this->extractEnemyBuffStacks($reportId, $fightIds, $enemyBuffAuras, $allActors);
+
+        // Enemy buff uptime (for Aura of Wrath, Imperator's Glory, Berserk, etc.)
+        $enemyBuffUptimes = [];
+        $enemyBuffsTotalTime = $enemyAux['enemyBuffs']['data']['totalTime'] ?? $totalDurationMs;
+        if ($enemyBuffsTotalTime > 0) {
+            foreach ($enemyBuffAuras as $aura) {
+                $name = $aura['name'] ?? '';
+                $uptime = $aura['totalUptime'] ?? 0;
+                if ($uptime <= 0) continue;
+                $enemyBuffUptimes[$name] = [
+                    'guid'       => $aura['guid'] ?? null,
+                    'uptime_pct' => round($uptime / $enemyBuffsTotalTime * 100, 1),
+                    'uses'       => $aura['totalUses'] ?? 0,
+                ];
+            }
+            uasort($enemyBuffUptimes, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
+        }
+
+        // Shielded casts analysis (e.g. Nexus Shield interrupt tracking)
+        $shieldedCasts = $this->extractShieldedCasts(
+            $reportId,
+            $fightIds,
+            $enemyBuffAuras,
+            $enemyCastEntries,
+            $cleanPlayers,
+            $fightStartTimes
+        );
+
+        // Player coordinate tracking during key debuffs (proxy for puddle placement etc.)
+        $playerCoords = $this->extractPlayerCoordsOnDebuffRemoval(
+            $reportId,
+            $fightIds,
+            $tablesData['debuffs']['data']['auras'] ?? [],
+            $cleanPlayers,
+            $fightStartTimes
+        );
+
+
+        // Damage done by target (boss vs adds breakdown) — parsed from standard DamageDone
+        $targetDamage = WclReportParserHelper::parseTargetDamage(
+            $tablesData['damageDone']['data']['entries'] ?? [],
+            $rosterNames
+        );
+
         // Player details (gear, ilvl, trinkets, stats)
         $playerDetailsRaw = $tablesData['playerDetails'] ?? null;
         $playerDetails    = WclReportParserHelper::parsePlayerDetails($playerDetailsRaw, $rosterNames);
@@ -598,23 +690,35 @@ GQL;
         }
 
         return [
-            'raid_title'         => $initialData['title'] ?? 'Raid Analysis',
-            'difficulties'       => $difficulties,
-            'has_kills'          => $hasKills,
-            'fight_durations'    => $durations,
-            'phase_summary'      => $phaseSummary,
-            'players'            => $cleanPlayers,
-            'player_details'     => $playerDetails,
-            'deaths'             => $cleanDeaths,
-            'major_damage_taken' => array_slice($cleanDamageTaken, 0, 15),
-            'casts_summary'      => $castsAndConsumables['casts'],
-            'consumables_used'   => $consumables,
-            'dispels'            => $cleanDispels,
-            'consumable_buffs'   => $consumableBuffs,
-            'buff_uptime'        => $buffUptime,
-            'debuff_uptime'      => $debuffUptime,
-            'resource_waste'     => $resourceWaste,
+            'raid_title'          => $initialData['title'] ?? 'Raid Analysis',
+            'difficulties'        => $difficulties,
+            'has_kills'           => $hasKills,
+            'fight_durations'     => $durations,
+            'phase_summary'       => $phaseSummary,
+            'players'             => $cleanPlayers,
+            'player_details'      => $playerDetails,
+            'deaths'              => $cleanDeaths,
+            'major_damage_taken'  => array_slice($cleanDamageTaken, 0, 50),
+            'target_damage'       => $targetDamage,
+            'interrupts'          => $interrupts,
+            'debuff_stacks'       => $debuffStacks,
+            'enemy_buff_stacks'   => $enemyBuffStacks,
+            'enemy_buff_uptimes'  => $enemyBuffUptimes,
+            'orb_staggering'      => $orbStaggering,
+            'shielded_casts'      => $shieldedCasts,
+            'player_coords_on_debuff' => $playerCoords,
+            'casts_summary'       => $castsAndConsumables['casts'],
+            'consumables_used'    => $consumables,
+            'dispels'             => $cleanDispels,
+            'consumable_buffs'    => $consumableBuffs,
+            'buff_uptime'         => array_slice($buffUptime, 0, 100, true),
+            'debuff_uptime'       => $debuffUptime,
+            'resource_waste'      => $resourceWaste,
             'performance_metrics' => $performanceMetrics,
+            // Raw report data (used by per-encounter helpers — phase bucketing, cooldown timing, etc.)
+            'raid_fights'         => array_values($raidFights),
+            'report_phases'       => $reportPhases,
+            'raid_actors'         => $allActors,
         ];
     }
 
@@ -685,6 +789,1012 @@ GQL;
         ]);
 
         return $data['reportData']['reports']['data'] ?? [];
+    }
+
+    /**
+     * Identify stacking tank/soak debuffs from the debuffs table and fetch stack events for each.
+     * Targets high-uptime debuffs (>10%) with keywords indicating stacking mechanics.
+     *
+     * @return array [debuffName => parsed stack data]
+     */
+    private function extractDebuffStacks(string $reportId, array $fightIds, array $debuffAuras, array $deathEntries, array $players): array
+    {
+        // Keywords for debuffs we want detailed event-level analysis of:
+        // - Stacking tank swap debuffs (max_stacks_per_player, stacks_at_death)
+        // - Healing absorb shields (avg_duration_ms shows how fast healers clear them)
+        // - Soak vulnerability stacks
+        $stackingKeywords = [
+            // Tank swaps / vulnerability stacks
+            'Destabilizing', 'Blackening', 'Vaelwing', 'Rakfang', 'Midnight Manifestation',
+            'Rift Vulnerability', 'Rift Slash', 'Impaled', 'Heaven\'s Lance',
+            'Ashen Benediction', 'Discordant Roar', 'Light Infused',
+            'Smashed', 'Judgment', 'Shield of the Righteous',
+            // Healing absorb shields
+            'Despotic Command', 'Rift Sickness', 'Eternal Burns', 'Null Corona',
+            'Voidstalker Sting',
+            // Mythic-specific
+            'Rift Madness', 'Gloomtouched', 'Diminish', 'Nexus Shield',
+            // Player-targeted debuffs from adds / boss
+            'Fixate', 'Aspect of the End', 'Silverstrike Arrow', 'Silverstrike Barrage',
+            'Umbral Tether', 'Umbral Collapse', 'Void Marked', 'Lingering Darkness',
+            'Dread Breath', 'Ranger Captain\'s Mark', 'Consuming Miasma',
+        ];
+
+        // Actor ID → name map
+        $actorMap = [];
+        foreach ($players as $p) {
+            if (isset($p['id'], $p['name'])) {
+                $actorMap[$p['id']] = $p['name'];
+            }
+        }
+
+        $result = [];
+        foreach ($debuffAuras as $aura) {
+            $name = $aura['name'] ?? '';
+            $guid = $aura['guid'] ?? null;
+            $uptime = $aura['totalUptime'] ?? 0;
+
+            if (!$guid || $uptime < 10000) continue; // skip very short debuffs
+
+            $isStackingCandidate = false;
+            foreach ($stackingKeywords as $kw) {
+                if (stripos($name, $kw) !== false) {
+                    $isStackingCandidate = true;
+                    break;
+                }
+            }
+            if (!$isStackingCandidate) continue;
+
+            try {
+                $events = $this->getDebuffStackEvents($reportId, $fightIds, (int) $guid);
+                if (empty($events)) continue;
+
+                $parsed = WclReportParserHelper::parseDebuffStacks($events, $actorMap, $deathEntries);
+                if (!empty($parsed['max_stacks_per_player'])) {
+                    $parsed['guid'] = (int) $guid;
+                    $result[$name] = $parsed;
+                }
+            } catch (\Exception $e) {
+                // Skip this debuff on error, don't fail the whole pipeline
+                continue;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract player x,y coordinates near key debuff removal events.
+     * WCL provides coords only on player cast events → for each removedebuff of a puddle-dropping
+     * debuff, find the nearest player cast event (within ±3s) to approximate position.
+     *
+     * Tracked debuffs: puddle-dropping / positioning-critical mechanics.
+     *
+     * @return array [debuffName => ['applications' => int, 'positions' => [...], 'center_avg' => [x,y], 'outlier_drops' => int]]
+     */
+    private function extractPlayerCoordsOnDebuffRemoval(string $reportId, array $fightIds, array $debuffAuras, array $cleanPlayers, array $fightStartTimes): array
+    {
+        // Debuffs whose expiration drops a puddle or positions matter
+        $keywords = [
+            'Despotic Command', 'Blisterburst', 'Void Dive', 'Light Dive',
+            'Corrupting Essence', 'Voidfire', 'Rift Madness', 'Alnshroud',
+            'Dread Breath', 'Gloom', 'Eruption', 'Consuming Miasma',
+        ];
+
+        $matched = [];
+        foreach ($debuffAuras as $aura) {
+            $name = $aura['name'] ?? '';
+            $guid = $aura['guid'] ?? null;
+            if (!$guid) continue;
+            foreach ($keywords as $kw) {
+                if (stripos($name, $kw) !== false) {
+                    $matched[$name] = (int) $guid;
+                    break;
+                }
+            }
+        }
+
+        if (empty($matched)) return [];
+
+        $playerMap = [];
+        foreach ($cleanPlayers as $p) {
+            if (isset($p['id'], $p['name'])) $playerMap[$p['id']] = $p['name'];
+        }
+
+        $result = [];
+        foreach ($matched as $debuffName => $debuffId) {
+            try {
+                $debuffEvents = $this->getDebuffStackEvents($reportId, $fightIds, $debuffId);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            // Keep only removedebuff events on known players
+            $removals = array_values(array_filter($debuffEvents, function ($e) use ($playerMap) {
+                return ($e['type'] ?? '') === 'removedebuff'
+                    && isset($playerMap[$e['targetID'] ?? null]);
+            }));
+
+            if (empty($removals)) continue;
+
+            // Fetch all player cast events with coords in this fight range
+            // Query casts table and fetch events per fight for coords
+            $positions = WclReportParserHelper::correlatePlayerCoordsWithEvents(
+                $removals,
+                $this->fetchPlayerCoordSnapshots($reportId, $fightIds, $playerMap),
+                $playerMap,
+                $fightStartTimes
+            );
+
+            if (!empty($positions)) {
+                $result[$debuffName] = $positions;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Fetch a sample of player cast events with x,y for coordinate lookup.
+     * Caps pagination to avoid loading tens of thousands of events for large reports.
+     */
+    private function fetchPlayerCoordSnapshots(string $reportId, array $fightIds, array $playerMap): array
+    {
+        $query = 'query ($reportId: String!, $fightIds: [Int]!, $startTime: Float) {
+          reportData { report(code: $reportId) {
+            events(dataType: Casts, fightIDs: $fightIds, killType: Encounters, includeResources: true, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+              data
+              nextPageTimestamp
+            }
+          } }
+        }';
+
+        $filtered = [];
+        $startTime = 0.0;
+        $pagesFetched = 0;
+        $maxPages = 10; // cap ~20,000 events total to bound memory
+
+        try {
+            do {
+                $data = $this->executeGraphql($query, [
+                    'reportId'  => $reportId,
+                    'fightIds'  => $fightIds,
+                    'startTime' => $startTime,
+                ]);
+
+                $page = $data['reportData']['report']['events'] ?? [];
+                $events = $page['data'] ?? [];
+
+                // Filter immediately to keep only useful events — reduces memory pressure
+                foreach ($events as $e) {
+                    if (!isset($playerMap[$e['sourceID'] ?? null])) continue;
+                    if (!isset($e['x'], $e['y'])) continue;
+                    // Keep only essential fields to save memory
+                    $filtered[] = [
+                        'timestamp' => $e['timestamp'] ?? 0,
+                        'sourceID'  => $e['sourceID'],
+                        'fight'     => $e['fight'] ?? null,
+                        'x'         => $e['x'],
+                        'y'         => $e['y'],
+                    ];
+                }
+                unset($events, $data, $page);
+
+                $next = $page['nextPageTimestamp'] ?? null;
+                $pagesFetched++;
+                if ($next === null || $next <= $startTime || $pagesFetched >= $maxPages) break;
+                $startTime = (float) $next;
+            } while (true);
+        } catch (\Exception $e) {
+            return $filtered;
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Extract stacking enemy buffs (e.g. Vaelwing on boss, Primordial Power).
+     * Boss self-buffs track tank swap/vulnerability via buff application counts.
+     *
+     * @return array [buffName => {max_stacks, applications, targets_seen}]
+     */
+    private function extractEnemyBuffStacks(string $reportId, array $fightIds, array $enemyBuffAuras, array $allActors): array
+    {
+        $stackingKeywords = [
+            'Vaelwing', 'Primordial Power', 'Rakfang', 'Aura of Wrath', 'Aura of Peace',
+            'Aura of Devotion', 'Tyr\'s Wrath', 'Light Infused', 'Zealous Spirit',
+            'Empowering Darkness', 'Cosmic Barrier', 'Umbral Barrier',
+        ];
+
+        $npcMap = [];
+        foreach ($allActors as $a) {
+            if (($a['type'] ?? '') === 'NPC' && isset($a['id'], $a['name'])) {
+                $npcMap[$a['id']] = $a['name'];
+            }
+        }
+
+        $result = [];
+        foreach ($enemyBuffAuras as $aura) {
+            $name = $aura['name'] ?? '';
+            $guid = $aura['guid'] ?? null;
+            if (!$guid) continue;
+
+            $matched = false;
+            foreach ($stackingKeywords as $kw) {
+                if (stripos($name, $kw) !== false) { $matched = true; break; }
+            }
+            if (!$matched) continue;
+
+            try {
+                $events = $this->getEnemyBuffEvents($reportId, $fightIds, (int) $guid);
+            } catch (\Exception $e) {
+                continue;
+            }
+            if (empty($events)) continue;
+
+            $maxStack = 0;
+            $applications = 0;
+            $targets = [];
+            foreach ($events as $e) {
+                $t = $e['type'] ?? '';
+                if ($t === 'applybuff') $applications++;
+                elseif ($t === 'applybuffstack') {
+                    $s = $e['stack'] ?? 0;
+                    if ($s > $maxStack) $maxStack = $s;
+                }
+                $tid = $e['targetID'] ?? null;
+                if ($tid && isset($npcMap[$tid])) {
+                    $targets[$npcMap[$tid]] = ($targets[$npcMap[$tid]] ?? 0) + 1;
+                }
+            }
+
+            $result[$name] = [
+                'max_stacks'   => $maxStack,
+                'applications' => $applications,
+                'targets_seen' => $targets,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract orb kill timing to detect overlapping kills (cause of DoT-stack wipes).
+     * Filters to known orb-style NPCs. Returns empty if no relevant NPC detected.
+     */
+    private function extractOrbStaggering(string $reportId, array $fightIds, array $npcMap, array $fightStartTimes): array
+    {
+        // NPC names that represent "orb"-style adds which cause DoT-overlap wipes
+        $orbKeywords = [
+            'Concentrated Void', 'Enduring Void', 'Void Spawn', 'Voidstalker', 'Unbound Void',
+            'Void Convergence', 'Void Orb', 'Blistercreep', 'Voidorb',
+        ];
+
+        $relevantNpcs = [];
+        foreach ($npcMap as $id => $name) {
+            foreach ($orbKeywords as $kw) {
+                if (stripos($name, $kw) !== false) {
+                    $relevantNpcs[$id] = $name;
+                    break;
+                }
+            }
+        }
+
+        if (empty($relevantNpcs)) return [];
+
+        try {
+            $deaths = $this->getEnemyDeathEvents($reportId, $fightIds);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        // Filter to only relevant NPCs
+        $filtered = array_values(array_filter($deaths, fn($e) => isset($relevantNpcs[$e['targetID'] ?? null])));
+        if (empty($filtered)) return [];
+
+        return WclReportParserHelper::parseOrbStaggering($filtered, $relevantNpcs, $fightStartTimes);
+    }
+
+    /**
+     * Analyze shielded cast attempts (e.g. Shadow Fracture interrupts on Nexus Shield clones).
+     * Returns empty array if no shield buff found in enemy auras.
+     */
+    private function extractShieldedCasts(string $reportId, array $fightIds, array $enemyBuffAuras, array $enemyCastEntries, array $cleanPlayers, array $fightStartTimes): array
+    {
+        $shieldKeywords = ['Nexus Shield'];
+        $shieldAura = null;
+        foreach ($enemyBuffAuras as $aura) {
+            $name = $aura['name'] ?? '';
+            foreach ($shieldKeywords as $kw) {
+                if (stripos($name, $kw) !== false) {
+                    $shieldAura = ['name' => $name, 'guid' => $aura['guid'] ?? null];
+                    break 2;
+                }
+            }
+        }
+
+        if (!$shieldAura || !$shieldAura['guid']) return [];
+
+        try {
+            $shieldEvents = $this->getEnemyBuffEvents($reportId, $fightIds, (int) $shieldAura['guid']);
+        } catch (\Exception $e) {
+            return [];
+        }
+        if (empty($shieldEvents)) return [];
+
+        $castKeywords = ['Shadow Fracture', 'Fearsome Cry', 'Essence Bolt'];
+        $targetAbilities = [];
+        foreach ($enemyCastEntries as $e) {
+            $n = $e['name'] ?? '';
+            $g = $e['guid'] ?? null;
+            if (!$g) continue;
+            foreach ($castKeywords as $kw) {
+                if (stripos($n, $kw) !== false) {
+                    $targetAbilities[$n] = $g;
+                    break;
+                }
+            }
+        }
+
+        $actorMap = [];
+        foreach ($cleanPlayers as $p) {
+            if (isset($p['id'], $p['name'])) $actorMap[$p['id']] = $p['name'];
+        }
+
+        $results = [];
+        foreach ($targetAbilities as $abilityName => $abilityId) {
+            try {
+                // Boss abilities → enemy caster
+                $castEvents = $this->getCastEventsForAbility($reportId, $fightIds, (int) $abilityId, true);
+                if (empty($castEvents)) continue;
+
+                $parsed = WclReportParserHelper::parseShieldedCasts($castEvents, $shieldEvents, $actorMap, $fightStartTimes);
+                if ($parsed['casts_total'] > 0) {
+                    $results[$abilityName] = array_merge(
+                        ['shield_buff' => $shieldAura['name']],
+                        $parsed
+                    );
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Extract boss position coordinates from casts of key mechanic abilities.
+     */
+    private function extractBossPositions(string $reportId, array $fightIds, array $castEntries, array $fightStartTimes): array
+    {
+        // Key boss mechanic casts to track positioning
+        $positioningKeywords = [
+            'Entropic Unraveling', 'Primordial Roar', 'Shadowclaw Slam',
+            'Imperator\'s Glory', 'Dark Upheaval', 'Void Breath',
+        ];
+
+        $targetAbilities = [];
+        foreach ($castEntries as $entry) {
+            $name = $entry['name'] ?? '';
+            $guid = $entry['guid'] ?? null;
+            if (!$guid) continue;
+            foreach ($positioningKeywords as $kw) {
+                if (stripos($name, $kw) !== false) {
+                    $targetAbilities[$name] = $guid;
+                    break;
+                }
+            }
+        }
+
+        $results = [];
+        foreach ($targetAbilities as $abilityName => $abilityId) {
+            try {
+                // Boss abilities → enemy caster
+                $events = $this->getCastEventsForAbility($reportId, $fightIds, (int) $abilityId, true);
+                if (empty($events)) continue;
+                $parsed = WclReportParserHelper::parseBossPositions($events, $fightStartTimes);
+                if ($parsed['casts_with_coords'] > 0) {
+                    $results[$abilityName] = $parsed;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Extract NPC summon waves from events — filters out player pet summons.
+     * Maps summon targetID → NPC name via masterData actors.
+     *
+     * @return array [fight_id => parsed wave data]
+     */
+    private function extractSummonWaves(string $reportId, array $fightIds, array $allActors, array $fightStartTimes): array
+    {
+        // Build actor ID → name map for NPCs only
+        $npcMap = [];
+        foreach ($allActors as $a) {
+            if (($a['type'] ?? '') === 'NPC' && isset($a['id'], $a['name'])) {
+                $npcMap[$a['id']] = $a['name'];
+            }
+        }
+
+        if (empty($npcMap)) return [];
+
+        try {
+            $events = $this->getSummonEvents($reportId, $fightIds);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        // Filter: keep only events where targetID is an NPC we know about
+        $npcSummons = array_values(array_filter($events, fn($e) => isset($npcMap[$e['targetID'] ?? null])));
+
+        if (empty($npcSummons)) return [];
+
+        // Build abilityGameID → targetName map for labeling
+        $abilityMap = [];
+        foreach ($npcSummons as $e) {
+            $aid = $e['abilityGameID'] ?? 0;
+            $tid = $e['targetID'] ?? null;
+            if ($aid && $tid && isset($npcMap[$tid]) && !isset($abilityMap[$aid])) {
+                $abilityMap[$aid] = $npcMap[$tid];
+            }
+        }
+
+        return WclReportParserHelper::parseSummonWaves($npcSummons, $fightStartTimes, $abilityMap);
+    }
+
+    /**
+     * Fetch all debuff stack events for a given ability ID across the provided fights.
+     * Paginates through the events API until all events are retrieved.
+     *
+     * @return array List of event objects with timestamp, type, sourceID, targetID, stack
+     */
+    public function getDebuffStackEvents(string $reportId, array $fightIds, int $abilityId): array
+    {
+        $query = WclQueryBuilder::buildDebuffStackEventsQuery();
+        $allEvents = [];
+        $startTime = 0.0;
+
+        do {
+            $data = $this->executeGraphql($query, [
+                'reportId'  => $reportId,
+                'fightIds'  => $fightIds,
+                'abilityId' => (float) $abilityId,
+                'startTime' => $startTime,
+            ]);
+
+            $page = $data['reportData']['report']['events'] ?? [];
+            $events = $page['data'] ?? [];
+            $allEvents = array_merge($allEvents, $events);
+
+            $next = $page['nextPageTimestamp'] ?? null;
+            if ($next === null || $next <= $startTime) {
+                break;
+            }
+            $startTime = (float) $next;
+        } while (true);
+
+        return $allEvents;
+    }
+
+    /**
+     * Fetch enemy death events (NPC deaths - orbs, adds).
+     */
+    public function getEnemyDeathEvents(string $reportId, array $fightIds): array
+    {
+        return $this->paginateEvents(WclQueryBuilder::buildEnemyDeathEventsQuery(), [
+            'reportId' => $reportId,
+            'fightIds' => $fightIds,
+        ]);
+    }
+
+    /**
+     * Fetch cast events for a specific ability with coordinates (includeResources).
+     * Pass $enemyCaster=true to get boss/NPC casts.
+     */
+    public function getCastEventsForAbility(string $reportId, array $fightIds, int $abilityId, bool $enemyCaster = false): array
+    {
+        return $this->paginateEvents(WclQueryBuilder::buildCastEventsQuery(), [
+            'reportId'      => $reportId,
+            'fightIds'      => $fightIds,
+            'abilityId'     => (float) $abilityId,
+            'hostilityType' => $enemyCaster ? 'Enemies' : 'Friendlies',
+        ]);
+    }
+
+    /**
+     * Fetch enemy buff events (e.g. Nexus Shield on boss clones).
+     */
+    public function getEnemyBuffEvents(string $reportId, array $fightIds, int $abilityId): array
+    {
+        return $this->paginateEvents(WclQueryBuilder::buildEnemyBuffEventsQuery(), [
+            'reportId'  => $reportId,
+            'fightIds'  => $fightIds,
+            'abilityId' => (float) $abilityId,
+        ]);
+    }
+
+    /**
+     * Generic helper: paginate events API calls with startTime cursor.
+     */
+    private function paginateEvents(string $query, array $variables): array
+    {
+        $all = [];
+        $variables['startTime'] = 0.0;
+
+        do {
+            $data = $this->executeGraphql($query, $variables);
+            $page = $data['reportData']['report']['events'] ?? [];
+            $events = $page['data'] ?? [];
+            $all = array_merge($all, $events);
+
+            $next = $page['nextPageTimestamp'] ?? null;
+            if ($next === null || $next <= $variables['startTime']) break;
+            $variables['startTime'] = (float) $next;
+        } while (true);
+
+        return $all;
+    }
+
+    /**
+     * Fetch all summon events (add spawns) across the given fights.
+     */
+    public function getSummonEvents(string $reportId, array $fightIds): array
+    {
+        $query = WclQueryBuilder::buildSummonEventsQuery();
+        $all = [];
+        $startTime = 0.0;
+
+        do {
+            $data = $this->executeGraphql($query, [
+                'reportId'  => $reportId,
+                'fightIds'  => $fightIds,
+                'startTime' => $startTime,
+            ]);
+
+            $page = $data['reportData']['report']['events'] ?? [];
+            $events = $page['data'] ?? [];
+            $all = array_merge($all, $events);
+
+            $next = $page['nextPageTimestamp'] ?? null;
+            if ($next === null || $next <= $startTime) break;
+            $startTime = (float) $next;
+        } while (true);
+
+        return $all;
+    }
+
+    /**
+     * Per-player consumable buff coverage — checks which players had each buff at any point.
+     * Iterates over consumable buff aura events and returns a per-player audit.
+     *
+     * @return array [
+     *   'players_with' => [buffName => [playerName, ...]],
+     *   'players_without' => [buffName => [playerName, ...]],
+     *   'raid_size' => int,
+     * ]
+     */
+    public function getPerPlayerConsumableAudit(string $reportId, array $fightIds, array $cleanPlayers, array $consumableBuffs): array
+    {
+        $playerNames = array_column($cleanPlayers, 'name');
+        $playerIds = array_column($cleanPlayers, 'id');
+        $playerMap = array_combine($playerIds, $playerNames);
+
+        $playersWith = [];
+        $playersWithout = [];
+
+        foreach ($consumableBuffs as $buffName => $data) {
+            $guid = null;
+            // Find the guid by querying buffs table again (cheap — we have it cached for raid)
+            // Use existing extractor approach: query enemy/friendly buff events for this ability.
+            // Simpler: rely on totalUses + bands to detect presence per actor via events query.
+            // For minimum cost, skip if this buff was applied to the entire raid (avg_players >= raid_size * 0.95)
+            $rs = count($playerNames);
+            $avg = $data['avg_players_per_fight'] ?? 0;
+            if ($rs > 0 && $avg >= $rs * 0.95) {
+                $playersWith[$buffName] = $playerNames;
+                $playersWithout[$buffName] = [];
+                continue;
+            }
+
+            // Otherwise: query buff events to find unique target players
+            $q = 'query ($reportId: String!, $fightIds: [Int]!, $abilityName: String!) {
+              reportData { report(code: $reportId) {
+                events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, filterExpression: $abilityName, hostilityType: Friendlies, limit: 2000) {
+                  data
+                }
+              } }
+            }';
+            try {
+                $r = $this->executeGraphql($q, [
+                    'reportId' => $reportId,
+                    'fightIds' => $fightIds,
+                    'abilityName' => 'ability.name = "' . str_replace('"', '\\"', $buffName) . '"',
+                ]);
+                $events = $r['reportData']['report']['events']['data'] ?? [];
+                $with = [];
+                foreach ($events as $e) {
+                    if (($e['type'] ?? '') !== 'applybuff') continue;
+                    $tid = $e['targetID'] ?? null;
+                    if ($tid && isset($playerMap[$tid])) {
+                        $with[$playerMap[$tid]] = true;
+                    }
+                }
+                $playersWith[$buffName] = array_keys($with);
+                $playersWithout[$buffName] = array_values(array_diff($playerNames, array_keys($with)));
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return [
+            'players_with'    => $playersWith,
+            'players_without' => $playersWithout,
+            'raid_size'       => count($playerNames),
+        ];
+    }
+
+    /**
+     * Per-player buff uptime for a specific aura.
+     * Calculates uptime % for each player based on applybuff/removebuff events.
+     *
+     * @return array [playerName => ['uptime_pct' => float, 'uses' => int, 'total_uptime_ms' => int]]
+     */
+    public function getPerPlayerBuffUptime(string $reportId, array $fightIds, int $abilityId, int $totalDurationMs, array $cleanPlayers = []): array
+    {
+        if ($totalDurationMs <= 0) return [];
+
+        $playerMap = [];
+        foreach ($cleanPlayers as $p) {
+            if (isset($p['id'], $p['name'])) $playerMap[$p['id']] = $p['name'];
+        }
+
+        $query = 'query ($reportId: String!, $fightIds: [Int]!, $abilityId: Float!, $startTime: Float) {
+          reportData { report(code: $reportId) {
+            events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, abilityID: $abilityId, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+              data
+              nextPageTimestamp
+            }
+          } }
+        }';
+
+        try {
+            $events = $this->paginateEvents($query, [
+                'reportId' => $reportId,
+                'fightIds' => $fightIds,
+                'abilityId' => (float) $abilityId,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        // Compute uptime per player
+        $current = []; // playerId => apply_timestamp
+        $totals = []; // playerId => sum_uptime_ms
+        $uses = [];
+
+        foreach ($events as $e) {
+            $type = $e['type'] ?? '';
+            $tid = $e['targetID'] ?? null;
+            $ts = $e['timestamp'] ?? 0;
+            if (!$tid || !isset($playerMap[$tid])) continue;
+
+            if ($type === 'applybuff') {
+                $current[$tid] = $ts;
+                $uses[$tid] = ($uses[$tid] ?? 0) + 1;
+            } elseif ($type === 'removebuff' && isset($current[$tid])) {
+                $totals[$tid] = ($totals[$tid] ?? 0) + ($ts - $current[$tid]);
+                unset($current[$tid]);
+            } elseif ($type === 'refreshbuff') {
+                // refresh extends — keep current apply timestamp
+            }
+        }
+
+        $result = [];
+        foreach ($totals as $tid => $totalMs) {
+            $name = $playerMap[$tid];
+            $result[$name] = [
+                'uptime_pct'      => round($totalMs / $totalDurationMs * 100, 1),
+                'uses'            => $uses[$tid] ?? 0,
+                'total_uptime_ms' => $totalMs,
+            ];
+        }
+        uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
+        return $result;
+    }
+
+    /**
+     * Per-encounter aggregated stats — casts/buffs/dispels/interrupts/debuffs/consumables
+     * scoped to a specific boss's fight IDs. Used to populate encounters[].player_stats.
+     *
+     * @return array{casts_summary: array, consumables_used: array, buff_uptime: array, debuff_uptime: array, dispels: array, interrupts: array}
+     */
+    public function getPerEncounterStats(string $reportId, array $fightIds, array $rosterNames = [], int $totalDurationMs = 0, array $playerDetails = []): array
+    {
+        $query = WclQueryBuilder::buildPerEncounterStatsQuery();
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId' => $reportId,
+                'fightIds' => $fightIds,
+            ]);
+        } catch (\Exception $e) {
+            return [
+                'casts_summary' => [],
+                'consumables_used' => [],
+                'buff_uptime' => [],
+                'debuff_uptime' => [],
+                'dispels' => [],
+                'interrupts' => [],
+            ];
+        }
+
+        $report = $data['reportData']['report'] ?? [];
+
+        // Casts + consumables (re-uses existing parser)
+        $castEntries = $report['casts']['data']['entries'] ?? [];
+        $castsAndConsumables = WclReportParserHelper::parseCastsAndConsumables($castEntries, $rosterNames);
+
+        // Buff uptime — top 100 most-frequent buffs in this fight
+        $buffsTotalTime = $report['buffs']['data']['totalTime'] ?? $totalDurationMs;
+        $buffUptime = WclReportParserHelper::parseBuffUptime(
+            $report['buffs']['data'] ?? [],
+            $buffsTotalTime ?: 1
+        );
+        $buffUptime = array_slice($buffUptime, 0, 100, true);
+
+        // Debuffs (top 30)
+        $debuffUptime = WclReportParserHelper::parseDebuffUptime(
+            $report['debuffs']['data'] ?? [],
+            $buffsTotalTime ?: 1,
+            $rosterNames
+        );
+        $debuffUptime = array_slice($debuffUptime, 0, 30, true);
+
+        // Dispels
+        $dispelEntries = $report['dispels']['data']['entries'][0]['entries'] ?? [];
+        $dispels = WclReportParserHelper::parseDispels($dispelEntries, $rosterNames);
+
+        // Interrupts
+        $interruptEntries = $report['interrupts']['data']['entries'][0]['entries'] ?? [];
+        $interrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
+
+        // Wave 1: per-player damage / damage taken / healing breakdowns
+        $damageDoneBreakdown  = WclReportParserHelper::parseDamageDoneBreakdown(
+            $report['damageDone']['data'] ?? [],
+            $rosterNames
+        );
+        $damageTakenBreakdown = WclReportParserHelper::parseDamageTakenBreakdown(
+            $report['damageTaken']['data'] ?? [],
+            $rosterNames
+        );
+        $healingBreakdown     = WclReportParserHelper::parseHealingBreakdown(
+            $report['healing']['data'] ?? [],
+            $rosterNames
+        );
+        $healTargets          = WclReportParserHelper::parseHealTargets(
+            $report['healing']['data'] ?? [],
+            $rosterNames,
+            $playerDetails
+        );
+
+        return [
+            'casts_summary'           => $castsAndConsumables['casts'],
+            'consumables_used'        => $castsAndConsumables['consumables'],
+            'buff_uptime'             => $buffUptime,
+            'debuff_uptime'           => $debuffUptime,
+            'dispels'                 => $dispels,
+            'interrupts'              => $interrupts,
+            'damage_done_breakdown'   => $damageDoneBreakdown,
+            'damage_taken_breakdown'  => $damageTakenBreakdown,
+            'healing_breakdown'       => $healingBreakdown,
+            'heal_targets'            => $healTargets,
+        ];
+    }
+
+    /**
+     * Cooldown discipline analysis for a single boss. Queries cast events filtered to a list
+     * of major cooldown ability IDs, returns per-player per-ability timing data.
+     *
+     * @param int[]  $abilityIds   Major cooldown spell IDs (cooldown_seconds >= some threshold)
+     * @param array  $cooldownsByAbility  abilityId → cooldown_seconds (used by parser)
+     * @param array  $abilityNames        abilityId → human-readable name
+     * @param array  $actorMap            actorId → playerName
+     * @param array  $fightDurations      fightId → duration_seconds (encounter total)
+     */
+    public function getCooldownTimings(
+        string $reportId,
+        array $fightIds,
+        array $abilityIds,
+        array $cooldownsByAbility,
+        array $abilityNames,
+        array $actorMap,
+        array $fightDurations
+    ): array {
+        if (empty($abilityIds) || empty($fightIds)) return [];
+
+        $expr = 'ability.id IN (' . implode(',', array_unique(array_map('intval', $abilityIds))) . ')';
+        $query = WclQueryBuilder::buildCooldownEventsQuery();
+
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId'         => $reportId,
+                'fightIds'         => $fightIds,
+                'filterExpression' => $expr,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $events = $data['reportData']['report']['events']['data'] ?? [];
+        return WclReportParserHelper::parseCooldownEvents(
+            $events,
+            $actorMap,
+            $abilityNames,
+            $cooldownsByAbility,
+            $fightDurations
+        );
+    }
+
+    /**
+     * Fetch applybuff events for a list of external cooldown spell IDs. Returns events
+     * grouped by (caster → target → ability) so the analyzer can show "who threw what on whom".
+     *
+     * @param int[] $abilityIds
+     * @param array<int, string> $actorMap  actorID → name
+     * @param array<int, string> $abilityNames  abilityID → name
+     * @return array<int, array{timestamp:int, fight:?int, caster:string, target:string, ability:string, ability_id:int}>
+     */
+    public function getExternalCooldownEvents(
+        string $reportId,
+        array $fightIds,
+        array $abilityIds,
+        array $actorMap,
+        array $abilityNames
+    ): array {
+        if (empty($abilityIds) || empty($fightIds)) return [];
+
+        $expr = 'type = "applybuff" AND ability.id IN (' . implode(',', array_unique(array_map('intval', $abilityIds))) . ')';
+        $query = WclQueryBuilder::buildCooldownEventsQuery(); // reuse: Casts events query
+        // Note: we need Buffs dataType, not Casts. Build a dedicated query instead.
+        $query = <<<'GQL'
+        query ($reportId: String!, $fightIds: [Int]!, $filterExpression: String!) {
+          reportData {
+            report(code: $reportId) {
+              events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, filterExpression: $filterExpression, limit: 5000, hostilityType: Friendlies) {
+                data
+              }
+            }
+          }
+        }
+GQL;
+
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId'         => $reportId,
+                'fightIds'         => $fightIds,
+                'filterExpression' => $expr,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $events = $data['reportData']['report']['events']['data'] ?? [];
+        $out = [];
+        foreach ($events as $e) {
+            if (($e['type'] ?? '') !== 'applybuff') continue;
+            $sid = $e['sourceID'] ?? null;
+            $tid = $e['targetID'] ?? null;
+            $aid = $e['abilityGameID'] ?? null;
+            $ts  = $e['timestamp'] ?? null;
+            if ($sid === null || $tid === null || $aid === null) continue;
+
+            $caster = $actorMap[$sid] ?? null;
+            $target = $actorMap[$tid] ?? null;
+            if (!$caster || !$target) continue;
+
+            $out[] = [
+                'timestamp'  => (int) $ts,
+                'fight'      => $e['fight'] ?? null,
+                'caster'     => $caster,
+                'target'     => $target,
+                'ability'    => $abilityNames[$aid] ?? "Spell {$aid}",
+                'ability_id' => (int) $aid,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Per-boss adds lookup. Returns NPC targets and per-player damage dealt to them
+     * in the specified fights (avoids the top-N merge across all bosses in the report).
+     *
+     * @return array [addName => ['total' => int, 'top_sources' => [playerName => int]]]
+     */
+    public function getBossAdds(string $reportId, array $fightIds, array $rosterNames = []): array
+    {
+        $query = WclQueryBuilder::buildBossAddsQuery();
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId' => $reportId,
+                'fightIds' => $fightIds,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $entries = $data['reportData']['report']['addsDamage']['data']['entries'] ?? [];
+        $parsed = WclReportParserHelper::parseTargetDamage($entries, $rosterNames);
+        return $parsed['adds'] ?? [];
+    }
+
+    /**
+     * Targeted damage_taken lookup for a specific ability across given fights.
+     *
+     * @return array{ability_id: int, entries: array} — entries are [name, type, total, ...]
+     */
+    public function getDamageTakenForAbility(string $reportId, array $fightIds, int $abilityId): array
+    {
+        $query = WclQueryBuilder::buildTargetedDamageTakenQuery();
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId'  => $reportId,
+                'fightIds'  => $fightIds,
+                'abilityId' => (float) $abilityId,
+            ]);
+        } catch (\Exception $e) {
+            return ['ability_id' => $abilityId, 'entries' => []];
+        }
+
+        $entries = $data['reportData']['report']['damageTaken']['data']['entries'] ?? [];
+        return [
+            'ability_id' => $abilityId,
+            'entries'    => array_values(array_filter($entries, fn($e) => ($e['type'] ?? '') !== 'NPC')),
+        ];
+    }
+
+    /**
+     * Batch-fetch damage_taken for multiple abilities. Filters to a specific boss's fights.
+     * Used by TacticalDataAnalyzer for precise per-mechanic damage aggregation.
+     *
+     * @param int[] $abilityIds
+     * @param int[] $fightIds  (boss-specific)
+     * @return array [abilityId => parsed damage taken]
+     */
+    public function getTargetedDamageTakenBatch(string $reportId, array $fightIds, array $abilityIds, array $rosterNames = []): array
+    {
+        $result = [];
+        foreach ($abilityIds as $aid) {
+            $aid = (int) $aid;
+            if ($aid <= 0) continue;
+
+            $raw = $this->getDamageTakenForAbility($reportId, $fightIds, $aid);
+            $victims = [];
+            foreach ($raw['entries'] as $playerEntry) {
+                $pname = $playerEntry['name'] ?? '';
+                if (!empty($rosterNames) && !in_array($pname, $rosterNames)) continue;
+
+                // When querying a single abilityID, WCL returns total damage directly
+                // on the player entry (not nested in abilities[]).
+                $dmg = (int) ($playerEntry['total'] ?? 0);
+                if ($dmg > 0) $victims[$pname] = $dmg;
+            }
+            arsort($victims);
+            if (!empty($victims)) {
+                $total = array_sum($victims);
+                $result[$aid] = [
+                    'ability_id'           => $aid,
+                    'total_damage_to_raid' => $total,
+                    'biggest_victims'      => array_slice($victims, 0, 5, true),
+                    'hit_count'            => count($victims),
+                ];
+            }
+        }
+        return $result;
     }
 
     /**

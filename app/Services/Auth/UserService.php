@@ -24,7 +24,7 @@ class UserService
         $transferData = $ownedStatics->map(fn ($static) => [
             'id'      => $static->id,
             'name'    => $static->name,
-            'url'     => route('profile.static.transfer', $static),
+            'url'     => route('profile.static.transfer'),
             'members' => $static->members->map(fn ($member) => [
                 'id'        => $member->id,
                 'name'      => $member->name,
@@ -71,6 +71,16 @@ class UserService
         event(new Registered($user));
 
         return $user;
+    }
+
+    /**
+     * Update the user's privacy preferences.
+     */
+    public function updatePrivacyPreferences(User $user, array $data): void
+    {
+        $user->update([
+            'hide_battletag' => (bool) ($data['hide_battletag'] ?? false),
+        ]);
     }
 
     /**

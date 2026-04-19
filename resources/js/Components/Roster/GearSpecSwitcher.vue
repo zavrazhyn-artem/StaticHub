@@ -41,8 +41,8 @@ onMounted(() => document.addEventListener('click', onClickOutside, true));
 onBeforeUnmount(() => document.removeEventListener('click', onClickOutside, true));
 
 const sizeMap = {
-    sm: { icon: 'w-5 h-5', popup: 'w-7 h-7', text: 'text-[7px]' },
-    xs: { icon: 'w-4 h-4', popup: 'w-5 h-5', text: 'text-[6px]' },
+    sm: { icon: 'w-5 h-5', popup: 'w-7 h-7', text: 'text-5xs' },
+    xs: { icon: 'w-4 h-4', popup: 'w-5 h-5', text: 'text-5xs' },
 };
 const sz = (key) => (sizeMap[props.size] ?? sizeMap.sm)[key];
 </script>
@@ -57,7 +57,7 @@ const sz = (key) => (sizeMap[props.size] ?? sizeMap.sm)[key];
             :class="[
                 sz('icon'),
                 hasMultiple()
-                    ? 'cursor-pointer border-primary/40 hover:border-primary'
+                    ? 'cursor-pointer border-emerald-400/40 hover:border-emerald-400'
                     : 'cursor-default border-white/10',
             ]"
             :title="activeSpec ?? ''"
@@ -74,7 +74,7 @@ const sz = (key) => (sizeMap[props.size] ?? sizeMap.sm)[key];
 
             <!-- Multi-spec indicator dot -->
             <div v-if="hasMultiple()"
-                 class="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary border border-[#0e0e10] z-10">
+                 class="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-[#0e0e10] z-10">
             </div>
         </button>
 
@@ -98,7 +98,7 @@ const sz = (key) => (sizeMap[props.size] ?? sizeMap.sm)[key];
                     :class="[
                         sz('popup'),
                         activeSpec === spec.name
-                            ? 'border-primary ring-1 ring-primary/50'
+                            ? 'border-emerald-400 ring-1 ring-emerald-400/50'
                             : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30',
                     ]"
                     :title="spec.name + (spec.name === mainSpecName ? ' (main)' : '')"
@@ -116,7 +116,7 @@ const sz = (key) => (sizeMap[props.size] ?? sizeMap.sm)[key];
                     <!-- Main spec star -->
                     <div v-if="spec.name === mainSpecName"
                          class="absolute -top-0.5 -right-0.5 text-yellow-400 leading-none z-10">
-                        <span class="text-[6px]">&#9733;</span>
+                        <span class="text-5xs">&#9733;</span>
                     </div>
                 </button>
             </div>

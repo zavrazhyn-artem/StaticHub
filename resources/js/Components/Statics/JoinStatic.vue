@@ -17,7 +17,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
         <div class="flex justify-between items-end mb-4">
             <div>
                 <span class="text-cyan-400 font-headline text-xs font-bold uppercase tracking-[0.3em] mb-2 block">{{ __('— Command Authorization') }}</span>
-                <h2 class="font-headline text-4xl font-black text-white uppercase tracking-tighter italic">
+                <h2 class="font-headline text-4xl font-black text-white uppercase tracking-tight italic">
                     {{ __('Join') }} {{ staticName }}
                 </h2>
                 <p class="text-on-surface-variant font-medium mt-2 max-w-2xl text-sm leading-relaxed">
@@ -50,7 +50,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
             </form>
 
             <div class="mt-8 pt-8 border-t border-white/5">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50">
+                <p class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant/50">
                     {{ __('Step 1: Join Group • Step 2: Select Character') }}
                 </p>
             </div>

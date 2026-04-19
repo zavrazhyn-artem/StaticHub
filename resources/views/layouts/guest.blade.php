@@ -8,15 +8,12 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
         <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+        <!-- All fonts bundled via app.css -->
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-background text-on-background min-h-screen arcane-bg antialiased flex flex-col items-center justify-center p-6">
+    <body class="bg-background text-on-background min-h-screen arcane-bg subpixel-antialiased flex flex-col items-center justify-center p-6">
         <div class="w-full sm:max-w-md mt-6 px-8 py-10 bg-surface-container-low border border-white/5 shadow-2xl overflow-hidden rounded-xl backdrop-blur-md">
             <div class="flex justify-center mb-8">
                 <a href="/" class="flex items-center gap-3">

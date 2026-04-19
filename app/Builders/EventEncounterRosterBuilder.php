@@ -62,4 +62,26 @@ class EventEncounterRosterBuilder extends Builder
             ->where('character_id', $characterId)
             ->delete();
     }
+
+    /**
+     * Character IDs whose every encounter row for this event is benched
+     * (i.e. benched across all bosses — no selected/queued rows exist).
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    public function fullyBenchedCharacterIds(int $eventId): \Illuminate\Support\Collection
+    {
+        return $this->getModel()::query()
+            ->where('event_id', $eventId)
+            ->where('selection_status', 'benched')
+            ->whereNotExists(function ($q) use ($eventId) {
+                $q->from('event_encounter_rosters as sub')
+                    ->whereColumn('sub.character_id', 'event_encounter_rosters.character_id')
+                    ->where('sub.event_id', $eventId)
+                    ->where('sub.selection_status', '!=', 'benched');
+            })
+            ->pluck('character_id')
+            ->unique()
+            ->values();
+    }
 }

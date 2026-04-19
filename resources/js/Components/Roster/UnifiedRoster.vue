@@ -145,7 +145,7 @@ const onWeekChange = async (week) => {
 
     weekLoading.value = true;
     try {
-        const { data } = await axios.get(`/statics/${props.staticId}/roster/weekly-snapshot`, {
+        const { data } = await axios.get(`/roster/weekly-snapshot`, {
             params: { week },
         });
         snapshotCache[week] = data.snapshot || {};
@@ -287,11 +287,11 @@ const auditTitle = (char) => {
     if (!char) return '';
     const parts = [];
     if (char.missing_enchants_slots?.length > 0)
-        parts.push(`Missing enchants: ${char.missing_enchants_slots.join(', ')}`);
+        parts.push(__('Missing enchants:') + ` ${char.missing_enchants_slots.join(', ')}`);
     if (char.low_quality_enchants_slots?.length > 0)
-        parts.push(`Low quality enchants: ${char.low_quality_enchants_slots.join(', ')}`);
+        parts.push(__('Low quality enchants:') + ` ${char.low_quality_enchants_slots.join(', ')}`);
     if (char.empty_sockets_count > 0)
-        parts.push(`Empty sockets: ${char.empty_sockets_count}`);
+        parts.push(__('Empty sockets:') + ` ${char.empty_sockets_count}`);
     return parts.join(' | ');
 };
 
@@ -313,7 +313,7 @@ const fetchRoster = async () => {
     }
     loading.value = true;
     try {
-        const response          = await axios.get(`/statics/${props.staticId}/roster/data`);
+        const response          = await axios.get(`/roster/data`);
         roster.value            = response.data.roster ?? [];
         currentUserAccess.value = response.data.current_user_access ?? 'member';
 
@@ -334,9 +334,9 @@ onMounted(fetchRoster);
 watch(currentTab, (val) => {
     localStorage.setItem('rosterActiveTab', val);
     if (val === 'treasury') {
-        window.location.href = `/statics/${props.staticId}/treasury`;
+        window.location.href = `/treasury`;
     } else if (val === 'settings') {
-        window.location.href = `/statics/${props.staticId}/settings/schedule`;
+        window.location.href = `/settings/schedule`;
     }
 });
 watch(selectedDifficulty, val => localStorage.setItem('rosterSelectedDifficulty', val));
@@ -384,7 +384,7 @@ const toggleRow = (memberId) => {
 
 const updateAccessRole = async (member, newRole) => {
     try {
-        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/access-role`, { access_role: newRole });
+        await axios.patch(`/roster/${member.id}/access-role`, { access_role: newRole });
         member.access_role = newRole;
     } catch (err) {
         console.error('Failed to update access role:', err);
@@ -394,7 +394,7 @@ const updateAccessRole = async (member, newRole) => {
 
 const updateRosterStatus = async (member, newStatus) => {
     try {
-        await axios.patch(`/statics/${props.staticId}/roster/${member.id}/roster-status`, { roster_status: newStatus });
+        await axios.patch(`/roster/${member.id}/roster-status`, { roster_status: newStatus });
         member.roster_status = newStatus;
     } catch (err) {
         console.error('Failed to update roster status:', err);
@@ -405,7 +405,7 @@ const updateRosterStatus = async (member, newStatus) => {
 const kickMember = async (member) => {
     if (!confirm(__('Remove {name} from this static?', { name: member.name }))) return;
     try {
-        await axios.delete(`/statics/${props.staticId}/roster/${member.id}/kick`);
+        await axios.delete(`/roster/${member.id}/kick`);
         roster.value = roster.value.filter(m => m.id !== member.id);
     } catch (err) {
         console.error('Failed to kick member:', err);
@@ -423,21 +423,21 @@ const kickMember = async (member) => {
             <div class="flex items-center gap-2">
                 <template v-if="isLive">
                     <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
-                    <span class="text-[11px] font-black uppercase tracking-widest text-green-400">{{ __('Live') }}</span>
+                    <span class="text-2xs font-bold uppercase tracking-wider text-green-400">{{ __('Live') }}</span>
                 </template>
                 <template v-else>
                     <span class="material-symbols-outlined text-sm text-amber-400">history</span>
-                    <span class="text-[11px] font-black uppercase tracking-widest text-amber-400">{{ __('Week') }} {{ weekNumber(selectedWeek) }}</span>
+                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-400">{{ __('Week') }} {{ weekNumber(selectedWeek) }}</span>
                 </template>
-                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-primary ml-1">sync</span>
+                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-emerald-400 ml-1">sync</span>
             </div>
 
             <!-- Role counts (center) -->
             <div class="flex items-center gap-4">
                 <div v-for="role in roles" :key="role.id" class="flex items-center gap-1.5">
                     <img :src="roleIconSrc(role.id)" class="w-4 h-4 opacity-70" :alt="__(role.labelKey)">
-                    <span class="text-[11px] font-bold" :class="role.color">{{ stats[role.id] }}</span>
-                    <span class="text-[10px] text-gray-600">/{{ role.max }}</span>
+                    <span class="text-2xs font-semibold" :class="role.color">{{ stats[role.id] }}</span>
+                    <span class="text-3xs text-gray-600">/{{ role.max }}</span>
                 </div>
             </div>
 
@@ -463,7 +463,7 @@ const kickMember = async (member) => {
 
         <!-- ── Loading ──────────────────────────────────────────────────── -->
         <div v-if="loading" class="flex justify-center p-12">
-            <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+            <span class="material-symbols-outlined animate-spin text-4xl text-emerald-400">sync</span>
         </div>
 
         <!-- ── Content ──────────────────────────────────────────────────── -->
@@ -522,11 +522,11 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.missing_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-red-400">auto_fix_high</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Missing Enchants') }}</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Missing Enchants') }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span v-for="slot in selectedAuditChar.missing_enchants_slots" :key="slot"
-                                  class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-300">
+                                  class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-3xs font-semibold text-red-300">
                                 {{ slot }}
                             </span>
                         </div>
@@ -536,11 +536,11 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.low_quality_enchants_slots?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-amber-400">auto_fix_high</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Low Quality Enchants') }}</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Low Quality Enchants') }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span v-for="slot in selectedAuditChar.low_quality_enchants_slots" :key="slot"
-                                  class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-300">
+                                  class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-3xs font-semibold text-amber-300">
                                 {{ slot }}
                             </span>
                         </div>
@@ -550,7 +550,7 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.empty_sockets_count > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-amber-400">hexagon</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Empty Sockets') }}</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Empty Sockets') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.empty_sockets_count }}
@@ -561,7 +561,7 @@ const kickMember = async (member) => {
                     <div v-if="(selectedAuditChar?.upgrades_missing ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-blue-400">upgrade</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Upgrades Missing') }}</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Upgrades Missing') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.upgrades_missing }}
@@ -571,8 +571,8 @@ const kickMember = async (member) => {
                     <!-- Spark Gear -->
                     <div v-if="(selectedAuditChar?.sparks_equipped ?? 0) > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="material-symbols-outlined text-sm text-cyan-400">flash_on</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
+                            <span class="material-symbols-outlined text-sm text-emerald-400">flash_on</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Sparks Equipped') }}</span>
                         </div>
                         <div class="text-2xl font-black text-white px-2">
                             {{ selectedAuditChar.sparks_equipped }}
@@ -583,13 +583,13 @@ const kickMember = async (member) => {
                     <div v-if="selectedAuditChar?.embellished_items?.length > 0" class="bg-white/5 rounded-xl border border-white/10 p-4">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-sm text-purple-400">diamond</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Embellished Items') }}</span>
+                            <span class="text-3xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Embellished Items') }}</span>
                         </div>
                         <div class="space-y-1">
                             <div v-for="(emb, i) in selectedAuditChar.embellished_items" :key="i"
                                  class="flex items-center gap-2 text-sm">
                                 <span class="text-purple-300 font-bold">{{ emb.name }}</span>
-                                <span class="text-gray-500 text-xs">ilvl {{ emb.ilvl }}</span>
+                                <span class="text-gray-400 text-xs">ilvl {{ emb.ilvl }}</span>
                                 <span v-if="emb.spell_name" class="text-gray-400 text-xs italic">{{ emb.spell_name }}</span>
                             </div>
                         </div>

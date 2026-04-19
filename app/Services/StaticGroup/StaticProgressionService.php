@@ -55,6 +55,14 @@ class StaticProgressionService
         $newAchievements = 0;
         $now = Carbon::now();
 
+        $existingRecords = StaticRaidProgression::query()
+            ->forStatic($static->id)
+            ->get(['instance_name', 'boss_name', 'difficulty'])
+            ->map(fn ($r) => "{$r->instance_name}|{$r->boss_name}|{$r->difficulty}")
+            ->flip();
+
+        $inserts = [];
+
         foreach ($instances as $instanceName => $configBosses) {
             foreach ($configBosses as $bossName) {
                 foreach (self::DIFFICULTIES as $diff) {
@@ -64,20 +72,29 @@ class StaticProgressionService
                         continue;
                     }
 
-                    $recorded = StaticRaidProgression::query()
-                        ->recordBossKill(
-                            $static->id,
-                            $instanceName,
-                            $bossName,
-                            $diff,
-                            $now
-                        );
+                    $key = "{$instanceName}|{$bossName}|{$diff}";
 
-                    if ($recorded) {
-                        $newAchievements++;
+                    if (isset($existingRecords[$key])) {
+                        continue;
                     }
+
+                    $inserts[] = [
+                        'static_group_id' => $static->id,
+                        'instance_name'   => $instanceName,
+                        'boss_name'       => $bossName,
+                        'difficulty'      => $diff,
+                        'achieved_at'     => $now,
+                        'created_at'      => $now,
+                        'updated_at'      => $now,
+                    ];
+
+                    $newAchievements++;
                 }
             }
+        }
+
+        if (!empty($inserts)) {
+            StaticRaidProgression::insert($inserts);
         }
 
         return $newAchievements;

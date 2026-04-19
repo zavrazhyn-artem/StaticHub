@@ -1,0 +1,41 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Node – rebuilt in node-builder stage
+node_modules
+
+# Composer – rebuilt in composer-builder stage
+vendor
+
+# Storage (runtime data, not needed in image)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/backup-temp/*
+storage/core-master
+
+# Dev / IDE
+.env
+.env.backup
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker itself
+docker-compose.yml
+docker-compose.prod.yml
+docker/dev
+docker/local
+
+# Tests & CI
+tests
+phpunit.xml
+.phpunit.cache
+
+# Docs & misc
+*.md
+LICENSE

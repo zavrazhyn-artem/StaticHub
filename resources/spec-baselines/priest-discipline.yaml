@@ -1,0 +1,54 @@
+spec: Discipline
+class: Priest
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Penance
+    ability_id: 47540
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Mind Blast'
+    ability_id: 8092
+    check: cast_efficiency
+    cooldown_seconds: 28.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Shadow Word: Death'
+    ability_id: 32379
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Evangelism
+    ability_id: 472433
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Ultimate Penitence'
+    ability_id: 421453
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Power Word: Barrier'
+    ability_id: 62618
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Power Infusion'
+    ability_id: 10060
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.8
+    severity: major

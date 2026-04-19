@@ -55,7 +55,7 @@ class DiscordLinkController extends Controller
         $static = Auth::user()->statics()->first();
 
         if ($static) {
-            return Redirect::route('statics.settings.profile', $static->id)->with('status', $status);
+            return Redirect::route('statics.settings.profile')->with('status', $status);
         }
 
         return Redirect::route('profile.edit')->with('status', $status);

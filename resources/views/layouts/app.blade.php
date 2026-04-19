@@ -9,13 +9,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"/>
+    <!-- All fonts (Inter/Space Grotesk/Orbitron/Material Symbols) bundled via app.css -->
 
     <script>
         // Читаємо JSON з перекладами і записуємо в глобальну змінну вікна
@@ -30,7 +24,7 @@
     <script>const whTooltips = {colorLinks: true, iconizeLinks: false, renameLinks: false};</script>
     <script src="https://wow.zamimg.com/js/tooltips.js"></script>
 </head>
-<body class="bg-background text-on-background min-h-screen arcane-bg antialiased">
+<body class="bg-background text-on-background min-h-screen arcane-bg subpixel-antialiased" x-data="{ sidebarOpen: false }">
 @php
     $static = Auth::user() ? Auth::user()->statics->first() : null;
     $isOnboarding = $onboarding ?? false;
@@ -38,7 +32,16 @@
     <!-- TopNavBar -->
 <header
     class="fixed top-0 z-50 w-full flex justify-between items-center px-6 py-4 bg-[#0e0e10]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-    <div class="flex items-center gap-8">
+    <div class="flex items-center gap-4 lg:gap-8">
+        @if($static && !$isOnboarding)
+            <button @click="sidebarOpen = !sidebarOpen"
+                    type="button"
+                    class="lg:hidden flex items-center justify-center h-10 w-10 -ml-2 rounded-md text-gray-300 hover:text-white hover:bg-white/5 active:scale-95 transition-all"
+                    :aria-expanded="sidebarOpen"
+                    aria-label="{{ __('Toggle menu') }}">
+                <span class="material-symbols-outlined" x-text="sidebarOpen ? 'close' : 'menu'">menu</span>
+            </button>
+        @endif
         <div class="flex items-center gap-3">
             <img src="/images/logo.svg" alt="BlastR Logo"
                  class="h-8 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]"/>
@@ -46,17 +49,17 @@
                 <span class="text-white">Blast</span><span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span
                         class="text-xs opacity-70 ml-0.5">r<span
-                            class="text-[10px] opacity-50 ml-0.5">r</span></span></span>
+                            class="text-3xs opacity-50 ml-0.5">r</span></span></span>
             </div>
         </div>
         @if($static && !$isOnboarding)
             @can('manage', $static)
             <div class="hidden md:flex items-center gap-4 ml-4">
-                <button onclick="handleInviteClick({{ $static->id }})"
+                <button onclick="handleInviteClick()"
                         class="flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-md hover:bg-cyan-500 hover:text-white transition-all active:scale-95 group">
                     <span class="material-symbols-outlined text-sm">person_add</span>
                     <span
-                        class="font-headline text-[10px] font-bold uppercase tracking-widest">{{ __("Invite to Group") }}</span>
+                        class="text-3xs font-semibold uppercase tracking-wider">{{ __("Invite to Group") }}</span>
                 </button>
                 <div id="invite-toast"
                      class="hidden fixed bottom-6 right-6 bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce font-headline text-xs font-bold uppercase tracking-widest z-[100]">
@@ -66,9 +69,9 @@
             @endcan
 
             <script>
-                async function handleInviteClick(staticId) {
+                async function handleInviteClick() {
                     try {
-                        const response = await fetch(`/statics/${staticId}/invite`, {
+                        const response = await fetch(`/invite`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -101,9 +104,9 @@
             <div id="discord-link-banner"
                  class="hidden items-center gap-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm text-amber-400">
                 <span class="material-symbols-outlined text-base leading-none">link_off</span>
-                <span class="font-headline text-[10px] font-bold uppercase tracking-widest leading-none">{{ __('Link your Discord for bot commands, RSVP & notifications') }}</span>
+                <span class="text-3xs font-semibold uppercase tracking-wider leading-none">{{ __('Link your Discord for bot commands, RSVP & notifications') }}</span>
                 <a href="{{ route('profile.discord.link') }}"
-                   class="ml-2 font-headline text-[10px] font-bold uppercase tracking-widest leading-none px-3 py-1.5 rounded-sm bg-amber-500 hover:bg-amber-400 text-black transition-all active:scale-95 flex items-center">
+                   class="ml-2 text-3xs font-semibold uppercase tracking-wider leading-none px-3 py-1.5 rounded-sm bg-amber-500 hover:bg-amber-400 text-black transition-all active:scale-95 flex items-center">
                     {{ __('Link Discord') }}
                 </a>
                 <button onclick="dismissDiscordBanner()"
@@ -153,7 +156,7 @@
                     @foreach($availableLocales as $locale)
                         @php $info = $localeMap[$locale]; @endphp
                         <button name="locale" value="{{ $locale }}"
-                                class="flex items-center gap-3 w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
+                                class="flex items-center gap-3 w-full px-4 py-2 text-start text-3xs font-semibold uppercase tracking-wider text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
                             <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}"
                                  class="w-5 h-auto rounded-sm">
                             {{ $info['label'] }}
@@ -191,14 +194,14 @@
                     <div class="px-4 py-2 border-b border-white/5">
                         <div
                             class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ Auth::user()->name }}</div>
-                        <div class="text-[10px] text-gray-500 font-medium truncate">{{ Auth::user()->email }}</div>
+                        <div class="text-3xs text-gray-400 font-medium truncate">{{ Auth::user()->email }}</div>
                     </div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <a href="{{ route('logout') }}"
                            onclick="event.preventDefault(); this.closest('form').submit();"
-                           class="block w-full px-4 py-2 text-start font-headline text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors">
+                           class="block w-full px-4 py-2 text-start text-3xs font-semibold uppercase tracking-wider text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors">
                             {{ __('Log Out') }}
                         </a>
                     </form>
@@ -209,56 +212,78 @@
     </div>
 </header>
 
+@if($static && !$isOnboarding)
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen"
+         x-transition:enter="transition-opacity ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+         style="display: none;"></div>
+@endif
+
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 hidden {{ $isOnboarding ? '' : 'lg:flex' }} flex-col">
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 flex-col z-40 {{ $isOnboarding ? 'hidden' : ($static ? 'flex transform transition-transform duration-300 ease-in-out lg:translate-x-0' : 'hidden lg:flex') }}"
+       @if($static && !$isOnboarding) :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" @endif>
     @if($static)
         <div class="px-6 mb-8">
-            <h2 class="font-headline text-lg font-bold text-white uppercase tracking-tighter">{{ $static->name }}</h2>
+            <h2 class="font-headline text-lg font-bold text-white uppercase tracking-tight">{{ $static->name }}</h2>
             <p class="text-xs font-bold text-cyan-400 uppercase tracking-widest mt-1">Mythic Progression</p>
         </div>
 
         <div class="flex-1 overflow-y-auto px-3 space-y-1">
-            <a href="{{ route('statics.dashboard', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.dashboard') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('dashboard') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('dashboard') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.dashboard') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">dashboard</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Dashboard') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('dashboard') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">dashboard</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Dashboard') }}</span>
             </a>
 
-            <a href="{{ route('statics.roster', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.roster') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.roster') ? 'bg-[#262528] text-white border-l-4 border-emerald-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">groups</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Roster') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.roster') ? 'text-emerald-400' : 'group-hover:text-emerald-400 transition-colors' }}">groups</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Roster') }}</span>
             </a>
 
 
             <a href="{{ route('schedule.index') }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('schedule.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('schedule.*') ? 'bg-[#262528] text-white border-l-4 border-fuchsia-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('schedule.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">calendar_month</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('schedule.*') ? 'text-fuchsia-400' : 'group-hover:text-fuchsia-400 transition-colors' }}">calendar_month</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Schedule') }}</span>
             </a>
 
-            <a href="{{ route('statics.boss-planner', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.boss-planner*') ? 'bg-[#262528] text-white border-l-4 border-orange-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.boss-planner') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.boss-planner*') ? 'bg-[#262528] text-white border-l-4 border-orange-500' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
                     class="material-symbols-outlined {{ request()->routeIs('statics.boss-planner*') ? 'text-orange-500' : 'group-hover:text-orange-500 transition-colors' }}">map</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Boss Planner') }}</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Boss Planner') }}</span>
             </a>
 
-            <a href="{{ route('statics.treasury', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.treasury') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.treasury') ? 'bg-[#262528] text-white border-l-4 border-yellow-500' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">payments</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Treasury') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.treasury') ? 'text-yellow-500' : 'group-hover:text-yellow-500 transition-colors' }}">payments</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Treasury') }}</span>
             </a>
 
-            <a href="{{ route('statics.logs.index', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-amber-500' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.logs.index') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.logs.*') ? 'bg-[#262528] text-white border-l-4 border-indigo-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-amber-500' : 'group-hover:text-amber-500 transition-colors' }}">terminal</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Intelligence') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.logs.*') ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors' }}">terminal</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Intelligence') }}</span>
+            </a>
+
+            <a href="{{ route('statics.gear') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.gear') ? 'bg-[#262528] text-white border-l-4 border-rose-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+                <span
+                    class="material-symbols-outlined {{ request()->routeIs('statics.gear') ? 'text-rose-400' : 'group-hover:text-rose-400 transition-colors' }}">shield</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Gear Management') }}</span>
             </a>
 
             <div class="pt-4 pb-2 px-4">
@@ -266,17 +291,17 @@
             </div>
 
             <a href="{{ route('characters.index') }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('characters.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('characters.*') ? 'bg-[#262528] text-white border-l-4 border-teal-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('characters.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">person</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('My Characters') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('characters.*') ? 'text-teal-400' : 'group-hover:text-teal-400 transition-colors' }}">person</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('My Characters') }}</span>
             </a>
 
-            <a href="{{ route('statics.settings.profile', $static->id) }}"
-               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-cyan-400' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
+            <a href="{{ route('statics.settings.profile') }}"
+               class="w-full flex items-center gap-3 px-4 py-2.5 group transition-all {{ request()->routeIs('statics.settings.*') ? 'bg-[#262528] text-white border-l-4 border-slate-400' : 'text-gray-400 hover:text-gray-300 hover:bg-[#1f1f22] hover:translate-x-1' }}">
                 <span
-                    class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-cyan-400' : 'group-hover:text-cyan-400 transition-colors' }}">settings</span>
-                <span class="font-headline text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
+                    class="material-symbols-outlined {{ request()->routeIs('statics.settings.*') ? 'text-slate-400' : 'group-hover:text-slate-400 transition-colors' }}">settings</span>
+                <span class="font-nav text-xs font-bold uppercase tracking-widest">{{ __('Settings') }}</span>
                 @unless(Auth::user()->discord_id)
                     <span class="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse-dot shadow-[0_0_8px_rgba(239,68,68,0.6)] shrink-0"></span>
                 @endunless
@@ -289,7 +314,7 @@
             <div class="text-lg font-black uppercase tracking-tighter italic leading-none">
                 <span class="text-white">Blast</span><span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span
-                        class="text-[8px] opacity-70 ml-0.5">r<span class="text-[6px] opacity-50 ml-0.5">r</span></span></span>
+                        class="text-5xs opacity-70 ml-0.5">r<span class="text-5xs opacity-50 ml-0.5">r</span></span></span>
             </div>
         </div>
     @endif
@@ -301,7 +326,7 @@
 
 <!-- Main Content Canvas -->
 <main class="{{ $isOnboarding ? '' : 'lg:ml-64' }} pt-24 px-8 min-h-screen" id="app">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-8xl mx-auto">
         {{ $slot }}
     </div>
 </main>

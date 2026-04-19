@@ -1,6 +1,32 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource/orbitron/400.css';
+@import '@fontsource/orbitron/500.css';
+@import '@fontsource/orbitron/700.css';
+@import '@fontsource/orbitron/900.css';
+
+/* Material Symbols (self-hosted, replaces Google Fonts link) */
+@import 'material-symbols/outlined.css';
+
+@import '@fontsource-variable/exo-2';
+@import '@fontsource-variable/montserrat';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   FONT CONFIG — Single source of truth.
+   Change the variables below to swap a font across the entire app.
+   Before swapping, make sure the new font is @imported above.
+   ============================================================ */
+:root {
+    --font-body:     'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-headline: 'Montserrat Variable', 'Montserrat', sans-serif;
+    --font-nav:      'Exo 2 Variable', 'Exo 2', sans-serif;
+    --font-slogan:   'Orbitron', sans-serif;
+    --focus-ring:    #4fd3f7;
+}
 
 @layer base {
     html {
@@ -8,7 +34,32 @@
         scrollbar-width: thin;
         scrollbar-color: rgba(255,255,255,0.08) transparent;
     }
-    body { @apply bg-background text-on-background min-h-screen; font-family: 'Manrope', sans-serif; }
+    body {
+        @apply bg-background text-on-background min-h-screen;
+        font-family: var(--font-body);
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'cv11', 'ss01', 'ss03', 'ss08';
+    }
+    table {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Keyboard-only focus outline (mouse clicks не показують).
+       Per-component focus:ring-* утиліти перекривають це завдяки вищій specificity. */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:not([tabindex="-1"]):focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+    }
+}
+
+@layer utilities {
+    .tabular { font-variant-numeric: tabular-nums; }
 }
 
 /* Subtle page scrollbar (Chrome, Edge, Safari) — only on html */
@@ -56,4 +107,23 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Прибираємо стрілочки для Firefox */
 input[type="number"] {
     -moz-appearance: textfield;
+}
+
+/* Inline ability links in AI report blocks. Wowhead's "colorLinks" config tints the
+   text by spell/item quality; we add a dotted underline + hover effect so readers
+   recognize it as an interactive element. */
+.ability-link {
+    text-decoration: underline dotted;
+    text-decoration-color: rgba(129, 140, 248, 0.45); /* indigo-400/45 */
+    text-underline-offset: 2px;
+    font-weight: 500;
+    cursor: help;
+    transition: text-decoration-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.ability-link:hover {
+    text-decoration-style: solid;
+    text-decoration-color: rgba(165, 180, 252, 1); /* indigo-300 */
+    background-color: rgba(99, 102, 241, 0.08);   /* indigo-500/8 */
 }

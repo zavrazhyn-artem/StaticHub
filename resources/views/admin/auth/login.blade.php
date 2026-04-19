@@ -6,13 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Blastr Admin - Login</title>
     <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0e0e10;
             color: #e0e0e0;
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -46,7 +48,7 @@
             padding: 0.75rem 1rem;
             color: #e0e0e0;
             font-size: 0.875rem;
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
             margin-bottom: 1rem;
         }
         .login-input:focus {
@@ -63,7 +65,7 @@
             padding: 0.75rem;
             font-size: 0.875rem;
             font-weight: 600;
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
             cursor: pointer;
             transition: background 0.15s;
         }

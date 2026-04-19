@@ -6,6 +6,7 @@ namespace App\Services\StaticGroup;
 
 use App\Helpers\CurrencyHelper;
 use App\Helpers\WeeklyResetHelper;
+use App\Models\Character;
 use App\Models\StaticGroup;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -115,15 +116,25 @@ class TreasuryService
 
     /**
      * Returns weekly tax status per user from the pivot bool.
+     * Each row includes the user's main character name + class, so the UI can
+     * display members the same way as the rest of Treasury (main name + colour).
      */
     public function fetchWeeklyTaxStatus(StaticGroup $static): Collection
     {
-        return $static->members->map(fn ($user) => [
-            'user_id'    => $user->id,
-            'name'       => $user->name,
-            'balance'    => (int) ($user->pivot->balance ?? 0),
-            'is_paid'    => (bool) ($user->pivot->current_weekly_tax_covered ?? false),
-        ]);
+        $userIds = $static->members->pluck('id')->all();
+        $mains   = Character::query()->mainsForUsersInStatic($userIds, $static->id);
+
+        return $static->members->map(function ($user) use ($mains) {
+            $main = $mains->get($user->id);
+            return [
+                'user_id'        => $user->id,
+                'name'           => $user->name,
+                'display_name'   => $main?->name ?? ($user->battletag ?? $user->name),
+                'playable_class' => $main?->playable_class,
+                'balance'        => (int) ($user->pivot->balance ?? 0),
+                'is_paid'        => (bool) ($user->pivot->current_weekly_tax_covered ?? false),
+            ];
+        });
     }
 
     /**
@@ -270,11 +281,15 @@ class TreasuryService
 
     public function fetchRecentTransactions(StaticGroup $static, int $limit = 10): Collection
     {
-        return Transaction::query()
+        $transactions = Transaction::query()
             ->forStatic($static->id)
             ->with('user')
             ->recent($limit)
             ->get();
+
+        $this->attachMainCharacterFields($transactions, $static->id);
+
+        return $transactions;
     }
 
     public function getPaginatedTransactions(int $staticId, ?int $userId = null, int $perPage = 20): LengthAwarePaginator
@@ -288,7 +303,28 @@ class TreasuryService
             $query->forUser($userId);
         }
 
-        return $query->paginate($perPage);
+        $paginator = $query->paginate($perPage);
+
+        $this->attachMainCharacterFields(collect($paginator->items()), $staticId);
+
+        return $paginator;
+    }
+
+    /**
+     * Treasury always displays members by their main character — name and class
+     * are easier to recognise than a BattleTag. Attaches `display_name` and
+     * `playable_class` to each transaction in-place.
+     */
+    private function attachMainCharacterFields(Collection $transactions, int $staticId): void
+    {
+        $userIds = $transactions->pluck('user_id')->filter()->unique()->values()->all();
+        $mains   = Character::query()->mainsForUsersInStatic($userIds, $staticId);
+
+        foreach ($transactions as $tx) {
+            $main = $mains->get($tx->user_id);
+            $tx->display_name   = $main?->name ?? ($tx->user?->battletag ?? $tx->user?->name);
+            $tx->playable_class = $main?->playable_class;
+        }
     }
 
     // =========================================================================

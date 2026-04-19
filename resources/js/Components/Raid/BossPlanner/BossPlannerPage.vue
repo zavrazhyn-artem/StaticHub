@@ -7,6 +7,7 @@ import MapToolbar from './MapToolbar.vue';
 import StepNavigator from './StepNavigator.vue';
 import PlayerPalette from './PlayerPalette.vue';
 import TimelineTab from './TimelineTab.vue';
+import ConfirmationModal from '@/Components/UI/ConfirmationModal.vue';
 import { useDodgePanel } from '@/composables/useDodgePanel';
 
 const props = defineProps({
@@ -19,7 +20,11 @@ const props = defineProps({
     routes: { type: Object, required: true },
 });
 
-const encounters = computed(() => props.plannerData.encounters || []);
+// Local reactive encounter list. We can't rely on reading props directly because
+// Vue's `defineProps` wraps only the top-level props object with reactivity — nested
+// arrays/objects are raw, so mutations (like pushing a newly-saved plan) wouldn't
+// trigger instanceGroups/template updates until a full page refresh.
+const encounters = ref(JSON.parse(JSON.stringify(props.plannerData.encounters || [])));
 
 // Group by instance
 const instanceGroups = computed(() => {
@@ -51,7 +56,7 @@ const selectionPos = ref({ x: 680, y: 80 });
 const isDraggingSel = ref(false);
 const selDragStart = ref({ x: 0, y: 0 });
 
-const shapeLabels = { circle: 'Circle', rect: 'Rectangle', arrow: 'Arrow', line: 'Line', cone: 'Cone / Wedge', text: 'Text Label', waypoint: 'Path' };
+const shapeLabels = computed(() => ({ circle: __('Circle'), rect: __('Rectangle'), arrow: __('Arrow'), line: __('Line'), cone: __('Cone / Wedge'), text: __('Text Label'), waypoint: __('Path') }));
 
 // Whether this selection type has direction by default
 const defaultShowDirection = (item) => {
@@ -309,14 +314,14 @@ const editElementType = computed(() => {
 
 const isGroupSelection = computed(() => (editSel.value?.count || 0) > 1);
 
-const groupFormations = [
-    { id: 'spread', icon: 'radio_button_unchecked', label: 'Spread' },
-    { id: 'stack', icon: 'fiber_manual_record', label: 'Stack' },
-    { id: 'line', icon: 'horizontal_rule', label: 'Line' },
-    { id: 'vline', icon: 'drag_handle', label: 'Column' },
-    { id: 'triangle', icon: 'change_history', label: 'Triangle' },
-    { id: 'tworows', icon: 'view_week', label: '2 Rows' },
-];
+const groupFormations = computed(() => [
+    { id: 'spread', icon: 'radio_button_unchecked', label: __('Spread') },
+    { id: 'stack', icon: 'fiber_manual_record', label: __('Stack') },
+    { id: 'line', icon: 'horizontal_rule', label: __('Line') },
+    { id: 'vline', icon: 'drag_handle', label: __('Column') },
+    { id: 'triangle', icon: 'change_history', label: __('Triangle') },
+    { id: 'tworows', icon: 'view_week', label: __('2 Rows') },
+]);
 
 // Rearrange existing linked group into a new formation
 const rearrangeGroupFormation = (formationId) => {
@@ -502,6 +507,7 @@ const openEditor = (index, planIndex = 0) => {
     showingMe.value = false;
     editorOpen.value = true;
     document.body.style.overflow = 'hidden';
+    snapshotPlan();
 };
 
 const openEditorWithPlan = (encIndex, planIndex) => {
@@ -522,17 +528,114 @@ const createNewPlanForEncounter = (encIndex) => {
     editorTab.value = 'map';
     editorOpen.value = true;
     document.body.style.overflow = 'hidden';
+    snapshotPlan();
+};
+
+// ─── Unsaved changes tracking ───
+// Snapshot the plan state as it was when the editor was opened (or last saved).
+// We compare by stringified value to catch any nested mutation.
+const originalPlanSnapshot = ref('');
+const closeConfirmOpen = ref(false);
+const savingFromConfirm = ref(false);
+
+const snapshotPlan = () => {
+    originalPlanSnapshot.value = localPlan.value ? JSON.stringify(localPlan.value) : '';
+};
+
+const isDirty = computed(() => {
+    if (!editorOpen.value || !canManageEditor.value) return false;
+    const current = localPlan.value ? JSON.stringify(localPlan.value) : '';
+    return current !== originalPlanSnapshot.value;
+});
+
+const canManageEditor = computed(() => props.canManage);
+
+const performClose = () => {
+    editorOpen.value = false;
+    editorEncounterIndex.value = null;
+    originalPlanSnapshot.value = '';
+    closeConfirmOpen.value = false;
+    document.body.style.overflow = '';
 };
 
 const closeEditor = () => {
-    editorOpen.value = false;
-    editorEncounterIndex.value = null;
-    document.body.style.overflow = '';
+    if (isDirty.value) {
+        closeConfirmOpen.value = true;
+        return;
+    }
+    performClose();
+};
+
+const handleCloseConfirmSave = async () => {
+    savingFromConfirm.value = true;
+    try {
+        await savePlan();
+    } finally {
+        savingFromConfirm.value = false;
+    }
+    closeConfirmOpen.value = false;
+    performClose();
+};
+
+const handleCloseConfirmDiscard = () => {
+    closeConfirmOpen.value = false;
+    performClose();
+};
+
+// ─── Delete plan ───
+const deleteConfirm = ref({ open: false, planId: null, encIndex: null, closeAfter: false });
+const deleting = ref(false);
+
+const requestDeletePlan = (planId, encIndex, closeAfter = false) => {
+    if (!props.canManage || !planId) return;
+    deleteConfirm.value = { open: true, planId, encIndex, closeAfter };
+};
+
+const requestDeleteCurrentPlan = () => {
+    if (!localPlan.value?.id || editorEncounterIndex.value === null) return;
+    requestDeletePlan(localPlan.value.id, editorEncounterIndex.value, true);
+};
+
+const cancelDelete = () => {
+    deleteConfirm.value = { open: false, planId: null, encIndex: null, closeAfter: false };
+};
+
+const confirmDelete = async () => {
+    const { planId, encIndex, closeAfter } = deleteConfirm.value;
+    if (!planId || encIndex === null) return;
+    deleting.value = true;
+    try {
+        const response = await fetch(`${props.routes.destroyBase}/${planId}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Delete failed');
+
+        const enc = encounters.value[encIndex];
+        if (enc) {
+            const remaining = (enc.plans || []).filter(p => p.id !== planId);
+            encounters.value[encIndex] = {
+                ...enc,
+                plans: remaining,
+                has_plan: remaining.length > 0,
+                plan: remaining[0] || null,
+            };
+        }
+
+        if (closeAfter) {
+            originalPlanSnapshot.value = localPlan.value ? JSON.stringify(localPlan.value) : '';
+            performClose();
+        }
+        cancelDelete();
+    } catch (e) {
+        console.error('Failed to delete plan:', e);
+    } finally {
+        deleting.value = false;
+    }
 };
 
 // Keyboard shortcuts
 const handleKeydown = (e) => {
-    if (e.key === 'Escape' && editorOpen.value) closeEditor();
     // Ctrl+Shift+Z — redo
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Z' && editorOpen.value) {
         e.preventDefault();
@@ -558,6 +661,7 @@ const createPlan = () => {
         timeline: null,
         difficulty: 'mythic',
     };
+    snapshotPlan();
 };
 
 // Group management
@@ -661,17 +765,26 @@ const savePlan = async () => {
         if (response.ok) {
             const data = await response.json();
             localPlan.value.id = data.plan.id;
-            // Update local encounters data
-            const enc = encounters.value[editorEncounterIndex.value];
+            // Replace the encounter object wholesale so the instanceGroups computed
+            // picks up the change. Nested-array mutation alone isn't enough.
+            const idx = editorEncounterIndex.value;
+            const enc = encounters.value[idx];
             if (enc) {
-                enc.has_plan = true;
                 const updatedPlan = JSON.parse(JSON.stringify({ ...localPlan.value, updated_at: new Date().toISOString() }));
-                enc.plan = updatedPlan;
-                if (!Array.isArray(enc.plans)) enc.plans = [];
-                const idx = enc.plans.findIndex(p => p.id === updatedPlan.id);
-                if (idx >= 0) enc.plans[idx] = updatedPlan;
-                else enc.plans.push(updatedPlan);
+                const existingPlans = Array.isArray(enc.plans) ? [...enc.plans] : [];
+                const planIdx = existingPlans.findIndex(p => p.id === updatedPlan.id);
+                if (planIdx >= 0) existingPlans[planIdx] = updatedPlan;
+                else existingPlans.push(updatedPlan);
+
+                encounters.value[idx] = {
+                    ...enc,
+                    has_plan: true,
+                    plan: updatedPlan,
+                    plans: existingPlans,
+                };
             }
+            // Refresh dirty snapshot now that server state matches.
+            snapshotPlan();
             saveSuccess.value = true;
             setTimeout(() => { saveSuccess.value = false; }, 2000);
         }
@@ -912,12 +1025,12 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <!-- Page header -->
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-black text-white uppercase tracking-tighter font-headline leading-none">
-                    Boss Planner
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight">
+                    {{ __('Boss Planner') }}
                 </h1>
                 <p class="text-xs text-on-surface-variant mt-1">
                     {{ staticGroup.name }} &mdash;
-                    <span class="text-primary">{{ plansCount }}</span> of {{ encounters.length }} encounters planned
+                    <span class="text-orange-500">{{ plansCount }}</span> {{ __('of') }} {{ encounters.length }} {{ __('encounters planned') }}
                 </p>
             </div>
         </div>
@@ -925,7 +1038,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <!-- Encounter accordion -->
         <div v-for="(bosses, instanceName) in instanceGroups" :key="instanceName" class="space-y-2">
             <div class="px-1 flex items-center gap-2 mt-4">
-                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
+                <span class="text-4xs font-bold uppercase tracking-[0.2em] text-on-surface-variant/50">{{ instanceName }}</span>
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
@@ -949,7 +1062,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </div>
                         <div v-if="(enc.plans || []).length > 0" class="flex items-center gap-1.5 shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                            <span class="text-[9px] text-on-surface-variant/50">{{ (enc.plans || []).length }}</span>
+                            <span class="text-4xs text-on-surface-variant/50">{{ (enc.plans || []).length }}</span>
                         </div>
                         <span class="material-symbols-outlined text-sm text-on-surface-variant/30 transition-transform"
                             :class="expandedBoss === enc.slug ? 'rotate-180' : ''">expand_more</span>
@@ -958,39 +1071,51 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                     <!-- Expanded plans area -->
                     <div v-show="expandedBoss === enc.slug" class="border-t border-white/5">
                         <!-- Plans -->
-                        <button v-for="(plan, pi) in (enc.plans || [])" :key="plan.id"
+                        <div v-for="(plan, pi) in (enc.plans || [])" :key="plan.id"
                             @click="openEditorWithPlan(enc._index, pi)"
-                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left border-b border-white/[0.03] last:border-0 group">
+                            role="button"
+                            tabindex="0"
+                            @keydown.enter="openEditorWithPlan(enc._index, pi)"
+                            @keydown.space.prevent="openEditorWithPlan(enc._index, pi)"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 cursor-pointer transition-colors text-left border-b border-white/[0.03] last:border-0 group">
                             <div class="w-6 h-6 rounded bg-orange-500/10 flex items-center justify-center shrink-0">
                                 <span class="material-symbols-outlined text-xs text-orange-400">map</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="text-[11px] font-bold text-white truncate group-hover:text-orange-300 transition-colors">
+                                <div class="text-2xs font-semibold text-white truncate group-hover:text-orange-300 transition-colors">
                                     {{ plan.title || enc.name }}
                                 </div>
                                 <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                    <span class="text-5xs font-semibold uppercase px-1.5 py-0.5 rounded"
                                         :class="{
                                             'bg-orange-500/10 text-orange-400': plan.difficulty === 'mythic',
                                             'bg-purple-500/10 text-purple-400': plan.difficulty === 'heroic',
                                             'bg-green-500/10 text-green-400': plan.difficulty === 'normal',
                                             'bg-blue-500/10 text-blue-400': plan.difficulty === 'raid_finder',
                                         }">{{ plan.difficulty }}</span>
-                                    <span class="text-[8px] text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
+                                    <span class="text-5xs text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-sm text-on-surface-variant/20 group-hover:text-orange-400/50">arrow_forward</span>
-                        </button>
+                            <button
+                                v-if="canManage"
+                                type="button"
+                                @click.stop="requestDeletePlan(plan.id, enc._index)"
+                                class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                :title="__('Delete Plan')"
+                            >
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                        </div>
 
                         <!-- New plan button -->
                         <div class="px-4 py-2.5 border-t border-white/[0.03]">
                             <button v-if="canManage" @click.stop="createNewPlanForEncounter(enc._index)"
-                                class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-white/10 text-on-surface-variant/50 hover:text-orange-400 hover:border-orange-500/30 transition-all text-[9px] font-bold uppercase tracking-widest">
+                                class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-white/10 text-on-surface-variant/50 hover:text-orange-400 hover:border-orange-500/30 transition-all text-4xs font-semibold uppercase tracking-wider">
                                 <span class="material-symbols-outlined text-xs">add</span>
                                 {{ __('New Plan') }}
                             </button>
                             <div v-else-if="(enc.plans || []).length === 0" class="text-center py-1">
-                                <span class="text-[9px] text-on-surface-variant/30">{{ __('No plans yet') }}</span>
+                                <span class="text-4xs text-on-surface-variant/30">{{ __('No plans yet') }}</span>
                             </div>
                         </div>
                     </div>
@@ -1023,11 +1148,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                 </h2>
                                 <div v-if="localPlan" class="flex items-center gap-2 mt-1">
                                     <input v-if="canManage" v-model="localPlan.title" type="text" :placeholder="__('Plan name...')"
-                                        class="bg-white/5 border border-white/10 rounded-lg text-[10px] text-white px-2.5 h-7 focus:ring-1 focus:ring-orange-500 outline-none w-36">
-                                    <span v-else-if="localPlan.title" class="text-[10px] text-on-surface-variant">{{ localPlan.title }}</span>
+                                        class="bg-white/5 border border-white/10 rounded-lg text-3xs text-white px-2.5 h-7 focus:ring-1 focus:ring-orange-500 outline-none w-36">
+                                    <span v-else-if="localPlan.title" class="text-3xs text-on-surface-variant">{{ localPlan.title }}</span>
                                     <div v-if="canManage" class="relative" @click.stop>
                                         <button type="button" @click="showDiffDropdown = !showDiffDropdown"
-                                            class="flex items-center gap-1.5 px-3 h-7 bg-surface-container-highest border border-white/5 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest hover:border-white/10 transition-all"
+                                            class="flex items-center gap-1.5 px-3 h-7 bg-surface-container-highest border border-white/5 rounded-lg text-3xs font-semibold uppercase tracking-wider hover:border-white/10 transition-all"
                                             :class="{ 'border-orange-500/50 ring-1 ring-orange-500/50': showDiffDropdown }">
                                             <span :class="{
                                                 'text-orange-400': localPlan.difficulty === 'mythic',
@@ -1042,11 +1167,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                                 class="w-full flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/5 transition-colors text-left"
                                                 :class="localPlan.difficulty === d.value ? 'bg-white/[0.03]' : ''">
                                                 <span class="w-1.5 h-1.5 rounded-full" :class="d.dot"></span>
-                                                <span class="font-headline text-[10px] font-bold uppercase tracking-widest" :class="d.color">{{ d.label }}</span>
+                                                <span class="text-3xs font-semibold uppercase tracking-wider" :class="d.color">{{ d.label }}</span>
                                             </button>
                                         </div>
                                     </div>
-                                    <span v-else class="text-[10px] font-bold uppercase"
+                                    <span v-else class="text-3xs font-semibold uppercase"
                                         :class="{
                                             'text-orange-400': localPlan.difficulty === 'mythic',
                                             'text-purple-400': localPlan.difficulty === 'heroic',
@@ -1061,14 +1186,14 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5">
                             <button
                                 @click="editorTab = 'map'"
-                                class="px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
+                                class="px-4 py-1.5 rounded-md text-4xs font-bold uppercase tracking-wider transition-all"
                                 :class="editorTab === 'map' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
                                 <span class="material-symbols-outlined text-xs align-middle mr-0.5">map</span> {{ __('Map') }}
                             </button>
                             <button
                                 @click="editorTab = 'cooldowns'"
-                                class="px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all"
+                                class="px-4 py-1.5 rounded-md text-4xs font-bold uppercase tracking-wider transition-all"
                                 :class="editorTab === 'cooldowns' ? 'bg-orange-500/20 text-orange-400' : 'text-on-surface-variant hover:text-white'"
                             >
                                 <span class="material-symbols-outlined text-xs align-middle mr-0.5">timer</span> {{ __('Cooldowns') }}
@@ -1082,7 +1207,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             v-if="canManage && localPlan"
                             @click="savePlan"
                             :disabled="saving"
-                            class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                            class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-3xs font-bold uppercase tracking-wider transition-all"
                             :class="saveSuccess
                                 ? 'bg-green-500/20 text-green-400'
                                 : saving
@@ -1090,13 +1215,13 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                     : 'bg-orange-500/15 text-orange-400 hover:bg-orange-500/25'"
                         >
                             <span class="material-symbols-outlined text-sm">{{ saveSuccess ? 'check' : saving ? 'hourglass_top' : 'save' }}</span>
-                            {{ saveSuccess ? 'Saved!' : saving ? 'Saving...' : 'Save' }}
+                            {{ saveSuccess ? __('Saved!') : saving ? __('Saving...') : __('Save') }}
                         </button>
 
                         <button
                             v-if="myCharacterIds.length > 0 && localPlan"
                             @click="toggleShowMe"
-                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-3xs font-bold uppercase tracking-wider transition-all"
                             :class="showingMe ? 'bg-yellow-500/20 text-yellow-400 animate-pulse' : 'bg-white/5 text-on-surface-variant hover:text-white hover:bg-white/10'"
                             :title="__('Show Me')"
                         >
@@ -1108,15 +1233,24 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             v-if="canManage && localPlan?.id"
                             @click="sharePlan"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
-                            title="Share Plan"
+                            :title="__('Share Plan')"
                         >
                             <span class="material-symbols-outlined text-lg">share</span>
                         </button>
 
                         <button
+                            v-if="canManage && localPlan?.id"
+                            @click="requestDeleteCurrentPlan"
+                            class="w-9 h-9 rounded-lg bg-white/5 hover:bg-red-500/20 text-on-surface-variant hover:text-red-400 transition-all flex items-center justify-center"
+                            :title="__('Delete Plan')"
+                        >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </button>
+
+                        <button
                             @click="showHelp = true"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
-                            title="Help & Shortcuts"
+                            :title="__('Help & Shortcuts')"
                         >
                             <span class="material-symbols-outlined text-lg">help</span>
                         </button>
@@ -1125,7 +1259,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             v-if="localPlan"
                             @click="exportPng"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
-                            title="Export PNG"
+                            :title="__('Export PNG')"
                         >
                             <span class="material-symbols-outlined text-lg">download</span>
                         </button>
@@ -1133,7 +1267,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <button
                             @click="closeEditor"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
-                            title="Close (Esc)"
+                            :title="__('Close')"
                         >
                             <span class="material-symbols-outlined text-xl">close</span>
                         </button>
@@ -1152,10 +1286,10 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                 <button
                                     v-if="canManage"
                                     @click="createPlan"
-                                    class="mt-5 px-6 py-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-widest hover:bg-orange-500/20 transition-all"
+                                    class="mt-5 px-6 py-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-3xs font-bold uppercase tracking-wider hover:bg-orange-500/20 transition-all"
                                 >
                                     <span class="material-symbols-outlined text-sm align-middle mr-1">add</span>
-                                    Create Plan
+                                    {{ __('Create Plan') }}
                                 </button>
                             </div>
                         </div>
@@ -1266,7 +1400,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 @mousedown="startSelDrag">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-on-surface-variant/50">drag_indicator</span>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-orange-400">{{ __('Current Selection') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-orange-400">{{ __('Current Selection') }}</span>
                 </div>
                 <button @click="clearSelection" class="text-on-surface-variant/50 hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">close</span>
@@ -1291,27 +1425,27 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <span v-else class="material-symbols-outlined text-2xl text-on-surface-variant/30">image</span>
                     </div>
                     <div class="min-w-0">
-                        <div class="text-[10px] font-bold text-white truncate">
+                        <div class="text-3xs font-semibold text-white truncate">
                             {{ currentSelection.type === 'shape' ? shapeLabels[currentSelection.id] || currentSelection.id : (currentSelection.displayName || currentSelection.label || currentSelection.id) }}
                         </div>
-                        <div class="text-[8px] text-on-surface-variant/50 uppercase">{{ currentSelection.type }}</div>
+                        <div class="text-5xs text-on-surface-variant/50 uppercase">{{ currentSelection.type }}</div>
                     </div>
                 </div>
 
                 <!-- Label input (not for waypoint/path) -->
                 <div v-if="!(currentSelection.type === 'shape' && currentSelection.id === 'waypoint')" class="space-y-1">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Label (optional)</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Label (optional)') }}</label>
                     <input
                         v-model="selectionLabel"
                         type="text"
-                        placeholder="Text under icon..."
-                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:ring-1 focus:ring-orange-500 outline-none placeholder-on-surface-variant/30"
+                        :placeholder="__('Text under icon...')"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-3xs text-white focus:ring-1 focus:ring-orange-500 outline-none placeholder-on-surface-variant/30"
                     >
                 </div>
 
                 <!-- Direction toggle -->
                 <div v-if="canToggleDirection(currentSelection)" class="flex items-center justify-between">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Direction</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
                     <button
                         @click="selectionShowDirection = !selectionShowDirection"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1324,7 +1458,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Fill toggle (circle, rect, cone) -->
                 <div v-if="canHaveFill(currentSelection)" class="flex items-center justify-between">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Fill</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
                     <button
                         @click="selectionFilled = !selectionFilled"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1337,7 +1471,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Color picker (shapes & text only) -->
                 <div v-if="currentSelection.type === 'shape'" class="space-y-1.5">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Color</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                     <div class="flex items-center gap-1.5">
                         <button v-for="c in colorPresets" :key="c"
                             @click="selectionColor = c"
@@ -1347,11 +1481,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         ></button>
                     </div>
                     <input v-model="selectionColor" type="text" placeholder="#FF0000"
-                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[9px] text-white font-mono focus:ring-1 focus:ring-orange-500 outline-none">
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-4xs text-white font-mono focus:ring-1 focus:ring-orange-500 outline-none">
                 </div>
 
                 <!-- Instructions -->
-                <div class="text-[8px] text-on-surface-variant/40 flex items-center gap-1.5">
+                <div class="text-5xs text-on-surface-variant/40 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-xs">mouse</span>
                     {{ currentSelection.type === 'shape' && currentSelection.id === 'waypoint' ? __('Click to add points, double-click to finish') : currentSelection.type === 'shape' ? __('Click and drag on the map to draw') : __('Click on the map to place') }}
                 </div>
@@ -1374,7 +1508,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 @mousedown="startEditDrag">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-on-surface-variant/50">drag_indicator</span>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-primary">{{ __('Edit Element') }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-orange-500">{{ __('Edit Element') }}</span>
                 </div>
                 <button @click="editSel = null" class="text-on-surface-variant/50 hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">close</span>
@@ -1385,43 +1519,43 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- ═══ GROUP SELECTION VIEW ═══ -->
                 <template v-if="isGroupSelection">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-xl text-primary">group_work</span>
+                        <div class="w-10 h-10 rounded-lg border border-orange-500/30 bg-orange-500/10 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-xl text-orange-500">group_work</span>
                         </div>
                         <div>
-                            <div class="text-[10px] font-bold text-white">{{ __('Group') }} ({{ editSel.count }} {{ __('elements') }})</div>
-                            <div class="text-[8px] text-on-surface-variant/50 uppercase">{{ __('Linked group') }}</div>
+                            <div class="text-3xs font-semibold text-white">{{ __('Group') }} ({{ editSel.count }} {{ __('elements') }})</div>
+                            <div class="text-5xs text-on-surface-variant/50 uppercase">{{ __('Linked group') }}</div>
                         </div>
                     </div>
 
                     <!-- Direction toggle for all -->
                     <div class="flex items-center justify-between">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Direction All') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction All') }}</label>
                         <div class="flex gap-1">
                             <button @click="updateEditProp({ showDirection: true })"
-                                class="px-2 py-0.5 rounded text-[8px] font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">ON</button>
+                                class="px-2 py-0.5 rounded text-5xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">{{ __('ON') }}</button>
                             <button @click="updateEditProp({ showDirection: false })"
-                                class="px-2 py-0.5 rounded text-[8px] font-bold bg-white/5 text-on-surface-variant hover:bg-white/10 transition-all">OFF</button>
+                                class="px-2 py-0.5 rounded text-5xs font-semibold bg-white/5 text-on-surface-variant hover:bg-white/10 transition-all">{{ __('OFF') }}</button>
                         </div>
                     </div>
 
                     <!-- Formation presets -->
                     <div class="space-y-1">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Formation') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Formation') }}</label>
                         <div class="grid grid-cols-3 gap-1">
                             <button v-for="f in groupFormations" :key="f.id"
                                 @click="rearrangeGroupFormation(f.id)"
                                 class="flex flex-col items-center gap-0.5 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
                                 :title="f.label">
                                 <span class="material-symbols-outlined text-sm text-on-surface-variant">{{ f.icon }}</span>
-                                <span class="text-[7px] font-bold text-on-surface-variant/60">{{ f.label }}</span>
+                                <span class="text-5xs font-semibold text-on-surface-variant/60">{{ f.label }}</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Color for arrow groups -->
                     <div v-if="editSel.type === 'arrow'" class="space-y-1.5">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Color') }}</label>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                         <div class="flex items-center gap-1.5">
                             <button v-for="c in colorPresets" :key="c"
                                 @click="updateEditProp({ color: c })"
@@ -1452,38 +1586,38 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             <span v-else class="material-symbols-outlined text-lg text-on-surface-variant/30">edit</span>
                         </div>
                         <div class="min-w-0">
-                            <div class="text-[10px] font-bold text-white truncate">
+                            <div class="text-3xs font-semibold text-white truncate">
                                 {{ editElement.playerData?.name || editElement.groupLabel || editElement.label || editElement.text || editElementType }}
                             </div>
-                            <div class="text-[8px] text-on-surface-variant/50 uppercase">{{ editSel.type }}</div>
+                            <div class="text-5xs text-on-surface-variant/50 uppercase">{{ editSel.type }}</div>
                         </div>
                     </div>
 
                     <!-- Label edit -->
                     <div v-if="editSel.type === 'marker' || editSel.type === 'player'" class="space-y-1">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Label</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Label') }}</label>
                     <input
                         :value="editSel.type === 'player' ? (editElement.customLabel || '') : (editElement.label || '')"
                         @input="updateEditProp(editSel.type === 'player' ? { customLabel: $event.target.value } : { label: $event.target.value })"
-                        type="text" placeholder="Label..."
-                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:ring-1 focus:ring-primary outline-none"
+                        type="text" :placeholder="__('Label...')"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-3xs text-white focus:ring-1 focus:ring-orange-500 outline-none"
                     >
                 </div>
 
                 <!-- Text edit (for text labels) -->
                 <div v-if="editSel.type === 'label'" class="space-y-1">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Text</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Text') }}</label>
                     <input
                         :value="editElement.text || ''"
                         @input="updateEditProp({ text: $event.target.value })"
                         type="text"
-                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:ring-1 focus:ring-primary outline-none"
+                        class="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-3xs text-white focus:ring-1 focus:ring-orange-500 outline-none"
                     >
                 </div>
 
                 <!-- Fill toggle (for shapes circle/rect/cone) -->
                 <div v-if="canEditFill(editSel.type, editElement)" class="flex items-center justify-between">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Fill</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Fill') }}</label>
                     <button
                         @click="updateEditProp({
                             filled: !(editElement.filled ?? true),
@@ -1499,7 +1633,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Direction toggle -->
                 <div v-if="canToggleDirectionForElement(editSel.type, editElement)" class="flex items-center justify-between">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Direction</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Direction') }}</label>
                     <button
                         @click="updateEditProp({ showDirection: !(editElement.showDirection ?? (editElement.playerData ? true : false)) })"
                         class="w-8 h-4 rounded-full transition-all relative"
@@ -1513,8 +1647,8 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Font size (for text labels) -->
                 <div v-if="editSel.type === 'label'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Font Size') }}</label>
-                        <span class="text-[9px] font-bold text-white">{{ editElement.fontSize || 14 }}px</span>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Font Size') }}</label>
+                        <span class="text-4xs font-semibold text-white">{{ editElement.fontSize || 14 }}px</span>
                     </div>
                     <input type="range" min="8" max="48" step="1"
                         :value="editElement.fontSize || 14"
@@ -1525,8 +1659,8 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Opacity (shapes and labels only) -->
                 <div v-if="editSel.type === 'shape' || editSel.type === 'label'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Opacity') }}</label>
-                        <span class="text-[9px] font-bold text-white">{{ Math.round((editElement.opacity ?? 1) * 100) }}%</span>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Opacity') }}</label>
+                        <span class="text-4xs font-semibold text-white">{{ Math.round((editElement.opacity ?? 1) * 100) }}%</span>
                     </div>
                     <input type="range" min="10" max="100" step="5"
                         :value="Math.round((editElement.opacity ?? 1) * 100)"
@@ -1537,8 +1671,8 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 <!-- Cone angle (for sector shapes) -->
                 <div v-if="editSel.type === 'shape' && editElement.type === 'cone'" class="space-y-1">
                     <div class="flex items-center justify-between">
-                        <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">{{ __('Spread') }}</label>
-                        <span class="text-[9px] font-bold text-white">{{ Math.round((editElement.spread ?? 0.5) * 180 / Math.PI) }}°</span>
+                        <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Spread') }}</label>
+                        <span class="text-4xs font-semibold text-white">{{ Math.round((editElement.spread ?? 0.5) * 180 / Math.PI) }}°</span>
                     </div>
                     <input type="range" min="10" max="180" step="5"
                         :value="Math.round((editElement.spread ?? 0.5) * 180 / Math.PI)"
@@ -1548,7 +1682,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
 
                 <!-- Color (for shapes, labels, arrows) -->
                 <div v-if="editSel.type === 'shape' || editSel.type === 'label' || editSel.type === 'arrow'" class="space-y-1.5">
-                    <label class="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Color</label>
+                    <label class="text-5xs font-bold uppercase tracking-wider text-on-surface-variant/40">{{ __('Color') }}</label>
                     <div class="flex items-center gap-1.5">
                         <button v-for="c in colorPresets" :key="c"
                             @click="editSel.type === 'shape'
@@ -1570,22 +1704,22 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         <div v-if="showSharePopup"
             class="fixed inset-0 z-[290] flex items-center justify-center bg-black/50"
             @click.self="showSharePopup = false" @mousedown.stop>
-            <div class="bg-[#1e1e22] border border-white/10 rounded-xl shadow-2xl p-5 w-[400px] space-y-4">
+            <div class="bg-[#1e1e22] border border-white/10 rounded-xl shadow-2xl p-5 w-[25rem] space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-black uppercase tracking-widest text-white">{{ __('Share Plan') }}</span>
                     <button @click="showSharePopup = false" class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-lg">close</span></button>
                 </div>
-                <p class="text-[10px] text-on-surface-variant">{{ __('Anyone with this link can view the plan (read-only).') }}</p>
+                <p class="text-3xs text-on-surface-variant">{{ __('Anyone with this link can view the plan (read-only).') }}</p>
                 <div class="flex gap-2">
                     <input :value="shareUrl" readonly
                         class="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none">
                     <button @click="copyShareUrl"
-                        class="px-3 py-2 rounded-lg bg-primary/80 hover:bg-primary text-white text-[10px] font-bold transition-all">
+                        class="px-3 py-2 rounded-lg bg-orange-500/80 hover:bg-orange-500 text-white text-3xs font-semibold transition-all">
                         {{ __('Copy') }}
                     </button>
                 </div>
                 <button @click="unsharePlan"
-                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-[10px] font-bold transition-all">
+                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-3xs font-semibold transition-all">
                     <span class="material-symbols-outlined text-sm">link_off</span>
                     {{ __('Revoke Share Link') }}
                 </button>
@@ -1603,73 +1737,72 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                     <span class="text-sm font-black uppercase tracking-widest text-white">{{ __('Help & Shortcuts') }}</span>
                     <button @click="showHelp = false" class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-lg">close</span></button>
                 </div>
-                <div class="flex-1 overflow-y-auto p-4 space-y-4 text-[11px]">
+                <div class="flex-1 overflow-y-auto p-4 space-y-4 text-2xs">
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Navigation</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Navigation') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Pan canvas</span><span class="font-mono text-white/50">Drag empty space</span></div>
-                            <div class="flex justify-between"><span>Pan (always)</span><span class="font-mono text-white/50">Middle mouse drag</span></div>
-                            <div class="flex justify-between"><span>Zoom in / out</span><span class="font-mono text-white/50">Scroll wheel</span></div>
-                            <div class="flex justify-between"><span>Reset zoom</span><span class="font-mono text-white/50">Fit screen button</span></div>
+                            <div class="flex justify-between"><span>{{ __('Pan canvas') }}</span><span class="font-mono text-white/50">{{ __('Drag empty space') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Pan (always)') }}</span><span class="font-mono text-white/50">{{ __('Middle mouse drag') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Zoom in / out') }}</span><span class="font-mono text-white/50">{{ __('Scroll wheel') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Reset zoom') }}</span><span class="font-mono text-white/50">{{ __('Fit screen button') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Selection</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Selection') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Select element</span><span class="font-mono text-white/50">Click</span></div>
-                            <div class="flex justify-between"><span>Multi-select</span><span class="font-mono text-white/50">Ctrl + Click</span></div>
-                            <div class="flex justify-between"><span>Rectangle select</span><span class="font-mono text-white/50">Shift + Drag</span></div>
-                            <div class="flex justify-between"><span>Select linked group</span><span class="font-mono text-white/50">Click any member</span></div>
+                            <div class="flex justify-between"><span>{{ __('Select element') }}</span><span class="font-mono text-white/50">{{ __('Click') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Multi-select') }}</span><span class="font-mono text-white/50">Ctrl + {{ __('Click') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Rectangle select') }}</span><span class="font-mono text-white/50">Shift + {{ __('Drag') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Select linked group') }}</span><span class="font-mono text-white/50">{{ __('Click any member') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Editing</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Editing') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Move element</span><span class="font-mono text-white/50">Drag</span></div>
-                            <div class="flex justify-between"><span>Resize</span><span class="font-mono text-white/50">Drag blue corner handles</span></div>
-                            <div class="flex justify-between"><span>Rotate</span><span class="font-mono text-white/50">Drag green handle</span></div>
-                            <div class="flex justify-between"><span>Delete</span><span class="font-mono text-white/50">Del / Backspace</span></div>
-                            <div class="flex justify-between"><span>Context menu</span><span class="font-mono text-white/50">Right-click</span></div>
+                            <div class="flex justify-between"><span>{{ __('Move element') }}</span><span class="font-mono text-white/50">{{ __('Drag') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Resize') }}</span><span class="font-mono text-white/50">{{ __('Drag blue corner handles') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Rotate') }}</span><span class="font-mono text-white/50">{{ __('Drag green handle') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Delete') }}</span><span class="font-mono text-white/50">Del / Backspace</span></div>
+                            <div class="flex justify-between"><span>{{ __('Context menu') }}</span><span class="font-mono text-white/50">{{ __('Right-click') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Shortcuts</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Shortcuts') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Undo</span><span class="font-mono text-white/50">Ctrl + Z</span></div>
-                            <div class="flex justify-between"><span>Redo</span><span class="font-mono text-white/50">Ctrl + Shift + Z</span></div>
-                            <div class="flex justify-between"><span>Copy</span><span class="font-mono text-white/50">Ctrl + C</span></div>
-                            <div class="flex justify-between"><span>Paste</span><span class="font-mono text-white/50">Ctrl + V</span></div>
-                            <div class="flex justify-between"><span>Duplicate</span><span class="font-mono text-white/50">Ctrl + D</span></div>
-                            <div class="flex justify-between"><span>Group selected</span><span class="font-mono text-white/50">Ctrl + G</span></div>
-                            <div class="flex justify-between"><span>Close editor</span><span class="font-mono text-white/50">Escape</span></div>
+                            <div class="flex justify-between"><span>{{ __('Undo') }}</span><span class="font-mono text-white/50">Ctrl + Z</span></div>
+                            <div class="flex justify-between"><span>{{ __('Redo') }}</span><span class="font-mono text-white/50">Ctrl + Shift + Z</span></div>
+                            <div class="flex justify-between"><span>{{ __('Copy') }}</span><span class="font-mono text-white/50">Ctrl + C</span></div>
+                            <div class="flex justify-between"><span>{{ __('Paste') }}</span><span class="font-mono text-white/50">Ctrl + V</span></div>
+                            <div class="flex justify-between"><span>{{ __('Duplicate') }}</span><span class="font-mono text-white/50">Ctrl + D</span></div>
+                            <div class="flex justify-between"><span>{{ __('Group selected') }}</span><span class="font-mono text-white/50">Ctrl + G</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Placing Elements</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Placing Elements') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Place icon/marker</span><span class="font-mono text-white/50">Select from panel → Click canvas</span></div>
-                            <div class="flex justify-between"><span>Draw shape</span><span class="font-mono text-white/50">Select shape → Click & drag</span></div>
-                            <div class="flex justify-between"><span>Place multiple</span><span class="font-mono text-white/50">Keep clicking (selection stays)</span></div>
-                            <div class="flex justify-between"><span>Edit placed element</span><span class="font-mono text-white/50">Click on it (exits placement)</span></div>
+                            <div class="flex justify-between"><span>{{ __('Place icon/marker') }}</span><span class="font-mono text-white/50">{{ __('Select from panel') }} → {{ __('Click canvas') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Draw shape') }}</span><span class="font-mono text-white/50">{{ __('Select shape') }} → {{ __('Click & drag') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Place multiple') }}</span><span class="font-mono text-white/50">{{ __('Keep clicking (selection stays)') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Edit placed element') }}</span><span class="font-mono text-white/50">{{ __('Click on it (exits placement)') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Steps / Phases</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Steps / Phases') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div class="flex justify-between"><span>Rename step</span><span class="font-mono text-white/50">Double-click tab</span></div>
-                            <div class="flex justify-between"><span>Add step</span><span class="font-mono text-white/50">+ button → New / Copy</span></div>
+                            <div class="flex justify-between"><span>{{ __('Rename step') }}</span><span class="font-mono text-white/50">{{ __('Double-click tab') }}</span></div>
+                            <div class="flex justify-between"><span>{{ __('Add step') }}</span><span class="font-mono text-white/50">{{ __('+ button') }} → {{ __('New / Copy') }}</span></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Toolbar Panels</h3>
+                        <h3 class="text-4xs font-bold uppercase tracking-wider text-orange-500 mb-2">{{ __('Toolbar Panels') }}</h3>
                         <div class="space-y-1 text-on-surface-variant">
-                            <div>Multiple panels can be open simultaneously. Each is draggable.</div>
-                            <div><span class="text-white font-bold">Markers</span> — Raid markers (skull, cross, etc.)</div>
-                            <div><span class="text-white font-bold">Shapes</span> — Circle, Rectangle, Triangle, Arrow, Line, Sector, Text</div>
-                            <div><span class="text-white font-bold">Abilities</span> — Boss abilities + class abilities (Warlock gateway)</div>
-                            <div><span class="text-white font-bold">Icons</span> — Roles, Classes, Boss portraits</div>
-                            <div><span class="text-white font-bold">Roster</span> — Player avatars + raid groups</div>
-                            <div><span class="text-white font-bold">Emoji</span> — Arrows, warnings, shapes, misc + custom emoji input</div>
+                            <div>{{ __('Multiple panels can be open simultaneously. Each is draggable.') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Markers') }}</span> — {{ __('Raid markers (skull, cross, etc.)') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Shapes') }}</span> — {{ __('Circle, Rectangle, Triangle, Arrow, Line, Sector, Text') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Abilities') }}</span> — {{ __('Boss abilities + class abilities (Warlock gateway)') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Icons') }}</span> — {{ __('Roles, Classes, Boss portraits') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Roster') }}</span> — {{ __('Player avatars + raid groups') }}</div>
+                            <div><span class="text-white font-bold">{{ __('Emoji') }}</span> — {{ __('Arrows, warnings, shapes, misc + custom emoji input') }}</div>
                         </div>
                     </div>
                 </div>
@@ -1687,17 +1820,47 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                 v-model="textPopupInput"
                 type="text"
                 :placeholder="__('Enter text...')"
-                class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:ring-1 focus:ring-primary outline-none w-[160px]"
+                class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:ring-1 focus:ring-orange-500 outline-none w-40"
                 @keydown.enter="confirmTextPopup"
                 @keydown.escape="cancelTextPopup"
                 autofocus
             >
-            <button @click="confirmTextPopup" class="px-2 py-1 rounded bg-primary/80 hover:bg-primary text-white text-[9px] font-bold transition-all">OK</button>
+            <button @click="confirmTextPopup" class="px-2 py-1 rounded bg-orange-500/80 hover:bg-orange-500 text-white text-4xs font-semibold transition-all">OK</button>
             <button @click="cancelTextPopup" class="px-1 py-1 text-on-surface-variant hover:text-white transition-all">
                 <span class="material-symbols-outlined text-xs">close</span>
             </button>
         </div>
     </Teleport>
+
+    <!-- Unsaved changes confirmation -->
+    <ConfirmationModal
+        :show="closeConfirmOpen"
+        variant="boss-planner"
+        z-index="z-[300]"
+        :title="__('Unsaved changes')"
+        :message="__('You have unsaved changes. Save them before closing?')"
+        :confirm-label="__('Save Changes')"
+        :tertiary-label="__(`Don't Save`)"
+        :cancel-label="__('Cancel')"
+        :loading="savingFromConfirm"
+        @confirm="handleCloseConfirmSave"
+        @tertiary="handleCloseConfirmDiscard"
+        @close="closeConfirmOpen = false"
+    />
+
+    <!-- Delete plan confirmation -->
+    <ConfirmationModal
+        :show="deleteConfirm.open"
+        variant="danger"
+        z-index="z-[300]"
+        :title="__('Delete Plan?')"
+        :message="__('This plan will be permanently deleted. This action cannot be undone.')"
+        :confirm-label="__('Delete Plan')"
+        :cancel-label="__('Cancel')"
+        :loading="deleting"
+        @confirm="confirmDelete"
+        @close="cancelDelete"
+    />
 </template>
 
 <style scoped>

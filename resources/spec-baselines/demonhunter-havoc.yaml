@@ -1,0 +1,33 @@
+spec: Havoc
+class: DemonHunter
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Immolation Aura'
+    ability_id: 258920
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Throw Glaive'
+    ability_id: 185123
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.95
+    severity: minor
+  -
+    ability: 'Essence Break'
+    ability_id: 258860
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Eye Beam'
+    ability_id: 198013
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.95
+    severity: major

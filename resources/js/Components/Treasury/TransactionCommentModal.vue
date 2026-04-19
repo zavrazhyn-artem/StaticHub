@@ -19,13 +19,13 @@ const emit = defineEmits(['close']);
             </button>
         </div>
 
-        <form :action="`/statics/${staticId}/treasury/${transaction.id}`" method="POST" class="p-6 space-y-4">
+        <form :action="`/treasury/${transaction.id}`" method="POST" class="p-6 space-y-4">
             <input type="hidden" name="_token" :value="csrfToken">
             <input type="hidden" name="_method" value="PATCH">
 
             <div class="p-3 rounded-lg bg-surface-container-highest border border-white/5 space-y-2">
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ transaction.date }}</span>
+                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ transaction.date }}</span>
                     <span class="text-sm font-black font-headline tracking-tight" :class="transaction.type === 'deposit' ? 'text-[#FFD700]' : 'text-error'">
                         {{ (transaction.type === 'deposit' ? '+' : '-') + transaction.amount }}
                     </span>
@@ -34,13 +34,13 @@ const emit = defineEmits(['close']);
             </div>
 
             <div class="space-y-1">
-                <label for="edit_description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Comment') }}</label>
+                <label for="edit_description" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Comment') }}</label>
                 <textarea name="description" id="edit_description" rows="4" v-model="transaction.description" :placeholder="__('Optional notes...')"
-                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none"></textarea>
+                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none"></textarea>
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
+                <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all">
                     {{ __('Save Comment') }}
                 </button>
             </div>

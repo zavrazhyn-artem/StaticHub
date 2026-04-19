@@ -102,15 +102,15 @@ const getSlotStyle = (slot) => {
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
           <!-- Grouped Categories -->
-          <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/20 text-gray-400 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
             <th colspan="3" class="p-2 text-center border-l border-white/5">{{ __('Raids') }}</th>
             <th colspan="3" class="p-2 text-center border-l border-white/10">{{ __('M+ Dungeons') }}</th>
             <th colspan="3" class="p-2 text-center border-l border-white/10">{{ __('Delves / World') }}</th>
           </tr>
           <!-- Slot Headers -->
-          <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
+          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
+            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[12.5rem] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
 
             <!-- Raid Slots -->
             <th class="p-4 text-center border-l border-white/5 w-20">{{ __('Slot 1') }}</th>
@@ -154,13 +154,13 @@ const getSlotStyle = (slot) => {
 
                   <div class="w-8 h-8 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="char.avatar_url" :src="char.avatar_url" :alt="char.name" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-white/20">?</span>
+                    <span v-else class="text-3xs text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
                     <div class="font-bold text-sm truncate" :class="classColors[char.class] || 'text-white'">
                       {{ char.name }}
                     </div>
-                    <div class="text-[9px] text-gray-500 uppercase font-medium truncate">
+                    <div class="text-4xs text-gray-400 uppercase font-medium truncate">
                       {{ getSpecName(char) }} {{ char.class }}
                     </div>
                   </div>
@@ -199,13 +199,13 @@ const getSlotStyle = (slot) => {
 
                   <div class="w-7 h-7 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="alt.avatar_url" :src="alt.avatar_url" :alt="alt.name" class="w-full h-full object-cover opacity-70" />
-                    <span v-else class="text-[10px] text-white/20">?</span>
+                    <span v-else class="text-3xs text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
                     <div class="font-bold text-xs truncate" :class="classColors[alt.class] || 'text-white'">
                       {{ alt.name }}
                     </div>
-                    <div class="text-[8px] text-gray-600 uppercase font-medium truncate">
+                    <div class="text-5xs text-gray-600 uppercase font-medium truncate">
                       {{ getSpecName(alt) }} {{ alt.class }}
                     </div>
                   </div>

@@ -40,7 +40,7 @@ class ApiLogger
                 'endpoint' => $this->truncateEndpoint($endpoint),
                 'method' => strtoupper($method),
                 'status_code' => $response->status(),
-                'response_time_ms' => (int) round((microtime(true) - $startTime) * 1000),
+                'response_time_ms' => max(0, (int) round((microtime(true) - $startTime) * 1000)),
                 'rate_limit_remaining' => $this->parseHeader($response, 'X-RateLimit-Remaining'),
                 'rate_limit_limit' => $this->parseHeader($response, 'X-RateLimit-Limit'),
                 'rate_limit_reset_at' => $this->parseResetHeader($response),

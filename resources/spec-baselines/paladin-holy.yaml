@@ -1,0 +1,68 @@
+spec: Holy
+class: Paladin
+role: healer
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Crusader Strike'
+    ability_id: 35395
+    check: cast_efficiency
+    cooldown_seconds: 7.8
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Judgment
+    ability_id: 275773
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Holy Prism'
+    ability_id: 114165
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Beacon of Virtue'
+    ability_id: 200025
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Avenging Wrath'
+    ability_id: 31884
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Blessing of Sacrifice'
+    ability_id: 6940
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Hand of Divinity'
+    ability_id: 1242008
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Avenging Crusader'
+    ability_id: 216331
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Holy Armaments'
+    ability_id: 432459
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major

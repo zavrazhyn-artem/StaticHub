@@ -50,14 +50,14 @@ const handleGroupDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffe
 
 const assignToGroup = (charId, groupId) => { emit('assign-group', { characterId: charId, groupId }); };
 
-const formations = [
-    { id: 'spread', label: 'Spread (circle)', icon: 'radio_button_unchecked' },
-    { id: 'stack', label: 'Stack (tight)', icon: 'fiber_manual_record' },
-    { id: 'line', label: 'Line', icon: 'horizontal_rule' },
-    { id: 'vline', label: 'Column', icon: 'drag_handle' },
-    { id: 'triangle', label: 'Triangle', icon: 'change_history' },
-    { id: 'tworows', label: 'Two rows', icon: 'view_week' },
-];
+const formations = computed(() => [
+    { id: 'spread', label: __('Spread (circle)'), icon: 'radio_button_unchecked' },
+    { id: 'stack', label: __('Stack (tight)'), icon: 'fiber_manual_record' },
+    { id: 'line', label: __('Line'), icon: 'horizontal_rule' },
+    { id: 'vline', label: __('Column'), icon: 'drag_handle' },
+    { id: 'triangle', label: __('Triangle'), icon: 'change_history' },
+    { id: 'tworows', label: __('Two rows'), icon: 'view_week' },
+]);
 
 const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
 </script>
@@ -66,11 +66,11 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
     <div class="h-full flex flex-col text-xs">
         <!-- Header -->
         <div class="shrink-0 px-3 py-2 border-b border-white/5 flex items-center justify-between">
-            <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">{{ __('Roster & Groups') }}</span>
+            <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant">{{ __('Roster & Groups') }}</span>
             <button
                 v-if="canManage && Object.keys(groups).length < 6"
                 @click="addGroup"
-                class="text-primary hover:text-white transition-colors" title="Add Group"
+                class="text-orange-500 hover:text-white transition-colors" :title="__('Add Group')"
             >
                 <span class="material-symbols-outlined text-sm">add</span>
             </button>
@@ -83,10 +83,10 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                     @click="toggleCollapse(group.id)"
                     @drop="handleGroupDrop($event, group.id)" @dragover="handleGroupDragOver">
                     <div class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: group.color }"></div>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-white flex-1">{{ group.label }}</span>
-                    <span class="text-[8px] text-on-surface-variant/50">{{ (group.members || []).length }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-white flex-1">{{ group.label }}</span>
+                    <span class="text-5xs text-on-surface-variant/50">{{ (group.members || []).length }}</span>
                     <button v-if="canManage" @click.stop="emit('remove-group', group.id)"
-                        class="text-on-surface-variant/30 hover:text-red-400 transition-colors" title="Remove group">
+                        class="text-on-surface-variant/30 hover:text-red-400 transition-colors" :title="__('Remove group')">
                         <span class="material-symbols-outlined text-xs">close</span>
                     </button>
                     <span class="material-symbols-outlined text-xs text-on-surface-variant/30 transition-transform"
@@ -100,20 +100,20 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                         draggable="true" @dragstart="handleDragStart($event, memberId)">
                         <div class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: group.color }"></div>
                         <img v-if="getChar(memberId)?.avatar_url" :src="getChar(memberId).avatar_url" class="w-4 h-4 rounded object-cover">
-                        <span class="text-[9px] font-bold truncate flex-1"
+                        <span class="text-4xs font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(getChar(memberId)?.playable_class)">{{ getChar(memberId)?.name || memberId }}</span>
                         <button v-if="canManage" @click.stop="emit('remove-from-group', { characterId: memberId, groupId: group.id })"
                             class="opacity-0 group-hover/member:opacity-100 text-on-surface-variant/40 hover:text-red-400 transition-all">
-                            <span class="material-symbols-outlined text-[10px]">close</span>
+                            <span class="material-symbols-outlined text-3xs">close</span>
                         </button>
                     </div>
                     <div v-if="(group.members || []).length === 0"
                         class="px-2 py-3 text-center border border-dashed border-white/10 rounded-md mx-1 my-1">
-                        <span class="text-[8px] text-on-surface-variant/30">{{ __('Drag players here') }}</span>
+                        <span class="text-5xs text-on-surface-variant/30">{{ __('Drag players here') }}</span>
                     </div>
                     <!-- Formation presets -->
                     <div v-if="canManage && (group.members || []).length >= 2" class="flex items-center gap-0.5 px-1 py-1">
-                        <span class="text-[7px] text-on-surface-variant/30 mr-1">{{ __('Place') }}:</span>
+                        <span class="text-5xs text-on-surface-variant/30 mr-1">{{ __('Place') }}:</span>
                         <button v-for="f in formations" :key="f.id" @click.stop="emit('place-formation', { groupId: group.id, formation: f.id })"
                             class="w-5 h-5 rounded flex items-center justify-center text-on-surface-variant/40 hover:text-white hover:bg-white/10 transition-all"
                             :title="f.label">
@@ -127,27 +127,27 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
             <div>
                 <div class="px-3 py-1.5 flex items-center gap-2">
                     <span class="material-symbols-outlined text-xs text-on-surface-variant/40">person</span>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
-                    <span class="text-[8px] text-on-surface-variant/30">{{ unassignedCharacters.length }}</span>
+                    <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/50 flex-1">{{ __('Unassigned') }}</span>
+                    <span class="text-5xs text-on-surface-variant/30">{{ unassignedCharacters.length }}</span>
                 </div>
                 <div class="pb-1 px-1.5">
                     <div v-for="char in unassignedCharacters" :key="char.id"
                         class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 cursor-grab transition-colors group/member"
                         draggable="true" @dragstart="handleDragStart($event, char.id)">
                         <img v-if="char.avatar_url" :src="char.avatar_url" class="w-4 h-4 rounded object-cover border border-white/10">
-                        <span class="text-[9px] font-bold truncate flex-1"
+                        <span class="text-4xs font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(char.playable_class)">{{ char.name }}</span>
                         <!-- Quick-assign buttons -->
                         <div v-if="canManage && groupEntries.length > 0"
                             class="opacity-0 group-hover/member:opacity-100 flex items-center gap-0.5 transition-all">
                             <button v-for="g in groupEntries" :key="g.id"
                                 @click.stop="assignToGroup(char.id, g.id)"
-                                class="w-4 h-4 rounded-sm flex items-center justify-center text-[7px] font-black text-white hover:scale-110 transition-transform"
-                                :style="{ backgroundColor: g.color + '80' }" :title="'Assign to ' + g.label">{{ g.id }}</button>
+                                class="w-4 h-4 rounded-sm flex items-center justify-center text-5xs font-bold text-white hover:scale-110 transition-transform"
+                                :style="{ backgroundColor: g.color + '80' }" :title="__('Assign to') + ' ' + g.label">{{ g.id }}</button>
                         </div>
                     </div>
                     <div v-if="unassignedCharacters.length === 0" class="py-2 text-center">
-                        <span class="text-[8px] text-on-surface-variant/30">{{ __('All assigned to groups') }}</span>
+                        <span class="text-5xs text-on-surface-variant/30">{{ __('All assigned to groups') }}</span>
                     </div>
                 </div>
             </div>

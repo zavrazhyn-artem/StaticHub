@@ -1,0 +1,33 @@
+spec: Feral
+class: Druid
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Incarnation: Avatar of Ashamane'
+    ability_id: 102543
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Berserk
+    ability_id: 106951
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Frantic Frenzy'
+    ability_id: 1243807
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Chomp
+    ability_id: 1244258
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.8
+    severity: major

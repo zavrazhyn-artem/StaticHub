@@ -1,4 +1,7 @@
 <script setup>
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
+
 const props = defineProps({
     blocks: { type: Array, default: () => [] },
 });
@@ -38,7 +41,7 @@ function colorClasses(color) {
             <!-- metric -->
             <div v-else-if="block.type === 'metric'"
                  class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-white/5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                <span class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant">
                     {{ block.label }}
                 </span>
                 <span :class="['text-sm font-black', colorClasses(block.color).text]">
@@ -71,7 +74,7 @@ function colorClasses(color) {
         <!-- Fallback if blocks is empty -->
         <p v-if="!blocks || blocks.length === 0"
            class="text-xs text-on-surface-variant italic">
-            No response data.
+            {{ __('No response data.') }}
         </p>
     </div>
 </template>

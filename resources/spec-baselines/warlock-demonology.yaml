@@ -1,0 +1,40 @@
+spec: Demonology
+class: Warlock
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Call Dreadstalkers'
+    ability_id: 104316
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Summon Vilefiend'
+    ability_id: 1251778
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Summon Charhound'
+    ability_id: 455476
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Summon Gloomhound'
+    ability_id: 455465
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Implosion
+    ability_id: 196277
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.9
+    severity: major

@@ -98,6 +98,11 @@ async function sendMessage() {
 </script>
 
 <template>
+    <!-- Click-outside backdrop: catches clicks on the report area and closes the chat. -->
+    <div v-if="open"
+         class="fixed inset-y-0 left-0 right-[600px] z-[65]"
+         @click="emit('close')"></div>
+
     <Transition
         enter-active-class="transition ease-out duration-300"
         enter-from-class="translate-x-full"
@@ -107,7 +112,7 @@ async function sendMessage() {
         leave-to-class="translate-x-full"
     >
         <div v-if="open"
-             class="fixed right-0 top-0 h-full w-[600px] bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 flex flex-col">
+             class="fixed right-0 top-0 h-full w-[600px] bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[70] flex flex-col">
             <!-- Header -->
             <div class="p-6 border-b border-white/5 flex items-center justify-between bg-surface-container-high">
                 <div class="flex items-center gap-3">
@@ -124,9 +129,9 @@ async function sendMessage() {
 
             <!-- Member notice -->
             <div v-if="!canViewGlobalReport"
-                 class="mx-4 mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-start gap-3">
-                <span class="material-symbols-outlined text-amber-500 text-sm mt-0.5 flex-shrink-0">lock</span>
-                <p class="text-[10px] text-amber-400/80 font-bold uppercase tracking-wider leading-relaxed">
+                 class="mx-4 mt-4 px-4 py-3 bg-indigo-400/5 border border-indigo-400/20 rounded-xl flex items-start gap-3">
+                <span class="material-symbols-outlined text-indigo-400 text-sm mt-0.5 flex-shrink-0">lock</span>
+                <p class="text-3xs text-indigo-300/80 font-semibold uppercase tracking-wider leading-relaxed">
                     {{ __('Personal mode — you can only ask about your own tactical report.') }}
                 </p>
             </div>
@@ -138,7 +143,7 @@ async function sendMessage() {
                         <div class="bg-primary/10 border border-primary/20 rounded-2xl rounded-tr-none p-4 max-w-[85%]">
                             <p class="text-xs text-on-surface font-medium leading-relaxed">{{ msg.text }}</p>
                         </div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant opacity-40">User &bull; {{ msg.time }}</span>
+                        <span class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-40">User &bull; {{ msg.time }}</span>
                     </div>
 
                     <div v-if="msg.role === 'ai'" class="flex flex-col items-start gap-2">
@@ -151,7 +156,7 @@ async function sendMessage() {
                                 <p v-else class="text-xs text-on-surface font-medium leading-relaxed">{{ msg.text }}</p>
                             </div>
                         </div>
-                        <span class="ml-11 text-[9px] font-black uppercase tracking-widest text-primary opacity-60">AI Analyst &bull; {{ msg.time }}</span>
+                        <span class="ml-11 text-4xs font-bold uppercase tracking-wider text-primary opacity-60">AI Analyst &bull; {{ msg.time }}</span>
                     </div>
                 </div>
 
@@ -189,7 +194,7 @@ async function sendMessage() {
                 </form>
                 <div class="mt-4 flex items-center gap-2 px-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant opacity-60">
+                    <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60">
                         {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }}) {{ __('is loaded.') }}
                     </p>
                 </div>

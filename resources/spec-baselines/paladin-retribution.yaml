@@ -1,0 +1,26 @@
+spec: Retribution
+class: Paladin
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Wake of Ashes'
+    ability_id: 255937
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Avenging Wrath'
+    ability_id: 31884
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Execution Sentence'
+    ability_id: 343527
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major

@@ -1,0 +1,40 @@
+spec: Vengeance
+class: DemonHunter
+role: tank
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Immolation Aura'
+    ability_id: 258920
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Sigil of Flame'
+    ability_id: 204596
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Spirit Bomb'
+    ability_id: 247454
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Fel Devastation'
+    ability_id: 212084
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Fel Desolation'
+    ability_id: 452486
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.8
+    severity: major

@@ -136,12 +136,12 @@ function mainSpecName(charId) {
 
         <!-- Table Header -->
         <div class="bg-black/40 px-8 py-5 border-b border-white/5 grid grid-cols-12 items-center">
-            <div class="col-span-4 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Character') }}</div>
-            <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Item Level') }}</div>
-            <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Realm') }}</div>
-            <div class="col-span-1 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Main') }}</div>
-            <div class="col-span-1 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Ready For Raid') }}</div>
-            <div class="col-span-2 font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Specializations') }}</div>
+            <div class="col-span-4 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant">{{ __('Character') }}</div>
+            <div class="col-span-2 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Item Level') }}</div>
+            <div class="col-span-2 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Realm') }}</div>
+            <div class="col-span-1 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Main') }}</div>
+            <div class="col-span-1 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Ready For Raid') }}</div>
+            <div class="col-span-2 text-3xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant text-center">{{ __('Specializations') }}</div>
         </div>
 
         <!-- Table Body -->
@@ -166,10 +166,10 @@ function mainSpecName(charId) {
                             {{ char.name }}
                             <span
                                 v-if="isMain(char.id)"
-                                class="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-[8px] uppercase tracking-widest font-black"
+                                class="px-1.5 py-0.5 rounded-full bg-teal-400/20 text-teal-400 border border-teal-400/30 text-5xs uppercase tracking-wider font-bold"
                             >{{ __('Main') }}</span>
                         </div>
-                        <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-2">
+                        <div class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider flex items-center gap-2">
                             <span>{{ __('Level') }} {{ char.level }}</span>
                             <span class="w-1 h-1 rounded-full bg-white/10"></span>
                             <span>{{ mainSpecName(char.id) || char.active_spec || char.playable_class }}</span>
@@ -179,7 +179,7 @@ function mainSpecName(charId) {
 
                 <!-- Item Level -->
                 <div class="col-span-2 text-center">
-                    <span class="font-headline font-black text-2xl tracking-tighter text-on-surface">
+                    <span class="font-headline font-black text-2xl tracking-tight text-on-surface">
                         {{ char.equipped_item_level ?? '?' }}
                     </span>
                 </div>
@@ -200,8 +200,8 @@ function mainSpecName(charId) {
                             @change="setMain(char.id)"
                             class="peer sr-only"
                         >
-                        <div class="w-5 h-5 rounded-full border-2 border-white/10 peer-checked:border-primary peer-checked:bg-primary/20 transition-all"></div>
-                        <div class="absolute w-2 h-2 rounded-full bg-primary opacity-0 peer-checked:opacity-100 transition-all"></div>
+                        <div class="w-5 h-5 rounded-full border-2 border-white/10 peer-checked:border-teal-400 peer-checked:bg-teal-400/20 transition-all"></div>
+                        <div class="absolute w-2 h-2 rounded-full bg-teal-400 opacity-0 peer-checked:opacity-100 transition-all"></div>
                     </label>
                 </div>
 
@@ -240,7 +240,7 @@ function mainSpecName(charId) {
 
         <!-- Footer: auto-save status -->
         <div class="p-6 bg-black/20 text-center border-t border-white/5">
-            <p class="text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-2"
+            <p class="text-3xs font-semibold uppercase tracking-[0.3em] flex items-center justify-center gap-2"
                :class="statusColor">
                 <span class="w-1.5 h-1.5 rounded-full" :class="dotColor"></span>
                 {{ statusLabel }}

@@ -21,6 +21,11 @@ use Illuminate\Support\Carbon;
  * @property string $status
  * @property bool $is_optional
  * @property array|null $encounter_order
+ * @property array|null $selected_encounters
+ * @property array|null $locked_encounters
+ * @property bool $boss_roster_enabled
+ * @property bool $split_enabled
+ * @property int $split_count
  * @property string|null $discord_message_id
  * @property bool $raid_started
  * @property bool $raid_over
@@ -59,11 +64,17 @@ class Event extends Model
         'static_id',
         'start_time',
         'end_time',
+        'timezone',
         'description',
         'difficulty',
         'status',
         'is_optional',
         'encounter_order',
+        'selected_encounters',
+        'locked_encounters',
+        'boss_roster_enabled',
+        'split_enabled',
+        'split_count',
         'assigned_plans',
         'discord_message_id',
         'raid_started',
@@ -78,6 +89,11 @@ class Event extends Model
         'status' => 'string',
         'is_optional' => 'boolean',
         'encounter_order' => 'array',
+        'selected_encounters' => 'array',
+        'locked_encounters' => 'array',
+        'boss_roster_enabled' => 'boolean',
+        'split_enabled' => 'boolean',
+        'split_count' => 'integer',
         'assigned_plans' => 'array',
         'raid_started' => 'boolean',
         'raid_over' => 'boolean',

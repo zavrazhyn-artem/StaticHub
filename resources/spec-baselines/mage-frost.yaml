@@ -1,0 +1,40 @@
+spec: Frost
+class: Mage
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Flurry
+    ability_id: 44614
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Ray of Frost'
+    ability_id: 205021
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Comet Storm'
+    ability_id: 153595
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Blizzard
+    ability_id: 190356
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Frozen Orb'
+    ability_id: 84714
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Helpers;
 
 use App\Models\Event;
+use App\Models\EventEncounterRoster;
 use App\Support\IconHelper;
 use Illuminate\Support\Collection;
 
@@ -42,6 +43,10 @@ class DiscordMessageBuilder
 
         $rawMain   = $rosterData['mainRoster'];   // tank/heal/mdps/rdps, includes pending
         $rawAbsent = $rosterData['absentRoster'];  // absent + tentative
+
+        // Character IDs benched across all encounters for this event.
+        $benchedIds = EventEncounterRoster::query()
+            ->fullyBenchedCharacterIds($event->id);
 
         // Split pending out of mainRoster; keep present/late/tentative in role groups
         $mainRoster    = ['tank' => collect(), 'heal' => collect(), 'mdps' => collect(), 'rdps' => collect()];
@@ -98,68 +103,83 @@ class DiscordMessageBuilder
 
         $analysisText = "";
         if ($event->tacticalReport && $event->tacticalReport->ai_analysis) {
-            $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', [$event->static->id, $event->tacticalReport->id]) . ")";
+            $analysisText = "\n\n🧠 **Tactical Analysis Ready!**\n[Read Full Review](" . route('statics.logs.show', $event->tacticalReport->id) . ")";
         }
 
-        $fields = [
-            [
-                'name'   => IconHelper::roleEmoji('tank') . ' Tanks',
-                'value'  => self::formatRosterField($mainRoster['tank']),
-                'inline' => true,
-            ],
-            [
-                'name'   => IconHelper::roleEmoji('heal') . ' Healers',
-                'value'  => self::formatRosterField($mainRoster['heal']),
-                'inline' => true,
-            ],
-            ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true],
-            [
-                'name'   => IconHelper::roleEmoji('melee') . ' Melee DPS',
-                'value'  => self::formatRosterField($mainRoster['mdps']),
-                'inline' => true,
-            ],
-            [
-                'name'   => IconHelper::roleEmoji('range') . ' Ranged DPS',
-                'value'  => self::formatRosterField($mainRoster['rdps']),
-                'inline' => true,
-            ],
-            ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true],
+        $fields = [];
+        $divider = '───────────────────────────────';
+
+        // Inline role fields — each role group gets chunked if needed.
+        // 'row_end' = inline spacer completing a 3-col row (keeps columns at 1/3 width);
+        // 'gap'     = full-width empty field adding vertical air.
+        $inlineRoles = [
+            ['emoji' => IconHelper::roleEmoji('tank'),  'label' => '*Tanks*',      'roster' => $mainRoster['tank']],
+            ['emoji' => IconHelper::roleEmoji('heal'),  'label' => '*Healers*',    'roster' => $mainRoster['heal']],
+            'row_end',
+            ['emoji' => IconHelper::roleEmoji('melee'), 'label' => '*Melee DPS*',  'roster' => $mainRoster['mdps']],
+            ['emoji' => IconHelper::roleEmoji('range'), 'label' => '*Ranged DPS*', 'roster' => $mainRoster['rdps']],
+            'row_end',
         ];
 
-        if ($absentRoster->isNotEmpty()) {
-            $fields[] = [
-                'name'   => '❌ Absent',
-                'value'  => self::formatRosterField($absentRoster),
-                'inline' => false,
-            ];
+        foreach ($inlineRoles as $role) {
+            if ($role === 'row_end') {
+                $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
+                continue;
+            }
+            if ($role === 'gap') {
+                $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
+                continue;
+            }
+            $chunks = self::formatRosterChunks($role['roster'], benchedIds: $benchedIds);
+            $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'], 'value' => $chunks[0], 'inline' => true];
+            for ($i = 1; $i < count($chunks); $i++) {
+                $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'] . ' (CONT.)', 'value' => $chunks[$i], 'inline' => true];
+            }
         }
 
-        if ($pendingRoster->isNotEmpty()) {
-            $fields[] = [
-                'name'   => '⏳ Pending',
-                'value'  => self::formatRosterField($pendingRoster),
-                'inline' => false,
-            ];
+        // Alphabetical sort for Pending so the raid leader can scan by name.
+        $pendingRoster = $pendingRoster->sortBy(fn ($c) => mb_strtolower($c->name))->values();
+
+        // Absent & Pending — each preceded by a full-width divider line, two columns each.
+        $sections = [
+            ['label' => IconHelper::statusEmoji('absent')  . ' *Absent*',  'roster' => $absentRoster],
+            ['label' => IconHelper::statusEmoji('pending') . ' *Pending*', 'roster' => $pendingRoster],
+        ];
+        foreach ($sections as $section) {
+            $roster = $section['roster'];
+            if ($roster->isEmpty()) continue;
+
+            $fields[] = ['name' => "\u{200B}", 'value' => $divider, 'inline' => false];
+
+            $half = (int) ceil($roster->count() / 2);
+            $col1 = self::formatRosterChunks($roster->slice(0, $half)->values(), suppressStatus: true, benchedIds: $benchedIds);
+            $col2 = self::formatRosterChunks($roster->slice($half)->values(), suppressStatus: true, benchedIds: $benchedIds);
+
+            $pad = "\u{200B}\n";
+            $fields[] = ['name' => $section['label'], 'value' => $pad . $col1[0], 'inline' => true];
+            $fields[] = ['name' => "\u{200B}", 'value' => $pad . $col2[0], 'inline' => true];
+            $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
         }
 
+        $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
         $fields[] = [
-            'name'   => '📊 Attendance',
-            'value'  => $statsLine,
+            'name'   => '📊 *Attendance*',
+            'value'  => '> ' . $statsLine,
             'inline' => false,
         ];
 
         $embed = [
-            'title'       => "📣 Raid Call",
+            'title'       => "📣 " . ($event->static?->name ?? 'Raid Call'),
             'description' => "🗓️ **Start:** <t:{$unixStart}:F>\n⏳ **Status:** <t:{$unixStart}:R>\n\n"
                 . $descriptionText
-                . "**Combat Roster:**" . $analysisText . "\n──────────────────────────",
+                . "***Combat Roster***" . $analysisText . "\n{$divider}",
             'color'     => 0x00A3FF,
             'thumbnail' => ['url' => config('app.url') . '/images/logo.svg'],
             'image'     => ['url' => config('app.url') . '/images/spacer-365.png'],
             'fields'    => $fields,
             'timestamp' => now()->toIso8601String(),
             'footer'    => [
-                'text'     => 'StaticHub Tactical HUD',
+                'text'     => 'BlastR Tactical HUD',
                 'icon_url' => config('app.url') . '/images/logo.svg',
             ],
         ];
@@ -189,10 +209,10 @@ class DiscordMessageBuilder
                             'type'        => 3,
                             'custom_id'   => "rsvp_select_{$event->id}",
                             'options'     => [
-                                ['label' => 'Present',  'value' => 'present',  'emoji' => ['name' => '✅']],
-                                ['label' => 'Late',     'value' => 'late',     'emoji' => ['name' => '⏰']],
-                                ['label' => 'Tentative','value' => 'tentative','emoji' => ['name' => '❓']],
-                                ['label' => 'Absent',   'value' => 'absent',   'emoji' => ['name' => '❌']],
+                                ['label' => 'Present',   'value' => 'present',   'emoji' => ['name' => 'rsvp_present',   'id' => config('discord_emojis.rsvp.present')]],
+                                ['label' => 'Late',      'value' => 'late',      'emoji' => ['name' => 'rsvp_late',      'id' => config('discord_emojis.rsvp.late')]],
+                                ['label' => 'Tentative', 'value' => 'tentative', 'emoji' => ['name' => 'rsvp_tentative', 'id' => config('discord_emojis.rsvp.tentative')]],
+                                ['label' => 'Absent',    'value' => 'absent',    'emoji' => ['name' => 'rsvp_absent',    'id' => config('discord_emojis.rsvp.absent')]],
                             ],
                             'placeholder' => '👇 Select your status',
                         ],
@@ -250,24 +270,51 @@ class DiscordMessageBuilder
         ];
     }
 
-    private static function formatRosterField(Collection $characters): string
-    {
+    /**
+     * Format roster into chunks that fit Discord's 1024-char field limit.
+     *
+     * @return array<int, string>
+     */
+    private static function formatRosterChunks(
+        Collection $characters,
+        bool $suppressStatus = false,
+        ?Collection $benchedIds = null,
+    ): array {
         if ($characters->isEmpty()) {
-            return '*None*';
+            return ['*None*'];
         }
 
-        return $characters->map(function ($char) {
-            $statusEmoji = match ($char->pivot->status ?? 'pending') {
-                'present'  => '✅',
-                'late'     => '⏰',
-                'tentative'=> '❓',
-                'absent'   => '❌',
-                default    => '⏳',
-            };
-
+        $lines = $characters->map(function ($char) use ($suppressStatus, $benchedIds) {
             $classEmoji = IconHelper::classEmoji($char->playable_class);
+            $isBenched = $benchedIds && $benchedIds->contains(fn ($id) => (int) $id === (int) $char->id);
+            $benchSuffix = $isBenched ? ' ' . IconHelper::benchEmoji() : '';
 
-            return "{$statusEmoji} {$classEmoji} **{$char->name}**";
-        })->implode("\n");
+            if ($suppressStatus) {
+                return "{$classEmoji} {$char->name}{$benchSuffix}";
+            }
+
+            $statusEmoji = IconHelper::statusEmoji($char->pivot->status ?? 'pending');
+
+            return "{$statusEmoji} {$classEmoji} {$char->name}{$benchSuffix}";
+        })->all();
+
+        $chunks = [];
+        $current = '';
+
+        foreach ($lines as $line) {
+            $append = $current === '' ? $line : "\n{$line}";
+            if (mb_strlen($current . $append) > 1024) {
+                $chunks[] = $current;
+                $current = $line;
+            } else {
+                $current .= $append;
+            }
+        }
+
+        if ($current !== '') {
+            $chunks[] = $current;
+        }
+
+        return $chunks;
     }
 }

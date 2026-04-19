@@ -16,24 +16,24 @@ defineProps({
     <div class="flex items-center gap-2 border-b border-white/5 mb-8">
         <a :href="profileUrl"
            :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                    activeTab === 'profile' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                    activeTab === 'profile' ? 'text-slate-400' : 'text-on-surface-variant hover:text-white']">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-m">person</span>
                 {{ __('Profile') }}
             </div>
             <div v-if="activeTab === 'profile'"
-                 class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+                 class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
         </a>
         <template v-if="canManage">
             <a :href="scheduleUrl"
                :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                        activeTab === 'schedule' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                        activeTab === 'schedule' ? 'text-slate-400' : 'text-on-surface-variant hover:text-white']">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-m">calendar_month</span>
                     {{ __('Schedule') }}
                 </div>
                 <div v-if="activeTab === 'schedule'"
-                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
             </a>
             <a :href="discordUrl"
                :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
@@ -49,13 +49,13 @@ defineProps({
             </a>
             <a :href="logsUrl"
                :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
-                        activeTab === 'logs' ? 'text-primary' : 'text-on-surface-variant hover:text-white']">
+                        activeTab === 'logs' ? 'text-slate-400' : 'text-on-surface-variant hover:text-white']">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-m">analytics</span>
                     {{ __('Warcraft Logs & AI') }}
                 </div>
                 <div v-if="activeTab === 'logs'"
-                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
             </a>
         </template>
     </div>

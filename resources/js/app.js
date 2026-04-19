@@ -1,36 +1,14 @@
 import './bootstrap';
 
-import { createApp } from 'vue';
+import { createApp, defineAsyncComponent } from 'vue';
 import * as Sentry from '@sentry/vue';
-import RosterOverview from './Components/Roster/RosterOverview.vue';
-import UnifiedRoster from './Components/Roster/UnifiedRoster.vue';
-import SyncStatusWidget from './Components/UI/SyncStatusWidget.vue';
-import TreasuryDashboard from './Components/Treasury/TreasuryDashboard.vue';
-import ScheduleCalendar from './Components/Schedule/ScheduleCalendar.vue';
-import EventDetails from './Components/Raid/EventDetails.vue';
-import BossPlannerPage from './Components/Raid/BossPlanner/BossPlannerPage.vue';
-import SharedPlanView from './Components/Raid/BossPlanner/SharedPlanView.vue';
-import JoinStatic from './Components/Statics/JoinStatic.vue';
-import LogsIndex from './Components/Logs/LogsIndex.vue';
-import LogShow from './Components/Logs/LogShow.vue';
-import SettingsTabs from './Components/Settings/SettingsTabs.vue';
-import SettingsLogs from './Components/Settings/SettingsLogs.vue';
-import SettingsSchedule from './Components/Settings/SettingsSchedule.vue';
-import SettingsDiscord from './Components/Settings/SettingsDiscord.vue';
-import SettingsProfile from './Components/Settings/SettingsProfile.vue';
-import StaticSetup from './Components/Statics/StaticSetup.vue';
-import ConsumablesPlanner from './Components/Treasury/ConsumablesPlanner.vue';
-import TransactionHistory from './Components/Treasury/TransactionHistory.vue';
-import ConsumableCard from './Components/Treasury/ConsumableCard.vue';
-import DashboardView from './Components/Dashboard/DashboardView.vue';
-import TransferOwnershipSelect from './Components/Profile/TransferOwnershipSelect.vue';
-import CharacterSpecPicker from './Components/Character/CharacterSpecPicker.vue';
-import CharactersPage from './Components/Character/CharactersPage.vue';
-import OnboardingStepper from './Components/Onboarding/OnboardingStepper.vue';
+
+// Eager (shared across layout or tiny) — loaded on every page anyway
 import AlertBanner from './Components/UI/AlertBanner.vue';
+import SyncStatusWidget from './Components/UI/SyncStatusWidget.vue';
 
-
-
+// Async factory — Vite emits a separate chunk per component, loaded on demand
+const lazy = (loader) => defineAsyncComponent(loader);
 
 const app = createApp({});
 
@@ -60,37 +38,47 @@ app.config.globalProperties.__ = (key, replace = {}) => {
     return translation;
 };
 
-app.component('roster-overview', RosterOverview);
-app.component('unified-roster', UnifiedRoster);
-app.component('sync-status-widget', SyncStatusWidget);
-app.component('treasury-dashboard', TreasuryDashboard);
-app.component('schedule-calendar', ScheduleCalendar);
-app.component('event-details', EventDetails);
-app.component('boss-planner-page', BossPlannerPage);
-app.component('shared-plan-view', SharedPlanView);
-app.component('join-static', JoinStatic);
-app.component('logs-index', LogsIndex);
-app.component('log-show', LogShow);
-app.component('settings-tabs', SettingsTabs);
-app.component('settings-logs', SettingsLogs);
-app.component('settings-schedule', SettingsSchedule);
-app.component('settings-discord', SettingsDiscord);
-app.component('settings-profile', SettingsProfile);
-app.component('static-setup', StaticSetup);
-app.component('consumables-planner', ConsumablesPlanner);
-app.component('consumable-card', ConsumableCard);
-app.component('transaction-history', TransactionHistory);
-app.component('dashboard-view', DashboardView);
-app.component('transfer-ownership-select', TransferOwnershipSelect);
-app.component('character-spec-picker', CharacterSpecPicker);
-app.component('characters-page', CharactersPage);
-app.component('onboarding-stepper', OnboardingStepper);
+// Shared UI primitives — eager
 app.component('alert-banner', AlertBanner);
+app.component('sync-status-widget', SyncStatusWidget);
+
+// Page-level components — lazy-loaded per route
+app.component('roster-overview',           lazy(() => import('./Components/Roster/RosterOverview.vue')));
+app.component('unified-roster',            lazy(() => import('./Components/Roster/UnifiedRoster.vue')));
+app.component('treasury-dashboard',        lazy(() => import('./Components/Treasury/TreasuryDashboard.vue')));
+app.component('schedule-calendar',         lazy(() => import('./Components/Schedule/ScheduleCalendar.vue')));
+app.component('event-details',             lazy(() => import('./Components/Raid/EventDetails.vue')));
+app.component('boss-planner-page',         lazy(() => import('./Components/Raid/BossPlanner/BossPlannerPage.vue')));
+app.component('shared-plan-view',          lazy(() => import('./Components/Raid/BossPlanner/SharedPlanView.vue')));
+app.component('join-static',               lazy(() => import('./Components/Statics/JoinStatic.vue')));
+app.component('logs-index',                lazy(() => import('./Components/Logs/LogsIndex.vue')));
+app.component('log-show',                  lazy(() => import('./Components/Logs/LogShow.vue')));
+app.component('settings-tabs',             lazy(() => import('./Components/Settings/SettingsTabs.vue')));
+app.component('settings-logs',             lazy(() => import('./Components/Settings/SettingsLogs.vue')));
+app.component('settings-schedule',         lazy(() => import('./Components/Settings/SettingsSchedule.vue')));
+app.component('settings-discord',          lazy(() => import('./Components/Settings/SettingsDiscord.vue')));
+app.component('settings-profile',          lazy(() => import('./Components/Settings/SettingsProfile.vue')));
+app.component('gear-management',           lazy(() => import('./Components/Gear/GearManagement.vue')));
+app.component('static-setup',              lazy(() => import('./Components/Statics/StaticSetup.vue')));
+app.component('consumables-planner',       lazy(() => import('./Components/Treasury/ConsumablesPlanner.vue')));
+app.component('consumable-card',           lazy(() => import('./Components/Treasury/ConsumableCard.vue')));
+app.component('transaction-history',       lazy(() => import('./Components/Treasury/TransactionHistory.vue')));
+app.component('dashboard-view',            lazy(() => import('./Components/Dashboard/DashboardView.vue')));
+app.component('transfer-ownership-select', lazy(() => import('./Components/Profile/TransferOwnershipSelect.vue')));
+app.component('character-spec-picker',     lazy(() => import('./Components/Character/CharacterSpecPicker.vue')));
+app.component('characters-page',           lazy(() => import('./Components/Character/CharactersPage.vue')));
+app.component('onboarding-stepper',        lazy(() => import('./Components/Onboarding/OnboardingStepper.vue')));
+app.component('landing-page',              lazy(() => import('./Components/Landing/LandingPage.vue')));
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {
     app.mount('#app');
 }
+
+// Force reload on bfcache restore (prevents stale Vue state on browser back)
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) window.location.reload();
+});
 
 import Alpine from 'alpinejs';
 

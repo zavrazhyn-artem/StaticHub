@@ -1,0 +1,131 @@
+# External defensive cooldowns — abilities cast on OTHER players/raid to mitigate incoming damage.
+# Tracked to evaluate coordination (did tank get external on tank-buster? did healer blow raid CD at right time?).
+#
+# scope: 'target' = single-target defensive on another player (usually tank-saver)
+#        'raid'   = raid-wide defensive (buff applied to everyone or large area)
+#
+# Spell IDs verified for Midnight expansion.
+
+- id: 33206
+  name: 'Pain Suppression'
+  class: Priest
+  scope: target
+- id: 62618
+  name: 'Power Word: Barrier'
+  class: Priest
+  scope: raid
+- id: 64843
+  name: 'Divine Hymn'
+  class: Priest
+  scope: raid
+- id: 47788
+  name: 'Guardian Spirit'
+  class: Priest
+  scope: target
+- id: 64901
+  name: 'Symbol of Hope'
+  class: Priest
+  scope: raid
+
+- id: 102342
+  name: 'Ironbark'
+  class: Druid
+  scope: target
+- id: 740
+  name: 'Tranquility'
+  class: Druid
+  scope: raid
+- id: 106898
+  name: 'Stampeding Roar'
+  class: Druid
+  scope: raid
+
+- id: 116849
+  name: 'Life Cocoon'
+  class: Monk
+  scope: target
+- id: 115310
+  name: 'Revival'
+  class: Monk
+  scope: raid
+- id: 322118
+  name: 'Invoke Yu''lon, the Jade Serpent'
+  class: Monk
+  scope: raid
+
+- id: 1022
+  name: 'Blessing of Protection'
+  class: Paladin
+  scope: target
+- id: 6940
+  name: 'Blessing of Sacrifice'
+  class: Paladin
+  scope: target
+- id: 31821
+  name: 'Aura Mastery'
+  class: Paladin
+  scope: raid
+- id: 210256
+  name: 'Blessing of Virtue'
+  class: Paladin
+  scope: raid
+
+- id: 108281
+  name: 'Ancestral Guidance'
+  class: Shaman
+  scope: raid
+- id: 98008
+  name: 'Spirit Link Totem'
+  class: Shaman
+  scope: raid
+- id: 2825
+  name: 'Bloodlust'
+  class: Shaman
+  scope: raid
+- id: 32182
+  name: 'Heroism'
+  class: Shaman
+  scope: raid
+
+- id: 80353
+  name: 'Time Warp'
+  class: Mage
+  scope: raid
+- id: 414660
+  name: 'Mass Barrier'
+  class: Mage
+  scope: raid
+
+- id: 51052
+  name: 'Anti-Magic Zone'
+  class: DeathKnight
+  scope: raid
+
+- id: 97462
+  name: 'Rallying Cry'
+  class: Warrior
+  scope: raid
+
+- id: 207399
+  name: 'Ancestral Protection Totem'
+  class: Shaman
+  scope: raid
+
+- id: 10060
+  name: 'Power Infusion'
+  class: Priest
+  scope: target
+
+- id: 29166
+  name: 'Innervate'
+  class: Druid
+  scope: target
+
+- id: 363534
+  name: 'Rewind'
+  class: Evoker
+  scope: raid
+- id: 357170
+  name: 'Time Dilation'
+  class: Evoker
+  scope: target

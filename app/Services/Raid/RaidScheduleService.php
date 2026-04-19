@@ -97,7 +97,9 @@ class RaidScheduleService
                 ->whereNull('discord_message_id')
                 ->get();
 
-            $allUpcomingRaids = $allUpcomingRaids->concat($upcomingRaids->toArray());
+            foreach ($upcomingRaids as $raid) {
+                $allUpcomingRaids->push($raid);
+            }
         }
 
         return $allUpcomingRaids;

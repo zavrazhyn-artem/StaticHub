@@ -1,0 +1,47 @@
+spec: Enhancement
+class: Shaman
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Stormstrike
+    ability_id: 17364
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Crash Lightning'
+    ability_id: 187874
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Surging Totem'
+    ability_id: 444995
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: Sundering
+    ability_id: 197214
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Doom Winds'
+    ability_id: 384352
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 1.0
+    severity: major
+  -
+    ability: Ascendance
+    ability_id: 114051
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major

@@ -6,9 +6,13 @@ use App\Enums\Locale;
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
-use App\Services\Discord\DiscordWebhookService;
+use App\Services\Analysis\BlockSchema;
+use App\Services\Analysis\EncounterSnapshotService;
 use App\Services\Analysis\GeminiService;
+use App\Services\Analysis\TacticalDataAnalyzer;
+use App\Services\Analysis\TrendAnalyzer;
 use App\Services\Analysis\WclService;
+use App\Services\Discord\DiscordWebhookService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -18,8 +22,10 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $timeout = 300;
-    public int $uniqueFor = 300;
+    public int $timeout = 1200;
+    public int $uniqueFor = 1800;
+    public int $tries = 1;
+    public int $backoff = 60;
 
     public TacticalReport $report;
 
@@ -34,74 +40,135 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         return (string) $this->report->id;
     }
 
-    public function handle(WclService $wclService, GeminiService $geminiService, DiscordWebhookService $webhookService): void
-    {
+    public function handle(
+        WclService $wclService,
+        TacticalDataAnalyzer $analyzer,
+        GeminiService $geminiService,
+        BlockSchema $blockSchema,
+        EncounterSnapshotService $snapshotService,
+        TrendAnalyzer $trendAnalyzer,
+        DiscordWebhookService $webhookService
+    ): void {
         if (!$this->report->wcl_report_id) return;
+
+        // Guard against duplicate runs — if the report already has AI output + valid cache,
+        // treat subsequent dispatches as no-ops instead of re-running the full pipeline.
+        $this->report->refresh();
+        $hasOutput = $this->report->ai_blocks || $this->report->ai_analysis;
+        if ($hasOutput && $this->report->isCacheActive()) {
+            Log::info("ProcessRaidAnalysisJob skipped — report already processed", [
+                'report_id' => $this->report->id,
+            ]);
+            return;
+        }
 
         try {
             $static = $this->report->staticGroup;
-
-            // Завантажуємо characters з user для locale + members для лідера
             $static->load('characters.user', 'members');
-
-            // Отримуємо масив імен з бази
             $rosterNames = $static->characters->pluck('name')->toArray();
 
-            // Передаємо ростер для жорсткої фільтрації
+            // Stage 1: WCL fetch (with roster filter)
             $logData = $wclService->getLogSummary($this->report->wcl_report_id, $rosterNames);
-
-            // Зберігаємо складності одразу — вони вже відомі з WCL
             $difficulties = $logData['difficulties'] ?? null;
-            unset($logData['difficulties']);
 
-            // Будуємо локалізаційний блок
             $localization = $this->buildLocalization($static, $logData['players'] ?? []);
 
-            // Відправляємо в Gemini (без поля difficulties — AI воно не потрібне)
-            $aiJsonResponse = $geminiService->analyzeTacticalData(json_encode($logData), $localization);
+            // Stage 2: PHP TacticalDataAnalyzer (deterministic preprocessing — replaces Flash)
+            $preprocessed = $analyzer->analyze(
+                $logData,
+                $localization,
+                $rosterNames,
+                $this->report->wcl_report_id
+            );
 
-            // Розбираємо отриманий JSON
-            $parsedData = json_decode($aiJsonResponse, true);
-
-            if (!$parsedData || !is_array($parsedData)) {
-                Log::error("Gemini didn't return valid JSON. Raw response: " . $aiJsonResponse);
-                return;
+            // Wave 3: persist per-encounter snapshots (always, regardless of subscription)
+            // and append cross-raid trends ONLY if the static has premium tier (feature flag).
+            try {
+                $snapshotService->saveFromPreprocessed($this->report, $preprocessed);
+            } catch (\Throwable $e) {
+                Log::warning('Snapshot save failed (non-fatal): ' . $e->getMessage());
             }
 
-            // 1. Зберігаємо загальний звіт та мета-поля
+            if ($this->trendsEnabled($static)) {
+                try {
+                    $trends = $trendAnalyzer->buildTrends(
+                        $static->id,
+                        $this->report->id,
+                        $preprocessed['encounters'] ?? []
+                    );
+                    if ($trends['enabled']) {
+                        $preprocessed['cross_raid_trends'] = $trends;
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Trend build failed (non-fatal): ' . $e->getMessage());
+                }
+            }
+
+            $preprocessedJson = json_encode($preprocessed, JSON_UNESCAPED_UNICODE);
+
+            // Player details + raid-wide consumables stay raid-wide (don't change per encounter)
+            $supplementary = json_encode([
+                'player_details' => $logData['player_details'] ?? [],
+            ], JSON_UNESCAPED_UNICODE);
+
+            // Stage 3a: create shared cache once (reused by main + per-player generators + chat)
+            $cache = $geminiService->createRaidCache($preprocessedJson, $supplementary);
+            $cacheId = $cache['cache_id'] ?? null;
+            $cacheExpiresAt = $cache['expires_at'] ?? null;
+
+            if (!$cacheId) {
+                throw new \Exception('Gemini cache creation failed — cannot proceed with split generation');
+            }
+
+            // Stage 3b: main raid-wide report (single call)
+            $main = $geminiService->generateMainReportBlocks($cacheId);
+            $mainBlocks = $blockSchema->sanitize($main['main']);
+            $title = $main['title'] ?: ($logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis');
+
             $this->report->update([
-                'title'        => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
-                'difficulties' => $difficulties,
-                'ai_analysis'  => $parsedData['main'] ?? 'Analysis not generated.',
+                'title'                  => $title,
+                'difficulties'           => $difficulties,
+                'ai_blocks'              => $mainBlocks,
+                'model'                  => config('services.gemini.pro_model'),
+                'gemini_cache_id'        => $cacheId,
+                'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
             ]);
 
-            // 2. Зберігаємо особисті звіти тільки для учасників рейду з ростеру
-            $metaKeys = ['title', 'main'];
+            // Stage 3c: per-player reports (parallel batches via Http::pool)
             $rosterCharacters = $static->characters;
-            $actualParticipantNames = array_map('strtolower', array_column($logData['players'] ?? [], 'name'));
+            $actualParticipantNames = array_column($logData['players'] ?? [], 'name');
 
-            foreach ($parsedData as $playerName => $content) {
-                if (in_array($playerName, $metaKeys, true)) continue;
-                if (!in_array(strtolower(trim($playerName)), $actualParticipantNames)) continue;
+            // Only generate for players who are in BOTH the log AND the roster
+            $targetPlayers = array_values(array_filter(
+                $actualParticipantNames,
+                fn($name) => $rosterCharacters->contains(fn($c) => strtolower($c->name) === strtolower(trim($name)))
+            ));
 
-                $character = $rosterCharacters->first(function ($c) use ($playerName) {
-                    return strtolower($c->name) === strtolower(trim($playerName));
-                });
+            if (!empty($targetPlayers)) {
+                $playerReports = $geminiService->generatePlayerReportBlocks($cacheId, $targetPlayers, 5);
 
-                if ($character && !empty($content)) {
+                foreach ($playerReports as $playerName => $blocks) {
+                    if (empty($blocks)) continue;
+
+                    $character = $rosterCharacters->first(
+                        fn($c) => strtolower($c->name) === strtolower(trim($playerName))
+                    );
+                    if (!$character) continue;
+
+                    $sanitized = $blockSchema->sanitize($blocks);
                     PersonalTacticalReport::updateOrCreate(
                         [
                             'tactical_report_id' => $this->report->id,
-                            'character_id' => $character->id,
+                            'character_id'       => $character->id,
                         ],
-                        ['content' => $content]
+                        ['ai_blocks' => $sanitized]
                     );
                 }
             }
 
             // Send webhook notification that AI report is ready
             $reportTitle = $this->report->title ?? 'Raid Analysis';
-            $reportUrl = route('statics.logs.show', [$static, $this->report]);
+            $reportUrl = route('statics.logs.show', $this->report);
             $payload = DiscordWebhookBuilder::buildAnalysisReadyPayload($reportTitle, $reportUrl);
             $webhookService->sendNotification($static, $payload);
 
@@ -109,6 +176,16 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             Log::error("ProcessRaidAnalysisJob failed: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Cross-raid trends are a premium-tier feature. Until the subscription system is
+     * wired up, we gate behind a config flag so dev / preview environments can opt in.
+     */
+    private function trendsEnabled(\App\Models\StaticGroup $static): bool
+    {
+        // TODO: replace with subscription tier check (e.g. $static->subscription?->tier === 'elite')
+        return (bool) config('analysis.cross_raid_trends_enabled', true);
     }
 
     /**

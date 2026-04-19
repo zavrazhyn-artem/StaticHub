@@ -105,8 +105,8 @@ export default {
         <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center">
             <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Consumables Planning') }}</h3>
             <div v-show="isSaving" class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                <span class="text-[9px] text-primary font-bold uppercase tracking-widest">{{ __('Saving...') }}</span>
+                <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                <span class="text-4xs text-yellow-500 font-semibold uppercase tracking-wider">{{ __('Saving...') }}</span>
             </div>
         </div>
 
@@ -114,17 +114,17 @@ export default {
             <!-- Static Info -->
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div class="bg-surface-container-lowest/50 p-3 rounded-lg border border-white/5">
-                    <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Raid Days') }}</div>
+                    <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">{{ __('Raid Days') }}</div>
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xs">calendar_month</span>
+                        <span class="material-symbols-outlined text-yellow-500 text-xs">calendar_month</span>
                         <span>{{ raidDays }}</span>
-                        <a v-if="settingsScheduleUrl" :href="settingsScheduleUrl" class="ml-auto text-[8px] text-primary hover:underline uppercase tracking-widest">{{ __('Edit') }}</a>
+                        <a v-if="settingsScheduleUrl" :href="settingsScheduleUrl" class="ml-auto text-5xs text-yellow-500 hover:underline uppercase tracking-wider">{{ __('Edit') }}</a>
                     </div>
                 </div>
                 <div class="bg-surface-container-lowest/50 p-3 rounded-lg border border-white/5">
-                    <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Total Members') }}</div>
+                    <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">{{ __('Total Members') }}</div>
                     <div class="text-lg font-headline font-black text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xs">groups</span>
+                        <span class="material-symbols-outlined text-yellow-500 text-xs">groups</span>
                         <span>{{ totalMembers }}/20</span>
                     </div>
                 </div>
@@ -145,27 +145,27 @@ export default {
             <div class="mt-4 pt-4 border-t border-white/5 flex flex-col gap-3">
                 <div class="grid grid-cols-3 gap-3">
                     <div class="flex flex-col">
-                        <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{{ __('Weekly Total') }}</div>
-                        <div class="text-lg font-headline font-black text-white mt-0.5 leading-none">
+                        <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Weekly Total') }}</div>
+                        <div class="text-lg font-headline font-black text-white mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(totalCost) }}</span>
-                            <span class="text-tertiary-dim text-[8px] uppercase">G</span>
+                            <span class="text-tertiary-dim text-5xs uppercase">G</span>
                         </div>
                     </div>
                     <div class="border-x border-white/5 px-3 flex flex-col">
-                        <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{{ __('Tax/Raider') }}</div>
-                        <div class="text-md font-headline font-bold text-white mt-0.5 leading-none">
+                        <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Tax/Raider') }}</div>
+                        <div class="text-md font-headline font-bold text-white mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(guildTaxPerRaider) }}</span>
-                            <span class="text-tertiary-dim text-[8px]">G</span>
+                            <span class="text-tertiary-dim text-5xs">G</span>
                         </div>
                     </div>
                     <div class="flex flex-col">
-                        <div class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant leading-tight">{{ __('AH Cost') }}</div>
-                        <div class="text-md font-headline font-bold text-error-dim mt-0.5 leading-none">
+                        <div class="text-4xs font-semibold uppercase tracking-wider text-on-surface-variant leading-tight">{{ __('AH Cost') }}</div>
+                        <div class="text-md font-headline font-bold text-error-dim mt-0.5 leading-none tabular-nums">
                             <span>{{ formatGold(individualCostPerRaider) }}</span>
-                            <span class="text-tertiary-dim text-[8px]">G</span>
+                            <span class="text-tertiary-dim text-5xs">G</span>
                         </div>
                         <div class="mt-1.5" v-show="savings > 0">
-                            <span class="inline-flex px-1.5 py-0.5 rounded bg-success-neon/10 text-success-neon text-[8px] font-bold uppercase tracking-widest">
+                            <span class="inline-flex px-1.5 py-0.5 rounded bg-success-neon/10 text-success-neon text-5xs font-semibold uppercase tracking-wider">
                                 {{ __('Save') }} {{ formatGold(savings) }} G
                             </span>
                         </div>

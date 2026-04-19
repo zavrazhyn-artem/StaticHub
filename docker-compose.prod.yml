@@ -19,10 +19,7 @@
 #   docker compose exec app php artisan migrate --seed
 
 x-app-defaults: &app-defaults
-  build:
-    context: .
-    dockerfile: docker/production/Dockerfile
-    target: production
+  image: blastr-app:latest
   restart: unless-stopped
   env_file: .env
   depends_on:
@@ -69,6 +66,10 @@ services:
   # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+      target: production
     healthcheck:
       test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
       interval: 30s
@@ -113,6 +114,7 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --innodb-buffer-pool-size=256M
       - --sort-buffer-size=4M
+      - --skip-log-bin
     volumes:
       - mysql_data:/var/lib/mysql
     ports:

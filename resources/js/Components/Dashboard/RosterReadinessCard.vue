@@ -20,6 +20,9 @@
 </template>
 
 <script setup>
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
+
 const props = defineProps({
     roleCounts: { type: Object, default: () => ({}) },
 })

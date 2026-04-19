@@ -111,7 +111,7 @@ const getWeeklyProgression = (char) => {
       <table class="w-full text-left border-collapse min-w-max">
         <thead>
           <!-- Instance headers -->
-          <tr class="bg-black/20 text-gray-500 text-[9px] uppercase tracking-widest font-bold border-b border-white/5">
+          <tr class="bg-black/20 text-gray-400 text-4xs uppercase tracking-wider font-semibold border-b border-white/5">
             <th class="p-2 pl-4 sticky left-0 z-20 bg-[#0e0e10] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Character') }}</th>
             <th class="p-2 text-center border-l border-white/5">{{ __('Weekly') }}</th>
             <template v-for="inst in raidInstances" :key="inst.name">
@@ -119,10 +119,10 @@ const getWeeklyProgression = (char) => {
             </template>
           </tr>
           <!-- Boss name headers -->
-          <tr class="bg-black/40 text-cyan-400 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">
-            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[200px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
+          <tr class="bg-black/40 text-emerald-400 text-3xs uppercase tracking-wider font-semibold border-b border-white/5">
+            <th class="p-4 sticky left-0 z-20 bg-[#0e0e10] min-w-[12.5rem] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">{{ __('Name') }}</th>
             <th class="p-4 text-center border-l border-white/5">{{ __('Prog') }}</th>
-            <th v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5 text-[9px] min-w-[80px]">
+            <th v-for="boss in allBosses" :key="boss" class="p-4 text-center border-l border-white/5 text-4xs min-w-20">
               {{ boss }}
             </th>
           </tr>
@@ -146,7 +146,7 @@ const getWeeklyProgression = (char) => {
                   </div>
                   <div class="w-8 h-8 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="char.avatar_url" :src="char.avatar_url" :alt="char.name" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-white/20">?</span>
+                    <span v-else class="text-3xs text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
                     <div class="font-bold text-sm truncate" :class="classColors[char.class] || 'text-white'">
@@ -158,7 +158,7 @@ const getWeeklyProgression = (char) => {
 
               <!-- Weekly Progression Summary -->
               <td class="p-4 text-center border-l border-white/5">
-                <span class="text-[11px] font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
+                <span class="text-2xs font-semibold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">
                   {{ getWeeklyProgression(char) }}
                 </span>
               </td>
@@ -183,7 +183,7 @@ const getWeeklyProgression = (char) => {
                   <div class="w-4 h-5 border-l-2 border-b-2 border-white/10 -mt-3 rounded-bl"></div>
                   <div class="w-7 h-7 rounded border border-white/10 bg-black/20 flex items-center justify-center overflow-hidden shrink-0">
                     <img v-if="alt.avatar_url" :src="alt.avatar_url" :alt="alt.name" class="w-full h-full object-cover opacity-70" />
-                    <span v-else class="text-[10px] text-white/20">?</span>
+                    <span v-else class="text-3xs text-white/20">?</span>
                   </div>
                   <div class="min-w-0">
                     <div class="font-bold text-xs truncate" :class="classColors[alt.class] || 'text-white'">{{ alt.name }}</div>
@@ -192,7 +192,7 @@ const getWeeklyProgression = (char) => {
               </td>
 
               <td class="p-4 text-center border-l border-white/5 opacity-80">
-                <span class="text-[10px] font-bold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getWeeklyProgression(alt) }}</span>
+                <span class="text-3xs font-semibold text-white whitespace-nowrap bg-white/5 px-2 py-1 rounded">{{ getWeeklyProgression(alt) }}</span>
               </td>
 
               <td v-for="boss in allBosses" :key="'alt-'+boss" class="p-4 text-center border-l border-white/5 opacity-80">

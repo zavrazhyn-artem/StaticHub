@@ -38,12 +38,23 @@ class GeminiPromptBuilder
     }
 
     /**
-     * Build the prompt for the real-time AI analyst chat.
-     *
-     * @param string $userMessage
-     * @param array $rawLogData
-     * @return string
+     * Build the report generation prompt for Pro model.
+     * Takes the structured analysis JSON from PHP TacticalDataAnalyzer and produces final HTML reports.
      */
+    public static function buildReportGenerationPrompt(string $preprocessedJsonData): string
+    {
+        $promptPath = resource_path('prompts/gemini_report_generation.txt');
+
+        if (!file_exists($promptPath)) {
+            Log::error("Report generation prompt file missing: {$promptPath}");
+            throw new \Exception("Report generation prompt file missing: {$promptPath}");
+        }
+
+        $systemPrompt = file_get_contents($promptPath);
+
+        return $systemPrompt . "\n\n=== PRE-ANALYZED DATA ===\n" . $preprocessedJsonData;
+    }
+
     /**
      * @param array $history  [ ['role' => 'user'|'assistant', 'text' => string], ... ]
      */

@@ -80,12 +80,24 @@ export default {
                 "warrior": "#C69B6D",
                 "success-neon": "#39FF14"
             },
+            // Font tokens reference CSS variables defined in app.css :root.
+            // To swap a font globally — edit the --font-* variables there, no config change needed.
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                "headline": ["Space Grotesk"],
-                "body": ["Manrope"],
-                "label": ["Manrope"],
-                "slogan": ["Orbitron", "sans-serif"]
+                sans:     ['var(--font-body)', ...defaultTheme.fontFamily.sans],
+                body:     ['var(--font-body)'],
+                label:    ['var(--font-body)'],
+                headline: ['var(--font-headline)'],
+                nav:      ['var(--font-nav)'],
+                slogan:   ['var(--font-slogan)'],
+            },
+            fontSize: {
+                '5xs': ['0.5rem',    { lineHeight: '0.75rem' }],    // 8px
+                '4xs': ['0.5625rem', { lineHeight: '0.8125rem' }],  // 9px
+                '3xs': ['0.625rem',  { lineHeight: '0.875rem' }],   // 10px
+                '2xs': ['0.6875rem', { lineHeight: '1rem' }],       // 11px
+            },
+            maxWidth: {
+                '8xl': '90rem',  // 1440px — main container
             },
             borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
             typography: (theme) => ({

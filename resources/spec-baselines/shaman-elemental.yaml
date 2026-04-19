@@ -1,0 +1,26 @@
+spec: Elemental
+class: Shaman
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: Ascendance
+    ability_id: 114050
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Stormkeeper
+    ability_id: 191634
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Ancestral Swiftness'
+    ability_id: 443454
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major

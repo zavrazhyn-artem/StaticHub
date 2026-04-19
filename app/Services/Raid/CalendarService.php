@@ -46,6 +46,7 @@ class CalendarService
                 'update_url'       => route('schedule.event.update', $event),
                 'start_time'       => $event->start_time->toIso8601String(),
                 'end_time'         => $event->end_time?->toIso8601String(),
+                'timezone'         => $event->timezone,
                 'description'      => $event->description,
                 'characters_count' => $event->characters_count ?? 0,
             ])->values()->all(),

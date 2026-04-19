@@ -79,6 +79,27 @@ class ProfileTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
+    public function test_user_can_toggle_hide_battletag_privacy(): void
+    {
+        $user = User::factory()->create(['hide_battletag' => false]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile/privacy', [
+                'hide_battletag' => '1',
+            ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect('/profile');
+
+        $this->assertTrue($user->refresh()->hide_battletag);
+
+        $this->actingAs($user)->patch('/profile/privacy', [
+            'hide_battletag' => '0',
+        ]);
+
+        $this->assertFalse($user->refresh()->hide_battletag);
+    }
+
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
         $user = User::factory()->create();

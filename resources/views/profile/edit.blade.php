@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+        <div class="max-w-8xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
             @if(session('status') === 'ownership-transferred')
                 <div class="p-4 bg-success-neon/10 border border-success-neon/30 rounded-xl flex items-center gap-3">
@@ -9,6 +9,52 @@
                 </div>
             @endif
 
+            @if(session('status') === 'privacy-updated')
+                <div class="p-4 bg-success-neon/10 border border-success-neon/30 rounded-xl flex items-center gap-3">
+                    <span class="material-symbols-outlined text-success-neon">check_circle</span>
+                    <p class="text-xs font-bold text-success-neon uppercase tracking-widest">{{ __('Privacy preferences updated.') }}</p>
+                </div>
+            @endif
+
+            <!-- Privacy Section -->
+            <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
+                <div class="max-w-xl">
+                    <header class="mb-6">
+                        <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
+                            {{ __('Privacy') }}
+                        </h2>
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            {{ __('Control how your identity is shown to other members.') }}
+                        </p>
+                    </header>
+
+                    <form method="POST" action="{{ route('profile.privacy.update') }}">
+                        @csrf
+                        @method('patch')
+
+                        <label class="flex items-start justify-between gap-4 p-4 bg-surface-container-lowest border border-white/5 rounded-lg cursor-pointer hover:bg-surface-container-low transition-all">
+                            <div class="flex-1">
+                                <div class="text-3xs font-semibold text-white uppercase tracking-wider">
+                                    {{ __('Hide BattleTag') }}
+                                </div>
+                                <div class="text-2xs text-gray-400 font-medium mt-1 leading-relaxed">
+                                    {{ __('When enabled, other members will see your main character name instead of your BattleTag.') }}
+                                </div>
+                            </div>
+                            <input type="hidden" name="hide_battletag" value="0">
+                            <input
+                                type="checkbox"
+                                name="hide_battletag"
+                                value="1"
+                                onchange="this.form.submit()"
+                                @checked(old('hide_battletag', $user->hide_battletag))
+                                class="mt-1 w-5 h-5 rounded border-white/20 bg-surface-container-lowest text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                            />
+                        </label>
+                    </form>
+                </div>
+            </div>
+
             <!-- Integrations Section -->
             <div class="p-4 sm:p-8 bg-surface-container-high border border-white/5 rounded-xl shadow-2xl">
                 <div class="max-w-xl">
@@ -16,7 +62,7 @@
                         <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
                             {{ __('Integrations') }}
                         </h2>
-                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             {{ __('Connect your external accounts for enhanced functionality.') }}
                         </p>
                     </header>
@@ -30,14 +76,14 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">Discord</div>
+                                    <div class="text-3xs font-semibold text-white uppercase tracking-wider">Discord</div>
                                     @if(auth()->user()->discord_id)
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <span class="text-xs font-bold text-success-neon">{{ auth()->user()->discord_username }}</span>
                                             <span class="material-symbols-outlined text-success-neon text-sm">check_circle</span>
                                         </div>
                                     @else
-                                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{{ __('Not Connected') }}</div>
+                                        <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">{{ __('Not Connected') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -45,12 +91,12 @@
                             @if(auth()->user()->discord_id)
                                 <form method="POST" action="{{ route('profile.discord.unlink') }}">
                                     @csrf
-                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
+                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-semibold uppercase tracking-wider py-2 px-4 rounded-sm transition-all active:scale-95">
                                         {{ __('Unlink') }}
                                     </button>
                                 </form>
                             @else
-                                <a href="{{ route('profile.discord.link') }}" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
+                                <a href="{{ route('profile.discord.link') }}" class="bg-[#5865F2] hover:bg-[#4752C4] text-white text-3xs font-semibold uppercase tracking-wider py-2 px-4 rounded-sm transition-all active:scale-95 shadow-[0_0_15px_rgba(88,101,242,0.3)] hover:shadow-[0_0_20px_rgba(88,101,242,0.5)]">
                                     {{ __('Link Account') }}
                                 </a>
                             @endif
@@ -67,7 +113,7 @@
                         <h2 class="font-headline text-lg font-bold text-white uppercase tracking-widest">
                             {{ __('Static Group') }}
                         </h2>
-                        <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <p class="mt-1 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             {{ __('Manage your static group membership.') }}
                         </p>
                     </header>
@@ -76,8 +122,8 @@
                     <div class="space-y-4 mb-4">
                         <div class="flex items-center justify-between p-4 bg-surface-container-lowest border border-white/5 rounded-lg">
                             <div>
-                                <div class="font-headline text-[10px] font-bold text-white uppercase tracking-widest">{{ $static->name }}</div>
-                                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                                <div class="text-3xs font-semibold text-white uppercase tracking-wider">{{ $static->name }}</div>
+                                <div class="text-3xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
                                     @if($static->owner_id === auth()->id())
                                         {{ __('Owner') }}
                                     @else
@@ -91,12 +137,12 @@
                                       onsubmit="return confirm('{{ __('Are you sure you want to leave this static group?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-headline text-[10px] font-bold uppercase tracking-widest py-2 px-4 rounded-sm transition-all active:scale-95">
+                                    <button type="submit" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-3xs font-semibold uppercase tracking-wider py-2 px-4 rounded-sm transition-all active:scale-95">
                                         {{ __('Leave') }}
                                     </button>
                                 </form>
                             @else
-                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{{ __('Owner') }}</span>
+                                <span class="text-3xs text-gray-400 font-semibold uppercase tracking-wider">{{ __('Owner') }}</span>
                             @endif
                         </div>
 

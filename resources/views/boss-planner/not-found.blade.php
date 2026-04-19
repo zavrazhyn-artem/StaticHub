@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Plan Not Found</title>
     @vite(['resources/css/app.css'])
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body class="bg-[#0d0d0f] text-white min-h-screen flex items-center justify-center">
     <div class="text-center space-y-4 max-w-md px-6">

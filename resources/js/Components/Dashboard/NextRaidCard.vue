@@ -22,7 +22,7 @@
                         <span class="inline-block min-w-[2ch] text-right">{{ padTwo(mins) }}</span>{{ __('minute_short') }}
                         <span class="inline-block min-w-[2ch] text-right">{{ padTwo(secs) }}</span>{{ __('second_short') }}
                     </div>
-                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{{ __('Countdown to Pull') }}</div>
+                    <div class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider">{{ __('Countdown to Pull') }}</div>
                 </div>
                 <div class="h-12 w-px bg-white/10 hidden md:block"></div>
                 <div>
@@ -42,6 +42,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useTranslation } from '@/composables/useTranslation';
+const { __ } = useTranslation();
 
 const props = defineProps({
     nextRaid: { type: Object, default: null },

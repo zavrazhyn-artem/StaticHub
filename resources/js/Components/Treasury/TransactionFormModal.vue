@@ -26,12 +26,12 @@ const selectedUserId = ref('');
             </button>
         </div>
 
-        <form :action="`/statics/${staticId}/treasury`" method="POST" class="p-6 space-y-4">
+        <form action="/treasury" method="POST" class="p-6 space-y-4">
             <input type="hidden" name="_token" :value="csrfToken">
             <input type="hidden" name="type" :value="transactionType">
 
             <div class="space-y-1">
-                <label class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Select Member') }}</label>
+                <label class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Select Member') }}</label>
                 <SelectUserWithMain
                     v-model="selectedUserId"
                     :members="members"
@@ -42,20 +42,20 @@ const selectedUserId = ref('');
             </div>
 
             <div class="space-y-1">
-                <label for="amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Amount (Gold)') }}</label>
+                <label for="amount" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Amount (Gold)') }}</label>
                 <input type="number" name="amount" id="amount" required :placeholder="__('e.g., 50000')"
-                       class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none">
+                       class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none">
             </div>
 
             <div class="space-y-1">
-                <label for="description" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Description') }}</label>
+                <label for="description" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Description') }}</label>
                 <textarea name="description" id="description" rows="2" :placeholder="__('Optional notes...')"
-                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-transparent outline-none"></textarea>
+                          class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none"></textarea>
             </div>
 
             <div class="pt-4">
                 <button type="submit" :disabled="!selectedUserId"
-                        class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     {{ __('Save Transaction') }}
                 </button>
             </div>

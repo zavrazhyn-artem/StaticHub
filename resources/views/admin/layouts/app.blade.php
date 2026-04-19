@@ -8,13 +8,12 @@
     <title>Blastr Admin</title>
     <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- All fonts bundled via app.css -->
 
     @vite(['resources/css/app.css'])
 
     <style>
-        body { background: #0e0e10; color: #e0e0e0; font-family: 'Manrope', sans-serif; }
+        body { background: #0e0e10; color: #e0e0e0; font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; text-rendering: optimizeLegibility; font-feature-settings: 'cv11', 'ss01', 'ss03'; }
         .admin-primary { color: #ef4444; }
         .admin-primary-bg { background-color: #ef4444; }
         .admin-primary-bg:hover { background-color: #dc2626; }
@@ -130,7 +129,7 @@
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="subpixel-antialiased">
     <div style="display: flex; min-height: 100vh;">
         {{-- Sidebar --}}
         <aside class="admin-sidebar" style="width: 250px; padding: 1.5rem 1rem; flex-shrink: 0;">

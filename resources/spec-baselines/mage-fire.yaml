@@ -1,0 +1,12 @@
+spec: Fire
+class: Mage
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Fire Blast'
+    ability_id: 108853
+    check: cast_efficiency
+    cooldown_seconds: 14.0
+    recommended_efficiency: 0.9
+    severity: major

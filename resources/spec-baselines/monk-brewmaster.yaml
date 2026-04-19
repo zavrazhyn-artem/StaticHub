@@ -1,0 +1,54 @@
+spec: Brewmaster
+class: Monk
+role: tank
+source: WoWAnalyzer-midnight (APL-derived, manual)
+rotation_checks:
+  -
+    ability: 'Keg Smash'
+    ability_id: 121253
+    check: cast_efficiency
+    cooldown_seconds: 8.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Breath of Fire'
+    ability_id: 115181
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Rising Sun Kick'
+    ability_id: 107428
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Purifying Brew'
+    ability_id: 119582
+    check: cast_efficiency
+    cooldown_seconds: 4.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Exploding Keg'
+    ability_id: 325153
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Black Ox Brew'
+    ability_id: 115399
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Invoke Niuzao, the Black Ox'
+    ability_id: 132578
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.90
+    severity: major

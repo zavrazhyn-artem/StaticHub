@@ -13,6 +13,8 @@ const props = defineProps({
     assignUrl: { type: String, default: '' },
 });
 
+const emit = defineEmits(['view-plan']);
+
 const encounters = computed(() => props.plannerData.encounters || []);
 
 const currentEncounter = computed(() => {
@@ -76,11 +78,11 @@ const unassignPlan = async () => {
                     <img v-if="currentEncounter?.portrait" :src="currentEncounter.portrait" class="w-9 h-9 rounded-lg border border-white/10 object-cover">
                     <div>
                         <h3 class="text-sm font-black text-white uppercase tracking-tight">{{ currentEncounter?.name }}</h3>
-                        <span class="text-[9px] text-on-surface-variant/50">{{ plans.length }} {{ __('plans available') }}</span>
+                        <span class="text-4xs text-on-surface-variant/50">{{ plans.length }} {{ __('plans available') }}</span>
                     </div>
                 </div>
                 <a :href="bossPlannerUrl"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[9px] font-bold uppercase tracking-widest hover:bg-orange-500/20 transition-all">
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-4xs font-semibold uppercase tracking-wider hover:bg-orange-500/20 transition-all">
                     <span class="material-symbols-outlined text-xs">open_in_new</span>
                     {{ __('Open Planner') }}
                 </a>
@@ -94,31 +96,38 @@ const unassignPlan = async () => {
                             <span class="material-symbols-outlined text-sm text-green-400">check_circle</span>
                         </div>
                         <div>
-                            <div class="text-[9px] font-black uppercase tracking-widest text-green-400/60">{{ __('Assigned Plan') }}</div>
+                            <div class="text-4xs font-bold uppercase tracking-wider text-green-400/60">{{ __('Assigned Plan') }}</div>
                             <div class="text-xs font-bold text-white">{{ assignedPlan.title || currentEncounter?.name }}</div>
                             <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                <span class="text-5xs font-semibold uppercase px-1.5 py-0.5 rounded"
                                     :class="{
                                         'bg-orange-500/10 text-orange-400': assignedPlan.difficulty === 'mythic',
                                         'bg-purple-500/10 text-purple-400': assignedPlan.difficulty === 'heroic',
                                         'bg-green-500/10 text-green-400': assignedPlan.difficulty === 'normal',
                                         'bg-blue-500/10 text-blue-400': assignedPlan.difficulty === 'raid_finder',
                                     }">{{ assignedPlan.difficulty === 'raid_finder' ? 'LFR' : assignedPlan.difficulty }}</span>
-                                <span class="text-[8px] text-on-surface-variant/40">{{ assignedPlan.steps?.length || 0 }} {{ __('phases') }}</span>
+                                <span class="text-5xs text-on-surface-variant/40">{{ assignedPlan.steps?.length || 0 }} {{ __('phases') }}</span>
                             </div>
                         </div>
                     </div>
-                    <button v-if="canManage" @click="unassignPlan"
-                        class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-bold hover:bg-red-500/20 transition-all">
-                        <span class="material-symbols-outlined text-xs">close</span>
-                        {{ __('Remove') }}
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <button @click="emit('view-plan', assignedPlan)"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-4xs font-semibold hover:bg-orange-500/20 transition-all">
+                            <span class="material-symbols-outlined text-xs">visibility</span>
+                            {{ __('View') }}
+                        </button>
+                        <button v-if="canManage" @click="unassignPlan"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-4xs font-semibold hover:bg-red-500/20 transition-all">
+                            <span class="material-symbols-outlined text-xs">close</span>
+                            {{ __('Remove') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Plans list (select to assign) -->
             <div v-if="plans.length > 0" class="space-y-1.5">
-                <div class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/40 px-1">
+                <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant/40 px-1">
                     {{ assignedPlan ? __('Other Plans') : __('Select a plan to assign') }}
                 </div>
                 <template v-for="plan in plans" :key="plan.id">
@@ -132,18 +141,18 @@ const unassignPlan = async () => {
                         <div class="flex-1 min-w-0">
                             <div class="text-xs font-bold text-white truncate">{{ plan.title || currentEncounter?.name }}</div>
                             <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                <span class="text-5xs font-semibold uppercase px-1.5 py-0.5 rounded"
                                     :class="{
                                         'bg-orange-500/10 text-orange-400': plan.difficulty === 'mythic',
                                         'bg-purple-500/10 text-purple-400': plan.difficulty === 'heroic',
                                         'bg-green-500/10 text-green-400': plan.difficulty === 'normal',
                                         'bg-blue-500/10 text-blue-400': plan.difficulty === 'raid_finder',
                                     }">{{ plan.difficulty === 'raid_finder' ? 'LFR' : plan.difficulty }}</span>
-                                <span class="text-[8px] text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
+                                <span class="text-5xs text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
                             </div>
                         </div>
                         <button v-if="canManage" @click="assignPlan(plan.id)"
-                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[9px] font-bold hover:bg-primary/20 transition-all shrink-0">
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-fuchsia-400/10 border border-fuchsia-400/20 text-fuchsia-400 text-4xs font-semibold hover:bg-fuchsia-400/20 transition-all shrink-0">
                             <span class="material-symbols-outlined text-xs">add_circle</span>
                             {{ __('Assign') }}
                         </button>

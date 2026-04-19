@@ -1,12 +1,12 @@
 <template>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-1">
                     <a :href="treasuryUrl" class="text-on-surface-variant hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-xl">arrow_back</span>
                     </a>
-                    <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Transaction History') }}</h1>
+                    <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Transaction History') }}</h1>
                 </div>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs ml-9">
                     {{ staticName }} &bull; {{ __('Full Ledger') }}
@@ -31,25 +31,28 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Date') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Member') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Type') }}</th>
-                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Amount') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Description') }}</th>
-                            <th v-if="canManageTreasury" class="px-4 py-3 text-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline w-10"></th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Type') }}</th>
+                            <th class="px-4 py-3 text-right text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Amount') }}</th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Description') }}</th>
+                            <th v-if="canManageTreasury" class="px-4 py-3 text-center text-3xs font-semibold text-on-surface-variant uppercase tracking-wider w-10"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         <tr v-for="tx in transactions" :key="tx.id" class="hover:bg-white/5 transition-colors">
-                            <td class="px-4 py-4 text-[10px] text-on-surface-variant font-medium whitespace-nowrap">
+                            <td class="px-4 py-4 text-3xs text-on-surface-variant font-medium whitespace-nowrap">
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold text-white">{{ tx.user.name }}</span>
+                                <span class="text-xs font-bold"
+                                      :style="{ color: getClassTextColor(tx.playable_class) }">
+                                    {{ tx.display_name }}
+                                </span>
                             </td>
                             <td class="px-4 py-4">
                                 <span
-                                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm"
+                                    class="inline-flex items-center gap-1 text-3xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-sm"
                                     :class="tx.type === 'deposit' ? 'bg-success-neon/10 text-success-neon' : 'bg-error/10 text-error'"
                                 >
                                     <span class="material-symbols-outlined text-xs">{{ tx.type === 'deposit' ? 'arrow_downward' : 'arrow_upward' }}</span>
@@ -61,11 +64,11 @@
                                     {{ tx.type === 'deposit' ? '+' : '-' }}{{ formatGold(tx.amount) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-xs text-on-surface-variant max-w-[200px] truncate">
+                            <td class="px-4 py-4 text-xs text-on-surface-variant max-w-[12.5rem] truncate">
                                 {{ tx.description || '—' }}
                             </td>
                             <td v-if="canManageTreasury" class="px-4 py-4 text-center">
-                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-primary transition-colors">
+                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-yellow-500 transition-colors">
                                     <span class="material-symbols-outlined text-lg">{{ tx.description ? 'edit_note' : 'add_comment' }}</span>
                                 </button>
                             </td>
@@ -93,10 +96,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useWowClasses } from '@/composables/useWowClasses';
 import SelectUserWithMain from '@/Components/UI/SelectUserWithMain.vue';
 import TransactionCommentModal from './TransactionCommentModal.vue';
 
 const { __ } = useTranslation();
+const { getClassTextColor } = useWowClasses();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -136,7 +141,7 @@ const openEditModal = (tx) => {
     editingTransaction.value = {
         id: tx.id,
         description: tx.description || '',
-        member: tx.user.name,
+        member: tx.display_name,
         date: formatDate(tx.created_at),
         amount: formatGold(tx.amount),
         type: tx.type,

@@ -232,6 +232,27 @@ return [
     | Used to determine weekly boss kills via last_updated_timestamp comparison.
     | Source: wowaudit VALID_RAIDS[:live] raid_ids.
     */
+    /*
+    |--------------------------------------------------------------------------
+    | WCL Encounter IDs
+    |--------------------------------------------------------------------------
+    | Stable Warcraft Logs encounterID per boss. Used for programmatic tactic lookup
+    | instead of matching by display name (which may vary by locale / comma usage).
+    | Source: WCL fights API.
+    */
+    'wcl_encounter_ids' => [
+        3176 => 'Imperator Averzian',
+        3177 => 'Vorasius',
+        3178 => 'Vaelgor & Ezzorak',
+        3179 => 'Fallen-King Salhadaar',
+        3180 => 'Lightblinded Vanguard',
+        3181 => 'Crown of the Cosmos',
+        3306 => 'Chimaerus the Undreamt God',
+        // TODO: populate once a report with these bosses is available
+        // ???? => "Belo'ren, Child of Al'ar",
+        // ???? => 'Midnight Falls',
+    ],
+
     'raid_boss_achievement_ids' => [
         'Imperator Averzian'       => ['raid_finder' => [61276], 'normal' => [61277], 'heroic' => [61278], 'mythic' => [61279]],
         'Vorasius'                 => ['raid_finder' => [61280], 'normal' => [61281], 'heroic' => [61282], 'mythic' => [61283]],

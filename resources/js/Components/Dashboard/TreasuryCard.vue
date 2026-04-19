@@ -20,30 +20,30 @@
         <div class="space-y-6">
             <div>
                 <div
-                    class="text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1"
+                    class="text-3xs font-semibold uppercase tracking-wider mb-1 flex items-center gap-1"
                     :class="taxStatus === 'danger' ? 'text-error' : taxStatus === 'warning' ? 'text-warning' : 'text-on-surface-variant'"
                 >
-                    <span v-if="taxStatus !== 'success'" class="material-symbols-outlined text-[12px]">
+                    <span v-if="taxStatus !== 'success'" class="material-symbols-outlined text-xs">
                         {{ taxStatus === 'danger' ? 'trending_up' : 'trending_down' }}
                     </span>
                     {{ __('Weekly Tax Goal') }}
                 </div>
                 <div class="flex items-baseline gap-2">
                     <span
-                        class="text-3xl font-black font-headline tracking-tighter"
+                        class="text-3xl font-black font-headline tracking-tight tabular-nums"
                         :class="taxStatus === 'danger' ? 'text-error' : taxStatus === 'warning' ? 'text-warning' : 'text-white'"
                     >{{ targetTax }}</span>
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
+                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Gold / Player') }}</span>
                 </div>
                 <div
                     v-if="taxStatus !== 'success'"
-                    class="mt-1 text-[8px] font-bold uppercase tracking-tighter"
+                    class="mt-1 text-5xs font-semibold uppercase tracking-tighter"
                     :class="taxStatus === 'danger' ? 'text-error' : 'text-warning'"
                 >{{ taxDescription }}</div>
             </div>
 
             <div class="pt-4 border-t border-white/5">
-                <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-3 text-center">
+                <div class="text-3xs text-on-surface-variant font-semibold uppercase tracking-wider mb-3 text-center">
                     {{ __('Collection Progress') }} ({{ weekRange }})
                 </div>
                 <div class="grid grid-cols-10 gap-1">
@@ -52,7 +52,7 @@
                         :key="'paid-' + i"
                         class="h-1.5 rounded-full"
                         :class="status.is_paid ? 'bg-success-neon shadow-[0_0_5px_rgba(0,255,153,0.3)]' : 'bg-white/10'"
-                        :title="status.name + ': ' + (status.is_paid ? __('Paid') : __('Pending'))"
+                        :title="status.display_name + ': ' + (status.is_paid ? __('Paid') : __('Pending'))"
                     ></div>
                     <div
                         v-for="i in emptySlots"
@@ -62,12 +62,12 @@
                     ></div>
                 </div>
                 <div class="flex justify-between mt-2">
-                    <span class="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">
+                    <span class="text-4xs font-semibold text-on-surface-variant uppercase tracking-wider">
                         {{ __('Paid:') }} {{ paidCount }} / 20
                     </span>
-                    <a :href="routes.treasury" class="text-[9px] font-bold text-primary hover:text-white uppercase tracking-widest flex items-center gap-1">
+                    <a :href="routes.treasury" class="text-4xs font-semibold text-primary hover:text-white uppercase tracking-wider flex items-center gap-1">
                         {{ __('Full Ledger') }}
-                        <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                        <span class="material-symbols-outlined text-3xs">chevron_right</span>
                     </a>
                 </div>
             </div>

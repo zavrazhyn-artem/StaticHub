@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Raid;
 use App\Http\Controllers\Controller;
 
 use App\Models\Event;
+use App\Models\StaticGroup;
 use App\Services\Raid\EventService;
 use App\Services\Raid\EventPayloadService;
 use App\Services\Raid\EncounterRosterService;
@@ -26,10 +27,17 @@ class EventController extends Controller
         protected DiscordMessageService $discordMessageService,
     ) {}
 
+    private function refreshDiscordAnnouncement(Event $event): void
+    {
+        if ($event->discord_message_id) {
+            $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
+        }
+    }
+
     /**
      * Display the specified raid event.
      */
-    public function show(Event $event): View
+    public function show(StaticGroup $static, Event $event): View
     {
         $data = $this->eventPayloadService->buildEventShowPayload($event, Auth::user());
 
@@ -39,7 +47,7 @@ class EventController extends Controller
     /**
      * Store RSVP for a specific character.
      */
-    public function rsvp(RsvpRequest $request, Event $event): RedirectResponse
+    public function rsvp(RsvpRequest $request, StaticGroup $static, Event $event): RedirectResponse
     {
         if ($event->raid_started) {
             return back()->withErrors(['character_id' => __('Event already started. Changes are not allowed.')]);
@@ -51,9 +59,7 @@ class EventController extends Controller
             return back()->withErrors(['character_id' => __('Invalid character selected.')]);
         }
 
-        if ($event->discord_message_id) {
-            $this->discordMessageService->sendOrUpdateRaidAnnouncement($event);
-        }
+        $this->refreshDiscordAnnouncement($event);
 
         return back()->with('success', __('Attendance status updated!'));
     }
@@ -61,7 +67,7 @@ class EventController extends Controller
     /**
      * Announce the raid event to Discord.
      */
-    public function announceToDiscord(Event $event): RedirectResponse
+    public function announceToDiscord(StaticGroup $static, Event $event): RedirectResponse
     {
         Gate::authorize('canAnnounceToDiscord', $event->static);
 
@@ -77,7 +83,7 @@ class EventController extends Controller
     /**
      * Bulk update encounter roster assignments.
      */
-    public function updateEncounterRoster(Request $request, Event $event): JsonResponse
+    public function updateEncounterRoster(Request $request, StaticGroup $static, Event $event): JsonResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
@@ -90,6 +96,7 @@ class EventController extends Controller
         ]);
 
         $this->encounterRosterService->bulkUpdateEncounterRoster($event, $validated['assignments']);
+        $this->refreshDiscordAnnouncement($event);
 
         return response()->json(['success' => true]);
     }
@@ -97,7 +104,7 @@ class EventController extends Controller
     /**
      * Assign a single character to an encounter.
      */
-    public function assignEncounterCharacter(Request $request, Event $event): JsonResponse
+    public function assignEncounterCharacter(Request $request, StaticGroup $static, Event $event): JsonResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
@@ -115,6 +122,7 @@ class EventController extends Controller
             $validated['selection_status'],
             $validated['position_order'] ?? 0,
         );
+        $this->refreshDiscordAnnouncement($event);
 
         return response()->json(['success' => true, 'roster' => $roster]);
     }
@@ -122,7 +130,7 @@ class EventController extends Controller
     /**
      * Remove a character from an encounter roster.
      */
-    public function removeEncounterCharacter(Request $request, Event $event): JsonResponse
+    public function removeEncounterCharacter(Request $request, StaticGroup $static, Event $event): JsonResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
@@ -136,14 +144,147 @@ class EventController extends Controller
             $validated['encounter_slug'],
             $validated['character_id'],
         );
+        $this->refreshDiscordAnnouncement($event);
 
         return response()->json(['success' => true]);
     }
 
     /**
+     * Override attendance status for a character (RL only).
+     */
+    public function overrideAttendance(Request $request, StaticGroup $static, Event $event): JsonResponse
+    {
+        Gate::authorize('canManageSchedule', $event->static);
+
+        $validated = $request->validate([
+            'character_id' => 'required|integer|exists:characters,id',
+            'status' => 'required|in:present,late,tentative,absent',
+            'spec_id' => 'nullable|integer|exists:specializations,id',
+        ]);
+
+        $updateData = ['status' => $validated['status']];
+        if (isset($validated['spec_id'])) {
+            $updateData['spec_id'] = $validated['spec_id'];
+        }
+
+        $attendance = \App\Models\RaidAttendance::where('event_id', $event->id)
+            ->where('character_id', $validated['character_id'])
+            ->first();
+
+        if ($attendance) {
+            $attendance->update($updateData);
+        } else {
+            \App\Models\RaidAttendance::create(array_merge([
+                'event_id' => $event->id,
+                'character_id' => $validated['character_id'],
+            ], $updateData));
+        }
+        $this->refreshDiscordAnnouncement($event);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Update event feature toggles (boss roster, splits).
+     */
+    public function updateSettings(Request $request, StaticGroup $static, Event $event): JsonResponse
+    {
+        Gate::authorize('canManageSchedule', $event->static);
+
+        $validated = $request->validate([
+            'boss_roster_enabled' => 'sometimes|boolean',
+            'split_enabled' => 'sometimes|boolean',
+            'split_count' => 'sometimes|integer|min:1|max:4',
+            'locked_encounters' => 'sometimes|nullable|array',
+            'locked_encounters.*' => 'string',
+        ]);
+
+        $event->update($validated);
+
+        return response()->json(['success' => true, 'event' => $event->fresh()]);
+    }
+
+    /**
+     * Save split raid assignments in bulk.
+     * Expects: { assignments: [{ character_id, split_group }] }
+     */
+    public function saveSplitAssignments(Request $request, StaticGroup $static, Event $event): JsonResponse
+    {
+        Gate::authorize('canManageSchedule', $event->static);
+
+
+        $validated = $request->validate([
+            'assignments' => 'required|array',
+            'assignments.*.character_id' => 'required|integer',
+            'assignments.*.split_group' => 'required|integer|min:1|max:4',
+        ]);
+
+        // Clear existing split assignments
+        \App\Models\RaidAttendance::where('event_id', $event->id)
+            ->whereNotNull('split_group')
+            ->update(['split_group' => null]);
+
+        // Apply new assignments
+        foreach ($validated['assignments'] as $assignment) {
+            $attendance = \App\Models\RaidAttendance::where('event_id', $event->id)
+                ->where('character_id', $assignment['character_id'])
+                ->first();
+
+            if ($attendance) {
+                $attendance->update(['split_group' => $assignment['split_group']]);
+            } else {
+                \App\Models\RaidAttendance::create([
+                    'event_id' => $event->id,
+                    'character_id' => $assignment['character_id'],
+                    'status' => 'present',
+                    'split_group' => $assignment['split_group'],
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Toggle encounter selection for an event.
+     */
+    public function toggleEncounter(Request $request, StaticGroup $static, Event $event): JsonResponse
+    {
+        Gate::authorize('canManageSchedule', $event->static);
+
+        // Bulk save: full list of selected encounters
+        if ($request->has('selected_encounters')) {
+            $slugs = $request->input('selected_encounters'); // null = all, [] = none, [...] = specific
+            $this->eventService->saveSelectedEncounters($event, $slugs);
+
+            return response()->json([
+                'success' => true,
+                'selected_encounters' => $event->fresh()->selected_encounters,
+            ]);
+        }
+
+        // Legacy: single toggle
+        $validated = $request->validate([
+            'encounter_slug' => 'required|string',
+            'selected' => 'required|boolean',
+        ]);
+
+        $this->eventService->toggleEncounterSelection(
+            $event,
+            $validated['encounter_slug'],
+            $validated['selected'],
+        );
+
+        return response()->json([
+            'success' => true,
+            'selected_encounters' => $event->fresh()->selected_encounters,
+        ]);
+    }
+
+    /**
      * Assign a plan to an encounter in this event.
      */
-    public function assignPlan(Request $request, Event $event): JsonResponse
+    public function assignPlan(Request $request, StaticGroup $static, Event $event): JsonResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 

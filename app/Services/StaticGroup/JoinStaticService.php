@@ -21,14 +21,14 @@ class JoinStaticService
     {
         $static = $this->fetchStaticByToken($token);
         $static->loadCount('members');
-        $static->load('owner:id,battletag,avatar');
+        $static->load('owner');
 
         return [
             'staticName' => $static->name,
             'region' => strtoupper($static->region),
             'memberCount' => $static->members_count,
-            'ownerName' => $static->owner->battletag ?? $static->owner->name,
-            'ownerAvatar' => $static->owner->avatar,
+            'ownerName' => $static->owner->getDisplayName($static->id),
+            'ownerAvatar' => $static->owner->getEffectiveAvatarUrl($static->id),
             'raidDays' => $static->getRaidDaysArray(),
             'token' => $token,
         ];

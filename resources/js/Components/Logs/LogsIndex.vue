@@ -150,14 +150,14 @@ const displayDifficultyText = computed(() => {
 </script>
 
 <template>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <div class="flex items-center gap-3 mb-2 text-amber-500 font-headline text-[10px] font-black uppercase tracking-[0.3em]">
+                <div class="flex items-center gap-3 mb-2 text-indigo-400 text-3xs font-bold uppercase tracking-[0.3em]">
                     <span class="material-symbols-outlined text-lg">terminal</span>
                     {{ __('Mission Intelligence Hub') }}
                 </div>
-                <h1 class="text-5xl font-black text-white uppercase tracking-tighter font-headline leading-none">{{ __('Tactical Logs') }}</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight">{{ __('Tactical Logs') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-2 uppercase tracking-widest text-xs flex items-center gap-2">
                     {{ staticName }}
                     <span class="opacity-20">•</span>
@@ -175,13 +175,13 @@ const displayDifficultyText = computed(() => {
 
                     <div class="relative w-full md:w-56 group">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <span class="material-symbols-outlined text-on-surface-variant text-lg group-focus-within:text-amber-500 transition-colors">calendar_month</span>
+                            <span class="material-symbols-outlined text-on-surface-variant text-lg group-focus-within:text-indigo-400 transition-colors">calendar_month</span>
                         </span>
                         <input
                             ref="dateInputRef"
                             type="text"
                             :placeholder="__('Dates Filter...')"
-                            class="block w-full pl-12 pr-4 py-3 h-[42px] bg-surface-container-highest border border-white/5 rounded-lg font-headline text-[10px] font-bold text-white uppercase tracking-widest focus:ring-1 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all outline-none cursor-pointer placeholder:text-on-surface-variant/50 placeholder:normal-case"
+                            class="block w-full pl-12 pr-4 py-3 h-[42px] bg-surface-container-highest border border-white/5 rounded-lg text-3xs font-semibold text-white uppercase tracking-wider focus:ring-1 focus:ring-indigo-400/50 focus:border-indigo-400/50 transition-all outline-none cursor-pointer placeholder:text-on-surface-variant/50 placeholder:normal-case"
                         />
                         <button v-if="fromDate && toDate" type="button"
                                 @click="clearDateFilter"
@@ -194,8 +194,8 @@ const displayDifficultyText = computed(() => {
                         <button
                             type="button"
                             @click="toggleDropdown"
-                            class="flex items-center justify-between w-full pl-4 pr-3 py-3 h-[42px] bg-surface-container-highest border border-white/5 rounded-lg font-headline text-[10px] font-bold uppercase tracking-widest hover:border-white/10 transition-all outline-none"
-                            :class="{'border-amber-500/50 ring-1 ring-amber-500/50': isDifficultyOpen}"
+                            class="flex items-center justify-between w-full pl-4 pr-3 py-3 h-[42px] bg-surface-container-highest border border-white/5 rounded-lg text-3xs font-semibold uppercase tracking-wider hover:border-white/10 transition-all outline-none"
+                            :class="{'border-indigo-400/50 ring-1 ring-indigo-400/50': isDifficultyOpen}"
                         >
                             <span class="truncate pr-2"
                                   :class="{
@@ -224,8 +224,8 @@ const displayDifficultyText = computed(() => {
                                 <label v-for="diff in difficulties" :key="diff.value"
                                        class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors">
                                     <input type="checkbox" :value="diff.value" v-model="selectedDifficulties"
-                                           class="w-4 h-4 rounded border-white/10 bg-black/40 text-amber-500 focus:ring-amber-500 focus:ring-offset-0 transition-all cursor-pointer">
-                                    <span class="font-headline text-[10px] font-bold uppercase tracking-widest" :class="diff.color">
+                                           class="w-4 h-4 rounded border-white/10 bg-black/40 text-indigo-400 focus:ring-indigo-400 focus:ring-offset-0 transition-all cursor-pointer">
+                                    <span class="text-3xs font-semibold uppercase tracking-wider" :class="diff.color">
                                         {{ __(diff.label) }}
                                     </span>
                                 </label>
@@ -235,7 +235,7 @@ const displayDifficultyText = computed(() => {
                 </form>
 
                 <button type="button" @click="showModal = true"
-                        class="flex items-center justify-center gap-2 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500 hover:text-black px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all text-amber-500 h-[42px] whitespace-nowrap w-full md:w-auto">
+                        class="flex items-center justify-center gap-2 bg-indigo-400/10 border border-indigo-400/30 hover:bg-indigo-400 hover:text-black px-6 py-2.5 rounded-lg text-3xs font-bold uppercase tracking-[0.2em] transition-all text-indigo-400 h-[42px] whitespace-nowrap w-full md:w-auto">
                     <span class="material-symbols-outlined text-sm">upload_file</span>
                     {{ __('Process Manual Log') }}
                 </button>
@@ -245,33 +245,33 @@ const displayDifficultyText = computed(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <template v-if="logs.length">
                 <div v-for="log in logs" :key="log.id"
-                     class="group relative bg-surface-container-low border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-500 hover:shadow-[0_0_40px_-15px_rgba(245,158,11,0.2)]">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+                     class="group relative bg-surface-container-low border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-400/30 transition-all duration-500 hover:shadow-[0_0_40px_-15px_rgba(245,158,11,0.2)]">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent"></div>
 
                     <div class="p-6 space-y-6">
                         <div>
                             <div class="space-y-1">
                                 <div class="flex justify-between">
-                                    <div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">
+                                    <div class="text-3xs font-bold text-on-surface-variant uppercase tracking-wider opacity-60">
                                         {{ log.date }}
                                     </div>
                                     <span v-if="log.has_ai"
-                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-[9px] font-black text-success-neon uppercase tracking-widest">
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-success-neon/10 border border-success-neon/20 rounded-full text-4xs font-bold text-success-neon uppercase tracking-wider">
                                     <span class="w-1 h-1 bg-success-neon rounded-full animate-pulse"></span>
                                     {{ __('Analyzed') }}
                                     </span>
                                     <span v-else
-                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-black text-amber-500 uppercase tracking-widest">
-                                    <span class="w-1 h-1 bg-amber-500 rounded-full animate-pulse"></span>
+                                          class="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded-full text-4xs font-bold text-indigo-400 uppercase tracking-wider">
+                                    <span class="w-1 h-1 bg-indigo-400 rounded-full animate-pulse"></span>
                                     {{ __('Pending AI') }}
                                     </span>
                                 </div>
-                                <h3 class="text-l font-black text-white uppercase tracking-tight group-hover:text-amber-500 transition-colors">
+                                <h3 class="text-l font-black text-white uppercase tracking-tight group-hover:text-indigo-400 transition-colors">
                                     {{ log.title ?? __('Manual Log Analysis') }}
                                 </h3>
                                 <div v-if="log.difficulties && log.difficulties.length" class="flex gap-2 mt-2">
                                      <span v-for="diff in log.difficulties" :key="diff"
-                                           class="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border border-white/10"
+                                           class="text-5xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border border-white/10"
                                            :class="{'text-orange-500 border-orange-500/30': diff === 'mythic', 'text-purple-400 border-purple-400/30': diff === 'heroic', 'text-green-400 border-green-400/30': diff === 'normal'}">
                                         {{ diff }}
                                      </span>
@@ -282,12 +282,12 @@ const displayDifficultyText = computed(() => {
                         <div class="flex items-center justify-between pt-2">
                             <div class="flex gap-4">
                                 <div class="text-center">
-                                    <div class="text-[10px] font-black text-white">WCL</div>
-                                    <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter opacity-60">{{ __('Report') }}</div>
+                                    <div class="text-3xs font-bold text-white">WCL</div>
+                                    <div class="text-5xs font-semibold text-on-surface-variant uppercase tracking-tighter opacity-60">{{ __('Report') }}</div>
                                 </div>
                             </div>
 
-                            <a :href="log.url" class="flex items-center gap-2 bg-white/5 hover:bg-amber-500 hover:text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all group/btn">
+                            <a :href="log.url" class="flex items-center gap-2 bg-white/5 hover:bg-indigo-400 hover:text-black px-4 py-2 rounded-lg text-3xs font-bold uppercase tracking-[0.15em] transition-all group/btn">
                                 {{ __('Open Files') }}
                                 <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
                             </a>
@@ -295,8 +295,8 @@ const displayDifficultyText = computed(() => {
                     </div>
 
                     <div class="absolute bottom-0 right-0 w-8 h-8 opacity-5">
-                        <div class="absolute bottom-0 right-0 w-full h-[1px] bg-amber-500"></div>
-                        <div class="absolute bottom-0 right-0 h-full w-[1px] bg-amber-500"></div>
+                        <div class="absolute bottom-0 right-0 w-full h-[1px] bg-indigo-400"></div>
+                        <div class="absolute bottom-0 right-0 h-full w-[1px] bg-indigo-400"></div>
                     </div>
                 </div>
             </template>
@@ -316,12 +316,12 @@ const displayDifficultyText = computed(() => {
                     <div class="p-8 bg-surface-container-highest border border-white/5 rounded-2xl shadow-2xl">
 
                         <div class="flex items-center gap-3 mb-6">
-                            <div class="p-3 bg-amber-500/10 rounded-xl">
-                                <span class="material-symbols-outlined text-amber-500">upload_file</span>
+                            <div class="p-3 bg-indigo-400/10 rounded-xl">
+                                <span class="material-symbols-outlined text-indigo-400">upload_file</span>
                             </div>
                             <div>
                                 <h2 class="text-2xl font-black text-white uppercase tracking-tight leading-none">{{ __('Manual Log Submission') }}</h2>
-                                <p class="text-on-surface-variant font-bold text-[10px] uppercase tracking-widest mt-1">{{ __('Tactical Analysis Pipeline') }}</p>
+                                <p class="text-on-surface-variant font-semibold text-3xs uppercase tracking-wider mt-1">{{ __('Tactical Analysis Pipeline') }}</p>
                             </div>
                         </div>
 
@@ -331,8 +331,8 @@ const displayDifficultyText = computed(() => {
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-error text-xl">timer</span>
                                 <div>
-                                    <p class="text-[10px] font-black text-error uppercase tracking-widest">{{ __('Cooldown Active') }}</p>
-                                    <p class="text-on-surface-variant text-[9px] font-bold uppercase tracking-widest mt-0.5">
+                                    <p class="text-3xs font-bold text-error uppercase tracking-wider">{{ __('Cooldown Active') }}</p>
+                                    <p class="text-on-surface-variant text-4xs font-semibold uppercase tracking-wider mt-0.5">
                                         {{ __('Next upload available in') }}
                                     </p>
                                 </div>
@@ -347,13 +347,13 @@ const displayDifficultyText = computed(() => {
 
                             <div class="space-y-6">
                                 <div>
-                                    <label for="wcl_url" class="block text-amber-500/60 uppercase tracking-widest text-[10px] font-black mb-2">{{ __('WCL Report URL') }}</label>
+                                    <label for="wcl_url" class="block text-indigo-400/60 uppercase tracking-wider text-3xs font-bold mb-2">{{ __('WCL Report URL') }}</label>
                                     <input id="wcl_url" name="wcl_url" type="text" v-model="wclUrl"
                                            :disabled="isOnCooldown"
-                                           class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-amber-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                           class="w-full bg-black/20 border border-white/10 p-4 rounded-lg text-white text-sm outline-none focus:border-indigo-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
                                            placeholder="https://www.warcraftlogs.com/reports/..."
                                            required>
-                                    <p class="mt-2 text-[9px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
+                                    <p class="mt-2 text-4xs text-on-surface-variant font-semibold uppercase tracking-wider opacity-40">
                                         Example: https://www.warcraftlogs.com/reports/aBcDeFg123456789
                                     </p>
                                 </div>
@@ -362,19 +362,19 @@ const displayDifficultyText = computed(() => {
                             <!-- Info Note -->
                             <div class="mt-4 p-3 bg-white/5 border border-white/5 rounded-lg flex items-start gap-2.5">
                                 <span class="material-symbols-outlined text-on-surface-variant text-base mt-0.5 shrink-0">info</span>
-                                <p class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed">
+                                <p class="text-4xs text-on-surface-variant font-semibold uppercase tracking-wider leading-relaxed">
                                     {{ __('Mythic+ logs and characters not in your roster will be filtered out and will not be processed.') }}
                                 </p>
                             </div>
 
                             <div class="mt-8 flex justify-end gap-3">
                                 <button type="button" @click="showModal = false"
-                                        class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-on-surface-variant hover:bg-white/5 transition-all">
+                                        class="px-6 py-3 rounded-xl text-3xs font-bold uppercase tracking-wider text-on-surface-variant hover:bg-white/5 transition-all">
                                     {{ __('Cancel') }}
                                 </button>
                                 <button type="submit"
                                         :disabled="isOnCooldown"
-                                        class="bg-amber-500 hover:bg-amber-400 text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-500"
+                                        class="bg-indigo-400 hover:bg-indigo-300 text-black px-8 py-3 rounded-xl text-3xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-indigo-400/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-400"
                                         @click.prevent="submitManualLog">
                                     {{ __('Submit for Analysis') }}
                                 </button>

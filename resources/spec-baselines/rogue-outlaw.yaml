@@ -1,0 +1,61 @@
+spec: Outlaw
+class: Rogue
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Roll the Bones'
+    ability_id: 1214909
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Between the Eyes'
+    ability_id: 315341
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Blade Flurry'
+    ability_id: 13877
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Adrenaline Rush'
+    ability_id: 13750
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Thistle Tea'
+    ability_id: 469779
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Killing Spree'
+    ability_id: 51690
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Keep It Rolling'
+    ability_id: 381989
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Preparation
+    ability_id: 1277933
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.9
+    severity: major

@@ -1,0 +1,54 @@
+spec: Protection
+class: Warrior
+role: tank
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Shield Slam'
+    ability_id: 23922
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Execute
+    ability_id: 163201
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Thunder Clap'
+    ability_id: 6343
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Avatar
+    ability_id: 107574
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Ravager
+    ability_id: 228920
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Shield Charge'
+    ability_id: 385952
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Demolish
+    ability_id: 436358
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major

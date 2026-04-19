@@ -10,7 +10,7 @@
                     <h3 class="font-headline text-lg font-bold text-white uppercase tracking-wider">
                         {{ __(currentHelp.title) }}
                     </h3>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                    <span class="text-3xs font-semibold uppercase tracking-wider text-primary">
                         {{ __('Onboarding Help') }}
                     </span>
                 </div>
@@ -24,7 +24,7 @@
             </p>
 
             <div v-if="currentHelp.tips.length" class="space-y-3">
-                <h4 class="font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                <h4 class="text-3xs font-semibold uppercase tracking-wider text-on-surface-variant/60">
                     {{ __('Tips') }}
                 </h4>
                 <div
@@ -42,7 +42,7 @@
         <div class="px-8 pb-6">
             <button
                 @click="$emit('close')"
-                class="w-full bg-white/5 border border-white/10 text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-[0.2em] py-3 rounded-lg hover:bg-white/10 hover:text-white transition-all"
+                class="w-full bg-white/5 border border-white/10 text-on-surface-variant font-semibold text-3xs uppercase tracking-[0.2em] py-3 rounded-lg hover:bg-white/10 hover:text-white transition-all"
             >
                 {{ __('Got it') }}
             </button>

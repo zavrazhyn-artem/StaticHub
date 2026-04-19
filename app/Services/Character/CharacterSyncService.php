@@ -8,7 +8,9 @@ use App\Jobs\Character\FetchBnetRawDataJob;
 use App\Jobs\Character\FetchRioRawDataJob;
 use App\Jobs\Character\SyncCharacterItemLevelJob;
 use App\Models\Character;
+use App\Models\CharacterStaticSpec;
 use App\Models\Realm;
+use App\Models\Specialization;
 use App\Models\User;
 use App\Services\Blizzard\BlizzardCharacterApiService;
 use App\Services\StaticGroup\RosterService;
@@ -36,17 +38,26 @@ class CharacterSyncService
         // Batch fetch all avatars concurrently
         $avatars = $this->blizzardApiService->fetchAvatarsBatch($apiCharacters);
 
+        // Resolve realms in batch — cache by slug to avoid repeated queries
+        $realmCache = [];
+        foreach ($apiCharacters as $apiData) {
+            $slug = $apiData['realm_slug'];
+            if (!isset($realmCache[$slug])) {
+                $realmCache[$slug] = $this->resolveRealm($apiData);
+            }
+        }
+
         // Upsert all characters with their avatars
         $characters = [];
         foreach ($apiCharacters as $idx => $apiData) {
-            $realm = $this->resolveRealm($apiData);
+            $realm = $realmCache[$apiData['realm_slug']];
             $characters[$idx] = $this->upsertCharacter($apiData, $userId, $realm->id, $avatars[$idx] ?? null);
         }
 
         // Batch fetch all profile summaries concurrently
         $profiles = $this->blizzardApiService->fetchProfilesBatch($apiCharacters);
 
-        // Update active_spec and ilvl from profiles
+        // Build batch updates from profiles
         foreach ($characters as $idx => $character) {
             $profileData = $profiles[$idx] ?? null;
             if ($profileData === null) {
@@ -63,11 +74,21 @@ class CharacterSyncService
                     : ($profileData['active_specialization'] ?? null);
             }
 
-            $character->update([
-                'equipped_item_level' => $profileData['equipped_item_level'] ?? $character->equipped_item_level,
-                'active_spec'         => $activeSpec ?? $character->active_spec,
-            ]);
+            $character->equipped_item_level = $profileData['equipped_item_level'] ?? $character->equipped_item_level;
+            $character->active_spec = $activeSpec ?? $character->active_spec;
         }
+
+        // Bulk update all characters in one query per batch
+        Character::upsert(
+            collect($characters)->map(fn (Character $c) => [
+                'id' => $c->id,
+                'equipped_item_level' => $c->equipped_item_level,
+                'active_spec' => $c->active_spec,
+                'updated_at' => now(),
+            ])->values()->all(),
+            ['id'],
+            ['equipped_item_level', 'active_spec', 'updated_at']
+        );
 
         // Dispatch async sync jobs for all characters
         foreach ($characters as $character) {
@@ -87,8 +108,8 @@ class CharacterSyncService
             return;
         }
 
-        $staticIds = $user->statics()->pluck('statics.id');
-        if ($staticIds->isEmpty()) {
+        $staticIds = $user->statics()->pluck('statics.id')->all();
+        if (empty($staticIds)) {
             return;
         }
 
@@ -97,10 +118,55 @@ class CharacterSyncService
             ->whereNotNull('active_spec')
             ->get();
 
+        if ($characters->isEmpty()) {
+            return;
+        }
+
+        $characterIds = $characters->pluck('id')->all();
+
+        // Load all existing spec assignments in one query
+        $existingSpecs = CharacterStaticSpec::whereIn('character_id', $characterIds)
+            ->whereIn('static_id', $staticIds)
+            ->get()
+            ->map(fn ($s) => "{$s->character_id}|{$s->static_id}")
+            ->flip();
+
+        // Load all specializations in one query (small table)
+        $specLookup = Specialization::all()
+            ->keyBy(fn ($s) => "{$s->name}|{$s->class_name}");
+
+        $inserts = [];
+        $now = now();
+
         foreach ($staticIds as $staticId) {
             foreach ($characters as $character) {
-                $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
+                $key = "{$character->id}|{$staticId}";
+                if (isset($existingSpecs[$key])) {
+                    continue;
+                }
+
+                if (!$character->active_spec || !$character->playable_class) {
+                    continue;
+                }
+
+                $spec = $specLookup["{$character->active_spec}|{$character->playable_class}"] ?? null;
+                if (!$spec) {
+                    continue;
+                }
+
+                $inserts[] = [
+                    'character_id' => $character->id,
+                    'static_id'    => $staticId,
+                    'spec_id'      => $spec->id,
+                    'is_main'      => true,
+                    'created_at'   => $now,
+                    'updated_at'   => $now,
+                ];
             }
+        }
+
+        if (!empty($inserts)) {
+            CharacterStaticSpec::insert($inserts);
         }
     }
 

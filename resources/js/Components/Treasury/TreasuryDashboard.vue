@@ -2,7 +2,7 @@
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white uppercase tracking-tighter font-headline">{{ __('Guild Treasury') }}</h1>
+                <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Guild Treasury') }}</h1>
                 <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">
                     {{ staticName }} • {{ __('Financial Ledger') }}
                 </p>
@@ -11,14 +11,14 @@
             <div v-if="canManageTreasury" class="flex items-center gap-2">
                 <button
                     @click="openTransactionModal('deposit')"
-                    class="bg-primary text-on-primary hover:brightness-110 px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                    class="bg-yellow-500 text-black hover:brightness-110 px-4 py-2 rounded-sm text-3xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">add_circle</span>
                     {{ __('Record Deposit') }}
                 </button>
                 <button
                     @click="openTransactionModal('withdrawal')"
-                    class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm font-headline text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
+                    class="bg-surface-container-high text-on-surface-variant hover:text-white px-4 py-2 rounded-sm text-3xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2"
                 >
                     <span class="material-symbols-outlined text-sm">remove_circle</span>
                     {{ __('Record Withdrawal') }}
@@ -29,30 +29,30 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">savings</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">savings</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Total Reserves') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Total Reserves') }}</h3>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-[#FFD700] tracking-tighter font-headline">{{ formatGold(reserves) }}</span>
+                    <span class="text-4xl font-black text-[#FFD700] tracking-tight font-headline tabular-nums">{{ formatGold(reserves) }}</span>
                     <span class="text-xs font-bold text-[#FFD700]/60 uppercase tracking-widest">{{ __('Gold') }}</span>
                 </div>
             </div>
 
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">payments</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">payments</span>
                 </div>
 
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Required Weekly Tax') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Required Weekly Tax') }}</h3>
 
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-white tracking-tighter font-headline">
+                    <span class="text-4xl font-black text-white tracking-tight font-headline tabular-nums">
                       {{ formatGold(dynamicTargetTax) }}
                     </span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Gold / Player') }}</span>
                 </div>
 
-                <div class="mt-2 text-[10px] uppercase font-bold tracking-widest transition-colors" :class="taxClass">
+                <div class="mt-2 text-3xs uppercase font-semibold tracking-wider transition-colors" :class="taxClass">
                     {{ taxDescription }}
                 </div>
                 <button v-if="canManageTreasury" @click="showTaxModal = true" class="absolute bottom-4 right-4 z-10 text-on-surface-variant hover:text-[#FFD700] transition-colors" :title="__('Edit Weekly Tax')">
@@ -62,17 +62,17 @@
 
             <div class="bg-surface-container-high border border-white/5 rounded-xl p-6 shadow-2xl backdrop-blur-sm relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-6xl text-primary">analytics</span>
+                    <span class="material-symbols-outlined text-6xl text-yellow-500">analytics</span>
                 </div>
-                <h3 class="text-on-surface-variant font-headline text-[10px] font-bold uppercase tracking-widest mb-4">{{ __('Financial Health') }}</h3>
+                <h3 class="text-on-surface-variant text-3xs font-semibold uppercase tracking-wider mb-4">{{ __('Financial Health') }}</h3>
                 <div class="flex items-baseline gap-2">
-          <span class="text-4xl font-black tracking-tighter font-headline" :class="autonomyClass">
+          <span class="text-4xl font-black tracking-tight font-headline tabular-nums" :class="autonomyClass">
             {{ autonomyValue }}
           </span>
                     <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weeks of Autonomy') }}</span>
                 </div>
-                <div class="mt-2 text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">
-                    {{ __('Weekly Cost:') }} <span>{{ formatGold(dynamicWeeklyCost) }}</span> G
+                <div class="mt-2 text-3xs text-on-surface-variant uppercase font-semibold tracking-wider">
+                    {{ __('Weekly Cost:') }} <span class="tabular-nums">{{ formatGold(dynamicWeeklyCost) }}</span> G
                 </div>
             </div>
         </div>
@@ -87,16 +87,19 @@
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Weekly Tax Tracking') }}</h3>
                 </div>
                 <div class="p-4 space-y-2 overflow-y-auto custom-scrollbar max-h-[468px]">
-                    <div v-for="status in weeklyStatus" :key="status.name" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
+                    <div v-for="status in sortedWeeklyStatus" :key="status.user_id" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full" :class="status.is_paid ? 'bg-success-neon shadow-[0_0_8px_rgba(0,255,153,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(255,68,68,0.5)]'"></div>
-                            <span class="text-sm font-medium text-white">{{ status.name }}</span>
+                            <span class="text-sm font-medium"
+                                  :style="{ color: getClassTextColor(status.playable_class) }">
+                                {{ status.display_name }}
+                            </span>
                         </div>
                         <div class="text-right">
                             <span class="text-xs font-bold" :class="status.is_paid ? 'text-success-neon' : 'text-error'">
                                 {{ status.is_paid ? __('Covered') : __('Not Covered') }}
                             </span>
-                            <div class="text-[9px] text-on-surface-variant font-medium">
+                            <div class="text-4xs text-on-surface-variant font-medium tabular-nums">
                                 {{ __('Balance:') }} {{ formatGold(status.balance) }}g
                             </div>
                         </div>
@@ -107,7 +110,7 @@
             <div class="bg-surface-container border border-white/5 rounded-xl shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
                 <div class="px-6 py-4 border-b border-white/5 bg-surface-container-high flex justify-between items-center shrink-0">
                     <h3 class="font-headline text-xs font-bold text-white uppercase tracking-widest">{{ __('Recent Transactions') }}</h3>
-                    <a :href="`/statics/${staticId}/treasury/history`" class="text-[10px] font-bold text-primary hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+                    <a href="/treasury/history" class="text-3xs font-semibold text-yellow-500 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1">
                         {{ __('View All') }}
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
@@ -116,19 +119,22 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                         <tr class="bg-surface-container-highest border-b border-white/5">
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Date') }}</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Member') }}</th>
-                            <th class="px-4 py-3 text-right text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline">{{ __('Amount') }}</th>
-                            <th class="px-4 py-3 text-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline w-10"></th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-right text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Amount') }}</th>
+                            <th class="px-4 py-3 text-center text-3xs font-semibold text-on-surface-variant uppercase tracking-wider w-10"></th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                         <tr v-for="tx in recentTransactions" :key="tx.id" class="hover:bg-white/5 transition-colors group">
-                            <td class="px-4 py-4 text-[10px] text-on-surface-variant font-medium">
+                            <td class="px-4 py-4 text-3xs text-on-surface-variant font-medium">
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold text-white">{{ tx.user.name }}</span>
+                                <span class="text-xs font-bold"
+                                      :style="{ color: getClassTextColor(tx.playable_class) }">
+                                    {{ tx.display_name }}
+                                </span>
                             </td>
                             <td class="px-4 py-4 text-right">
                   <span class="text-sm font-black font-headline tracking-tight" :class="tx.type === 'deposit' ? 'text-[#FFD700]' : 'text-error'">
@@ -136,7 +142,7 @@
                   </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-full">
+                                <button @click="openEditModal(tx)" class="text-on-surface-variant hover:text-yellow-500 transition-colors flex items-center justify-center w-full">
                                     <span class="material-symbols-outlined text-lg">{{ tx.description ? 'chat_bubble' : 'add_comment' }}</span>
                                 </button>
                             </td>
@@ -162,7 +168,7 @@
             </div>
             <div class="p-6 space-y-4">
                 <div class="space-y-1">
-                    <label for="tax_amount" class="block font-headline text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{{ __('Weekly Tax Per Player (Gold)') }}</label>
+                    <label for="tax_amount" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Weekly Tax Per Player (Gold)') }}</label>
                     <div class="relative group">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-[#FFD700] transition-colors text-lg">payments</span>
@@ -170,12 +176,12 @@
                         <input type="number" id="tax_amount" v-model.number="taxInputValue" min="0"
                                class="w-full pl-12 pr-4 py-3 bg-surface-container-highest border border-white/5 rounded-sm font-headline text-sm font-bold text-white tracking-widest focus:ring-2 focus:ring-[#FFD700] focus:border-transparent transition-all outline-none">
                     </div>
-                    <p class="text-[9px] text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Amount of gold each raider is expected to contribute weekly.') }}</p>
+                    <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Amount of gold each raider is expected to contribute weekly.') }}</p>
                 </div>
-                <div v-if="taxSaveError" class="text-[10px] text-error font-bold uppercase tracking-wider">{{ taxSaveError }}</div>
+                <div v-if="taxSaveError" class="text-3xs text-error font-semibold uppercase tracking-wider">{{ taxSaveError }}</div>
                 <div class="pt-2">
                     <button @click="saveTax" :disabled="taxSaving"
-                            class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                            class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                         <span v-if="taxSaving" class="material-symbols-outlined text-lg animate-spin">sync</span>
                         <span v-else class="material-symbols-outlined text-lg">save</span>
                         {{ taxSaving ? __('Saving...') : __('Save') }}
@@ -206,10 +212,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useWowClasses } from '@/composables/useWowClasses';
 import GlassModal from '@/Components/UI/GlassModal.vue';
 import TransactionCommentModal from './TransactionCommentModal.vue';
 import TransactionFormModal from './TransactionFormModal.vue';
 const { __ } = useTranslation();
+const { getClassTextColor } = useWowClasses();
 
 const props = defineProps({
     staticId: { type: Number, required: true },
@@ -251,7 +259,7 @@ const saveTax = async () => {
     taxSaving.value = true;
     taxSaveError.value = '';
     try {
-        const response = await fetch(`/statics/${props.staticId}/treasury-settings`, {
+        const response = await fetch(`/treasury-settings`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -299,13 +307,20 @@ const openEditModal = (tx) => {
     editingTransaction.value = {
         id: tx.id,
         description: tx.description || '',
-        member: tx.user.name,
+        member: tx.display_name,
         date: formatDate(tx.created_at),
         amount: formatGold(tx.amount),
         type: tx.type
     };
     showEditModal.value = true;
 };
+
+const sortedWeeklyStatus = computed(() => {
+    return [...props.weeklyStatus].sort((a, b) => {
+        if (a.is_paid !== b.is_paid) return a.is_paid ? 1 : -1;
+        return (a.display_name || '').localeCompare(b.display_name || '');
+    });
+});
 
 const autonomyValue = computed(() => {
     if (dynamicWeeklyCost.value <= 0) return '∞';

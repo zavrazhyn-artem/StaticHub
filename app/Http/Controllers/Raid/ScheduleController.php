@@ -52,7 +52,7 @@ class ScheduleController extends Controller
     /**
      * Update an event in the schedule.
      */
-    public function update(StoreScheduleRequest $request, Event $event): RedirectResponse
+    public function update(StoreScheduleRequest $request, StaticGroup $static, Event $event): RedirectResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 
@@ -69,7 +69,7 @@ class ScheduleController extends Controller
     /**
      * Delete an event from the schedule.
      */
-    public function destroy(Event $event): RedirectResponse
+    public function destroy(StaticGroup $static, Event $event): RedirectResponse
     {
         Gate::authorize('canManageSchedule', $event->static);
 

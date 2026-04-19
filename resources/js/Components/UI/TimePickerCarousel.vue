@@ -71,11 +71,11 @@ defineExpose({ close });
         >
             <span>{{ modelValue }}</span>
             <span
-                class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform"
+                class="material-symbols-outlined text-base text-on-surface-variant transition-transform"
                 :class="{ 'rotate-180': showDropdown }"
             >expand_more</span>
         </div>
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none z-50">{{ icon }}</span>
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-on-surface-variant pointer-events-none z-50">{{ icon }}</span>
 
         <!-- Carousel dropdown -->
         <div
@@ -84,7 +84,7 @@ defineExpose({ close });
         >
             <div class="flex justify-center items-center h-[120px] relative w-full px-2">
                 <!-- Selection highlight -->
-                <div class="absolute top-1/2 -translate-y-1/2 left-2 right-2 h-[40px] bg-primary/10 border-y border-primary/20 rounded-md pointer-events-none"></div>
+                <div class="absolute top-1/2 -translate-y-1/2 left-2 right-2 h-10 bg-primary/10 border-y border-primary/20 rounded-md pointer-events-none"></div>
 
                 <!-- Hours column -->
                 <div class="h-full w-1/2 relative group/hours">
@@ -100,14 +100,14 @@ defineExpose({ close });
                         @scroll="(e) => handleScroll(e, 'hours')"
                         class="h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar"
                     >
-                        <div class="h-[40px]"></div>
+                        <div class="h-10"></div>
                         <div
                             v-for="h in hours"
                             :key="h"
-                            class="h-[40px] flex items-center justify-center snap-center text-lg font-bold"
+                            class="h-10 flex items-center justify-center snap-center text-lg font-bold"
                             :class="tempHour === h ? 'text-primary' : 'text-on-surface-variant/40'"
                         >{{ h }}</div>
-                        <div class="h-[40px]"></div>
+                        <div class="h-10"></div>
                     </div>
                     <button
                         type="button"
@@ -134,14 +134,14 @@ defineExpose({ close });
                         @scroll="(e) => handleScroll(e, 'minutes')"
                         class="h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar"
                     >
-                        <div class="h-[40px]"></div>
+                        <div class="h-10"></div>
                         <div
                             v-for="m in minutes"
                             :key="m"
-                            class="h-[40px] flex items-center justify-center snap-center text-lg font-bold"
+                            class="h-10 flex items-center justify-center snap-center text-lg font-bold"
                             :class="tempMinute === m ? 'text-primary' : 'text-on-surface-variant/40'"
                         >{{ m }}</div>
-                        <div class="h-[40px]"></div>
+                        <div class="h-10"></div>
                     </div>
                     <button
                         type="button"

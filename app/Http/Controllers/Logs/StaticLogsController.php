@@ -65,11 +65,11 @@ class StaticLogsController extends Controller
      */
     public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
-        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
-
-        if ($cooldownState['on_cooldown']) {
-            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
-        }
+//        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
+//
+//        if ($cooldownState['on_cooldown']) {
+//            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
+//        }
 
         $report = $this->logAnalysisService->processManualLogSubmission(
             $request->input('wcl_url'),
@@ -80,7 +80,7 @@ class StaticLogsController extends Controller
             return back()->with('error', __('Invalid Warcraft Logs URL. Could not extract Report ID.'));
         }
 
-        return redirect()->route('statics.logs.index', $static)
+        return redirect()->route('statics.logs.index')
             ->with('success', __('Log submitted for analysis. It will appear here shortly.'));
     }
 }

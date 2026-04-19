@@ -1,0 +1,33 @@
+spec: Balance
+class: Druid
+role: dps
+source: WoWAnalyzer-midnight
+rotation_checks:
+  -
+    ability: 'Solar Eclipse'
+    ability_id: 1233346
+    check: cast_efficiency
+    cooldown_seconds: 32.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'New Moon'
+    ability_id: 274281
+    check: cast_efficiency
+    cooldown_seconds: 6.67
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Wild Mushroom'
+    ability_id: 88747
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Force of Nature'
+    ability_id: 205636
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.8
+    severity: major

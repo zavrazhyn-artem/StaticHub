@@ -20,9 +20,17 @@ class FetchAuctionsCommand extends Command
     {
         $this->info('Starting to fetch commodities...');
 
-        $insertedCount = $auctionSyncService->executeSync();
+        try {
+            $insertedCount = $auctionSyncService->executeSync();
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+            report($e);
+
+            return self::SUCCESS;
+        }
+
         $this->info("Successfully saved {$insertedCount} price snapshots.");
 
-        return 0;
+        return self::SUCCESS;
     }
 }
