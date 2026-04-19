@@ -28,6 +28,23 @@ const sectionHeight = () =>
 const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 60).padStart(2, '0')}`;
 const iconUrl = (filename) => `/images/cooldowns/${filename}`;
 
+// Priority drives the icon ring: high = thicker, low = thinner.
+const strokeWidthFor = (priority, isFocused) => {
+    if (isFocused) return 2.5;
+    if (priority === 'high') return 2.25;
+    if (priority === 'low') return 1.0;
+    return 1.5;
+};
+
+// Build a concise tooltip string for an ability cast.
+const tooltipFor = (ability, cast) => {
+    const parts = [`${ability.name} · ${formatTime(cast)}`];
+    if (ability.priority) parts.push(`priority: ${ability.priority}`);
+    if (ability.recommended_response?.length) parts.push(`response: ${ability.recommended_response.join(', ')}`);
+    if (ability.notes) parts.push('', ability.notes);
+    return parts.join('\n');
+};
+
 const gridLines = () => {
     const lines = [];
     const minor = props.pxPerSec < 4 ? 30 : props.pxPerSec < 8 ? 15 : 5;
@@ -88,14 +105,17 @@ const onClick = (e) => {
                 <g v-for="(phase, i) in phases" :key="'p' + i">
                     <line :x1="phase.time * pxPerSec" :x2="phase.time * pxPerSec"
                         :y1="0" :y2="sectionHeight()"
-                        stroke="#E74C3C" stroke-width="3"
+                        :stroke="phase.draggable ? '#E74C3C' : '#FFFFFF44'"
+                        :stroke-width="phase.draggable ? 3 : 1.5"
+                        :stroke-dasharray="phase.draggable ? '0' : '4 3'"
                         data-interactive
-                        :style="canManage ? 'cursor: ew-resize;' : ''"
-                        @mousedown.stop="canManage && emit('start-phase-drag', { index: phase.segmentIndex ?? (i + 1), clientX: $event.clientX })"
+                        :style="(canManage && phase.draggable) ? 'cursor: ew-resize;' : 'cursor: default;'"
+                        @mousedown.stop="canManage && phase.draggable && emit('start-phase-drag', { index: phase.segmentIndex ?? (i + 1), clientX: $event.clientX })"
                         @click.stop
                         @contextmenu.prevent.stop />
                     <text :x="phase.time * pxPerSec + 4" y="12"
-                        fill="#E74C3C" font-size="10" font-weight="700"
+                        :fill="phase.draggable ? '#E74C3C' : '#FFFFFF66'"
+                        font-size="10" font-weight="700"
                         data-interactive
                         :style="canManage ? 'cursor: text;' : ''"
                         @click.stop
@@ -121,7 +141,20 @@ const onClick = (e) => {
                             {{ formatTime(cast) }}
                         </text>
                         <g data-interactive style="cursor: pointer;"
-                            @click.stop="emit('focus-cast', { time: cast, spell_id: ab.spell_id, ability_name: ab.name, color: ab.color })">
+                            @click.stop="emit('focus-cast', {
+                                time: cast,
+                                spell_id: ab.spell_id,
+                                name: ab.name,
+                                ability_name: ab.name,
+                                icon_filename: ab.icon_filename,
+                                color: ab.color,
+                                school: ab.school,
+                                priority: ab.priority,
+                                recommended_response: ab.recommended_response,
+                                notes: ab.notes,
+                                duration_sec: ab.duration_sec,
+                            })">
+                            <title>{{ tooltipFor(ab, cast) }}</title>
                             <image v-if="ab.icon_filename" :href="iconUrl(ab.icon_filename)"
                                 :x="cast * pxPerSec - ICON_SIZE / 2"
                                 :y="TOP_PADDING + i * ROW_HEIGHT"
@@ -131,7 +164,7 @@ const onClick = (e) => {
                                 :width="ICON_SIZE" :height="ICON_SIZE"
                                 fill="transparent"
                                 :stroke="focusedCast && focusedCast.time === cast && focusedCast.spell_id === ab.spell_id ? '#06B6D4' : ab.color"
-                                :stroke-width="focusedCast && focusedCast.time === cast && focusedCast.spell_id === ab.spell_id ? 2.5 : 1.5" />
+                                :stroke-width="strokeWidthFor(ab.priority, focusedCast && focusedCast.time === cast && focusedCast.spell_id === ab.spell_id)" />
                         </g>
                     </template>
                 </g>

@@ -1,0 +1,550 @@
+# Boss timeline — Belo'ren, Child of Al'ar, Normal (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline (Mythic-only mechanics removed).
+# Tactics enrichment: resources/tactics/beloren-child-of-alar.md.
+
+encounter:
+  id: 3182
+  slug: beloren-child-of-alar
+  name: "Belo'ren, Child of Al'ar"
+  season: midnight-s1
+  difficulty: normal
+  fight_duration_max: 480
+seed:
+  source: viserio
+  note: "Derived from Viserio's Mythic timeline with Mythic-only mechanics stripped."
+phases:
+  -
+    id: p1
+    name: 'Phase 1'
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 44
+  -
+    id: i1
+    name: 'Intermission 1'
+    is_intermission: true
+    trigger:
+      type: hp_below
+      value: ~
+      estimated_time: 44
+      min_time: 31
+      max_time: 57
+    seed_duration: 436
+abilities:
+  -
+    id: death_drop
+    spell_id: 1246709
+    name: 'Death Drop'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 66
+      -
+        phase: i1
+        at: 72
+      -
+        phase: i1
+        at: 232
+      -
+        phase: i1
+        at: 238
+      -
+        phase: i1
+        at: 398
+      -
+        phase: i1
+        at: 404
+  -
+    id: guardian_s_edict
+    spell_id: 1260826
+    name: "Guardian's Edict"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 149
+      -
+        phase: i1
+        at: 315
+  -
+    id: incubation_of_flames
+    spell_id: 1242792
+    name: 'Incubation of Flames'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 74
+      -
+        phase: i1
+        at: 240
+      -
+        phase: i1
+        at: 406
+  -
+    id: light_burn
+    spell_id: 1244348
+    name: 'Light Burn'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 32
+      -
+        phase: i1
+        at: 38
+      -
+        phase: i1
+        at: 143
+      -
+        phase: i1
+        at: 193
+      -
+        phase: i1
+        at: 309
+      -
+        phase: i1
+        at: 359
+  -
+    id: light_dive
+    spell_id: 1241291
+    name: 'Light Dive'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 19
+      -
+        phase: i1
+        at: 25
+      -
+        phase: i1
+        at: 128
+      -
+        phase: i1
+        at: 178
+      -
+        phase: i1
+        at: 228
+      -
+        phase: i1
+        at: 294
+      -
+        phase: i1
+        at: 344
+      -
+        phase: i1
+        at: 394
+  -
+    id: light_edict
+    spell_id: 1261217
+    name: 'Light Edict'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 40
+      -
+        phase: i1
+        at: 46
+      -
+        phase: i1
+        at: 128
+      -
+        phase: i1
+        at: 148
+      -
+        phase: i1
+        at: 178
+      -
+        phase: i1
+        at: 198
+      -
+        phase: i1
+        at: 228
+      -
+        phase: i1
+        at: 294
+      -
+        phase: i1
+        at: 314
+      -
+        phase: i1
+        at: 344
+      -
+        phase: i1
+        at: 364
+      -
+        phase: i1
+        at: 394
+  -
+    id: radiant_echoes
+    spell_id: 1242981
+    name: 'Radiant Echoes'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 7
+      -
+        phase: i1
+        at: 13
+      -
+        phase: i1
+        at: 63
+      -
+        phase: i1
+        at: 114
+      -
+        phase: i1
+        at: 164
+      -
+        phase: i1
+        at: 214
+      -
+        phase: i1
+        at: 280
+      -
+        phase: i1
+        at: 330
+      -
+        phase: i1
+        at: 380
+  -
+    id: void_edict
+    spell_id: 1261218
+    name: 'Void Edict'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 20
+      -
+        phase: i1
+        at: 26
+      -
+        phase: i1
+        at: 132
+      -
+        phase: i1
+        at: 152
+      -
+        phase: i1
+        at: 182
+      -
+        phase: i1
+        at: 202
+      -
+        phase: i1
+        at: 232
+      -
+        phase: i1
+        at: 298
+      -
+        phase: i1
+        at: 318
+      -
+        phase: i1
+        at: 348
+      -
+        phase: i1
+        at: 368
+      -
+        phase: i1
+        at: 398
+  -
+    id: voidlight_convergence
+    spell_id: 1242515
+    name: 'Voidlight Convergence'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 1
+      -
+        phase: i1
+        at: 7
+      -
+        phase: i1
+        at: 57
+      -
+        phase: i1
+        at: 108
+      -
+        phase: i1
+        at: 158
+      -
+        phase: i1
+        at: 208
+      -
+        phase: i1
+        at: 274
+      -
+        phase: i1
+        at: 324
+      -
+        phase: i1
+        at: 374
+conditional_abilities:
+  -
+    id: voidlight_convergence
+    spell_id: ~
+    name: 'Voidlight Convergence'
+    icon: ~
+    school: shadow
+    trigger: color_assignment
+    priority: medium
+    recommended_response: {  }
+    notes: 'Assigns every player either a light or void color. The assigned color reduces damage from matching-color mechanics by 50%. Players must track their color for all subsequent mechanics.'
+    notes_uk: 'Кожен гравець отримує світлий або темний колір. Відповідний колір зменшує вхідну шкоду від механік на 50%. Стежте за своїм кольором для всіх наступних механік.'
+  -
+    id: light_dive_void_dive
+    spell_id: ~
+    name: 'Light Dive / Void Dive'
+    icon: ~
+    school: shadow
+    trigger: soak
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Marks a player with a colored soak circle dealing split damage, causing knockback, and leaving a permanent puddle. Matching-color players stack to soak; puddles placed at room edges.'
+    notes_uk: 'Мітить гравця кольоровою зоною під спліт-шкоду, відкидає та залишає постійну калюжу. Гравці відповідного кольору стакаються для поглинання. Калюжі розміщувати по краях кімнати.'
+  -
+    id: light_dive_void_dive_puddle
+    spell_id: ~
+    name: 'Light Dive / Void Dive (puddle)'
+    icon: ~
+    school: shadow
+    trigger: puddle_placement
+    priority: medium
+    recommended_response: {  }
+    notes: 'Dive leaves a permanent ground puddle. Soak target must drop it at room edges to preserve space.'
+    notes_uk: 'Dive залишає постійну калюжу. Ціль повинна виносити її до країв кімнати, щоб зберегти простір.'
+  -
+    id: infused_quills
+    spell_id: ~
+    name: 'Infused Quills'
+    icon: ~
+    school: shadow
+    trigger: soak
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Heroic/Mythic only. Marks players and fires opposite-colored quills at them. A different matching-color player must intercept each quill. On Mythic, splash damage requires spread positioning.'
+    notes_uk: 'Тільки на Героїку/Міфіку. Мітить гравців і стріляє в них шипами протилежного кольору. Інший гравець відповідного кольору повинен перехопити кожен шип. На Міфіку, сплеш-шкода вимагає розбігу.'
+  -
+    id: guardian_s_edict
+    spell_id: ~
+    name: "Guardian's Edict"
+    icon: ~
+    school: shadow
+    trigger: tankbuster
+    priority: high
+    recommended_response: {  }
+    notes: 'Boss fires a series of colored frontal cones. Tanks must soak only matching-color cones. Wrong-color soak or unsoaked cone causes boss enrage. Final cone splits between both tanks.'
+    notes_uk: 'Бос випускає серію кольорових фронтальних конусів. Танки поглинають лише конуси відповідного кольору. Поглинання неправильного кольору або пропущений конус викликає енрейдж боса. Останній конус ділиться між обома танками.'
+  -
+    id: guardian_s_edict_tank_swap
+    spell_id: ~
+    name: "Guardian's Edict (tank swap)"
+    icon: ~
+    school: shadow
+    trigger: tank_swap
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Tanks may need to swap between Edict combos depending on debuff stacks and color rotation.'
+    notes_uk: 'Танкам, можливо, доведеться мінятися між комбінаціями Edict залежно від стаків дебафу та ротації кольорів.'
+  -
+    id: radiant_echoes
+    spell_id: ~
+    name: 'Radiant Echoes'
+    icon: ~
+    school: shadow
+    trigger: positioning
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Light and void orbs float across the room. Players collide with matching-color orbs to clear space. On Mythic, orbs explode if they touch the boss.'
+    notes_uk: 'Світлі та темні сфери літають по кімнаті. Гравці зіштовхуються зі сферами відповідного кольору, щоб очистити простір. На Міфіку, сфери вибухають, якщо торкаються боса.'
+  -
+    id: light_eruption_void_eruption
+    spell_id: ~
+    name: 'Light Eruption / Void Eruption'
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: high
+    recommended_response:
+      - stop
+    notes: 'Bird adds cast Eruption dealing lethal raid-wide damage if it completes. Only matching-color players can interrupt. This is a color-locked interrupt.'
+    notes_uk: 'Птахи-ади кастують Eruption, завдаючи смертельної шкоди рейду, якщо каст завершиться. Переривати можуть лише гравці відповідного кольору.'
+  -
+    id: light_blast_void_blast
+    spell_id: ~
+    name: 'Light Blast / Void Blast'
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Secondary bird add cast. Any player can interrupt regardless of color.'
+    notes_uk: 'Другий каст птаха-ада. Переривати може будь-який гравець, незалежно від кольору.'
+  -
+    id: rebirth
+    spell_id: ~
+    name: Rebirth
+    icon: ~
+    school: shadow
+    trigger: rebirth
+    priority: medium
+    recommended_response: {  }
+    notes: 'When bird adds die they become eggs. Egg must be killed within 15 seconds or the add respawns at full HP. Burning Heart damage intensifies during this window.'
+    notes_uk: "Коли птахи-ади помирають, вони стають яйцями. Яйце потрібно вбити протягом 15 секунд, інакше ад респавниться з повним здоров'ям. Шкода від Burning Heart посилюється протягом цього вікна."
+  -
+    id: rebirth_add_management
+    spell_id: ~
+    name: 'Rebirth (add management)'
+    icon: ~
+    school: shadow
+    trigger: add_management
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Immediate target switch to eggs on bird death. Hard DPS check to prevent respawn cascade.'
+    notes_uk: 'Негайний свіч на яйця після смерті птахів. Жорстка перевірка DPS, щоб запобігти каскаду респавнів.'
+  -
+    id: death_drop
+    spell_id: ~
+    name: 'Death Drop'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Phase transition. When boss reaches 0 HP it smashes into center dealing knockback damage reduced by distance. Players must spread from center before transition.'
+    notes_uk: 'Перехід фази. Коли бос досягає 0 HP, він врізається в центр, завдаючи шкоди з відкиданням, що зменшується відстанню. Розбіжіться від центру перед переходом.'
+  -
+    id: burning_heart
+    spell_id: ~
+    name: 'Burning Heart'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Constant pulsing raid-wide damage throughout the fight. Damage intensifies during Rebirth windows.'
+    notes_uk: 'Постійна пульсуюча шкода по рейду протягом бою. Шкода посилюється під час вікон Rebirth.'
+  -
+    id: eternal_burns
+    spell_id: ~
+    name: 'Eternal Burns'
+    icon: ~
+    school: shadow
+    trigger: absorb_shield
+    priority: medium
+    recommended_response: {  }
+    notes: 'Places an absorb shield and a DoT debuff on random players. DoT persists until the absorb is fully healed through. Healers must prioritize absorb targets.'
+    notes_uk: 'Накладає щит-абсорб та DoT-дебаф на випадкових гравців. DoT триває, доки абсорб не буде повністю проліковано. Хілери пріоритетно лікують цілі з абсорбом.'
+  -
+    id: eternal_burns_shield_heal
+    spell_id: ~
+    name: 'Eternal Burns (shield heal)'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: medium
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Healing through the absorb shield is the only way to remove the paired DoT. Not removable by dispel.'
+    notes_uk: 'Пролікування абсорб-щита - єдиний спосіб зняти парний DoT. Не знімається диспелом.'
+  -
+    id: incubation_of_flames
+    spell_id: ~
+    name: 'Incubation of Flames'
+    icon: ~
+    school: shadow
+    trigger: burn_phase
+    priority: high
+    recommended_response: {  }
+    notes: 'Phase 2. Room splits into colored cone zones and the boss becomes an egg. Players have a 30-second window to damage the egg. Move to matching-color zone; burst with cooldowns.'
+    notes_uk: 'Фаза 2. Кімната розділяється на кольорові конусні зони, і бос стає яйцем. У гравців є 30 секунд, щоб завдати шкоди яйцю. Рухайтесь до зони відповідного кольору; бурстіть з кулдаунами.'
+  -
+    id: incubation_of_flames_positioning
+    spell_id: ~
+    name: 'Incubation of Flames (positioning)'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Wrong-color zone standing deals damage. Players must remain in their assigned-color zone during the burn window.'
+    notes_uk: 'Стояння в зоні неправильного кольору завдає шкоди. Залишайтеся в зоні свого кольору під час бурсту.'
+  -
+    id: ashen_benediction
+    spell_id: ~
+    name: 'Ashen Benediction'
+    icon: ~
+    school: shadow
+    trigger: energy_ramp
+    priority: high
+    recommended_response: {  }
+    notes: 'Fires a burst of fire damage and applies a stacking 10% healing reduction debuff after each Phase 2 cycle. Persists for remainder of fight. Drives soft enrage.'
+    notes_uk: 'Після кожного циклу Фази 2 випускає вибух вогняної шкоди та накладає стакаючий дебаф на 10% зменшення лікування. Триває до кінця бою. Створює софт-енрейдж.'

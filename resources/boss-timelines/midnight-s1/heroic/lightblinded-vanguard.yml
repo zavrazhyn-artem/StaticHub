@@ -1,0 +1,864 @@
+# Boss timeline — Lightblinded Vanguard, Heroic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline (Mythic-only mechanics removed).
+# Tactics enrichment: resources/tactics/lightblinded-vanguard.md.
+
+encounter:
+  id: 3180
+  slug: lightblinded-vanguard
+  name: 'Lightblinded Vanguard'
+  season: midnight-s1
+  difficulty: heroic
+  fight_duration_max: 510
+seed:
+  source: viserio
+  note: "Derived from Viserio's Mythic timeline with Mythic-only mechanics stripped."
+phases:
+  -
+    id: p1
+    name: Combat
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 510
+abilities:
+  -
+    id: aura_of_devotion
+    spell_id: 1246162
+    name: 'Aura of Devotion'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 29
+      -
+        phase: p1
+        at: 34
+      -
+        phase: p1
+        at: 188
+      -
+        phase: p1
+        at: 193
+      -
+        phase: p1
+        at: 347
+      -
+        phase: p1
+        at: 352
+  -
+    id: aura_of_peace
+    spell_id: 1248451
+    name: 'Aura of Peace'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Bellamy at 100 energy reduces damage taken by allied bosses within 40 yards by 75%.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 138
+      -
+        phase: p1
+        at: 297
+      -
+        phase: p1
+        at: 456
+    notes_uk: 'Bellamy на 100 енергії зменшує вхідну шкоду для союзних босів в межах 40 ярдів на 75%.'
+  -
+    id: aura_of_wrath
+    spell_id: 1248449
+    name: 'Aura of Wrath'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Senn at 100 energy pacifies players dealing damage to any Vanguard within 40 yards.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 82
+      -
+        phase: p1
+        at: 241
+      -
+        phase: p1
+        at: 400
+    notes_uk: 'Senn на 100 енергії унерухомлює гравців, що завдають шкоди будь-якому Vanguard в межах 40 ярдів.'
+  -
+    id: avenger_s_shield
+    spell_id: 1246497
+    name: "Avenger's Shield"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Shields thrown at marked players applying a dispellable DoT. Spread and dispel quickly. On Mythic, targets all players.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 18
+      -
+        phase: p1
+        at: 72
+      -
+        phase: p1
+        at: 96
+      -
+        phase: p1
+        at: 108
+      -
+        phase: p1
+        at: 126
+      -
+        phase: p1
+        at: 140
+      -
+        phase: p1
+        at: 146
+      -
+        phase: p1
+        at: 162
+      -
+        phase: p1
+        at: 180
+      -
+        phase: p1
+        at: 234
+      -
+        phase: p1
+        at: 255
+      -
+        phase: p1
+        at: 270
+      -
+        phase: p1
+        at: 288
+      -
+        phase: p1
+        at: 299
+      -
+        phase: p1
+        at: 306
+      -
+        phase: p1
+        at: 326
+      -
+        phase: p1
+        at: 342
+      -
+        phase: p1
+        at: 396
+      -
+        phase: p1
+        at: 414
+      -
+        phase: p1
+        at: 432
+      -
+        phase: p1
+        at: 450
+      -
+        phase: p1
+        at: 458
+    notes_uk: 'Щити кидаються в помічених гравців, накладаючи диспелений DoT. Розбіжіться та швидко диспеліть. На Міфіку, ціль — всі гравці.'
+  -
+    id: blinding_light
+    spell_id: 1258514
+    name: 'Blinding Light'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 35
+      -
+        phase: p1
+        at: 96
+      -
+        phase: p1
+        at: 169
+      -
+        phase: p1
+        at: 213
+      -
+        phase: p1
+        at: 265
+      -
+        phase: p1
+        at: 329
+      -
+        phase: p1
+        at: 372
+      -
+        phase: p1
+        at: 424
+  -
+    id: divine_storm
+    spell_id: 1246765
+    name: 'Divine Storm'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: '8-yard AoE around Lightblood. Melee must step out. On Mythic, spawns tornadoes that travel inward.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 15
+      -
+        phase: p1
+        at: 33
+      -
+        phase: p1
+        at: 51
+      -
+        phase: p1
+        at: 69
+      -
+        phase: p1
+        at: 123
+      -
+        phase: p1
+        at: 141
+      -
+        phase: p1
+        at: 159
+      -
+        phase: p1
+        at: 177
+      -
+        phase: p1
+        at: 195
+      -
+        phase: p1
+        at: 213
+      -
+        phase: p1
+        at: 231
+      -
+        phase: p1
+        at: 267
+      -
+        phase: p1
+        at: 285
+      -
+        phase: p1
+        at: 303
+      -
+        phase: p1
+        at: 321
+      -
+        phase: p1
+        at: 339
+      -
+        phase: p1
+        at: 357
+      -
+        phase: p1
+        at: 375
+      -
+        phase: p1
+        at: 393
+      -
+        phase: p1
+        at: 429
+      -
+        phase: p1
+        at: 447
+    notes_uk: 'AoE радіусом 8 ярдів навколо Lightblood. Мілі повинні відійти. На Міфіку, створює торнадо, що рухаються до центру.'
+  -
+    id: divine_toll
+    spell_id: 1248644
+    name: 'Divine Toll'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Traveling shield waves for 18 seconds. Hit players take damage and are silenced for 6 seconds.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 34
+      -
+        phase: p1
+        at: 87
+      -
+        phase: p1
+        at: 193
+      -
+        phase: p1
+        at: 246
+      -
+        phase: p1
+        at: 352
+      -
+        phase: p1
+        at: 405
+    notes_uk: 'Хвилі щитів, що рухаються протягом 18 секунд. Гравці, що потрапили під удар, отримують шкоду та сайленс на 6 секунд.'
+  -
+    id: elekk_charge
+    spell_id: 1249130
+    name: 'Elekk Charge'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Senn gains absorb shield and charges forward on an elekk, damaging all players in the path.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 31
+      -
+        phase: p1
+        at: 90
+      -
+        phase: p1
+        at: 163
+      -
+        phase: p1
+        at: 207
+      -
+        phase: p1
+        at: 259
+      -
+        phase: p1
+        at: 322
+      -
+        phase: p1
+        at: 367
+      -
+        phase: p1
+        at: 419
+    notes_uk: 'Senn отримує абсорб-щит та робить ривок вперед на елеку, завдаючи шкоди всім гравцям на шляху.'
+  -
+    id: execution_sentence
+    spell_id: 1250839
+    name: 'Execution Sentence'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Marked circles must be soaked by multiple players (one per set). Spinning hammers emerge after soak and must be dodged.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 82
+      -
+        phase: p1
+        at: 90
+      -
+        phase: p1
+        at: 138
+      -
+        phase: p1
+        at: 146
+      -
+        phase: p1
+        at: 241
+      -
+        phase: p1
+        at: 249
+      -
+        phase: p1
+        at: 297
+      -
+        phase: p1
+        at: 305
+      -
+        phase: p1
+        at: 400
+      -
+        phase: p1
+        at: 408
+      -
+        phase: p1
+        at: 456
+      -
+        phase: p1
+        at: 464
+    notes_uk: "Помічені круги повинні бути поглинуті кількома гравцями (один на набір). Обертові молоти з'являються після поглинання і їх потрібно уникати."
+  -
+    id: final_verdict
+    spell_id: 1251812
+    name: 'Final Verdict'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Additional damaging cast cycled by the bosses; healers should mitigate.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 29
+      -
+        phase: p1
+        at: 65
+      -
+        phase: p1
+        at: 119
+      -
+        phase: p1
+        at: 155
+      -
+        phase: p1
+        at: 173
+      -
+        phase: p1
+        at: 227
+      -
+        phase: p1
+        at: 281
+      -
+        phase: p1
+        at: 317
+      -
+        phase: p1
+        at: 335
+      -
+        phase: p1
+        at: 389
+      -
+        phase: p1
+        at: 443
+    notes_uk: 'Додатковий каст шкоди, що чергується босами; хілери повинні мітігувати.'
+  -
+    id: judgment
+    spell_id: 1251857
+    name: Judgment
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Two-part attack. Judgment applies debuff increasing Shield of the Righteous damage by 500%. Tanks must swap between the two hits.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 22
+      -
+        phase: p1
+        at: 26
+      -
+        phase: p1
+        at: 58
+      -
+        phase: p1
+        at: 62
+      -
+        phase: p1
+        at: 112
+      -
+        phase: p1
+        at: 116
+      -
+        phase: p1
+        at: 148
+      -
+        phase: p1
+        at: 152
+      -
+        phase: p1
+        at: 166
+      -
+        phase: p1
+        at: 170
+      -
+        phase: p1
+        at: 220
+      -
+        phase: p1
+        at: 224
+      -
+        phase: p1
+        at: 274
+      -
+        phase: p1
+        at: 278
+      -
+        phase: p1
+        at: 310
+      -
+        phase: p1
+        at: 314
+      -
+        phase: p1
+        at: 328
+      -
+        phase: p1
+        at: 332
+      -
+        phase: p1
+        at: 382
+      -
+        phase: p1
+        at: 386
+      -
+        phase: p1
+        at: 436
+      -
+        phase: p1
+        at: 440
+    notes_uk: 'Атака з двох частин. Judgment накладає дебаф, що збільшує шкоду від Shield of the Righteous на 500%. Танки повинні мінятися між двома ударами.'
+  -
+    id: light_infused
+    spell_id: 1258659
+    name: 'Light Infused'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Constant ticking raid damage that increases 25% per Aura cast, creating a soft enrage.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 0
+      -
+        phase: p1
+        at: 26
+      -
+        phase: p1
+        at: 79
+      -
+        phase: p1
+        at: 134
+      -
+        phase: p1
+        at: 185
+      -
+        phase: p1
+        at: 238
+      -
+        phase: p1
+        at: 291
+      -
+        phase: p1
+        at: 344
+      -
+        phase: p1
+        at: 397
+      -
+        phase: p1
+        at: 451
+    notes_uk: 'Постійна тикаюча шкода по рейду, яка збільшується на 25% за кожен каст Aura, створюючи софт-енрейдж.'
+  -
+    id: sacred_toll
+    spell_id: 1246749
+    name: 'Sacred Toll'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Large burst raid-wide damage. Dangerous when overlapping with Searing Radiance.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 22
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 58
+      -
+        phase: p1
+        at: 76
+      -
+        phase: p1
+        at: 112
+      -
+        phase: p1
+        at: 130
+      -
+        phase: p1
+        at: 166
+      -
+        phase: p1
+        at: 184
+      -
+        phase: p1
+        at: 202
+      -
+        phase: p1
+        at: 220
+      -
+        phase: p1
+        at: 274
+      -
+        phase: p1
+        at: 292
+      -
+        phase: p1
+        at: 310
+      -
+        phase: p1
+        at: 328
+      -
+        phase: p1
+        at: 346
+      -
+        phase: p1
+        at: 364
+      -
+        phase: p1
+        at: 382
+      -
+        phase: p1
+        at: 436
+    notes_uk: 'Велика вибухова шкода по рейду. Небезпечно при перекритті з Searing Radiance.'
+  -
+    id: searing_radiance
+    spell_id: 1255738
+    name: 'Searing Radiance'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Raid-wide pulsing damage for 15 seconds. On Mythic, damage increases by 10% per second.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 11
+      -
+        phase: p1
+        at: 63
+      -
+        phase: p1
+        at: 115
+      -
+        phase: p1
+        at: 182
+      -
+        phase: p1
+        at: 234
+      -
+        phase: p1
+        at: 341
+      -
+        phase: p1
+        at: 394
+    notes_uk: 'Пульсуюча шкода по рейду протягом 15 секунд. На Міфіку, шкода збільшується на 10% за секунду.'
+  -
+    id: shield_of_the_righteous
+    spell_id: 1251859
+    name: 'Shield of the Righteous'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Two-part attack. Judgment applies debuff increasing Shield of the Righteous damage by 500%. Tanks must swap between the two hits.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 25
+      -
+        phase: p1
+        at: 61
+      -
+        phase: p1
+        at: 115
+      -
+        phase: p1
+        at: 151
+      -
+        phase: p1
+        at: 169
+      -
+        phase: p1
+        at: 223
+      -
+        phase: p1
+        at: 277
+      -
+        phase: p1
+        at: 313
+      -
+        phase: p1
+        at: 331
+      -
+        phase: p1
+        at: 385
+      -
+        phase: p1
+        at: 439
+    notes_uk: 'Атака з двох частин. Judgment накладає дебаф, що збільшує шкоду від Shield of the Righteous на 500%. Танки повинні мінятися між двома ударами.'
+  -
+    id: tyr_s_wrath
+    spell_id: 1248710
+    name: "Tyr's Wrath"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Mythic-only damaging cast that overlaps with other mechanics depending on which boss the Spirit empowers.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 39
+      -
+        phase: p1
+        at: 44
+      -
+        phase: p1
+        at: 49
+      -
+        phase: p1
+        at: 54
+      -
+        phase: p1
+        at: 148
+      -
+        phase: p1
+        at: 153
+      -
+        phase: p1
+        at: 158
+      -
+        phase: p1
+        at: 163
+      -
+        phase: p1
+        at: 198
+      -
+        phase: p1
+        at: 203
+      -
+        phase: p1
+        at: 208
+      -
+        phase: p1
+        at: 213
+      -
+        phase: p1
+        at: 307
+      -
+        phase: p1
+        at: 312
+      -
+        phase: p1
+        at: 317
+      -
+        phase: p1
+        at: 322
+      -
+        phase: p1
+        at: 357
+      -
+        phase: p1
+        at: 362
+      -
+        phase: p1
+        at: 367
+      -
+        phase: p1
+        at: 372
+      -
+        phase: p1
+        at: 466
+      -
+        phase: p1
+        at: 471
+      -
+        phase: p1
+        at: 476
+    notes_uk: 'Каст шкоди тільки на Міфіку, що перекривається з іншими механіками залежно від того, якого боса підсилює Spirit.'
+conditional_abilities:
+  -
+    id: exorcism
+    spell_id: 1246745
+    name: Exorcism
+    icon: ~
+    school: shadow
+    trigger: tankbuster
+    priority: medium
+    recommended_response: {  }
+    notes: 'Single large holy damage hit on current tank. Requires active mitigation or defensive.'
+    notes_uk: 'Одиночний великий удар святою шкодою по поточному танку. Вимагає активної мітігації або захисної здібності.'
+  -
+    id: consecration
+    spell_id: 1256133
+    name: Consecration
+    icon: ~
+    school: shadow
+    trigger: puddle_placement
+    priority: medium
+    recommended_response: {  }
+    notes: 'Persistent puddle left after each Aura channel (Heroic+). On Mythic, also pacifies and increases damage taken 100%.'
+    notes_uk: 'Постійна калюжа залишається після кожного касту Aura (Героїк+). На Міфіку, також унерухомлює та збільшує вхідну шкоду на 100%.'
+  -
+    id: aura_of_wrath
+    spell_id: 1248450
+    name: 'Aura of Wrath'
+    icon: ~
+    school: shadow
+    trigger: energy_ramp
+    priority: medium
+    recommended_response: {  }
+    notes: 'Lightblood at 100 energy buffs allied boss damage by 100% within 40 yards for 15 seconds.'
+    notes_uk: 'Lightblood на 100 енергії бафає шкоду союзних босів на 100% в межах 40 ярдів на 15 секунд.'
+  -
+    id: zealous_spirit_mythic
+    spell_id: 1276713
+    name: 'Zealous Spirit (Mythic)'
+    icon: ~
+    school: shadow
+    trigger: add_management
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Spirit rotates between bosses, increasing damage 30% and empowering one ability while forcing dangerous overlaps.'
+    notes_uk: 'Spirit обертається між босами, збільшуючи шкоду на 30% та підсилюючи одну здібність, водночас створюючи небезпечні перекриття.'
+  -
+    id: divine_shield_mass_dispel
+    spell_id: 1246384
+    name: 'Divine Shield + Mass Dispel'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: medium
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'All three bosses apply Divine Shield immunity when Bloodlust is used. Priest must Mass Dispel immediately.'
+    notes_uk: 'Всі три боси накладають Divine Shield імунітет, коли використовується Bloodlust. Пріст повинен негайно зробити Mass Dispel.'

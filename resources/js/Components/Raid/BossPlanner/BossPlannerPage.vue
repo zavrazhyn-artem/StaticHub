@@ -484,6 +484,17 @@ const phaseSegmentsForCurrentPlan = computed(() => {
     return byDiff[diff] || byDiff['mythic'] || [];
 });
 
+// Conditional abilities — triggered by raid state, not on the fixed timeline.
+// Shown in a strip above the boss section and available to AI log analysis.
+const conditionalAbilitiesForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.conditional_abilities || {};
+    if (Array.isArray(byDiff)) return byDiff;
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
 // Current step groups (backward compat: default to empty)
 const currentGroups = computed(() => {
     return currentStep.value?.groups || {};
@@ -1372,6 +1383,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             :timeline="localPlan.timeline || {}"
                             :boss-abilities="bossAbilitiesForCurrentPlan"
                             :default-phase-segments="phaseSegmentsForCurrentPlan"
+                            :conditional-abilities="conditionalAbilitiesForCurrentPlan"
                             :roster="roster"
                             :player-cooldowns="plannerData.player_cooldowns || {}"
                             :can-manage="canManage"

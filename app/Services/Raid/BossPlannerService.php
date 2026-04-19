@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services\Raid;
 
-use App\Models\BossAbilityTiming;
-use App\Models\BossPhaseSegment;
 use App\Models\RaidPlan;
 use Illuminate\Database\Eloquent\Collection;
 
 class BossPlannerService
 {
+    public function __construct(
+        private readonly BossTimelineService $timelineService,
+    ) {}
+
     /**
      * Create a new raid plan for an encounter.
      */
@@ -159,63 +161,10 @@ class BossPlannerService
         $encounterBosses = config('wow_season.encounter_bosses', []);
         $season = (string) (config('wow_season.current_season') ?: 'midnight-s1');
 
-        // Fetch global timings + this static's overrides; static rows take precedence
-        // when both exist for the same (encounter, difficulty, spell).
-        $rows = BossAbilityTiming::query()
-            ->forSeason($season)
-            ->globalOrForStatic($staticId)
-            ->orderBy('row_order')
-            ->get();
-
-        // Group: encounter_slug → difficulty → [{ability}].
-        // Static-specific rows beat global rows at the (slug, diff, spell) level.
-        $sorted = $rows->sortByDesc(fn (BossAbilityTiming $t) => $t->static_id ?? 0)->values();
-        $picked = [];
-        foreach ($sorted as $t) {
-            $key = $t->encounter_slug . '|' . $t->difficulty . '|' . $t->spell_id;
-            if (isset($picked[$key])) continue;
-            $picked[$key] = $t;
-        }
-        $orderedRows = collect($picked)->sortBy(fn (BossAbilityTiming $t) => $t->row_order)->values();
-        $timings = [];
-        foreach ($orderedRows as $t) {
-            $timings[$t->encounter_slug][$t->difficulty][] = [
-                'spell_id' => $t->spell_id,
-                'name' => $t->name,
-                'icon_filename' => $t->icon_filename,
-                'color' => $t->color,
-                'ability_type' => $t->ability_type,
-                'default_casts' => $t->default_casts,
-                'duration_sec' => $t->duration_sec,
-            ];
-        }
-
-        // Phase segments — same static-override logic
-        $segRows = BossPhaseSegment::query()
-            ->forSeason($season)
-            ->globalOrForStatic($staticId)
-            ->orderBy('segment_order')
-            ->get();
-        $sortedSegs = $segRows->sortByDesc(fn (BossPhaseSegment $s) => $s->static_id ?? 0)->values();
-        $pickedSegs = [];
-        foreach ($sortedSegs as $s) {
-            $key = $s->encounter_slug . '|' . $s->difficulty . '|' . $s->segment_id;
-            if (isset($pickedSegs[$key])) continue;
-            $pickedSegs[$key] = $s;
-        }
-        $orderedSegs = collect($pickedSegs)->sortBy(fn (BossPhaseSegment $s) => $s->segment_order)->values();
-        $phaseSegments = [];
-        foreach ($orderedSegs as $s) {
-            $phaseSegments[$s->encounter_slug][$s->difficulty][] = [
-                'segment_id' => $s->segment_id,
-                'phase_id' => $s->phase_id,
-                'phase_name' => $s->phase_name,
-                'is_intermission' => $s->is_intermission,
-                'seed_start' => $s->seed_start,
-                'seed_duration' => $s->seed_duration,
-                'segment_order' => $s->segment_order,
-            ];
-        }
+        // YAML-backed timeline data: [slug][difficulty] → { encounter, phases,
+        // abilities, conditional_abilities }. Source of truth lives in
+        // resources/boss-timelines/{season}/{difficulty}/{slug}.yml.
+        $timelineData = $this->timelineService->loadSeason($season);
 
         $encounters = [];
         foreach ($raidInstances as $instanceName => $bosses) {
@@ -230,6 +179,17 @@ class BossPlannerService
 
                 $bossPlans = $plans->filter(fn (RaidPlan $p) => $p->encounter_slug === $slug)->values();
 
+                // Slice YAML data per difficulty for this encounter.
+                $bossTimeline = $timelineData[$slug] ?? [];
+                $timingsByDiff = [];
+                $phasesByDiff = [];
+                $conditionalsByDiff = [];
+                foreach ($bossTimeline as $diff => $payload) {
+                    $timingsByDiff[$diff] = $payload['abilities'] ?? [];
+                    $phasesByDiff[$diff] = $payload['phases'] ?? [];
+                    $conditionalsByDiff[$diff] = $payload['conditional_abilities'] ?? [];
+                }
+
                 $encounters[] = [
                     'slug' => $slug,
                     'name' => $bossName,
@@ -238,8 +198,9 @@ class BossPlannerService
                     'portrait' => $portraits[0] ?? null,
                     'portraits' => $portraits,
                     'abilities' => $bossData['abilities'] ?? [],
-                    'boss_ability_timings' => $timings[$slug] ?? [],
-                    'phase_segments' => $phaseSegments[$slug] ?? [],
+                    'boss_ability_timings' => $timingsByDiff,
+                    'phase_segments' => $phasesByDiff,
+                    'conditional_abilities' => $conditionalsByDiff,
                     'has_plan' => $bossPlans->isNotEmpty(),
                     'plans' => $bossPlans->map(fn (RaidPlan $p) => [
                         'id' => $p->id,

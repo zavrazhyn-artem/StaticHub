@@ -1,0 +1,344 @@
+# Boss timeline — Imperator Averzian, Mythic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline.
+# Tactics enrichment: resources/tactics/imperator-averzian.md.
+
+encounter:
+  id: 3176
+  slug: imperator-averzian
+  name: 'Imperator Averzian'
+  season: midnight-s1
+  difficulty: mythic
+  fight_duration_max: 570
+seed:
+  source: viserio
+  note: "Cast times parsed from Viserio's published Mythic timeline."
+phases:
+  -
+    id: p1
+    name: Combat
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 570
+abilities:
+  -
+    id: cosmic_eruption
+    spell_id: 1261249
+    name: 'Cosmic Eruption'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Voidshaper channel that claims a space. On completion, 12-yard explosion plus outward beams from the claimed space.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 58
+      -
+        phase: p1
+        at: 138
+      -
+        phase: p1
+        at: 244
+      -
+        phase: p1
+        at: 324
+      -
+        phase: p1
+        at: 428
+      -
+        phase: p1
+        at: 508
+    notes_uk: 'Voidshaper кастує, захоплюючи простір. Після завершення — 12-ярдовий вибух та промені назовні від захопленого простору.'
+  -
+    id: dark_upheaval
+    spell_id: 1249251
+    name: 'Dark Upheaval'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Raid-wide burst damage followed by a ticking DOT on the whole raid. Primary healing check.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 7
+      -
+        phase: p1
+        at: 55
+      -
+        phase: p1
+        at: 91
+      -
+        phase: p1
+        at: 193
+      -
+        phase: p1
+        at: 241
+      -
+        phase: p1
+        at: 277
+      -
+        phase: p1
+        at: 377
+      -
+        phase: p1
+        at: 425
+      -
+        phase: p1
+        at: 461
+    notes_uk: 'Вибухова шкода по рейду, за якою слідує тикаючий DoT на весь рейд. Основна перевірка лікування.'
+  -
+    id: oblivion_s_wrath
+    spell_id: 1260712
+    name: "Oblivion's Wrath"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Void beam spears shoot outward from Averzian in multiple directions, dealing damage and knocking players back.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 63
+      -
+        phase: p1
+        at: 81
+      -
+        phase: p1
+        at: 249
+      -
+        phase: p1
+        at: 267
+      -
+        phase: p1
+        at: 433
+      -
+        phase: p1
+        at: 451
+    notes_uk: 'Промені Void beam вистрілюють назовні від Averzian в декількох напрямках, завдаючи шкоди та відкидаючи гравців.'
+  -
+    id: shadow_s_advance
+    spell_id: 1262776
+    name: "Shadow's Advance"
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response:
+      - stop
+    notes: 'Summons 3 Abyssal Voidshapers that channel Void Rupture to claim board spaces. Raid must kill 2 of 3 per cycle to prevent 3-in-a-row.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 17
+      -
+        phase: p1
+        at: 97
+      -
+        phase: p1
+        at: 203
+      -
+        phase: p1
+        at: 283
+      -
+        phase: p1
+        at: 387
+      -
+        phase: p1
+        at: 467
+    notes_uk: 'Викликає 3 Abyssal Voidshapers, які кастують Void Rupture, щоб захопити простір. Рейд повинен вбити 2 з 3 за цикл, щоб запобігти 3 поспіль захопленням.'
+  -
+    id: umbral_collapse
+    spell_id: 1249266
+    name: 'Umbral Collapse'
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Marked player positions soak circle on priority Voidshaper to remove its 99% damage reduction. Raid stacks to share damage.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 38
+      -
+        phase: p1
+        at: 45
+      -
+        phase: p1
+        at: 118
+      -
+        phase: p1
+        at: 125
+      -
+        phase: p1
+        at: 224
+      -
+        phase: p1
+        at: 231
+      -
+        phase: p1
+        at: 304
+      -
+        phase: p1
+        at: 311
+      -
+        phase: p1
+        at: 408
+      -
+        phase: p1
+        at: 415
+      -
+        phase: p1
+        at: 488
+      -
+        phase: p1
+        at: 495
+    notes_uk: 'Помічений гравець розміщує зону поглинання на пріоритетному Voidshaper, щоб зняти його 99% зменшення шкоди. Рейд стакається, щоб розділити шкоду.'
+  -
+    id: void_fall
+    spell_id: 1258880
+    name: 'Void Fall'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Knocks players back and spawns ground void zones that must be avoided.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 166
+      -
+        phase: p1
+        at: 352
+      -
+        phase: p1
+        at: 536
+    notes_uk: 'Відкидає гравців та створює войд-зони на землі, яких потрібно уникати.'
+  -
+    id: void_marked
+    spell_id: 1280015
+    name: 'Void Marked'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 23
+      -
+        phase: p1
+        at: 103
+      -
+        phase: p1
+        at: 209
+      -
+        phase: p1
+        at: 289
+      -
+        phase: p1
+        at: 393
+      -
+        phase: p1
+        at: 473
+  -
+    id: void_rupture
+    spell_id: 1262036
+    name: 'Void Rupture'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Voidshaper channel that claims a space. On completion, 12-yard explosion plus outward beams from the claimed space.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 53
+      -
+        phase: p1
+        at: 133
+      -
+        phase: p1
+        at: 239
+      -
+        phase: p1
+        at: 319
+      -
+        phase: p1
+        at: 423
+      -
+        phase: p1
+        at: 503
+    notes_uk: 'Voidshaper кастує, захоплюючи простір. Після завершення — 12-ярдовий вибух та промені назовні від захопленого простору.'
+conditional_abilities:
+  -
+    id: cosmic_shell
+    spell_id: 1280035
+    name: 'Cosmic Shell'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: high
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Mythic only. Voidshapers spawn with 2 stacks of immunity. Dispel debuffed players near the add to remove stacks before DPS.'
+    notes_uk: "Тільки на Міфіку. Voidshapers з'являються з 2 стаками імунітету. Диспеліть дебафнутих гравців біля адда, щоб зняти стаки перед DPS."
+  -
+    id: imperator_s_glory
+    spell_id: 1270853
+    name: "Imperator's Glory"
+    icon: ~
+    school: shadow
+    trigger: positioning
+    priority: high
+    recommended_response:
+      - movement
+    notes: 'Boss gains 75% increased damage dealt and 99% damage reduction within 10 yards of claimed spaces (and adds on Heroic+). Tanks must reposition.'
+    notes_uk: 'Бос отримує 75% збільшення завданої шкоди та 99% зменшення вхідної шкоди в межах 10 ярдів від захоплених просторів (та аддів на Героїку+). Танки повинні змінити позицію.'
+  -
+    id: shadow_phalanx
+    spell_id: 1249321
+    name: 'Shadow Phalanx'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: high
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Untargetable troops march across arena dealing massive damage. Raid must move through the safe corridor between formations.'
+    notes_uk: 'Нецільові війська марширують по арені, завдаючи величезної шкоди. Рейд повинен рухатися через безпечний коридор між формаціями.'
+  -
+    id: blackening_wounds
+    spell_id: 1265540
+    name: 'Blackening Wounds'
+    icon: ~
+    school: shadow
+    trigger: tank_swap
+    priority: high
+    recommended_response:
+      - tank_swap
+    notes: "Tank melee debuff reduces max HP by 4% per stack (20s duration). Adds fixate the highest-stack tank on Shadow's Advance, forcing a swap."
+    notes_uk: "Танковий мілі-дебаф зменшує максимальне HP на 4% за стак (тривалість 20 с). Ади фіксуються на танку з найбільшою кількістю стаків під час Shadow's Advance, змушуючи до свіпа."

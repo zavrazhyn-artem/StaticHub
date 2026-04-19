@@ -1,0 +1,810 @@
+# Boss timeline — Crown of the Cosmos, Mythic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline.
+# Tactics enrichment: resources/tactics/crown-of-the-cosmos.md.
+
+encounter:
+  id: 3181
+  slug: crown-of-the-cosmos
+  name: 'Crown of the Cosmos'
+  season: midnight-s1
+  difficulty: mythic
+  fight_duration_max: 570
+seed:
+  source: viserio
+  note: "Cast times parsed from Viserio's published Mythic timeline."
+phases:
+  -
+    id: p1
+    name: 'Phase 1'
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 139
+  -
+    id: i1
+    name: 'Intermission 1'
+    is_intermission: true
+    trigger:
+      type: hp_below
+      value: ~
+      estimated_time: 139
+      min_time: 97
+      max_time: 181
+    seed_duration: 25
+  -
+    id: p2
+    name: 'Phase 2'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 164
+      min_time: 164
+      max_time: 164
+    seed_duration: 152
+  -
+    id: i2
+    name: 'Intermission 2'
+    is_intermission: true
+    trigger:
+      type: hp_below
+      value: ~
+      estimated_time: 316
+      min_time: 221
+      max_time: 411
+    seed_duration: 15
+  -
+    id: p3
+    name: 'Phase 3'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 331
+      min_time: 331
+      max_time: 331
+    seed_duration: 239
+abilities:
+  -
+    id: aspect_of_the_end
+    spell_id: 1239080
+    name: 'Aspect of the End'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Tethers multiple players (one always on tank) with stacking healing reduction; break sequentially with tank swaps.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p3
+        at: 0
+      -
+        phase: p3
+        at: 41
+      -
+        phase: p3
+        at: 60
+      -
+        phase: p3
+        at: 101
+      -
+        phase: p3
+        at: 120
+      -
+        phase: p3
+        at: 161
+      -
+        phase: p3
+        at: 180
+    notes_uk: "Зв'язує кількох гравців (один завжди на танку) зі стакаючим зменшенням лікування; розривайте послідовно з танковими свіпами."
+  -
+    id: call_of_the_void
+    spell_id: 1237837
+    name: 'Call of the Void'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 15
+      -
+        phase: p2
+        at: 67
+      -
+        phase: p2
+        at: 119
+  -
+    id: cosmic_barrier
+    spell_id: 1246918
+    name: 'Cosmic Barrier'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 9
+      -
+        phase: p3
+        at: 4
+      -
+        phase: p3
+        at: 64
+      -
+        phase: p3
+        at: 124
+      -
+        phase: p3
+        at: 184
+  -
+    id: dark_hand
+    spell_id: 1233787
+    name: 'Dark Hand'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Morium tank buster with knockback; use defensives and mind positioning.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 7
+      -
+        phase: p1
+        at: 48
+      -
+        phase: p1
+        at: 75
+      -
+        phase: p1
+        at: 102
+      -
+        phase: p3
+        at: 150
+      -
+        phase: p3
+        at: 167
+    notes_uk: 'Танкбастер Morium з відкиданням; використовуйте захисні здібності та враховуйте позиціонування.'
+  -
+    id: devouring_cosmos
+    spell_id: 1238843
+    name: 'Devouring Cosmos'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Consumes platform; grab a feather to jump to next section. 3 casts = soft enrage.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p3
+        at: 55
+      -
+        phase: p3
+        at: 115
+      -
+        phase: p3
+        at: 175
+    notes_uk: 'Поглинає платформу; візьміть перо, щоб перестрибнути до наступної секції. 3 касти = софт-енрейдж.'
+  -
+    id: grasp_of_emptiness
+    spell_id: 1232467
+    name: 'Grasp of Emptiness'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 5
+      -
+        phase: p1
+        at: 28
+      -
+        phase: p1
+        at: 55
+      -
+        phase: p1
+        at: 81
+      -
+        phase: p2
+        at: 20
+      -
+        phase: p2
+        at: 45
+      -
+        phase: p2
+        at: 72
+      -
+        phase: p2
+        at: 97
+      -
+        phase: p2
+        at: 124
+      -
+        phase: p3
+        at: 1
+      -
+        phase: p3
+        at: 11
+      -
+        phase: p3
+        at: 46
+      -
+        phase: p3
+        at: 62
+      -
+        phase: p3
+        at: 71
+      -
+        phase: p3
+        at: 106
+      -
+        phase: p3
+        at: 122
+      -
+        phase: p3
+        at: 131
+      -
+        phase: p3
+        at: 166
+      -
+        phase: p3
+        at: 182
+      -
+        phase: p3
+        at: 191
+  -
+    id: interrupting_tremor
+    spell_id: 1243743
+    name: 'Interrupting Tremor'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 10
+      -
+        phase: p1
+        at: 30
+      -
+        phase: p1
+        at: 50
+      -
+        phase: p3
+        at: 81
+      -
+        phase: p3
+        at: 98
+  -
+    id: null_corona
+    spell_id: 1233865
+    name: 'Null Corona'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Random player absorb shield; heal through, do NOT dispel (transfers to another player).'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 3
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 80
+      -
+        phase: p3
+        at: 22
+      -
+        phase: p3
+        at: 82
+      -
+        phase: p3
+        at: 142
+    notes_uk: 'Абсорб-щит на випадковому гравцеві; пролікуйте, НЕ диспеліть (передається іншому гравцеві).'
+  -
+    id: ranger_captain_s_mark
+    spell_id: 1237614
+    name: "Ranger Captain's Mark"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 34
+      -
+        phase: p2
+        at: 40
+      -
+        phase: p2
+        at: 59
+      -
+        phase: p2
+        at: 65
+      -
+        phase: p2
+        at: 86
+      -
+        phase: p2
+        at: 92
+      -
+        phase: p2
+        at: 111
+      -
+        phase: p2
+        at: 117
+  -
+    id: rift_slash
+    spell_id: 1246461
+    name: 'Rift Slash'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Clone tank buster applying stacking 10% stat reduction; swap at ~3 stacks.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 15
+      -
+        phase: p2
+        at: 25
+      -
+        phase: p2
+        at: 37
+      -
+        phase: p2
+        at: 49
+      -
+        phase: p2
+        at: 65
+      -
+        phase: p2
+        at: 77
+      -
+        phase: p2
+        at: 89
+      -
+        phase: p2
+        at: 101
+      -
+        phase: p2
+        at: 117
+    notes_uk: 'Танкбастер клона, що накладає стакаюче зменшення статів на 10%; міняйтесь приблизно на 3 стаках.'
+  -
+    id: silverstrike_arrow
+    spell_id: 1233602
+    name: 'Silverstrike Arrow'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Piercing arrow used to remove death immunity from adds and clear stacks from allies.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 20
+      -
+        phase: p1
+        at: 38
+      -
+        phase: p1
+        at: 57
+      -
+        phase: p1
+        at: 76
+      -
+        phase: p1
+        at: 93
+      -
+        phase: p1
+        at: 120
+    notes_uk: 'Piercing arrow використовується для зняття імунітету до смерті з аддів та зняття стаків з союзників.'
+  -
+    id: silversunder_catastrophe
+    spell_id: 1234546
+    name: 'Silversunder Catastrophe'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 4
+      -
+        phase: i1
+        at: 10
+      -
+        phase: i1
+        at: 16
+      -
+        phase: i1
+        at: 22
+  -
+    id: void_expulsion
+    spell_id: 1233819
+    name: 'Void Expulsion'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Orbs spawn on ranged, explode, leave persistent puddles; consolidate in dead zones.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 13
+      -
+        phase: p1
+        at: 21
+      -
+        phase: p1
+        at: 27
+      -
+        phase: p1
+        at: 53
+      -
+        phase: p1
+        at: 61
+      -
+        phase: p1
+        at: 67
+      -
+        phase: p1
+        at: 86
+      -
+        phase: p1
+        at: 94
+      -
+        phase: p1
+        at: 100
+      -
+        phase: p1
+        at: 113
+      -
+        phase: p1
+        at: 121
+      -
+        phase: p1
+        at: 127
+      -
+        phase: p2
+        at: 30
+      -
+        phase: p2
+        at: 38
+      -
+        phase: p2
+        at: 44
+      -
+        phase: p2
+        at: 55
+      -
+        phase: p2
+        at: 63
+      -
+        phase: p2
+        at: 69
+      -
+        phase: p2
+        at: 82
+      -
+        phase: p2
+        at: 90
+      -
+        phase: p2
+        at: 96
+      -
+        phase: p2
+        at: 107
+      -
+        phase: p2
+        at: 115
+      -
+        phase: p2
+        at: 121
+      -
+        phase: p2
+        at: 134
+      -
+        phase: p2
+        at: 142
+      -
+        phase: p3
+        at: 31
+      -
+        phase: p3
+        at: 39
+      -
+        phase: p3
+        at: 45
+      -
+        phase: p3
+        at: 91
+      -
+        phase: p3
+        at: 99
+      -
+        phase: p3
+        at: 105
+      -
+        phase: p3
+        at: 151
+      -
+        phase: p3
+        at: 159
+      -
+        phase: p3
+        at: 165
+    notes_uk: 'Сфери з''являються на ренжах, вибухають, залишають постійні калюжі; збирайте їх у "мертвих" зонах.'
+  -
+    id: voidstalker_sting
+    spell_id: 1237035
+    name: 'Voidstalker Sting'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Stacking DoT on multiple players; cleanse via arrows in P2, heal through in P3.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 19
+      -
+        phase: p2
+        at: 44
+      -
+        phase: p2
+        at: 71
+      -
+        phase: p2
+        at: 96
+      -
+        phase: p2
+        at: 122
+      -
+        phase: p3
+        at: 7
+      -
+        phase: p3
+        at: 24
+      -
+        phase: p3
+        at: 36
+      -
+        phase: p3
+        at: 50
+      -
+        phase: p3
+        at: 67
+      -
+        phase: p3
+        at: 84
+      -
+        phase: p3
+        at: 96
+      -
+        phase: p3
+        at: 110
+      -
+        phase: p3
+        at: 127
+      -
+        phase: p3
+        at: 144
+      -
+        phase: p3
+        at: 156
+      -
+        phase: p3
+        at: 170
+      -
+        phase: p3
+        at: 187
+    notes_uk: 'Стакаючий DoT на кількох гравцях; знімайте стрілами в P2, проліковуйте в P3.'
+conditional_abilities:
+  -
+    id: grasp_of_emptiness
+    spell_id: 1260026
+    name: 'Grasp of Emptiness'
+    icon: ~
+    school: shadow
+    trigger: positioning
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Targeted blue circle with obelisk beams; target angles beams away from raid, others clear out.'
+    notes_uk: 'Синій круг з променями обеліска на цілі; ціль спрямовує промені від рейду, інші відходять.'
+  -
+    id: corrupting_essence
+    spell_id: 1261531
+    name: 'Corrupting Essence'
+    icon: ~
+    school: shadow
+    trigger: add_management
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Void Droplet death splash applies 30% increased damage taken; kill near Sentinels for amp.'
+    notes_uk: 'Сплеш від смерті Void Droplet накладає 30% збільшення вхідної шкоди; вбивайте біля Sentinels для підсилення.'
+  -
+    id: stellar_emission
+    spell_id: 1234570
+    name: 'Stellar Emission'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Pull toward center with stacking raid damage every 2s; arrows remove stacks.'
+    notes_uk: 'Тягне до центру зі стакаючою шкодою по рейду кожні 2 секунди; стріли знімають стаки.'
+  -
+    id: silverstrike_barrage
+    spell_id: 1243981
+    name: 'Silverstrike Barrage'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Waves of arrows; on Heroic applies 800% arrow vulnerability for 8s — alternate soaking/dodging.'
+    notes_uk: 'Хвилі стріл; на Героїку накладає 800% вразливості до стріл на 8 секунд — чергуйте поглинання/ухилення.'
+  -
+    id: dimensional_slash
+    spell_id: 1260482
+    name: 'Dimensional Slash'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: low
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Cleave/slash pattern from the void clone; sidestep telegraphed arcs.'
+    notes_uk: 'Шаблон Cleave/slash від войд-клона; відходьте від телеграфованих арок.'
+  -
+    id: ravenous_abyss
+    spell_id: 1243753
+    name: 'Ravenous Abyss'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Vorelus 15yd AoE applying 70% damage reduction debuff; clear out immediately.'
+    notes_uk: 'Vorelus AoE радіусом 15 ярдів, що накладає дебаф на 70% зменшення шкоди; негайно відійдіть.'
+  -
+    id: umbral_tether
+    spell_id: 1237844
+    name: 'Umbral Tether'
+    icon: ~
+    school: shadow
+    trigger: tether
+    priority: medium
+    recommended_response: {  }
+    notes: 'Tethers between players must be managed via positioning to avoid snap damage.'
+    notes_uk: "Зв'язки між гравцями потрібно контролювати за допомогою позиціонування, щоб уникнути миттєвої шкоди."
+  -
+    id: ranger_captain_s_mark
+    spell_id: 1259856
+    name: "Ranger Captain's Mark"
+    icon: ~
+    school: shadow
+    trigger: positioning
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Marks players for Silverstrike Ricochet; coordinate positioning to bounce arrow through adds.'
+    notes_uk: 'Мітить гравців для Silverstrike Ricochet; координуйте позиціонування, щоб відбити стрілу через аддів.'
+  -
+    id: echoing_darkness
+    spell_id: 1233778
+    name: 'Echoing Darkness'
+    icon: ~
+    school: shadow
+    trigger: energy_ramp
+    priority: medium
+    recommended_response: {  }
+    notes: 'Stacking buff on boss/adds that ramps damage — burn priority target to prevent overrun.'
+    notes_uk: 'Стакаючий баф на босі/аддах, що збільшує шкоду — бурстіть пріоритетну ціль, щоб запобігти перевантаженню.'
+  -
+    id: void_barrage
+    spell_id: 1260000
+    name: 'Void Barrage'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Clone barrage pattern; dodge telegraphed projectile spread.'
+    notes_uk: 'Шаблон Barrage клонів; ухиляйтесь від телеграфованого розповсюдження снарядів.'
+  -
+    id: empowering_darkness
+    spell_id: 1237251
+    name: 'Empowering Darkness'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: medium
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Cosmic Barrier / empowering cast — DPS switch to shield break.'
+    notes_uk: 'Cosmic Barrier / підсилюючий каст — DPS перемикається на збиття щита.'
+  -
+    id: cosmic_barrier
+    spell_id: 1261287
+    name: 'Cosmic Barrier'
+    icon: ~
+    school: shadow
+    trigger: absorb_shield
+    priority: medium
+    recommended_response: {  }
+    notes: '15% health shield on clone that pulses raid damage until broken; full DPS swap.'
+    notes_uk: "Щит на 15% здоров'я на клоні, що пульсує шкоду по рейду до збиття; повний свіч DPS."
+  -
+    id: cosmic_radiation
+    spell_id: 1260766
+    name: 'Cosmic Radiation'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Pulsing raid-wide damage during the final burn; healer cooldown rotation.'
+    notes_uk: 'Пульсуюча шкода по рейду під час фінального бурсту; ротація хілерських кулдаунів.'
+  -
+    id: berserk
+    spell_id: 27680
+    name: Berserk
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Hard enrage — unrecoverable raid-wide damage if boss is not killed in time.'
+    notes_uk: 'Хард-енрейдж — непоправна шкода по рейду, якщо бос не вбитий вчасно.'

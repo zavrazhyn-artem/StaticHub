@@ -1,0 +1,464 @@
+# Boss timeline — Chimaerus the Undreamt God, Mythic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline.
+# Tactics enrichment: resources/tactics/chimaerus-the-undreamt-god.md.
+
+encounter:
+  id: 3306
+  slug: chimaerus-the-undreamt-god
+  name: 'Chimaerus the Undreamt God'
+  season: midnight-s1
+  difficulty: mythic
+  fight_duration_max: 360
+seed:
+  source: viserio
+  note: "Cast times parsed from Viserio's published Mythic timeline."
+phases:
+  -
+    id: p1
+    name: 'Phase 1'
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 157
+  -
+    id: p2
+    name: 'Phase 2'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 157
+      min_time: 157
+      max_time: 157
+    seed_duration: 94
+  -
+    id: p3
+    name: 'Phase 3'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 251
+      min_time: 251
+      max_time: 251
+    seed_duration: 75
+  -
+    id: p4
+    name: 'Phase 4'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 326
+      min_time: 326
+      max_time: 326
+    seed_duration: 34
+abilities:
+  -
+    id: alndust_upheaval
+    spell_id: 1262289
+    name: 'Alndust Upheaval'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Soak circle on tank; soakers are sent to the Rift realm. Two groups alternate to manage Rift Vulnerability on Heroic+.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 19
+      -
+        phase: p1
+        at: 91
+      -
+        phase: p1
+        at: 155
+      -
+        phase: p2
+        at: 40
+      -
+        phase: p3
+        at: 18
+    notes_uk: 'Зона поглинання на танку; поглиначі відправляються в Rift. Дві групи чергуються, щоб керувати Rift Vulnerability на Героїку+.'
+  -
+    id: alnsight
+    spell_id: 1262289
+    name: Alnsight
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Soak circle on tank; soakers are sent to the Rift realm. Two groups alternate to manage Rift Vulnerability on Heroic+.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 19
+      -
+        phase: p1
+        at: 91
+      -
+        phase: p2
+        at: 40
+      -
+        phase: p3
+        at: 18
+    notes_uk: 'Зона поглинання на танку; поглиначі відправляються в Rift. Дві групи чергуються, щоб керувати Rift Vulnerability на Героїку+.'
+  -
+    id: caustic_phlegm
+    spell_id: 1246621
+    name: 'Caustic Phlegm'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Raid-wide nature DoT lasting 12 seconds. Healers ramp throughput; defensives if overlapping.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 26
+      -
+        phase: p1
+        at: 53
+      -
+        phase: p1
+        at: 101
+      -
+        phase: p1
+        at: 124
+      -
+        phase: p2
+        at: 5
+      -
+        phase: p2
+        at: 16
+      -
+        phase: p2
+        at: 47
+      -
+        phase: p2
+        at: 74
+      -
+        phase: p3
+        at: 28
+      -
+        phase: p3
+        at: 51
+    notes_uk: 'DoT природної шкоди по рейду, тривалістю 12 секунд. Хілери посилюють лікування; захисні здібності, якщо перекривається.'
+  -
+    id: colossal_strikes
+    spell_id: 1262020
+    name: 'Colossal Strikes'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Three-hit tankbuster from Colossal Horror adds dealing heavy physical and nature damage. Requires active mitigation.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 34
+      -
+        phase: p1
+        at: 53
+      -
+        phase: p1
+        at: 104
+      -
+        phase: p2
+        at: 55
+      -
+        phase: p2
+        at: 74
+      -
+        phase: p3
+        at: 31
+    notes_uk: 'Танкбастер з трьох ударів від Colossal Horror аддів, завдає великої фізичної та природної шкоди. Вимагає активної мітігації.'
+  -
+    id: consume
+    spell_id: 1245396
+    name: Consume
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Boss smashes down dealing raid damage, eating remaining adds, and restarting Stage 1.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 69
+      -
+        phase: p1
+        at: 140
+      -
+        phase: p2
+        at: 90
+      -
+        phase: p3
+        at: 67
+    notes_uk: 'Бос розбивається, завдаючи шкоди рейду, поглинаючи решту аддів та перезапускаючи Етап 1.'
+  -
+    id: consuming_miasma
+    spell_id: 1257087
+    name: 'Consuming Miasma'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 31
+      -
+        phase: p1
+        at: 83
+      -
+        phase: p1
+        at: 121
+      -
+        phase: p2
+        at: 52
+      -
+        phase: p3
+        at: 10
+      -
+        phase: p3
+        at: 48
+  -
+    id: corrupted_devastation
+    spell_id: 1245452
+    name: 'Corrupted Devastation'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p2
+        at: 4
+  -
+    id: rending_tear
+    spell_id: 1272726
+    name: 'Rending Tear'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 36
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 109
+      -
+        phase: p1
+        at: 113
+      -
+        phase: p2
+        at: 57
+      -
+        phase: p2
+        at: 61
+      -
+        phase: p3
+        at: 36
+      -
+        phase: p3
+        at: 40
+  -
+    id: rift_emergence
+    spell_id: 1258610
+    name: 'Rift Emergence'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 9
+      -
+        phase: p1
+        at: 84
+      -
+        phase: p2
+        at: 30
+      -
+        phase: p3
+        at: 11
+  -
+    id: rift_madness
+    spell_id: 1264756
+    name: 'Rift Madness'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Mythic only. Two Rift players (one always a healer) take escalating damage until Reality players physically rescue them by standing on them to trigger a realm swap.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 44
+      -
+        phase: p1
+        at: 117
+      -
+        phase: p2
+        at: 65
+      -
+        phase: p3
+        at: 44
+    notes_uk: 'Тільки на Міфіку. Два гравці в Rift (один завжди хілер) отримують зростаючу шкоду, доки гравці в Reality не врятують їх, ставши на них, щоб викликати зміну світу.'
+  -
+    id: rift_sickness
+    spell_id: 1250953
+    name: 'Rift Sickness'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Per-add raid-wide healing absorb. Kill adds quickly to prevent stacking absorbs.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 13
+      -
+        phase: p1
+        at: 87
+      -
+        phase: p2
+        at: 34
+      -
+        phase: p3
+        at: 14
+    notes_uk: 'Лікувальний абсорб по рейду за кожного адда. Швидко вбивайте аддів, щоб запобігти стаканню абсорбів.'
+conditional_abilities:
+  -
+    id: rending_tear
+    spell_id: 1272689
+    name: 'Rending Tear'
+    icon: ~
+    school: shadow
+    trigger: positioning
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Frontal cone dealing heavy physical damage plus bleed and knockback. Tank faces boss away from raid.'
+    notes_uk: 'Фронтальний конус, що завдає великої фізичної шкоди, кровотечу та відкидання. Танк тримає боса від рейду.'
+  -
+    id: alnshroud
+    spell_id: 1245727
+    name: Alnshroud
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: medium
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Manifestation add absorb shield. Break in Rift, finish add in Reality. Leaves puddle on break.'
+    notes_uk: 'Щит-абсорб адда Manifestation. Збити в Rift, добити адда в Reality. Залишає калюжу при збитті.'
+  -
+    id: corrupted_devastation
+    spell_id: 1252933
+    name: 'Corrupted Devastation'
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Boss soars across a marked line, stunning and damaging players hit, spawning adds and puddles.'
+    notes_uk: 'Бос пролітає по відміченій лінії, приголомшуючи та завдаючи шкоди гравцям, що потрапили під удар, створюючи аддів та калюжі.'
+  -
+    id: consuming_miasma
+    spell_id: 1258192
+    name: 'Consuming Miasma'
+    icon: ~
+    school: shadow
+    trigger: puddle_placement
+    priority: medium
+    recommended_response: {  }
+    notes: 'Heroic+ dispellable debuff creating 10-yard explosions that destroy nearby puddles. Dispel on puddles.'
+    notes_uk: 'Диспелений дебаф на Героїку+, що створює вибухи радіусом 10 ярдів, які знищують сусідні калюжі. Диспелити на калюжах.'
+  -
+    id: dissonance
+    spell_id: 1252933
+    name: Dissonance
+    icon: ~
+    school: shadow
+    trigger: realm_split
+    priority: medium
+    recommended_response: {  }
+    notes: 'Mythic only. Players pulse massive damage to nearby allies in the opposite realm. Maintain permanent realm separation.'
+    notes_uk: 'Тільки на Міфіку. Гравці пульсують величезну шкоду сусіднім союзникам в протилежному світі. Підтримуйте постійне розділення світів.'
+  -
+    id: discordant_roar
+    spell_id: 1249207
+    name: 'Discordant Roar'
+    icon: ~
+    school: shadow
+    trigger: add_management
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Raid-wide physical damage on Colossal Horror spawn with stacking 10% per-stack damage amp on subsequent Roars.'
+    notes_uk: 'Фізична шкода по рейду при появі Colossal Horror зі стакаючим підсиленням шкоди на 10% за стак на наступних Roars.'
+  -
+    id: essence_bolt
+    spell_id: 1261997
+    name: 'Essence Bolt'
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Single-target nature damage from Haunting Essences. Interrupt priority when Fearsome Cry is not up.'
+    notes_uk: 'Одноцільова природна шкода від Haunting Essences. Пріоритет переривання, коли Fearsome Cry не кастується.'
+  -
+    id: fearsome_cry
+    spell_id: 1261997
+    name: 'Fearsome Cry'
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Haunting Essence raid-wide fear and nature damage. Must be interrupted every cast.'
+    notes_uk: 'Haunting Essence: страх по рейду та природна шкода. Повинен бути перерваний при кожному касті.'
+  -
+    id: rift_vulnerability
+    spell_id: 1253744
+    name: 'Rift Vulnerability'
+    icon: ~
+    school: shadow
+    trigger: energy_ramp
+    priority: medium
+    recommended_response: {  }
+    notes: 'Heroic+ stacking debuff from Alndust Upheaval soaks causing 600% increased soak damage. Rotate two groups strictly.'
+    notes_uk: 'Стакаючий дебаф на Героїку+ від поглинань Alndust Upheaval, що збільшує шкоду від поглинання на 600%. Суворо ротуйте дві групи.'

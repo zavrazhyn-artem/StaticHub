@@ -6,12 +6,15 @@ import TimelineBossSection from './TimelineBossSection.vue';
 import TimelinePlayerSection from './TimelinePlayerSection.vue';
 import PlayerCdPanel from './PlayerCdPanel.vue';
 import AssignmentEditPanel from './AssignmentEditPanel.vue';
+import ConditionalAbilitiesStrip from './ConditionalAbilitiesStrip.vue';
+import AbilityDetailPanel from './AbilityDetailPanel.vue';
 const { __ } = useTranslation();
 
 const props = defineProps({
     timeline: { type: Object, default: () => ({}) },
     bossAbilities: { type: Array, default: () => [] },
     defaultPhaseSegments: { type: Array, default: () => [] },
+    conditionalAbilities: { type: Array, default: () => [] },
     roster: { type: Array, default: () => [] },
     playerCooldowns: { type: Object, default: () => ({}) },
     canManage: { type: Boolean, default: false },
@@ -22,9 +25,22 @@ const emit = defineEmits(['update', 'toggle-character-cooldown']);
 
 // ─── Phase segments: read from timeline, fall back to encounter defaults ───
 // Each segment: { id, phase_id, name, start, duration, seed_duration, is_intermission }
+// We always return freshly constructed objects so downstream computeds always
+// see new references when anything inside phase_segments changes — otherwise
+// a shared array reference could mask per-element mutations during drag.
 const effectiveSegments = computed(() => {
     const saved = props.timeline?.phase_segments;
-    if (Array.isArray(saved) && saved.length > 0) return saved;
+    if (Array.isArray(saved) && saved.length > 0) {
+        return saved.map(s => ({
+            id: s.id,
+            phase_id: s.phase_id,
+            name: s.name,
+            start: s.start,
+            duration: s.duration,
+            seed_duration: s.seed_duration ?? s.duration,
+            is_intermission: s.is_intermission,
+        }));
+    }
     return (props.defaultPhaseSegments || []).map(s => ({
         id: s.segment_id,
         phase_id: s.phase_id,
@@ -36,10 +52,35 @@ const effectiveSegments = computed(() => {
     }));
 });
 
-// ─── Cast derivation with pattern extrapolation ───
-// If the current segment duration is longer than the seed, extrapolate any
-// "pattern" casts (fill_ratio > 50%) using the median gap between consecutive
-// seed casts. Shorter segment: drop casts beyond the new duration.
+// ─── Cast derivation within a phase ───
+// Casts are stored phase-relative (offset seconds from the phase's start).
+// - Phase SHRUNK below seed duration → drop casts past the new end (they hide).
+// - Phase at seed duration → return seed offsets unchanged.
+// - Phase STRETCHED past seed duration → detect the observed cast pattern and
+//   extrapolate forwards so new casts follow the same rhythm.
+//
+// Cluster detection: look for the smallest clusterSize K such that
+// offsets[i+K] − offsets[i] is constant for every i. That constant is the
+// cycle period, and the first K offsets are the base cluster we replicate.
+// Handles paired-burst abilities (e.g., Oblivion's Wrath fires twice 18s
+// apart, cycle repeats every 186s) and regular intervals alike.
+const detectClusterPeriod = (sorted) => {
+    const n = sorted.length;
+    if (n < 2) return null;
+    for (let k = 1; k <= Math.floor(n / 2); k++) {
+        if (n < k * 2) break;
+        let period = null;
+        let valid = true;
+        for (let i = 0; i + k < n; i++) {
+            const diff = sorted[i + k] - sorted[i];
+            if (period === null) period = diff;
+            else if (Math.abs(diff - period) > 2) { valid = false; break; }
+        }
+        if (valid && period > 0) return { clusterSize: k, period };
+    }
+    return null;
+};
+
 const deriveSegmentCasts = (seedOffsets, seedDuration, currentDuration) => {
     if (!seedOffsets || seedOffsets.length === 0) return [];
     const sorted = [...seedOffsets].sort((a, b) => a - b);
@@ -49,10 +90,32 @@ const deriveSegmentCasts = (seedOffsets, seedDuration, currentDuration) => {
     }
     if (currentDuration === seedDuration || sorted.length < 2) return sorted;
 
+    const detection = detectClusterPeriod(sorted);
+    if (detection) {
+        const { clusterSize, period } = detection;
+        const base = sorted.slice(0, clusterSize);
+        const extended = [...sorted];
+        let clusterStart = sorted[sorted.length - clusterSize];
+        let guard = 100;
+        while (guard-- > 0) {
+            clusterStart += period;
+            if (clusterStart >= currentDuration) break;
+            for (let k = 0; k < clusterSize; k++) {
+                const t = clusterStart + (base[k] - base[0]);
+                if (t < currentDuration) extended.push(t);
+            }
+        }
+        extended.sort((a, b) => a - b);
+        return extended;
+    }
+
+    // Fallback — no clean cluster detected. Use median gap from the last
+    // cast as a rough extrapolator. Gate with spanRatio so short scripted
+    // burst abilities don't sprout ghost casts.
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
     const spanRatio = (last - first) / Math.max(1, seedDuration - first);
-    if (spanRatio < 0.5) return sorted; // scripted cluster — don't extrapolate
+    if (spanRatio < 0.5) return sorted;
 
     const gaps = [];
     for (let i = 1; i < sorted.length; i++) gaps.push(sorted[i] - sorted[i - 1]);
@@ -100,14 +163,21 @@ const derivedBossAbilities = computed(() => {
 });
 
 // Derived phase boundaries (skip the first — it's at time 0, not a boundary).
-// These are used by boss/player sections as vertical marker lines.
+// Enriches each marker with its trigger kind so the timeline can style
+// HP-gated (draggable) vs time-scripted (locked) boundaries differently.
 const derivedPhaseMarkers = computed(() =>
-    effectiveSegments.value.slice(1).map((s, idxFromOne) => ({
-        time: s.start,
-        label: s.name,
-        segmentIndex: idxFromOne + 1, // real index in the segments array
-        is_intermission: s.is_intermission,
-    }))
+    effectiveSegments.value.slice(1).map((s, idxFromOne) => {
+        const segmentIndex = idxFromOne + 1;
+        const trigger = props.defaultPhaseSegments?.[segmentIndex]?.trigger || {};
+        return {
+            time: s.start,
+            label: s.name,
+            segmentIndex,
+            is_intermission: s.is_intermission,
+            draggable: trigger.type === 'hp_below',
+            trigger_type: trigger.type || 'time_from_pull',
+        };
+    })
 );
 
 const LEFT_WIDTH = 180;
@@ -235,6 +305,11 @@ const onStartPhaseDrag = ({ index, clientX }) => {
     if (!props.canManage) return;
     // `index` here is the segmentIndex from derivedPhaseMarkers (real index in segments)
     if (index <= 0) return;
+    // Only HP-gated phases (i1/i2 intermissions on Crown of the Cosmos and
+    // Belo'ren) are user-draggable. Everything else is time-scripted and
+    // locked to its seed timing.
+    const trigger = props.defaultPhaseSegments?.[index]?.trigger || {};
+    if (trigger.type !== 'hp_below') return;
     segmentDragState = {
         index,
         startClientX: clientX,
@@ -249,9 +324,17 @@ const onSegmentDragMove = (e) => {
     const dx = e.clientX - startClientX;
     const deltaSec = Math.round(dx / viewport.pxPerSec.value);
     const prev = origSegments[index - 1];
-    const minStart = prev.start + MIN_SEGMENT_DURATION;
+    const phaseTrigger = props.defaultPhaseSegments?.[index]?.trigger || {};
+    // Clamp newStart within the phase's configured min_time/max_time (absolute
+    // seconds from pull). Falls back to a 5s floor if bounds aren't set.
+    const minStart = Math.max(
+        prev.start + MIN_SEGMENT_DURATION,
+        phaseTrigger.min_time ?? 0,
+    );
+    const maxStart = phaseTrigger.max_time ?? Number.POSITIVE_INFINITY;
     let newStart = origSegments[index].start + deltaSec;
     if (newStart < minStart) newStart = minStart;
+    if (newStart > maxStart) newStart = maxStart;
     const realDelta = newStart - origSegments[index].start;
     const next = origSegments.map(s => ({ ...s }));
     next[index - 1].duration = newStart - next[index - 1].start;
@@ -462,12 +545,28 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
                 {{ visibleAbilities.length }} {{ __('boss abilities') }} · {{ sortedRoster.length }} {{ __('players') }} · {{ assignments.length }} {{ __('assignments') }}
             </div>
             <div v-if="focusedCast"
-                class="flex items-center gap-1.5 px-2 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                class="flex items-center gap-1.5 px-2 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 max-w-xl">
                 <span class="material-symbols-outlined text-xs">my_location</span>
-                <span class="text-[9px] font-bold uppercase tracking-widest">{{ __('Snap to') }} {{ focusedCast.ability_name }} · {{ Math.floor(focusedCast.time / 60) }}:{{ String(focusedCast.time % 60).padStart(2, '0') }}</span>
+                <span class="text-[9px] font-bold uppercase tracking-widest">
+                    {{ __('Snap to') }} {{ focusedCast.ability_name }} · {{ Math.floor(focusedCast.time / 60) }}:{{ String(focusedCast.time % 60).padStart(2, '0') }}
+                </span>
+                <span v-if="focusedCast.priority" class="text-[8px] font-black uppercase px-1 py-0.5 rounded"
+                    :class="{
+                        'bg-red-500/20 text-red-300': focusedCast.priority === 'high',
+                        'bg-amber-500/20 text-amber-300': focusedCast.priority === 'medium',
+                        'bg-white/10 text-white/50': focusedCast.priority === 'low',
+                    }">{{ __('priority_' + focusedCast.priority) }}</span>
+                <span v-for="r in (focusedCast.recommended_response || [])" :key="r"
+                    class="text-[7px] font-black uppercase tracking-wider px-1 py-0.5 rounded bg-primary/15 text-primary/80">
+                    {{ __('response_' + r) === 'response_' + r ? r.replace(/_/g, ' ') : __('response_' + r) }}
+                </span>
                 <button @click="clearFocus" class="ml-1 hover:text-white">
                     <span class="material-symbols-outlined text-xs">close</span>
                 </button>
+            </div>
+            <div v-if="focusedCast && focusedCast.notes" class="text-[9px] text-on-surface-variant/70 max-w-md truncate"
+                :title="focusedCast.notes">
+                {{ focusedCast.notes }}
             </div>
             <div class="ml-auto flex items-center gap-2">
                 <!-- Hidden abilities toggle -->
@@ -492,6 +591,9 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
         <div class="shrink-0 px-4 py-1 bg-[#0a0a0c] text-[8px] text-on-surface-variant/30 border-b border-white/5">
             {{ __('Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom') }}
         </div>
+
+        <!-- Conditional mechanics strip (not on the fixed timeline) -->
+        <ConditionalAbilitiesStrip :abilities="conditionalAbilities" />
 
         <!-- Sticky boss section -->
         <div ref="containerRef" class="shrink-0 border-b border-white/5">
@@ -578,6 +680,14 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
             @close="selectedAssignmentId = null"
             @update="updateAssignment"
             @remove="removeAssignment"
+        />
+
+        <!-- Floating detail panel for the currently focused boss cast -->
+        <AbilityDetailPanel
+            v-if="focusedCast"
+            :key="(focusedCast.spell_id || 0) + ':' + focusedCast.time"
+            :ability="focusedCast"
+            @close="clearFocus"
         />
     </div>
 </template>

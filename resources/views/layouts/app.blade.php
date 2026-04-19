@@ -16,6 +16,7 @@
         window.translations = {!! file_exists(base_path('lang/' . app()->getLocale() . '.json'))
             ? file_get_contents(base_path('lang/' . app()->getLocale() . '.json'))
             : '{}' !!};
+        window.appLocale = @json(app()->getLocale());
     </script>
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -248,9 +248,8 @@ return [
         3180 => 'Lightblinded Vanguard',
         3181 => 'Crown of the Cosmos',
         3306 => 'Chimaerus the Undreamt God',
-        // TODO: populate once a report with these bosses is available
-        // ???? => "Belo'ren, Child of Al'ar",
-        // ???? => 'Midnight Falls',
+        3182 => "Belo'ren, Child of Al'ar",
+        3183 => 'Midnight Falls',
     ],
 
     'raid_boss_achievement_ids' => [
