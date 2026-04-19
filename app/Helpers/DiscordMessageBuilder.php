@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Helpers;
 
 use App\Models\Event;
+use App\Models\EventEncounterRoster;
 use App\Support\IconHelper;
 use Illuminate\Support\Collection;
 
@@ -42,6 +43,10 @@ class DiscordMessageBuilder
 
         $rawMain   = $rosterData['mainRoster'];   // tank/heal/mdps/rdps, includes pending
         $rawAbsent = $rosterData['absentRoster'];  // absent + tentative
+
+        // Character IDs benched across all encounters for this event.
+        $benchedIds = EventEncounterRoster::query()
+            ->fullyBenchedCharacterIds($event->id);
 
         // Split pending out of mainRoster; keep present/late/tentative in role groups
         $mainRoster    = ['tank' => collect(), 'heal' => collect(), 'mdps' => collect(), 'rdps' => collect()];
@@ -118,25 +123,39 @@ class DiscordMessageBuilder
                 $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
                 continue;
             }
-            $chunks = self::formatRosterChunks($role['roster']);
+            $chunks = self::formatRosterChunks($role['roster'], benchedIds: $benchedIds);
             $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'], 'value' => $chunks[0], 'inline' => true];
             for ($i = 1; $i < count($chunks); $i++) {
                 $fields[] = ['name' => $role['emoji'] . ' ' . $role['label'] . ' (cont.)', 'value' => $chunks[$i], 'inline' => true];
             }
         }
 
-        // Absent & Pending — two columns each
-        foreach ([['❌ Absent', $absentRoster], ['⏳ Pending', $pendingRoster]] as [$label, $roster]) {
+        // Absent & Pending — two columns each, status icon suppressed (redundant with section label)
+        $sections = [
+            ['label' => IconHelper::statusEmoji('absent')  . ' Absent',  'roster' => $absentRoster],
+            ['label' => IconHelper::statusEmoji('pending') . ' Pending', 'roster' => $pendingRoster],
+        ];
+        $firstSection = true;
+        foreach ($sections as $section) {
+            $roster = $section['roster'];
             if ($roster->isEmpty()) continue;
 
-            $half = (int) ceil($roster->count() / 2);
-            $col1 = self::formatRosterChunks($roster->slice(0, $half)->values());
-            $col2 = self::formatRosterChunks($roster->slice($half)->values());
+            if (!$firstSection) {
+                $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
+            }
+            $firstSection = false;
 
-            $fields[] = ['name' => $label, 'value' => $col1[0], 'inline' => true];
+            $half = (int) ceil($roster->count() / 2);
+            $col1 = self::formatRosterChunks($roster->slice(0, $half)->values(), suppressStatus: true, benchedIds: $benchedIds);
+            $col2 = self::formatRosterChunks($roster->slice($half)->values(), suppressStatus: true, benchedIds: $benchedIds);
+
+            $fields[] = ['name' => $section['label'], 'value' => $col1[0], 'inline' => true];
             $fields[] = ['name' => "\u{200B}", 'value' => $col2[0], 'inline' => true];
             $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => true];
         }
+
+        // Full-width break before Attendance summary
+        $fields[] = ['name' => "\u{200B}", 'value' => "\u{200B}", 'inline' => false];
 
         $fields[] = [
             'name'   => '📊 Attendance',
@@ -155,7 +174,7 @@ class DiscordMessageBuilder
             'fields'    => $fields,
             'timestamp' => now()->toIso8601String(),
             'footer'    => [
-                'text'     => 'StaticHub Tactical HUD',
+                'text'     => 'BlastR Tactical HUD',
                 'icon_url' => config('app.url') . '/images/logo.svg',
             ],
         ];
@@ -251,24 +270,27 @@ class DiscordMessageBuilder
      *
      * @return array<int, string>
      */
-    private static function formatRosterChunks(Collection $characters): array
-    {
+    private static function formatRosterChunks(
+        Collection $characters,
+        bool $suppressStatus = false,
+        ?Collection $benchedIds = null,
+    ): array {
         if ($characters->isEmpty()) {
             return ['*None*'];
         }
 
-        $lines = $characters->map(function ($char) {
-            $statusEmoji = match ($char->pivot->status ?? 'pending') {
-                'present'  => '✅',
-                'late'     => '⏰',
-                'tentative'=> '❓',
-                'absent'   => '❌',
-                default    => '⏳',
-            };
-
+        $lines = $characters->map(function ($char) use ($suppressStatus, $benchedIds) {
             $classEmoji = IconHelper::classEmoji($char->playable_class);
+            $isBenched = $benchedIds && $benchedIds->contains(fn ($id) => (int) $id === (int) $char->id);
+            $benchSuffix = $isBenched ? ' ' . IconHelper::benchEmoji() : '';
 
-            return "{$statusEmoji} {$classEmoji} **{$char->name}**";
+            if ($suppressStatus) {
+                return "{$classEmoji} **{$char->name}**{$benchSuffix}";
+            }
+
+            $statusEmoji = IconHelper::statusEmoji($char->pivot->status ?? 'pending');
+
+            return "{$statusEmoji} {$classEmoji} **{$char->name}**{$benchSuffix}";
         })->all();
 
         $chunks = [];

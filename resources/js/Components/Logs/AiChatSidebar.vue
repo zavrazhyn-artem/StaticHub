@@ -98,6 +98,11 @@ async function sendMessage() {
 </script>
 
 <template>
+    <!-- Click-outside backdrop: catches clicks on the report area and closes the chat. -->
+    <div v-if="open"
+         class="fixed inset-y-0 left-0 right-[600px] z-[65]"
+         @click="emit('close')"></div>
+
     <Transition
         enter-active-class="transition ease-out duration-300"
         enter-from-class="translate-x-full"
@@ -107,7 +112,7 @@ async function sendMessage() {
         leave-to-class="translate-x-full"
     >
         <div v-if="open"
-             class="fixed right-0 top-0 h-full w-[600px] bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-50 flex flex-col">
+             class="fixed right-0 top-0 h-full w-[600px] bg-surface-container border-l border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[70] flex flex-col">
             <!-- Header -->
             <div class="p-6 border-b border-white/5 flex items-center justify-between bg-surface-container-high">
                 <div class="flex items-center gap-3">

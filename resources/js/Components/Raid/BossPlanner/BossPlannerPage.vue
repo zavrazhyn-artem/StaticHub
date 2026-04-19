@@ -6,6 +6,7 @@ import RaidMapCanvas from './RaidMapCanvas.vue';
 import MapToolbar from './MapToolbar.vue';
 import StepNavigator from './StepNavigator.vue';
 import PlayerPalette from './PlayerPalette.vue';
+import ConfirmationModal from '@/Components/UI/ConfirmationModal.vue';
 import { useDodgePanel } from '@/composables/useDodgePanel';
 
 const props = defineProps({
@@ -18,7 +19,11 @@ const props = defineProps({
     routes: { type: Object, required: true },
 });
 
-const encounters = computed(() => props.plannerData.encounters || []);
+// Local reactive encounter list. We can't rely on reading props directly because
+// Vue's `defineProps` wraps only the top-level props object with reactivity — nested
+// arrays/objects are raw, so mutations (like pushing a newly-saved plan) wouldn't
+// trigger instanceGroups/template updates until a full page refresh.
+const encounters = ref(JSON.parse(JSON.stringify(props.plannerData.encounters || [])));
 
 // Group by instance
 const instanceGroups = computed(() => {
@@ -479,6 +484,7 @@ const openEditor = (index, planIndex = 0) => {
     showingMe.value = false;
     editorOpen.value = true;
     document.body.style.overflow = 'hidden';
+    snapshotPlan();
 };
 
 const openEditorWithPlan = (encIndex, planIndex) => {
@@ -498,17 +504,114 @@ const createNewPlanForEncounter = (encIndex) => {
     editorTab.value = 'map';
     editorOpen.value = true;
     document.body.style.overflow = 'hidden';
+    snapshotPlan();
+};
+
+// ─── Unsaved changes tracking ───
+// Snapshot the plan state as it was when the editor was opened (or last saved).
+// We compare by stringified value to catch any nested mutation.
+const originalPlanSnapshot = ref('');
+const closeConfirmOpen = ref(false);
+const savingFromConfirm = ref(false);
+
+const snapshotPlan = () => {
+    originalPlanSnapshot.value = localPlan.value ? JSON.stringify(localPlan.value) : '';
+};
+
+const isDirty = computed(() => {
+    if (!editorOpen.value || !canManageEditor.value) return false;
+    const current = localPlan.value ? JSON.stringify(localPlan.value) : '';
+    return current !== originalPlanSnapshot.value;
+});
+
+const canManageEditor = computed(() => props.canManage);
+
+const performClose = () => {
+    editorOpen.value = false;
+    editorEncounterIndex.value = null;
+    originalPlanSnapshot.value = '';
+    closeConfirmOpen.value = false;
+    document.body.style.overflow = '';
 };
 
 const closeEditor = () => {
-    editorOpen.value = false;
-    editorEncounterIndex.value = null;
-    document.body.style.overflow = '';
+    if (isDirty.value) {
+        closeConfirmOpen.value = true;
+        return;
+    }
+    performClose();
+};
+
+const handleCloseConfirmSave = async () => {
+    savingFromConfirm.value = true;
+    try {
+        await savePlan();
+    } finally {
+        savingFromConfirm.value = false;
+    }
+    closeConfirmOpen.value = false;
+    performClose();
+};
+
+const handleCloseConfirmDiscard = () => {
+    closeConfirmOpen.value = false;
+    performClose();
+};
+
+// ─── Delete plan ───
+const deleteConfirm = ref({ open: false, planId: null, encIndex: null, closeAfter: false });
+const deleting = ref(false);
+
+const requestDeletePlan = (planId, encIndex, closeAfter = false) => {
+    if (!props.canManage || !planId) return;
+    deleteConfirm.value = { open: true, planId, encIndex, closeAfter };
+};
+
+const requestDeleteCurrentPlan = () => {
+    if (!localPlan.value?.id || editorEncounterIndex.value === null) return;
+    requestDeletePlan(localPlan.value.id, editorEncounterIndex.value, true);
+};
+
+const cancelDelete = () => {
+    deleteConfirm.value = { open: false, planId: null, encIndex: null, closeAfter: false };
+};
+
+const confirmDelete = async () => {
+    const { planId, encIndex, closeAfter } = deleteConfirm.value;
+    if (!planId || encIndex === null) return;
+    deleting.value = true;
+    try {
+        const response = await fetch(`${props.routes.destroyBase}/${planId}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': props.csrfToken, 'Accept': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Delete failed');
+
+        const enc = encounters.value[encIndex];
+        if (enc) {
+            const remaining = (enc.plans || []).filter(p => p.id !== planId);
+            encounters.value[encIndex] = {
+                ...enc,
+                plans: remaining,
+                has_plan: remaining.length > 0,
+                plan: remaining[0] || null,
+            };
+        }
+
+        if (closeAfter) {
+            originalPlanSnapshot.value = localPlan.value ? JSON.stringify(localPlan.value) : '';
+            performClose();
+        }
+        cancelDelete();
+    } catch (e) {
+        console.error('Failed to delete plan:', e);
+    } finally {
+        deleting.value = false;
+    }
 };
 
 // Keyboard shortcuts
 const handleKeydown = (e) => {
-    if (e.key === 'Escape' && editorOpen.value) closeEditor();
     // Ctrl+Shift+Z — redo
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Z' && editorOpen.value) {
         e.preventDefault();
@@ -533,6 +636,7 @@ const createPlan = () => {
         steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
         difficulty: 'mythic',
     };
+    snapshotPlan();
 };
 
 // Group management
@@ -635,17 +739,26 @@ const savePlan = async () => {
         if (response.ok) {
             const data = await response.json();
             localPlan.value.id = data.plan.id;
-            // Update local encounters data
-            const enc = encounters.value[editorEncounterIndex.value];
+            // Replace the encounter object wholesale so the instanceGroups computed
+            // picks up the change. Nested-array mutation alone isn't enough.
+            const idx = editorEncounterIndex.value;
+            const enc = encounters.value[idx];
             if (enc) {
-                enc.has_plan = true;
                 const updatedPlan = JSON.parse(JSON.stringify({ ...localPlan.value, updated_at: new Date().toISOString() }));
-                enc.plan = updatedPlan;
-                if (!Array.isArray(enc.plans)) enc.plans = [];
-                const idx = enc.plans.findIndex(p => p.id === updatedPlan.id);
-                if (idx >= 0) enc.plans[idx] = updatedPlan;
-                else enc.plans.push(updatedPlan);
+                const existingPlans = Array.isArray(enc.plans) ? [...enc.plans] : [];
+                const planIdx = existingPlans.findIndex(p => p.id === updatedPlan.id);
+                if (planIdx >= 0) existingPlans[planIdx] = updatedPlan;
+                else existingPlans.push(updatedPlan);
+
+                encounters.value[idx] = {
+                    ...enc,
+                    has_plan: true,
+                    plan: updatedPlan,
+                    plans: existingPlans,
+                };
             }
+            // Refresh dirty snapshot now that server state matches.
+            snapshotPlan();
             saveSuccess.value = true;
             setTimeout(() => { saveSuccess.value = false; }, 2000);
         }
@@ -927,9 +1040,13 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                     <!-- Expanded plans area -->
                     <div v-show="expandedBoss === enc.slug" class="border-t border-white/5">
                         <!-- Plans -->
-                        <button v-for="(plan, pi) in (enc.plans || [])" :key="plan.id"
+                        <div v-for="(plan, pi) in (enc.plans || [])" :key="plan.id"
                             @click="openEditorWithPlan(enc._index, pi)"
-                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left border-b border-white/[0.03] last:border-0 group">
+                            role="button"
+                            tabindex="0"
+                            @keydown.enter="openEditorWithPlan(enc._index, pi)"
+                            @keydown.space.prevent="openEditorWithPlan(enc._index, pi)"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 cursor-pointer transition-colors text-left border-b border-white/[0.03] last:border-0 group">
                             <div class="w-6 h-6 rounded bg-orange-500/10 flex items-center justify-center shrink-0">
                                 <span class="material-symbols-outlined text-xs text-orange-400">map</span>
                             </div>
@@ -948,8 +1065,16 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                     <span class="text-5xs text-on-surface-variant/40">{{ plan.steps?.length || 0 }} {{ __('phases') }}</span>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-sm text-on-surface-variant/20 group-hover:text-orange-400/50">arrow_forward</span>
-                        </button>
+                            <button
+                                v-if="canManage"
+                                type="button"
+                                @click.stop="requestDeletePlan(plan.id, enc._index)"
+                                class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-on-surface-variant/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                :title="__('Delete Plan')"
+                            >
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                        </div>
 
                         <!-- New plan button -->
                         <div class="px-4 py-2.5 border-t border-white/[0.03]">
@@ -1083,6 +1208,15 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </button>
 
                         <button
+                            v-if="canManage && localPlan?.id"
+                            @click="requestDeleteCurrentPlan"
+                            class="w-9 h-9 rounded-lg bg-white/5 hover:bg-red-500/20 text-on-surface-variant hover:text-red-400 transition-all flex items-center justify-center"
+                            :title="__('Delete Plan')"
+                        >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </button>
+
+                        <button
                             @click="showHelp = true"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
                             :title="__('Help & Shortcuts')"
@@ -1102,7 +1236,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         <button
                             @click="closeEditor"
                             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center justify-center"
-                            :title="__('Close') + ' (Esc)'"
+                            :title="__('Close')"
                         >
                             <span class="material-symbols-outlined text-xl">close</span>
                         </button>
@@ -1620,7 +1754,6 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             <div class="flex justify-between"><span>{{ __('Paste') }}</span><span class="font-mono text-white/50">Ctrl + V</span></div>
                             <div class="flex justify-between"><span>{{ __('Duplicate') }}</span><span class="font-mono text-white/50">Ctrl + D</span></div>
                             <div class="flex justify-between"><span>{{ __('Group selected') }}</span><span class="font-mono text-white/50">Ctrl + G</span></div>
-                            <div class="flex justify-between"><span>{{ __('Close editor') }}</span><span class="font-mono text-white/50">Escape</span></div>
                         </div>
                     </div>
                     <div>
@@ -1677,6 +1810,36 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
             </button>
         </div>
     </Teleport>
+
+    <!-- Unsaved changes confirmation -->
+    <ConfirmationModal
+        :show="closeConfirmOpen"
+        variant="boss-planner"
+        z-index="z-[300]"
+        :title="__('Unsaved changes')"
+        :message="__('You have unsaved changes. Save them before closing?')"
+        :confirm-label="__('Save Changes')"
+        :tertiary-label="__(`Don't Save`)"
+        :cancel-label="__('Cancel')"
+        :loading="savingFromConfirm"
+        @confirm="handleCloseConfirmSave"
+        @tertiary="handleCloseConfirmDiscard"
+        @close="closeConfirmOpen = false"
+    />
+
+    <!-- Delete plan confirmation -->
+    <ConfirmationModal
+        :show="deleteConfirm.open"
+        variant="danger"
+        z-index="z-[300]"
+        :title="__('Delete Plan?')"
+        :message="__('This plan will be permanently deleted. This action cannot be undone.')"
+        :confirm-label="__('Delete Plan')"
+        :cancel-label="__('Cancel')"
+        :loading="deleting"
+        @confirm="confirmDelete"
+        @close="cancelDelete"
+    />
 </template>
 
 <style scoped>

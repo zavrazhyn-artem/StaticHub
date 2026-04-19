@@ -268,65 +268,130 @@ const handleSwapCharacter = async ({ fromCharId, toCharId, userId }) => {
     }
 };
 
-// Bench / Unbench handlers (RL override) — reactive, no reload
-const moveCharacterStatus = (characterId, newStatus) => {
-    const isBenching = newStatus === 'tentative' || newStatus === 'absent';
+// Event-level bench: character is fully benched when every encounter roster row for this event
+// has selection_status='benched'. Derived from localEncounterRosters so UI reacts to local edits.
+const eventBenchedSet = computed(() => {
+    const perChar = {};
+    for (const [slug, groups] of Object.entries(localEncounterRosters.value)) {
+        for (const g of ['selected', 'queued', 'benched']) {
+            for (const entry of (groups[g] || [])) {
+                const id = entry.character_id;
+                if (!perChar[id]) perChar[id] = { total: 0, nonBenched: 0 };
+                perChar[id].total++;
+                if (g !== 'benched') perChar[id].nonBenched++;
+            }
+        }
+    }
+    const set = new Set();
+    for (const [id, counts] of Object.entries(perChar)) {
+        if (counts.total > 0 && counts.nonBenched === 0) set.add(Number(id));
+    }
+    return set;
+});
 
-    // 1. Update localMainRoster (All Encounters view)
-    if (isBenching) {
-        for (const role of ['tank', 'heal', 'mdps', 'rdps']) {
-            const idx = localMainRoster.value[role].findIndex(c => c.id === characterId);
+// Find the character object across local rosters + alts; returns a clonable shape for encounter entries.
+const findCharForBench = (characterId) => {
+    for (const role of ['tank', 'heal', 'mdps', 'rdps']) {
+        const c = (localMainRoster.value[role] || []).find(ch => ch.id === characterId);
+        if (c) return c;
+    }
+    const abs = localAbsentRoster.value.find(ch => ch.id === characterId);
+    if (abs) return abs;
+    for (const alts of Object.values(props.allStaticAlts)) {
+        const a = alts.find(ch => ch.id === characterId);
+        if (a) return { ...a, assigned_role: a.main_spec?.role || 'rdps' };
+    }
+    return null;
+};
+
+// Enabled encounter slugs (null means all encounters enabled).
+const enabledEncounterSlugs = () => {
+    return localSelectedEncounters.value === null
+        ? props.encounters.map(e => e.slug)
+        : localSelectedEncounters.value;
+};
+
+// Materialize encounter roster from current main/absent roster if it's empty.
+const ensureRosterMaterialized = (slug) => {
+    const existing = localEncounterRosters.value[slug];
+    const hasData = existing && (
+        (existing.selected?.length || 0) > 0
+        || (existing.queued?.length || 0) > 0
+        || (existing.benched?.length || 0) > 0
+    );
+    if (hasData) return;
+
+    const materialized = { selected: [], queued: [], benched: [] };
+    for (const role of ['tank', 'heal', 'mdps', 'rdps']) {
+        (localMainRoster.value[role] || []).forEach(c => {
+            materialized.selected.push({
+                character_id: c.id,
+                character_name: c.name,
+                class_name: c.playable_class,
+                role: c.assigned_role || c.main_spec?.role || role,
+                spec: c.main_spec || null,
+                selection_status: 'selected',
+                position_order: materialized.selected.length,
+            });
+        });
+    }
+    localAbsentRoster.value.forEach(c => {
+        materialized.queued.push({
+            character_id: c.id,
+            character_name: c.name,
+            class_name: c.playable_class,
+            role: c.assigned_role || c.main_spec?.role || 'rdps',
+            spec: c.main_spec || null,
+            selection_status: 'queued',
+            position_order: materialized.queued.length,
+        });
+    });
+    localEncounterRosters.value[slug] = materialized;
+};
+
+// Move a char to `benched` (or back to `selected`) on all enabled, unlocked encounters.
+// RSVP is untouched — event-level bench is purely encounter-roster state.
+const setEventBench = (characterId, benched) => {
+    const char = findCharForBench(characterId);
+    if (!char) return;
+
+    const slugs = enabledEncounterSlugs();
+    let changed = false;
+
+    for (const slug of slugs) {
+        if (lockedBosses.value.has(slug)) continue;
+        ensureRosterMaterialized(slug);
+        const roster = localEncounterRosters.value[slug];
+
+        // Strip the char from every group
+        let entry = null;
+        for (const g of ['selected', 'queued', 'benched']) {
+            const idx = (roster[g] || []).findIndex(e => e.character_id === characterId);
             if (idx !== -1) {
-                const foundChar = { ...localMainRoster.value[role][idx] };
-                localMainRoster.value[role].splice(idx, 1);
-                foundChar.pivot = { ...foundChar.pivot, status: newStatus };
-                foundChar.assigned_role = role;
-                localAbsentRoster.value.push(foundChar);
+                [entry] = roster[g].splice(idx, 1);
                 break;
             }
         }
-    } else {
-        const idx = localAbsentRoster.value.findIndex(c => c.id === characterId);
-        if (idx !== -1) {
-            const foundChar = { ...localAbsentRoster.value[idx] };
-            localAbsentRoster.value.splice(idx, 1);
-            foundChar.pivot = { ...foundChar.pivot, status: newStatus };
-            const role = foundChar.assigned_role || foundChar.main_spec?.role || 'rdps';
-            (localMainRoster.value[role] || localMainRoster.value.rdps).push(foundChar);
+
+        if (!entry) {
+            entry = {
+                character_id: char.id,
+                character_name: char.name,
+                class_name: char.playable_class,
+                role: char.assigned_role || char.main_spec?.role || 'rdps',
+                spec: char.main_spec || null,
+                position_order: 0,
+            };
         }
+
+        const targetGroup = benched ? 'benched' : 'selected';
+        entry.selection_status = targetGroup;
+        if (!roster[targetGroup]) roster[targetGroup] = [];
+        roster[targetGroup].push(entry);
+        changed = true;
     }
 
-    // 2. Propagate to saved encounter rosters — skip LOCKED bosses
-    let propagated = false;
-    for (const [slug, roster] of Object.entries(localEncounterRosters.value)) {
-        if (lockedBosses.value.has(slug)) continue;
-        if (!roster.selected && !roster.queued) continue;
-
-        if (isBenching) {
-            const selIdx = (roster.selected || []).findIndex(e => e.character_id === characterId);
-            if (selIdx !== -1) {
-                const [entry] = roster.selected.splice(selIdx, 1);
-                entry.selection_status = 'queued';
-                if (!roster.queued) roster.queued = [];
-                roster.queued.push(entry);
-                propagated = true;
-            }
-        } else {
-            const qIdx = (roster.queued || []).findIndex(e => e.character_id === characterId);
-            if (qIdx !== -1) {
-                const [entry] = roster.queued.splice(qIdx, 1);
-                entry.selection_status = 'selected';
-                if (!roster.selected) roster.selected = [];
-                roster.selected.push(entry);
-                propagated = true;
-            }
-        }
-    }
-
-    // 3. Persist encounter rosters if any were changed
-    if (propagated) {
-        persistEncounterRosters();
-    }
+    if (changed) persistEncounterRosters();
 };
 
 // Debounced persist for all encounter rosters
@@ -358,25 +423,6 @@ const persistEncounterRosters = () => {
             console.error('Failed to persist encounter rosters:', e);
         }
     }, 500);
-};
-
-const updateAttendanceStatus = async (characterId, status) => {
-    // Optimistic UI
-    moveCharacterStatus(characterId, status);
-
-    try {
-        await fetch(props.routes.overrideAttendance, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': props.csrfToken,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ character_id: characterId, status }),
-        });
-    } catch (e) {
-        console.error('Failed to update attendance:', e);
-    }
 };
 
 // Handle spec change — update role reactively
@@ -445,21 +491,19 @@ const handleChangeSpec = async ({ characterId, spec }) => {
 
 const handleBench = (characterId) => {
     if (selectedEncounter.value) {
-        // On a boss: always local change only (boss → All never propagates)
+        // On a boss: local per-boss bench — preserved existing behavior
         modifyEncounterRoster(selectedEncounter.value, characterId, 'queued');
     } else {
-        // All Encounters: global, propagates to unlocked bosses
-        updateAttendanceStatus(characterId, 'tentative');
+        // All Encounters: event-level bench — encounter rosters only, RSVP untouched
+        setEventBench(characterId, true);
     }
 };
 
 const handleUnbench = (characterId) => {
     if (selectedEncounter.value) {
-        // On a boss: always local change only
         modifyEncounterRoster(selectedEncounter.value, characterId, 'selected');
     } else {
-        // All Encounters: global, propagates to unlocked bosses
-        updateAttendanceStatus(characterId, 'present');
+        setEventBench(characterId, false);
     }
 };
 
@@ -1279,6 +1323,7 @@ const activeRosterClasses = computed(() => {
                         :role-limits="effectiveRoleLimits"
                         :weekly-raid-data="weeklyRaidData"
                         :bench-history="benchHistory"
+                        :event-benched-set="eventBenchedSet"
                         :planning-stats="planningStats"
                         :encounter-slug="selectedEncounter"
                         :difficulty="event.difficulty"

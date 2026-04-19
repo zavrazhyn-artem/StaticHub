@@ -1002,5 +1002,11 @@
     "Privacy preferences updated.": "Privacy preferences updated.",
     "Failed to update privacy settings": "Failed to update privacy settings",
     "Enabled": "Enabled",
-    "Disabled": "Disabled"
+    "Disabled": "Disabled",
+    "Unsaved changes": "Unsaved changes",
+    "You have unsaved changes. Save them before closing?": "You have unsaved changes. Save them before closing?",
+    "Don't Save": "Don't Save",
+    "Delete Plan": "Delete Plan",
+    "Delete Plan?": "Delete Plan?",
+    "This plan will be permanently deleted. This action cannot be undone.": "This plan will be permanently deleted. This action cannot be undone."
 }

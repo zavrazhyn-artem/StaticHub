@@ -249,7 +249,7 @@ class StaticLogService
             'title'        => $log->title,
             'difficulties' => $log->difficulties ?? [],
             'date'         => $log->created_at->format('M d, Y'),
-            'has_ai'       => (bool) $log->ai_analysis,
+            'has_ai'       => (bool) ($log->ai_blocks || $log->ai_analysis),
             'url'          => route('statics.logs.show', $log),
         ], $logs->items());
 

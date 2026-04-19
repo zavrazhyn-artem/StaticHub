@@ -12,6 +12,7 @@ const props = defineProps({
     roleLimits: { type: Object, default: () => ({}) },
     weeklyRaidData: { type: Object, default: () => ({}) },
     benchHistory: { type: Object, default: () => ({}) },
+    eventBenchedSet: { type: Set, default: () => new Set() },
     planningStats: { type: Object, default: () => ({}) },
     encounterSlug: { type: String, default: null },
     difficulty: { type: String, default: 'mythic' },
@@ -47,20 +48,33 @@ const roleLimit = (roleKey) => {
     return null; // DPS fills remaining
 };
 
+const isEventBenched = (charId) => props.eventBenchedSet.has(charId);
+
 const layoutData = computed(() => {
     const data = {};
     const statusWeights = { present: 1, late: 2, pending: 3, tentative: 4, absent: 5 };
     const getWeight = (s) => statusWeights[s] || 99;
 
     for (const roleKey of ['tank', 'heal', 'mdps', 'rdps']) {
-        const mainChars = [...(props.mainRoster[roleKey] || [])].sort(
-            (a, b) => getWeight(a.pivot?.status) - getWeight(b.pivot?.status)
-        );
-        const absentChars = props.absentRoster
-            .filter(c => c.assigned_role === roleKey)
+        // Main: only non-benched chars with their normal role.
+        const mainChars = [...(props.mainRoster[roleKey] || [])]
+            .filter(c => !isEventBenched(c.id))
             .sort((a, b) => getWeight(a.pivot?.status) - getWeight(b.pivot?.status));
 
-        data[roleKey] = { mainChars, absentChars };
+        // Inactive strip: RSVP-absent/tentative AND event-benched chars belonging to this role.
+        const absentChars = props.absentRoster
+            .filter(c => c.assigned_role === roleKey && !isEventBenched(c.id))
+            .sort((a, b) => getWeight(a.pivot?.status) - getWeight(b.pivot?.status));
+        const benchedInRole = [];
+        (props.mainRoster[roleKey] || []).forEach(c => {
+            if (isEventBenched(c.id)) benchedInRole.push({ ...c, assigned_role: c.assigned_role || roleKey });
+        });
+        props.absentRoster.forEach(c => {
+            if (c.assigned_role === roleKey && isEventBenched(c.id)) benchedInRole.push(c);
+        });
+        const inactiveChars = [...benchedInRole, ...absentChars];
+
+        data[roleKey] = { mainChars, inactiveChars };
     }
     return data;
 });
@@ -224,48 +238,72 @@ const getAttendance = (charId) => {
                 >{{ __('No players') }}</div>
             </div>
 
-            <!-- Absent/tentative -->
+            <!-- Inactive strip: RSVP-absent/tentative + event-benched chars for this role -->
             <div
-                v-if="layoutData[roleKey].absentChars.length > 0"
+                v-if="layoutData[roleKey].inactiveChars.length > 0"
                 class="px-1.5 pb-1 flex flex-wrap gap-0.5 border-t border-white/5 pt-1"
             >
                 <button
-                    v-for="char in layoutData[roleKey].absentChars"
-                    :key="'abs-' + char.id"
+                    v-for="char in layoutData[roleKey].inactiveChars"
+                    :key="'inact-' + char.id"
                     @click="emit('character-click', char)"
-                    class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/10 transition-colors group/abs"
+                    class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/10 transition-colors group/abs relative"
                     :class="[
-                        char.pivot?.status === 'tentative' ? 'opacity-50' : 'opacity-30',
-                        isBenched(char.id) ? '!opacity-70 ring-1 ring-orange-500/40' : '',
+                        isEventBenched(char.id)
+                            ? 'opacity-60 ring-1 ring-violet-400/30'
+                            : (char.pivot?.status === 'tentative' ? 'opacity-50' : 'opacity-30'),
+                        !isEventBenched(char.id) && isBenched(char.id) ? '!opacity-70 ring-1 ring-orange-500/40' : '',
                     ]"
                 >
-                    <img
-                        v-if="char.main_spec?.icon_url"
-                        :src="char.main_spec.icon_url"
-                        class="w-5 h-5 rounded border border-white/10 grayscale"
-                    >
-                    <div v-else class="w-5 h-5 rounded border border-white/10 flex items-center justify-center bg-white/5 grayscale">
-                        <span class="material-symbols-outlined text-3xs opacity-40">person</span>
+                    <div class="relative shrink-0">
+                        <img
+                            v-if="char.main_spec?.icon_url"
+                            :src="char.main_spec.icon_url"
+                            class="w-5 h-5 rounded border grayscale"
+                            :class="isEventBenched(char.id) ? 'border-violet-400/40' : 'border-white/10'"
+                        >
+                        <div v-else class="w-5 h-5 rounded border border-white/10 flex items-center justify-center bg-white/5 grayscale">
+                            <span class="material-symbols-outlined text-3xs opacity-40">person</span>
+                        </div>
+                        <!-- Status dot: same RSVP colors as main roster -->
+                        <div
+                            v-if="isEventBenched(char.id)"
+                            class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-surface-container"
+                            :class="{
+                                'bg-green-400': char.pivot?.status === 'present',
+                                'bg-yellow-400': char.pivot?.status === 'late',
+                                'bg-white/30': char.pivot?.status === 'pending',
+                                'bg-yellow-500': char.pivot?.status === 'tentative',
+                                'bg-red-400': char.pivot?.status === 'absent',
+                            }"
+                        ></div>
                     </div>
 
                     <span class="text-4xs font-semibold truncate max-w-[60px]"
-                        :class="isBenched(char.id) ? 'text-orange-400' : 'text-on-surface-variant/70'"
+                        :class="isEventBenched(char.id)
+                            ? 'text-violet-300'
+                            : (isBenched(char.id) ? 'text-orange-400' : 'text-on-surface-variant/70')"
                     >{{ char.name }}</span>
 
-                    <!-- Bench warning badge -->
+                    <!-- Event-bench chair marker -->
                     <span
-                        v-if="isBenched(char.id)"
+                        v-if="isEventBenched(char.id)"
+                        class="material-symbols-outlined text-3xs text-violet-400"
+                        :title="__('Benched for this raid')"
+                    >airline_seat_recline_normal</span>
+
+                    <!-- Historical bench warning badge (different concept, past raids) -->
+                    <span
+                        v-if="!isEventBenched(char.id) && isBenched(char.id)"
                         class="text-5xs font-bold px-1 rounded bg-orange-500/20 text-orange-400 leading-none whitespace-nowrap"
                     >{{ benchHistory[char.id]?.bench_count }}/{{ benchHistory[char.id]?.total_events }}</span>
 
+                    <!-- Unbench button: only for event-benched chars -->
                     <button
-                        v-if="canManage && !locked"
+                        v-if="canManage && !locked && isEventBenched(char.id)"
                         @click.stop="emit('unbench', char.id)"
-                        class="items-center justify-center w-4 h-4 rounded border transition-all"
-                        :class="isBenched(char.id)
-                            ? 'flex bg-green-500/20 border-green-500/30 hover:bg-green-500/30'
-                            : 'hidden group-hover/abs:flex bg-green-500/20 border-green-500/30 hover:bg-green-500/30'"
-                        :title="isBenched(char.id) ? __('Benched frequently! Move to roster') : __('Move to roster')"
+                        class="hidden group-hover/abs:flex items-center justify-center w-4 h-4 rounded bg-green-500/20 border border-green-500/30 hover:bg-green-500/30 transition-all"
+                        :title="__('Move to roster')"
                     >
                         <span class="material-symbols-outlined text-2xs text-green-400">arrow_upward</span>
                     </button>

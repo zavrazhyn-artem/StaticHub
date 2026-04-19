@@ -1014,5 +1014,11 @@
     "Privacy preferences updated.": "Налаштування приватності оновлено.",
     "Failed to update privacy settings": "Не вдалося оновити налаштування приватності",
     "Enabled": "Увімкнено",
-    "Disabled": "Вимкнено"
+    "Disabled": "Вимкнено",
+    "Unsaved changes": "Незбережені зміни",
+    "You have unsaved changes. Save them before closing?": "У вас є незбережені зміни. Зберегти їх перед закриттям?",
+    "Don't Save": "Не зберігати",
+    "Delete Plan": "Видалити план",
+    "Delete Plan?": "Видалити план?",
+    "This plan will be permanently deleted. This action cannot be undone.": "Цей план буде остаточно видалено. Цю дію не можна скасувати."
 }
