@@ -24,7 +24,7 @@
     <script>const whTooltips = {colorLinks: true, iconizeLinks: false, renameLinks: false};</script>
     <script src="https://wow.zamimg.com/js/tooltips.js"></script>
 </head>
-<body class="bg-background text-on-background min-h-screen arcane-bg subpixel-antialiased">
+<body class="bg-background text-on-background min-h-screen arcane-bg subpixel-antialiased" x-data="{ sidebarOpen: false }">
 @php
     $static = Auth::user() ? Auth::user()->statics->first() : null;
     $isOnboarding = $onboarding ?? false;
@@ -32,7 +32,16 @@
     <!-- TopNavBar -->
 <header
     class="fixed top-0 z-50 w-full flex justify-between items-center px-6 py-4 bg-[#0e0e10]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-    <div class="flex items-center gap-8">
+    <div class="flex items-center gap-4 lg:gap-8">
+        @if($static && !$isOnboarding)
+            <button @click="sidebarOpen = !sidebarOpen"
+                    type="button"
+                    class="lg:hidden flex items-center justify-center h-10 w-10 -ml-2 rounded-md text-gray-300 hover:text-white hover:bg-white/5 active:scale-95 transition-all"
+                    :aria-expanded="sidebarOpen"
+                    aria-label="{{ __('Toggle menu') }}">
+                <span class="material-symbols-outlined" x-text="sidebarOpen ? 'close' : 'menu'">menu</span>
+            </button>
+        @endif
         <div class="flex items-center gap-3">
             <img src="/images/logo.svg" alt="BlastR Logo"
                  class="h-8 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]"/>
@@ -203,8 +212,23 @@
     </div>
 </header>
 
+@if($static && !$isOnboarding)
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen"
+         x-transition:enter="transition-opacity ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+         style="display: none;"></div>
+@endif
+
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 hidden {{ $isOnboarding ? '' : 'lg:flex' }} flex-col">
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#131315] border-r border-white/5 pt-24 flex-col z-40 {{ $isOnboarding ? 'hidden' : ($static ? 'flex transform transition-transform duration-300 ease-in-out lg:translate-x-0' : 'hidden lg:flex') }}"
+       @if($static && !$isOnboarding) :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" @endif>
     @if($static)
         <div class="px-6 mb-8">
             <h2 class="font-headline text-lg font-bold text-white uppercase tracking-tight">{{ $static->name }}</h2>
