@@ -1,0 +1,32 @@
+# Raid-wide burst cooldowns ("lust"-class abilities). Used to detect burst window timing
+# so we can analyse whether players sync personal CDs around them.
+#
+# All apply +30% haste/damage to the raid for 30-40 seconds.
+
+- id: 2825
+  name: 'Bloodlust'
+  class: Shaman
+- id: 32182
+  name: 'Heroism'
+  class: Shaman
+- id: 80353
+  name: 'Time Warp'
+  class: Mage
+- id: 264667
+  name: "Primal Rage"
+  class: Hunter
+- id: 90355
+  name: 'Ancient Hysteria'
+  class: Hunter
+- id: 178207
+  name: 'Drums of Fury'
+  class: Item
+- id: 230935
+  name: 'Drums of the Mountain'
+  class: Item
+- id: 256740
+  name: 'Drums of Maelstrom'
+  class: Item
+- id: 309658
+  name: 'Drums of Deathly Ferocity'
+  class: Item

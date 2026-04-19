@@ -1,0 +1,24 @@
+# Active mitigation buffs per tank spec.
+# Format: class-spec-slug → [{id, name}]
+# Source: Midnight spell IDs verified via WCL.
+
+warrior-protection:
+  - id: 132404
+    name: 'Shield Block'
+  - id: 190456
+    name: 'Ignore Pain'
+paladin-protection:
+  - id: 132403
+    name: 'Shield of the Righteous'
+deathknight-blood:
+  - id: 195181
+    name: 'Bone Shield'
+druid-guardian:
+  - id: 192081
+    name: 'Ironfur'
+demonhunter-vengeance:
+  - id: 203981
+    name: 'Soul Fragments'
+monk-brewmaster:
+  - id: 115069
+    name: 'Stagger'

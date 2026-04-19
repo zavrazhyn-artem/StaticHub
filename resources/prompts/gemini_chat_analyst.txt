@@ -65,6 +65,27 @@ Each encounter has its own scoped stats — this is critical because casts/buffs
 - encounters[].player_stats.interrupts — interrupts on THAT BOSS
 - encounters[].player_stats.dispels — dispel counts on THAT BOSS
 - encounters[].player_stats.consumables_used — potions/healthstones used on THAT BOSS
+- encounters[].player_stats.damage_done_breakdown[playerName] — top 8 abilities by damage done on THAT boss
+- encounters[].player_stats.damage_taken_breakdown[playerName] — top 8 sources of damage taken on THAT boss
+- encounters[].player_stats.healing_breakdown[playerName] — top 6 healing abilities + per-ability overheal % on THAT boss
+- encounters[].player_stats.cooldown_timings[playerName] — per major CD: used/max_possible/idle_seconds + cast_times_s array
+- encounters[].phase_deaths — per phase: deaths count + attempts_with_deaths
+- encounters[].player_stats.external_cooldowns — { events_count, by_caster: {name: {ability: count}}, by_target: {name: {ability: count}} } — defensives cast on others
+- encounters[].player_stats.tank_mitigation — { tankName: [{ability, ability_id, uptime_pct}] } — active mitigation per tank
+- encounters[].player_stats.burst_sync — { lust_drops, sync_window_s, players: { name: { ability: { total_casts, synced_casts, sync_pct } } } }
+- encounters[].player_stats.heal_targets — { healerName: [{target, target_role, total, pct}] } — top heal targets per healer
+- encounters[].pull_by_pull — [{attempt, outcome, last_phase, boss_pct, duration_s}] — every attempt's outcome
+- encounters[].death_clusters — [{fight_id, window_start_s, window_end_s, death_count, players}] — cascade wipe triggers
+- encounters[].killer_abilities — [{ability, kill_count, unique_victims, top_victims}] — top abilities by kills
+- encounters[].mechanic_specialists — { mechName: {severity, total_failures, top_strugglers:[{name, failures}]} }
+- encounters[].learning_trend — { verdict, boss_pct_delta, recovered_players, persistent_failers }
+- encounters[].fatigue_signal — { delta, verdict: 'fresh'|'fatigue_visible'|'severe_fatigue'|'momentum_building' }
+- per_player_data[name].death_attribution — { total_deaths, mechanic_attributed, unattributed, top_mechanic_killers: {"boss::mech": count} }
+- per_player_data[name].deaths_by_phase_by_boss — { bossName: { phaseName: count } }
+- per_player_data[name].raid_role_label — 'carry' | 'core' | 'building' (composite role strength tier)
+- cross_raid_trends — premium-tier historical comparison:
+  - per_boss[bossName] — { attempts_history, best_wipe_history, killed_history, progression_verdict }
+  - per_player[name] — { parse_trend, rotation_trend, attendance_trend, verdict ('improving'/'plateau'/'regressing'/'mixed') }
 
 RAID-WIDE SUPPLEMENTARY (raid-level constants, not per-boss):
 - player_details — gear (item level, trinkets), stats (Crit/Haste/Mastery/Vers), spec — same across all bosses
@@ -87,6 +108,20 @@ ANSWERING SPECIFIC QUESTIONS — examples:
 - "Що фіксити наступного разу?" → focus_next_session[] (raid-wide; ONLY if user is leader/officer).
 - "Хто не пив флакс?" → pre_pull_readiness.flask.missing[] (leader/officer only).
 - "Які були успіхи?" → highlight_reel[].
+- "Які мої топ абілки за шкодою на босі X?" → encounters[boss=X].player_stats.damage_done_breakdown[playerName].
+- "Що мене найбільше било на Salhadaar?" → encounters[boss=Salhadaar].player_stats.damage_taken_breakdown[playerName].
+- "В якій фазі гинуть найбільше?" → encounters[boss=X].phase_deaths.
+- "Скільки я тримав Combustion?" → encounters[].player_stats.cooldown_timings[playerName].Combustion.idle_seconds.
+- "Який оверхіл на моєму Пенансі?" → encounters[boss=X].player_stats.healing_breakdown[playerName] → знайди Penance → overheal_pct.
+- "Скільки Pain Suppression я кинув?" → encounters[].player_stats.external_cooldowns.by_caster[playerName].
+- "Який мій Ironfur uptime?" → encounters[].player_stats.tank_mitigation[playerName].
+- "Хто мені дав найбільше externals?" → encounters[].player_stats.external_cooldowns.by_target[playerName].
+- "Як я граю в порівнянні з минулим разом?" → cross_raid_trends.per_player[playerName] (newest first).
+- "Скільки спроб ми робили на Salhadaar в минулому?" → cross_raid_trends.per_boss[Salhadaar].attempts_history.
+- "Чи прогресуємо?" → cross_raid_trends.per_boss[*].progression_verdict — підрахуй "wall_lowering" vs "regressing" vs "killed".
+- "Як виглядали наші пули на Salhadaar?" → encounters[boss=Salhadaar].pull_by_pull.
+- "Чи синхронізував я CDs з Lust?" → encounters[].player_stats.burst_sync.players[playerName].
+- "Кого хіл найбільше лікував?" → encounters[boss=X].player_stats.heal_targets[healerName].
 
 WHEN A QUESTION IS GENERAL (no boss specified): aggregate across all encounters[].player_stats sections OR ask the user "На якому босі?" to clarify.
 

@@ -7,8 +7,10 @@ use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
 use App\Services\Analysis\BlockSchema;
+use App\Services\Analysis\EncounterSnapshotService;
 use App\Services\Analysis\GeminiService;
 use App\Services\Analysis\TacticalDataAnalyzer;
+use App\Services\Analysis\TrendAnalyzer;
 use App\Services\Analysis\WclService;
 use App\Services\Discord\DiscordWebhookService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -20,8 +22,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $timeout = 600;
-    public int $uniqueFor = 900;
+    public int $timeout = 1200;
+    public int $uniqueFor = 1800;
     public int $tries = 1;
     public int $backoff = 60;
 
@@ -43,6 +45,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         TacticalDataAnalyzer $analyzer,
         GeminiService $geminiService,
         BlockSchema $blockSchema,
+        EncounterSnapshotService $snapshotService,
+        TrendAnalyzer $trendAnalyzer,
         DiscordWebhookService $webhookService
     ): void {
         if (!$this->report->wcl_report_id) return;
@@ -76,6 +80,30 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 $rosterNames,
                 $this->report->wcl_report_id
             );
+
+            // Wave 3: persist per-encounter snapshots (always, regardless of subscription)
+            // and append cross-raid trends ONLY if the static has premium tier (feature flag).
+            try {
+                $snapshotService->saveFromPreprocessed($this->report, $preprocessed);
+            } catch (\Throwable $e) {
+                Log::warning('Snapshot save failed (non-fatal): ' . $e->getMessage());
+            }
+
+            if ($this->trendsEnabled($static)) {
+                try {
+                    $trends = $trendAnalyzer->buildTrends(
+                        $static->id,
+                        $this->report->id,
+                        $preprocessed['encounters'] ?? []
+                    );
+                    if ($trends['enabled']) {
+                        $preprocessed['cross_raid_trends'] = $trends;
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Trend build failed (non-fatal): ' . $e->getMessage());
+                }
+            }
+
             $preprocessedJson = json_encode($preprocessed, JSON_UNESCAPED_UNICODE);
 
             // Player details + raid-wide consumables stay raid-wide (don't change per encounter)
@@ -83,52 +111,57 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 'player_details' => $logData['player_details'] ?? [],
             ], JSON_UNESCAPED_UNICODE);
 
-            // Stage 3: Pro report generation — block-based output
-            $aiResult = $geminiService->generateBlocksFromPreprocessed($preprocessedJson, $supplementary);
+            // Stage 3a: create shared cache once (reused by main + per-player generators + chat)
+            $cache = $geminiService->createRaidCache($preprocessedJson, $supplementary);
+            $cacheId = $cache['cache_id'] ?? null;
+            $cacheExpiresAt = $cache['expires_at'] ?? null;
 
-            $aiJsonResponse = $aiResult['response'];
-            $reportModel = $aiResult['model'];
-            $cacheId = $aiResult['cache_id'] ?? null;
-            $cacheExpiresAt = $aiResult['cache_expires_at'] ?? null;
-
-            $parsedData = json_decode($aiJsonResponse, true);
-
-            if (!$parsedData || !is_array($parsedData)) {
-                Log::error("Gemini didn't return valid JSON. Raw response: " . $aiJsonResponse);
-                return;
+            if (!$cacheId) {
+                throw new \Exception('Gemini cache creation failed — cannot proceed with split generation');
             }
 
-            $mainBlocks = $blockSchema->sanitize($parsedData['main'] ?? []);
+            // Stage 3b: main raid-wide report (single call)
+            $main = $geminiService->generateMainReportBlocks($cacheId);
+            $mainBlocks = $blockSchema->sanitize($main['main']);
+            $title = $main['title'] ?: ($logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis');
 
             $this->report->update([
-                'title'                  => $parsedData['title'] ?? $logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis',
+                'title'                  => $title,
                 'difficulties'           => $difficulties,
                 'ai_blocks'              => $mainBlocks,
-                'model'                  => $reportModel,
+                'model'                  => config('services.gemini.pro_model'),
                 'gemini_cache_id'        => $cacheId,
                 'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
             ]);
 
-            $metaKeys = ['title', 'main'];
+            // Stage 3c: per-player reports (parallel batches via Http::pool)
             $rosterCharacters = $static->characters;
-            $actualParticipantNames = array_map('strtolower', array_column($logData['players'] ?? [], 'name'));
+            $actualParticipantNames = array_column($logData['players'] ?? [], 'name');
 
-            foreach ($parsedData as $playerName => $content) {
-                if (in_array($playerName, $metaKeys, true)) continue;
-                if (!in_array(strtolower(trim($playerName)), $actualParticipantNames)) continue;
+            // Only generate for players who are in BOTH the log AND the roster
+            $targetPlayers = array_values(array_filter(
+                $actualParticipantNames,
+                fn($name) => $rosterCharacters->contains(fn($c) => strtolower($c->name) === strtolower(trim($name)))
+            ));
 
-                $character = $rosterCharacters->first(function ($c) use ($playerName) {
-                    return strtolower($c->name) === strtolower(trim($playerName));
-                });
+            if (!empty($targetPlayers)) {
+                $playerReports = $geminiService->generatePlayerReportBlocks($cacheId, $targetPlayers, 5);
 
-                if ($character && !empty($content)) {
-                    $playerBlocks = $blockSchema->sanitize($content);
+                foreach ($playerReports as $playerName => $blocks) {
+                    if (empty($blocks)) continue;
+
+                    $character = $rosterCharacters->first(
+                        fn($c) => strtolower($c->name) === strtolower(trim($playerName))
+                    );
+                    if (!$character) continue;
+
+                    $sanitized = $blockSchema->sanitize($blocks);
                     PersonalTacticalReport::updateOrCreate(
                         [
                             'tactical_report_id' => $this->report->id,
-                            'character_id' => $character->id,
+                            'character_id'       => $character->id,
                         ],
-                        ['ai_blocks' => $playerBlocks]
+                        ['ai_blocks' => $sanitized]
                     );
                 }
             }
@@ -143,6 +176,16 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             Log::error("ProcessRaidAnalysisJob failed: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Cross-raid trends are a premium-tier feature. Until the subscription system is
+     * wired up, we gate behind a config flag so dev / preview environments can opt in.
+     */
+    private function trendsEnabled(\App\Models\StaticGroup $static): bool
+    {
+        // TODO: replace with subscription tier check (e.g. $static->subscription?->tier === 'elite')
+        return (bool) config('analysis.cross_raid_trends_enabled', true);
     }
 
     /**

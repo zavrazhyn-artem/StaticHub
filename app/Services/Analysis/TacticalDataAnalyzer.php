@@ -25,6 +25,8 @@ class TacticalDataAnalyzer
         private readonly WclService $wclService,
         private readonly RotationAnalyzer $rotationAnalyzer,
         private readonly InsightsBuilder $insightsBuilder,
+        private readonly SpecBaselineLoader $specBaselineLoader,
+        private readonly CombatReferenceLoader $combatRefs,
     ) {}
 
     /**
@@ -77,7 +79,8 @@ class TacticalDataAnalyzer
         $raidSummary = $this->buildRaidSummary($logData, $difficulty, $encounters);
         $perPlayerData = $this->buildPerPlayerData($logData, $encounters, $players);
 
-        // Enrich per-player data with rotation_analysis + rotation_issues
+        // Enrich per-player data with rotation_analysis + rotation_issues, AND attach
+        // per-encounter rotation breakdowns to encounters[i].player_rotation (by reference).
         $totalDurationSeconds = (int) ($logData['fight_durations']['total_seconds'] ?? 0);
         $this->rotationAnalyzer->apply($perPlayerData, $encounters, $totalDurationSeconds);
 
@@ -89,20 +92,32 @@ class TacticalDataAnalyzer
             $consumableAudit['per_player'] = $logData['per_player_consumable_audit'];
         }
 
+        // Wave 5A: deeper insights from existing data — mutates encounters + per_player_data
+        $this->insightsBuilder->correlateDeathsToMechanics($encounters, $perPlayerData, $logData);
+        $this->insightsBuilder->detectDeathClusters($encounters, $logData);
+        $this->insightsBuilder->identifyKillerAbilities($encounters, $logData);
+        $this->insightsBuilder->identifyMechanicSpecialists($encounters);
+        $this->insightsBuilder->analyzeWithinRaidLearning($encounters, $logData);
+        $this->insightsBuilder->analyzeFatigueCurves($encounters, $logData);
+        $this->insightsBuilder->identifyCarryPlayers($perPlayerData);
+        $this->insightsBuilder->analyzePhaseParticipation($encounters, $perPlayerData, $logData);
+
         // Secondary insights (depend on all above being populated)
         $focusNextSession  = $this->insightsBuilder->buildFocusNextSession($encounters, $perPlayerData, $consumableAudit);
         $prePullReadiness  = $this->insightsBuilder->buildPrePullReadiness($consumableAudit);
         $highlightReel     = $this->insightsBuilder->buildHighlightReel($encounters, $perPlayerData, $raidSummary);
+        $playerPerformance = $this->insightsBuilder->buildPlayerPerformanceSummary($encounters, $perPlayerData);
 
         return [
-            'raid_summary'        => $raidSummary,
-            'encounters'          => $encounters,
-            'per_player_data'     => $perPlayerData,
-            'consumable_audit'    => $consumableAudit,
-            'focus_next_session'  => $focusNextSession,
-            'pre_pull_readiness'  => $prePullReadiness,
-            'highlight_reel'      => $highlightReel,
-            'localization'        => $localization,
+            'raid_summary'                => $raidSummary,
+            'encounters'                  => $encounters,
+            'per_player_data'             => $perPlayerData,
+            'consumable_audit'            => $consumableAudit,
+            'focus_next_session'          => $focusNextSession,
+            'pre_pull_readiness'          => $prePullReadiness,
+            'highlight_reel'              => $highlightReel,
+            'player_performance_summary'  => $playerPerformance,
+            'localization'                => $localization,
         ];
     }
 
@@ -150,20 +165,69 @@ class TacticalDataAnalyzer
             $bossAdds = $this->wclService->getBossAdds($reportId, $bossFightIds, $rosterNames);
         }
 
-        // Per-encounter stats (casts/buffs/dispels/interrupts/debuffs scoped to this boss only)
+        // Per-encounter stats (casts/buffs/dispels/interrupts/debuffs/damage scoped to this boss only)
         $perEncounterStats = [];
+        $bossDurationMs = 0;
+        foreach ($tries as $t) {
+            $bossDurationMs += ($t['duration_s'] ?? 0) * 1000;
+        }
         if ($reportId && !empty($bossFightIds)) {
-            $bossDurationMs = 0;
-            foreach ($tries as $t) {
-                $bossDurationMs += ($t['duration_s'] ?? 0) * 1000;
-            }
             $perEncounterStats = $this->wclService->getPerEncounterStats(
                 $reportId,
                 $bossFightIds,
                 $rosterNames,
+                $bossDurationMs,
+                $logData['player_details'] ?? []
+            );
+
+            // Wave 1: cooldown timing analysis for all major CDs of participating specs
+            $cdTimings = $this->collectCooldownTimings(
+                $reportId,
+                $bossFightIds,
+                $logData,
+                $tries,
+                $rosterNames
+            );
+            if (!empty($cdTimings)) {
+                $perEncounterStats['cooldown_timings'] = $cdTimings;
+            }
+
+            // Wave 2: external defensive cooldowns given/received
+            $externalCds = $this->collectExternalCooldowns(
+                $reportId,
+                $bossFightIds,
+                $logData
+            );
+            if (!empty($externalCds)) {
+                $perEncounterStats['external_cooldowns'] = $externalCds;
+            }
+
+            // Wave 2: per-tank active mitigation uptime
+            $tankMitigation = $this->collectTankMitigation(
+                $reportId,
+                $bossFightIds,
+                $logData,
                 $bossDurationMs
             );
+            if (!empty($tankMitigation)) {
+                $perEncounterStats['tank_mitigation'] = $tankMitigation;
+            }
+
+            // Wave 4: burst sync analysis (lust drops + personal CD alignment)
+            $burstSync = $this->collectBurstSync(
+                $reportId,
+                $bossFightIds,
+                $logData,
+                $tries,
+                $perEncounterStats['cooldown_timings'] ?? []
+            );
+            if (!empty($burstSync) && !empty($burstSync['lust_drops'])) {
+                $perEncounterStats['burst_sync'] = $burstSync;
+            }
         }
+
+        // Wave 1: bucket deaths by phase using existing fight phase transitions
+        $phaseDeaths = $this->bucketEncounterDeathsByPhase($logData, $bossName, $tries);
 
         $kills = count(array_filter($tries, fn($t) => ($t['outcome'] ?? '') === 'kill'));
         $wipes = count($tries) - $kills;
@@ -233,7 +297,10 @@ class TacticalDataAnalyzer
             'kills'             => $kills,
             'wipes'             => $wipes,
             'best_wipe_pct'     => $bestWipe,
+            'duration_seconds'  => (int) round($bossDurationMs / 1000),
             'phase_progression' => $this->buildPhaseProgression($tries),
+            'phase_deaths'      => $phaseDeaths,
+            'pull_by_pull'      => $this->buildPullByPull($tries),
             'mechanic_failures' => $mechanicFailures,
             'interrupt_analysis' => $interruptAnalysis,
             'add_performance'   => $addPerformance,
@@ -1252,5 +1319,386 @@ class TacticalDataAnalyzer
             $result[$debuffName] = array_merge($data, ['stacks_at_death_per_player' => $filteredDeaths]);
         }
         return $result;
+    }
+
+    // ─── WAVE 4: PULL-BY-PULL PROGRESSION ──────────────────────────────────────
+
+    /**
+     * Render the attempts list as a clean ordered timeline so the AI can show progression.
+     *
+     * @return array<int, array{attempt:int, outcome:string, last_phase:?string, boss_pct:?float, duration_s:int}>
+     */
+    private function buildPullByPull(array $tries): array
+    {
+        $out = [];
+        foreach (array_values($tries) as $idx => $t) {
+            $out[] = [
+                'attempt'     => $idx + 1,
+                'outcome'     => $t['outcome'] ?? 'wipe',
+                'last_phase'  => $t['last_phase'] ?? null,
+                'boss_pct'    => isset($t['boss_pct']) ? (float) $t['boss_pct'] : null,
+                'duration_s'  => (int) ($t['duration_s'] ?? 0),
+            ];
+        }
+        return $out;
+    }
+
+    // ─── WAVE 1: PHASE + COOLDOWN HELPERS ────────────────────────────────────
+
+    /**
+     * For each fight in this encounter, bucket deaths by the phase window the death occurred in.
+     * Aggregates across attempts.
+     *
+     * @return array<string, array{deaths:int, attempts_with_deaths:int}>
+     */
+    private function bucketEncounterDeathsByPhase(array $logData, string $bossName, array $tries): array
+    {
+        $deathsByTry = $logData['deaths'][$bossName] ?? [];
+        if (empty($deathsByTry)) return [];
+
+        // Flatten try groups → flat list with fight_id + time_ms_relative on each entry.
+        $deathsByBoss = [];
+        foreach ($deathsByTry as $tryDeaths) {
+            if (!is_array($tryDeaths)) continue;
+            foreach ($tryDeaths as $d) {
+                if (is_array($d)) $deathsByBoss[] = $d;
+            }
+        }
+
+        // Build fight_id → [phase transitions, fight start]
+        $rawFights = $logData['raid_fights'] ?? [];
+        $bossFightIds = array_flip(array_column($tries, 'fight_id'));
+
+        $fightInfo = [];
+        foreach ($rawFights as $f) {
+            $fid = $f['id'] ?? null;
+            if ($fid === null || !isset($bossFightIds[$fid])) continue;
+            $fightInfo[$fid] = [
+                'startTime' => (int) ($f['startTime'] ?? 0),
+                'phases'    => $f['phaseTransitions'] ?? [],
+                'encounter' => (int) ($f['encounterID'] ?? 0),
+            ];
+        }
+        if (empty($fightInfo)) return [];
+
+        // Map encounterID → phase id → name
+        $phaseNameById = [];
+        foreach ($logData['report_phases'] ?? [] as $ep) {
+            $eid = $ep['encounterID'] ?? 0;
+            foreach ($ep['phases'] ?? [] as $ph) {
+                $phaseNameById[$eid][$ph['id']] = $ph['name'] ?? "Phase {$ph['id']}";
+            }
+        }
+
+        $phaseDeathCounts = [];
+        $phaseAttemptsWithDeath = [];
+
+        foreach ($fightInfo as $fid => $info) {
+            $fightStartMs = $info['startTime'];
+            $encId = $info['encounter'];
+            $localPhaseNames = $phaseNameById[$encId] ?? [];
+
+            // Convert phase transitions from absolute to relative (start at 0)
+            $relPhases = [];
+            foreach ($info['phases'] as $pt) {
+                $relPhases[] = [
+                    'id'        => $pt['id'] ?? 0,
+                    'startTime' => max(0, ($pt['startTime'] ?? 0) - $fightStartMs),
+                ];
+            }
+            // Implicit phase 1 starts at 0
+            if (empty($relPhases) || $relPhases[0]['startTime'] > 0) {
+                array_unshift($relPhases, ['id' => 1, 'startTime' => 0]);
+            }
+
+            // Player deaths for this fight
+            $fightDeaths = array_filter($deathsByBoss, fn($d) => ($d['fight_id'] ?? null) === $fid);
+            if (empty($fightDeaths)) continue;
+
+            $attemptPhasesSeen = [];
+            foreach ($fightDeaths as $d) {
+                $tMs = $d['time_ms_relative'] ?? null;
+                if ($tMs === null) continue;
+
+                $phaseId = 1;
+                foreach ($relPhases as $rp) {
+                    if ($tMs >= $rp['startTime']) $phaseId = $rp['id'];
+                    else break;
+                }
+                $phaseName = $localPhaseNames[$phaseId] ?? "Phase {$phaseId}";
+                $phaseDeathCounts[$phaseName] = ($phaseDeathCounts[$phaseName] ?? 0) + 1;
+                $attemptPhasesSeen[$phaseName] = true;
+            }
+            foreach (array_keys($attemptPhasesSeen) as $pn) {
+                $phaseAttemptsWithDeath[$pn] = ($phaseAttemptsWithDeath[$pn] ?? 0) + 1;
+            }
+        }
+
+        $out = [];
+        foreach ($phaseDeathCounts as $phaseName => $count) {
+            $out[$phaseName] = [
+                'deaths'                => $count,
+                'attempts_with_deaths'  => $phaseAttemptsWithDeath[$phaseName] ?? 0,
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Collect cooldown timing analysis for all participating players' major CDs (cooldown ≥ 60s).
+     */
+    private function collectCooldownTimings(string $reportId, array $bossFightIds, array $logData, array $tries, array $rosterNames): array
+    {
+        // Gather participating players (from rawFights' friendlyPlayers + their specs from playerDetails).
+        // Determine specs from logData['player_details'].
+        $playerDetails = $logData['player_details'] ?? [];
+        $specsInFight = [];
+        foreach ($playerDetails as $name => $d) {
+            $class = $d['class'] ?? null;
+            $spec = $d['spec'] ?? null;
+            if (!$class || !$spec) continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+            $key = "{$class}|{$spec}";
+            $specsInFight[$key] = ['class' => $class, 'spec' => $spec];
+        }
+        if (empty($specsInFight)) return [];
+
+        $cooldownsByAbility = [];
+        $abilityNames = [];
+        foreach ($specsInFight as $entry) {
+            $baseline = $this->specBaselineLoader->load($entry['class'], $entry['spec']);
+            if (!$baseline) continue;
+            foreach ($baseline['rotation_checks'] ?? [] as $check) {
+                $cdSec = (float) ($check['cooldown_seconds'] ?? 0);
+                $aId   = (int) ($check['ability_id'] ?? 0);
+                if ($cdSec < 60 || $aId <= 0) continue; // major CDs only
+                $cooldownsByAbility[$aId] = $cdSec;
+                $abilityNames[$aId] = (string) ($check['ability'] ?? "Spell {$aId}");
+            }
+        }
+        if (empty($cooldownsByAbility)) return [];
+
+        // Build actor map (id → name) from raid_fights
+        $actorMap = [];
+        foreach ($logData['raid_actors'] ?? [] as $actor) {
+            if (($actor['type'] ?? '') !== 'Player') continue;
+            $actorMap[$actor['id']] = $actor['name'];
+        }
+
+        // Per-fight durations (seconds)
+        $fightDurations = [];
+        foreach ($tries as $t) {
+            $fightDurations[$t['fight_id']] = (int) ($t['duration_s'] ?? 0);
+        }
+
+        return $this->wclService->getCooldownTimings(
+            $reportId,
+            $bossFightIds,
+            array_keys($cooldownsByAbility),
+            $cooldownsByAbility,
+            $abilityNames,
+            $actorMap,
+            $fightDurations
+        );
+    }
+
+    /**
+     * Wave 2 — fetch external defensive cooldowns per encounter and aggregate them
+     * by caster (who gave) and by target (who received).
+     *
+     * @return array{events:array, by_caster:array, by_target:array}
+     */
+    private function collectExternalCooldowns(string $reportId, array $bossFightIds, array $logData): array
+    {
+        $refs = $this->combatRefs->externalCooldowns();
+        if (empty($refs)) return [];
+
+        $abilityIds = array_column($refs, 'id');
+        $abilityNames = array_column($refs, 'name', 'id');
+
+        $actorMap = [];
+        foreach ($logData['raid_actors'] ?? [] as $actor) {
+            if (($actor['type'] ?? '') !== 'Player') continue;
+            $actorMap[$actor['id']] = $actor['name'];
+        }
+
+        $events = $this->wclService->getExternalCooldownEvents(
+            $reportId,
+            $bossFightIds,
+            $abilityIds,
+            $actorMap,
+            $abilityNames
+        );
+        if (empty($events)) return [];
+
+        $byCaster = [];
+        $byTarget = [];
+        foreach ($events as $e) {
+            $byCaster[$e['caster']][$e['ability']] = ($byCaster[$e['caster']][$e['ability']] ?? 0) + 1;
+            // Target-side: count self-casts as personal, external-casts separately
+            if ($e['caster'] !== $e['target']) {
+                $byTarget[$e['target']][$e['ability']] = ($byTarget[$e['target']][$e['ability']] ?? 0) + 1;
+            }
+        }
+
+        // Sort ability counts desc per player
+        foreach ($byCaster as &$abilities) arsort($abilities);
+        unset($abilities);
+        foreach ($byTarget as &$abilities) arsort($abilities);
+        unset($abilities);
+
+        return [
+            'events_count' => count($events),
+            'by_caster'    => $byCaster,
+            'by_target'    => $byTarget,
+        ];
+    }
+
+    /**
+     * Wave 4 — burst sync analysis. Find when lust-class abilities drop, then check whether
+     * each player's personal major CD casts fall within the burst window.
+     *
+     * @param array $cooldownTimings  Already-fetched cooldown_timings from Wave 1
+     *                                (so we don't re-query). Shape: {playerName: {abilityName: {cast_times_s, ...}}}
+     */
+    private function collectBurstSync(string $reportId, array $bossFightIds, array $logData, array $tries, array $cooldownTimings): array
+    {
+        $burstAbilities = $this->combatRefs->raidBurstCooldowns();
+        if (empty($burstAbilities)) return [];
+
+        $abilityIds = array_column($burstAbilities, 'id');
+        $abilityNames = array_column($burstAbilities, 'name', 'id');
+
+        $actorMap = [];
+        foreach ($logData['raid_actors'] ?? [] as $actor) {
+            if (($actor['type'] ?? '') !== 'Player') continue;
+            $actorMap[$actor['id']] = $actor['name'];
+        }
+
+        // Reuse the cooldown events fetcher — but it needs cooldown_seconds map. Lust = 5min
+        // baseline; we don't really care about idle math here, so pass dummy 300s for all.
+        $cooldownsByAbility = array_fill_keys($abilityIds, 300.0);
+        $fightDurations = [];
+        foreach ($tries as $t) {
+            $fightDurations[$t['fight_id']] = (int) ($t['duration_s'] ?? 0);
+        }
+
+        $rawLustEvents = $this->wclService->getCooldownTimings(
+            $reportId,
+            $bossFightIds,
+            $abilityIds,
+            $cooldownsByAbility,
+            $abilityNames,
+            $actorMap,
+            $fightDurations
+        );
+
+        // Build flat list of (lust ability + time_s + caster) drops across all fights
+        $lustDrops = [];
+        foreach ($rawLustEvents as $caster => $byAbility) {
+            foreach ($byAbility as $abilityName => $cd) {
+                foreach ($cd['cast_times_s'] ?? [] as $t) {
+                    $lustDrops[] = [
+                        'time_s'  => (int) $t,
+                        'ability' => $abilityName,
+                        'caster'  => $caster,
+                    ];
+                }
+            }
+        }
+        if (empty($lustDrops)) return [];
+
+        usort($lustDrops, fn($a, $b) => $a['time_s'] <=> $b['time_s']);
+
+        // For each player's major CDs (cooldown_timings), check sync with any lust drop ±15s
+        $window = 15;
+        $synced = [];
+        foreach ($cooldownTimings as $player => $byAbility) {
+            $playerSynced = [];
+            foreach ($byAbility as $ability => $cd) {
+                $totalCasts = count($cd['cast_times_s'] ?? []);
+                if ($totalCasts === 0) continue;
+
+                $syncedCasts = 0;
+                foreach ($cd['cast_times_s'] as $castT) {
+                    foreach ($lustDrops as $drop) {
+                        if (abs($castT - $drop['time_s']) <= $window) {
+                            $syncedCasts++;
+                            break;
+                        }
+                    }
+                }
+                $playerSynced[$ability] = [
+                    'total_casts'   => $totalCasts,
+                    'synced_casts'  => $syncedCasts,
+                    'sync_pct'      => (int) round($syncedCasts / $totalCasts * 100),
+                ];
+            }
+            if (!empty($playerSynced)) {
+                $synced[$player] = $playerSynced;
+            }
+        }
+
+        return [
+            'lust_drops'    => $lustDrops,
+            'sync_window_s' => $window,
+            'players'       => $synced,
+        ];
+    }
+
+    /**
+     * Wave 2 — per-tank active mitigation uptime. For each tank identified by role, query
+     * each of their spec's mitigation buffs via events-based per-player uptime calc.
+     *
+     * @return array<string, array<int, array{ability:string, ability_id:int, uptime_pct:float}>>
+     */
+    private function collectTankMitigation(string $reportId, array $bossFightIds, array $logData, int $durationMs): array
+    {
+        $playerDetails = $logData['player_details'] ?? [];
+        $cleanPlayers = $logData['players'] ?? [];
+
+        $out = [];
+        foreach ($playerDetails as $name => $d) {
+            $role = $d['role'] ?? '';
+            if (!in_array($role, ['tank', 'tanks'], true)) continue;
+            $class = $d['class'] ?? null;
+            $spec  = $d['spec']  ?? null;
+            $buffs = $this->combatRefs->tankMitigationFor($class, $spec);
+            if (empty($buffs)) continue;
+
+            // Find player ID for event matching
+            $playerId = null;
+            foreach ($cleanPlayers as $p) {
+                if (($p['name'] ?? '') === $name) { $playerId = $p['id'] ?? null; break; }
+            }
+            if (!$playerId) continue;
+
+            $rows = [];
+            foreach ($buffs as $buff) {
+                try {
+                    $uptime = $this->wclService->getPerPlayerBuffUptime(
+                        $reportId,
+                        $bossFightIds,
+                        (int) $buff['id'],
+                        $durationMs,
+                        [['id' => $playerId, 'name' => $name]]
+                    );
+                    $pct = $uptime[$name]['uptime_pct'] ?? null;
+                    if ($pct === null) continue;
+                    $rows[] = [
+                        'ability'    => $buff['name'],
+                        'ability_id' => (int) $buff['id'],
+                        'uptime_pct' => (float) $pct,
+                    ];
+                } catch (\Throwable $e) {
+                    // non-fatal per-ability
+                    continue;
+                }
+            }
+            if (!empty($rows)) {
+                $out[$name] = $rows;
+            }
+        }
+        return $out;
     }
 }

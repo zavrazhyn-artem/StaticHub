@@ -152,11 +152,35 @@ GQL;
         query ($reportId: String!, $fightIds: [Int]!) {
           reportData {
             report(code: $reportId) {
-              casts:    table(dataType: Casts, fightIDs: $fightIds, killType: Encounters, viewBy: Ability)
-              buffs:    table(dataType: Buffs, fightIDs: $fightIds, killType: Encounters)
-              dispels:  table(dataType: Dispels, fightIDs: $fightIds, killType: Encounters)
-              interrupts: table(dataType: Interrupts, fightIDs: $fightIds, killType: Encounters)
-              debuffs:  table(dataType: Debuffs, fightIDs: $fightIds, killType: Encounters)
+              casts:        table(dataType: Casts, fightIDs: $fightIds, killType: Encounters, viewBy: Ability)
+              buffs:        table(dataType: Buffs, fightIDs: $fightIds, killType: Encounters)
+              dispels:      table(dataType: Dispels, fightIDs: $fightIds, killType: Encounters)
+              interrupts:   table(dataType: Interrupts, fightIDs: $fightIds, killType: Encounters)
+              debuffs:      table(dataType: Debuffs, fightIDs: $fightIds, killType: Encounters)
+              damageDone:   table(dataType: DamageDone, fightIDs: $fightIds, killType: Encounters)
+              damageTaken:  table(dataType: DamageTaken, fightIDs: $fightIds, killType: Encounters)
+              healing:      table(dataType: Healing, fightIDs: $fightIds, killType: Encounters)
+              deaths:       table(dataType: Deaths, fightIDs: $fightIds, killType: Encounters)
+            }
+          }
+        }
+GQL;
+    }
+
+    /**
+     * Cooldown timing — fetch cast events for specific spell IDs (player major CDs).
+     * Uses filterExpression to scope to a list of ability IDs.
+     * One query per encounter, returns timestamps + sourceID per cast.
+     */
+    public static function buildCooldownEventsQuery(): string
+    {
+        return <<<'GQL'
+        query ($reportId: String!, $fightIds: [Int]!, $filterExpression: String!) {
+          reportData {
+            report(code: $reportId) {
+              events(dataType: Casts, fightIDs: $fightIds, killType: Encounters, filterExpression: $filterExpression, limit: 5000) {
+                data
+              }
             }
           }
         }

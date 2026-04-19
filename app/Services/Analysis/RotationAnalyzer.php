@@ -14,11 +14,14 @@ namespace App\Services\Analysis;
  *   average_threshold = recommended - 0.05
  *   major_threshold   = recommended - 0.15
  *
- * Flagged as severity = 'major' if efficiency < major_threshold,
- * else 'minor' if < average_threshold, otherwise the ability is passing and
- * no rotation_issue is emitted.
+ * CRITICAL — duration is **participated_seconds**, not total raid duration. A player
+ * benched for half the night should not be penalized as if they were there. We determine
+ * participation per-encounter by checking whether they appear in the encounter's casts_summary.
  *
- * Aggregates casts raid-wide for stability (per-encounter view can come later).
+ * Outputs:
+ *   per_player_data[player].rotation_analysis  — raid-wide aggregate, normalized to participation
+ *   per_player_data[player].rotation_issues    — compact list of non-passing checks
+ *   encounters[i].player_rotation[player]      — per-encounter breakdown (so the AI sees attendance)
  */
 class RotationAnalyzer
 {
@@ -28,16 +31,55 @@ class RotationAnalyzer
     public function __construct(private readonly SpecBaselineLoader $loader) {}
 
     /**
-     * Populate per_player_data[player]['rotation_issues'] in-place.
+     * Populate per_player_data[player]['rotation_analysis' + 'rotation_issues'] in-place,
+     * AND attach encounters[i]['player_rotation'] per-encounter breakdown.
      *
      * @param array<string, array> $perPlayerData
-     * @param array $encounters              Full encounters[] with player_stats.casts_summary
-     * @param int   $totalDurationSeconds    Full raid duration (all fights)
+     * @param array $encounters   Full encounters[] with duration_seconds + player_stats.casts_summary
+     * @param int   $totalDurationSeconds  Total raid duration (fallback)
      */
-    public function apply(array &$perPlayerData, array $encounters, int $totalDurationSeconds): void
+    public function apply(array &$perPlayerData, array &$encounters, int $totalDurationSeconds): void
     {
         if ($totalDurationSeconds < 60) return;
 
+        // Step 1: for each encounter, compute per-player rotation checks (requires a baseline
+        // for that player's class+spec). Also determine participation per (player, encounter).
+        $participationSeconds = [];
+        foreach ($encounters as &$enc) {
+            $encDuration = (int) ($enc['duration_seconds'] ?? 0);
+            if ($encDuration < 30) continue; // skip incomplete / empty encounters
+
+            $perEncRotation = [];
+            foreach ($enc['player_stats']['casts_summary'] ?? [] as $player => $abilities) {
+                if (!is_array($abilities) || empty($abilities)) continue;
+
+                // Participated if they cast anything this encounter
+                $participationSeconds[$player] = ($participationSeconds[$player] ?? 0) + $encDuration;
+
+                $baseline = $this->loader->load(
+                    $perPlayerData[$player]['class'] ?? null,
+                    $perPlayerData[$player]['spec'] ?? null
+                );
+                $checks = $baseline['rotation_checks'] ?? [];
+                if (empty($checks)) continue;
+
+                $rows = [];
+                foreach ($checks as $check) {
+                    $row = $this->evaluateCheck($check, $abilities, $encDuration);
+                    if ($row !== null) $rows[] = $row;
+                }
+                if (!empty($rows)) {
+                    $perEncRotation[$player] = $rows;
+                }
+            }
+
+            if (!empty($perEncRotation)) {
+                $enc['player_rotation'] = $perEncRotation;
+            }
+        }
+        unset($enc);
+
+        // Step 2: aggregate raid-wide using PARTICIPATED duration per player.
         $castsByPlayer = $this->aggregateCasts($encounters);
 
         foreach ($perPlayerData as $name => &$entry) {
@@ -50,10 +92,19 @@ class RotationAnalyzer
             $playerCasts = $castsByPlayer[$name] ?? [];
             if (empty($playerCasts)) continue;
 
+            $playerDuration = $participationSeconds[$name] ?? 0;
+            if ($playerDuration < 60) continue; // too little data for this player
+
+            $encountersParticipated = count(array_filter(
+                $encounters,
+                fn($e) => isset($e['player_stats']['casts_summary'][$name])
+            ));
+            $totalEncounters = count($encounters);
+
             $analysis = [];
             $issues = [];
             foreach ($checks as $check) {
-                $row = $this->evaluateCheck($check, $playerCasts, $totalDurationSeconds);
+                $row = $this->evaluateCheck($check, $playerCasts, $playerDuration);
                 if ($row === null) continue;
                 $analysis[] = $row;
                 if ($row['status'] !== 'passing') {
@@ -67,9 +118,12 @@ class RotationAnalyzer
 
             if (!empty($analysis)) {
                 $entry['rotation_analysis'] = [
-                    'source'           => $baseline['source'] ?? 'WoWAnalyzer-midnight',
-                    'duration_seconds' => $totalDurationSeconds,
-                    'checks'           => $analysis,
+                    'source'                   => $baseline['source'] ?? 'WoWAnalyzer-midnight',
+                    'participated_seconds'     => $playerDuration,
+                    'total_raid_seconds'       => $totalDurationSeconds,
+                    'encounters_participated'  => $encountersParticipated,
+                    'total_encounters'         => $totalEncounters,
+                    'checks'                   => $analysis,
                 ];
             }
             if (!empty($issues)) {
@@ -79,9 +133,8 @@ class RotationAnalyzer
     }
 
     /**
-     * Evaluate a single check. Returns null if the ability isn't talented/used at all,
-     * otherwise returns a full row (including 'passing' entries — the chat needs to see
-     * what a player did RIGHT too, not just what they missed).
+     * Evaluate a single check against a (player_casts, duration_seconds) pair.
+     * Returns null if the ability isn't cast at all (likely not talented).
      */
     private function evaluateCheck(array $check, array $playerCasts, int $durationSec): ?array
     {
@@ -95,13 +148,10 @@ class RotationAnalyzer
         if (!$ability || !is_numeric($cooldown) || $cooldown <= 0) return null;
 
         $maxCasts = $durationSec / (float) $cooldown;
-        if ($maxCasts < 1) return null; // fight too short to expect even 1 cast
+        if ($maxCasts < 1) return null;
 
         $actual = (int) ($playerCasts[$ability] ?? 0);
-
-        // Zero casts → most likely the ability isn't talented (Midnight rotations are heavily
-        // talent-gated). Skip to avoid false positives on abilities the player can't cast.
-        if ($actual === 0) return null;
+        if ($actual === 0) return null; // not talented / not in rotation this encounter
 
         $efficiency = $actual / $maxCasts;
         $minorThreshold = $recommended - self::MINOR_DOWNSTEP;
@@ -112,7 +162,11 @@ class RotationAnalyzer
         } elseif ($efficiency < $majorThreshold) {
             $status = 'major';
         } else {
-            $status = ($severityCfg === 'minor') ? 'minor' : 'minor';
+            $status = 'minor';
+            if ($severityCfg === 'major' && $efficiency < $recommended - 0.10) {
+                // slightly stricter for abilities the baseline marks as major-priority
+                $status = 'minor';
+            }
         }
 
         $pct = (int) round($efficiency * 100);
@@ -122,15 +176,15 @@ class RotationAnalyzer
         $summary = "{$ability} cast efficiency {$pct}% (target {$recommendedPct}%+) — {$actual} casts of a possible {$maxInt}.";
 
         return [
-            'ability'         => $ability,
-            'ability_id'      => $check['ability_id'] ?? null,
+            'ability'          => $ability,
+            'ability_id'       => $check['ability_id'] ?? null,
             'cooldown_seconds' => (float) $cooldown,
-            'actual_casts'    => $actual,
-            'max_possible'    => $maxInt,
-            'efficiency_pct'  => $pct,
-            'recommended_pct' => $recommendedPct,
-            'status'          => $status,
-            'summary'         => $summary,
+            'actual_casts'     => $actual,
+            'max_possible'     => $maxInt,
+            'efficiency_pct'   => $pct,
+            'recommended_pct'  => $recommendedPct,
+            'status'           => $status,
+            'summary'          => $summary,
         ];
     }
 

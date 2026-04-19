@@ -11,5 +11,6 @@
         static-name="{{ $static->name }}"
         logs-index-url="{{ $logsIndexUrl }}"
         analyze-api-url="/api/logs/analyze"
+        :ability-index='@json($abilityIndex ?? new \stdClass)'
     ></log-show>
 </x-app-layout>

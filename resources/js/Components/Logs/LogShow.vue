@@ -18,6 +18,7 @@ const props = defineProps({
     staticName:          { type: String, required: true },
     logsIndexUrl:        { type: String, required: true },
     analyzeApiUrl:       { type: String, required: true },
+    abilityIndex:        { type: Object, default: () => ({}) },
 });
 
 const activeTab = ref('global');
@@ -185,7 +186,7 @@ const activePersonalReport = computed(() => {
                         </span>
                     </div>
                     <div class="p-8">
-                        <ReportBlocks v-if="personalReport.blocks" :blocks="personalReport.blocks" />
+                        <ReportBlocks v-if="personalReport.blocks" :blocks="personalReport.blocks" :ability-map="abilityIndex" />
                         <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="personalReport.html"></div>
                     </div>
                 </div>
@@ -243,7 +244,7 @@ const activePersonalReport = computed(() => {
                                 </div>
                             </div>
                             <div class="p-8">
-                                <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" />
+                                <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" :ability-map="abilityIndex" />
                                 <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
                             </div>
                         </section>
@@ -295,7 +296,7 @@ const activePersonalReport = computed(() => {
                             </span>
                         </div>
                         <div class="p-8">
-                            <ReportBlocks v-if="activePersonalReport.blocks" :blocks="activePersonalReport.blocks" />
+                            <ReportBlocks v-if="activePersonalReport.blocks" :blocks="activePersonalReport.blocks" :ability-map="abilityIndex" />
                             <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="activePersonalReport.html"></div>
                         </div>
                     </div>

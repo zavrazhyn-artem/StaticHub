@@ -89,7 +89,7 @@ class WclReportParserHelper
             }
         }
 
-        // Group by boss → try_N, strip internal fields
+        // Group by boss → try_N. Keep fight_id + relative_ms for downstream phase bucketing.
         $grouped = [];
         foreach ($individualDeaths as $death) {
             $fightId  = $death['fight_id'];
@@ -97,8 +97,8 @@ class WclReportParserHelper
             $tryNum   = $fightTryMap[$fightId] ?? 1;
             $tryKey   = "try_{$tryNum}";
 
+            $death['time_ms_relative'] = $death['_relative_ms'] ?? null;
             unset($death['_relative_ms']);
-            unset($death['fight_id']);
 
             $grouped[$bossName][$tryKey][] = $death;
         }
@@ -641,6 +641,271 @@ class WclReportParserHelper
         arsort($result);
 
         return $result;
+    }
+
+    /**
+     * Per-player damage-done top abilities. Returns top N (default 8) abilities for each player
+     * with absolute damage and percentage of player's total.
+     *
+     * @return array<string, array<int, array{ability:string,total:int,pct:float,type:?int}>>
+     */
+    public static function parseDamageDoneBreakdown(array $damageDoneData, array $rosterNames = [], int $topN = 8): array
+    {
+        $out = [];
+        foreach ($damageDoneData['entries'] ?? [] as $entry) {
+            $name = $entry['name'] ?? null;
+            if (!$name) continue;
+            if (($entry['type'] ?? '') === 'NPC') continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+            $playerTotal = (int) ($entry['total'] ?? 0);
+            if ($playerTotal <= 0) continue;
+
+            $abilities = [];
+            foreach ($entry['abilities'] ?? [] as $a) {
+                $aTotal = (int) ($a['total'] ?? 0);
+                if ($aTotal <= 0) continue;
+                $abilities[] = [
+                    'ability' => (string) ($a['name'] ?? '?'),
+                    'total'   => $aTotal,
+                    'pct'     => round($aTotal / $playerTotal * 100, 1),
+                    'type'    => $a['type'] ?? null,
+                ];
+            }
+            usort($abilities, fn($a, $b) => $b['total'] <=> $a['total']);
+            $out[$name] = array_slice($abilities, 0, $topN);
+        }
+        return $out;
+    }
+
+    /**
+     * Per-player damage-taken top sources (the abilities that hit them hardest).
+     *
+     * @return array<string, array<int, array{ability:string,total:int,pct:float,hit_count:?int}>>
+     */
+    public static function parseDamageTakenBreakdown(array $damageTakenData, array $rosterNames = [], int $topN = 8): array
+    {
+        $out = [];
+        foreach ($damageTakenData['entries'] ?? [] as $entry) {
+            $name = $entry['name'] ?? null;
+            if (!$name) continue;
+            if (($entry['type'] ?? '') === 'NPC') continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+            $playerTotal = (int) ($entry['total'] ?? 0);
+            if ($playerTotal <= 0) continue;
+
+            $abilities = [];
+            foreach ($entry['abilities'] ?? [] as $a) {
+                $aTotal = (int) ($a['total'] ?? 0);
+                if ($aTotal <= 0) continue;
+                $abilities[] = [
+                    'ability'   => (string) ($a['name'] ?? '?'),
+                    'total'     => $aTotal,
+                    'pct'       => round($aTotal / $playerTotal * 100, 1),
+                    'hit_count' => $a['hitCount'] ?? null,
+                ];
+            }
+            usort($abilities, fn($a, $b) => $b['total'] <=> $a['total']);
+            $out[$name] = array_slice($abilities, 0, $topN);
+        }
+        return $out;
+    }
+
+    /**
+     * Per-healer top heal targets — who you healed the most (and what was overheal).
+     * Distinguishes "tank healer" vs "raid healer" play patterns.
+     *
+     * @return array<string, array<int, array{target:string,total:int,pct:float,target_role:?string}>>
+     */
+    public static function parseHealTargets(array $healingData, array $rosterNames = [], array $playerDetails = [], int $topN = 5): array
+    {
+        // Build roleByName lookup
+        $roleByName = [];
+        foreach ($playerDetails as $name => $d) {
+            $role = $d['role'] ?? null;
+            if ($role) $roleByName[$name] = in_array($role, ['tanks', 'tank'], true) ? 'tank'
+                : (in_array($role, ['healers', 'healer'], true) ? 'healer' : 'dps');
+        }
+
+        $out = [];
+        foreach ($healingData['entries'] ?? [] as $entry) {
+            $name = $entry['name'] ?? null;
+            if (!$name) continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+            if (($entry['type'] ?? '') !== 'NPC' && ($roleByName[$name] ?? '') !== 'healer') continue;
+
+            $playerTotal = (int) ($entry['total'] ?? 0);
+            if ($playerTotal <= 0) continue;
+
+            $targets = [];
+            foreach ($entry['targets'] ?? [] as $t) {
+                $tName = $t['name'] ?? '';
+                $tTotal = (int) ($t['total'] ?? 0);
+                if ($tTotal <= 0) continue;
+                $targets[] = [
+                    'target'      => $tName,
+                    'total'       => $tTotal,
+                    'pct'         => round($tTotal / $playerTotal * 100, 1),
+                    'target_role' => $roleByName[$tName] ?? null,
+                ];
+            }
+            usort($targets, fn($a, $b) => $b['total'] <=> $a['total']);
+            $out[$name] = array_slice($targets, 0, $topN);
+        }
+        return $out;
+    }
+
+    /**
+     * Per-healer top healing abilities with overheal %.
+     *
+     * @return array<string, array<int, array{ability:string,total:int,pct:float,overheal_pct:float}>>
+     */
+    public static function parseHealingBreakdown(array $healingData, array $rosterNames = [], int $topN = 6): array
+    {
+        $out = [];
+        foreach ($healingData['entries'] ?? [] as $entry) {
+            $name = $entry['name'] ?? null;
+            if (!$name) continue;
+            if (($entry['type'] ?? '') === 'NPC') continue;
+            if (!empty($rosterNames) && !in_array($name, $rosterNames)) continue;
+
+            $playerTotal = (int) ($entry['total'] ?? 0);
+            if ($playerTotal <= 0) continue;
+
+            $abilities = [];
+            foreach ($entry['abilities'] ?? [] as $a) {
+                $aTotal = (int) ($a['total'] ?? 0);
+                if ($aTotal <= 0) continue;
+                $aOver = (int) ($a['overheal'] ?? 0);
+                $aRaw  = $aTotal + $aOver;
+                $abilities[] = [
+                    'ability'      => (string) ($a['name'] ?? '?'),
+                    'total'        => $aTotal,
+                    'pct'          => round($aTotal / $playerTotal * 100, 1),
+                    'overheal_pct' => $aRaw > 0 ? round($aOver / $aRaw * 100, 1) : 0.0,
+                ];
+            }
+            usort($abilities, fn($a, $b) => $b['total'] <=> $a['total']);
+            $out[$name] = array_slice($abilities, 0, $topN);
+        }
+        return $out;
+    }
+
+    /**
+     * Bucket deaths into phase windows for a single encounter.
+     *
+     * @param array $deaths            Death events with `time` field (ms relative to fight start)
+     * @param array $phaseTransitions  [{ id, startTime }] from fight data — startTime is relative ms
+     * @return array<string, int>      [phaseName => deathCount]
+     */
+    public static function bucketDeathsByPhase(array $deaths, array $phaseTransitions, array $phaseNamesById = []): array
+    {
+        if (empty($phaseTransitions)) return [];
+
+        // Sort phase transitions by startTime ascending
+        usort($phaseTransitions, fn($a, $b) => ($a['startTime'] ?? 0) <=> ($b['startTime'] ?? 0));
+
+        $buckets = [];
+        foreach ($deaths as $d) {
+            $t = $d['time'] ?? $d['timestamp'] ?? null;
+            if ($t === null) continue;
+
+            $phase = null;
+            foreach ($phaseTransitions as $pt) {
+                if ($t >= ($pt['startTime'] ?? 0)) {
+                    $phase = $pt['id'];
+                } else {
+                    break;
+                }
+            }
+            if ($phase === null) continue;
+            $name = $phaseNamesById[$phase] ?? "Phase {$phase}";
+            $buckets[$name] = ($buckets[$name] ?? 0) + 1;
+        }
+        return $buckets;
+    }
+
+    /**
+     * Parse cooldown cast events into per-player per-ability timing data.
+     * Returns timestamps + idle gap analysis to evaluate cooldown discipline.
+     *
+     * @param array $events    Cast events with `timestamp`, `sourceID`, `abilityGameID`, `fight`
+     * @param array $actorMap  ActorID → playerName
+     * @param array $abilityNames  AbilityID → name lookup
+     * @param array $cooldownsByAbility  AbilityID → cooldown_seconds (from spec baselines)
+     * @param array $fightDurations  fightId → duration_seconds
+     *
+     * @return array<string, array<string, array{
+     *   ability_id:int, used:int, max_possible:int, idle_seconds:int, casts:array<int,int>
+     * }>>  Outer: playerName, inner: abilityName.
+     */
+    public static function parseCooldownEvents(
+        array $events,
+        array $actorMap,
+        array $abilityNames,
+        array $cooldownsByAbility,
+        array $fightDurations
+    ): array {
+        // Group casts by (player, ability), collecting timestamps in seconds (relative to fight start).
+        $casts = [];
+        foreach ($events as $e) {
+            if (($e['type'] ?? '') !== 'cast') continue;
+            $sourceId = $e['sourceID'] ?? null;
+            $abilityId = $e['abilityGameID'] ?? null;
+            $time = $e['timestamp'] ?? null;
+            $fightId = $e['fight'] ?? null;
+            if ($sourceId === null || $abilityId === null || $time === null) continue;
+            if (!isset($cooldownsByAbility[$abilityId])) continue;
+
+            $playerName = $actorMap[$sourceId] ?? null;
+            if (!$playerName) continue;
+
+            $casts[$playerName][$abilityId][] = [
+                'time_s'   => (int) round($time / 1000),
+                'fight_id' => $fightId,
+            ];
+        }
+
+        $totalDurationSeconds = (int) array_sum($fightDurations);
+        $out = [];
+
+        foreach ($casts as $playerName => $byAbility) {
+            foreach ($byAbility as $abilityId => $castList) {
+                $cd = (float) $cooldownsByAbility[$abilityId];
+                if ($cd <= 0) continue;
+
+                $abilityName = $abilityNames[$abilityId] ?? "Spell {$abilityId}";
+                $used = count($castList);
+                $maxPossible = (int) floor($totalDurationSeconds / $cd);
+
+                // Idle time must be computed WITHIN a fight window only (between-fight gaps
+                // are not "holds"). Group by fight_id, sort chronologically, sum (gap - cd).
+                $byFight = [];
+                foreach ($castList as $c) {
+                    $byFight[$c['fight_id'] ?? 0][] = $c['time_s'];
+                }
+                $idleSeconds = 0;
+                foreach ($byFight as $times) {
+                    sort($times);
+                    for ($i = 1; $i < count($times); $i++) {
+                        $gap = $times[$i] - $times[$i - 1];
+                        $excess = $gap - (int) $cd;
+                        if ($excess > 0) $idleSeconds += $excess;
+                    }
+                }
+
+                $out[$playerName][$abilityName] = [
+                    'ability_id'   => (int) $abilityId,
+                    'used'         => $used,
+                    'max_possible' => $maxPossible,
+                    'idle_seconds' => $idleSeconds,
+                    'cast_times_s' => array_column($castList, 'time_s'),
+                ];
+            }
+        }
+
+        return $out;
     }
 
     /**

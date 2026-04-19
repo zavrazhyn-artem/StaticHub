@@ -8,6 +8,7 @@ use App\Helpers\GeminiPromptBuilder;
 use App\Helpers\GeminiResponseFormatter;
 use App\Helpers\RaidAnalysisPromptBuilder;
 use App\Services\Logging\AiRequestLogger;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -315,6 +316,155 @@ class GeminiService
                 'cache_expires_at' => $cacheExpiresAt,
             ];
         }
+    }
+
+    /**
+     * Create the raid-wide Gemini cache that both main + per-player generation will reuse.
+     * Returns the cache descriptor or null on failure.
+     *
+     * @return array{cache_id: string, expires_at: ?string}|null
+     */
+    public function createRaidCache(string $preprocessedJson, ?string $supplementaryJson = null, int $ttlSeconds = 10800): ?array
+    {
+        $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
+            . "produced by a deterministic PHP analyzer plus raw supplementary log data for chat queries. "
+            . "Use the PRE-ANALYZED section for failures/performance summaries; use the RAW SUPPLEMENTARY "
+            . "section for per-player details (cast counts, buff uptimes, dispel counts, gear, "
+            . "consumables, etc.) when the user asks specific stats questions.\n\n"
+            . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
+
+        if ($supplementaryJson) {
+            $cacheContent .= "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryJson;
+        }
+
+        return $this->createCachedContext($cacheContent, $this->proModel, $ttlSeconds);
+    }
+
+    /**
+     * Generate ONLY the raid-wide `main` report + title via a single Gemini call.
+     * Uses the cached context created by `createRaidCache`.
+     *
+     * @return array{title: string, main: array<int, array>}
+     */
+    public function generateMainReportBlocks(string $cacheId): array
+    {
+        $instructions = file_get_contents(resource_path('prompts/gemini_main_report.txt'));
+        $url = $this->buildModelUrl($this->proModel);
+
+        Log::info('Generating main report blocks', ['cache_id' => $cacheId]);
+
+        $raw = $this->executeWithCache(
+            $cacheId,
+            $instructions . "\n\nGenerate the raid-wide main report now. Output strictly raw JSON.",
+            $url,
+            300,
+            true,
+            32768
+        );
+
+        $cleaned = GeminiResponseFormatter::cleanMarkdown($raw);
+        $decoded = json_decode($cleaned, true);
+
+        if (!is_array($decoded)) {
+            throw new \Exception('Main report returned invalid JSON: ' . mb_substr((string) $raw, 0, 500));
+        }
+
+        return [
+            'title' => (string) ($decoded['title'] ?? 'Raid Analysis'),
+            'main'  => is_array($decoded['main'] ?? null) ? $decoded['main'] : [],
+        ];
+    }
+
+    /**
+     * Generate personal report blocks for each player IN PARALLEL (batched).
+     * Uses Http::pool for concurrency, batched to `$concurrency` to respect rate limits.
+     *
+     * @param string   $cacheId
+     * @param string[] $playerNames   Player names to generate for
+     * @param int      $concurrency   Max parallel requests per batch (default 5)
+     * @return array<string, array<int, array>>  [playerName => blocks[]]
+     */
+    public function generatePlayerReportBlocks(string $cacheId, array $playerNames, int $concurrency = 5): array
+    {
+        $instructions = file_get_contents(resource_path('prompts/gemini_player_report.txt'));
+        $url = $this->buildModelUrl($this->proModel);
+        $results = [];
+
+        foreach (array_chunk($playerNames, $concurrency) as $batchIndex => $batch) {
+            Log::info('Generating player reports batch', [
+                'batch' => $batchIndex + 1,
+                'size'  => count($batch),
+                'players' => $batch,
+            ]);
+
+            $batchResults = $this->dispatchPlayerBatch($cacheId, $url, $instructions, $batch);
+            foreach ($batchResults as $name => $blocks) {
+                $results[$name] = $blocks;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Dispatch a single parallel batch of per-player Gemini calls.
+     *
+     * @param string[] $playerNames
+     * @return array<string, array<int, array>>
+     */
+    private function dispatchPlayerBatch(string $cacheId, string $url, string $instructions, array $playerNames): array
+    {
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn($name) => $pool->as($name)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->timeout(300)
+                ->post($url . '?key=' . $this->apiKey, [
+                    'cachedContent' => $cacheId,
+                    'contents' => [[
+                        'role' => 'user',
+                        'parts' => [[
+                            'text' => $instructions . "\n\nTARGET_PLAYER: {$name}\n\nGenerate the personal report blocks for this player. Output strictly raw JSON of shape { \"blocks\": [...] }.",
+                        ]],
+                    ]],
+                    'generationConfig' => [
+                        'maxOutputTokens' => 32768,
+                        'responseMimeType' => 'application/json',
+                    ],
+                ]),
+            $playerNames
+        ));
+
+        $out = [];
+        foreach ($responses as $name => $response) {
+            if (!is_object($response) || !method_exists($response, 'successful') || !$response->successful()) {
+                $body = is_object($response) && method_exists($response, 'body') ? $response->body() : 'unknown error';
+                Log::error('Player report generation failed', [
+                    'player' => $name,
+                    'body'   => mb_substr((string) $body, 0, 500),
+                ]);
+                $out[$name] = [];
+                continue;
+            }
+
+            $data = $response->json();
+            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $cleaned = GeminiResponseFormatter::cleanMarkdown((string) $text);
+            $decoded = json_decode($cleaned, true);
+
+            if (!is_array($decoded)) {
+                Log::warning('Player report invalid JSON', [
+                    'player' => $name,
+                    'preview' => mb_substr((string) $text, 0, 300),
+                ]);
+                $out[$name] = [];
+                continue;
+            }
+
+            $blocks = $decoded['blocks'] ?? $decoded;
+            $out[$name] = is_array($blocks) && array_is_list($blocks) ? $blocks : [];
+        }
+
+        return $out;
     }
 
     /**

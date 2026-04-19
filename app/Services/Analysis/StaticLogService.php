@@ -208,6 +208,7 @@ class StaticLogService
             'canUseAiChat'       => $canUseAiChat,
             'chatHistory'        => $chatHistory,
             'logsIndexUrl'       => route('statics.logs.index'),
+            'abilityIndex'       => app(AbilityNameIndex::class)->all(),
         ];
     }
 

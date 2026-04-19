@@ -30,7 +30,7 @@ defineProps({
             <div class="flex items-center justify-center gap-6 drop-shadow-[0_0_40px_rgba(58,223,250,0.3)] transition-transform hover:scale-105 duration-500">
                 <img src="/images/logo.svg" alt="BlastR Logo" class="w-28 h-28 md:w-36 md:h-36 object-contain" />
                 <div class="text-6xl md:text-8xl font-black uppercase tracking-tighter italic leading-none pr-4">
-                    <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R</span>
+                    <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400 pr-4">R</span>
                 </div>
             </div>
 

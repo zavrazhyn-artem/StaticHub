@@ -1,12 +1,16 @@
 <script setup>
 import { computed } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useAbilityLinker } from '@/composables/useAbilityLinker';
 
 const { __ } = useTranslation();
 
 const props = defineProps({
     blocks: { type: Array, default: () => [] },
+    abilityMap: { type: Object, default: () => ({}) },
 });
+
+const { linkify } = useAbilityLinker(props.abilityMap);
 
 const toneMap = {
     danger:  { text: 'text-red-400',   bg: 'bg-red-500/10',   border: 'border-red-500/30',   bar: 'bg-red-400' },
@@ -66,9 +70,8 @@ const empty = computed(() => !Array.isArray(props.blocks) || props.blocks.length
 
             <!-- paragraph -->
             <p v-else-if="block.type === 'paragraph'"
-               class="text-sm text-gray-300 leading-relaxed">
-                {{ block.text }}
-            </p>
+               class="text-sm text-gray-300 leading-relaxed"
+               v-html="linkify(block.text)"></p>
 
             <!-- divider -->
             <div v-else-if="block.type === 'divider'" class="border-t border-white/5"></div>
@@ -166,7 +169,7 @@ const empty = computed(() => !Array.isArray(props.blocks) || props.blocks.length
                     <div v-if="block.title" :class="['text-xs font-bold uppercase tracking-wider', tone(block.severity).text]">
                         {{ block.title }}
                     </div>
-                    <p class="text-sm text-gray-300 leading-relaxed">{{ block.text }}</p>
+                    <p class="text-sm text-gray-300 leading-relaxed" v-html="linkify(block.text)"></p>
                 </div>
             </div>
 
@@ -181,7 +184,7 @@ const empty = computed(() => !Array.isArray(props.blocks) || props.blocks.length
                     <li v-for="(item, j) in block.items" :key="j"
                         class="flex items-start gap-3 text-sm text-gray-300 leading-relaxed">
                         <span class="material-symbols-outlined text-sm text-indigo-400 flex-shrink-0 mt-0.5">arrow_forward</span>
-                        <span>{{ item.text }}</span>
+                        <span v-html="linkify(item.text)"></span>
                     </li>
                 </ul>
             </div>
@@ -214,7 +217,7 @@ const empty = computed(() => !Array.isArray(props.blocks) || props.blocks.length
                 <div v-for="(issue, j) in block.issues" :key="j"
                      :class="['flex items-start gap-3 px-3 py-2 rounded-lg border', tone(severityToTone[issue.severity] || 'info').bg, tone(severityToTone[issue.severity] || 'info').border]">
                     <span class="text-xs font-bold text-white flex-shrink-0 min-w-[120px]">{{ issue.ability }}</span>
-                    <span class="text-xs text-gray-300 flex-1">{{ issue.issue }}</span>
+                    <span class="text-xs text-gray-300 flex-1" v-html="linkify(issue.issue)"></span>
                     <span :class="['text-3xs font-bold uppercase tracking-wider flex-shrink-0', tone(severityToTone[issue.severity] || 'info').text]">
                         {{ issue.severity }}
                     </span>

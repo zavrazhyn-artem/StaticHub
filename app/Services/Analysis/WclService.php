@@ -349,6 +349,10 @@ class WclService
             'debuff_uptime'       => $debuffUptime,
             'resource_waste'      => $resourceWaste,
             'performance_metrics' => $performanceMetrics,
+            // Raw report data (used by per-encounter helpers — phase bucketing, cooldown timing, etc.)
+            'raid_fights'         => array_values($raidFights),
+            'report_phases'       => $reportPhases,
+            'raid_actors'         => $allActors,
         ];
     }
 
@@ -1143,7 +1147,7 @@ class WclService
      *
      * @return array{casts_summary: array, consumables_used: array, buff_uptime: array, debuff_uptime: array, dispels: array, interrupts: array}
      */
-    public function getPerEncounterStats(string $reportId, array $fightIds, array $rosterNames = [], int $totalDurationMs = 0): array
+    public function getPerEncounterStats(string $reportId, array $fightIds, array $rosterNames = [], int $totalDurationMs = 0, array $playerDetails = []): array
     {
         $query = WclQueryBuilder::buildPerEncounterStatsQuery();
         try {
@@ -1192,14 +1196,151 @@ class WclService
         $interruptEntries = $report['interrupts']['data']['entries'][0]['entries'] ?? [];
         $interrupts = WclReportParserHelper::parseInterrupts($interruptEntries, $rosterNames);
 
+        // Wave 1: per-player damage / damage taken / healing breakdowns
+        $damageDoneBreakdown  = WclReportParserHelper::parseDamageDoneBreakdown(
+            $report['damageDone']['data'] ?? [],
+            $rosterNames
+        );
+        $damageTakenBreakdown = WclReportParserHelper::parseDamageTakenBreakdown(
+            $report['damageTaken']['data'] ?? [],
+            $rosterNames
+        );
+        $healingBreakdown     = WclReportParserHelper::parseHealingBreakdown(
+            $report['healing']['data'] ?? [],
+            $rosterNames
+        );
+        $healTargets          = WclReportParserHelper::parseHealTargets(
+            $report['healing']['data'] ?? [],
+            $rosterNames,
+            $playerDetails
+        );
+
         return [
-            'casts_summary'    => $castsAndConsumables['casts'],
-            'consumables_used' => $castsAndConsumables['consumables'],
-            'buff_uptime'      => $buffUptime,
-            'debuff_uptime'    => $debuffUptime,
-            'dispels'          => $dispels,
-            'interrupts'       => $interrupts,
+            'casts_summary'           => $castsAndConsumables['casts'],
+            'consumables_used'        => $castsAndConsumables['consumables'],
+            'buff_uptime'             => $buffUptime,
+            'debuff_uptime'           => $debuffUptime,
+            'dispels'                 => $dispels,
+            'interrupts'              => $interrupts,
+            'damage_done_breakdown'   => $damageDoneBreakdown,
+            'damage_taken_breakdown'  => $damageTakenBreakdown,
+            'healing_breakdown'       => $healingBreakdown,
+            'heal_targets'            => $healTargets,
         ];
+    }
+
+    /**
+     * Cooldown discipline analysis for a single boss. Queries cast events filtered to a list
+     * of major cooldown ability IDs, returns per-player per-ability timing data.
+     *
+     * @param int[]  $abilityIds   Major cooldown spell IDs (cooldown_seconds >= some threshold)
+     * @param array  $cooldownsByAbility  abilityId → cooldown_seconds (used by parser)
+     * @param array  $abilityNames        abilityId → human-readable name
+     * @param array  $actorMap            actorId → playerName
+     * @param array  $fightDurations      fightId → duration_seconds (encounter total)
+     */
+    public function getCooldownTimings(
+        string $reportId,
+        array $fightIds,
+        array $abilityIds,
+        array $cooldownsByAbility,
+        array $abilityNames,
+        array $actorMap,
+        array $fightDurations
+    ): array {
+        if (empty($abilityIds) || empty($fightIds)) return [];
+
+        $expr = 'ability.id IN (' . implode(',', array_unique(array_map('intval', $abilityIds))) . ')';
+        $query = WclQueryBuilder::buildCooldownEventsQuery();
+
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId'         => $reportId,
+                'fightIds'         => $fightIds,
+                'filterExpression' => $expr,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $events = $data['reportData']['report']['events']['data'] ?? [];
+        return WclReportParserHelper::parseCooldownEvents(
+            $events,
+            $actorMap,
+            $abilityNames,
+            $cooldownsByAbility,
+            $fightDurations
+        );
+    }
+
+    /**
+     * Fetch applybuff events for a list of external cooldown spell IDs. Returns events
+     * grouped by (caster → target → ability) so the analyzer can show "who threw what on whom".
+     *
+     * @param int[] $abilityIds
+     * @param array<int, string> $actorMap  actorID → name
+     * @param array<int, string> $abilityNames  abilityID → name
+     * @return array<int, array{timestamp:int, fight:?int, caster:string, target:string, ability:string, ability_id:int}>
+     */
+    public function getExternalCooldownEvents(
+        string $reportId,
+        array $fightIds,
+        array $abilityIds,
+        array $actorMap,
+        array $abilityNames
+    ): array {
+        if (empty($abilityIds) || empty($fightIds)) return [];
+
+        $expr = 'type = "applybuff" AND ability.id IN (' . implode(',', array_unique(array_map('intval', $abilityIds))) . ')';
+        $query = WclQueryBuilder::buildCooldownEventsQuery(); // reuse: Casts events query
+        // Note: we need Buffs dataType, not Casts. Build a dedicated query instead.
+        $query = <<<'GQL'
+        query ($reportId: String!, $fightIds: [Int]!, $filterExpression: String!) {
+          reportData {
+            report(code: $reportId) {
+              events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, filterExpression: $filterExpression, limit: 5000, hostilityType: Friendlies) {
+                data
+              }
+            }
+          }
+        }
+GQL;
+
+        try {
+            $data = $this->executeGraphql($query, [
+                'reportId'         => $reportId,
+                'fightIds'         => $fightIds,
+                'filterExpression' => $expr,
+            ]);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $events = $data['reportData']['report']['events']['data'] ?? [];
+        $out = [];
+        foreach ($events as $e) {
+            if (($e['type'] ?? '') !== 'applybuff') continue;
+            $sid = $e['sourceID'] ?? null;
+            $tid = $e['targetID'] ?? null;
+            $aid = $e['abilityGameID'] ?? null;
+            $ts  = $e['timestamp'] ?? null;
+            if ($sid === null || $tid === null || $aid === null) continue;
+
+            $caster = $actorMap[$sid] ?? null;
+            $target = $actorMap[$tid] ?? null;
+            if (!$caster || !$target) continue;
+
+            $out[] = [
+                'timestamp'  => (int) $ts,
+                'fight'      => $e['fight'] ?? null,
+                'caster'     => $caster,
+                'target'     => $target,
+                'ability'    => $abilityNames[$aid] ?? "Spell {$aid}",
+                'ability_id' => (int) $aid,
+            ];
+        }
+
+        return $out;
     }
 
     /**

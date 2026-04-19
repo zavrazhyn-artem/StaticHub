@@ -108,3 +108,22 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
+
+/* Inline ability links in AI report blocks. Wowhead's "colorLinks" config tints the
+   text by spell/item quality; we add a dotted underline + hover effect so readers
+   recognize it as an interactive element. */
+.ability-link {
+    text-decoration: underline dotted;
+    text-decoration-color: rgba(129, 140, 248, 0.45); /* indigo-400/45 */
+    text-underline-offset: 2px;
+    font-weight: 500;
+    cursor: help;
+    transition: text-decoration-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.ability-link:hover {
+    text-decoration-style: solid;
+    text-decoration-color: rgba(165, 180, 252, 1); /* indigo-300 */
+    background-color: rgba(99, 102, 241, 0.08);   /* indigo-500/8 */
+}
