@@ -8,10 +8,13 @@ import PlayerCdPanel from './PlayerCdPanel.vue';
 import AssignmentEditPanel from './AssignmentEditPanel.vue';
 import ConditionalAbilitiesStrip from './ConditionalAbilitiesStrip.vue';
 import AbilityDetailPanel from './AbilityDetailPanel.vue';
+import { buildMrtNote } from '@/utils/mrtNote';
 const { __ } = useTranslation();
 
 const props = defineProps({
     timeline: { type: Object, default: () => ({}) },
+    encounter: { type: Object, default: () => ({}) },
+    difficulty: { type: String, default: 'mythic' },
     bossAbilities: { type: Array, default: () => [] },
     defaultPhaseSegments: { type: Array, default: () => [] },
     conditionalAbilities: { type: Array, default: () => [] },
@@ -20,6 +23,16 @@ const props = defineProps({
     canManage: { type: Boolean, default: false },
     cooldownToggleBase: { type: String, default: '' },
     csrfToken: { type: String, default: '' },
+    // Active editor tab (cooldowns|map|...). Floating panels that <Teleport>
+    // to body need this to know when to hide — parent's v-show doesn't reach
+    // teleported children, so we gate their display with v-show inside.
+    activeTab: { type: String, default: 'cooldowns' },
+    // Logged-in user's character IDs in this roster. Drives the "Show Me"
+    // highlight that pulses the user's rows.
+    myCharacterIds: { type: Array, default: () => [] },
+    // Show Me toggle owned by the page header — one button controls both the
+    // map and the cooldowns tab highlights.
+    showingMe: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update', 'toggle-character-cooldown']);
 
@@ -195,10 +208,33 @@ const hiddenAbilities = computed(() => new Set(props.timeline?.hidden_abilities 
 
 // When showHidden is on, the hidden list is rendered but visually dimmed.
 const showHiddenAbilities = ref(false);
+
+// Focus mode now does exactly two things: hide every other player's row and
+// force boss abilities into compact mode. The boss-ability list itself is not
+// filtered — the planner still wants to see the full incoming boss timeline
+// while focusing on one player's CDs underneath.
+const focusedAbilitySpellIds = computed(() => null);
+const effectiveCompactMode = computed(() => compactMode.value || (focusMode.value && !!selectedPlayer.value));
+const rosterForDisplay = computed(() => {
+    if (focusMode.value && selectedPlayer.value) {
+        return sortedRoster.value.filter(c => c.id === selectedPlayer.value.id);
+    }
+    return sortedRoster.value;
+});
+
 const visibleAbilities = computed(() => {
     const base = derivedBossAbilities.value;
-    if (showHiddenAbilities.value) return base;
-    return base.filter(a => !hiddenAbilities.value.has(a.spell_id));
+    let list = base;
+    if (!showHiddenAbilities.value) {
+        list = list.filter(a => !hiddenAbilities.value.has(a.spell_id));
+    }
+    // Priority filter
+    list = list.filter(a => priorityFilters.value[a.priority] !== false);
+    // Focus mode
+    if (focusedAbilitySpellIds.value) {
+        list = list.filter(a => focusedAbilitySpellIds.value.has(a.spell_id));
+    }
+    return list;
 });
 const hiddenAbilityIdArr = computed(() => [...hiddenAbilities.value]);
 
@@ -209,11 +245,31 @@ const toggleHiddenAbility = (spellId) => {
     emit('update', { ...props.timeline, hidden_abilities: [...next] });
 };
 
-// CD type filter (session-local, not persisted)
+// CD type filter (session-local, not persisted) — read by PlayerCdPanel.
 const cdTypeFilters = ref({ personal: true, external: true, raid: true, utility: true });
-const toggleCdType = (type) => {
-    cdTypeFilters.value = { ...cdTypeFilters.value, [type]: !cdTypeFilters.value[type] };
+
+// ─── Boss-ability priority filter (for bosses with 20+ abilities) ──────
+// Toggle H/M/L in the toolbar; abilities with priority not in the selected
+// set are hidden from the timeline. All three enabled by default.
+const priorityFilters = ref({ high: true, medium: true, low: true });
+const togglePriority = (level) => {
+    priorityFilters.value = { ...priorityFilters.value, [level]: !priorityFilters.value[level] };
 };
+
+// ─── Focus mode ───────────────────────────────────────────────────────
+// When a player is selected, focus mode narrows the boss-ability timeline to
+// only abilities that player has an assignment on, OR whose recommended_response
+// matches their role. Exits on second click on the same player.
+const focusMode = ref(false);
+const toggleFocusMode = () => { focusMode.value = !focusMode.value; };
+
+// ─── Compact / expanded row mode ──────────────────────────────────────
+// Compact halves boss-ability row height for bosses like Midnight Falls.
+const compactMode = ref(false);
+const toggleCompactMode = () => { compactMode.value = !compactMode.value; };
+
+// ─── Show Me flag is owned by BossPlannerPage (one button drives both
+//     tabs). We receive it as a prop and forward to the player section.
 
 const ROLE_ORDER = { tank: 0, heal: 1, mdps: 2, rdps: 2 };
 const sortedRoster = computed(() =>
@@ -521,6 +577,28 @@ const updateDuration = (e) => {
     emit('update', { ...props.timeline, phase_segments: next });
 };
 const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 60).padStart(2, '0')}`;
+
+// Export the current plan as a MethodRaidTools / NSRT note and copy to
+// clipboard. Raid lead pastes via `/rt note` in-game.
+const mrtExportState = ref('idle'); // 'idle' | 'copied' | 'error'
+const exportMrtNote = async () => {
+    const note = buildMrtNote({
+        encounter: props.encounter,
+        difficulty: props.difficulty,
+        segments: effectiveSegments.value,
+        assignments: assignments.value,
+        bossAbilities: props.bossAbilities,
+    });
+    try {
+        await navigator.clipboard.writeText(note);
+        mrtExportState.value = 'copied';
+        setTimeout(() => { mrtExportState.value = 'idle'; }, 2000);
+    } catch (e) {
+        console.error('Clipboard write failed:', e);
+        mrtExportState.value = 'error';
+        setTimeout(() => { mrtExportState.value = 'idle'; }, 2000);
+    }
+};
 </script>
 
 <template>
@@ -569,6 +647,36 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
                 {{ focusedCast.notes }}
             </div>
             <div class="ml-auto flex items-center gap-2">
+                <!-- Priority filter H/M/L -->
+                <div class="flex items-center gap-0.5 bg-white/5 rounded p-0.5" :title="__('Priority filter')">
+                    <button v-for="lvl in ['high','medium','low']" :key="lvl"
+                        @click="togglePriority(lvl)"
+                        class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest transition-all"
+                        :class="priorityFilters[lvl]
+                            ? (lvl === 'high' ? 'bg-red-500/20 text-red-300' : lvl === 'medium' ? 'bg-amber-500/20 text-amber-300' : 'bg-white/15 text-white/60')
+                            : 'text-on-surface-variant/30 hover:text-on-surface-variant/60'">
+                        {{ lvl === 'high' ? 'H' : lvl === 'medium' ? 'M' : 'L' }}
+                    </button>
+                </div>
+
+                <!-- Focus mode on selected player -->
+                <button v-if="selectedPlayer" @click="toggleFocusMode"
+                    :title="__('Focus on selected player (show only their abilities)')"
+                    class="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all"
+                    :class="focusMode ? 'bg-cyan-500/20 text-cyan-300' : 'bg-white/5 text-on-surface-variant hover:text-white'">
+                    <span class="material-symbols-outlined text-xs">{{ focusMode ? 'person_search' : 'person' }}</span>
+                    {{ focusMode ? __('Focused') : __('Focus') }}
+                </button>
+
+                <!-- Compact rows -->
+                <button @click="toggleCompactMode"
+                    :title="__('Compact row height for bosses with many abilities')"
+                    class="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all"
+                    :class="compactMode ? 'bg-white/20 text-white' : 'bg-white/5 text-on-surface-variant hover:text-white'">
+                    <span class="material-symbols-outlined text-xs">{{ compactMode ? 'density_small' : 'density_medium' }}</span>
+                    {{ compactMode ? __('Compact') : __('Normal') }}
+                </button>
+
                 <!-- Hidden abilities toggle -->
                 <button v-if="hiddenAbilities.size > 0" @click="showHiddenAbilities = !showHiddenAbilities"
                     class="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all"
@@ -576,16 +684,20 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
                     <span class="material-symbols-outlined text-xs">{{ showHiddenAbilities ? 'visibility' : 'visibility_off' }}</span>
                     {{ showHiddenAbilities ? __('Hide hidden') : (__('Show hidden') + ' (' + hiddenAbilities.size + ')') }}
                 </button>
-                <!-- CD type filters -->
-                <div class="flex items-center gap-0.5 bg-white/5 rounded p-0.5">
-                    <button v-for="type in ['personal','external','raid','utility']" :key="type"
-                        @click="toggleCdType(type)"
-                        class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest transition-all"
-                        :class="cdTypeFilters[type] ? 'bg-primary/20 text-primary' : 'text-on-surface-variant/30 hover:text-on-surface-variant/60'"
-                        :title="type">
-                        {{ type === 'personal' ? 'P' : type === 'external' ? 'E' : type === 'raid' ? 'R' : 'U' }}
-                    </button>
-                </div>
+                <!-- Copy MRT note → clipboard (Boss Planner orange accent) -->
+                <button @click="exportMrtNote"
+                    :title="__('Copy MethodRaidTools note to clipboard (paste via /rt note in-game)')"
+                    class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest transition-all"
+                    :class="mrtExportState === 'copied'
+                        ? 'bg-success-neon/15 border-success-neon/40 text-success-neon'
+                        : mrtExportState === 'error'
+                            ? 'bg-error/15 border-error/40 text-error'
+                            : 'bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 hover:text-orange-300'">
+                    <span class="material-symbols-outlined text-xs">
+                        {{ mrtExportState === 'copied' ? 'check' : mrtExportState === 'error' ? 'error' : 'content_copy' }}
+                    </span>
+                    {{ mrtExportState === 'copied' ? __('Copied') : mrtExportState === 'error' ? __('Error') : __('Copy MRT') }}
+                </button>
             </div>
         </div>
         <div class="shrink-0 px-4 py-1 bg-[#0a0a0c] text-[8px] text-on-surface-variant/30 border-b border-white/5">
@@ -611,6 +723,7 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
                 :phase-edit-mode="phaseEditMode"
                 :focused-cast="focusedCast"
                 :hidden-ability-ids="hiddenAbilityIdArr"
+                :compact="effectiveCompactMode"
                 @pan-start="onPanStart"
                 @wheel="onWheel"
                 @click-empty="onClickEmpty"
@@ -625,9 +738,9 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
         <!-- Scrollable player section -->
         <div class="flex-1 overflow-y-auto">
             <TimelinePlayerSection
-                :roster="sortedRoster"
+                :roster="rosterForDisplay"
                 :assignments="assignments"
-                :phases="phases"
+                :phases="derivedPhaseMarkers"
                 :fight-duration="fightDurationRef"
                 :px-per-sec="viewport.pxPerSec.value"
                 :pan-x="viewport.panX.value"
@@ -643,6 +756,8 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
                 :phase-edit-mode="phaseEditMode"
                 :player-cooldowns="playerCooldowns"
                 :focused-cast="focusedCast"
+                :my-character-ids="myCharacterIds"
+                :showing-me="showingMe && activeTab === 'cooldowns'"
                 @pan-start="onPanStart"
                 @wheel="onWheel"
                 @click-empty="onClickEmpty"
@@ -656,7 +771,10 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
             />
         </div>
 
-        <!-- Floating CD panel for selected player -->
+        <!-- Floating CD panel for selected player.
+             Teleport escapes the parent tab's v-show — use the `visible` prop
+             to hide the panel when the user switches away, without losing its
+             position or selection state. -->
         <PlayerCdPanel
             v-if="selectedPlayer"
             :character="selectedPlayer"
@@ -664,6 +782,7 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
             :disabled-spell-ids="selectedPlayerDisabledIds"
             :type-filters="cdTypeFilters"
             :can-manage="canManage"
+            :visible="activeTab === 'cooldowns'"
             @close="selectedPlayerId = null"
             @drag-start="onPanelDragStart"
             @toggle-cd="onToggleCharacterCd"
@@ -677,14 +796,17 @@ const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 
             :fight-duration="fightDurationRef"
             :can-manage="canManage"
             :cooldown-sec="cooldownForSelected"
+            :visible="activeTab === 'cooldowns'"
             @close="selectedAssignmentId = null"
             @update="updateAssignment"
             @remove="removeAssignment"
         />
 
-        <!-- Floating detail panel for the currently focused boss cast -->
+        <!-- Floating detail panel for the currently focused boss cast.
+             No Teleport — root is the fixed div, so v-show suffices. -->
         <AbilityDetailPanel
             v-if="focusedCast"
+            v-show="activeTab === 'cooldowns'"
             :key="(focusedCast.spell_id || 0) + ':' + focusedCast.time"
             :ability="focusedCast"
             @close="clearFocus"

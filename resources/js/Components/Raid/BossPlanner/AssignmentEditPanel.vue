@@ -9,6 +9,9 @@ const props = defineProps({
     fightDuration: { type: Number, default: 360 },
     canManage: { type: Boolean, default: false },
     cooldownSec: { type: Number, default: 0 },
+    // Teleport-to-body escapes parent tab's v-show; `visible` gates display
+    // while keeping the panel state (drag position, form inputs) alive.
+    visible: { type: Boolean, default: true },
 });
 const emit = defineEmits(['close', 'update', 'remove']);
 
@@ -85,6 +88,7 @@ const classColor = computed(() => ({
 <template>
     <Teleport to="body">
         <div ref="panelRef"
+            v-show="visible"
             class="fixed z-[265] w-[260px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="isDodging ? 'panel-dodging' : ''"
             :style="{ left: position.x + 'px', top: position.y + 'px' }"

@@ -1012,5 +1012,19 @@
     "Snap to": "Snap to",
     "Hide hidden": "Hide hidden",
     "Show hidden": "Show hidden",
-    "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom": "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom"
+    "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom": "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom",
+    "Copy MRT": "Copy MRT",
+    "Copy MethodRaidTools note to clipboard (paste via /rt note in-game)": "Copy MethodRaidTools note to clipboard (paste via /rt note in-game)",
+    "Copied": "Copied",
+    "Error": "Error",
+    "Priority filter": "Priority filter",
+    "Focus on selected player (show only their abilities)": "Focus on selected player (show only their abilities)",
+    "Focused": "Focused",
+    "Focus": "Focus",
+    "Compact row height for bosses with many abilities": "Compact row height for bosses with many abilities",
+    "Compact": "Compact",
+    "Normal": "Normal",
+    "Show Me (pulse my character rows)": "Show Me (pulse my character rows)",
+    "Show Me": "Show Me",
+    "Drag to the map to place this icon": "Drag to the map to place this icon"
 }

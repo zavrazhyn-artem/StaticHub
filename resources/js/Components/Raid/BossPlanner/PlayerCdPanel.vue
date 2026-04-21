@@ -10,6 +10,10 @@ const props = defineProps({
     disabledSpellIds: { type: Array, default: () => [] },
     typeFilters: { type: Object, default: () => ({ personal: true, external: true, raid: true, utility: true }) },
     canManage: { type: Boolean, default: false },
+    // The panel teleports to body, escaping the parent tab's v-show. Pass
+    // `visible` so the panel can hide itself when the user switches tabs
+    // while preserving its drag position and selection state.
+    visible: { type: Boolean, default: true },
 });
 const emit = defineEmits(['close', 'drag-start', 'toggle-cd']);
 
@@ -81,6 +85,7 @@ const cdsByType = computed(() => {
 <template>
     <Teleport to="body">
         <div ref="panelRef"
+            v-show="visible"
             class="fixed z-[260] w-[280px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="isDodging ? 'panel-dodging' : ''"
             :style="{ left: position.x + 'px', top: position.y + 'px' }"
@@ -128,7 +133,9 @@ const cdsByType = computed(() => {
                                     canManage && !isDisabled(cd.spell_id) ? 'cursor-grab hover:border-primary/40 hover:bg-white/10' : 'cursor-default',
                                 ]"
                                 :title="cd.name + ' — ' + cd.cooldown + 's CD' + (cd.requires_talent ? ' (talent)' : '')">
-                                <img :src="remoteIconUrl(cd.icon)" class="w-7 h-7 rounded shrink-0"
+                                <img :src="remoteIconUrl(cd.icon)"
+                                    draggable="false"
+                                    class="w-7 h-7 rounded shrink-0 select-none"
                                     :class="isDisabled(cd.spell_id) ? 'grayscale' : ''">
                                 <div class="min-w-0 flex-1">
                                     <div class="text-[9px] font-bold text-white truncate"

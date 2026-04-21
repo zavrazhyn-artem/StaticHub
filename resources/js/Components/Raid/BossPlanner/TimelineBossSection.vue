@@ -13,17 +13,28 @@ const props = defineProps({
     phaseEditMode: { type: Boolean, default: false },
     focusedCast: { type: Object, default: null },
     hiddenAbilityIds: { type: Array, default: () => [] },
+    // Compact row height — used for bosses with 20+ abilities where the
+    // default layout eats too much vertical space above the raid section.
+    compact: { type: Boolean, default: false },
 });
 const emit = defineEmits(['pan-start', 'wheel', 'click-empty', 'remove-phase', 'focus-cast', 'toggle-hidden-ability', 'start-phase-drag', 'rename-phase']);
 
-const ROW_HEIGHT = 26;
-const ICON_SIZE = 20;
+import { computed } from 'vue';
+const ROW_HEIGHT_DEFAULT = 26;
+const ROW_HEIGHT_COMPACT = 16;
+const ICON_SIZE_DEFAULT = 20;
+const ICON_SIZE_COMPACT = 12;
 const TOP_PADDING = 12;
 const BOTTOM_PADDING = 24;
 const LEFT_PADDING = 12;
 
+// Row height / icon size depend on compact mode — use computed refs so
+// template expressions stay declarative.
+const ROW_HEIGHT = computed(() => props.compact ? ROW_HEIGHT_COMPACT : ROW_HEIGHT_DEFAULT);
+const ICON_SIZE = computed(() => props.compact ? ICON_SIZE_COMPACT : ICON_SIZE_DEFAULT);
+
 const sectionHeight = () =>
-    TOP_PADDING + props.abilities.length * ROW_HEIGHT + BOTTOM_PADDING;
+    TOP_PADDING + props.abilities.length * ROW_HEIGHT.value + BOTTOM_PADDING;
 
 const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 60).padStart(2, '0')}`;
 const iconUrl = (filename) => `/images/cooldowns/${filename}`;

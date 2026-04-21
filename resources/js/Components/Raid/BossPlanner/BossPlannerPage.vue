@@ -902,6 +902,26 @@ const handlePlayerDrop = (player) => {
     updateStepData({ players: existing });
 };
 
+// Direct-drop placement from MapToolbar: bypasses the click-to-activate
+// state machine. The user dragged an icon out of a toolbar popup onto the
+// canvas — we just call the existing placement routine with the dropped
+// item acting as a one-shot selection, then restore whatever was selected
+// before (or clear if nothing was).
+const handleDropToolbarItem = ({ item, point }) => {
+    if (!currentStep.value) return;
+    const prev = currentSelection.value;
+    const prevLabel = selectionLabel.value;
+    const prevSd = selectionShowDirection.value;
+    currentSelection.value = item;
+    selectionLabel.value = item.label || '';
+    selectionShowDirection.value = defaultShowDirection(item);
+    pushUndo();
+    handleCanvasPlacement(point);
+    currentSelection.value = prev;
+    selectionLabel.value = prevLabel;
+    selectionShowDirection.value = prevSd;
+};
+
 // Handle canvas click when in place-icon mode
 const handleCanvasPlacement = (point) => {
     if (!currentStep.value || !currentSelection.value) return;
@@ -1317,6 +1337,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                     :groups="currentGroups"
                                     :can-undo="undoStack.length > 0"
                                     :can-redo="redoStack.length > 0"
+                                    :visible="editorTab === 'map'"
                                     @select-tool="(t) => { activeTool = t; if (t === 'select') clearSelection(); }"
                                     @select-icon="handleSelectIcon"
                                     @undo="undo"
@@ -1368,6 +1389,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                         :highlighted-markers="highlightedMarkerIds"
                                         @update="updateStepData"
                                         @place="handleCanvasPlacement"
+                                        @drop-toolbar-item="handleDropToolbarItem"
                                         @action-start="pushUndo"
                                         @request-text="showTextPopup"
                                         @selection-change="handleSelectionChange"
@@ -1381,6 +1403,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                     <div v-show="editorTab === 'cooldowns'" class="h-full">
                         <TimelineTab
                             :timeline="localPlan.timeline || {}"
+                            :encounter="editorEncounter"
+                            :difficulty="localPlan.difficulty || 'mythic'"
+                            :active-tab="editorTab"
+                            :my-character-ids="myCharacterIds"
+                            :showing-me="showingMe"
                             :boss-abilities="bossAbilitiesForCurrentPlan"
                             :default-phase-segments="phaseSegmentsForCurrentPlan"
                             :conditional-abilities="conditionalAbilitiesForCurrentPlan"
@@ -1397,10 +1424,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         </Transition>
     </Teleport>
 
-    <!-- Current Selection floating window -->
+    <!-- Current Selection floating window (map tab only — state persists) -->
     <Teleport to="body">
         <div
             v-if="currentSelection && editorOpen"
+            v-show="editorTab === 'map'"
             ref="selectionWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="selectionDodging ? 'panel-dodging' : ''"
@@ -1505,10 +1533,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         </div>
     </Teleport>
 
-    <!-- Edit Selected Element floating window -->
+    <!-- Edit Selected Element floating window (map tab only) -->
     <Teleport to="body">
         <div
             v-if="editSel && editElement && editorOpen"
+            v-show="editorTab === 'map'"
             ref="editWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="editDodging ? 'panel-dodging' : ''"
@@ -1825,6 +1854,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
     <!-- Text input tooltip (appears at click point) -->
     <Teleport to="body">
         <div v-if="textPopup && editorOpen"
+            v-show="editorTab === 'map'"
             class="fixed z-[280] bg-[#1e1e22] border border-white/10 rounded-lg shadow-2xl flex items-center gap-1 p-1"
             :style="{ left: textPopup.screenX + 'px', top: (textPopup.screenY - 40) + 'px' }"
             @mousedown.stop @click.stop>

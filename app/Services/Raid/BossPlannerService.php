@@ -166,6 +166,11 @@ class BossPlannerService
         // resources/boss-timelines/{season}/{difficulty}/{slug}.yml.
         $timelineData = $this->timelineService->loadSeason($season);
 
+        // Reverse lookup: boss name → WCL encounterID. Needed by the MRT-note
+        // exporter so the generated string can include the `EncounterID:<n>`
+        // anchor that NSRT / MethodRaidTools read.
+        $encounterIdByName = array_flip(config('wow_season.wcl_encounter_ids', []));
+
         $encounters = [];
         foreach ($raidInstances as $instanceName => $bosses) {
             foreach ($bosses as $bossName) {
@@ -193,6 +198,7 @@ class BossPlannerService
                 $encounters[] = [
                     'slug' => $slug,
                     'name' => $bossName,
+                    'encounter_id' => $encounterIdByName[$bossName] ?? null,
                     'instance' => $instanceName,
                     'maps' => $encounterMaps[$slug] ?? [],
                     'portrait' => $portraits[0] ?? null,

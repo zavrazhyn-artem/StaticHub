@@ -83,6 +83,7 @@ const notesLabel = computed(() => {
     const locale = (window.appLocale || 'en').toLowerCase();
     return a['notes_' + locale] || a.notes || '';
 });
+
 </script>
 
 <template>

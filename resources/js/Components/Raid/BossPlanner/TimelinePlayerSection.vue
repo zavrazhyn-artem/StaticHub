@@ -20,6 +20,8 @@ const props = defineProps({
     selectedAssignmentId: { type: String, default: null },
     playerCooldowns: { type: Object, default: () => ({}) },
     focusedCast: { type: Object, default: null },
+    myCharacterIds: { type: Array, default: () => [] },
+    showingMe: { type: Boolean, default: false },
 });
 const emit = defineEmits([
     'pan-start', 'wheel', 'click-empty', 'select-player',
@@ -50,16 +52,22 @@ const classColor = (cls) => ({
 })[cls] || '#FFFFFF';
 
 // ─── Row layout (cumulative Y per player, expand selected) ───
+// "Show Me" auto-expands every row that belongs to the logged-in user so
+// their CDs are visible without an extra click, and feeds the pulse flag
+// below to highlight them.
+const myIdSet = computed(() => new Set(props.myCharacterIds));
+
 const rowLayout = computed(() => {
     const layout = [];
     let y = TOP_PADDING;
     for (const char of props.roster) {
-        const expanded = props.selectedPlayerId === char.id;
+        const isMe = props.showingMe && myIdSet.value.has(char.id);
+        const expanded = props.selectedPlayerId === char.id || isMe;
         const cds = expanded ? (props.playerCooldowns[char.spec_slug] || []) : [];
         const height = expanded
             ? HEADER_ROW + Math.max(1, cds.length) * SUB_ROW
             : COLLAPSED_ROW;
-        layout.push({ char, y, height, expanded, cds });
+        layout.push({ char, y, height, expanded, cds, isMe });
         y += height;
     }
     return layout;
@@ -136,12 +144,10 @@ const onMouseDown = (e) => {
     e.preventDefault();
     emit('pan-start', e.clientX);
 };
-const onWheel = (e) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const localX = e.clientX - rect.left - props.leftWidth;
-    emit('wheel', { localX, deltaY: e.deltaY });
-};
+// No wheel handler on the player section — the parent `overflow-y-auto`
+// scrolls vertically natively. Attaching any wheel handler (even a no-op)
+// makes Chrome emit "non-passive event listener" violations on every wheel
+// event, which floods the console and visibly stutters dragging.
 const onClick = (e) => {
     if (!props.phaseEditMode) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -226,7 +232,7 @@ const renderTimeFor = (a) => isDraggingAssignment(a.id) ? previewTime.value : a.
 <template>
     <svg :width="viewportWidth + leftWidth + rightPadding" :height="sectionHeight"
         class="select-none block bg-[#0a0a0c]"
-        @mousedown="onMouseDown" @wheel.prevent="onWheel" @click="onClick"
+        @mousedown="onMouseDown" @click="onClick"
         @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
         :class="phaseEditMode ? 'cursor-crosshair' : 'cursor-grab'">
         <defs>
@@ -259,6 +265,17 @@ const renderTimeFor = (a) => isDraggingAssignment(a.id) ? previewTime.value : a.
 
                 <!-- Per-row backgrounds -->
                 <g v-for="(row, i) in rowLayout" :key="'rowbg' + row.char.id">
+                    <!-- "Show Me" pulse: highlights the logged-in user's rows.
+                         Uses a gently animated rect overlay so the viewer can
+                         spot their own block at a glance without blocking any
+                         cast markers beneath. -->
+                    <rect v-if="row.isMe"
+                        :x="0" :y="row.y"
+                        :width="contentWidth" :height="row.height - 2"
+                        fill="#FCD34D14" stroke="#FCD34D88" stroke-width="1"
+                        pointer-events="none">
+                        <animate attributeName="fill-opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+                    </rect>
                     <!-- Selected expansion: stronger background -->
                     <rect v-if="row.expanded"
                         :x="0" :y="row.y"

@@ -1017,5 +1017,19 @@
     "Snap to": "Прив'язати до",
     "Hide hidden": "Сховати приховане",
     "Show hidden": "Показати приховане",
-    "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom": "Клік по касту боса — фокус · Тягни межу фази — змінити розмір · Двоклік по назві межі — перейменувати · Правий клік по назві абілки — сховати · Тягни пусте місце — панорама · Скрол — зум"
+    "Click boss cast to focus · Drag phase boundary to resize segment · Double-click boundary label to rename · Right-click ability label to hide · Drag empty to pan · Scroll to zoom": "Клік по касту боса — фокус · Тягни межу фази — змінити розмір · Двоклік по назві межі — перейменувати · Правий клік по назві абілки — сховати · Тягни пусте місце — панорама · Скрол — зум",
+    "Copy MRT": "Copy MRT",
+    "Copy MethodRaidTools note to clipboard (paste via /rt note in-game)": "Скопіювати MRT-ноту в буфер обміну (вставити через /rt note в грі)",
+    "Copied": "Скопійовано",
+    "Error": "Помилка",
+    "Priority filter": "Фільтр пріоритету",
+    "Focus on selected player (show only their abilities)": "Сфокусуватись на обраному гравці (показати лише його абілки)",
+    "Focused": "В фокусі",
+    "Focus": "Фокус",
+    "Compact row height for bosses with many abilities": "Компактна висота рядків для босів з багатьма абілками",
+    "Compact": "Компактно",
+    "Normal": "Звичайно",
+    "Show Me (pulse my character rows)": "Показати мене (пульсація моїх рядків)",
+    "Show Me": "Показати мене",
+    "Drag to the map to place this icon": "Перетягни на мапу щоб розмістити іконку"
 }
