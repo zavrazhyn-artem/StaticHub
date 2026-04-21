@@ -24,6 +24,20 @@ class StaticGroupPermissionPolicy
 {
     use HandlesAuthorization, ResolvesStaticRole;
 
+    /**
+     * Block every ability when ghost mode is active. Ghost is strictly
+     * read-only — no policy-gated write (manage, kick, treasury, schedule,
+     * etc.) should succeed even if the UI is unchanged.
+     */
+    public function before(User $user, string $ability): ?bool
+    {
+        if (app(\App\Services\Ghost\GhostModeService::class)->isActive()) {
+            return false;
+        }
+
+        return null;
+    }
+
     // -------------------------------------------------------------------------
     // Settings
     // -------------------------------------------------------------------------

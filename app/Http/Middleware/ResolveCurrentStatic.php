@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\StaticGroup;
 use App\Models\User;
+use App\Services\Ghost\GhostModeService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +15,15 @@ class ResolveCurrentStatic
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            $static = User::query()->firstStaticForUser(Auth::id());
-            $route  = $request->route();
+            $ghost = app(GhostModeService::class);
+
+            if ($ghost->isActive()) {
+                $static = StaticGroup::withoutGlobalScopes()->find($ghost->currentStaticId());
+            } else {
+                $static = User::query()->firstStaticForUser(Auth::id());
+            }
+
+            $route = $request->route();
 
             if ($static && $route) {
                 // Laravel's controller dispatcher resolves typed args by position after

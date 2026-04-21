@@ -162,11 +162,17 @@ class StaticGroup extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('member', function (Builder $builder) {
-            if (auth()->check()) {
-                $builder->whereHas('members', function ($query) {
-                    $query->where('user_id', auth()->id());
-                });
+            if (! auth()->check()) {
+                return;
             }
+
+            if (app(\App\Services\Ghost\GhostModeService::class)->isActive()) {
+                return;
+            }
+
+            $builder->whereHas('members', function ($query) {
+                $query->where('user_id', auth()->id());
+            });
         });
     }
     public function transactions(): HasMany

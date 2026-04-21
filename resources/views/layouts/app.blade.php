@@ -27,7 +27,14 @@
 </head>
 <body class="bg-background text-on-background min-h-screen arcane-bg subpixel-antialiased" x-data="{ sidebarOpen: false }">
 @php
-    $static = Auth::user() ? Auth::user()->statics->first() : null;
+    $ghostService = app(\App\Services\Ghost\GhostModeService::class);
+    $ghostActive = $ghostService->isActive();
+
+    if ($ghostActive) {
+        $static = \App\Models\StaticGroup::withoutGlobalScopes()->find($ghostService->currentStaticId());
+    } else {
+        $static = Auth::user() ? Auth::user()->statics->first() : null;
+    }
     $isOnboarding = $onboarding ?? false;
 @endphp
     <!-- TopNavBar -->
@@ -131,6 +138,24 @@
     @endif
 
     <div class="flex items-center gap-4">
+        @if($ghostActive)
+            <!-- Ghost Mode Badge + Exit -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500/10 border border-fuchsia-500/40 rounded-md">
+                <span class="material-symbols-outlined text-fuchsia-400 text-sm">visibility</span>
+                <span class="text-3xs font-semibold uppercase tracking-wider text-fuchsia-300">
+                    {{ __('Ghost') }}:&nbsp;{{ $static?->name }}
+                </span>
+            </div>
+            <form action="{{ route('admin.ghost.exit') }}" method="POST">
+                @csrf
+                <button type="submit"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500/10 border border-fuchsia-500/50 text-fuchsia-300 rounded-md hover:bg-fuchsia-500 hover:text-white transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    <span class="text-3xs font-semibold uppercase tracking-wider">{{ __('Back to Admin') }}</span>
+                </button>
+            </form>
+        @endif
+
         <!-- Language Selector -->
         @php
             $localeMap = [

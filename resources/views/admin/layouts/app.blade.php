@@ -160,6 +160,13 @@
                     <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
                     Invite Codes
                 </a>
+                @if(app(\App\Services\Ghost\GhostModeService::class)->canActivate())
+                    <a href="{{ route('admin.statics.index') }}"
+                       class="admin-nav-link {{ request()->routeIs('admin.statics.*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">groups</span>
+                        Statics
+                    </a>
+                @endif
 
                 <div style="margin: 1rem 0; border-top: 1px solid rgba(255,255,255,0.06);"></div>
                 <span style="padding: 0 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555;">External Tools</span>

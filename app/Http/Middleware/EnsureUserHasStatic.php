@@ -16,6 +16,10 @@ class EnsureUserHasStatic
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check()) {
+            if (app(\App\Services\Ghost\GhostModeService::class)->isActive()) {
+                return $next($request);
+            }
+
             $userId = auth()->id();
             $userQuery = \App\Models\User::query();
 

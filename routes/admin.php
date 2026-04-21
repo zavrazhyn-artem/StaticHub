@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\AdminAiLogController;
 use App\Http\Controllers\Admin\AdminApiLogController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminGhostController;
 use App\Http\Controllers\Admin\AdminInviteCodeController;
+use App\Http\Controllers\Admin\AdminStaticsController;
 use Illuminate\Support\Facades\Route;
 
 // Public admin routes
@@ -22,4 +24,9 @@ Route::middleware('admin_auth')->group(function () {
     Route::get('/invite-codes', [AdminInviteCodeController::class, 'index'])->name('admin.invite-codes');
     Route::post('/invite-codes/generate', [AdminInviteCodeController::class, 'generate'])->name('admin.invite-codes.generate');
     Route::delete('/invite-codes/{inviteCode}', [AdminInviteCodeController::class, 'destroy'])->name('admin.invite-codes.destroy');
+
+    Route::get('/statics', [AdminStaticsController::class, 'index'])->name('admin.statics.index');
+
+    Route::post('/ghost/enter/{static}', [AdminGhostController::class, 'enter'])->name('admin.ghost.enter');
+    Route::post('/ghost/exit', [AdminGhostController::class, 'exit'])->name('admin.ghost.exit');
 });
