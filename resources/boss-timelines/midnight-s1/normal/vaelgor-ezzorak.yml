@@ -1,0 +1,686 @@
+# Boss timeline — Vaelgor & Ezzorak, Normal (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline (Mythic-only mechanics removed).
+# Tactics enrichment: resources/tactics/vaelgor-and-ezzorak.md.
+
+encounter:
+  id: 3178
+  slug: vaelgor-ezzorak
+  name: 'Vaelgor & Ezzorak'
+  season: midnight-s1
+  difficulty: normal
+  fight_duration_max: 540
+seed:
+  source: viserio
+  note: "Derived from Viserio's Mythic timeline with Mythic-only mechanics stripped."
+phases:
+  -
+    id: p1
+    name: 'Phase 1'
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 128
+  -
+    id: i1
+    name: 'Intermission 1'
+    is_intermission: true
+    trigger:
+      type: time_from_pull
+      value: 128
+      min_time: 128
+      max_time: 128
+    seed_duration: 10
+  -
+    id: p2
+    name: 'Phase 2'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 138
+      min_time: 138
+      max_time: 138
+    seed_duration: 402
+abilities:
+  -
+    id: dread_breath
+    spell_id: 1244221
+    name: 'Dread Breath'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Frontal fear cone from Ezzorak; face the boss away from the raid and use fear immunities or trinkets.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 7
+      -
+        phase: p1
+        at: 11
+      -
+        phase: p1
+        at: 72
+      -
+        phase: p1
+        at: 76
+      -
+        phase: i1
+        at: 8
+      -
+        phase: p2
+        at: 2
+      -
+        phase: p2
+        at: 10
+      -
+        phase: p2
+        at: 14
+      -
+        phase: p2
+        at: 55
+      -
+        phase: p2
+        at: 59
+      -
+        phase: p2
+        at: 112
+      -
+        phase: p2
+        at: 116
+      -
+        phase: p2
+        at: 181
+      -
+        phase: p2
+        at: 185
+      -
+        phase: p2
+        at: 225
+      -
+        phase: p2
+        at: 229
+      -
+        phase: p2
+        at: 299
+      -
+        phase: p2
+        at: 303
+      -
+        phase: p2
+        at: 345
+      -
+        phase: p2
+        at: 349
+    notes_uk: 'Фронтальний конус страху від Ezzorak; тримайте боса від рейду та використовуйте імунітети до страху або трінкети.'
+  -
+    id: gloom
+    spell_id: 1245391
+    name: Gloom
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Stacking soak mechanic that applies Gloomtouched vulnerability; rotate soakers to avoid lethal stacks.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 14
+      -
+        phase: p1
+        at: 27
+      -
+        phase: p1
+        at: 64
+      -
+        phase: p1
+        at: 73
+      -
+        phase: p1
+        at: 114
+      -
+        phase: i1
+        at: 0
+      -
+        phase: p2
+        at: 75
+      -
+        phase: p2
+        at: 84
+      -
+        phase: p2
+        at: 124
+      -
+        phase: p2
+        at: 135
+      -
+        phase: p2
+        at: 177
+      -
+        phase: p2
+        at: 191
+      -
+        phase: p2
+        at: 222
+      -
+        phase: p2
+        at: 233
+      -
+        phase: p2
+        at: 272
+      -
+        phase: p2
+        at: 279
+      -
+        phase: p2
+        at: 341
+      -
+        phase: p2
+        at: 352
+    notes_uk: 'Стакаюча механіка поглинання, що накладає вразливість Gloomtouched; ротуйте поглиначів, щоб уникнути смертельних стаків.'
+  -
+    id: impale
+    spell_id: 1265152
+    name: Impale
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 18
+      -
+        phase: p1
+        at: 43
+      -
+        phase: p1
+        at: 68
+      -
+        phase: p1
+        at: 89
+      -
+        phase: p1
+        at: 118
+      -
+        phase: p2
+        at: 49
+      -
+        phase: p2
+        at: 79
+      -
+        phase: p2
+        at: 99
+      -
+        phase: p2
+        at: 128
+      -
+        phase: p2
+        at: 153
+      -
+        phase: p2
+        at: 226
+      -
+        phase: p2
+        at: 247
+      -
+        phase: p2
+        at: 276
+      -
+        phase: p2
+        at: 297
+  -
+    id: midnight_flames
+    spell_id: 1249748
+    name: 'Midnight Flames'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Triggers the intermission at 100 energy; raid must burn the Unbound Shadow add while surviving Midnight Flames raid damage.'
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 5
+      -
+        phase: p2
+        at: 166
+      -
+        phase: p2
+        at: 331
+    notes_uk: 'Запускає інтермісію на 100 енергії; рейд повинен бурстити адда Unbound Shadow, виживаючи під шкодою Midnight Flames по рейду.'
+  -
+    id: midnight_manifestation
+    spell_id: 1258744
+    name: 'Midnight Manifestation'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Persistent DoT and intermission add that must be handled by the raid; cleave down or kite per assignment.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 7
+      -
+        phase: p2
+        at: 49
+      -
+        phase: p2
+        at: 205
+    notes_uk: 'Постійний DoT та адд інтермісії, з якими повинен впоратися рейд; клив або кайт за призначенням.'
+  -
+    id: nullbeam
+    spell_id: 1262623
+    name: Nullbeam
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Targeted beam that must be soaked by an assigned tank or immune player to prevent raid-wide damage.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 30
+      -
+        phase: p1
+        at: 80
+      -
+        phase: p2
+        at: 2
+      -
+        phase: p2
+        at: 40
+      -
+        phase: p2
+        at: 90
+      -
+        phase: p2
+        at: 140
+      -
+        phase: p2
+        at: 238
+      -
+        phase: p2
+        at: 288
+      -
+        phase: p2
+        at: 331
+    notes_uk: 'Цільовий промінь, який повинен поглинути призначений танк або імунний гравець, щоб запобігти шкоді по рейду.'
+  -
+    id: nullzone
+    spell_id: 1244672
+    name: Nullzone
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Ground zones that must be avoided or used to break tethers depending on assignment; coordinate with Nullbeam soakers.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 90
+      -
+        phase: p2
+        at: 11
+      -
+        phase: p2
+        at: 50
+      -
+        phase: p2
+        at: 100
+      -
+        phase: p2
+        at: 150
+      -
+        phase: p2
+        at: 247
+      -
+        phase: p2
+        at: 297
+    notes_uk: "Наземні зони, яких потрібно уникати або використовувати для розриву зв'язків залежно від призначення; координуйте з поглиначами Nullbeam."
+  -
+    id: rakfang
+    spell_id: 1245645
+    name: Rakfang
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Tank swap debuff applied by Ezzorak that leaves a lingering vulnerability; swap tanks to let it fall off.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 16
+      -
+        phase: p1
+        at: 41
+      -
+        phase: p1
+        at: 66
+      -
+        phase: p1
+        at: 87
+      -
+        phase: p1
+        at: 116
+      -
+        phase: p2
+        at: 47
+      -
+        phase: p2
+        at: 77
+      -
+        phase: p2
+        at: 97
+      -
+        phase: p2
+        at: 126
+      -
+        phase: p2
+        at: 151
+      -
+        phase: p2
+        at: 224
+      -
+        phase: p2
+        at: 245
+      -
+        phase: p2
+        at: 274
+      -
+        phase: p2
+        at: 295
+    notes_uk: 'Дебаф для танкового свіпа, накладений Ezzorak, який залишає тривалу вразливість; міняйте танків, щоб він спав.'
+  -
+    id: shadowmark
+    spell_id: 1270497
+    name: Shadowmark
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 4
+      -
+        phase: p2
+        at: 1
+      -
+        phase: p2
+        at: 9
+      -
+        phase: p2
+        at: 16
+      -
+        phase: p2
+        at: 23
+      -
+        phase: p2
+        at: 31
+      -
+        phase: p2
+        at: 165
+      -
+        phase: p2
+        at: 172
+      -
+        phase: p2
+        at: 180
+      -
+        phase: p2
+        at: 188
+      -
+        phase: p2
+        at: 195
+      -
+        phase: p2
+        at: 203
+      -
+        phase: p2
+        at: 330
+      -
+        phase: p2
+        at: 337
+      -
+        phase: p2
+        at: 345
+      -
+        phase: p2
+        at: 352
+      -
+        phase: p2
+        at: 359
+      -
+        phase: p2
+        at: 367
+  -
+    id: tail_lash
+    spell_id: 1264467
+    name: 'Tail Lash'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Rear cone melee swipe from Vaelgor; melee must stay out of the tail arc.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 14
+      -
+        phase: p1
+        at: 41
+      -
+        phase: p1
+        at: 58
+      -
+        phase: p1
+        at: 91
+      -
+        phase: p1
+        at: 108
+      -
+        phase: p2
+        at: 51
+      -
+        phase: p2
+        at: 68
+      -
+        phase: p2
+        at: 101
+      -
+        phase: p2
+        at: 119
+      -
+        phase: p2
+        at: 151
+      -
+        phase: p2
+        at: 216
+      -
+        phase: p2
+        at: 249
+      -
+        phase: p2
+        at: 266
+      -
+        phase: p2
+        at: 305
+      -
+        phase: p2
+        at: 316
+    notes_uk: 'Мілі-свайп заднім конусом від Vaelgor; мілі повинні триматися поза дугою хвоста.'
+  -
+    id: vaelwing
+    spell_id: 1265131
+    name: Vaelwing
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - tank_swap
+    notes: 'Stacking tank buff on Vaelgor that increases melee damage dealt; requires tank swap before stacks become lethal.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 12
+      -
+        phase: p1
+        at: 39
+      -
+        phase: p1
+        at: 56
+      -
+        phase: p1
+        at: 89
+      -
+        phase: p1
+        at: 106
+      -
+        phase: p2
+        at: 49
+      -
+        phase: p2
+        at: 66
+      -
+        phase: p2
+        at: 99
+      -
+        phase: p2
+        at: 117
+      -
+        phase: p2
+        at: 149
+      -
+        phase: p2
+        at: 214
+      -
+        phase: p2
+        at: 247
+      -
+        phase: p2
+        at: 264
+      -
+        phase: p2
+        at: 303
+      -
+        phase: p2
+        at: 314
+    notes_uk: 'Стакаючий баф на Vaelgor, що збільшує завдану мілі-шкоду; вимагає танкового свіпа, перш ніж стаки стануть смертельними.'
+  -
+    id: void_howl
+    spell_id: 1244917
+    name: 'Void Howl'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Spawns void orbs that must be managed and soaked or kited by assigned players before they reach the boss.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 38
+      -
+        phase: p1
+        at: 78
+      -
+        phase: p2
+        at: 33
+      -
+        phase: p2
+        at: 68
+      -
+        phase: p2
+        at: 108
+      -
+        phase: p2
+        at: 148
+      -
+        phase: p2
+        at: 170
+      -
+        phase: p2
+        at: 236
+      -
+        phase: p2
+        at: 281
+      -
+        phase: p2
+        at: 316
+    notes_uk: 'Створює войд-сфери, якими повинні керувати та поглинати або кайтити призначені гравці, перш ніж вони досягнуть боса.'
+conditional_abilities:
+  -
+    id: twilight_bond
+    spell_id: ~
+    name: 'Twilight Bond'
+    icon: ~
+    school: shadow
+    trigger: tether
+    priority: medium
+    recommended_response: {  }
+    notes: 'Invisible health bond between Vaelgor and Ezzorak; if their HP differs by more than 10%, the lower boss heals and the raid takes escalating damage. Balance DPS between both bosses.'
+    notes_uk: "Невидимий зв'язок здоров'я між Vaelgor та Ezzorak; якщо їх HP відрізняється більш ніж на 10%, бос з меншим HP лікується, і рейд отримує зростаючу шкоду. Збалансуйте DPS між обома босами."
+  -
+    id: voidbolt
+    spell_id: 1245175
+    name: Voidbolt
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Cast by Ezzorak and must be interrupted on rotation; missed interrupts cause heavy raid damage.'
+    notes_uk: 'Кастується Ezzorak і повинен бути перерваний по ротації; пропущені переривання завдають великої шкоди рейду.'
+  -
+    id: radiant_barrier
+    spell_id: 1249595
+    name: 'Radiant Barrier'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: medium
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Protective barrier cast during intermission that must be broken with coordinated burst or shield interrupts to allow damage to the add.'
+    notes_uk: "Захисний бар'єр, кастований під час інтермісії, який повинен бути розбитий скоординованим бурстом або перериваннями щита, щоб дозволити завдати шкоди адду."
+  -
+    id: cosmosis
+    spell_id: 1263623
+    name: Cosmosis
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Mythic-only cross-realm raid damage that requires precise positioning and cooldown rotations to survive.'
+    notes_uk: 'Міфічна міжпросторова шкода по рейду, що вимагає точного позиціонування та ротацій кулдаунів для виживання.'

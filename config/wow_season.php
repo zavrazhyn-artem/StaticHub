@@ -13,6 +13,14 @@ return [
     'first_period'  => 1052,
 
     /*
+    | Cooldown timeline pipeline — auto-seeded boss ability timings.
+    | current_season is the identifier stored in `boss_ability_timings.season`.
+    | wcl_zone_id is the WCL zone covering all current-season raids.
+    */
+    'current_season' => 'midnight-s1',
+    'wcl_zone_id'    => 46,
+
+    /*
     | Season start date (UTC) — the first weekly reset of the season.
     | Used to generate the full list of weeks for the roster week selector.
     */
@@ -240,9 +248,8 @@ return [
         3180 => 'Lightblinded Vanguard',
         3181 => 'Crown of the Cosmos',
         3306 => 'Chimaerus the Undreamt God',
-        // TODO: populate once a report with these bosses is available
-        // ???? => "Belo'ren, Child of Al'ar",
-        // ???? => 'Midnight Falls',
+        3182 => "Belo'ren, Child of Al'ar",
+        3183 => 'Midnight Falls',
     ],
 
     'raid_boss_achievement_ids' => [

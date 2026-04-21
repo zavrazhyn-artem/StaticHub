@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Raid;
 
 use App\Http\Controllers\Controller;
+use App\Models\CharacterCooldownOverride;
 use App\Models\RaidPlan;
 use App\Models\StaticGroup;
 use App\Services\Raid\BossPlannerService;
@@ -51,6 +52,7 @@ class BossPlannerController extends Controller
             'encounter_slug' => 'required|string',
             'title' => 'nullable|string|max:255',
             'steps' => 'required|array',
+            'timeline' => 'nullable|array',
             'difficulty' => 'string|in:raid_finder,normal,heroic,mythic',
             'plan_id' => 'nullable|integer|exists:raid_plans,id',
         ]);
@@ -167,25 +169,69 @@ class BossPlannerController extends Controller
             ->get();
 
         $characters = [];
+        $charsByMember = [];
         foreach ($members as $user) {
             $mainChar = $user->characters->first(
                 fn ($c) => $c->statics->first()?->pivot->role === 'main'
             ) ?? $user->characters->first();
-
             if ($mainChar) {
-                $mainSpec = $mainChar->characterStaticSpecs->first();
-                $role = $mainSpec?->specialization?->role ?? 'rdps';
-
-                $characters[] = [
-                    'id' => $mainChar->id,
-                    'name' => $mainChar->name,
-                    'playable_class' => $mainChar->playable_class,
-                    'avatar_url' => $mainChar->avatar_url,
-                    'assigned_role' => $role,
-                ];
+                $charsByMember[$mainChar->id] = $mainChar;
             }
         }
 
+        // Fetch all disabled CD overrides for these characters in one query.
+        $disabledByChar = CharacterCooldownOverride::query()
+            ->disabledForCharacters(array_keys($charsByMember))
+            ->groupBy('character_id')
+            ->map(fn ($rows) => $rows->pluck('spell_id')->map(fn ($id) => (int) $id)->values()->toArray());
+
+        foreach ($charsByMember as $mainChar) {
+            $spec = $mainChar->getMainSpecInStatic($static->id);
+            $specSlug = null;
+            if ($spec) {
+                $specSlug = strtolower(str_replace(' ', '', $spec->class_name))
+                    . '.' . strtolower(str_replace(' ', '', $spec->name));
+            }
+            $characters[] = [
+                'id' => $mainChar->id,
+                'name' => $mainChar->name,
+                'playable_class' => $mainChar->playable_class,
+                'avatar_url' => $mainChar->avatar_url,
+                'assigned_role' => $mainChar->getCombatRoleInStatic($static->id),
+                'spec_slug' => $specSlug,
+                'spec_name' => $spec?->name,
+                'disabled_cd_spell_ids' => $disabledByChar[$mainChar->id] ?? [],
+            ];
+        }
+
         return $characters;
+    }
+
+    /**
+     * Toggle a single cooldown for a character (officer override).
+     * enabled=false hides the CD from the player's draggable list.
+     */
+    public function toggleCharacterCooldown(\Illuminate\Http\Request $request, StaticGroup $static, \App\Models\Character $character): \Illuminate\Http\JsonResponse
+    {
+        \Illuminate\Support\Facades\Gate::authorize('canManageSchedule', $static);
+
+        $validated = $request->validate([
+            'spell_id' => 'required|integer|min:1',
+            'enabled' => 'required|boolean',
+        ]);
+
+        if ($validated['enabled']) {
+            CharacterCooldownOverride::query()
+                ->where('character_id', $character->id)
+                ->where('spell_id', $validated['spell_id'])
+                ->delete();
+        } else {
+            CharacterCooldownOverride::query()->updateOrCreate(
+                ['character_id' => $character->id, 'spell_id' => $validated['spell_id']],
+                ['enabled' => false],
+            );
+        }
+
+        return response()->json(['success' => true]);
     }
 }

@@ -6,6 +6,7 @@ import RaidMapCanvas from './RaidMapCanvas.vue';
 import MapToolbar from './MapToolbar.vue';
 import StepNavigator from './StepNavigator.vue';
 import PlayerPalette from './PlayerPalette.vue';
+import TimelineTab from './TimelineTab.vue';
 import ConfirmationModal from '@/Components/UI/ConfirmationModal.vue';
 import { useDodgePanel } from '@/composables/useDodgePanel';
 
@@ -461,6 +462,39 @@ const currentStep = computed(() => {
     return localPlan.value.steps[currentStepIndex.value] || localPlan.value.steps[0];
 });
 
+// Pick the boss ability list matching the current plan's difficulty.
+// Backend now returns nested { encounter_slug: { mythic: [...], heroic: [...], normal: [...] } }.
+const bossAbilitiesForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.boss_ability_timings || {};
+    if (Array.isArray(byDiff)) return byDiff; // backward compat (flat array)
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
+// Phase segments for the current plan's difficulty — used as defaults when a plan
+// doesn't yet have its own saved phase_segments.
+const phaseSegmentsForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.phase_segments || {};
+    if (Array.isArray(byDiff)) return byDiff;
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
+// Conditional abilities — triggered by raid state, not on the fixed timeline.
+// Shown in a strip above the boss section and available to AI log analysis.
+const conditionalAbilitiesForCurrentPlan = computed(() => {
+    const enc = editorEncounter.value;
+    if (!enc) return [];
+    const byDiff = enc.conditional_abilities || {};
+    if (Array.isArray(byDiff)) return byDiff;
+    const diff = localPlan.value?.difficulty || 'mythic';
+    return byDiff[diff] || byDiff['mythic'] || [];
+});
+
 // Current step groups (backward compat: default to empty)
 const currentGroups = computed(() => {
     return currentStep.value?.groups || {};
@@ -497,6 +531,7 @@ const createNewPlanForEncounter = (encIndex) => {
         id: null,
         title: null,
         steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
+        timeline: null,
         difficulty: 'mythic',
     };
     currentStepIndex.value = 0;
@@ -634,6 +669,7 @@ const createPlan = () => {
         id: null,
         title: null,
         steps: [{ label: 'Phase 1', groups: {}, markers: [], players: [], shapes: [], arrows: [], labels: [] }],
+        timeline: null,
         difficulty: 'mythic',
     };
     snapshotPlan();
@@ -732,6 +768,7 @@ const savePlan = async () => {
                 encounter_slug: editorEncounter.value.slug,
                 title: localPlan.value.title,
                 steps: localPlan.value.steps,
+                timeline: localPlan.value.timeline || null,
                 difficulty: localPlan.value.difficulty || 'mythic',
                 plan_id: localPlan.value.id || null,
             }),
@@ -843,6 +880,11 @@ const updateStepData = (data) => {
     if (!localPlan.value) return;
     localPlan.value.steps[currentStepIndex.value] = { ...localPlan.value.steps[currentStepIndex.value], ...data };
 };
+
+const updateTimelineData = (data) => {
+    if (!localPlan.value) return;
+    localPlan.value.timeline = data;
+};
 const handlePlayerDrop = (player) => {
     if (!currentStep.value) return;
     const existing = [...(currentStep.value.players || [])];
@@ -858,6 +900,26 @@ const handlePlayerDrop = (player) => {
         x: 480 + Math.random() * 60 - 30, y: 270 + Math.random() * 60 - 30,
     });
     updateStepData({ players: existing });
+};
+
+// Direct-drop placement from MapToolbar: bypasses the click-to-activate
+// state machine. The user dragged an icon out of a toolbar popup onto the
+// canvas — we just call the existing placement routine with the dropped
+// item acting as a one-shot selection, then restore whatever was selected
+// before (or clear if nothing was).
+const handleDropToolbarItem = ({ item, point }) => {
+    if (!currentStep.value) return;
+    const prev = currentSelection.value;
+    const prevLabel = selectionLabel.value;
+    const prevSd = selectionShowDirection.value;
+    currentSelection.value = item;
+    selectionLabel.value = item.label || '';
+    selectionShowDirection.value = defaultShowDirection(item);
+    pushUndo();
+    handleCanvasPlacement(point);
+    currentSelection.value = prev;
+    selectionLabel.value = prevLabel;
+    selectionShowDirection.value = prevSd;
 };
 
 // Handle canvas click when in place-icon mode
@@ -1275,6 +1337,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                     :groups="currentGroups"
                                     :can-undo="undoStack.length > 0"
                                     :can-redo="redoStack.length > 0"
+                                    :visible="editorTab === 'map'"
                                     @select-tool="(t) => { activeTool = t; if (t === 'select') clearSelection(); }"
                                     @select-icon="handleSelectIcon"
                                     @undo="undo"
@@ -1326,6 +1389,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                                         :highlighted-markers="highlightedMarkerIds"
                                         @update="updateStepData"
                                         @place="handleCanvasPlacement"
+                                        @drop-toolbar-item="handleDropToolbarItem"
                                         @action-start="pushUndo"
                                         @request-text="showTextPopup"
                                         @selection-change="handleSelectionChange"
@@ -1335,39 +1399,36 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                         </template>
                     </div>
 
-                    <!-- Cooldowns placeholder -->
-                    <div v-show="editorTab === 'cooldowns'" class="h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <span class="material-symbols-outlined text-6xl text-on-surface-variant/10">timer</span>
-                            <p class="text-lg font-black text-on-surface-variant/20 uppercase tracking-widest mt-4">{{ __('Cooldown Planner') }}</p>
-                            <p class="text-xs text-on-surface-variant/20 mt-2 max-w-md mx-auto">
-                                {{ __('Assign healing and defensive cooldowns to boss ability timelines. Coming soon.') }}
-                            </p>
-                            <div class="mt-6 flex items-center justify-center gap-3 opacity-20">
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-blue-400">shield</span>
-                                    <span class="text-4xs font-semibold text-on-surface-variant">{{ __('Defensives') }}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-green-400">healing</span>
-                                    <span class="text-4xs font-semibold text-on-surface-variant">{{ __('Healing CDs') }}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                    <span class="material-symbols-outlined text-sm text-red-400">local_fire_department</span>
-                                    <span class="text-4xs font-semibold text-on-surface-variant">{{ __('DPS CDs') }}</span>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Cooldowns tab -->
+                    <div v-show="editorTab === 'cooldowns'" class="h-full">
+                        <TimelineTab
+                            :timeline="localPlan.timeline || {}"
+                            :encounter="editorEncounter"
+                            :difficulty="localPlan.difficulty || 'mythic'"
+                            :active-tab="editorTab"
+                            :my-character-ids="myCharacterIds"
+                            :showing-me="showingMe"
+                            :boss-abilities="bossAbilitiesForCurrentPlan"
+                            :default-phase-segments="phaseSegmentsForCurrentPlan"
+                            :conditional-abilities="conditionalAbilitiesForCurrentPlan"
+                            :roster="roster"
+                            :player-cooldowns="plannerData.player_cooldowns || {}"
+                            :can-manage="canManage"
+                            :cooldown-toggle-base="routes.cooldownToggleBase || ''"
+                            :csrf-token="csrfToken"
+                            @update="updateTimelineData"
+                        />
                     </div>
                 </div>
             </div>
         </Transition>
     </Teleport>
 
-    <!-- Current Selection floating window -->
+    <!-- Current Selection floating window (map tab only — state persists) -->
     <Teleport to="body">
         <div
             v-if="currentSelection && editorOpen"
+            v-show="editorTab === 'map'"
             ref="selectionWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="selectionDodging ? 'panel-dodging' : ''"
@@ -1472,10 +1533,11 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
         </div>
     </Teleport>
 
-    <!-- Edit Selected Element floating window -->
+    <!-- Edit Selected Element floating window (map tab only) -->
     <Teleport to="body">
         <div
             v-if="editSel && editElement && editorOpen"
+            v-show="editorTab === 'map'"
             ref="editWindowRef"
             class="fixed z-[260] w-[220px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
             :class="editDodging ? 'panel-dodging' : ''"
@@ -1792,6 +1854,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
     <!-- Text input tooltip (appears at click point) -->
     <Teleport to="body">
         <div v-if="textPopup && editorOpen"
+            v-show="editorTab === 'map'"
             class="fixed z-[280] bg-[#1e1e22] border border-white/10 rounded-lg shadow-2xl flex items-center gap-1 p-1"
             :style="{ left: textPopup.screenX + 'px', top: (textPopup.screenY - 40) + 'px' }"
             @mousedown.stop @click.stop>

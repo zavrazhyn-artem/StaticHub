@@ -76,6 +76,372 @@ class WclService
         return $this->accessToken = $token;
     }
 
+    /**
+     * Fetch the world's top speed kill for an encounter at a given difficulty.
+     * Returns null if no rankings exist (e.g. brand-new boss with no kills).
+     */
+    public function findTopKillFightForEncounter(int $encounterId, int $difficulty): ?array
+    {
+        $query = <<<'GQL'
+        query ($encounterId: Int!, $difficulty: Int!) {
+          worldData {
+            encounter(id: $encounterId) {
+              id
+              name
+              fightRankings(metric: speed, difficulty: $difficulty, page: 1)
+            }
+          }
+        }
+GQL;
+
+        $data = $this->executeGraphql($query, [
+            'encounterId' => $encounterId,
+            'difficulty' => $difficulty,
+        ]);
+
+        $encounter = $data['worldData']['encounter'] ?? null;
+        $rankings = $encounter['fightRankings']['rankings'] ?? [];
+        if (empty($rankings)) return null;
+
+        $first = $rankings[0];
+        $report = $first['report'] ?? null;
+        if (!$report || empty($report['code']) || !isset($report['fightID'])) return null;
+
+        return [
+            'encounter_id' => $encounterId,
+            'encounter_name' => $encounter['name'] ?? null,
+            'difficulty' => $difficulty,
+            'report_code' => (string) $report['code'],
+            'fight_id' => (int) $report['fightID'],
+            'kill_duration_ms' => (int) ($first['duration'] ?? 0),
+            'kill_started_at_ms' => (int) ($first['startTime'] ?? 0),
+            'guild_name' => $first['guild']['name'] ?? null,
+            'server_name' => $first['server']['name'] ?? null,
+            'server_region' => $first['server']['region'] ?? null,
+        ];
+    }
+
+    /**
+     * Fetch all encounters in a WCL zone.
+     */
+    public function fetchZoneEncounters(int $zoneId): array
+    {
+        $query = <<<'GQL'
+        query ($zoneId: Int!) {
+          worldData {
+            zone(id: $zoneId) {
+              id
+              name
+              encounters { id name }
+            }
+          }
+        }
+GQL;
+        $data = $this->executeGraphql($query, ['zoneId' => $zoneId]);
+        return $data['worldData']['zone']['encounters'] ?? [];
+    }
+
+    /**
+     * Fetch boss cast timeline for a single fight. Returns abilities grouped
+     * by spell_id with cast timestamps (seconds relative to fight start),
+     * plus phase transitions. Used to seed the boss ability timings table.
+     */
+    public function fetchBossCastTimeline(string $reportId, int $fightId): array
+    {
+        // Step 1: fights + master data + phase definitions
+        $meta = $this->executeGraphql(
+            WclQueryBuilder::buildReportFightsAndActorsQuery(),
+            ['reportId' => $reportId]
+        )['reportData']['report'] ?? [];
+
+        $fight = null;
+        foreach ($meta['fights'] ?? [] as $f) {
+            if ((int) $f['id'] === $fightId) {
+                $fight = $f;
+                break;
+            }
+        }
+        if (!$fight) {
+            throw new \Exception("Fight #{$fightId} not found in report {$reportId}");
+        }
+
+        // Build phase segment index from fight.phaseTransitions. Each transition
+        // becomes a segment; segment N ends when segment N+1 starts (or at fight end).
+        // Phase definitions (name, isIntermission) come from report.phases.
+        $phaseDefs = [];
+        foreach ($meta['phases'] ?? [] as $encDef) {
+            if ((int) ($encDef['encounterID'] ?? 0) !== (int) ($fight['encounterID'] ?? 0)) continue;
+            foreach ($encDef['phases'] ?? [] as $p) {
+                $phaseDefs[(int) $p['id']] = [
+                    'name' => $p['name'] ?? ('Phase ' . $p['id']),
+                    'is_intermission' => (bool) ($p['isIntermission'] ?? false),
+                ];
+            }
+        }
+
+        $abilityIndex = [];
+        foreach ($meta['masterData']['abilities'] ?? [] as $ab) {
+            $abilityIndex[(int) $ab['gameID']] = $ab;
+        }
+
+        $bossActorIds = [];
+        foreach ($meta['masterData']['actors'] ?? [] as $actor) {
+            if (($actor['type'] ?? '') === 'NPC' && ($actor['subType'] ?? '') === 'Boss') {
+                $bossActorIds[(int) $actor['id']] = true;
+            }
+        }
+
+        $startTime = (float) $fight['startTime'];
+        $endTime = (float) $fight['endTime'];
+
+        // Step 2: paginate cast events across the fight window
+        $allEvents = [];
+        $cursor = $startTime;
+        $safety = 20;
+        while ($cursor !== null && $cursor < $endTime && $safety-- > 0) {
+            $page = $this->executeGraphql(
+                WclQueryBuilder::buildBossCastEventsQuery(),
+                [
+                    'reportId' => $reportId,
+                    'fightId' => $fightId,
+                    'startTime' => $cursor,
+                    'endTime' => $endTime,
+                ]
+            )['reportData']['report']['events'] ?? [];
+
+            foreach ($page['data'] ?? [] as $event) {
+                $allEvents[] = $event;
+            }
+
+            $next = $page['nextPageTimestamp'] ?? null;
+            if ($next === null || (float) $next <= $cursor) {
+                break;
+            }
+            $cursor = (float) $next;
+        }
+
+        // Step 3: group boss casts by ability
+        $blacklistedSpells = [
+            145629, // Anti-Magic Zone (DK player ability — leaks into boss cast feed via mind-control / scripted reuse)
+        ];
+        $grouped = [];
+        foreach ($allEvents as $event) {
+            if (($event['type'] ?? '') !== 'cast') continue;
+
+            $sourceId = (int) ($event['sourceID'] ?? 0);
+            $abilityGameId = (int) ($event['abilityGameID'] ?? 0);
+            if ($abilityGameId === 0 || $abilityGameId === 1) continue; // skip melee/auto
+            if (in_array($abilityGameId, $blacklistedSpells, true)) continue;
+
+            if (!empty($bossActorIds) && !isset($bossActorIds[$sourceId])) continue;
+
+            $ability = $abilityIndex[$abilityGameId] ?? null;
+            if (!$ability) continue;
+
+            if (!isset($grouped[$abilityGameId])) {
+                $grouped[$abilityGameId] = [
+                    'spell_id' => $abilityGameId,
+                    'name' => $ability['name'] ?? "Spell {$abilityGameId}",
+                    'icon' => pathinfo($ability['icon'] ?? '', PATHINFO_FILENAME),
+                    'type' => (int) ($ability['type'] ?? 0),
+                    'casts' => [],
+                ];
+            }
+
+            $relative = (int) round((((float) $event['timestamp']) - $startTime) / 1000);
+            if ($relative < 0) continue;
+            $grouped[$abilityGameId]['casts'][] = $relative;
+        }
+
+        foreach ($grouped as &$ab) {
+            $ab['casts'] = array_values(array_unique($ab['casts']));
+            sort($ab['casts']);
+        }
+        unset($ab);
+
+        // Compute durations from buff/debuff apply/remove pairs.
+        $auraEvents = $this->fetchBossAuraEvents($reportId, $fightId, $startTime, $endTime, $bossActorIds);
+        $durationsBySpell = $this->computeAuraDurations($auraEvents);
+        foreach ($grouped as &$ab) {
+            $ms = $durationsBySpell[$ab['spell_id']] ?? null;
+            if ($ms !== null) {
+                $ab['duration_sec'] = max(0, (int) round($ms / 1000));
+            } else {
+                $ab['duration_sec'] = 0;
+            }
+        }
+        unset($ab);
+
+        // Deduplicate by ability name: encounters often script the same "ability"
+        // across multiple spell IDs (telegraph / damage / aoe variants). Keep the
+        // variant with the most casts — that's typically the main user-visible one.
+        $byName = [];
+        foreach ($grouped as $ab) {
+            $name = $ab['name'];
+            if (!isset($byName[$name]) || count($ab['casts']) > count($byName[$name]['casts'])) {
+                $byName[$name] = $ab;
+            }
+        }
+        $grouped = $byName;
+
+        // Build phase segments from transitions. If no transitions exist (phaseless boss),
+        // create a single segment spanning the whole fight.
+        $fightDuration = (int) round(($endTime - $startTime) / 1000);
+        $transitions = [];
+        foreach ($fight['phaseTransitions'] ?? [] as $pt) {
+            $transitions[] = [
+                'phase_id' => (int) $pt['id'],
+                'start_sec' => (int) round((((float) $pt['startTime']) - $startTime) / 1000),
+            ];
+        }
+        usort($transitions, fn ($a, $b) => $a['start_sec'] <=> $b['start_sec']);
+
+        $segments = [];
+        if (empty($transitions)) {
+            $segments[] = [
+                'segment_id' => 's1',
+                'phase_id' => 1,
+                'phase_name' => $phaseDefs[1]['name'] ?? 'Fight',
+                'is_intermission' => $phaseDefs[1]['is_intermission'] ?? false,
+                'seed_start' => 0,
+                'seed_duration' => $fightDuration,
+                'segment_order' => 0,
+            ];
+        } else {
+            foreach ($transitions as $i => $tx) {
+                $nextStart = $transitions[$i + 1]['start_sec'] ?? $fightDuration;
+                $segments[] = [
+                    'segment_id' => 's' . ($i + 1),
+                    'phase_id' => $tx['phase_id'],
+                    'phase_name' => $phaseDefs[$tx['phase_id']]['name'] ?? ('Phase ' . $tx['phase_id']),
+                    'is_intermission' => $phaseDefs[$tx['phase_id']]['is_intermission'] ?? false,
+                    'seed_start' => $tx['start_sec'],
+                    'seed_duration' => max(1, $nextStart - $tx['start_sec']),
+                    'segment_order' => $i,
+                ];
+            }
+        }
+
+        // Attribute each cast to the segment it falls in. Replace the flat int list
+        // with a list of {segment_id, offset} so it can auto-adjust when a segment
+        // is stretched/shrunk at plan time.
+        foreach ($grouped as &$ab) {
+            $attributed = [];
+            foreach ($ab['casts'] as $sec) {
+                $seg = null;
+                foreach ($segments as $s) {
+                    if ($sec >= $s['seed_start'] && $sec < ($s['seed_start'] + $s['seed_duration'])) {
+                        $seg = $s;
+                        break;
+                    }
+                }
+                if (!$seg) {
+                    // Cast at exact fight end — attribute to last segment
+                    $seg = end($segments);
+                }
+                $attributed[] = [
+                    'segment_id' => $seg['segment_id'],
+                    'offset' => $sec - $seg['seed_start'],
+                ];
+            }
+            $ab['casts'] = $attributed;
+        }
+        unset($ab);
+
+        return [
+            'report_id' => $reportId,
+            'fight' => [
+                'id' => $fightId,
+                'encounter_id' => (int) ($fight['encounterID'] ?? 0),
+                'name' => $fight['name'] ?? '',
+                'duration_sec' => $fightDuration,
+            ],
+            'segments' => $segments,
+            'abilities' => array_values($grouped),
+        ];
+    }
+
+    /**
+     * Fetch buff + debuff events for the fight, restricted to boss sources.
+     * Returns a flat list of { type, ts, sourceID, spellId } records.
+     */
+    private function fetchBossAuraEvents(string $reportId, int $fightId, float $startTime, float $endTime, array $bossActorIds): array
+    {
+        $queries = [
+            WclQueryBuilder::buildBossBuffEventsQuery(),
+            WclQueryBuilder::buildBossDebuffEventsQuery(),
+        ];
+
+        $events = [];
+        foreach ($queries as $query) {
+            $cursor = $startTime;
+            $safety = 20;
+            while ($cursor !== null && $cursor < $endTime && $safety-- > 0) {
+                $page = $this->executeGraphql($query, [
+                    'reportId' => $reportId,
+                    'fightId' => $fightId,
+                    'startTime' => $cursor,
+                    'endTime' => $endTime,
+                ])['reportData']['report']['events'] ?? [];
+
+                foreach ($page['data'] ?? [] as $event) {
+                    $sourceId = (int) ($event['sourceID'] ?? 0);
+                    if (!empty($bossActorIds) && !isset($bossActorIds[$sourceId])) continue;
+                    $events[] = $event;
+                }
+
+                $next = $page['nextPageTimestamp'] ?? null;
+                if ($next === null || (float) $next <= $cursor) break;
+                $cursor = (float) $next;
+            }
+        }
+        return $events;
+    }
+
+    /**
+     * Match apply ↔ remove events per (spell_id, target) and return median
+     * duration (ms) per spell_id. Median is more robust than average for
+     * abilities with occasional refresh / early dispel anomalies.
+     */
+    private function computeAuraDurations(array $events): array
+    {
+        $open = [];          // "spellId-targetId" => apply timestamp
+        $bySpell = [];       // spellId => [duration_ms, ...]
+        $applyTypes = ['applybuff', 'applydebuff'];
+        $removeTypes = ['removebuff', 'removedebuff'];
+
+        foreach ($events as $ev) {
+            $type = $ev['type'] ?? '';
+            $spellId = (int) ($ev['abilityGameID'] ?? 0);
+            $targetId = (int) ($ev['targetID'] ?? 0);
+            $ts = (float) ($ev['timestamp'] ?? 0);
+            if ($spellId === 0) continue;
+
+            $key = $spellId . '-' . $targetId;
+            if (in_array($type, $applyTypes, true)) {
+                $open[$key] = $ts;
+            } elseif (in_array($type, $removeTypes, true) && isset($open[$key])) {
+                $duration = $ts - $open[$key];
+                unset($open[$key]);
+                if ($duration > 0 && $duration < 600000) {
+                    $bySpell[$spellId][] = $duration;
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($bySpell as $spellId => $durations) {
+            sort($durations);
+            $n = count($durations);
+            $median = $n % 2 === 1
+                ? $durations[(int) (($n - 1) / 2)]
+                : ($durations[$n / 2 - 1] + $durations[$n / 2]) / 2;
+            // Skip "instant" auras (< 1.5s) — likely procs, not mechanic durations
+            if ($median >= 1500) $result[$spellId] = $median;
+        }
+        return $result;
+    }
+
     public function getLogSummary(string $reportId, array $rosterNames = []): array
     {
         // Large Mythic reports with many boss tries can exceed PHP's 128M default.

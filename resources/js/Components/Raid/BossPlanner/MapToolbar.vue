@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { startCustomDrag } from '@/composables/useCustomDrag';
 const { __ } = useTranslation();
 
 const props = defineProps({
@@ -11,6 +12,9 @@ const props = defineProps({
     groups: { type: Object, default: () => ({}) },
     canUndo: { type: Boolean, default: false },
     canRedo: { type: Boolean, default: false },
+    // Popup panels teleport to body and therefore escape the map tab's
+    // v-show. `visible` hides them while keeping their open-state intact.
+    visible: { type: Boolean, default: true },
 });
 const emit = defineEmits(['select-tool', 'select-icon', 'undo', 'redo']);
 
@@ -213,6 +217,40 @@ const panelDefs = computed(() => ({
 
 const handleItemClick = (item) => { emit('select-icon', item); };
 
+// Click-or-drag on an icon item: if the pointer moves >5px during mousedown,
+// start a custom drag (ghost icon under cursor → drop on map = direct placement).
+// If the pointer barely moves, treat it as a plain click and emit select-icon
+// so the legacy click-to-place flow still works.
+const DRAG_THRESHOLD = 5;
+const iconSrcFor = (item) => {
+    if (item.img) return item.img;
+    if (item.type === 'emoji' || item.emoji) return null;
+    return null;
+};
+const onItemPointerDown = (item, e) => {
+    if (e.button !== 0) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    let started = false;
+    const onMove = (ev) => {
+        if (started) return;
+        if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < DRAG_THRESHOLD) return;
+        started = true;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        startCustomDrag(ev, { type: 'toolbar-item', item }, iconSrcFor(item));
+    };
+    const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        if (!started) handleItemClick(item);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+    e.stopPropagation();
+};
+
 const customEmoji = ref('');
 const addCustomEmoji = () => {
     if (!customEmoji.value.trim()) return;
@@ -281,6 +319,7 @@ const colorClasses = {
     <Teleport to="body">
         <template v-for="panelId in openPanels" :key="panelId">
             <div
+                v-show="visible"
                 class="fixed z-[250] w-[320px] max-h-[420px] bg-[#1a1a1e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden"
                 :class="dodgingPanels.has(panelId) ? 'panel-dodging' : ''"
                 :style="{ left: panelPositions[panelId].x + 'px', top: panelPositions[panelId].y + 'px' }"
@@ -306,7 +345,7 @@ const colorClasses = {
                         <!-- Shapes: grid tiles -->
                         <div v-if="section.id === 'shapes'" class="grid grid-cols-4 gap-1">
                             <button v-for="item in section.items" :key="item.id"
-                                @click="handleItemClick(item)"
+                                @mousedown="onItemPointerDown(item, $event)"
                                 class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg transition-all hover:bg-white/10"
                                 :class="activeTool === item.id ? 'bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30' : 'text-on-surface-variant'"
                                 :title="item.label">
@@ -320,7 +359,7 @@ const colorClasses = {
                         <!-- Groups -->
                         <div v-else-if="section.id === 'groups'" class="grid grid-cols-4 gap-1">
                             <button v-for="item in section.items" :key="item.id"
-                                @click="handleItemClick(item)"
+                                @mousedown="onItemPointerDown(item, $event)"
                                 class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg transition-all hover:bg-white/10 border border-transparent"
                                 :title="(item.displayName || item.label) + ' (' + item.count + 'p)'">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center border-2"
@@ -333,7 +372,7 @@ const colorClasses = {
                         <!-- Players -->
                         <div v-else-if="section.id === 'players'" class="grid grid-cols-2 gap-1">
                             <button v-for="item in section.items" :key="item.id"
-                                @click="handleItemClick(item)"
+                                @mousedown="onItemPointerDown(item, $event)"
                                 class="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all hover:bg-white/5 text-left">
                                 <img v-if="item.img" :src="item.img" class="w-6 h-6 rounded object-cover border border-white/10 shrink-0">
                                 <div class="min-w-0">
@@ -344,7 +383,7 @@ const colorClasses = {
                         <!-- Grid: icons/emoji -->
                         <div v-else class="grid grid-cols-8 gap-1">
                             <button v-for="item in section.items" :key="item.id"
-                                @click="handleItemClick(item)"
+                                @mousedown="onItemPointerDown(item, $event)"
                                 class="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/10 hover:scale-110 border border-transparent"
                                 :title="item.label || item.id">
                                 <span v-if="item.type === 'emoji'" class="text-lg leading-none">{{ item.emoji }}</span>

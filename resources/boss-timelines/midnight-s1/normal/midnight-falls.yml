@@ -1,0 +1,591 @@
+# Boss timeline — Midnight Falls, Normal (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline (Mythic-only mechanics removed).
+# Tactics enrichment: resources/tactics/midnight-falls.md.
+
+encounter:
+  id: 3183
+  slug: midnight-falls
+  name: 'Midnight Falls'
+  season: midnight-s1
+  difficulty: normal
+  fight_duration_max: 660
+seed:
+  source: viserio
+  note: "Derived from Viserio's Mythic timeline with Mythic-only mechanics stripped."
+phases:
+  -
+    id: p1
+    name: Combat
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 660
+abilities:
+  -
+    id: black_tide
+    spell_id: 1263253
+    name: 'Black Tide'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 393
+      -
+        phase: p1
+        at: 448
+      -
+        phase: p1
+        at: 503
+  -
+    id: core_harvest
+    spell_id: 1282412
+    name: 'Core Harvest'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 258
+      -
+        phase: p1
+        at: 288
+      -
+        phase: p1
+        at: 318
+  -
+    id: dark_constellation_left
+    spell_id: 1266388
+    name: 'Dark Constellation [Left]'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 350
+      -
+        phase: p1
+        at: 358
+      -
+        phase: p1
+        at: 366
+      -
+        phase: p1
+        at: 374
+      -
+        phase: p1
+        at: 382
+      -
+        phase: p1
+        at: 409
+      -
+        phase: p1
+        at: 417
+      -
+        phase: p1
+        at: 425
+      -
+        phase: p1
+        at: 433
+      -
+        phase: p1
+        at: 460
+      -
+        phase: p1
+        at: 474
+      -
+        phase: p1
+        at: 486
+  -
+    id: dark_constellation_right
+    spell_id: 1266344
+    name: 'Dark Constellation [Right]'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 354
+      -
+        phase: p1
+        at: 362
+      -
+        phase: p1
+        at: 370
+      -
+        phase: p1
+        at: 378
+      -
+        phase: p1
+        at: 405
+      -
+        phase: p1
+        at: 413
+      -
+        phase: p1
+        at: 421
+      -
+        phase: p1
+        at: 429
+      -
+        phase: p1
+        at: 437
+      -
+        phase: p1
+        at: 467
+      -
+        phase: p1
+        at: 480
+      -
+        phase: p1
+        at: 492
+  -
+    id: dark_meltdown
+    spell_id: 1281123
+    name: 'Dark Meltdown'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 322
+  -
+    id: dark_quasar
+    spell_id: 1279420
+    name: 'Dark Quasar'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 57
+      -
+        phase: p1
+        at: 119
+  -
+    id: dark_rune
+    spell_id: 1249609
+    name: 'Dark Rune'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 102
+      -
+        phase: p1
+        at: 164
+  -
+    id: death_s_requiem_left
+    spell_id: 1286915
+    name: "Death's Requiem [Left]"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 373
+      -
+        phase: p1
+        at: 408
+      -
+        phase: p1
+        at: 483
+  -
+    id: death_s_requiem_right
+    spell_id: 1273375
+    name: "Death's Requiem [Right]"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 353
+      -
+        phase: p1
+        at: 428
+      -
+        phase: p1
+        at: 463
+  -
+    id: galvanize
+    spell_id: 1284525
+    name: Galvanize
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 238
+      -
+        phase: p1
+        at: 268
+      -
+        phase: p1
+        at: 298
+  -
+    id: grim_symphony
+    spell_id: 1284980
+    name: 'Grim Symphony'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 50
+      -
+        phase: p1
+        at: 112
+      -
+        phase: p1
+        at: 174
+  -
+    id: heaven_hell
+    spell_id: 1276525
+    name: 'Heaven & Hell'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 546
+      -
+        phase: p1
+        at: 566
+      -
+        phase: p1
+        at: 586
+      -
+        phase: p1
+        at: 606
+  -
+    id: heaven_s_glaives
+    spell_id: 1253915
+    name: "Heaven's Glaives"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 26
+      -
+        phase: p1
+        at: 88
+      -
+        phase: p1
+        at: 150
+  -
+    id: heaven_s_lance
+    spell_id: 1267049
+    name: "Heaven's Lance"
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 20
+      -
+        phase: p1
+        at: 40
+      -
+        phase: p1
+        at: 60
+      -
+        phase: p1
+        at: 80
+      -
+        phase: p1
+        at: 100
+      -
+        phase: p1
+        at: 120
+      -
+        phase: p1
+        at: 140
+      -
+        phase: p1
+        at: 160
+      -
+        phase: p1
+        at: 245
+      -
+        phase: p1
+        at: 265
+      -
+        phase: p1
+        at: 285
+      -
+        phase: p1
+        at: 305
+      -
+        phase: p1
+        at: 370
+      -
+        phase: p1
+        at: 400
+      -
+        phase: p1
+        at: 430
+      -
+        phase: p1
+        at: 460
+      -
+        phase: p1
+        at: 490
+  -
+    id: into_the_darkwell
+    spell_id: 1282043
+    name: 'Into the Darkwell'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 226
+  -
+    id: light_siphon_left
+    spell_id: 1266897
+    name: 'Light Siphon [Left]'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 348
+      -
+        phase: p1
+        at: 423
+      -
+        phase: p1
+        at: 458
+  -
+    id: light_siphon_right
+    spell_id: 1266810
+    name: 'Light Siphon [Right]'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 368
+      -
+        phase: p1
+        at: 403
+      -
+        phase: p1
+        at: 478
+  -
+    id: severance
+    spell_id: 1275057
+    name: Severance
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 332
+  -
+    id: starsplinter
+    spell_id: 1285510
+    name: Starsplinter
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 535
+      -
+        phase: p1
+        at: 555
+      -
+        phase: p1
+        at: 575
+      -
+        phase: p1
+        at: 595
+      -
+        phase: p1
+        at: 615
+  -
+    id: termination_prism
+    spell_id: 1284931
+    name: 'Termination Prism'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 6
+      -
+        phase: p1
+        at: 16
+      -
+        phase: p1
+        at: 68
+      -
+        phase: p1
+        at: 78
+      -
+        phase: p1
+        at: 130
+      -
+        phase: p1
+        at: 140
+  -
+    id: the_dark_archangel
+    spell_id: 1251343
+    name: 'The Dark Archangel'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 387
+      -
+        phase: p1
+        at: 442
+      -
+        phase: p1
+        at: 497
+  -
+    id: total_eclipse
+    spell_id: 1285563
+    name: 'Total Eclipse'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 191
+conditional_abilities:
+  -
+    id: mechanic
+    spell_id: ~
+    name: Mechanic
+    icon: ~
+    school: shadow
+    trigger: conditional
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+  -
+    id: mechanic
+    spell_id: ~
+    name: Mechanic
+    icon: ~
+    school: shadow
+    trigger: conditional
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+  -
+    id: mechanic
+    spell_id: ~
+    name: Mechanic
+    icon: ~
+    school: shadow
+    trigger: conditional
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+  -
+    id: mechanic
+    spell_id: ~
+    name: Mechanic
+    icon: ~
+    school: shadow
+    trigger: conditional
+    priority: medium
+    recommended_response: {  }
+    notes: ''

@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 class BossPlannerService
 {
+    public function __construct(
+        private readonly BossTimelineService $timelineService,
+    ) {}
+
     /**
      * Create a new raid plan for an encounter.
      */
@@ -21,6 +25,7 @@ class BossPlannerService
             'difficulty' => $data['difficulty'] ?? 'mythic',
             'title' => $data['title'] ?? null,
             'steps' => $data['steps'] ?? [$this->defaultStep()],
+            'timeline' => $data['timeline'] ?? null,
         ]);
     }
 
@@ -32,6 +37,7 @@ class BossPlannerService
         $plan->update(array_filter([
             'title' => $data['title'] ?? $plan->title,
             'steps' => $data['steps'] ?? $plan->steps,
+            'timeline' => array_key_exists('timeline', $data) ? $data['timeline'] : $plan->timeline,
             'difficulty' => $data['difficulty'] ?? $plan->difficulty,
         ], fn ($v) => $v !== null));
 
@@ -153,6 +159,17 @@ class BossPlannerService
 
         $encounterMaps = config('wow_season.encounter_maps', []);
         $encounterBosses = config('wow_season.encounter_bosses', []);
+        $season = (string) (config('wow_season.current_season') ?: 'midnight-s1');
+
+        // YAML-backed timeline data: [slug][difficulty] → { encounter, phases,
+        // abilities, conditional_abilities }. Source of truth lives in
+        // resources/boss-timelines/{season}/{difficulty}/{slug}.yml.
+        $timelineData = $this->timelineService->loadSeason($season);
+
+        // Reverse lookup: boss name → WCL encounterID. Needed by the MRT-note
+        // exporter so the generated string can include the `EncounterID:<n>`
+        // anchor that NSRT / MethodRaidTools read.
+        $encounterIdByName = array_flip(config('wow_season.wcl_encounter_ids', []));
 
         $encounters = [];
         foreach ($raidInstances as $instanceName => $bosses) {
@@ -167,19 +184,35 @@ class BossPlannerService
 
                 $bossPlans = $plans->filter(fn (RaidPlan $p) => $p->encounter_slug === $slug)->values();
 
+                // Slice YAML data per difficulty for this encounter.
+                $bossTimeline = $timelineData[$slug] ?? [];
+                $timingsByDiff = [];
+                $phasesByDiff = [];
+                $conditionalsByDiff = [];
+                foreach ($bossTimeline as $diff => $payload) {
+                    $timingsByDiff[$diff] = $payload['abilities'] ?? [];
+                    $phasesByDiff[$diff] = $payload['phases'] ?? [];
+                    $conditionalsByDiff[$diff] = $payload['conditional_abilities'] ?? [];
+                }
+
                 $encounters[] = [
                     'slug' => $slug,
                     'name' => $bossName,
+                    'encounter_id' => $encounterIdByName[$bossName] ?? null,
                     'instance' => $instanceName,
                     'maps' => $encounterMaps[$slug] ?? [],
                     'portrait' => $portraits[0] ?? null,
                     'portraits' => $portraits,
                     'abilities' => $bossData['abilities'] ?? [],
+                    'boss_ability_timings' => $timingsByDiff,
+                    'phase_segments' => $phasesByDiff,
+                    'conditional_abilities' => $conditionalsByDiff,
                     'has_plan' => $bossPlans->isNotEmpty(),
                     'plans' => $bossPlans->map(fn (RaidPlan $p) => [
                         'id' => $p->id,
                         'title' => $p->title,
                         'steps' => $p->steps,
+                        'timeline' => $p->timeline,
                         'difficulty' => $p->difficulty,
                         'updated_at' => $p->updated_at->toIso8601String(),
                     ])->toArray(),
@@ -188,6 +221,7 @@ class BossPlannerService
                         'id' => $bossPlans->first()->id,
                         'title' => $bossPlans->first()->title,
                         'steps' => $bossPlans->first()->steps,
+                        'timeline' => $bossPlans->first()->timeline,
                         'difficulty' => $bossPlans->first()->difficulty,
                         'updated_at' => $bossPlans->first()->updated_at->toIso8601String(),
                     ] : null,
@@ -197,6 +231,8 @@ class BossPlannerService
 
         return [
             'encounters' => $encounters,
+            'season' => $season,
+            'player_cooldowns' => config('wow_cooldowns', []),
             'staticId' => $staticId,
             'eventId' => $eventId,
         ];

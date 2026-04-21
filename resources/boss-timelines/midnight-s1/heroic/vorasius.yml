@@ -1,0 +1,326 @@
+# Boss timeline — Vorasius, Heroic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline (Mythic-only mechanics removed).
+# Tactics enrichment: resources/tactics/vorasius.md.
+
+encounter:
+  id: 3177
+  slug: vorasius
+  name: Vorasius
+  season: midnight-s1
+  difficulty: heroic
+  fight_duration_max: 390
+seed:
+  source: viserio
+  note: "Derived from Viserio's Mythic timeline with Mythic-only mechanics stripped."
+phases:
+  -
+    id: p1
+    name: Combat
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 390
+abilities:
+  -
+    id: blisterburst
+    spell_id: 1259186
+    name: Blisterburst
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response:
+      - stop
+    notes: 'Spawns Blistercreep adds that fixate players. Kill next to Crystal Walls so explosions break walls before Void Breath.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 77
+      -
+        phase: p1
+        at: 199
+      -
+        phase: p1
+        at: 323
+    notes_uk: 'Створює аддів Blistercreep, які фіксуються на гравцях. Вбивайте біля Crystal Walls, щоб вибухи розбивали стіни до Void Breath.'
+  -
+    id: fixate
+    spell_id: 1254113
+    name: Fixate
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - stop
+    notes: 'Blistercreep locks onto a random raid member. Fixated player kites the add to a Crystal Wall.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 67
+      -
+        phase: p1
+        at: 189
+      -
+        phase: p1
+        at: 313
+    notes_uk: 'Blistercreep фіксується на випадковому члені рейду. Фіксований гравець кайтить адда до Crystal Wall.'
+  -
+    id: parasite_expulsion
+    spell_id: 1254199
+    name: 'Parasite Expulsion'
+    icon: ~
+    school: shadow
+    priority: low
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Periodic raid-wide damage pulse. Healers maintain raid health.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 60
+      -
+        phase: p1
+        at: 182
+      -
+        phase: p1
+        at: 305
+    notes_uk: "Періодичний імпульс шкоди по рейду. Хілери підтримують здоров'я рейду."
+  -
+    id: primordial_roar
+    spell_id: 1260052
+    name: 'Primordial Roar'
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response: {  }
+    notes: 'Channel pulls all players toward boss then knocks back with raid damage. Pre-position away from edges.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 12
+      -
+        phase: p1
+        at: 132
+      -
+        phase: p1
+        at: 253
+    notes_uk: 'Каст тягне всіх гравців до боса, потім відкидає зі шкодою по рейду. Заздалегідь позиціонуйтесь подалі від країв.'
+  -
+    id: smashing_frenzy
+    spell_id: 1241836
+    name: 'Smashing Frenzy'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 17
+      -
+        phase: p1
+        at: 22
+      -
+        phase: p1
+        at: 27
+      -
+        phase: p1
+        at: 32
+      -
+        phase: p1
+        at: 36
+      -
+        phase: p1
+        at: 41
+      -
+        phase: p1
+        at: 46
+      -
+        phase: p1
+        at: 51
+      -
+        phase: p1
+        at: 68
+      -
+        phase: p1
+        at: 73
+      -
+        phase: p1
+        at: 78
+      -
+        phase: p1
+        at: 83
+      -
+        phase: p1
+        at: 137
+      -
+        phase: p1
+        at: 142
+      -
+        phase: p1
+        at: 147
+      -
+        phase: p1
+        at: 152
+      -
+        phase: p1
+        at: 157
+      -
+        phase: p1
+        at: 162
+      -
+        phase: p1
+        at: 166
+      -
+        phase: p1
+        at: 171
+      -
+        phase: p1
+        at: 191
+      -
+        phase: p1
+        at: 196
+      -
+        phase: p1
+        at: 201
+      -
+        phase: p1
+        at: 205
+      -
+        phase: p1
+        at: 258
+      -
+        phase: p1
+        at: 263
+      -
+        phase: p1
+        at: 267
+      -
+        phase: p1
+        at: 272
+      -
+        phase: p1
+        at: 277
+      -
+        phase: p1
+        at: 282
+      -
+        phase: p1
+        at: 287
+      -
+        phase: p1
+        at: 292
+      -
+        phase: p1
+        at: 314
+      -
+        phase: p1
+        at: 319
+      -
+        phase: p1
+        at: 323
+      -
+        phase: p1
+        at: 328
+  -
+    id: void_breath
+    spell_id: 1256855
+    name: 'Void Breath'
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Slow deadly beam sweeps across the room for 15s. Hide behind destroyed Crystal Walls on the opposite side.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 96
+      -
+        phase: p1
+        at: 101
+      -
+        phase: p1
+        at: 217
+      -
+        phase: p1
+        at: 222
+      -
+        phase: p1
+        at: 338
+      -
+        phase: p1
+        at: 343
+    notes_uk: 'Повільний смертоносний промінь проноситься по кімнаті протягом 15 секунд. Ховайтеся за зруйнованими Crystal Walls на протилежній стороні.'
+conditional_abilities:
+  -
+    id: shadowclaw_slam
+    spell_id: 1272329
+    name: 'Shadowclaw Slam'
+    icon: ~
+    school: shadow
+    trigger: soak
+    priority: high
+    recommended_response:
+      - raid_cd
+      - movement
+    notes: 'Tank-soaked circle applying 150% physical vulnerability (Smashed). Swap after 2 soaks. Creates Aftershock expanding rings and spawns Void Crystal Walls.'
+    notes_uk: 'Поглинається танком коло, що накладає 150% фізичної вразливості (Smashed). Міняйтесь після 2 поглинань. Створює розширювальні кільця Aftershock та генерує Void Crystal Walls.'
+  -
+    id: aftershock
+    spell_id: ~
+    name: Aftershock
+    icon: ~
+    school: shadow
+    trigger: dodge
+    priority: medium
+    recommended_response:
+      - movement
+      - personal
+    notes: 'Expanding rings erupt outward after Shadowclaw Slam. All players dodge outward pulses (damage shares the same ability IDs as Shadowclaw Slam).'
+    notes_uk: 'Розширювальні кільця вибухають назовні після Shadowclaw Slam. Всі гравці ухиляються від зовнішніх імпульсів (шкода має ті ж ID здібностей, що й Shadowclaw Slam).'
+  -
+    id: creep_spit
+    spell_id: 1272527
+    name: 'Creep Spit'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: low
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Debuff applied by Blistercreep on fixated targets. Dispel the slow promptly.'
+    notes_uk: 'Дебаф, накладений Blistercreep на фіксовані цілі. Негайно диспеліть уповільнення.'
+  -
+    id: primordial_power
+    spell_id: 1272937
+    name: 'Primordial Power'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: low
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'Boss self-buff gained during Void Breath — increases ongoing damage output.'
+    notes_uk: 'Селф-баф боса, отриманий під час Void Breath — збільшує поточний вихід шкоди.'
+  -
+    id: overpowering_pulse
+    spell_id: ~
+    name: 'Overpowering Pulse'
+    icon: ~
+    school: shadow
+    trigger: tankbuster
+    priority: high
+    recommended_response: {  }
+    notes: 'Passive wipe check — if no player is in melee range of boss, the entire raid dies. Tank must stay in melee at all times.'
+    notes_uk: 'Пасивна перевірка на вайп — якщо жоден гравець не знаходиться в мілі-зоні боса, весь рейд вмирає. Танк повинен постійно перебувати в мілі.'

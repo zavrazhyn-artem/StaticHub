@@ -14,6 +14,7 @@
                 'save' => route('statics.boss-planner.save'),
                 'shareBase' => url('/boss-planner'),
                 'destroyBase' => url('/boss-planner'),
+                'cooldownToggleBase' => url('/boss-planner/character'),
             ]) }}"
         ></boss-planner-page>
     </div>

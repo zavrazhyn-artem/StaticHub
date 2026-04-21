@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
 
@@ -17,7 +17,7 @@ const props = defineProps({
     highlightedMarkers: { type: Object, default: () => new Set() },
 });
 
-const emit = defineEmits(['update', 'move-group', 'place', 'action-start', 'selection-change', 'request-text']);
+const emit = defineEmits(['update', 'move-group', 'place', 'action-start', 'selection-change', 'request-text', 'drop-toolbar-item']);
 
 const svgRef = ref(null);
 const containerRef = ref(null);
@@ -947,19 +947,65 @@ const handleDblClickLabel = (e, index) => {
 
 const closeCtx = () => { ctxMenu.value.show = false; };
 
+// Native HTML5 drop — still used by the roster palette for player drops.
 const handleDrop = (e) => {
     e.preventDefault();
-    try {
-        const data = JSON.parse(e.dataTransfer.getData('application/json'));
-        const point = getSvgPoint(e);
+    let data;
+    try { data = JSON.parse(e.dataTransfer.getData('application/json')); }
+    catch { return; }
+    if (!data) return;
+    const point = getSvgPoint(e);
+    if (data.character_id || data.id) {
         emit('update', { players: [...players.value, {
-            character_id: data.id, character_name: data.name,
-            class_name: data.playable_class, role: data.assigned_role || data.main_spec?.role || 'rdps',
+            character_id: data.id ?? data.character_id,
+            character_name: data.name ?? data.character_name,
+            class_name: data.playable_class ?? data.class_name,
+            role: data.assigned_role || data.main_spec?.role || data.role || 'rdps',
             x: point.x, y: point.y, scale: 1, rotation: 0,
         }] });
-    } catch (err) { /* ignore */ }
+    }
 };
-const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+
+// Custom drop — panels dispatch a window `custom-drop` event with payload +
+// the element under the cursor at release time. Two payload shapes are
+// currently handled:
+//   - { type: 'ability-icon', spell_id, icon_filename | icon, name, color }
+//   - { type: 'toolbar-item', item: <selection object from MapToolbar> }
+const onCustomDrop = (e) => {
+    const { payload, target, clientX, clientY } = e.detail || {};
+    if (!payload) return;
+    if (!containerRef.value?.contains(target)) return;
+    const point = getSvgPoint({ clientX, clientY });
+
+    if (payload.type === 'ability-icon' && payload.spell_id) {
+        let src;
+        if (payload.icon_filename) src = `/images/cooldowns/${payload.icon_filename}`;
+        else if (payload.icon) src = `https://wow.zamimg.com/images/wow/icons/large/${payload.icon}.jpg`;
+        else src = '/images/raidplan/raid-markers/skull.png';
+        emit('update', {
+            markers: [...markers.value, {
+                type: 'icon', src, isAbility: true,
+                spell_id: payload.spell_id, label: payload.name || '',
+                x: point.x, y: point.y, scale: 1, rotation: 0,
+                showDirection: false,
+            }],
+        });
+        return;
+    }
+    if (payload.type === 'toolbar-item' && payload.item) {
+        emit('drop-toolbar-item', { item: payload.item, point });
+    }
+};
+onMounted(() => window.addEventListener('custom-drop', onCustomDrop));
+onBeforeUnmount(() => window.removeEventListener('custom-drop', onCustomDrop));
+const handleDragOver = (e) => {
+    e.preventDefault();
+    // Align dropEffect with the source's effectAllowed. Panels dragging
+    // ability icons set `copy`; the legacy roster-drag source uses defaults.
+    // Picking `copy` keeps both paths happy without forcing a move cursor
+    // that would be rejected for copy-only sources.
+    e.dataTransfer.dropEffect = 'copy';
+};
 
 defineExpose({ svgRef });
 </script>

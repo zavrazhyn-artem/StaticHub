@@ -1,0 +1,390 @@
+# Boss timeline — Fallen-King Salhadaar, Mythic (Season 17 / Midnight S1).
+# Source: Viserio Mythic timeline.
+# Tactics enrichment: resources/tactics/fallen-king-salhadaar.md.
+
+encounter:
+  id: 3179
+  slug: fallen-king-salhadaar
+  name: 'Fallen-King Salhadaar'
+  season: midnight-s1
+  difficulty: mythic
+  fight_duration_max: 510
+seed:
+  source: viserio
+  note: "Cast times parsed from Viserio's published Mythic timeline."
+phases:
+  -
+    id: p1
+    name: 'Phase 1'
+    is_intermission: false
+    trigger:
+      type: pull
+    seed_duration: 102
+  -
+    id: i1
+    name: 'Intermission 1'
+    is_intermission: true
+    trigger:
+      type: time_from_pull
+      value: 102
+      min_time: 102
+      max_time: 102
+    seed_duration: 20
+  -
+    id: p2
+    name: 'Phase 2'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 122
+      min_time: 122
+      max_time: 122
+    seed_duration: 103
+  -
+    id: i2
+    name: 'Intermission 2'
+    is_intermission: true
+    trigger:
+      type: time_from_pull
+      value: 225
+      min_time: 225
+      max_time: 225
+    seed_duration: 20
+  -
+    id: p3
+    name: 'Phase 3'
+    is_intermission: false
+    trigger:
+      type: time_from_pull
+      value: 245
+      min_time: 245
+      max_time: 245
+    seed_duration: 265
+abilities:
+  -
+    id: dark_radiation
+    spell_id: 1285211
+    name: 'Dark Radiation'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 28
+      -
+        phase: p1
+        at: 46
+      -
+        phase: p1
+        at: 85
+      -
+        phase: p1
+        at: 97
+      -
+        phase: p2
+        at: 36
+      -
+        phase: p2
+        at: 53
+      -
+        phase: p2
+        at: 80
+      -
+        phase: p2
+        at: 93
+      -
+        phase: p3
+        at: 39
+      -
+        phase: p3
+        at: 53
+      -
+        phase: p3
+        at: 82
+      -
+        phase: p3
+        at: 97
+      -
+        phase: p3
+        at: 159
+      -
+        phase: p3
+        at: 174
+      -
+        phase: p3
+        at: 204
+      -
+        phase: p3
+        at: 219
+  -
+    id: despotic_command
+    spell_id: 1260823
+    name: 'Despotic Command'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: 'Healing absorb debuff on random players. Healers must clear. On expire, drops Dark Radiation puddle.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 24
+      -
+        phase: p1
+        at: 69
+      -
+        phase: p2
+        at: 24
+      -
+        phase: p2
+        at: 69
+      -
+        phase: p3
+        at: 23
+      -
+        phase: p3
+        at: 68
+      -
+        phase: p3
+        at: 145
+      -
+        phase: p3
+        at: 190
+    notes_uk: 'Дебаф лікувального абсорбу на випадкових гравцях. Хілери повинні зняти. Після закінчення дії залишає калюжу Dark Radiation.'
+  -
+    id: entropic_unraveling
+    spell_id: 1246175
+    name: 'Entropic Unraveling'
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response: {  }
+    notes: '100-energy burst window with 25% damage taken. Dodge Umbral Beams during the window.'
+    duration_sec: 0
+    casts:
+      -
+        phase: i1
+        at: 1
+      -
+        phase: i2
+        at: 0
+      -
+        phase: p3
+        at: 102
+      -
+        phase: p3
+        at: 224
+    notes_uk: 'Вікно бурсту на 100 енергії зі 25% збільшенням вхідної шкоди. Ухиляйтесь від Umbral Beams під час вікна.'
+  -
+    id: fractured_projection
+    spell_id: 1254081
+    name: 'Fractured Projection'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response: {  }
+    notes: ''
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 28
+      -
+        phase: p1
+        at: 73
+      -
+        phase: p2
+        at: 28
+      -
+        phase: p2
+        at: 73
+      -
+        phase: p3
+        at: 27
+      -
+        phase: p3
+        at: 72
+      -
+        phase: p3
+        at: 149
+      -
+        phase: p3
+        at: 194
+  -
+    id: shattering_twilight
+    spell_id: 1253032
+    name: 'Shattering Twilight'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - movement
+    notes: 'Tank must position boss away from raid during cast. Spikes fire in lines.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 50
+      -
+        phase: p1
+        at: 95
+      -
+        phase: p2
+        at: 50
+      -
+        phase: p2
+        at: 95
+      -
+        phase: p3
+        at: 49
+      -
+        phase: p3
+        at: 94
+      -
+        phase: p3
+        at: 171
+      -
+        phase: p3
+        at: 216
+    notes_uk: 'Танк тримає боса від рейду під час касту. Шипи вистрілюють лініями.'
+  -
+    id: twisting_obscurity
+    spell_id: 1250686
+    name: 'Twisting Obscurity'
+    icon: ~
+    school: shadow
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: '23s raid-wide DoT. Healers pop cooldowns.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 16
+      -
+        phase: p1
+        at: 61
+      -
+        phase: p2
+        at: 16
+      -
+        phase: p2
+        at: 61
+      -
+        phase: p3
+        at: 15
+      -
+        phase: p3
+        at: 60
+      -
+        phase: p3
+        at: 137
+      -
+        phase: p3
+        at: 182
+    notes_uk: 'DoT по рейду тривалістю 23 секунди. Хілери використовують кулдауни.'
+  -
+    id: void_convergence
+    spell_id: 1243453
+    name: 'Void Convergence'
+    icon: ~
+    school: shadow
+    priority: high
+    recommended_response: {  }
+    notes: 'Orbs spawn and advance to boss — wipe if contact. Kill staggered to avoid DoT stacks.'
+    duration_sec: 0
+    casts:
+      -
+        phase: p1
+        at: 13
+      -
+        phase: p1
+        at: 59
+      -
+        phase: p2
+        at: 13
+      -
+        phase: p2
+        at: 59
+      -
+        phase: p3
+        at: 13
+      -
+        phase: p3
+        at: 58
+      -
+        phase: p3
+        at: 135
+      -
+        phase: p3
+        at: 180
+    notes_uk: "Сфери з'являються та рухаються до боса — вайп у разі контакту. Вбивайте по черзі, щоб уникнути стаків DoT."
+conditional_abilities:
+  -
+    id: destabilizing_strikes
+    spell_id: 1271579
+    name: 'Destabilizing Strikes'
+    icon: ~
+    school: shadow
+    trigger: tank_swap
+    priority: high
+    recommended_response:
+      - tank_swap
+    notes: 'Stacking debuff on active tank. Swap at 5-7 stacks.'
+    notes_uk: 'Стакаючий дебаф на активному танку. Міняйтесь на 5-7 стаках.'
+  -
+    id: shadow_fracture
+    spell_id: 1254088
+    name: 'Shadow Fracture'
+    icon: ~
+    school: shadow
+    trigger: interrupt
+    priority: high
+    recommended_response:
+      - stop
+    notes: 'Cast by clones of Fractured Projection. Must be interrupted.'
+    notes_uk: 'Кастується клонами Fractured Projection. Повинен бути перерваний.'
+  -
+    id: nexus_shield
+    spell_id: 1275056
+    name: 'Nexus Shield'
+    icon: ~
+    school: shadow
+    trigger: shield_interrupt
+    priority: high
+    recommended_response:
+      - stop
+      - dispel_magic
+    notes: 'Buffs clones — wasted interrupts hit shield. Only unshielded clone is interruptible.'
+    notes_uk: 'Бафає клонів — витрачені переривання потрапляють у щит. Перервати можна лише клона без щита.'
+  -
+    id: void_exposure
+    spell_id: 1250828
+    name: 'Void Exposure'
+    icon: ~
+    school: shadow
+    trigger: proximity_damage
+    priority: low
+    recommended_response: {  }
+    notes: 'Damage taken from standing too close to orbs.'
+    notes_uk: 'Шкода від стояння занадто близько до сфер.'
+  -
+    id: torturous_extract
+    spell_id: 1245592
+    name: 'Torturous Extract'
+    icon: ~
+    school: shadow
+    trigger: raid_damage
+    priority: medium
+    recommended_response:
+      - raid_cd
+      - external
+    notes: 'High-tick damage on players during fight cycles.'
+    notes_uk: 'Висока тикаюча шкода по гравцях під час циклів бою.'
