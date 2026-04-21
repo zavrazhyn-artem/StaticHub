@@ -25,12 +25,12 @@ class ScheduleController extends Controller
     /**
      * Display the schedule.
      */
-    public function index(Request $request): View
+    public function index(StaticGroup $static, Request $request): View
     {
         $year  = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
 
-        $scheduleData = $this->eventService->buildSchedulePayload($year, $month, Auth::id());
+        $scheduleData = $this->eventService->buildSchedulePayload($year, $month, $static);
 
         return view('schedule.index', $scheduleData);
     }

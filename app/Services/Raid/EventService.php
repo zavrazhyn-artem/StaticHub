@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Models\Character;
-use App\Services\StaticGroup\StaticService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +17,6 @@ class EventService
     public function __construct(
         protected RaidAttendanceService $attendanceService,
         protected CalendarService       $calendarService,
-        protected StaticService         $staticService,
     ) {}
 
     /**
@@ -183,12 +181,10 @@ class EventService
     // -----------------------------------------------------------------------
 
     /**
-     * Get the schedule index payload for a user.
+     * Get the schedule index payload for a given static.
      */
-    public function buildSchedulePayload(int $year, int $month, int $userId): array
+    public function buildSchedulePayload(int $year, int $month, StaticGroup $static): array
     {
-        $static = $this->staticService->getDefaultStaticForUser($userId);
-
         $calendarData = $this->calendarService->buildMonthGrid($year, $month, $static->id);
 
         return array_merge($calendarData, [

@@ -6,6 +6,23 @@
         <p style="color: #888; font-size: 0.875rem;">System overview and quick access to tools</p>
     </div>
 
+    {{-- TEMP DEBUG: remove after verifying ghost-mode activation --}}
+    @php
+        $ghost = app(\App\Services\Ghost\GhostModeService::class);
+        $ghostUid = config('ghost.user_id');
+    @endphp
+    <div class="admin-card" style="padding: 1rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.8rem;">
+        <div style="color: #fbbf24; margin-bottom: 0.5rem; font-weight: 700;">Ghost activation debug</div>
+        <div>config('ghost.user_id') = <strong>{{ var_export($ghostUid, true) }}</strong></div>
+        <div>auth()->check() = <strong>{{ var_export(auth()->check(), true) }}</strong></div>
+        <div>auth()->id() = <strong>{{ var_export(auth()->id(), true) }}</strong></div>
+        <div>session('admin_authenticated') = <strong>{{ var_export(session('admin_authenticated'), true) }}</strong></div>
+        <div>(int)auth id === (int)ghost id : <strong>{{ var_export((int) auth()->id() === (int) $ghostUid, true) }}</strong></div>
+        <div>canActivate() = <strong style="color: {{ $ghost->canActivate() ? '#4ade80' : '#f87171' }};">{{ var_export($ghost->canActivate(), true) }}</strong></div>
+        <div>request scheme = <strong>{{ request()->getScheme() }}</strong></div>
+        <div>request host = <strong>{{ request()->getHost() }}</strong></div>
+    </div>
+
     {{-- Metrics Grid --}}
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
         <div class="admin-card" style="padding: 1.25rem;">
