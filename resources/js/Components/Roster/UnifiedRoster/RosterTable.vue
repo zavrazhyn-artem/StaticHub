@@ -125,7 +125,7 @@ const slotLabels = {
 
 <template>
     <div class="relative w-full">
-    <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[55vh] overflow-y-auto overflow-x-auto roster-scroll">
+    <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[calc(90vh-220px)] overflow-y-auto overflow-x-auto roster-scroll">
         <table class="text-left text-2xs border-collapse w-full">
             <!-- thead ──────────────────────────────────────── -->
             <thead class="sticky top-0 z-20">

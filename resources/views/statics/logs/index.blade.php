@@ -7,6 +7,7 @@
         current-from-date="{{ $currentFromDate ?? '' }}"
         current-to-date="{{ $currentToDate ?? '' }}"
         manual-log-url="{{ route('statics.logs.manual.store') }}"
+        :manual-log-enabled="{{ app()->environment(['local', 'development']) ? 'true' : 'false' }}"
         :cooldown-state='@json($cooldownState)'
     ></logs-index>
 

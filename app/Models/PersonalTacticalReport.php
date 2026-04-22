@@ -43,10 +43,12 @@ class PersonalTacticalReport extends Model
         'character_id',
         'content',
         'ai_blocks',
+        'ai_blocks_translations',
     ];
 
     protected $casts = [
-        'ai_blocks' => 'array',
+        'ai_blocks'              => 'array',
+        'ai_blocks_translations' => 'array',
     ];
 
     public function tacticalReport(): BelongsTo

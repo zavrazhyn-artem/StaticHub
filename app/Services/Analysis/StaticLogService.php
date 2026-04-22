@@ -149,12 +149,13 @@ class StaticLogService
         $rosterReports = [];
         $rosterMembers = [];
         if ($canViewGlobalReport) {
-            $allPersonalReports = $report->personalReports()->with('character')->get();
+            $allPersonalReports = $report->personalReports()->with('character.user')->get();
 
             $rosterReports = $allPersonalReports->mapWithKeys(function ($pr) {
                 return [$pr->id => [
-                    'blocks' => $pr->ai_blocks ?: null,
-                    'html'   => $pr->ai_blocks ? null : ($pr->content ? Str::markdown($pr->content) : null),
+                    'blocks'       => $pr->ai_blocks ?: null,
+                    'html'         => $pr->ai_blocks ? null : ($pr->content ? Str::markdown($pr->content) : null),
+                    'owner_locale' => $pr->character?->user?->locale ?? 'en',
                 ]];
             })->all();
 

@@ -63,10 +63,17 @@ onUnmounted(() => {
     if (chatTimer) clearInterval(chatTimer);
 });
 
-const canChat = computed(() => props.canUseAiChat && !chatExpired.value);
+const canSendMessages = computed(() => props.canUseAiChat && !chatExpired.value);
 
 // Character selector for leaders/officers on Personal Report tab
 const selectedReportId = ref(props.personalReport?.id ? String(props.personalReport.id) : '');
+
+// Personal report translation (lazy, per-report cache)
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const viewerLocale = String(window.appLocale || 'en').split('-')[0].toLowerCase();
+const translatedBlocks = ref({});  // { reportId: blocks[] }
+const showOriginal = ref({});      // { reportId: boolean }
+const translatingId = ref(null);
 
 const activePersonalReport = computed(() => {
     if (!props.canViewGlobalReport || !props.rosterMembers.length) {
@@ -76,21 +83,71 @@ const activePersonalReport = computed(() => {
     const member = props.rosterMembers.find(m => String(m.id) === id);
     if (!member) return props.personalReport;
     const entry = props.rosterReports[id] || {};
+    const useTranslation = !showOriginal.value[id] && translatedBlocks.value[id];
     return {
         id,
-        blocks:         entry.blocks || null,
+        blocks:         useTranslation ? translatedBlocks.value[id] : (entry.blocks || null),
         html:           entry.html || null,
+        owner_locale:   entry.owner_locale || 'en',
+        has_translation: !!translatedBlocks.value[id],
         char_name:      member.character.name,
         char_class:     member.character.playable_class,
         char_class_css: member.character.playable_class.toLowerCase().replace(/ /g, '-'),
     };
 });
+
+const canTranslateActive = computed(() => {
+    const r = activePersonalReport.value;
+    if (!r || !r.blocks && !r.has_translation) return false;
+    if (!r.owner_locale) return false;
+    return r.owner_locale.split('-')[0].toLowerCase() !== viewerLocale;
+});
+
+async function translateActiveReport() {
+    const id = selectedReportId.value;
+    if (!id || translatingId.value === id) return;
+
+    // Already fetched — just toggle back to translated view.
+    if (translatedBlocks.value[id]) {
+        showOriginal.value = { ...showOriginal.value, [id]: false };
+        return;
+    }
+
+    translatingId.value = id;
+    try {
+        const response = await fetch(`/api/logs/personal/${id}/translate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ locale: viewerLocale }),
+        });
+        if (!response.ok) throw new Error('translate failed');
+        const data = await response.json();
+        if (Array.isArray(data.blocks)) {
+            translatedBlocks.value = { ...translatedBlocks.value, [id]: data.blocks };
+            showOriginal.value = { ...showOriginal.value, [id]: false };
+        }
+    } catch (e) {
+        console.error('Translation failed', e);
+    } finally {
+        translatingId.value = null;
+    }
+}
+
+function toggleActiveOriginal() {
+    const id = selectedReportId.value;
+    if (!id) return;
+    showOriginal.value = { ...showOriginal.value, [id]: !showOriginal.value[id] };
+}
 </script>
 
 <template>
     <div class="relative">
         <AiChatSidebar
-            v-if="canChat"
+            v-if="canUseAiChat"
             :open="chatOpen"
             :report-id="report.id"
             :report-title="report.title"
@@ -98,22 +155,20 @@ const activePersonalReport = computed(() => {
             :can-view-global-report="canViewGlobalReport"
             :chat-history="chatHistory"
             :analyze-api-url="analyzeApiUrl"
+            :read-only="chatExpired"
             @close="chatOpen = false"
         />
 
         <!-- Floating Chat Toggle -->
-        <button v-if="canChat && !chatOpen" @click="chatOpen = true"
-            class="fixed bottom-8 right-8 z-40 bg-primary hover:bg-primary-dim text-on-primary-fixed p-4 rounded-full shadow-[0_0_20px_rgba(79,211,247,0.4)] transition-all hover:scale-110 flex items-center gap-3 group">
-            <span v-if="chatTimeRemaining" class="text-4xs font-bold uppercase tracking-wider overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ chatTimeRemaining }}</span>
+        <button v-if="canUseAiChat && !chatOpen" @click="chatOpen = true"
+            :class="chatExpired
+                ? 'bg-surface-container-high text-on-surface-variant hover:text-white'
+                : 'bg-primary hover:bg-primary-dim text-on-primary-fixed shadow-[0_0_20px_rgba(79,211,247,0.4)]'"
+            class="fixed bottom-8 right-8 z-40 p-4 rounded-full transition-all hover:scale-110 flex items-center gap-3 group">
+            <span v-if="chatExpired" class="text-4xs font-bold uppercase tracking-wider">{{ __('Chat expired') }}</span>
+            <span v-else-if="chatTimeRemaining" class="text-4xs font-bold uppercase tracking-wider overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">{{ chatTimeRemaining }}</span>
             <span class="material-symbols-outlined">psychology</span>
         </button>
-
-        <!-- Chat Expired Badge -->
-        <div v-if="canUseAiChat && chatExpired && !chatOpen"
-            class="fixed bottom-8 right-8 z-40 bg-surface-container-high text-on-surface-variant p-4 rounded-full opacity-50 cursor-not-allowed flex items-center gap-3">
-            <span class="text-4xs font-bold uppercase tracking-wider">{{ __('Chat expired') }}</span>
-            <span class="material-symbols-outlined">psychology</span>
-        </div>
 
         <!-- Main Content -->
         <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -291,9 +346,33 @@ const activePersonalReport = computed(() => {
                                     </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-bold text-indigo-400 uppercase tracking-wider">
-                                {{ personalReport && activePersonalReport.id === personalReport.id ? __('Your personal Report') : __('Personal Report') }}
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <!-- Translate toggle: appears when report locale differs from viewer locale -->
+                                <template v-if="canTranslateActive">
+                                    <button
+                                        v-if="!activePersonalReport.has_translation"
+                                        @click="translateActiveReport"
+                                        :disabled="translatingId === activePersonalReport.id"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-400/10 hover:bg-emerald-400/20 border border-emerald-400/30 rounded text-4xs font-bold text-emerald-400 uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-wait"
+                                        :title="__('Translate this report into your language')"
+                                    >
+                                        <span v-if="translatingId === activePersonalReport.id" class="material-symbols-outlined text-sm animate-spin">sync</span>
+                                        <span v-else class="material-symbols-outlined text-sm">translate</span>
+                                        {{ translatingId === activePersonalReport.id ? __('Translating...') : __('Translate') }}
+                                    </button>
+                                    <button
+                                        v-else
+                                        @click="toggleActiveOriginal"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-400/10 hover:bg-emerald-400/20 border border-emerald-400/30 rounded text-4xs font-bold text-emerald-400 uppercase tracking-wider transition-all"
+                                    >
+                                        <span class="material-symbols-outlined text-sm">translate</span>
+                                        {{ showOriginal[activePersonalReport.id] ? __('Show translation') : __('Show original') }}
+                                    </button>
+                                </template>
+                                <span class="px-3 py-1 bg-indigo-400/10 border border-indigo-400/20 rounded text-4xs font-bold text-indigo-400 uppercase tracking-wider">
+                                    {{ personalReport && activePersonalReport.id === personalReport.id ? __('Your personal Report') : __('Personal Report') }}
+                                </span>
+                            </div>
                         </div>
                         <div class="p-8">
                             <ReportBlocks v-if="activePersonalReport.blocks" :blocks="activePersonalReport.blocks" :ability-map="abilityIndex" />

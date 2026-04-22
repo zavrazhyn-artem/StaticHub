@@ -134,6 +134,31 @@ class CharacterBuilder extends Builder
         );
     }
 
+    /**
+     * Bulk upsert characters from Blizzard API in a single query — replaces N*(SELECT+INSERT)
+     * with one INSERT ... ON DUPLICATE KEY UPDATE. Every row must include every NOT NULL
+     * column (user_id, realm_id, name, …) so MySQL's strict mode is satisfied on the INSERT path.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return \Illuminate\Database\Eloquent\Collection<int, Character>
+     */
+    public function upsertFromBlizzard(array $rows): \Illuminate\Database\Eloquent\Collection
+    {
+        if (empty($rows)) {
+            return Character::query()->whereRaw('0 = 1')->get();
+        }
+
+        $this->upsert(
+            $rows,
+            ['id'],
+            ['user_id', 'realm_id', 'name', 'playable_class', 'playable_race', 'level', 'avatar_url']
+        );
+
+        return Character::query()
+            ->whereIn('id', array_column($rows, 'id'))
+            ->get();
+    }
+
     public function findById(int $id): ?Character
     {
         return $this->find($id);

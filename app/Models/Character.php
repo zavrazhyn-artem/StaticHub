@@ -238,6 +238,16 @@ class Character extends Model
      */
     public function getMainSpecInStatic(int $staticId): ?Specialization
     {
+        // Prefer the eager-loaded relation when available — callers that pre-load
+        // `characterStaticSpecs.specialization` (e.g. BossPlannerController roster)
+        // otherwise trigger 2 queries per character on the list.
+        if ($this->relationLoaded('characterStaticSpecs')) {
+            $record = $this->characterStaticSpecs
+                ->first(fn ($s) => (int) $s->static_id === $staticId && $s->is_main);
+
+            return $record?->specialization;
+        }
+
         $record = $this->characterStaticSpecs()
             ->where('static_id', $staticId)
             ->where('is_main', true)

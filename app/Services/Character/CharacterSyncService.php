@@ -47,11 +47,33 @@ class CharacterSyncService
             }
         }
 
-        // Upsert all characters with their avatars
-        $characters = [];
+        // Upsert all characters in a single query — was N*(SELECT + INSERT) on the
+        // hot onboarding path. All NOT NULL columns are provided on the INSERT side.
+        $rows = [];
         foreach ($apiCharacters as $idx => $apiData) {
             $realm = $realmCache[$apiData['realm_slug']];
-            $characters[$idx] = $this->upsertCharacter($apiData, $userId, $realm->id, $avatars[$idx] ?? null);
+            $rows[$idx] = [
+                'id'             => $apiData['id'],
+                'user_id'        => $userId,
+                'realm_id'       => $realm->id,
+                'name'           => $apiData['name'],
+                'playable_class' => $apiData['playable_class'],
+                'playable_race'  => $apiData['playable_race'],
+                'level'          => $apiData['level'],
+                'avatar_url'     => $avatars[$idx] ?? null,
+            ];
+        }
+
+        $charactersById = Character::query()
+            ->upsertFromBlizzard(array_values($rows))
+            ->keyBy('id');
+
+        // Preserve the $idx ordering so downstream $profiles[$idx] alignment still works.
+        $characters = [];
+        foreach ($apiCharacters as $idx => $apiData) {
+            if ($char = $charactersById->get($apiData['id'])) {
+                $characters[$idx] = $char;
+            }
         }
 
         // Batch fetch all profile summaries concurrently
@@ -78,17 +100,15 @@ class CharacterSyncService
             $character->active_spec = $activeSpec ?? $character->active_spec;
         }
 
-        // Bulk update all characters in one query per batch
-        Character::upsert(
-            collect($characters)->map(fn (Character $c) => [
-                'id' => $c->id,
-                'equipped_item_level' => $c->equipped_item_level,
-                'active_spec' => $c->active_spec,
-                'updated_at' => now(),
-            ])->values()->all(),
-            ['id'],
-            ['equipped_item_level', 'active_spec', 'updated_at']
-        );
+        // Persist the profile-derived mutations. Each character is already in the DB
+        // (upsertCharacter above did updateOrCreate with all required fields), so we
+        // save() in place — avoids INSERT-side NOT NULL validation that a bulk upsert
+        // would trip on columns like user_id / realm_id / name.
+        foreach ($characters as $character) {
+            if ($character->isDirty(['equipped_item_level', 'active_spec'])) {
+                $character->save();
+            }
+        }
 
         // Dispatch async sync jobs for all characters
         foreach ($characters as $character) {

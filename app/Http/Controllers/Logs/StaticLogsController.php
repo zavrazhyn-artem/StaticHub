@@ -65,6 +65,10 @@ class StaticLogsController extends Controller
      */
     public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
     {
+        // Manual log upload is a dev/author-only tool — gate at the route level so
+        // that hiding the UI isn't the only protection.
+        abort_unless(app()->environment(['local', 'development']), 403);
+
 //        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
 //
 //        if ($cooldownState['on_cooldown']) {

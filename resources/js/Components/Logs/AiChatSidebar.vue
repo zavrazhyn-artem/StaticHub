@@ -12,6 +12,7 @@ const props = defineProps({
     canViewGlobalReport: { type: Boolean, default: false },
     chatHistory: { type: Array, default: () => [] },
     analyzeApiUrl: { type: String, required: true },
+    readOnly: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
 
@@ -56,6 +57,7 @@ function currentTime() {
 }
 
 async function sendMessage() {
+    if (props.readOnly) return;
     if (!newMessage.value.trim() || isLoading.value) return;
 
     const userMsg = newMessage.value;
@@ -178,26 +180,36 @@ async function sendMessage() {
 
             <!-- Input Area -->
             <div class="p-6 bg-surface-container-high border-t border-white/5">
-                <form @submit.prevent="sendMessage" class="relative group">
-                    <div class="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary/0 rounded-xl opacity-20 group-focus-within:opacity-100 transition duration-300"></div>
-                    <div class="relative flex items-center gap-2 bg-surface-container-lowest border border-white/10 rounded-xl p-2 pl-4">
-                        <input type="text" v-model="newMessage"
-                            :placeholder="__('Analyze tactical data...')"
-                            :disabled="isLoading"
-                            class="bg-transparent border-none focus:ring-0 text-xs text-white placeholder-on-surface-variant/40 flex-1 py-2 outline-none">
-                        <button type="submit"
-                            :disabled="isLoading || !newMessage.trim()"
-                            class="bg-primary hover:bg-primary-dim text-on-primary-fixed p-2 rounded-lg transition-all shadow-[0_0_15px_rgba(79,211,247,0.3)] flex items-center justify-center disabled:opacity-50 disabled:shadow-none">
-                            <span class="material-symbols-outlined text-sm">send</span>
-                        </button>
+                <template v-if="readOnly">
+                    <div class="flex items-start gap-3 px-4 py-3 bg-amber-400/5 border border-amber-400/20 rounded-xl">
+                        <span class="material-symbols-outlined text-amber-400 text-sm mt-0.5 flex-shrink-0">lock_clock</span>
+                        <p class="text-3xs text-amber-300/80 font-semibold uppercase tracking-wider leading-relaxed">
+                            {{ __('Chat session has expired. History is preserved in read-only mode.') }}
+                        </p>
                     </div>
-                </form>
-                <div class="mt-4 flex items-center gap-2 px-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                    <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60">
-                        {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }}) {{ __('is loaded.') }}
-                    </p>
-                </div>
+                </template>
+                <template v-else>
+                    <form @submit.prevent="sendMessage" class="relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary/0 rounded-xl opacity-20 group-focus-within:opacity-100 transition duration-300"></div>
+                        <div class="relative flex items-center gap-2 bg-surface-container-lowest border border-white/10 rounded-xl p-2 pl-4">
+                            <input type="text" v-model="newMessage"
+                                :placeholder="__('Analyze tactical data...')"
+                                :disabled="isLoading"
+                                class="bg-transparent border-none focus:ring-0 text-xs text-white placeholder-on-surface-variant/40 flex-1 py-2 outline-none">
+                            <button type="submit"
+                                :disabled="isLoading || !newMessage.trim()"
+                                class="bg-primary hover:bg-primary-dim text-on-primary-fixed p-2 rounded-lg transition-all shadow-[0_0_15px_rgba(79,211,247,0.3)] flex items-center justify-center disabled:opacity-50 disabled:shadow-none">
+                                <span class="material-symbols-outlined text-sm">send</span>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-4 flex items-center gap-2 px-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                        <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60">
+                            {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }}) {{ __('is loaded.') }}
+                        </p>
+                    </div>
+                </template>
             </div>
         </div>
     </Transition>

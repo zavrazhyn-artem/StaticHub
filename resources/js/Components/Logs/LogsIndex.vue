@@ -15,6 +15,7 @@ const props = defineProps({
     currentFromDate:    { type: String, default: '' },
     currentToDate:      { type: String, default: '' },
     manualLogUrl:       { type: String, required: true },
+    manualLogEnabled:   { type: Boolean, default: false },
     cooldownState:      { type: Object, default: () => ({ on_cooldown: false, remaining_seconds: 0, cooldown_minutes: 60 }) },
 });
 
@@ -234,7 +235,7 @@ const displayDifficultyText = computed(() => {
                     </div>
                 </form>
 
-                <button type="button" @click="showModal = true"
+                <button v-if="manualLogEnabled" type="button" @click="showModal = true"
                         class="flex items-center justify-center gap-2 bg-indigo-400/10 border border-indigo-400/30 hover:bg-indigo-400 hover:text-black px-6 py-2.5 rounded-lg text-3xs font-bold uppercase tracking-[0.2em] transition-all text-indigo-400 h-[42px] whitespace-nowrap w-full md:w-auto">
                     <span class="material-symbols-outlined text-sm">upload_file</span>
                     {{ __('Process Manual Log') }}
@@ -308,7 +309,7 @@ const displayDifficultyText = computed(() => {
             </div>
         </div>
 
-        <Teleport to="body">
+        <Teleport v-if="manualLogEnabled" to="body">
             <div v-if="showModal"
                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                  @click.self="showModal = false">

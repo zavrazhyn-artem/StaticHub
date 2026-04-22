@@ -14,6 +14,7 @@ use App\Http\Controllers\Raid\EventController;
 use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
 use App\Http\Controllers\Static\StaticController;
+use App\Http\Controllers\Logs\LogTranslationController;
 use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
@@ -29,6 +30,32 @@ Route::get('/', function () {
 });
 
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
+
+// GlitchTip / Sentry diagnostic endpoint.
+// Default: sends a captureMessage event (returns 200). Pass ?throw=1 to raise
+// an uncaught exception and exercise the error-reporting path end-to-end.
+Route::get('/ping', function (\Illuminate\Http\Request $request) {
+    $tag  = $request->query('tag', 'ping');
+    $note = sprintf('GlitchTip ping [%s] @ %s', $tag, now()->toIso8601String());
+
+    if ($request->boolean('throw')) {
+        throw new \RuntimeException($note);
+    }
+
+    $eventId = null;
+    if (function_exists('\\Sentry\\captureMessage')) {
+        $eventId = (string) \Sentry\captureMessage($note);
+    }
+
+    return response()->json([
+        'ok'          => true,
+        'env'         => app()->environment(),
+        'tag'         => $tag,
+        'message'     => $note,
+        'event_id'    => $eventId,
+        'dsn_configured' => !empty(config('sentry.dsn')),
+    ]);
+})->name('ping');
 
 Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static'])->group(function () {
 
@@ -122,6 +149,7 @@ Route::middleware(['auth', 'resolve_current_static'])->group(function () {
 
     // AI Analyst
     Route::post('/api/logs/analyze', [AiAnalystController::class, 'ask']);
+    Route::post('/api/logs/personal/{personalReport}/translate', [LogTranslationController::class, 'personal'])->name('statics.logs.personal.translate');
 
     // Roster participation
     Route::post('/participation', [RosterController::class, 'updateParticipation'])->name('roster.updateParticipation');
