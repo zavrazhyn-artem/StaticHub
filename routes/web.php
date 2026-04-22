@@ -31,30 +31,15 @@ Route::get('/', function () {
 
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
 
-// GlitchTip / Sentry diagnostic endpoint.
-// Default: sends a captureMessage event (returns 200). Pass ?throw=1 to raise
-// an uncaught exception and exercise the error-reporting path end-to-end.
+// Lightweight health/ping endpoint.
+// Default: returns {"message":"ok"} with no Sentry side-effect — safe for uptime monitors.
+// Pass ?throw=1 to raise an uncaught exception end-to-end (for GlitchTip pipeline testing).
 Route::get('/ping', function (\Illuminate\Http\Request $request) {
-    $tag  = $request->query('tag', 'ping');
-    $note = sprintf('GlitchTip ping [%s] @ %s', $tag, now()->toIso8601String());
-
     if ($request->boolean('throw')) {
-        throw new \RuntimeException($note);
+        throw new \RuntimeException('GlitchTip ping (throw)');
     }
 
-    $eventId = null;
-    if (function_exists('\\Sentry\\captureMessage')) {
-        $eventId = (string) \Sentry\captureMessage($note);
-    }
-
-    return response()->json([
-        'ok'          => true,
-        'env'         => app()->environment(),
-        'tag'         => $tag,
-        'message'     => $note,
-        'event_id'    => $eventId,
-        'dsn_configured' => !empty(config('sentry.dsn')),
-    ]);
+    return response()->json(['message' => 'ok']);
 })->name('ping');
 
 Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static'])->group(function () {
