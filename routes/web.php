@@ -23,6 +23,11 @@ use App\Http\Controllers\Gear\GearController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FeedbackCommentController;
+use App\Http\Controllers\FeedbackSubtaskController;
+use App\Http\Controllers\FeedbackUploadController;
+use App\Http\Controllers\FeedbackVoteController;
 use App\Services\Backup\BackupHealthService;
 use Illuminate\Support\Facades\Route;
 
@@ -190,5 +195,35 @@ Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('pla
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');
 Route::get('/auth/battlenet/callback', [BattleNetController::class, 'callback'])->name('battlenet.callback');
+
+// ----- Feedback / Roadmap --------------------------------------------------
+// Public browsing (guests see everything, but can't act).
+// Each top-level section gets its own URL so that /roadmap, /changelog, /help
+// can be linked independently.
+Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+Route::get('/feedback/{post}', [FeedbackController::class, 'show'])->name('feedback.show');
+Route::get('/roadmap', [FeedbackController::class, 'roadmap'])->name('feedback.roadmap');
+
+// User-only actions — require a full Battle.net login (Auth::check()).
+// The controller re-checks to produce a clean JSON 401 for AJAX.
+Route::middleware('auth')->group(function () {
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::post('/feedback/{post}/vote', [FeedbackVoteController::class, 'toggle'])->name('feedback.vote');
+    Route::post('/feedback/{post}/comments', [FeedbackCommentController::class, 'store'])->name('feedback.comments.store');
+    Route::post('/feedback/uploads', [FeedbackUploadController::class, 'store'])->name('feedback.uploads');
+});
+
+// Owner-or-admin + admin-only actions. No `auth` middleware so that an admin
+// logged in on the admin subdomain (session flag only, no Battle.net user)
+// can still manage posts. Authorization happens inside controllers.
+Route::patch('/feedback/{post}', [FeedbackController::class, 'update'])->name('feedback.update');
+Route::delete('/feedback/{post}', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
+Route::delete('/feedback/comments/{comment}', [FeedbackCommentController::class, 'destroy'])->name('feedback.comments.destroy');
+
+Route::patch('/feedback/{post}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status');
+Route::post('/feedback/{post}/subtasks', [FeedbackSubtaskController::class, 'store'])->name('feedback.subtasks.store');
+Route::patch('/feedback/subtasks/{subtask}', [FeedbackSubtaskController::class, 'update'])->name('feedback.subtasks.update');
+Route::delete('/feedback/subtasks/{subtask}', [FeedbackSubtaskController::class, 'destroy'])->name('feedback.subtasks.destroy');
+Route::post('/feedback/{post}/subtasks/reorder', [FeedbackSubtaskController::class, 'reorder'])->name('feedback.subtasks.reorder');
 
 require __DIR__.'/auth.php';

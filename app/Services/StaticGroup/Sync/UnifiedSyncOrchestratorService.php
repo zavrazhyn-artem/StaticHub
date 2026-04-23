@@ -51,9 +51,15 @@ class UnifiedSyncOrchestratorService
             $characters = $static->characters;
             $dispatched = 0;
 
+            // Spread dispatches across a 50s window so 20 statics × 30 chars
+            // don't all hit Redis/APIs in the same second. Paired with
+            // ShouldBeUnique + RateLimited middleware on the fetch jobs.
             foreach ($characters as $character) {
-                FetchBnetRawDataJob::dispatch($character);
-                FetchRioRawDataJob::dispatch($character);
+                $jitter = random_int(0, 50);
+                FetchBnetRawDataJob::dispatch($character)
+                    ->delay(now()->addSeconds($jitter));
+                FetchRioRawDataJob::dispatch($character)
+                    ->delay(now()->addSeconds(random_int(0, 50)));
                 $dispatched++;
             }
 
@@ -62,7 +68,7 @@ class UnifiedSyncOrchestratorService
             $this->markStaticAsSynced($static->id, SyncType::WCL);
 
             RecalculateStaticProgressionJob::dispatch($static->id)
-                ->delay(now()->addMinutes(3));
+                ->delay(now()->addMinutes(5));
 
             $messages[] = sprintf(
                 'Dispatched bnet+rio sync for %d character(s) in static: %s (ID: %d)',

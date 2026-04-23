@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('raid_events')) {
+            return;
+        }
+
         Schema::table('raid_attendances', function (Blueprint $table) {
             $table->dropForeign(['raid_event_id']);
         });

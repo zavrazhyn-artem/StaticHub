@@ -69,6 +69,9 @@ app.component('character-spec-picker',     lazy(() => import('./Components/Chara
 app.component('characters-page',           lazy(() => import('./Components/Character/CharactersPage.vue')));
 app.component('onboarding-stepper',        lazy(() => import('./Components/Onboarding/OnboardingStepper.vue')));
 app.component('landing-page',              lazy(() => import('./Components/Landing/LandingPage.vue')));
+app.component('feedback-list',             lazy(() => import('./Components/Feedback/FeedbackList.vue')));
+app.component('feedback-detail',           lazy(() => import('./Components/Feedback/FeedbackDetail.vue')));
+app.component('roadmap-kanban',            lazy(() => import('./Components/Feedback/RoadmapKanban.vue')));
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

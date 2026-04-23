@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Auth\BattleNetAuthService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Two\InvalidStateException;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
@@ -26,10 +27,19 @@ class BattleNetController extends Controller
     /**
      * Redirect the user to the Battle.net authentication page.
      *
+     * Accepts an optional `redirect_to` query parameter which is stored in the
+     * session so that public-page visitors (e.g. /feedback) end up back where
+     * they started instead of being dropped into onboarding.
+     *
      * @return SymfonyRedirectResponse
      */
-    public function redirect(): SymfonyRedirectResponse
+    public function redirect(Request $request): SymfonyRedirectResponse
     {
+        $redirectTo = $request->query('redirect_to');
+        if (is_string($redirectTo) && $this->isSafePublicPath($redirectTo)) {
+            $request->session()->put('feedback_return_to', $redirectTo);
+        }
+
         return $this->authService->buildRedirectProvider();
     }
 
@@ -73,10 +83,34 @@ class BattleNetController extends Controller
             return redirect()->route('onboarding.index');
         }
 
+        // If the user started on a public page (feedback/roadmap/etc.), bounce
+        // them back there — no forced onboarding for folks who just want to
+        // vote or read the roadmap.
+        if ($returnTo = session('feedback_return_to')) {
+            session()->forget('feedback_return_to');
+            if ($this->isSafePublicPath($returnTo)) {
+                return redirect($returnTo);
+            }
+        }
+
         if (User::query()->hasMainCharacter($user->id)) {
             return redirect()->route('dashboard');
         }
 
         return redirect()->route('onboarding.index');
+    }
+
+    /**
+     * Validate that a path is a same-origin public page we're willing to redirect to.
+     */
+    private function isSafePublicPath(string $path): bool
+    {
+        if (! str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return false;
+        }
+
+        $pathOnly = parse_url($path, PHP_URL_PATH) ?? '';
+
+        return (bool) preg_match('#^/(feedback|roadmap|changelog|help)(?:/|$)#', $pathOnly);
     }
 }

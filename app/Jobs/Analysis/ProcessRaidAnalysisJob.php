@@ -49,6 +49,11 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         TrendAnalyzer $trendAnalyzer,
         DiscordWebhookService $webhookService
     ): void {
+        // Large preprocessed JSON + Gemini HTTP pool responses can briefly exceed
+        // the default worker memory ceiling; cap within the job to stay well under
+        // supervisor's --memory=1024 budget while leaving headroom for PHP itself.
+        ini_set('memory_limit', '896M');
+
         if (!$this->report->wcl_report_id) return;
 
         // Guard against duplicate runs — if the report already has AI output + valid cache,

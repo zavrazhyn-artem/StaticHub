@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Realm;
 use App\Models\StaticGroup;
 use App\Models\Character;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,33 +13,38 @@ class RosterTest extends TestCase
 {
     use RefreshDatabase;
 
+    private Realm $realm;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->realm = Realm::create(['name' => 'Silvermoon', 'slug' => 'silvermoon', 'region' => 'eu']);
+    }
+
     public function test_roster_page_displays_grouped_characters()
     {
         $user = User::factory()->create(['name' => 'Player One', 'battletag' => 'Player#1234']);
-        $realm = \App\Models\Realm::create(['name' => 'Silvermoon', 'slug' => 'silvermoon', 'region' => 'eu']);
         $static = StaticGroup::create([
             'name' => 'Loot & Taxes',
             'slug' => 'loot-taxes',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
 
-        // Ensure user belongs to the static (to pass has_static middleware)
         $user->statics()->attach($static, ['role' => 'owner']);
 
         $mainChar = Character::create([
-            'id' => 1, 'user_id' => $user->id, 'name' => 'MainChar', 'realm_id' => $realm->id,
+            'id' => 1, 'user_id' => $user->id, 'name' => 'MainChar', 'realm_id' => $this->realm->id,
             'playable_class' => 'Paladin', 'playable_race' => 'Human', 'level' => 80,
             'avatar_url' => 'https://avatar.url/main'
         ]);
         $altChar = Character::create([
-            'id' => 2, 'user_id' => $user->id, 'name' => 'AltChar', 'realm_id' => $realm->id,
+            'id' => 2, 'user_id' => $user->id, 'name' => 'AltChar', 'realm_id' => $this->realm->id,
             'playable_class' => 'Mage', 'playable_race' => 'Human', 'level' => 80,
             'avatar_url' => 'https://avatar.url/alt'
         ]);
 
-        $mainChar->statics()->attach($static, ['role' => 'main', 'combat_role' => 'tank']);
-        $altChar->statics()->attach($static, ['role' => 'alt', 'combat_role' => 'rdps']);
+        $mainChar->statics()->attach($static, ['role' => 'main']);
+        $altChar->statics()->attach($static, ['role' => 'alt']);
 
         $response = $this->actingAs($user)->get(route('statics.roster'));
 
@@ -56,10 +62,15 @@ class RosterTest extends TestCase
         $static = StaticGroup::create([
             'name' => 'Loot & Taxes',
             'slug' => 'loot-taxes',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
         $user->statics()->attach($static, ['role' => 'owner']);
+
+        $char = Character::create([
+            'user_id' => $user->id, 'name' => 'NavChar', 'realm_id' => $this->realm->id,
+            'playable_class' => 'Paladin', 'playable_race' => 'Human', 'level' => 80,
+        ]);
+        $char->statics()->attach($static, ['role' => 'main']);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
@@ -73,31 +84,28 @@ class RosterTest extends TestCase
     public function test_user_can_update_participation()
     {
         $user = User::factory()->create();
-        $realm = \App\Models\Realm::create(['name' => 'Silvermoon', 'slug' => 'silvermoon', 'region' => 'eu']);
         $static = StaticGroup::create([
             'name' => 'Test Static',
             'slug' => 'test-static',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
         $user->statics()->attach($static, ['role' => 'owner']);
 
         $char1 = Character::create([
-            'id' => 10, 'user_id' => $user->id, 'name' => 'Char1', 'realm_id' => $realm->id,
+            'id' => 10, 'user_id' => $user->id, 'name' => 'Char1', 'realm_id' => $this->realm->id,
             'playable_class' => 'Paladin', 'playable_race' => 'Human', 'level' => 80,
         ]);
         $char2 = Character::create([
-            'id' => 11, 'user_id' => $user->id, 'name' => 'Char2', 'realm_id' => $realm->id,
+            'id' => 11, 'user_id' => $user->id, 'name' => 'Char2', 'realm_id' => $this->realm->id,
             'playable_class' => 'Mage', 'playable_race' => 'Human', 'level' => 80,
         ]);
+
+        // Attach one character first so middleware doesn't redirect to onboarding
+        $char1->statics()->attach($static, ['role' => 'main']);
 
         $response = $this->actingAs($user)->post(route('roster.updateParticipation'), [
             'main_character_id' => $char1->id,
             'raiding_characters' => [$char1->id, $char2->id],
-            'combat_roles' => [
-                $char1->id => 'tank',
-                $char2->id => 'rdps',
-            ],
         ]);
 
         $response->assertRedirect();
@@ -105,22 +113,17 @@ class RosterTest extends TestCase
             'character_id' => $char1->id,
             'static_id' => $static->id,
             'role' => 'main',
-            'combat_role' => 'tank',
         ]);
         $this->assertDatabaseHas('character_static', [
             'character_id' => $char2->id,
             'static_id' => $static->id,
             'role' => 'alt',
-            'combat_role' => 'rdps',
         ]);
 
-        // Update again, removing char2 and changing role of char1
+        // Update again, removing char2
         $response = $this->actingAs($user)->post(route('roster.updateParticipation'), [
             'main_character_id' => $char1->id,
             'raiding_characters' => [$char1->id],
-            'combat_roles' => [
-                $char1->id => 'mdps',
-            ],
         ]);
 
         $response->assertRedirect();
@@ -128,7 +131,6 @@ class RosterTest extends TestCase
             'character_id' => $char1->id,
             'static_id' => $static->id,
             'role' => 'main',
-            'combat_role' => 'mdps',
         ]);
         $this->assertDatabaseMissing('character_static', [
             'character_id' => $char2->id,

@@ -6,8 +6,10 @@ namespace App\Jobs\Character;
 
 use App\Services\Character\CharacterSyncService;
 use App\Models\Character;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -18,7 +20,7 @@ use Throwable;
  * Runs on the dedicated 'bnet' queue so Blizzard API calls never block
  * Raider.io fetches and vice versa.
  */
-class FetchBnetRawDataJob implements ShouldQueue
+class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
@@ -26,10 +28,22 @@ class FetchBnetRawDataJob implements ShouldQueue
 
     public int $backoff = 60;
 
+    public int $uniqueFor = 180;
+
     public function __construct(
         public readonly Character $character,
     ) {
         $this->onQueue(config('sync.queues.bnet', 'bnet'));
+    }
+
+    public function uniqueId(): string
+    {
+        return (string) $this->character->id;
+    }
+
+    public function middleware(): array
+    {
+        return [new RateLimited('bnet-api')];
     }
 
     public function handle(CharacterSyncService $syncService): void

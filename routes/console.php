@@ -15,10 +15,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(FetchAuctionsCommand::class)->hourly();
-Schedule::command(ProcessDiscordAutomations::class)->everyMinute();
-Schedule::command(SyncAllStaticsCommand::class)->everyMinute();
-Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00');
+Schedule::command(FetchAuctionsCommand::class)->hourly()->withoutOverlapping(30)->onOneServer();
+Schedule::command(ProcessDiscordAutomations::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
+Schedule::command(SyncAllStaticsCommand::class)->everyMinute()->withoutOverlapping(10)->onOneServer();
+Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00')->onOneServer();
 
 // Weekly reset — snapshot character_weekly_data and clear it
 Schedule::command('weekly:reset eu')->weeklyOn(3, '04:01'); // Wednesday 04:01 UTC

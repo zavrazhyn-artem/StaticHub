@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Character;
+use App\Models\Realm;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Services\Character\CharacterSyncService;
@@ -14,27 +15,34 @@ class CharacterTest extends TestCase
 {
     use RefreshDatabase;
 
+    private Realm $realm;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->realm = Realm::create(['name' => 'Silvermoon', 'slug' => 'silvermoon', 'region' => 'eu']);
+    }
+
     public function test_user_can_import_characters()
     {
         $user = User::factory()->create();
         $static = StaticGroup::create([
             'name' => 'Test Static',
             'slug' => 'test-static',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
         $user->statics()->attach($static, ['role' => 'owner']);
 
-        // Let's mock CharacterSyncService and check if it's actually called.
-        $this->instance(CharacterSyncService::class, \Mockery::mock(CharacterSyncService::class, function (MockInterface $mock) use ($user) {
+        $realm = $this->realm;
+        $this->instance(CharacterSyncService::class, \Mockery::mock(CharacterSyncService::class, function (MockInterface $mock) use ($user, $realm) {
             $mock->shouldReceive('syncUserCharacters')
                 ->once()
-                ->andReturnUsing(function() use ($user) {
+                ->andReturnUsing(function() use ($user, $realm) {
                     Character::create([
                         'id' => 12345,
                         'user_id' => $user->id,
                         'name' => 'TestChar',
-                        'realm' => 'Silvermoon',
+                        'realm_id' => $realm->id,
                         'playable_class' => 'Paladin',
                         'playable_race' => 'Human',
                         'level' => 80,
@@ -63,17 +71,16 @@ class CharacterTest extends TestCase
         $static = StaticGroup::create([
             'name' => 'Test Static',
             'slug' => 'test-static',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
         $user->statics()->attach($static, ['role' => 'owner']);
 
         $char1 = Character::create([
-            'id' => 1, 'user_id' => $user->id, 'name' => 'Char1', 'realm' => 'Silvermoon',
+            'id' => 1, 'user_id' => $user->id, 'name' => 'Char1', 'realm_id' => $this->realm->id,
             'playable_class' => 'Paladin', 'playable_race' => 'Human', 'level' => 80,
         ]);
         $char2 = Character::create([
-            'id' => 2, 'user_id' => $user->id, 'name' => 'Char2', 'realm' => 'Silvermoon',
+            'id' => 2, 'user_id' => $user->id, 'name' => 'Char2', 'realm_id' => $this->realm->id,
             'playable_class' => 'Mage', 'playable_race' => 'Human', 'level' => 80,
         ]);
 
@@ -118,7 +125,6 @@ class CharacterTest extends TestCase
         $static = StaticGroup::create([
             'name' => 'Test Static',
             'slug' => 'test-static',
-            'server' => 'Silvermoon',
             'owner_id' => $user->id,
         ]);
         $user->statics()->attach($static, ['role' => 'owner']);
@@ -127,7 +133,7 @@ class CharacterTest extends TestCase
             'id' => 12345,
             'user_id' => $user->id,
             'name' => 'TestChar',
-            'realm' => 'Silvermoon',
+            'realm_id' => $this->realm->id,
             'playable_class' => 'Paladin',
             'playable_race' => 'Human',
             'level' => 80,

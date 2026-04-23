@@ -20,7 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             $host = parse_url(config('app.url'), PHP_URL_HOST);
-            $adminDomain = config('admin.subdomain', 'admin') . '.' . $host;
+            $adminDomain = config('admin.domain')
+                ?: config('admin.subdomain', 'admin') . '.' . $host;
 
             Route::domain($adminDomain)
                 ->middleware('web')

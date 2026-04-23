@@ -9,6 +9,7 @@ class AppLayout extends Component
 {
     public function __construct(
         public bool $onboarding = false,
+        public bool $bare = false,
     ) {}
 
     /**
@@ -16,6 +17,9 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app', ['onboarding' => $this->onboarding]);
+        return view('layouts.app', [
+            'onboarding' => $this->onboarding,
+            'bare' => $this->bare,
+        ]);
     }
 }
