@@ -19,6 +19,7 @@
         "laravel/pulse": "^1.7",
         "laravel/socialite": "^5.26",
         "laravel/tinker": "^3.0",
+        "masbug/flysystem-google-drive-ext": "^2.4",
         "opcodesio/log-viewer": "^3.24",
         "opis/json-schema": "^2.6",
         "sentry/sentry-laravel": "^4.24",

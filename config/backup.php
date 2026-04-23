@@ -162,15 +162,19 @@ return [
 
             /*
              * The disk names on which the backups will be stored.
+             *
+             * Google Drive is enabled automatically when GOOGLE_DRIVE_REFRESH_TOKEN is set
+             * in .env (i.e. production). Local dev keeps backups on the local disk only.
              */
-            'disks' => [
+            'disks' => array_filter([
                 'local',
-            ],
+                env('GOOGLE_DRIVE_REFRESH_TOKEN') ? 'google' : null,
+            ]),
 
             /*
              * Determines whether to allow backups to continue when some targets fail instead of failing completely.
              */
-            'continue_on_failure' => false,
+            'continue_on_failure' => true,
         ],
 
         /*
