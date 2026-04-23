@@ -62,6 +62,13 @@ class RawDataSyncService
                 if (isset($schemaColumns[$column])) {
                     try {
                         $this->schemaValidator->validate($payload, $schemaColumns[$column]);
+
+                        if ($column === 'bnet_raid' && empty($payload['expansions'])) {
+                            Log::info('RawDataSyncService: bnet_raid has no raid progression.', [
+                                'character_id' => $character->id,
+                            ]);
+                        }
+
                         $updates[$column] = $payload;
                     } catch (JsonSchemaValidationException $e) {
                         Log::error("RawDataSyncService: schema validation failed for route '{$column}'.", [
