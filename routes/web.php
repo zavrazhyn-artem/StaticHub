@@ -37,7 +37,7 @@ Route::post('/language/switch', [LanguageController::class, 'switch'])->name('la
 // Pass ?throw=1 to raise an uncaught exception end-to-end (for GlitchTip pipeline testing).
 Route::get('/ping', function (\Illuminate\Http\Request $request) {
     if ($request->boolean('throw')) {
-        throw new \RuntimeException('GlitchTip ping (throw)');
+        throw new \RuntimeException('GlitchTip ping ('.uniqid().')');
     }
 
     return response()->json(['message' => 'ok']);
