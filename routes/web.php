@@ -23,6 +23,7 @@ use App\Http\Controllers\Gear\GearController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
+use App\Services\Backup\BackupHealthService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -41,6 +42,15 @@ Route::get('/ping', function (\Illuminate\Http\Request $request) {
 
     return response()->json(['message' => 'ok']);
 })->name('ping');
+
+// Backup freshness — polled by GlitchTip Uptime Monitor. 200 while every
+// destination has a backup within BackupHealthService::FRESHNESS_THRESHOLD_HOURS,
+// 503 with details otherwise.
+Route::get('/health/backup', function (BackupHealthService $service) {
+    $result = $service->check();
+
+    return response()->json($result, $result['status'] === 'ok' ? 200 : 503);
+})->name('health.backup');
 
 Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static'])->group(function () {
 
