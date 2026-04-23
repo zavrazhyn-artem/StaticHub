@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TreasuryService
 {
@@ -82,32 +83,14 @@ class TreasuryService
     // =========================================================================
 
     /**
-     * Reserves = sum(user balances) + tax * count(covered users) - withdrawals_this_week
+     * Reserves is a persistent pool stored on the static row. It grows when
+     * members cover tax (balance → treasury) and shrinks on withdrawals.
+     * Personal member balances are tracked separately on the pivot and are
+     * NOT part of reserves.
      */
     public function calculateReserves(StaticGroup $static): int
     {
-        $region    = strtolower($static->region ?? 'eu');
-        $periodKey = WeeklyResetHelper::periodKey($region);
-        $tax       = (int) ($static->weekly_tax_per_player ?? 0);
-
-        $pivotData = DB::table('static_user')
-            ->where('static_id', $static->id)
-            ->select(
-                DB::raw('SUM(balance) as total_balance'),
-                DB::raw('SUM(CASE WHEN current_weekly_tax_covered = 1 THEN 1 ELSE 0 END) as covered_count'),
-            )
-            ->first();
-
-        $totalBalance = (int) ($pivotData->total_balance ?? 0);
-        $coveredCount = (int) ($pivotData->covered_count ?? 0);
-
-        $withdrawalsThisWeek = Transaction::query()
-            ->forStatic($static->id)
-            ->byType('withdrawal')
-            ->inPeriod($periodKey)
-            ->sumAmount();
-
-        return $totalBalance + ($tax * $coveredCount) - $withdrawalsThisWeek;
+        return (int) ($static->treasury_balance ?? 0);
     }
 
     // =========================================================================
@@ -189,26 +172,54 @@ class TreasuryService
     }
 
     /**
-     * Create a withdrawal: does NOT affect user balance, just records the transaction.
+     * Create a withdrawal: decrements the static's treasury_balance and logs
+     * the transaction. Does NOT touch personal member balances. Refuses to
+     * overdraft — reserves cannot go negative.
+     *
+     * @throws ValidationException when amount exceeds current treasury_balance.
      */
     public function createWithdrawal(StaticGroup $static, int $userId, int $amount, ?string $description = null): Transaction
     {
         $region    = strtolower($static->region ?? 'eu');
         $periodKey = WeeklyResetHelper::periodKey($region);
 
-        return Transaction::create([
-            'static_id'  => $static->id,
-            'user_id'    => $userId,
-            'amount'     => $amount,
-            'type'       => 'withdrawal',
-            'period_key' => $periodKey,
-            'description' => $description,
-            'created_at' => Carbon::now(),
-        ]);
+        return DB::transaction(function () use ($static, $userId, $amount, $description, $periodKey) {
+            // Conditional UPDATE makes the check race-safe: if two withdrawals
+            // arrive at once, only one can succeed while reserves stay non-negative.
+            $affected = DB::table('statics')
+                ->where('id', $static->id)
+                ->where('treasury_balance', '>=', $amount)
+                ->update(['treasury_balance' => DB::raw("treasury_balance - {$amount}")]);
+
+            if ($affected === 0) {
+                $available = (int) DB::table('statics')->where('id', $static->id)->value('treasury_balance');
+                throw ValidationException::withMessages([
+                    'amount' => __('Insufficient reserves. Available: :amount gold.', [
+                        'amount' => number_format(CurrencyHelper::copperToGold($available)),
+                    ]),
+                ]);
+            }
+
+            $transaction = Transaction::create([
+                'static_id'  => $static->id,
+                'user_id'    => $userId,
+                'amount'     => $amount,
+                'type'       => 'withdrawal',
+                'period_key' => $periodKey,
+                'description' => $description,
+                'created_at' => Carbon::now(),
+            ]);
+
+            $static->treasury_balance = (int) ($static->treasury_balance ?? 0) - $amount;
+
+            return $transaction;
+        });
     }
 
     /**
      * If user hasn't covered tax yet and now has enough balance, deduct and mark covered.
+     * The deducted amount is moved from the member's personal balance into the
+     * static's persistent treasury_balance.
      */
     public function tryCoverTax(StaticGroup $static, int $userId): void
     {
@@ -227,13 +238,21 @@ class TreasuryService
         }
 
         if ($pivot->balance >= $tax) {
-            DB::table('static_user')
-                ->where('static_id', $static->id)
-                ->where('user_id', $userId)
-                ->update([
-                    'balance' => DB::raw("balance - {$tax}"),
-                    'current_weekly_tax_covered' => true,
-                ]);
+            DB::transaction(function () use ($static, $userId, $tax) {
+                DB::table('static_user')
+                    ->where('static_id', $static->id)
+                    ->where('user_id', $userId)
+                    ->update([
+                        'balance' => DB::raw("balance - {$tax}"),
+                        'current_weekly_tax_covered' => true,
+                    ]);
+
+                DB::table('statics')
+                    ->where('id', $static->id)
+                    ->increment('treasury_balance', $tax);
+
+                $static->treasury_balance = (int) ($static->treasury_balance ?? 0) + $tax;
+            });
         }
     }
 
@@ -242,7 +261,8 @@ class TreasuryService
      * Called by WeeklyResetCommand.
      *
      * 1. Reset everyone to uncovered.
-     * 2. If tax > 0, deduct from users who can afford it and mark them covered.
+     * 2. If tax > 0, deduct from users who can afford it, mark them covered,
+     *    and add the collected total to the static's treasury_balance.
      */
     public function processWeeklyTaxReset(StaticGroup $static): void
     {
@@ -257,21 +277,33 @@ class TreasuryService
             return;
         }
 
-        // Step 2: deduct tax from members who have enough balance
-        $members = DB::table('static_user')
-            ->where('static_id', $static->id)
-            ->where('balance', '>=', $tax)
-            ->get(['user_id']);
-
-        foreach ($members as $member) {
-            DB::table('static_user')
+        DB::transaction(function () use ($static, $tax) {
+            // Step 2: deduct tax from members who have enough balance
+            $members = DB::table('static_user')
                 ->where('static_id', $static->id)
-                ->where('user_id', $member->user_id)
-                ->update([
-                    'balance' => DB::raw("balance - {$tax}"),
-                    'current_weekly_tax_covered' => true,
-                ]);
-        }
+                ->where('balance', '>=', $tax)
+                ->get(['user_id']);
+
+            foreach ($members as $member) {
+                DB::table('static_user')
+                    ->where('static_id', $static->id)
+                    ->where('user_id', $member->user_id)
+                    ->update([
+                        'balance' => DB::raw("balance - {$tax}"),
+                        'current_weekly_tax_covered' => true,
+                    ]);
+            }
+
+            $collected = $tax * $members->count();
+
+            if ($collected > 0) {
+                DB::table('statics')
+                    ->where('id', $static->id)
+                    ->increment('treasury_balance', $collected);
+
+                $static->treasury_balance = (int) ($static->treasury_balance ?? 0) + $collected;
+            }
+        });
     }
 
     public function updateTransactionComment(Transaction $transaction, ?string $description): void

@@ -130,6 +130,13 @@ export default {
                 </div>
             </div>
 
+            <div class="flex items-center gap-2 px-3 py-2 mb-2 rounded-md bg-surface-container-lowest/50 border border-white/5">
+                <span class="material-symbols-outlined text-yellow-500 text-sm">info</span>
+                <p class="text-3xs text-on-surface-variant">
+                    {{ __('Quantities below are per single raid night, not per week.') }}
+                </p>
+            </div>
+
             <!-- Recipe Cards -->
             <div class="space-y-2">
                 <consumable-card

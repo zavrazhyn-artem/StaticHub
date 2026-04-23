@@ -1032,5 +1032,9 @@
     "Normal": "Normal",
     "Show Me (pulse my character rows)": "Show Me (pulse my character rows)",
     "Show Me": "Show Me",
-    "Drag to the map to place this icon": "Drag to the map to place this icon"
+    "Drag to the map to place this icon": "Drag to the map to place this icon",
+    "Available in reserves: :amount g": "Available in reserves: :amount g",
+    "Cannot withdraw more than the reserves hold.": "Cannot withdraw more than the reserves hold.",
+    "Quantities below are per single raid night, not per week.": "Quantities below are per single raid night, not per week.",
+    "Insufficient reserves. Available: :amount gold.": "Insufficient reserves. Available: :amount gold."
 }

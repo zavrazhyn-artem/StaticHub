@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
  * @property array|null $automation_settings
  * @property array|null $consumable_settings
  * @property int $guild_tax_per_player
+ * @property int $treasury_balance
  * @property Carbon|null $bnet_last_synced_at
  * @property Carbon|null $rio_last_synced_at
  * @property Carbon|null $wcl_last_synced_at
@@ -105,6 +106,7 @@ class StaticGroup extends Model
         'consumable_settings',
         'guild_tax_per_player',
         'weekly_tax_per_player',
+        'treasury_balance',
         'bnet_last_synced_at',
         'rio_last_synced_at',
         'wcl_last_synced_at',
@@ -117,6 +119,7 @@ class StaticGroup extends Model
         'automation_settings' => 'array',
         'consumable_settings' => 'array',
         'weekly_tax_per_player' => 'integer',
+        'treasury_balance' => 'integer',
         'bnet_last_synced_at' => 'datetime',
         'rio_last_synced_at' => 'datetime',
         'wcl_last_synced_at' => 'datetime',

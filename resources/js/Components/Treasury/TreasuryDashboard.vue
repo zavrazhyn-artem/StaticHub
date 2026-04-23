@@ -204,6 +204,7 @@
             :members="members"
             :static-id="staticId"
             :csrf-token="csrfToken"
+            :reserves="reserves"
             @close="showDepositModal = false"
         />
     </div>

@@ -1,18 +1,32 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import GlassModal from '../UI/GlassModal.vue';
 import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
+import { useTranslation } from '@/composables/useTranslation';
 
-defineProps({
+const props = defineProps({
     show: { type: Boolean, required: true },
     transactionType: { type: String, required: true },
     members: { type: Array, required: true },
     staticId: { type: Number, required: true },
     csrfToken: { type: String, required: true },
+    // Current reserves in copper — used to block overdrafting a withdrawal.
+    reserves: { type: Number, default: 0 },
 });
 const emit = defineEmits(['close']);
+const { __ } = useTranslation();
 
 const selectedUserId = ref('');
+const amountGold = ref('');
+
+const reservesGold = computed(() => Math.floor((props.reserves ?? 0) / 10000));
+const amountExceedsReserves = computed(() => {
+    if (props.transactionType !== 'withdrawal') return false;
+    const n = Number(amountGold.value);
+    if (!Number.isFinite(n) || n <= 0) return false;
+    return n > reservesGold.value;
+});
+const submitDisabled = computed(() => !selectedUserId.value || amountExceedsReserves.value);
 </script>
 
 <template>
@@ -43,8 +57,14 @@ const selectedUserId = ref('');
 
             <div class="space-y-1">
                 <label for="amount" class="block text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Amount (Gold)') }}</label>
-                <input type="number" name="amount" id="amount" required :placeholder="__('e.g., 50000')"
+                <input type="number" name="amount" id="amount" required min="1" v-model="amountGold" :placeholder="__('e.g., 50000')"
                        class="w-full bg-surface-container-highest border border-white/5 rounded-sm px-3 py-2 text-sm text-white focus:ring-1 focus:ring-yellow-500 focus:border-transparent outline-none">
+                <p v-if="transactionType === 'withdrawal'" class="text-3xs text-on-surface-variant pt-1">
+                    {{ __('Available in reserves: :amount g', { amount: reservesGold.toLocaleString() }) }}
+                </p>
+                <p v-if="amountExceedsReserves" class="text-3xs text-error pt-1">
+                    {{ __('Cannot withdraw more than the reserves hold.') }}
+                </p>
             </div>
 
             <div class="space-y-1">
@@ -54,7 +74,7 @@ const selectedUserId = ref('');
             </div>
 
             <div class="pt-4">
-                <button type="submit" :disabled="!selectedUserId"
+                <button type="submit" :disabled="submitDisabled"
                         class="w-full bg-yellow-500 text-black py-3 rounded-sm font-headline text-xs font-bold uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     {{ __('Save Transaction') }}
                 </button>

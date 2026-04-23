@@ -1037,5 +1037,9 @@
     "Normal": "Звичайно",
     "Show Me (pulse my character rows)": "Показати мене (пульсація моїх рядків)",
     "Show Me": "Показати мене",
-    "Drag to the map to place this icon": "Перетягни на мапу щоб розмістити іконку"
+    "Drag to the map to place this icon": "Перетягни на мапу щоб розмістити іконку",
+    "Available in reserves: :amount g": "Доступно в резерві: :amount з",
+    "Cannot withdraw more than the reserves hold.": "Не можна зняти більше, ніж є в резерві.",
+    "Quantities below are per single raid night, not per week.": "Кількості нижче — на один рейд, а не на тиждень.",
+    "Insufficient reserves. Available: :amount gold.": "Недостатньо резервів. Доступно: :amount золота."
 }
