@@ -58,8 +58,8 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureJobRateLimiters(): void
     {
-        RateLimiter::for('bnet-api', fn () => Limit::perMinute(30));
-        RateLimiter::for('rio-api', fn () => Limit::perMinute(30));
+        RateLimiter::for('bnet-api', fn () => Limit::perMinute(300));
+        RateLimiter::for('rio-api', fn () => Limit::perMinute(60));
         RateLimiter::for('wcl-api', fn () => Limit::perMinute(15));
     }
 }

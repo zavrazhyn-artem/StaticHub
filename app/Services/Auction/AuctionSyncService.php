@@ -78,7 +78,7 @@ class AuctionSyncService
         $now = now();
         $insertedCount = 0;
 
-        foreach (array_chunk($minPrices, 500, true) as $chunk) {
+        foreach (array_chunk($minPrices, 200, true) as $chunk) {
             $snapshots = [];
             foreach ($chunk as $itemId => $price) {
                 $snapshots[] = [

@@ -24,8 +24,6 @@ class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $tries = 3;
-
     public int $backoff = 60;
 
     public int $uniqueFor = 180;
@@ -34,6 +32,11 @@ class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
         public readonly Character $character,
     ) {
         $this->onQueue(config('sync.queues.bnet', 'bnet'));
+    }
+
+    public function retryUntil(): \DateTime
+    {
+        return now()->addMinutes(30);
     }
 
     public function uniqueId(): string
