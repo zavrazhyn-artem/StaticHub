@@ -57,7 +57,7 @@ Route::get('/health/backup', function (BackupHealthService $service) {
     return response()->json($result, $result['status'] === 'ok' ? 200 : 503);
 })->name('health.backup');
 
-Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static'])->group(function () {
+Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_static', 'log_user_activity'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');

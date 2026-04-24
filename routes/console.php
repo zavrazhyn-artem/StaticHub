@@ -2,7 +2,9 @@
 
 use App\Console\Commands\FetchAuctionsCommand;
 use App\Console\Commands\GenerateEventsCommand;
+use App\Console\Commands\ProcessUserActivityLogsCommand;
 use App\Console\Commands\PurgeOldLogsCommand;
+use App\Console\Commands\PurgeUserActivityLogsCommand;
 use App\Console\Commands\SyncAllStaticsCommand;
 use App\Models\StaticGroup;
 use App\Jobs\SyncStaticGroupJob;
@@ -32,4 +34,7 @@ Schedule::command('backup:run --only-db')->daily()->at('03:00');
 Schedule::command('backup:clean')->daily()->at('04:00');
 
 Schedule::command(PurgeOldLogsCommand::class)->daily()->at('05:00');
+
+Schedule::command(ProcessUserActivityLogsCommand::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
+Schedule::command(PurgeUserActivityLogsCommand::class)->daily()->at('05:15')->onOneServer();
 
