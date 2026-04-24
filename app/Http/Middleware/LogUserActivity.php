@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Services\Admin\UserActivityLogService;
+use App\Services\Ghost\GhostModeService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,10 @@ use Throwable;
 
 class LogUserActivity
 {
-    public function __construct(private readonly UserActivityLogService $logger) {}
+    public function __construct(
+        private readonly UserActivityLogService $logger,
+        private readonly GhostModeService $ghost,
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -25,6 +29,10 @@ class LogUserActivity
     {
         try {
             if (! Auth::check()) {
+                return;
+            }
+
+            if ($this->ghost->isActive()) {
                 return;
             }
 

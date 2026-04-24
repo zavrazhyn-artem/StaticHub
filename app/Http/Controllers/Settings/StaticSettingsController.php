@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateLogsRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\StaticGroup;
 use App\Services\Auth\UserService;
+use App\Services\StaticGroup\DiscordCacheService;
 use App\Services\StaticGroup\StaticSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class StaticSettingsController extends Controller
     public function __construct(
         protected StaticSettingsService $service,
         protected UserService $userService,
+        protected DiscordCacheService $discordCacheService,
     ) {}
 
     public function profile(StaticGroup $static): View
@@ -61,6 +63,24 @@ class StaticSettingsController extends Controller
         Gate::authorize('canAccessSettings', $static);
 
         return view('statics.settings.discord', $this->service->buildDiscordSettingsPayload($static));
+    }
+
+    public function discordContext(StaticGroup $static): JsonResponse
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        try {
+            $context = $this->service->resolveDiscordGuildContext($static);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => 'discord_unavailable'], 502);
+        }
+
+        $cached = $this->discordCacheService->applyFromContext($static, $context);
+
+        return response()->json([
+            ...$context,
+            'cachedNames' => $cached,
+        ]);
     }
 
     public function logs(StaticGroup $static): View

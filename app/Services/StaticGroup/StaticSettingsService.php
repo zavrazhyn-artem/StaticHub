@@ -20,6 +20,7 @@ class StaticSettingsService
         protected RaidScheduleService   $raidScheduleService,
         protected DiscordWebhookService $discordWebhookService,
         protected WclService            $wclService,
+        protected DiscordCacheService   $discordCacheService,
     ) {}
 
     public function buildScheduleSettingsPayload(StaticGroup $static): array
@@ -54,22 +55,19 @@ class StaticSettingsService
 
     public function buildDiscordSettingsPayload(StaticGroup $static): array
     {
-        $context = $this->resolveDiscordGuildContext($static);
-
         $clientId    = config('services.discord.client_id');
         $redirectUri = urlencode(route('discord.bot-invited'));
         $discordInviteUrl = "https://discord.com/oauth2/authorize?client_id={$clientId}&permissions=117760&response_type=code&redirect_uri={$redirectUri}&integration_type=0&scope=bot+applications.commands+guilds";
 
-        $webhookChannel = null;
-        if (!empty($static->discord_webhook_url)) {
-            $webhookChannel = $this->discordWebhookService->resolveWebhookChannel($static->discord_webhook_url);
-        }
+        $cached = $static->discord_cached_names ?? [];
 
-        return array_merge([
-            'static'          => $static,
+        return [
+            'static'           => $static,
             'discordInviteUrl' => $discordInviteUrl,
-            'webhookChannel'  => $webhookChannel,
-        ], $context);
+            'webhookChannel'   => $cached['webhook_channel'] ?? null,
+            'discordGuildId'   => $static->discord_guild_id,
+            'cachedNames'      => $cached,
+        ];
     }
 
     /**
@@ -205,11 +203,13 @@ class StaticSettingsService
 
     public function executeUpdateDiscordSettings(StaticGroup $static, array $data): ?array
     {
+        $webhookUrlChanged = array_key_exists('discord_webhook_url', $data);
+
         $this->updateSettings($static, $data);
 
-        // If webhook URL was updated, resolve and return channel info.
-        if (isset($data['discord_webhook_url']) && !empty($data['discord_webhook_url'])) {
-            return $this->discordWebhookService->resolveWebhookChannel($data['discord_webhook_url']);
+        if ($webhookUrlChanged) {
+            $cached = $this->discordCacheService->refreshWebhookChannel($static->fresh());
+            return $cached['webhook_channel'] ?? null;
         }
 
         return null;
@@ -286,32 +286,14 @@ class StaticSettingsService
     }
 
     /**
-     * Resolve Discord guild context including bot guilds, channels, and roles.
-     * Guilds are filtered to only those where the static's leader is a member.
+     * Resolve Discord guild context (bot guilds where leader is a member, plus channels and
+     * roles for the currently selected guild). Runs Discord API calls in parallel pools.
      */
     public function resolveDiscordGuildContext(StaticGroup $static): array
     {
-        $ownerDiscordId = $static->owner?->discord_id;
-
-        $botGuilds = $ownerDiscordId
-            ? $this->discordMessageService->getGuildsForMember($ownerDiscordId)
-            : [];
-
-        $discordGuildId = $static->discord_guild_id;
-
-        $discordChannels = [];
-        $discordRoles = [];
-
-        if ($discordGuildId) {
-            $discordChannels = $this->discordMessageService->getGuildChannels($discordGuildId);
-            $discordRoles = $this->discordMessageService->getGuildRoles($discordGuildId);
-        }
-
-        return [
-            'botGuilds' => $botGuilds,
-            'discordGuildId' => $discordGuildId,
-            'discordChannels' => $discordChannels,
-            'discordRoles' => $discordRoles,
-        ];
+        return $this->discordMessageService->getDiscordContext(
+            $static->owner?->discord_id,
+            $static->discord_guild_id,
+        );
     }
 }

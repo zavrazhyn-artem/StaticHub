@@ -1,17 +1,17 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import SettingsTabs from './SettingsTabs.vue';
 import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
 import ToastNotification from '@/Components/UI/ToastNotification.vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
+import AlertBanner from '@/Components/UI/AlertBanner.vue';
 const { __ } = useTranslation();
 
 const props = defineProps({
     staticName:       { type: String,  required: true },
-    botGuilds:        { type: Array,   default: () => [] },
-    discordChannels:  { type: Array,   default: () => [] },
-    discordRoles:     { type: Array,   default: () => [] },
+    contextUrl:       { type: String,  required: true },
+    cachedNames:      { type: Object,  default: () => ({}) },
     discordGuildId:   { type: String,  default: '' },
     discordChannelId: { type: String,  default: '' },
     discordRoleIds:   { type: Array,   default: () => [] },
@@ -51,6 +51,19 @@ const showRolesModal    = ref(false);
 const maxVisibleRoles   = 2;
 let inviteCheckInterval = null;
 
+// --- Discord context (lazy-loaded; pre-populated with cached names) ---
+const stubFromCache = (entry) => entry && entry.id ? [{ id: entry.id, name: entry.name }] : [];
+const channelStubs  = (() => {
+    const seen = new Set();
+    return [props.cachedNames.announcement_channel, props.cachedNames.notification_channel]
+        .filter(c => c && c.id && !seen.has(c.id) && seen.add(c.id))
+        .map(c => ({ id: c.id, name: c.name }));
+})();
+
+const botGuilds       = ref(stubFromCache(props.cachedNames.guild));
+const contextLoading  = ref(true);
+const contextError    = ref(false);
+
 function openInvitePopup() {
     const popup = window.open(props.inviteUrl, 'discord_invite', 'width=500,height=800');
     if (!popup) return;
@@ -76,11 +89,43 @@ function openInvitePopup() {
 
 onBeforeUnmount(() => clearInterval(inviteCheckInterval));
 
-const channels        = ref([...props.discordChannels]);
-const roles           = ref([...props.discordRoles]);
+const channels        = ref(channelStubs);
+const roles           = ref((props.cachedNames.ping_roles ?? []).map(r => ({ id: r.id, name: r.name })));
 const channelsLoading = ref(false);
 const rolesLoading    = ref(false);
-const fetchedGuildId  = ref(props.discordGuildId);
+const fetchedGuildId  = ref('');
+
+function mergeWithStubs(fresh, stubs) {
+    const ids = new Set((fresh ?? []).map(f => f.id));
+    const extra = (stubs ?? []).filter(s => s && s.id && !ids.has(s.id));
+    return [...(fresh ?? []), ...extra];
+}
+
+async function loadDiscordContext() {
+    contextLoading.value = true;
+    contextError.value   = false;
+
+    try {
+        const res = await fetch(props.contextUrl, {
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        botGuilds.value = mergeWithStubs(data.botGuilds, stubFromCache(props.cachedNames.guild));
+        channels.value  = mergeWithStubs(data.discordChannels, channelStubs);
+        roles.value     = mergeWithStubs(data.discordRoles, props.cachedNames.ping_roles ?? []);
+        fetchedGuildId.value = selectedGuildId.value;
+    } catch {
+        contextError.value = true;
+        // Keep cache stubs in place so the user still sees their saved values
+    } finally {
+        contextLoading.value = false;
+    }
+}
+
+onMounted(loadDiscordContext);
 
 // Per-field save state
 const saving = ref({});
@@ -388,8 +433,25 @@ async function deleteNotifChannelTestMessage() {
 const noChannelsError = () =>
     selectedGuildId.value &&
     !channelsLoading.value &&
+    !contextLoading.value &&
     channels.value.length === 0 &&
     fetchedGuildId.value === selectedGuildId.value;
+
+// --- Loader / disabled state for selects during initial Discord context fetch ---
+const channelBusy = computed(() => contextLoading.value || channelsLoading.value);
+const roleBusy    = computed(() => contextLoading.value || rolesLoading.value);
+
+const guildSelectLoading  = computed(() => !contextError.value && contextLoading.value && !!selectedGuildId.value);
+const guildSelectDisabled = computed(() => contextError.value || (contextLoading.value && !selectedGuildId.value));
+
+const channelSelectLoading  = computed(() => !contextError.value && channelBusy.value && !!selectedChannelId.value);
+const channelSelectDisabled = computed(() => contextError.value || noChannelsError() || (channelBusy.value && !selectedChannelId.value));
+
+const notifChannelSelectLoading  = computed(() => !contextError.value && channelBusy.value && !!selectedNotifChannelId.value);
+const notifChannelSelectDisabled = computed(() => contextError.value || noChannelsError() || (channelBusy.value && !selectedNotifChannelId.value));
+
+const roleSelectLoading  = computed(() => !contextError.value && roleBusy.value && selectedRoleIds.value.length > 0);
+const roleSelectDisabled = computed(() => contextError.value || (roleBusy.value && selectedRoleIds.value.length === 0));
 </script>
 
 <template>
@@ -470,9 +532,23 @@ const noChannelsError = () =>
     </GlassModal>
 
     <div class="max-w-4xl mx-auto">
-        <div class="mb-8">
+        <div class="mb-8 relative">
             <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline">{{ __('Static Settings') }}</h1>
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ staticName }}</p>
+
+            <div v-if="contextError" class="absolute top-full left-0 right-0 mt-0 z-30 flex justify-center pointer-events-none">
+                <div class="pointer-events-auto">
+                    <AlertBanner
+                        variant="warning"
+                        icon="warning"
+                        :dismissible="false"
+                        :action-label="__('Retry')"
+                        @action="loadDiscordContext"
+                    >
+                        {{ __('Could not reach Discord. Some fields are disabled until the connection is restored.') }}
+                    </AlertBanner>
+                </div>
+            </div>
         </div>
 
         <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="discord" :can-manage="canManage" />
@@ -496,20 +572,22 @@ const noChannelsError = () =>
                             <span :class="['material-symbols-outlined text-sm w-5 text-center transition-opacity', fieldIcon('discord_guild_id').cls, fieldIcon('discord_guild_id').visible ? 'opacity-100' : 'opacity-0']">{{ fieldIcon('discord_guild_id').icon }}</span>
                         </div>
                         <SearchableSelect
-                            v-if="botGuilds.length"
+                            v-if="contextLoading || botGuilds.length"
                             v-model="selectedGuildId"
                             :options="botGuilds"
                             input-name="discord_guild_id"
                             icon="dns"
-                            :placeholder="__('Select a server...')"
+                            :placeholder="contextLoading ? __('Loading servers...') : __('Select a server...')"
                             :search-placeholder="__('Search server...')"
                             :empty-text="__('No servers found.')"
+                            :loading="guildSelectLoading"
+                            :disabled="guildSelectDisabled"
                             accent-color="#5865F2"
                         />
                         <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic min-h-12 flex items-center">
                             {{ __('Invite the bot to a server first') }}
                         </div>
-                        <p v-if="botGuilds.length" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
+                        <p v-if="contextLoading || botGuilds.length" class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider">{{ __('Select the server where your bot is present.') }}</p>
                     </div>
 
                     <!-- Invite bot -->
@@ -550,11 +628,11 @@ const noChannelsError = () =>
                                 input-name="discord_channel_id"
                                 icon="chat"
                                 prefix="# "
-                                :placeholder="channelsLoading ? __('Loading channels...') : __('Select a channel...')"
+                                :placeholder="channelBusy ? __('Loading channels...') : __('Select a channel...')"
                                 :search-placeholder="__('Search channel...')"
                                 :empty-text="__('No channels found.')"
-                                :loading="channelsLoading"
-                                :disabled="noChannelsError()"
+                                :loading="channelSelectLoading"
+                                :disabled="channelSelectDisabled"
                                 accent-color="#5865F2"
                             />
                             <div v-else class="w-full px-4 py-3 bg-surface-container-highest/50 border border-white/5 rounded-lg font-headline text-xs font-bold text-on-surface-variant/40 tracking-widest italic">
@@ -597,11 +675,11 @@ const noChannelsError = () =>
                                 :options="roles.filter(r => !selectedRoleIds.includes(r.id))"
                                 icon="groups"
                                 prefix="@ "
-                                :placeholder="rolesLoading ? __('Loading roles...') : (selectedRoleIds.length ? __('Add another role...') : __('No mention'))"
+                                :placeholder="roleBusy ? __('Loading roles...') : (selectedRoleIds.length ? __('Add another role...') : __('No mention'))"
                                 :search-placeholder="__('Search role...')"
                                 :empty-text="__('No more roles.')"
-                                :loading="rolesLoading"
-                                :disabled="!roles.length && !rolesLoading"
+                                :loading="roleSelectLoading"
+                                :disabled="roleSelectDisabled || (!roles.length && !roleBusy)"
                                 accent-color="#a78bfa"
                             />
                             <!-- Selected roles chips below -->
@@ -746,11 +824,11 @@ const noChannelsError = () =>
                                         input-name="notification_channel_id"
                                         icon="chat"
                                         prefix="# "
-                                        :placeholder="channelsLoading ? __('Loading channels...') : __('Select a channel...')"
+                                        :placeholder="channelBusy ? __('Loading channels...') : __('Select a channel...')"
                                         :search-placeholder="__('Search channel...')"
                                         :empty-text="__('No channels found.')"
-                                        :loading="channelsLoading"
-                                        :disabled="noChannelsError()"
+                                        :loading="notifChannelSelectLoading"
+                                        :disabled="notifChannelSelectDisabled"
                                         accent-color="#5865F2"
                                         drop-up
                                     />

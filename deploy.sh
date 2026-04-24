@@ -18,7 +18,7 @@ echo "🛑 2. Зупиняємо worker/scheduler перед build (звільн
 # повзти годинами або зависати під OOM. Workers під SIGTERM чекають
 # поки поточний job закінчиться (типово до 30с), потім SIGKILL.
 # Jobs що обірвались стануть reserved у Redis і підхопляться після деплою.
-docker compose -f docker-compose.prod.yml stop -t 30 worker scheduler 2>/dev/null || true
+docker compose -f docker-compose.prod.yml stop -t 30 worker 2>/dev/null || true
 
 echo "📦 3. Збираємо імейджі..."
 # Docker розумний: якщо package.json чи composer.json не змінились,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Discord;
 
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -48,13 +49,6 @@ class DiscordApiService
         return null;
     }
 
-    public function getGuilds(): array
-    {
-        $result = $this->makeRequest('GET', '/users/@me/guilds');
-
-        return is_array($result) ? $result : [];
-    }
-
     public function getChannels(string $guildId): array
     {
         $result = $this->makeRequest('GET', "/guilds/{$guildId}/channels");
@@ -67,13 +61,6 @@ class DiscordApiService
         $result = $this->makeRequest('GET', "/guilds/{$guildId}/roles");
 
         return is_array($result) ? $result : [];
-    }
-
-    public function getGuildMember(string $guildId, string $userId): ?array
-    {
-        $result = $this->makeRequest('GET', "/guilds/{$guildId}/members/{$userId}");
-
-        return is_array($result) ? $result : null;
     }
 
     public function sendMessage(string $channelId, array $payload): ?array
@@ -123,5 +110,112 @@ class DiscordApiService
     {
         $result = $this->makeRequest('DELETE', "/channels/{$channelId}/messages/{$messageId}");
         return $result !== null;
+    }
+
+    /**
+     * Fetch guilds + (optionally) channels and roles for one guild in a single parallel pool.
+     * Throws if any required endpoint fails — caller decides how to surface the error.
+     *
+     * @return array{guilds: array, channels: array, roles: array}
+     * @throws \RuntimeException
+     */
+    public function fetchGuildContext(?string $guildId): array
+    {
+        if (empty($this->botToken)) {
+            throw new \RuntimeException('Discord bot token is missing in configuration.');
+        }
+
+        $endpoints = ['guilds' => '/users/@me/guilds'];
+        if ($guildId) {
+            $endpoints['channels'] = "/guilds/{$guildId}/channels";
+            $endpoints['roles']    = "/guilds/{$guildId}/roles";
+        }
+
+        $responses = Http::pool(fn (Pool $pool) => collect($endpoints)
+            ->map(fn (string $endpoint, string $key) => $pool
+                ->as($key)
+                ->withToken($this->botToken, 'Bot')
+                ->get($this->baseUrl . $endpoint))
+            ->all());
+
+        $result = ['guilds' => [], 'channels' => [], 'roles' => []];
+
+        foreach ($endpoints as $key => $endpoint) {
+            $response = $responses[$key] ?? null;
+
+            if (!$response instanceof \Illuminate\Http\Client\Response) {
+                Log::error("Discord pool transport error on GET {$endpoint}", [
+                    'exception' => $response instanceof \Throwable ? $response->getMessage() : 'unknown',
+                ]);
+                throw new \RuntimeException("Discord API unreachable: GET {$endpoint}");
+            }
+
+            if (!$response->successful()) {
+                Log::error("Discord pool error on GET {$endpoint}", [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                throw new \RuntimeException("Discord API error {$response->status()} on GET {$endpoint}");
+            }
+
+            $result[$key] = $response->json() ?? [];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Resolve which of the given guild IDs the user is a member of, in a single parallel pool.
+     * 404 means "not a member" (expected); other failures throw.
+     *
+     * @return array<string, bool> Map of guildId → membership status.
+     * @throws \RuntimeException
+     */
+    public function fetchMembershipMap(array $guildIds, string $userId): array
+    {
+        if (empty($guildIds)) {
+            return [];
+        }
+
+        if (empty($this->botToken)) {
+            throw new \RuntimeException('Discord bot token is missing in configuration.');
+        }
+
+        $responses = Http::pool(fn (Pool $pool) => collect($guildIds)
+            ->map(fn (string $guildId) => $pool
+                ->as($guildId)
+                ->withToken($this->botToken, 'Bot')
+                ->get($this->baseUrl . "/guilds/{$guildId}/members/{$userId}"))
+            ->all());
+
+        $map = [];
+        foreach ($guildIds as $guildId) {
+            $response = $responses[$guildId] ?? null;
+
+            if (!$response instanceof \Illuminate\Http\Client\Response) {
+                Log::error("Discord pool transport error on membership lookup for guild {$guildId}", [
+                    'exception' => $response instanceof \Throwable ? $response->getMessage() : 'unknown',
+                ]);
+                throw new \RuntimeException("Discord API unreachable: membership lookup for guild {$guildId}");
+            }
+
+            if ($response->successful()) {
+                $map[$guildId] = true;
+                continue;
+            }
+
+            if ($response->status() === 404) {
+                $map[$guildId] = false;
+                continue;
+            }
+
+            Log::error("Discord pool error on membership lookup for guild {$guildId}", [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+            throw new \RuntimeException("Discord API error {$response->status()} on membership lookup for guild {$guildId}");
+        }
+
+        return $map;
     }
 }

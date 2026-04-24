@@ -107,12 +107,6 @@ defineExpose({ close });
             <!-- Leading icon -->
             <span :class="['absolute top-1/2 -translate-y-1/2 pointer-events-none', compact ? 'left-1.5' : 'left-3']">
                 <span
-                    v-if="loading"
-                    :class="['material-symbols-outlined animate-spin', compact ? 'text-xs' : 'text-lg']"
-                    :style="`color: ${accentColor}`"
-                >sync</span>
-                <span
-                    v-else
                     :class="['material-symbols-outlined transition-colors', compact ? 'text-xs' : 'text-lg', open ? '' : 'text-on-surface-variant']"
                     :style="open ? `color: ${accentColor}` : ''"
                 >{{ icon }}</span>
@@ -120,13 +114,18 @@ defineExpose({ close });
 
             <!-- Label -->
             <span v-if="selectedLabel" class="truncate text-white uppercase">{{ selectedLabel }}</span>
-            <span v-else-if="loading" :class="['truncate text-on-surface-variant/60 italic', compact ? '' : 'text-xs']">{{ $slots.loading ? '' : placeholder }}</span>
+            <span v-else-if="loading" :class="['truncate text-on-surface-variant/60 italic', compact ? '' : 'text-xs']">{{ placeholder }}</span>
             <span v-else :class="['truncate text-on-surface-variant/50 italic font-normal', compact ? '' : 'text-xs']">{{ placeholder }}</span>
 
-            <!-- Trailing: clear OR chevron -->
+            <!-- Trailing: spinner (loading) OR clear OR chevron -->
             <span :class="['absolute top-1/2 -translate-y-1/2 flex items-center', compact ? 'right-1.5' : 'right-3']">
+                <span
+                    v-if="loading"
+                    :class="['material-symbols-outlined animate-spin', compact ? 'text-xs' : 'text-base']"
+                    :style="`color: ${accentColor}`"
+                >sync</span>
                 <button
-                    v-if="modelValue && !loading && !disabled"
+                    v-else-if="modelValue && !disabled"
                     type="button"
                     @click="clear"
                     :class="['material-symbols-outlined text-on-surface-variant hover:text-white transition-colors', compact ? 'text-2xs' : 'text-sm']"

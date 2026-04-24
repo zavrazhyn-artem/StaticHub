@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::get('/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::patch('/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
     Route::get('/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
+    Route::get('/settings/discord/context', [StaticSettingsController::class, 'discordContext'])->name('statics.settings.discord.context');
     Route::patch('/settings/discord', [StaticSettingsController::class, 'updateDiscord'])->name('statics.settings.discord.update');
     Route::post('/settings/discord/test', [StaticSettingsController::class, 'testDiscordWebhook'])->name('statics.settings.discord.test');
     Route::post('/settings/discord/test-channel', [StaticSettingsController::class, 'testDiscordChannel'])->name('statics.settings.discord.test-channel');

@@ -48,24 +48,36 @@ class DiscordMessageService
     }
 
     /**
-     * Fetch all guilds the bot is in.
+     * Fetch all Discord context (guilds the owner can manage, channels and roles for the
+     * currently selected guild) in two parallel pools. Channels filtered to text type.
+     *
+     * @return array{botGuilds: array, discordChannels: array, discordRoles: array}
      */
-    public function getGuildsTheBotIsIn(): array
+    public function getDiscordContext(?string $ownerDiscordId, ?string $discordGuildId): array
     {
-        return $this->discordApiTask->getGuilds();
-    }
+        $context = $this->discordApiTask->fetchGuildContext($discordGuildId);
 
-    /**
-     * Fetch bot guilds filtered to only those where the given Discord user is a member.
-     */
-    public function getGuildsForMember(string $discordUserId): array
-    {
-        $botGuilds = $this->discordApiTask->getGuilds();
+        $botGuilds = [];
+        if ($ownerDiscordId && !empty($context['guilds'])) {
+            $guildIds = array_map(fn (array $g) => (string) $g['id'], $context['guilds']);
+            $membership = $this->discordApiTask->fetchMembershipMap($guildIds, $ownerDiscordId);
 
-        return collect($botGuilds)
-            ->filter(fn(array $guild) => $this->discordApiTask->getGuildMember($guild['id'], $discordUserId) !== null)
+            $botGuilds = collect($context['guilds'])
+                ->filter(fn (array $g) => $membership[(string) $g['id']] ?? false)
+                ->values()
+                ->toArray();
+        }
+
+        $channels = collect($context['channels'])
+            ->filter(fn (array $c) => ($c['type'] ?? null) === 0)
             ->values()
             ->toArray();
+
+        return [
+            'botGuilds'       => $botGuilds,
+            'discordChannels' => $channels,
+            'discordRoles'    => $context['roles'],
+        ];
     }
 
     /**

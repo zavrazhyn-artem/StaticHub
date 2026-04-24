@@ -1,9 +1,8 @@
 <x-app-layout>
     <settings-discord
         static-name="{{ $static->name }}"
-        :bot-guilds='@json($botGuilds ?? [])'
-        :discord-channels='@json($discordChannels ?? [])'
-        :discord-roles='@json($discordRoles ?? [])'
+        context-url="{{ route('statics.settings.discord.context') }}"
+        :cached-names='@json($cachedNames ?? new stdClass())'
         discord-guild-id="{{ $discordGuildId ?? '' }}"
         discord-channel-id="{{ $static->discord_channel_id ?? '' }}"
         :discord-role-ids='@json($static->automation_settings["ping_role_ids"] ?? ($static->automation_settings["ping_role_id"] ?? null ? [$static->automation_settings["ping_role_id"]] : []))'
