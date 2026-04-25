@@ -1,35 +1,21 @@
 spec: Brewmaster
 class: Monk
 role: tank
-source: WoWAnalyzer-midnight (APL-derived, manual)
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Keg Smash'
-    ability_id: 121253
+    ability: 'Invoke Niuzao, the Black Ox'
+    ability_id: 132578
     check: cast_efficiency
-    cooldown_seconds: 8.0
-    recommended_efficiency: 0.80
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Breath of Fire'
-    ability_id: 115181
+    ability: 'Weapons of Order'
+    ability_id: 387184
     check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.80
-    severity: major
-  -
-    ability: 'Rising Sun Kick'
-    ability_id: 107428
-    check: cast_efficiency
-    cooldown_seconds: 10.0
-    recommended_efficiency: 0.80
-    severity: minor
-  -
-    ability: 'Purifying Brew'
-    ability_id: 119582
-    check: cast_efficiency
-    cooldown_seconds: 4.0
-    recommended_efficiency: 0.80
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Exploding Keg'
@@ -39,16 +25,79 @@ rotation_checks:
     recommended_efficiency: 0.90
     severity: major
   -
+    ability: 'Empty the Cellar'
+    ability_id: 1262329
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
     ability: 'Black Ox Brew'
     ability_id: 115399
     check: cast_efficiency
     cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Breath of Fire'
+    ability_id: 115181
+    check: cast_efficiency
+    cooldown_seconds: 15.0
     recommended_efficiency: 0.90
     severity: major
   -
-    ability: 'Invoke Niuzao, the Black Ox'
-    ability_id: 132578
+    ability: 'Celestial Conduit'
+    ability_id: 443028
     check: cast_efficiency
-    cooldown_seconds: 180.0
-    recommended_efficiency: 0.90
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
     severity: major
+  -
+    ability: 'Celestial Brew'
+    ability_id: 322507
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: 'Purifying Brew'
+    ability_id: 119582
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Touch of Death'
+    ability_id: 322109
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Rushing Jade Wind'
+    ability_id: 116847
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Fortifying Brew'
+    ability_id: 115203
+    check: cast_efficiency
+    cooldown_seconds: 360.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Diffuse Magic'
+    ability_id: 1243287
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Dampen Harm'
+    ability_id: 122278
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor

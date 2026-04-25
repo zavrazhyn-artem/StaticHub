@@ -1,36 +1,8 @@
 spec: Shadow
 class: Priest
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: 'Mind Blast'
-    ability_id: 8092
-    check: cast_efficiency
-    cooldown_seconds: 9.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Tentacle Slam'
-    ability_id: 1227280
-    check: cast_efficiency
-    cooldown_seconds: 7.5
-    recommended_efficiency: 0.1
-    severity: minor
-  -
-    ability: Halo
-    ability_id: 120644
-    check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Void Torrent'
-    ability_id: 263165
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
-    severity: major
   -
     ability: Voidform
     ability_id: 228260
@@ -39,16 +11,107 @@ rotation_checks:
     recommended_efficiency: 0.95
     severity: major
   -
-    ability: Voidwraith
-    ability_id: 451235
-    check: cast_efficiency
-    cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
     ability: 'Power Infusion'
     ability_id: 10060
     check: cast_efficiency
     cooldown_seconds: 120.0
     recommended_efficiency: 0.95
     severity: major
+  -
+    ability: 'Void Torrent'
+    ability_id: 263165
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: Halo
+    ability_id: 120644
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Mind Blast'
+    ability_id: 8092
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Mindbender
+    ability_id: 1230339
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Shadowfiend
+    ability_id: 34433
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Voidwraith
+    ability_id: 451235
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Shadow Word: Death'
+    ability_id: 32379
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: 'Psychic Scream'
+    ability_id: 8122
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Silence
+    ability_id: 15487
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Dispersion
+    ability_id: 47585
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Desperate Prayer'
+    ability_id: 19236
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Fade
+    ability_id: 586
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Vampiric Embrace'
+    ability_id: 15286
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Mass Dispel'
+    ability_id: 32375
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor

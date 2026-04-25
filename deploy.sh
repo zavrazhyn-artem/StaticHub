@@ -13,7 +13,7 @@ echo "========================================"
 echo "⬇️ 1. Оновлюємо код з Git..."
 git pull
 
-echo "🛑 2. Зупиняємо worker/scheduler перед build (звільняємо CPU/RAM)..."
+echo "🛑 2. Зупиняємо worker перед build (звільняємо CPU/RAM)..."
 # Без цього BuildKit конкурує з queue workers за CPU/RAM і білд може
 # повзти годинами або зависати під OOM. Workers під SIGTERM чекають
 # поки поточний job закінчиться (типово до 30с), потім SIGKILL.

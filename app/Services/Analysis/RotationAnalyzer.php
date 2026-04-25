@@ -133,6 +133,28 @@ class RotationAnalyzer
     }
 
     /**
+     * Evaluate a player's full rotation for a single fight (or any duration).
+     * Public entry point used by FightBreakdownBuilder for per-pull analysis;
+     * returns the same row shape as the per-encounter `player_rotation` data
+     * produced by apply(). Returns [] when no baseline exists for the spec or
+     * the player did nothing in the window.
+     */
+    public function evaluatePlayerRotation(?string $class, ?string $spec, array $playerCasts, int $durationSec): array
+    {
+        if ($durationSec < 30 || empty($playerCasts)) return [];
+        $baseline = $this->loader->load($class, $spec);
+        $checks = $baseline['rotation_checks'] ?? [];
+        if (empty($checks)) return [];
+
+        $rows = [];
+        foreach ($checks as $check) {
+            $row = $this->evaluateCheck($check, $playerCasts, $durationSec);
+            if ($row !== null) $rows[] = $row;
+        }
+        return $rows;
+    }
+
+    /**
      * Evaluate a single check against a (player_casts, duration_seconds) pair.
      * Returns null if the ability isn't cast at all (likely not talented).
      */

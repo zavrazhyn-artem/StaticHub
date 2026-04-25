@@ -1,21 +1,28 @@
 spec: Windwalker
 class: Monk
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Fists of Fury'
-    ability_id: 113656
+    ability: 'Storm, Earth, and Fire'
+    ability_id: 137639
     check: cast_efficiency
-    cooldown_seconds: 24.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.90
     severity: major
   -
-    ability: 'Rising Sun Kick'
-    ability_id: 107428
+    ability: 'Invoke Xuen, the White Tiger'
+    ability_id: 123904
     check: cast_efficiency
-    cooldown_seconds: 10.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Strike of the Windlord'
+    ability_id: 392983
+    check: cast_efficiency
+    cooldown_seconds: 35.0
+    recommended_efficiency: 0.95
     severity: major
   -
     ability: 'Whirling Dragon Punch'
@@ -25,19 +32,33 @@ rotation_checks:
     recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Expel Harm'
-    ability_id: 322101
+    ability: 'Fists of Fury'
+    ability_id: 113656
     check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 24.0
+    recommended_efficiency: 0.90
     severity: major
   -
-    ability: 'Chi Burst'
-    ability_id: 123986
+    ability: 'Rising Sun Kick'
+    ability_id: 107428
     check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.85
     severity: major
+  -
+    ability: 'Celestial Conduit'
+    ability_id: 1248989
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Touch of Death'
+    ability_id: 322109
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.80
+    severity: minor
   -
     ability: 'Slicing Winds'
     ability_id: 1217413
@@ -49,20 +70,41 @@ rotation_checks:
     ability: Zenith
     ability_id: 1249625
     check: cast_efficiency
-    cooldown_seconds: 45.0
-    recommended_efficiency: 0.95
-    severity: major
-  -
-    ability: 'Strike of the Windlord'
-    ability_id: 392983
-    check: cast_efficiency
-    cooldown_seconds: 35.0
-    recommended_efficiency: 0.95
-    severity: major
-  -
-    ability: 'Celestial Conduit'
-    ability_id: 1248989
-    check: cast_efficiency
     cooldown_seconds: 90.0
     recommended_efficiency: 0.95
     severity: major
+  -
+    ability: 'Chi Burst'
+    ability_id: 123986
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Touch of Karma'
+    ability_id: 122470
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.60
+    severity: minor
+  -
+    ability: 'Expel Harm'
+    ability_id: 322101
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Fortifying Brew'
+    ability_id: 115203
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Diffuse Magic'
+    ability_id: 1243287
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor

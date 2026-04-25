@@ -1,13 +1,48 @@
 spec: Vengeance
 class: DemonHunter
 role: tank
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Immolation Aura'
-    ability_id: 258920
+    ability: Metamorphosis
+    ability_id: 187827
     check: cast_efficiency
-    cooldown_seconds: 15.0
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Fiery Brand'
+    ability_id: 204021
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.7
+    severity: major
+  -
+    ability: 'Demon Spikes'
+    ability_id: 203720
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Fel Devastation'
+    ability_id: 212084
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Soul Carver'
+    ability_id: 207407
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Sigil of Spite'
+    ability_id: 390163
+    check: cast_efficiency
+    cooldown_seconds: 60.0
     recommended_efficiency: 0.9
     severity: major
   -
@@ -22,19 +57,33 @@ rotation_checks:
     ability_id: 247454
     check: cast_efficiency
     cooldown_seconds: 25.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: minor
   -
-    ability: 'Fel Devastation'
-    ability_id: 212084
+    ability: 'Immolation Aura'
+    ability_id: 258920
     check: cast_efficiency
-    cooldown_seconds: 40.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.9
     severity: major
   -
-    ability: 'Fel Desolation'
-    ability_id: 452486
+    ability: 'Soul Barrier'
+    ability_id: 1265924
     check: cast_efficiency
-    cooldown_seconds: 40.0
-    recommended_efficiency: 0.8
-    severity: major
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.6
+    severity: minor
+  -
+    ability: 'Vengeful Retreat'
+    ability_id: 198793
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: Darkness
+    ability_id: 196718
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.5
+    severity: minor

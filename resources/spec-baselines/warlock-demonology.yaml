@@ -1,40 +1,152 @@
 spec: Demonology
 class: Warlock
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Summon Demonic Tyrant'
+    ability_id: 265187
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
   -
     ability: 'Call Dreadstalkers'
     ability_id: 104316
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: 'Summon Vilefiend'
     ability_id: 1251778
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: 'Summon Charhound'
     ability_id: 455476
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: 'Summon Gloomhound'
     ability_id: 455465
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
+  -
+    ability: 'Power Siphon'
+    ability_id: 264130
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Demonic Strength'
+    ability_id: 267171
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Nether Portal'
+    ability_id: 267217
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Bilescourge Bombers'
+    ability_id: 267211
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Grimoire: Felguard'
+    ability_id: 111898
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Grimoire: Imp Lord'
+    ability_id: 1276452
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Grimoire: Fel Ravager'
+    ability_id: 1276467
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Soul Strike'
+    ability_id: 264057
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.80
+    severity: minor
   -
     ability: Implosion
     ability_id: 196277
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.9
-    severity: major
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Mortal Coil'
+    ability_id: 6789
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Howl of Terror'
+    ability_id: 5484
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Shadowfury
+    ability_id: 30283
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Unending Resolve'
+    ability_id: 104773
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Dark Pact'
+    ability_id: 108416
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Demonic Circle: Teleport'
+    ability_id: 48020
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Fel Domination'
+    ability_id: 333889
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor

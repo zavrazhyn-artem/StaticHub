@@ -1,33 +1,54 @@
 spec: Havoc
 class: DemonHunter
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Immolation Aura'
-    ability_id: 258920
+    ability: Metamorphosis
+    ability_id: 200166
     check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.95
-    severity: major
-  -
-    ability: 'Throw Glaive'
-    ability_id: 185123
-    check: cast_efficiency
-    cooldown_seconds: 9.0
-    recommended_efficiency: 0.95
-    severity: minor
-  -
-    ability: 'Essence Break'
-    ability_id: 258860
-    check: cast_efficiency
-    cooldown_seconds: 40.0
-    recommended_efficiency: 0.95
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Eye Beam'
     ability_id: 198013
     check: cast_efficiency
-    cooldown_seconds: 40.0
+    cooldown_seconds: 30.0
     recommended_efficiency: 0.95
     severity: major
+  -
+    ability: 'The Hunt'
+    ability_id: 370965
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Essence Break'
+    ability_id: 258860
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Immolation Aura'
+    ability_id: 258920
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: minor
+  -
+    ability: Felblade
+    ability_id: 232893
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: 'Vengeful Retreat'
+    ability_id: 198793
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.75
+    severity: minor

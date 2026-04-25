@@ -1,54 +1,110 @@
 spec: Discipline
 class: Priest
 role: healer
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: Penance
-    ability_id: 47540
+    ability: 'Power Word: Radiance'
+    ability_id: 194509
     check: cast_efficiency
-    cooldown_seconds: 9.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Mind Blast'
-    ability_id: 8092
-    check: cast_efficiency
-    cooldown_seconds: 28.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Shadow Word: Death'
-    ability_id: 32379
-    check: cast_efficiency
-    cooldown_seconds: 10.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Evangelism
-    ability_id: 472433
-    check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Ultimate Penitence'
-    ability_id: 421453
-    check: cast_efficiency
-    cooldown_seconds: 240.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Power Word: Barrier'
     ability_id: 62618
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: 'Pain Suppression'
+    ability_id: 33206
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: Evangelism
+    ability_id: 472433
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Mindbender
+    ability_id: 1280137
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Shadowfiend
+    ability_id: 34433
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Power Infusion'
     ability_id: 10060
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.95
     severity: major
+  -
+    ability: 'Mind Blast'
+    ability_id: 8092
+    check: cast_efficiency
+    cooldown_seconds: 28.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: Voidwraith
+    ability_id: 451234
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Ultimate Penitence'
+    ability_id: 421453
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: 'Shadow Word: Death'
+    ability_id: 32379
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: Penance
+    ability_id: 47540
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Mass Dispel'
+    ability_id: 32375
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Desperate Prayer'
+    ability_id: 19236
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Fade
+    ability_id: 586
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor

@@ -1,27 +1,20 @@
 spec: Arcane
 class: Mage
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Arcane Orb'
-    ability_id: 153626
+    ability: 'Arcane Surge'
+    ability_id: 365350
     check: cast_efficiency
-    cooldown_seconds: 20.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
     severity: major
   -
     ability: 'Touch of the Magi'
     ability_id: 321507
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Arcane Surge'
-    ability_id: 365350
-    check: cast_efficiency
-    cooldown_seconds: 90.0
     recommended_efficiency: 0.9
     severity: major
   -
@@ -36,5 +29,75 @@ rotation_checks:
     ability_id: 205025
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.6
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Arcane Orb'
+    ability_id: 153626
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.85
     severity: major
+  -
+    ability: 'Mirror Image'
+    ability_id: 55342
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Time Warp'
+    ability_id: 80353
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.7
+    severity: major
+  -
+    ability: Supernova
+    ability_id: 157980
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: "Dragon's Breath"
+    ability_id: 31661
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Alter Time'
+    ability_id: 342245
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.6
+    severity: minor
+  -
+    ability: 'Prismatic Barrier'
+    ability_id: 235450
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Ice Block'
+    ability_id: 45438
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Greater Invisibility'
+    ability_id: 110959
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Mass Invisibility'
+    ability_id: 414664
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.5
+    severity: minor

@@ -1,33 +1,103 @@
 spec: Preservation
 class: Evoker
 role: healer
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: Reversion
-    ability_id: 366155
+    ability: Rewind
+    ability_id: 363534
     check: cast_efficiency
-    cooldown_seconds: 4.5
-    recommended_efficiency: 0.6
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.70
     severity: major
-  -
-    ability: 'Temporal Anomaly'
-    ability_id: 373861
-    check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
-    severity: minor
   -
     ability: 'Dream Flight'
     ability_id: 359816
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: Stasis
     ability_id: 370537
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.85
     severity: major
+  -
+    ability: 'Emerald Communion'
+    ability_id: 370960
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: Spiritbloom
+    ability_id: 367226
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Dream Breath'
+    ability_id: 355936
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Tip the Scales'
+    ability_id: 370553
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Temporal Anomaly'
+    ability_id: 373861
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Time Dilation'
+    ability_id: 357170
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Fire Breath'
+    ability_id: 357208
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Engulf
+    ability_id: 443328
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Obsidian Scales'
+    ability_id: 363916
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Renewing Blaze'
+    ability_id: 374348
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Zephyr
+    ability_id: 374227
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor

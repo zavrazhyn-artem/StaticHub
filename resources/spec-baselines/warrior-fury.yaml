@@ -1,8 +1,64 @@
 spec: Fury
 class: Warrior
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: Recklessness
+    ability_id: 1719
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Avatar
+    ability_id: 107574
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Bladestorm
+    ability_id: 446035
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: "Odyn's Fury"
+    ability_id: 385059
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: "Champion's Spear"
+    ability_id: 376079
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Thunder Clap'
+    ability_id: 6343
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: Bloodthirst
+    ability_id: 23881
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Bloodbath
+    ability_id: 335096
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.85
+    severity: minor
   -
     ability: 'Raging Blow'
     ability_id: 85288
@@ -18,44 +74,58 @@ rotation_checks:
     recommended_efficiency: 0.8
     severity: minor
   -
-    ability: Bloodthirst
-    ability_id: 23881
+    ability: 'Storm Bolt'
+    ability_id: 107570
     check: cast_efficiency
-    cooldown_seconds: 4.5
-    recommended_efficiency: 0.8
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
     severity: minor
   -
-    ability: Bloodbath
-    ability_id: 335096
+    ability: Shockwave
+    ability_id: 46968
     check: cast_efficiency
-    cooldown_seconds: 4.5
-    recommended_efficiency: 0.8
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.5
     severity: minor
   -
-    ability: Rend
-    ability_id: 772
+    ability: 'Enraged Regeneration'
+    ability_id: 184364
     check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
     severity: minor
   -
-    ability: Recklessness
-    ability_id: 1719
+    ability: 'Spell Reflection'
+    ability_id: 23920
     check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.95
-    severity: major
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.5
+    severity: minor
   -
-    ability: Bladestorm
-    ability_id: 446035
+    ability: 'Rallying Cry'
+    ability_id: 97462
     check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.95
-    severity: major
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
   -
-    ability: Avatar
-    ability_id: 107574
+    ability: 'Berserker Rage'
+    ability_id: 18499
     check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.95
-    severity: major
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Berserker Shout'
+    ability_id: 384100
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Battle Shout'
+    ability_id: 6673
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.5
+    severity: minor

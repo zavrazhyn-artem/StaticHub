@@ -1,15 +1,15 @@
 spec: Devourer
 class: DemonHunter
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Vengeful Retreat'
-    ability_id: 198793
+    ability: 'The Hunt'
+    ability_id: 1246167
     check: cast_efficiency
-    cooldown_seconds: 25.0
-    recommended_efficiency: 0.8
-    severity: minor
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.9
+    severity: major
   -
     ability: Voidblade
     ability_id: 1245412
@@ -18,9 +18,37 @@ rotation_checks:
     recommended_efficiency: 0.9
     severity: major
   -
-    ability: 'The Hunt'
-    ability_id: 1246167
+    ability: Reap
+    ability_id: 1226019
     check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
-    severity: major
+    cooldown_seconds: 8.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Vengeful Retreat'
+    ability_id: 198793
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: Felblade
+    ability_id: 232893
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Blur
+    ability_id: 198589
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Darkness
+    ability_id: 196718
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.5
+    severity: minor

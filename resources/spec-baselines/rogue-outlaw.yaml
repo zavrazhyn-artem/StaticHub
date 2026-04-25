@@ -1,61 +1,138 @@
 spec: Outlaw
 class: Rogue
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Roll the Bones'
-    ability_id: 1214909
+    ability: 'Adrenaline Rush'
+    ability_id: 13750
     check: cast_efficiency
-    cooldown_seconds: 45.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.95
     severity: major
   -
-    ability: 'Between the Eyes'
-    ability_id: 315341
+    ability: 'Roll the Bones'
+    ability_id: 315508
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Blade Flurry'
     ability_id: 13877
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Adrenaline Rush'
-    ability_id: 13750
-    check: cast_efficiency
-    cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Thistle Tea'
-    ability_id: 469779
-    check: cast_efficiency
-    cooldown_seconds: 20.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.80
     severity: major
   -
     ability: 'Killing Spree'
     ability_id: 51690
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Ghostly Strike'
+    ability_id: 196937
+    check: cast_efficiency
+    cooldown_seconds: 35.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Blade Rush'
+    ability_id: 271877
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Echoing Reprimand'
+    ability_id: 385616
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: Sepsis
+    ability_id: 328547
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Marked for Death'
+    ability_id: 137619
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Between the Eyes'
+    ability_id: 315341
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Vanish
+    ability_id: 1856
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Thistle Tea'
+    ability_id: 381623
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Keep It Rolling'
     ability_id: 381989
     check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 360.0
+    recommended_efficiency: 0.70
     severity: major
   -
     ability: Preparation
     ability_id: 1277933
     check: cast_efficiency
     cooldown_seconds: 240.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.70
     severity: major
+  -
+    ability: 'Cloak of Shadows'
+    ability_id: 31224
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Evasion
+    ability_id: 5277
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Feint
+    ability_id: 1966
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Crimson Vial'
+    ability_id: 185311
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Kick
+    ability_id: 1766
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.50
+    severity: minor

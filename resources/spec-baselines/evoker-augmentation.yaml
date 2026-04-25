@@ -1,54 +1,89 @@
 spec: Augmentation
 class: Evoker
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Breath of Eons'
+    ability_id: 403631
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.95
+    severity: major
   -
     ability: 'Ebon Might'
     ability_id: 395152
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: Upheaval
-    ability_id: 408092
-    check: cast_efficiency
-    cooldown_seconds: 40.0
-    recommended_efficiency: 0.95
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: Prescience
     ability_id: 409311
     check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Blistering Scales'
-    ability_id: 360827
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.90
     severity: major
   -
-    ability: 'Breath of Eons'
-    ability_id: 442204
+    ability: Upheaval
+    ability_id: 396286
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Tip the Scales'
+    ability_id: 370553
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.95
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Time Skip'
     ability_id: 404977
     check: cast_efficiency
     cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Fire Breath'
+    ability_id: 357208
+    check: cast_efficiency
+    cooldown_seconds: 30.0
     recommended_efficiency: 0.95
     severity: major
+  -
+    ability: 'Blistering Scales'
+    ability_id: 360827
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
   -
     ability: 'Bestow Weyrnstone'
     ability_id: 408233
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
-    severity: major
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Obsidian Scales'
+    ability_id: 363916
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Renewing Blaze'
+    ability_id: 374348
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Zephyr
+    ability_id: 374227
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor

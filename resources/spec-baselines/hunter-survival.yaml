@@ -1,21 +1,28 @@
 spec: Survival
 class: Hunter
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
     ability: 'Kill Command'
     ability_id: 259489
     check: cast_efficiency
-    cooldown_seconds: 2.5
-    recommended_efficiency: 0.8
+    cooldown_seconds: 5.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Wildfire Bomb'
+    ability_id: 259495
+    check: cast_efficiency
+    cooldown_seconds: 18.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: Boomstick
     ability_id: 1261193
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: Takedown
@@ -23,4 +30,67 @@ rotation_checks:
     check: cast_efficiency
     cooldown_seconds: 90.0
     recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Aspect of the Eagle'
+    ability_id: 186289
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: Camouflage
+    ability_id: 199483
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Harpoon
+    ability_id: 190925
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Aspect of the Turtle'
+    ability_id: 186265
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Exhilaration
+    ability_id: 109304
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Survival of the Fittest'
+    ability_id: 264735
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Intimidation
+    ability_id: 19577
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Misdirection
+    ability_id: 34477
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Primal Rage'
+    ability_id: 264667
+    check: cast_efficiency
+    cooldown_seconds: 360.0
+    recommended_efficiency: 0.7
     severity: major

@@ -1,47 +1,110 @@
 spec: Enhancement
 class: Shaman
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: Stormstrike
-    ability_id: 17364
+    ability: 'Feral Spirit'
+    ability_id: 51533
     check: cast_efficiency
-    cooldown_seconds: 7.5
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Crash Lightning'
-    ability_id: 187874
-    check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Surging Totem'
-    ability_id: 444995
-    check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: Sundering
-    ability_id: 197214
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Doom Winds'
-    ability_id: 384352
-    check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 1.0
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
     severity: major
   -
     ability: Ascendance
     ability_id: 114051
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Doom Winds'
+    ability_id: 384352
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Sundering
+    ability_id: 197214
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Primordial Wave'
+    ability_id: 375982
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Crash Lightning'
+    ability_id: 187874
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Lava Lash'
+    ability_id: 60103
+    check: cast_efficiency
+    cooldown_seconds: 18.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Ice Strike'
+    ability_id: 342240
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Surging Totem'
+    ability_id: 455630
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Voltaic Blaze'
+    ability_id: 470057
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Astral Shift'
+    ability_id: 108271
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Earth Elemental'
+    ability_id: 198103
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Stone Bulwark Totem'
+    ability_id: 108270
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Bloodlust
+    ability_id: 2825
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: Heroism
+    ability_id: 32182
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.70
     severity: major

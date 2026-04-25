@@ -1,49 +1,28 @@
 spec: Arms
 class: Warrior
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Mortal Strike'
-    ability_id: 12294
+    ability: Avatar
+    ability_id: 107574
     check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Overpower
-    ability_id: 7384
-    check: cast_efficiency
-    cooldown_seconds: 12.0
-    recommended_efficiency: 0.8
-    severity: minor
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
   -
     ability: 'Colossus Smash'
     ability_id: 167105
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.95
     severity: major
   -
-    ability: Demolish
-    ability_id: 436358
+    ability: Bladestorm
+    ability_id: 446035
     check: cast_efficiency
-    cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: Cleave
-    ability_id: 845
-    check: cast_efficiency
-    cooldown_seconds: 4.5
-    recommended_efficiency: 0.6
-    severity: major
-  -
-    ability: 'Sweeping Strikes'
-    ability_id: 260708
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: Ravager
@@ -53,16 +32,79 @@ rotation_checks:
     recommended_efficiency: 0.9
     severity: major
   -
-    ability: 'Thunder Clap'
-    ability_id: 6343
+    ability: "Champion's Spear"
+    ability_id: 376079
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Demolish
+    ability_id: 436358
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Sweeping Strikes'
+    ability_id: 260708
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Mortal Strike'
+    ability_id: 12294
     check: cast_efficiency
     cooldown_seconds: 6.0
     recommended_efficiency: 0.8
     severity: minor
   -
-    ability: Avatar
-    ability_id: 107574
+    ability: 'Thunder Clap'
+    ability_id: 6343
     check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
-    severity: major
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Storm Bolt'
+    ability_id: 107570
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Die by the Sword'
+    ability_id: 118038
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Spell Reflection'
+    ability_id: 23920
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Rallying Cry'
+    ability_id: 97462
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Berserker Rage'
+    ability_id: 18499
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Battle Shout'
+    ability_id: 6673
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.5
+    severity: minor

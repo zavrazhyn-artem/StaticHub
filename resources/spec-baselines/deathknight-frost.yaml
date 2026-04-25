@@ -1,8 +1,36 @@
 spec: Frost
 class: DeathKnight
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Pillar of Frost'
+    ability_id: 51271
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Empower Rune Weapon'
+    ability_id: 47568
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.8
+    severity: major
+  -
+    ability: 'Breath of Sindragosa'
+    ability_id: 1249658
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: "Frostwyrm's Fury"
+    ability_id: 279302
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.9
+    severity: major
   -
     ability: 'Remorseless Winter'
     ability_id: 196770
@@ -10,3 +38,52 @@ rotation_checks:
     cooldown_seconds: 20.0
     recommended_efficiency: 0.85
     severity: major
+  -
+    ability: "Reaper's Mark"
+    ability_id: 439843
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Abomination Limb'
+    ability_id: 1263569
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Raise Dead'
+    ability_id: 46585
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: Frostscythe
+    ability_id: 207230
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: 'Anti-Magic Shell'
+    ability_id: 48707
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Icebound Fortitude'
+    ability_id: 48792
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Lichborne
+    ability_id: 49039
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor

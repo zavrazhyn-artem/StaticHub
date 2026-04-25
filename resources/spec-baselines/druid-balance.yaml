@@ -1,33 +1,82 @@
 spec: Balance
 class: Druid
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Solar Eclipse'
-    ability_id: 1233346
+    ability: 'Celestial Alignment'
+    ability_id: 194223
     check: cast_efficiency
-    cooldown_seconds: 32.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'New Moon'
-    ability_id: 274281
+    ability: 'Incarnation: Chosen of Elune'
+    ability_id: 102560
     check: cast_efficiency
-    cooldown_seconds: 6.67
-    recommended_efficiency: 0.9
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Wild Mushroom'
-    ability_id: 88747
+    ability: 'Convoke the Spirits'
+    ability_id: 391528
     check: cast_efficiency
-    cooldown_seconds: 10.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Force of Nature'
     ability_id: 205636
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: major
+  -
+    ability: 'Fury of Elune'
+    ability_id: 202770
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'New Moon'
+    ability_id: 274281
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Wild Mushroom'
+    ability_id: 88747
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Adaptive Swarm'
+    ability_id: 391888
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Barkskin
+    ability_id: 22812
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Survival Instincts'
+    ability_id: 61336
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Renewal
+    ability_id: 108238
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor

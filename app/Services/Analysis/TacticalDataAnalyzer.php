@@ -27,6 +27,9 @@ class TacticalDataAnalyzer
         private readonly InsightsBuilder $insightsBuilder,
         private readonly SpecBaselineLoader $specBaselineLoader,
         private readonly CombatReferenceLoader $combatRefs,
+        private readonly BossTimelineLoader $bossTimelineLoader,
+        private readonly WipeDetector $wipeDetector,
+        private readonly FightBreakdownBuilder $fightBreakdownBuilder,
     ) {}
 
     /**
@@ -50,6 +53,18 @@ class TacticalDataAnalyzer
             ));
         }
         $playerNames = array_column($players, 'name');
+
+        // Tag every death with normal | wipe_called | tank_loss_cascade | mechanic_oneshot.
+        // Mutates $logData['deaths'] in-place — downstream consumers (mechanic
+        // failure detection, insights) skip entries flagged as suppressed.
+        if (isset($logData['deaths'])) {
+            $tankNames = $this->extractTankNames($logData['player_details'] ?? []);
+            $this->wipeDetector->tag(
+                $logData['deaths'],
+                $logData['phase_summary'] ?? [],
+                $tankNames
+            );
+        }
 
         $encounters = [];
         foreach ($bossNames as $bossName) {
@@ -289,6 +304,22 @@ class TacticalDataAnalyzer
             $logData['interrupts'] ?? []
         );
 
+        // Scheduled boss-mechanic timeline (same source as the Raid Planner UI).
+        // Lets the AI correlate deaths & missed CDs with absolute-time scheduled
+        // casts — e.g. "death at 134s vs Primordial Roar at 132s".
+        $bossTimeline = $this->loadBossTimelineForEncounter($tactics, $difficulty);
+
+        // Per-fight (per-pull) breakdown — isolates each attempt so the AI can
+        // analyse ability usage / deaths / outcome WITHOUT mixing data across
+        // pulls. The encounter-level aggregates above stay for raid-wide views.
+        $fights = $this->fightBreakdownBuilder->build(
+            $tries,
+            $logData['deaths'][$bossName] ?? [],
+            $logData['per_fight_casts'] ?? [],
+            // perPlayerData isn't built yet at this point — pass players for class+spec lookup
+            $this->playerSpecLookup($playerNames, $logData)
+        );
+
         return [
             'boss'              => $bossName,
             'wcl_encounter_id'  => $tactics['wcl_encounter_id'] ?? null,
@@ -308,9 +339,61 @@ class TacticalDataAnalyzer
             'healing_analysis'  => $healingAnalysis,
             'top_performers'    => $topPerformers,
             'worst_performers'  => $worstPerformers,
+            'boss_timeline'     => $bossTimeline,
+            'fights'            => $fights,
             // Per-encounter raw stats (scoped to this boss's fights — replaces global supplementary)
             'player_stats'      => $perEncounterStats,
         ];
+    }
+
+    /**
+     * Build a {playerName: {class, spec}} map so FightBreakdownBuilder can
+     * resolve spec baselines without needing the full perPlayerData (which
+     * isn't assembled until after analyzeEncounter() returns).
+     */
+    private function playerSpecLookup(array $playerNames, array $logData): array
+    {
+        $details = $logData['player_details'] ?? [];
+        $out = [];
+        foreach ($playerNames as $name) {
+            $d = $details[$name] ?? [];
+            $out[$name] = [
+                'class' => $d['class'] ?? null,
+                'spec'  => $d['spec']  ?? null,
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Pluck tank names from player_details for WipeDetector lookup.
+     */
+    private function extractTankNames(array $playerDetails): array
+    {
+        $tanks = [];
+        foreach ($playerDetails as $name => $details) {
+            if (($details['role'] ?? null) === 'tanks') {
+                $tanks[] = $name;
+            }
+        }
+        return $tanks;
+    }
+
+    /**
+     * Resolve the boss-timeline slug from the loaded tactics file (its source
+     * filename matches the timeline slug — e.g. `vorasius.md` → `vorasius`)
+     * and return the slim AI payload, or null if no timeline YAML exists.
+     */
+    private function loadBossTimelineForEncounter(array $tactics, string $difficulty): ?array
+    {
+        $sourceFile = $tactics['source_file'] ?? '';
+        if (!$sourceFile) return null;
+
+        $slug = preg_replace('/\.md$/i', '', $sourceFile);
+        if (!$slug) return null;
+
+        $season = (string) config('wow_season.current_season', 'midnight-s1');
+        return $this->bossTimelineLoader->load($season, $slug, mb_strtolower($difficulty));
     }
 
     private function loadTacticsForBoss(string $bossName, array $logData): array
@@ -453,6 +536,13 @@ class TacticalDataAnalyzer
 
         foreach ($deaths as $tryKey => $tryDeaths) {
             foreach ($tryDeaths as $d) {
+                // Skip deaths the WipeDetector flagged as RL /wipe call or
+                // tank-loss cascade — those aren't player-mechanic mistakes.
+                // mechanic_oneshot stays in (it IS a mechanic failure).
+                if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) {
+                    continue;
+                }
+
                 $blow = $d['killing_blow'] ?? '';
                 $blowGuid = $d['killing_blow_guid'] ?? null;
 
@@ -1029,7 +1119,8 @@ class TacticalDataAnalyzer
             $perf = $performance[$name] ?? [];
             $td = $targetDamage[$name] ?? [];
 
-            // Collect deaths
+            // Collect deaths — pass through WipeDetector tags so the AI knows
+            // which were the player's mistake vs suppressed (RL wipe / tank loss).
             $deathDetails = [];
             $mechanicFailures = [];
             foreach ($encounters as $enc) {
@@ -1042,6 +1133,9 @@ class TacticalDataAnalyzer
                             'try' => $tryKey,
                             'time' => $d['time_into_fight'] ?? null,
                             'killing_blow' => $d['killing_blow'] ?? null,
+                            'tag' => $d['tag'] ?? 'normal',
+                            'suppressed_as_wipe_call' => !empty($d['suppressed_as_wipe_call']),
+                            'suppressed_as_tank_loss' => !empty($d['suppressed_as_tank_loss']),
                         ];
                     }
                 }
@@ -1357,11 +1451,15 @@ class TacticalDataAnalyzer
         if (empty($deathsByTry)) return [];
 
         // Flatten try groups → flat list with fight_id + time_ms_relative on each entry.
+        // Skip suppressed deaths (RL /wipe call, tank-loss cascade) — they're
+        // not phase-attributable mistakes.
         $deathsByBoss = [];
         foreach ($deathsByTry as $tryDeaths) {
             if (!is_array($tryDeaths)) continue;
             foreach ($tryDeaths as $d) {
-                if (is_array($d)) $deathsByBoss[] = $d;
+                if (!is_array($d)) continue;
+                if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
+                $deathsByBoss[] = $d;
             }
         }
 

@@ -7,10 +7,16 @@ namespace App\Helpers;
 class WclReportParserHelper
 {
     /**
-     * Parse deaths, filter out wipe deaths, and group by boss/try.
+     * Parse deaths and group by boss/try. Returns ALL deaths (no filtering).
+     * Wipe / cascade / oneshot classification is done downstream by WipeDetector,
+     * which tags each entry — consumers can then choose whether to honour the tag.
+     *
+     * Each death entry has:
+     *   player, fight_id, killing_blow, killing_blow_guid,
+     *   time_into_fight (formatted M:SS), time_ms_relative (raw ms)
      *
      * @param array $phaseSummary  Boss → [ fight_id, outcome, ... ] from buildPhaseSummary()
-     * @param int   $raidSize      Number of roster players (for wipe detection threshold)
+     * @param int   $raidSize      Kept for backwards compatibility (no longer used)
      */
     public static function parseDeaths(
         array $deathsData,
@@ -40,17 +46,11 @@ class WclReportParserHelper
                 'killing_blow'      => $d['killingBlow']['name'] ?? 'Unknown Ability',
                 'killing_blow_guid' => $d['killingBlow']['guid'] ?? null,
                 'time_into_fight'   => self::msToFightTime($relativeMs),
-                '_relative_ms'      => $relativeMs,
+                'time_ms_relative'  => $relativeMs,
             ];
         }, $entries));
 
-        // Group deaths by fight_id
-        $byFight = [];
-        foreach ($allDeaths as $death) {
-            $byFight[$death['fight_id']][] = $death;
-        }
-
-        // Build fight_id → boss name lookup from phase_summary
+        // Build fight_id → boss + try_N lookup from phase_summary
         $fightBossMap = [];
         $fightTryMap  = [];
         foreach ($phaseSummary as $bossName => $tries) {
@@ -62,46 +62,23 @@ class WclReportParserHelper
             }
         }
 
-        // Build fight outcome lookup from phase_summary
-        $fightOutcomes = [];
-        foreach ($phaseSummary as $tries) {
-            foreach ($tries as $try) {
-                $fightOutcomes[$try['fight_id']] = $try['outcome'] ?? 'wipe';
-            }
-        }
-
-        // Filter wipe cascade deaths.
-        // Deaths that occur while < 60% of the raid is dead = individual mistakes (keep).
-        // Deaths after 60% of the raid is already dead = wipe cascade (discard).
-        $cascadeThreshold = (int) ceil($raidSize * 0.6);
-        $individualDeaths = [];
-
-        foreach ($byFight as $fightId => $fightDeaths) {
-            usort($fightDeaths, fn($a, $b) => ($a['_relative_ms'] ?? 0) <=> ($b['_relative_ms'] ?? 0));
-
-            $deadCount = 0;
-            foreach ($fightDeaths as $death) {
-                $deadCount++;
-                if ($deadCount > $cascadeThreshold) {
-                    break; // 60%+ dead — rest is wipe cascade
-                }
-                $individualDeaths[] = $death + ['fight_id' => $fightId];
-            }
-        }
-
-        // Group by boss → try_N. Keep fight_id + relative_ms for downstream phase bucketing.
+        // Group by boss → try_N. Sort each try chronologically.
         $grouped = [];
-        foreach ($individualDeaths as $death) {
-            $fightId  = $death['fight_id'];
+        foreach ($allDeaths as $death) {
+            $fightId  = $death['fight_id'] ?? null;
+            if ($fightId === null) continue;
             $bossName = $fightBossMap[$fightId] ?? 'Unknown';
             $tryNum   = $fightTryMap[$fightId] ?? 1;
             $tryKey   = "try_{$tryNum}";
-
-            $death['time_ms_relative'] = $death['_relative_ms'] ?? null;
-            unset($death['_relative_ms']);
-
             $grouped[$bossName][$tryKey][] = $death;
         }
+
+        foreach ($grouped as &$byTry) {
+            foreach ($byTry as &$deaths) {
+                usort($deaths, fn($a, $b) => ($a['time_ms_relative'] ?? 0) <=> ($b['time_ms_relative'] ?? 0));
+            }
+        }
+        unset($byTry, $deaths);
 
         return $grouped;
     }

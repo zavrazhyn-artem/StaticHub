@@ -1,68 +1,166 @@
 spec: Restoration
 class: Shaman
 role: healer
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: Riptide
-    ability_id: 61295
+    ability: 'Healing Tide Totem'
+    ability_id: 108280
     check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Healing Stream Totem'
-    ability_id: 5394
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Stormstream Totem'
-    ability_id: 1267068
-    check: cast_efficiency
-    cooldown_seconds: 50.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Healing Rain'
-    ability_id: 73920
-    check: cast_efficiency
-    cooldown_seconds: 18.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Healing Rain'
-    ability_id: 456366
-    check: cast_efficiency
-    cooldown_seconds: 25.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Unleash Life'
-    ability_id: 73685
-    check: cast_efficiency
-    cooldown_seconds: 20.0
-    recommended_efficiency: 0.9
-    severity: minor
-  -
-    ability: 'Ancestral Swiftness'
-    ability_id: 443454
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Surging Totem'
-    ability_id: 444995
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.70
     severity: major
   -
     ability: 'Spirit Link Totem'
     ability_id: 98008
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: 'Mana Tide Totem'
+    ability_id: 16191
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: Ascendance
+    ability_id: 114052
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Cloudburst Totem'
+    ability_id: 157153
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Ancestral Protection Totem'
+    ability_id: 207399
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Earthen Wall Totem'
+    ability_id: 198838
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Primordial Wave'
+    ability_id: 375982
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Surging Totem'
+    ability_id: 455630
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Stormstream Totem'
+    ability_id: 1267016
+    check: cast_efficiency
+    cooldown_seconds: 50.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: Wellspring
+    ability_id: 197995
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: Riptide
+    ability_id: 61295
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Healing Stream Totem'
+    ability_id: 5394
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Healing Rain'
+    ability_id: 73920
+    check: cast_efficiency
+    cooldown_seconds: 18.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Unleash Life'
+    ability_id: 73685
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Ancestral Swiftness'
+    ability_id: 443454
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: "Nature's Swiftness"
+    ability_id: 378081
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: Downpour
+    ability_id: 462603
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Astral Shift'
+    ability_id: 108271
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Earth Elemental'
+    ability_id: 198103
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Stone Bulwark Totem'
+    ability_id: 108270
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Bloodlust
+    ability_id: 2825
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.70
+    severity: major
+  -
+    ability: Heroism
+    ability_id: 32182
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.70
     severity: major

@@ -1,68 +1,117 @@
 spec: Holy
 class: Paladin
 role: healer
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: 'Crusader Strike'
-    ability_id: 35395
-    check: cast_efficiency
-    cooldown_seconds: 7.8
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Judgment
-    ability_id: 275773
-    check: cast_efficiency
-    cooldown_seconds: 12.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Holy Prism'
-    ability_id: 114165
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Beacon of Virtue'
-    ability_id: 200025
-    check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
-    severity: minor
   -
     ability: 'Avenging Wrath'
     ability_id: 31884
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Blessing of Sacrifice'
-    ability_id: 6940
-    check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: 'Hand of Divinity'
-    ability_id: 1242008
-    check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.95
     severity: major
   -
     ability: 'Avenging Crusader'
     ability_id: 216331
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Aura Mastery'
+    ability_id: 31821
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.60
+    severity: minor
+  -
+    ability: 'Divine Toll'
+    ability_id: 375576
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: "Tyr's Deliverance"
+    ability_id: 1241275
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Hand of Divinity'
+    ability_id: 1242008
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Beacon of Virtue'
+    ability_id: 200025
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Holy Prism'
+    ability_id: 114165
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: 'Holy Armaments'
     ability_id: 432459
     check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
     severity: major
+  -
+    ability: 'Holy Shock'
+    ability_id: 20473
+    check: cast_efficiency
+    cooldown_seconds: 8.5
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Judgment
+    ability_id: 275773
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Crusader Strike'
+    ability_id: 35395
+    check: cast_efficiency
+    cooldown_seconds: 7.8
+    recommended_efficiency: 0.75
+    severity: minor
+  -
+    ability: 'Blessing of Sacrifice'
+    ability_id: 6940
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.70
+    severity: minor
+  -
+    ability: 'Lay on Hands'
+    ability_id: 633
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.10
+    severity: minor
+  -
+    ability: 'Divine Protection'
+    ability_id: 498
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Divine Shield'
+    ability_id: 642
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor

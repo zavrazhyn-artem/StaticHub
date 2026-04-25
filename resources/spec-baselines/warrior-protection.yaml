@@ -1,34 +1,20 @@
 spec: Protection
 class: Warrior
 role: tank
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: 'Shield Slam'
-    ability_id: 23922
-    check: cast_efficiency
-    cooldown_seconds: 9.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Execute
-    ability_id: 163201
-    check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Thunder Clap'
-    ability_id: 6343
-    check: cast_efficiency
-    cooldown_seconds: 6.0
-    recommended_efficiency: 0.8
-    severity: minor
   -
     ability: Avatar
     ability_id: 107574
     check: cast_efficiency
     cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Shield Charge'
+    ability_id: 385952
+    check: cast_efficiency
+    cooldown_seconds: 45.0
     recommended_efficiency: 0.9
     severity: major
   -
@@ -39,11 +25,11 @@ rotation_checks:
     recommended_efficiency: 0.9
     severity: major
   -
-    ability: 'Shield Charge'
-    ability_id: 385952
+    ability: "Champion's Spear"
+    ability_id: 376079
     check: cast_efficiency
-    cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
     severity: major
   -
     ability: Demolish
@@ -52,3 +38,94 @@ rotation_checks:
     cooldown_seconds: 45.0
     recommended_efficiency: 0.9
     severity: major
+  -
+    ability: 'Shield Slam'
+    ability_id: 23922
+    check: cast_efficiency
+    cooldown_seconds: 9.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Thunder Clap'
+    ability_id: 6343
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Demoralizing Shout'
+    ability_id: 1160
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Last Stand'
+    ability_id: 12975
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Shield Wall'
+    ability_id: 871
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Spell Reflection'
+    ability_id: 23920
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Shockwave
+    ability_id: 46968
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Storm Bolt'
+    ability_id: 107570
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Rallying Cry'
+    ability_id: 97462
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Berserker Rage'
+    ability_id: 18499
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Heroic Leap'
+    ability_id: 6544
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Battle Shout'
+    ability_id: 6673
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Challenging Shout'
+    ability_id: 1161
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor

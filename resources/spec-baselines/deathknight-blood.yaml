@@ -1,15 +1,8 @@
 spec: Blood
 class: DeathKnight
 role: tank
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: 'Blood Boil'
-    ability_id: 50842
-    check: cast_efficiency
-    cooldown_seconds: 3.75
-    recommended_efficiency: 0.85
-    severity: major
   -
     ability: 'Dancing Rune Weapon'
     ability_id: 49028
@@ -18,9 +11,93 @@ rotation_checks:
     recommended_efficiency: 0.9
     severity: major
   -
+    ability: 'Vampiric Blood'
+    ability_id: 55233
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Icebound Fortitude'
+    ability_id: 48792
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Anti-Magic Shell'
+    ability_id: 48707
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Anti-Magic Zone'
+    ability_id: 51052
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Death Pact'
+    ability_id: 48743
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Lichborne
+    ability_id: 49039
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Consumption
+    ability_id: 1263824
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Blood Boil'
+    ability_id: 50842
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.85
+    severity: minor
+  -
     ability: 'Death and Decay'
     ability_id: 43265
     check: cast_efficiency
     cooldown_seconds: 15.0
     recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Soul Reaper'
+    ability_id: 343294
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: "Reaper's Mark"
+    ability_id: 439843
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.9
     severity: major
+  -
+    ability: 'Raise Dead'
+    ability_id: 46585
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: "Gorefiend's Grasp"
+    ability_id: 108199
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor

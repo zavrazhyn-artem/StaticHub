@@ -1,8 +1,22 @@
 spec: Marksmanship
 class: Hunter
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: Trueshot
+    ability_id: 288613
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Aimed Shot'
+    ability_id: 19434
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.9
+    severity: major
   -
     ability: 'Rapid Fire'
     ability_id: 257044
@@ -16,4 +30,88 @@ rotation_checks:
     check: cast_efficiency
     cooldown_seconds: 45.0
     recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: 'Black Arrow'
+    ability_id: 466932
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Salvo
+    ability_id: 400456
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Wailing Dead'
+    ability_id: 1264290
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Lunar Storm'
+    ability_id: 1253732
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Camouflage
+    ability_id: 199483
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Aspect of the Turtle'
+    ability_id: 186265
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Exhilaration
+    ability_id: 109304
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Survival of the Fittest'
+    ability_id: 264735
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Fortitude of the Bear'
+    ability_id: 392956
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Intimidation
+    ability_id: 19577
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: Misdirection
+    ability_id: 34477
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Primal Rage'
+    ability_id: 264667
+    check: cast_efficiency
+    cooldown_seconds: 360.0
+    recommended_efficiency: 0.7
     severity: major

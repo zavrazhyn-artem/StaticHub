@@ -708,6 +708,7 @@ GQL;
             'shielded_casts'      => $shieldedCasts,
             'player_coords_on_debuff' => $playerCoords,
             'casts_summary'       => $castsAndConsumables['casts'],
+            'per_fight_casts'     => $this->getPerFightCastsSummary($reportId, $fightIds, $rosterNames),
             'consumables_used'    => $consumables,
             'dispels'             => $cleanDispels,
             'consumable_buffs'    => $consumableBuffs,
@@ -1505,6 +1506,53 @@ GQL;
         }
         uasort($result, fn($a, $b) => $b['uptime_pct'] <=> $a['uptime_pct']);
         return $result;
+    }
+
+    /**
+     * Per-fight casts_summary keyed by fight_id. Batches all fights into a
+     * single GraphQL request via aliases (chunked at 30 fights per request to
+     * stay below WCL's complexity ceiling). Used by FightBreakdownBuilder to
+     * compute per-pull cast_efficiency.
+     *
+     * @return array<int, array<string, array<string, int>>>  fight_id => playerName => abilityName => cast_count
+     */
+    public function getPerFightCastsSummary(string $reportId, array $fightIds, array $rosterNames = []): array
+    {
+        if (empty($fightIds)) return [];
+
+        $out = [];
+        foreach (array_chunk($fightIds, 30) as $chunk) {
+            $aliases = [];
+            foreach ($chunk as $fid) {
+                $aliases[] = "f{$fid}: table(dataType: Casts, fightIDs: [{$fid}], killType: Encounters, viewBy: Ability)";
+            }
+            $aliasBlock = implode("\n              ", $aliases);
+
+            $query = <<<GQL
+            query (\$reportId: String!) {
+              reportData {
+                report(code: \$reportId) {
+                  {$aliasBlock}
+                }
+              }
+            }
+GQL;
+
+            try {
+                $data = $this->executeGraphql($query, ['reportId' => $reportId]);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            $report = $data['reportData']['report'] ?? [];
+            foreach ($chunk as $fid) {
+                $alias = "f{$fid}";
+                $entries = $report[$alias]['data']['entries'] ?? [];
+                $parsed = WclReportParserHelper::parseCastsAndConsumables($entries, $rosterNames);
+                $out[$fid] = $parsed['casts'] ?? [];
+            }
+        }
+        return $out;
     }
 
     /**

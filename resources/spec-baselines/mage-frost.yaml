@@ -1,40 +1,103 @@
 spec: Frost
 class: Mage
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: Flurry
-    ability_id: 44614
+    ability: 'Icy Veins'
+    ability_id: 12472
     check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Frozen Orb'
+    ability_id: 84714
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: 'Comet Storm'
+    ability_id: 1247777
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Ray of Frost'
     ability_id: 205021
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Comet Storm'
-    ability_id: 153595
+    ability: Flurry
+    ability_id: 44614
     check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
-    ability: Blizzard
-    ability_id: 190356
-    check: cast_efficiency
-    cooldown_seconds: 12.0
+    cooldown_seconds: 30.0
     recommended_efficiency: 0.8
     severity: minor
   -
-    ability: 'Frozen Orb'
-    ability_id: 84714
+    ability: 'Cold Snap'
+    ability_id: 235219
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Ice Nova'
+    ability_id: 157997
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.8
+    severity: minor
+  -
+    ability: 'Cone of Cold'
+    ability_id: 120
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.6
+    severity: minor
+  -
+    ability: 'Mirror Image'
+    ability_id: 55342
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Time Warp'
+    ability_id: 80353
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.7
+    severity: major
+  -
+    ability: 'Alter Time'
+    ability_id: 342245
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
-    severity: major
+    recommended_efficiency: 0.6
+    severity: minor
+  -
+    ability: 'Ice Barrier'
+    ability_id: 11426
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Ice Block'
+    ability_id: 45438
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Greater Invisibility'
+    ability_id: 110959
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.5
+    severity: minor

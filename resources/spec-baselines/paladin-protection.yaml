@@ -1,68 +1,131 @@
 spec: Protection
 class: Paladin
 role: tank
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: Consecration
-    ability_id: 26573
-    check: cast_efficiency
-    cooldown_seconds: 4.5
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Blessed Hammer'
-    ability_id: 204019
-    check: cast_efficiency
-    cooldown_seconds: 1.67
-    recommended_efficiency: 0.9
-    severity: minor
-  -
-    ability: 'Hammer of the Righteous'
-    ability_id: 53595
-    check: cast_efficiency
-    cooldown_seconds: 2.5
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Judgment
-    ability_id: 275779
-    check: cast_efficiency
-    cooldown_seconds: 5.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: 'Hammer of Wrath'
-    ability_id: 1241288
-    check: cast_efficiency
-    cooldown_seconds: 7.5
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: 'Holy Armaments'
-    ability_id: 432459
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.9
-    severity: major
   -
     ability: 'Avenging Wrath'
     ability_id: 31884
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: Sentinel
     ability_id: 389539
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: 'Divine Toll'
     ability_id: 375576
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
+  -
+    ability: 'Eye of Tyr'
+    ability_id: 387174
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Moment of Glory'
+    ability_id: 327193
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Bastion of Light'
+    ability_id: 378974
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: "Avenger's Shield"
+    ability_id: 31935
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Holy Armaments'
+    ability_id: 432459
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: Judgment
+    ability_id: 275779
+    check: cast_efficiency
+    cooldown_seconds: 5.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Hammer of Wrath'
+    ability_id: 1241288
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: Consecration
+    ability_id: 26573
+    check: cast_efficiency
+    cooldown_seconds: 4.5
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Blessed Hammer'
+    ability_id: 204019
+    check: cast_efficiency
+    cooldown_seconds: 5.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Ardent Defender'
+    ability_id: 31850
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.60
+    severity: minor
+  -
+    ability: 'Guardian of Ancient Kings'
+    ability_id: 86659
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Blessing of Spellwarding'
+    ability_id: 204018
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Lay on Hands'
+    ability_id: 633
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.10
+    severity: minor
+  -
+    ability: 'Divine Shield'
+    ability_id: 642
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Blessing of Sacrifice'
+    ability_id: 6940
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.70
+    severity: minor

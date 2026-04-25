@@ -1,8 +1,15 @@
 spec: Fire
 class: Mage
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: Combustion
+    ability_id: 190319
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.95
+    severity: major
   -
     ability: 'Fire Blast'
     ability_id: 108853
@@ -10,3 +17,59 @@ rotation_checks:
     cooldown_seconds: 14.0
     recommended_efficiency: 0.9
     severity: major
+  -
+    ability: 'Phoenix Flames'
+    ability_id: 257541
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.9
+    severity: major
+  -
+    ability: Meteor
+    ability_id: 153561
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: "Dragon's Breath"
+    ability_id: 31661
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.7
+    severity: minor
+  -
+    ability: 'Mirror Image'
+    ability_id: 55342
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Time Warp'
+    ability_id: 80353
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.7
+    severity: major
+  -
+    ability: 'Alter Time'
+    ability_id: 342245
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.6
+    severity: minor
+  -
+    ability: 'Blazing Barrier'
+    ability_id: 235313
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.5
+    severity: minor
+  -
+    ability: 'Ice Block'
+    ability_id: 45438
+    check: cast_efficiency
+    cooldown_seconds: 240.0
+    recommended_efficiency: 0.5
+    severity: minor

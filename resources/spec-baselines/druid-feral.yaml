@@ -1,33 +1,82 @@
 spec: Feral
 class: Druid
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
-  -
-    ability: 'Incarnation: Avatar of Ashamane'
-    ability_id: 102543
-    check: cast_efficiency
-    cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
-    severity: major
   -
     ability: Berserk
     ability_id: 106951
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Incarnation: Avatar of Ashamane'
+    ability_id: 102543
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: "Tiger's Fury"
+    ability_id: 5217
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Convoke the Spirits'
+    ability_id: 391528
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Feral Frenzy'
+    ability_id: 274837
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: 'Frantic Frenzy'
     ability_id: 1243807
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: Chomp
     ability_id: 1244258
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.8
-    severity: major
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Adaptive Swarm'
+    ability_id: 391888
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Barkskin
+    ability_id: 22812
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Survival Instincts'
+    ability_id: 61336
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Renewal
+    ability_id: 108238
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor

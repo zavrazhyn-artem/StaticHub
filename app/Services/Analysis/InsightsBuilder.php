@@ -451,6 +451,7 @@ class InsightsBuilder
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
                 foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
                     $name = $d['player'] ?? null;
                     if (!$name) continue;
                     $deathsByPlayer[$name][] = $d + ['boss' => $bossName];
@@ -504,6 +505,7 @@ class InsightsBuilder
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
                 foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
                     $deathsByBoss[$bossName][] = $d;
                 }
             }
@@ -576,6 +578,7 @@ class InsightsBuilder
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
                 foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
                     $fid = $d['fight_id'] ?? null;
                     if ($fid === null) continue;
                     $deathsByBossFight[$bossName][$fid][] = $d['player'] ?? '?';
@@ -666,7 +669,10 @@ class InsightsBuilder
         foreach ($logData['deaths'] ?? [] as $bossName => $byTry) {
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
-                foreach ($tryDeaths as $d) $deathsByBoss[$bossName][] = $d;
+                foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
+                    $deathsByBoss[$bossName][] = $d;
+                }
             }
         }
 
@@ -759,6 +765,7 @@ class InsightsBuilder
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
                 foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
                     $fid = $d['fight_id'] ?? null;
                     if ($fid === null) continue;
                     $deathsByBossFight[$bossName][$fid] = ($deathsByBossFight[$bossName][$fid] ?? 0) + 1;
@@ -884,6 +891,7 @@ class InsightsBuilder
             foreach ($byTry as $tryDeaths) {
                 if (!is_array($tryDeaths)) continue;
                 foreach ($tryDeaths as $d) {
+                    if (!empty($d['suppressed_as_wipe_call']) || !empty($d['suppressed_as_tank_loss'])) continue;
                     $name = $d['player'] ?? null;
                     if (!$name) continue;
                     $deathsByPlayer[$name][$bossName][] = $d['fight_id'] ?? null;

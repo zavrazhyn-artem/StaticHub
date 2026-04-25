@@ -1,8 +1,22 @@
 spec: Destruction
 class: Warlock
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Summon Infernal'
+    ability_id: 1122
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: Cataclysm
+    ability_id: 152108
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: major
   -
     ability: 'Channel Demonfire'
     ability_id: 196447
@@ -14,7 +28,7 @@ rotation_checks:
     ability: Conflagrate
     ability_id: 17962
     check: cast_efficiency
-    cooldown_seconds: 6.5
+    cooldown_seconds: 13.0
     recommended_efficiency: 0.95
     severity: major
   -
@@ -22,26 +36,82 @@ rotation_checks:
     ability_id: 6353
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: Shadowburn
+    ability_id: 17877
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.90
+    severity: minor
+  -
+    ability: 'Dimensional Rift'
+    ability_id: 1280868
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.90
     severity: major
   -
     ability: Havoc
     ability_id: 80240
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
-    severity: major
-  -
-    ability: Cataclysm
-    ability_id: 152108
-    check: cast_efficiency
-    cooldown_seconds: 30.0
-    recommended_efficiency: 0.8
-    severity: major
+    recommended_efficiency: 0.80
+    severity: minor
   -
     ability: Malevolence
     ability_id: 442726
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
+  -
+    ability: 'Mortal Coil'
+    ability_id: 6789
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Howl of Terror'
+    ability_id: 5484
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Shadowfury
+    ability_id: 30283
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Unending Resolve'
+    ability_id: 104773
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Dark Pact'
+    ability_id: 108416
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Demonic Circle: Teleport'
+    ability_id: 48020
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Fel Domination'
+    ability_id: 333889
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor

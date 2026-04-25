@@ -1,8 +1,22 @@
 spec: Affliction
 class: Warlock
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Summon Darkglare'
+    ability_id: 205180
+    check: cast_efficiency
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Dark Harvest'
+    ability_id: 1257052
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
   -
     ability: Haunt
     ability_id: 48181
@@ -15,19 +29,75 @@ rotation_checks:
     ability_id: 442726
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Dark Harvest'
-    ability_id: 1257052
+    ability: 'Phantom Singularity'
+    ability_id: 205179
+    check: cast_efficiency
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Vile Taint'
+    ability_id: 278350
+    check: cast_efficiency
+    cooldown_seconds: 20.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Soul Rot'
+    ability_id: 386997
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
   -
-    ability: 'Summon Darkglare'
-    ability_id: 205180
+    ability: 'Mortal Coil'
+    ability_id: 6789
     check: cast_efficiency
-    cooldown_seconds: 120.0
-    recommended_efficiency: 0.9
-    severity: major
+    cooldown_seconds: 45.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Howl of Terror'
+    ability_id: 5484
+    check: cast_efficiency
+    cooldown_seconds: 40.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: Shadowfury
+    ability_id: 30283
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Unending Resolve'
+    ability_id: 104773
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Dark Pact'
+    ability_id: 108416
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Demonic Circle: Teleport'
+    ability_id: 48020
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Fel Domination'
+    ability_id: 333889
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.50
+    severity: minor

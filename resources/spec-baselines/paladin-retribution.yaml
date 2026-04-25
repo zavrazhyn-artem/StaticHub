@@ -1,8 +1,22 @@
 spec: Retribution
 class: Paladin
 role: dps
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
+  -
+    ability: 'Avenging Wrath'
+    ability_id: 31884
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.95
+    severity: major
+  -
+    ability: Crusade
+    ability_id: 1253598
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.95
+    severity: major
   -
     ability: 'Wake of Ashes'
     ability_id: 255937
@@ -11,16 +25,100 @@ rotation_checks:
     recommended_efficiency: 0.85
     severity: major
   -
-    ability: 'Avenging Wrath'
-    ability_id: 31884
-    check: cast_efficiency
-    cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
-    severity: major
-  -
     ability: 'Execution Sentence'
     ability_id: 343527
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.9
+    recommended_efficiency: 0.90
     severity: major
+  -
+    ability: 'Final Reckoning'
+    ability_id: 343721
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Divine Toll'
+    ability_id: 375576
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Hammer of Wrath'
+    ability_id: 1241288
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Blade of Justice'
+    ability_id: 184575
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Crusader Strike'
+    ability_id: 35395
+    check: cast_efficiency
+    cooldown_seconds: 6.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: Judgment
+    ability_id: 20271
+    check: cast_efficiency
+    cooldown_seconds: 12.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Hammer of Light'
+    ability_id: 427453
+    check: cast_efficiency
+    cooldown_seconds: 7.5
+    recommended_efficiency: 0.90
+    severity: major
+  -
+    ability: 'Eye of Tyr'
+    ability_id: 387174
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Holy Armaments'
+    ability_id: 432459
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Shield of Vengeance'
+    ability_id: 184662
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Divine Protection'
+    ability_id: 403876
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.50
+    severity: minor
+  -
+    ability: 'Lay on Hands'
+    ability_id: 633
+    check: cast_efficiency
+    cooldown_seconds: 600.0
+    recommended_efficiency: 0.10
+    severity: minor
+  -
+    ability: 'Divine Shield'
+    ability_id: 642
+    check: cast_efficiency
+    cooldown_seconds: 300.0
+    recommended_efficiency: 0.50
+    severity: minor

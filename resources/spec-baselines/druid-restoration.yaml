@@ -1,33 +1,96 @@
 spec: Restoration
 class: Druid
 role: healer
-source: WoWAnalyzer-midnight
+source: icy-veins
 rotation_checks:
   -
-    ability: 'Wild Growth'
-    ability_id: 48438
+    ability: Tranquility
+    ability_id: 740
     check: cast_efficiency
-    cooldown_seconds: 10.0
-    recommended_efficiency: 0.8
-    severity: minor
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.70
+    severity: major
   -
-    ability: Swiftmend
-    ability_id: 18562
+    ability: 'Convoke the Spirits'
+    ability_id: 391528
     check: cast_efficiency
-    cooldown_seconds: 15.0
-    recommended_efficiency: 0.8
-    severity: minor
-  -
-    ability: Ironbark
-    ability_id: 102342
-    check: cast_efficiency
-    cooldown_seconds: 90.0
-    recommended_efficiency: 0.9
+    cooldown_seconds: 120.0
+    recommended_efficiency: 0.80
     severity: major
   -
     ability: 'Incarnation: Tree of Life'
     ability_id: 33891
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.8
+    recommended_efficiency: 0.80
     severity: major
+  -
+    ability: Innervate
+    ability_id: 29166
+    check: cast_efficiency
+    cooldown_seconds: 180.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: Flourish
+    ability_id: 197721
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: "Nature's Vigil"
+    ability_id: 124974
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: major
+  -
+    ability: 'Grove Guardians'
+    ability_id: 1226140
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.80
+    severity: major
+  -
+    ability: 'Cenarion Ward'
+    ability_id: 102351
+    check: cast_efficiency
+    cooldown_seconds: 30.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: "Nature's Swiftness"
+    ability_id: 132158
+    check: cast_efficiency
+    cooldown_seconds: 60.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: 'Wild Growth'
+    ability_id: 48438
+    check: cast_efficiency
+    cooldown_seconds: 10.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: Swiftmend
+    ability_id: 18562
+    check: cast_efficiency
+    cooldown_seconds: 15.0
+    recommended_efficiency: 0.80
+    severity: minor
+  -
+    ability: Ironbark
+    ability_id: 102342
+    check: cast_efficiency
+    cooldown_seconds: 90.0
+    recommended_efficiency: 0.85
+    severity: minor
+  -
+    ability: 'Adaptive Swarm'
+    ability_id: 391888
+    check: cast_efficiency
+    cooldown_seconds: 25.0
+    recommended_efficiency: 0.85
+    severity: minor
