@@ -26,6 +26,13 @@
     --font-nav:      'Exo 2 Variable', 'Exo 2', sans-serif;
     --font-slogan:   'Orbitron', sans-serif;
     --focus-ring:    #4fd3f7;
+    --sidebar-w:     272px;
+}
+
+/* Sync main content margin to sidebar width on desktop. The CSS variable is
+   set early in <head> from localStorage so there's no flash on reload. */
+@media (min-width: 1024px) {
+    .app-main { margin-left: var(--sidebar-w); }
 }
 
 @layer base {

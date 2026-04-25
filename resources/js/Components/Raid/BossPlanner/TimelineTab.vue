@@ -674,7 +674,7 @@ const exportMrtNote = async () => {
                     class="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all"
                     :class="compactMode ? 'bg-white/20 text-white' : 'bg-white/5 text-on-surface-variant hover:text-white'">
                     <span class="material-symbols-outlined text-xs">{{ compactMode ? 'density_small' : 'density_medium' }}</span>
-                    {{ compactMode ? __('Compact') : __('Normal') }}
+                    {{ compactMode ? __('Compact') : __('Row density: Normal') }}
                 </button>
 
                 <!-- Hidden abilities toggle -->

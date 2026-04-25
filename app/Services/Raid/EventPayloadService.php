@@ -193,6 +193,79 @@ class EventPayloadService
     }
 
     /**
+     * Compact payload — just the data RsvpModal.vue needs to open.
+     * Used by sidebar/dashboard widgets that show "Записатись" inline.
+     */
+    public function buildRsvpModalPayload(Event $event, User $user): array
+    {
+        $userCharacters = $this->fetchUserCharactersInStatic($user->id, $event->static_id);
+        $currentAttendance = $event->getUserAttendance($user->id);
+
+        $selectedCharacterId = $this->resolveSelectedCharacterId(
+            $user,
+            $userCharacters,
+            $currentAttendance,
+            $event->static_id
+        );
+
+        $userCharIds = $userCharacters->pluck('id');
+        $allUserSpecRecords = CharacterStaticSpec::whereIn('character_id', $userCharIds)
+            ->where('static_id', $event->static_id)
+            ->with('specialization')
+            ->get()
+            ->groupBy('character_id');
+
+        $characterSpecs = $userCharacters->mapWithKeys(function ($char) use ($allUserSpecRecords) {
+            $specRecords = $allUserSpecRecords->get($char->id, collect());
+            return [$char->id => $specRecords->filter(fn ($r) => $r->specialization)
+                ->map(fn ($r) => [
+                    'id'       => $r->specialization->id,
+                    'name'     => $r->specialization->name,
+                    'role'     => $r->specialization->role,
+                    'icon_url' => $r->specialization->icon_url,
+                    'is_main'  => (bool) $r->is_main,
+                ])->values()];
+        });
+
+        $userCharactersPayload = $userCharacters->map(fn ($c) => [
+            'id'              => $c->id,
+            'name'            => $c->name,
+            'playable_class'  => $c->playable_class,
+            'avatar_url'      => $c->avatar_url,
+        ])->values();
+
+        $attendingCharacter = $currentAttendance
+            ? $userCharacters->firstWhere('id', $currentAttendance->character_id)
+            : null;
+        $attendingSpec = $currentAttendance?->spec_id
+            ? Specialization::find($currentAttendance->spec_id)
+            : null;
+
+        return [
+            'rsvpRoute'           => route('schedule.event.rsvp', $event->id),
+            'userCharacters'      => $userCharactersPayload,
+            'selectedCharacterId' => $selectedCharacterId,
+            'characterSpecs'      => $characterSpecs,
+            'currentAttendance'   => $currentAttendance ? [
+                'character_id' => $currentAttendance->character_id,
+                'status'       => $currentAttendance->status,
+                'comment'      => $currentAttendance->comment,
+                'spec_id'      => $currentAttendance->spec_id,
+                'character'    => $attendingCharacter ? [
+                    'name'           => $attendingCharacter->name,
+                    'playable_class' => $attendingCharacter->playable_class,
+                    'avatar_url'     => $attendingCharacter->avatar_url,
+                ] : null,
+                'spec' => $attendingSpec ? [
+                    'name'     => $attendingSpec->name,
+                    'role'     => $attendingSpec->role,
+                    'icon_url' => $attendingSpec->icon_url,
+                ] : null,
+            ] : null,
+        ];
+    }
+
+    /**
      * Determine the default selected character for the RSVP form.
      */
     private function resolveSelectedCharacterId(User $user, Collection $userCharacters, ?RaidAttendance $currentAttendance, int $staticId): ?int

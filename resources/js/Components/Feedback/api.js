@@ -73,17 +73,17 @@ export const SUBTASK_STATUS_META = {
 // `label` is the full name (used on cards/detail badges).
 // `shortLabel` is a compact form used in filter chips to fit on one row.
 export const TAG_META = {
-    raid_events: { label: 'Raid Events', shortLabel: 'Raids', icon: 'event', classes: 'bg-red-500/10 text-red-400 border-red-500/30' },
-    boss_planner: { label: 'Boss Planner', shortLabel: 'Tactics', icon: 'map', classes: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-    roster: { label: 'Roster', shortLabel: 'Roster', icon: 'groups', classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-    gear: { label: 'Gear', shortLabel: 'Gear', icon: 'shield', classes: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
-    ai_analysis: { label: 'AI Analysis', shortLabel: 'AI', icon: 'psychology', classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-    treasury: { label: 'Treasury', shortLabel: 'Treasury', icon: 'payments', classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
-    character: { label: 'Character & Profile', shortLabel: 'Profile', icon: 'person', classes: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
-    discord: { label: 'Discord', shortLabel: 'Discord', icon: 'forum', classes: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
-    admin: { label: 'Settings & Admin', shortLabel: 'Settings', icon: 'settings', classes: 'bg-slate-500/10 text-slate-400 border-slate-500/30' },
-    bug: { label: 'Bug', shortLabel: 'Bug', icon: 'bug_report', classes: 'bg-rose-700/10 text-rose-400 border-rose-700/30' },
-    general: { label: 'General', shortLabel: 'Other', icon: 'tag', classes: 'bg-white/5 text-on-surface-variant border-white/10' },
+    raid_events: { label: 'Raid Events', shortLabel: 'FB:Raids', icon: 'event', classes: 'bg-red-500/10 text-red-400 border-red-500/30' },
+    boss_planner: { label: 'Boss Planner', shortLabel: 'FB:Tactics', icon: 'map', classes: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
+    roster: { label: 'Roster', shortLabel: 'FB:Roster', icon: 'groups', classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
+    gear: { label: 'Gear', shortLabel: 'FB:Gear', icon: 'shield', classes: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
+    ai_analysis: { label: 'AI Analysis', shortLabel: 'FB:AI', icon: 'psychology', classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+    treasury: { label: 'Treasury', shortLabel: 'FB:Treasury', icon: 'payments', classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
+    character: { label: 'Character & Profile', shortLabel: 'FB:Profile', icon: 'person', classes: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
+    discord: { label: 'Discord', shortLabel: 'FB:Discord', icon: 'forum', classes: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
+    admin: { label: 'Settings & Admin', shortLabel: 'FB:Settings', icon: 'settings', classes: 'bg-slate-500/10 text-slate-400 border-slate-500/30' },
+    bug: { label: 'Bug', shortLabel: 'FB:Bug', icon: 'bug_report', classes: 'bg-rose-700/10 text-rose-400 border-rose-700/30' },
+    general: { label: 'General', shortLabel: 'FB:Other', icon: 'tag', classes: 'bg-white/5 text-on-surface-variant border-white/10' },
 };
 
 export function tagMeta(tag) {

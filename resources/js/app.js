@@ -5,7 +5,7 @@ import * as Sentry from '@sentry/vue';
 
 // Eager (shared across layout or tiny) — loaded on every page anyway
 import AlertBanner from './Components/UI/AlertBanner.vue';
-import SyncStatusWidget from './Components/UI/SyncStatusWidget.vue';
+import LayoutShell from './Components/Layout/LayoutShell.vue';
 
 // Async factory — Vite emits a separate chunk per component, loaded on demand
 const lazy = (loader) => defineAsyncComponent(loader);
@@ -40,7 +40,7 @@ app.config.globalProperties.__ = (key, replace = {}) => {
 
 // Shared UI primitives — eager
 app.component('alert-banner', AlertBanner);
-app.component('sync-status-widget', SyncStatusWidget);
+app.component('layout-shell', LayoutShell);
 
 // Page-level components — lazy-loaded per route
 app.component('roster-overview',           lazy(() => import('./Components/Roster/RosterOverview.vue')));

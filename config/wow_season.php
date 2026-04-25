@@ -20,6 +20,7 @@ return [
     'current_season' => 'midnight-s1',
     'wcl_zone_id'    => 46,
 
+
     /*
     | Season start date (UTC) — the first weekly reset of the season.
     | Used to generate the full list of weeks for the roster week selector.

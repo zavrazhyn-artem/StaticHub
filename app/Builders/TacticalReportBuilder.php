@@ -87,4 +87,23 @@ class TacticalReportBuilder extends Builder
             ->orderByDesc('created_at')
             ->first();
     }
+
+    /**
+     * Latest AI-analysed report for a static (any source). Used by the
+     * dashboard "last AI report" widget. Counts a report as analysed when
+     * either the legacy `ai_analysis` text or the structured `ai_blocks`
+     * JSON is populated.
+     */
+    public function latestAnalyzedForStatic(int $staticId): ?TacticalReport
+    {
+        return $this->where('static_id', $staticId)
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->whereNotNull('ai_analysis')
+                       ->where('ai_analysis', '!=', '');
+                })->orWhereNotNull('ai_blocks');
+            })
+            ->orderByDesc('created_at')
+            ->first();
+    }
 }
