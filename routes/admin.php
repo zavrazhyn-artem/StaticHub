@@ -29,6 +29,8 @@ Route::middleware('admin_auth')->group(function () {
     Route::get('/statics', [AdminStaticsController::class, 'index'])->name('admin.statics.index');
 
     Route::get('/user-activity', [AdminUserActivityController::class, 'index'])->name('admin.user-activity');
+    Route::get('/user-activity/statics', [AdminUserActivityController::class, 'statics'])->name('admin.user-activity.statics');
+    Route::get('/user-activity/users', [AdminUserActivityController::class, 'users'])->name('admin.user-activity.users');
     Route::get('/user-activity/users/{user}', [AdminUserActivityController::class, 'show'])->name('admin.user-activity.show');
 
     Route::post('/ghost/enter/{static}', [AdminGhostController::class, 'enter'])->name('admin.ghost.enter');

@@ -98,7 +98,88 @@ class UserActivityLogBuilder extends Builder
             ->get([
                 DB::raw('HOUR(created_at) as hour'),
                 DB::raw('COUNT(*) as views'),
+                DB::raw('COUNT(DISTINCT user_id) as active_users'),
             ]);
+    }
+
+    public function topStaticsPaginated(
+        int $days,
+        string $search,
+        string $sort,
+        string $direction,
+        int $perPage = 25,
+    ): LengthAwarePaginator {
+        $columns = [
+            'name' => 'static_name',
+            'views' => 'views',
+            'active_users' => 'active_users',
+            'last_seen' => 'last_seen',
+        ];
+        $sortColumn = $columns[$sort] ?? 'views';
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        $query = $this->getQuery()->newQuery()
+            ->from('user_activity_logs as ual')
+            ->leftJoin('statics', 'statics.id', '=', 'ual.static_id')
+            ->where('ual.created_at', '>=', now()->subDays($days))
+            ->groupBy('ual.static_id', 'statics.name')
+            ->select([
+                'ual.static_id',
+                'statics.name as static_name',
+                DB::raw('COUNT(*) as views'),
+                DB::raw('COUNT(DISTINCT ual.user_id) as active_users'),
+                DB::raw('MAX(ual.created_at) as last_seen'),
+            ]);
+
+        if ($search !== '') {
+            $query->where('statics.name', 'like', '%' . $search . '%');
+        }
+
+        return $query->orderBy($sortColumn, $direction)->paginate($perPage);
+    }
+
+    public function topUsersPaginated(
+        int $days,
+        string $search,
+        string $sort,
+        string $direction,
+        int $perPage = 25,
+    ): LengthAwarePaginator {
+        $columns = [
+            'name' => 'user_name',
+            'static' => 'static_name',
+            'views' => 'views',
+            'last_seen' => 'last_seen',
+        ];
+        $sortColumn = $columns[$sort] ?? 'views';
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        $query = $this->getQuery()->newQuery()
+            ->from('user_activity_logs as ual')
+            ->leftJoin('users', 'users.id', '=', 'ual.user_id')
+            ->leftJoin('statics', 'statics.id', '=', 'ual.static_id')
+            ->where('ual.created_at', '>=', now()->subDays($days))
+            ->groupBy('ual.user_id', 'users.name', 'users.battletag', 'ual.static_id', 'statics.name')
+            ->select([
+                'ual.user_id',
+                'users.name as user_name',
+                'users.battletag',
+                'ual.static_id',
+                'statics.name as static_name',
+                DB::raw('COUNT(*) as views'),
+                DB::raw('MAX(ual.created_at) as last_seen'),
+            ]);
+
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+            $query->where(function ($q) use ($like) {
+                $q->where('users.name', 'like', $like)
+                  ->orWhere('users.battletag', 'like', $like)
+                  ->orWhere('statics.name', 'like', $like);
+            });
+        }
+
+        return $query->orderBy($sortColumn, $direction)->paginate($perPage);
     }
 
     public function dailyActivity(int $days = 14): Collection

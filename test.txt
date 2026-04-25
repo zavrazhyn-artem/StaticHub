@@ -1,0 +1,47 @@
+[IDE diff test marker — якщо бачиш це вікно diff-viewer'а PhpStorm = інтеграція працює]
+ Зміни готові. Тепер три речі що треба зробити поза Claude:
+
+  1. Перебудувати Docker-образ
+
+  Виконай у WSL-терміналі (поза цією сесією):
+  cd /home/zavrik/claude-agent
+  docker compose build
+
+  Це додасть socat у контейнер. Без цього тунелю не буде.
+
+  2. Прокинути IDE-змінні з Windows у WSL (КРИТИЧНО)
+1
+  Це головний підводний камінь. PhpStorm на Windows встановлює CLAUDE_CODE_SSE_PORT для процесу wsl.exe, але WSL не передає змінні в Linux-bash без WSLENV.
+
+  На Windows-стороні (PowerShell з адмін-правами) додати:
+  [Environment]::SetEnvironmentVariable(
+    "WSLENV",
+    "CLAUDE_CODE_SSE_PORT/u:ENABLE_IDE_INTE.сдуфкGRATION/u:TERMINAL_EMULATOR/u:" + $env:WSLENV,
+    "User"
+  )
+
+  Після цього повністю перезапусти PhpStorm (закрити з трея!).
+
+  /u означає "Unix-only" — змінна з'явиться тільки коли заходимо у WSL.
+
+  3. Запустити нову сесію через плагін
+
+  Завершити поточну (exit або Ctrl+D), і запустити заново через Claude Code [Beta] панель PhpStorm.
+
+  Що ти маєш побачити при запуску
+
+  🔍 Перевірка IDE-змінних на хості:
+     CLAUDE_CODE_SSE_PORT     = 64512   ← має бути число!
+     ENABLE_IDE_INTEGRATION   = true
+     TERMINAL_EMULATOR        = JetBrains-JediTerm
+  ✅ IDE-сокет знайдено на порту 64512 — піднімаю socat-тунель у контейнері
+
+  Якщо побачиш <empty> — значить WSLENV не спрацював, треба ще раз перезапустити PhpStorm або перевірити [Environment]::GetEnvironmentVariable("WSLENV", "User") у PowerShell.
+
+  Що зміниться у файлах
+
+  - Dockerfile — додано socat до системних залежностей
+  - docker-compose.yml — додано extra_hosts: host.docker.internal:host-gateway (контейнер тепер бачить хост)
+  - run-agent.sh — додано блок: діагностика IDE-змінних → запуск socat-тунелю → проброс env через docker exec -e
+
+  Зроби docker compose build і WSLENV-фікс, потім скажи що показав діагностичний вивід — і дізнаємося чи спрацювало.

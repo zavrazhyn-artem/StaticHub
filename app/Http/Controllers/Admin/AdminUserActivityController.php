@@ -19,6 +19,16 @@ class AdminUserActivityController extends Controller
         return view('admin.user-activity.index', $this->dashboard->buildDashboardPayload());
     }
 
+    public function statics(Request $request): View
+    {
+        return view('admin.user-activity.statics', $this->dashboard->buildTopStaticsPayload($request));
+    }
+
+    public function users(Request $request): View
+    {
+        return view('admin.user-activity.users', $this->dashboard->buildTopUsersPayload($request));
+    }
+
     public function show(User $user, Request $request): View
     {
         return view('admin.user-activity.show', [

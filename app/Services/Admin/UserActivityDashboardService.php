@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 class UserActivityDashboardService
 {
     private const SORTABLE = ['created_at', 'route_name', 'url', 'method'];
+    private const STATICS_SORTABLE = ['name', 'views', 'active_users', 'last_seen'];
+    private const USERS_SORTABLE = ['name', 'static', 'views', 'last_seen'];
+    private const PERIODS = [7, 14, 30];
 
     public function buildDashboardPayload(): array
     {
@@ -30,6 +33,66 @@ class UserActivityDashboardService
                 'active_statics_14d' => UserActivityLog::query()->recent(14)->distinct()->count('static_id'),
             ],
         ];
+    }
+
+    public function buildTopStaticsPayload(Request $request): array
+    {
+        $period = $this->resolvePeriod($request);
+        $search = trim((string) $request->query('q', ''));
+        $sort = (string) $request->query('sort', 'views');
+        $direction = strtolower((string) $request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if (! in_array($sort, self::STATICS_SORTABLE, true)) {
+            $sort = 'views';
+        }
+
+        $rows = UserActivityLog::query()
+            ->topStaticsPaginated($period, $search, $sort, $direction, 25)
+            ->withQueryString();
+
+        return [
+            'rows' => $rows,
+            'filters' => [
+                'q' => $search,
+                'sort' => $sort,
+                'dir' => $direction,
+                'period' => $period,
+            ],
+            'periods' => self::PERIODS,
+        ];
+    }
+
+    public function buildTopUsersPayload(Request $request): array
+    {
+        $period = $this->resolvePeriod($request);
+        $search = trim((string) $request->query('q', ''));
+        $sort = (string) $request->query('sort', 'views');
+        $direction = strtolower((string) $request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if (! in_array($sort, self::USERS_SORTABLE, true)) {
+            $sort = 'views';
+        }
+
+        $rows = UserActivityLog::query()
+            ->topUsersPaginated($period, $search, $sort, $direction, 25)
+            ->withQueryString();
+
+        return [
+            'rows' => $rows,
+            'filters' => [
+                'q' => $search,
+                'sort' => $sort,
+                'dir' => $direction,
+                'period' => $period,
+            ],
+            'periods' => self::PERIODS,
+        ];
+    }
+
+    private function resolvePeriod(Request $request): int
+    {
+        $period = (int) $request->query('period', 14);
+        return in_array($period, self::PERIODS, true) ? $period : 14;
     }
 
     public function buildUserDrilldownPayload(User $user, Request $request): array
@@ -72,9 +135,11 @@ class UserActivityDashboardService
         $rows = UserActivityLog::query()->hourlyActivity($days)->keyBy('hour');
         $out = [];
         for ($h = 0; $h < 24; $h++) {
+            $row = $rows->get($h);
             $out[] = [
                 'hour' => $h,
-                'views' => (int) ($rows->get($h)->views ?? 0),
+                'views' => (int) ($row->views ?? 0),
+                'active_users' => (int) ($row->active_users ?? 0),
             ];
         }
         return $out;
