@@ -155,6 +155,9 @@ Route::middleware(['auth', 'resolve_current_static'])->group(function () {
 
     // AI Analyst
     Route::post('/api/logs/analyze', [AiAnalystController::class, 'ask']);
+    Route::post('/api/logs/{report}/chat/activate', [AiAnalystController::class, 'activate'])
+        ->whereNumber('report')
+        ->name('statics.logs.chat.activate');
     Route::post('/api/logs/personal/{personalReport}/translate', [LogTranslationController::class, 'personal'])->name('statics.logs.personal.translate');
 
     // Roster participation

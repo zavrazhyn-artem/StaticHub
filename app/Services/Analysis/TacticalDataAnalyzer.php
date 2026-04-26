@@ -207,11 +207,12 @@ class TacticalDataAnalyzer
                 $perEncounterStats['cooldown_timings'] = $cdTimings;
             }
 
-            // Wave 2: external defensive cooldowns given/received
+            // Wave 2: external defensive cooldowns given/received + temporal coverage
             $externalCds = $this->collectExternalCooldowns(
                 $reportId,
                 $bossFightIds,
-                $logData
+                $logData,
+                $logData['deaths'][$bossName] ?? []
             );
             if (!empty($externalCds)) {
                 $perEncounterStats['external_cooldowns'] = $externalCds;
@@ -1690,7 +1691,7 @@ class TacticalDataAnalyzer
      *
      * @return array{events:array, by_caster:array, by_target:array}
      */
-    private function collectExternalCooldowns(string $reportId, array $bossFightIds, array $logData): array
+    private function collectExternalCooldowns(string $reportId, array $bossFightIds, array $logData, array $deathsByTry = []): array
     {
         $refs = $this->combatRefs->externalCooldowns();
         if (empty($refs)) return [];
@@ -1729,11 +1730,107 @@ class TacticalDataAnalyzer
         foreach ($byTarget as &$abilities) arsort($abilities);
         unset($abilities);
 
-        return [
+        $tankNames = $this->extractTankNames($logData['player_details'] ?? []);
+        $tankDeathCoverage = $this->analyzeTankExternalCoverage($events, $deathsByTry, $tankNames);
+
+        $result = [
             'events_count' => count($events),
             'by_caster'    => $byCaster,
             'by_target'    => $byTarget,
         ];
+        if (!empty($tankDeathCoverage)) {
+            $result['tank_death_coverage'] = $tankDeathCoverage;
+        }
+        return $result;
+    }
+
+    /**
+     * Wave 2 (timing extension) — for each tank death, was an external defensive
+     * buff active when it landed? Distinguishes:
+     *   - covered: external applied within 4s before death (active and recent)
+     *   - late: applied 4-8s before (likely expired or barely active)
+     *   - no_external: nothing applied within 8s
+     *
+     * Surfaces "reactive vs proactive" external coordination — the difference
+     * between landing externals BEFORE damage spikes vs AFTER they kill the tank.
+     *
+     * @param array $externalEvents Raw apply-buff events (ts, caster, target, ability)
+     * @param array $deathsByTry    $logData['deaths'][bossName] — keyed by try id
+     * @param array $tankNames      Roster tanks (from extractTankNames)
+     * @return array<string, array{deaths_total:int, covered:int, late:int, no_external:int, avg_late_seconds:float}>
+     */
+    private function analyzeTankExternalCoverage(array $externalEvents, array $deathsByTry, array $tankNames): array
+    {
+        if (empty($externalEvents) || empty($tankNames) || empty($deathsByTry)) {
+            return [];
+        }
+
+        $coveredWindowMs = 4000;  // <=4s before death = good coverage
+        $lateWindowMs = 8000;     // 4-8s before death = applied but expiring/late
+
+        $coverage = [];
+        foreach ($tankNames as $tank) {
+            $coverage[$tank] = [
+                'deaths_total'     => 0,
+                'covered'          => 0,
+                'late'             => 0,
+                'no_external'      => 0,
+                'avg_late_seconds' => 0.0,
+            ];
+        }
+
+        $tanksSet = array_flip($tankNames);
+        $lateSecondsByTank = [];
+
+        foreach ($deathsByTry as $tryDeaths) {
+            if (!is_array($tryDeaths)) continue;
+            foreach ($tryDeaths as $death) {
+                $name = $death['name'] ?? null;
+                $ts = $death['timestamp'] ?? null;
+                if (!$name || !$ts || !isset($tanksSet[$name])) continue;
+                if (($death['tag'] ?? 'normal') === 'wipe_called') continue;
+
+                $coverage[$name]['deaths_total']++;
+
+                $latestApply = null;
+                foreach ($externalEvents as $ext) {
+                    if (($ext['target'] ?? null) !== $name) continue;
+                    $extTs = $ext['timestamp'] ?? null;
+                    if ($extTs === null) continue;
+                    $delta = $ts - $extTs;
+                    if ($delta < 0 || $delta > $lateWindowMs) continue;
+                    if ($latestApply === null || $extTs > $latestApply) {
+                        $latestApply = $extTs;
+                    }
+                }
+
+                if ($latestApply === null) {
+                    $coverage[$name]['no_external']++;
+                } else {
+                    $delta = $ts - $latestApply;
+                    if ($delta <= $coveredWindowMs) {
+                        $coverage[$name]['covered']++;
+                    } else {
+                        $coverage[$name]['late']++;
+                        $lateSecondsByTank[$name][] = $delta / 1000;
+                    }
+                }
+            }
+        }
+
+        // Compute avg late seconds; drop tanks with no real deaths
+        foreach ($coverage as $name => $c) {
+            if ($c['deaths_total'] === 0) {
+                unset($coverage[$name]);
+                continue;
+            }
+            $points = $lateSecondsByTank[$name] ?? [];
+            if (!empty($points)) {
+                $coverage[$name]['avg_late_seconds'] = round(array_sum($points) / count($points), 1);
+            }
+        }
+
+        return $coverage;
     }
 
     /**

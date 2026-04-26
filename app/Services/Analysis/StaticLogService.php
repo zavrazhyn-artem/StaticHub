@@ -186,8 +186,10 @@ class StaticLogService
                 : null,
             'wcl_url'           => 'https://www.warcraftlogs.com/reports/' . $report->wcl_report_id,
             'model'              => $report->model,
-            'chat_available'     => $report->isCacheActive(),
-            'chat_expires_at'    => $report->gemini_cache_expires_at?->toIso8601String(),
+            'chat_available'     => $report->isChatActive(),
+            'chat_expires_at'    => $report->chat_active_until?->toIso8601String(),
+            'can_activate_chat'  => $report->canActivateChat(),
+            'chat_activate_url'  => route('statics.logs.chat.activate', ['report' => $report->id]),
             'execution_metrics'  => $executionMetrics,
         ];
 

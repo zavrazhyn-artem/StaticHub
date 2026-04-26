@@ -13,8 +13,39 @@ const props = defineProps({
     chatHistory: { type: Array, default: () => [] },
     analyzeApiUrl: { type: String, required: true },
     readOnly: { type: Boolean, default: false },
+    canActivateChat: { type: Boolean, default: false },
+    chatActivateUrl: { type: String, default: '' },
+    chatTimeRemaining: { type: String, default: '' },
 });
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'activated']);
+
+const activating = ref(false);
+const activationError = ref('');
+
+async function activateChat() {
+    if (activating.value || !props.chatActivateUrl) return;
+    activating.value = true;
+    activationError.value = '';
+    try {
+        const response = await fetch(props.chatActivateUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            activationError.value = data.error || 'activation_failed';
+            return;
+        }
+        emit('activated', data.chat_active_until);
+    } catch {
+        activationError.value = 'network_error';
+    } finally {
+        activating.value = false;
+    }
+}
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
@@ -180,11 +211,27 @@ async function sendMessage() {
 
             <!-- Input Area -->
             <div class="p-6 bg-surface-container-high border-t border-white/5">
-                <template v-if="readOnly">
+                <template v-if="readOnly && canActivateChat">
+                    <button @click="activateChat"
+                        :disabled="activating"
+                        class="w-full bg-primary hover:bg-primary-dim text-on-primary-fixed py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(79,211,247,0.3)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none">
+                        <span class="material-symbols-outlined text-base">bolt</span>
+                        <span class="text-2xs font-bold uppercase tracking-wider">
+                            {{ activating ? __('Activating…') : __('Activate chat for 30 minutes') }}
+                        </span>
+                    </button>
+                    <p class="mt-3 text-4xs text-on-surface-variant/70 text-center leading-relaxed">
+                        {{ __('One-shot activation — usable by the whole static for 30 min, then expires.') }}
+                    </p>
+                    <p v-if="activationError" class="mt-2 text-3xs text-error font-semibold text-center">
+                        {{ __('Activation failed:') }} {{ activationError }}
+                    </p>
+                </template>
+                <template v-else-if="readOnly">
                     <div class="flex items-start gap-3 px-4 py-3 bg-amber-400/5 border border-amber-400/20 rounded-xl">
                         <span class="material-symbols-outlined text-amber-400 text-sm mt-0.5 flex-shrink-0">lock_clock</span>
                         <p class="text-3xs text-amber-300/80 font-semibold uppercase tracking-wider leading-relaxed">
-                            {{ __('Chat session has expired. History is preserved in read-only mode.') }}
+                            {{ __('Chat is not active for this report.') }}
                         </p>
                     </div>
                 </template>
@@ -203,10 +250,15 @@ async function sendMessage() {
                             </button>
                         </div>
                     </form>
-                    <div class="mt-4 flex items-center gap-2 px-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                        <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60">
-                            {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }}) {{ __('is loaded.') }}
+                    <div class="mt-4 flex items-center justify-between gap-2 px-1">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse flex-shrink-0"></span>
+                            <p class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 truncate">
+                                {{ __('Context:') }} {{ reportTitle }} ({{ wclReportId }})
+                            </p>
+                        </div>
+                        <p v-if="chatTimeRemaining" class="text-4xs font-bold uppercase tracking-wider text-success-neon flex-shrink-0">
+                            {{ chatTimeRemaining }}
                         </p>
                     </div>
                 </template>

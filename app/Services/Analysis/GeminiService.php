@@ -18,6 +18,7 @@ class GeminiService
     private string $baseUrl;
     private string $flashModel;
     private string $proModel;
+    private ?string $thinkingLevel;
 
     private const BASE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
     private const CACHE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/cachedContents';
@@ -32,11 +33,60 @@ class GeminiService
         );
         $this->flashModel = (string) config('services.gemini.flash_model', 'gemini-2.5-flash');
         $this->proModel = (string) config('services.gemini.pro_model', 'gemini-2.5-flash');
+
+        $level = config('services.gemini.thinking_level');
+        $this->thinkingLevel = is_string($level) && in_array($level, ['low', 'medium', 'high'], true)
+            ? $level
+            : null;
     }
 
     public function buildModelUrl(string $model): string
     {
         return self::BASE_API_URL . $model . ':generateContent';
+    }
+
+    /**
+     * Delete an explicit cached context (chat session cleanup).
+     * Returns true on 200/204, false otherwise. Quiet on failure — Google
+     * auto-expires caches via TTL anyway, so a failed delete is not fatal.
+     */
+    public function deleteCachedContext(string $cacheId): bool
+    {
+        $url = 'https://generativelanguage.googleapis.com/v1beta/' . $cacheId;
+        try {
+            $response = Http::timeout(15)->delete($url . '?key=' . $this->apiKey);
+            if ($response->successful()) {
+                Log::info('Gemini cache deleted', ['cache_id' => $cacheId]);
+                return true;
+            }
+            Log::warning('Gemini cache delete failed', [
+                'cache_id' => $cacheId,
+                'status'   => $response->status(),
+                'body'     => mb_substr((string) $response->body(), 0, 300),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Gemini cache delete exception', ['cache_id' => $cacheId, 'message' => $e->getMessage()]);
+        }
+        return false;
+    }
+
+    /**
+     * Build generationConfig with optional thinkingConfig from env.
+     * thinkingLevel applies to Gemini 3+ models; older models ignore it.
+     */
+    private function buildGenerationConfig(int $maxOutputTokens, bool $jsonMode = false): array
+    {
+        $config = ['maxOutputTokens' => $maxOutputTokens];
+
+        if ($jsonMode) {
+            $config['responseMimeType'] = 'application/json';
+        }
+
+        if ($this->thinkingLevel !== null) {
+            $config['thinkingConfig'] = ['thinkingLevel' => $this->thinkingLevel];
+        }
+
+        return $config;
     }
 
     /**
@@ -118,14 +168,8 @@ class GeminiService
                     ],
                 ],
             ],
-            'generationConfig' => [
-                'maxOutputTokens' => $maxOutputTokens,
-            ],
+            'generationConfig' => $this->buildGenerationConfig($maxOutputTokens, $jsonMode),
         ];
-
-        if ($jsonMode) {
-            $payload['generationConfig']['responseMimeType'] = 'application/json';
-        }
 
         $startTime = microtime(true);
         $modelName = 'unknown';
@@ -334,14 +378,15 @@ class GeminiService
     }
 
     /**
-     * Create the raid-wide Gemini cache that both main + per-player generation will reuse.
-     * Returns the cache descriptor or null on failure.
+     * Build the raid context block that is sent as a stable prefix in every
+     * main + per-player generation call. Identical across calls so Gemini's
+     * implicit caching kicks in for free (no $1/M/h storage charge).
      *
-     * @return array{cache_id: string, expires_at: ?string}|null
+     * Used by both the inline generation flow and the explicit chat cache.
      */
-    public function createRaidCache(string $preprocessedJson, ?string $supplementaryJson = null, int $ttlSeconds = 10800): ?array
+    public function buildRaidContextContent(string $preprocessedJson, ?string $supplementaryJson = null): string
     {
-        $cacheContent = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
+        $content = "You are a WoW Mythic Raid AI Analyst. Below is pre-analyzed raid combat data "
             . "produced by a deterministic PHP analyzer plus raw supplementary log data for chat queries. "
             . "Use the PRE-ANALYZED section for failures/performance summaries; use the RAW SUPPLEMENTARY "
             . "section for per-player details (cast counts, buff uptimes, dispel counts, gear, "
@@ -349,41 +394,74 @@ class GeminiService
             . "=== PRE-ANALYZED RAID DATA ===\n" . $preprocessedJson;
 
         if ($supplementaryJson) {
-            $cacheContent .= "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryJson;
+            $content .= "\n\n=== RAW SUPPLEMENTARY DATA (for chat queries) ===\n" . $supplementaryJson;
         }
 
-        return $this->createCachedContext($cacheContent, $this->proModel, $ttlSeconds);
+        return $content;
+    }
+
+    /**
+     * Create an explicit Gemini cache for chat (paid storage, $1/M/hour).
+     * Only called when a user explicitly activates chat — never during report
+     * generation, which uses implicit caching via stable prefixes.
+     *
+     * @return array{cache_id: string, expires_at: ?string}|null
+     */
+    public function createRaidCache(string $contextContent, int $ttlSeconds = 1800): ?array
+    {
+        return $this->createCachedContext($contextContent, $this->proModel, $ttlSeconds);
+    }
+
+    /**
+     * Extract token counts from a Gemini response, including implicit cache hit count.
+     * Returned shape mirrors what we surface in INFO logs and AiRequestLog metadata.
+     */
+    private function extractUsage(?array $data): array
+    {
+        $usage = $data['usageMetadata'] ?? [];
+        return [
+            'prompt'   => $usage['promptTokenCount'] ?? null,
+            'cached'   => $usage['cachedContentTokenCount'] ?? null,
+            'output'   => $usage['candidatesTokenCount'] ?? null,
+            'thoughts' => $usage['thoughtsTokenCount'] ?? null,
+            'total'    => $usage['totalTokenCount'] ?? null,
+        ];
     }
 
     /**
      * Generate ONLY the raid-wide `main` report + title via a single Gemini call.
-     * Uses the cached context created by `createRaidCache`.
+     * Sends the context inline so Gemini's implicit prefix-cache can dedupe
+     * the same context across the 24+ calls in one analysis pass — no explicit
+     * cache, no storage charge.
      *
      * @return array{title: string, main: array<int, array>}
      */
-    public function generateMainReportBlocks(string $cacheId): array
+    public function generateMainReportBlocks(string $contextContent): array
     {
         $instructions = file_get_contents(resource_path('prompts/gemini_main_report.txt'));
         $url = $this->buildModelUrl($this->proModel);
 
-        Log::info('Generating main report blocks', ['cache_id' => $cacheId]);
+        Log::info('Generating main report blocks', [
+            'context_chars' => strlen($contextContent),
+            'model'         => $this->proModel,
+        ]);
 
-        // Bypass executeWithCache so we can inspect the FULL raw response on
-        // failure — useful when Gemini returns truncated JSON without flagging
-        // MAX_TOKENS. We dump the entire candidate payload to storage/logs so
-        // we can see finishReason, parts[] structure, usage metadata, etc.
+        // Single text part with stable prefix [context + instructions] so
+        // Gemini implicit caching can reuse it across player calls. Only the
+        // trailing "Generate ..." sentence varies between calls.
+        $text = $contextContent
+            . "\n\n=== INSTRUCTIONS ===\n" . $instructions
+            . "\n\nGenerate the raid-wide main report now. Output strictly raw JSON.";
+
         $payload = [
-            'cachedContent' => $cacheId,
             'contents' => [[
                 'role' => 'user',
-                'parts' => [['text' => $instructions . "\n\nGenerate the raid-wide main report now. Output strictly raw JSON."]],
+                'parts' => [['text' => $text]],
             ]],
-            'generationConfig' => [
-                'maxOutputTokens'  => 65536,
-                'responseMimeType' => 'application/json',
-            ],
+            'generationConfig' => $this->buildGenerationConfig(65536, true),
         ];
 
+        $startTime = microtime(true);
         $response = Http::withHeaders(['Content-Type' => 'application/json'])
             ->timeout(300)
             ->post($url . '?key=' . $this->apiKey, $payload);
@@ -393,13 +471,18 @@ class GeminiService
                 'status' => $response->status(),
                 'body'   => mb_substr((string) $response->body(), 0, 1000),
             ]);
+            $this->aiLogger->logRequest(
+                'gemini', $this->proModel, $url,
+                $response->json(), $startTime, 'error', $response->body(),
+                ['stage' => 'main_report']
+            );
             throw new \Exception('Main report HTTP failed (' . $response->status() . '): ' . mb_substr((string) $response->body(), 0, 500));
         }
 
         $data = $response->json();
         $candidate = $data['candidates'][0] ?? [];
         $finishReason = $candidate['finishReason'] ?? null;
-        $usage = $data['usageMetadata'] ?? null;
+        $usage = $this->extractUsage($data);
 
         // Gemini 3 may emit multiple parts (thoughts + answer). Concatenate ALL
         // text-bearing parts so we don't accidentally pick a thinking-only part
@@ -412,20 +495,31 @@ class GeminiService
             }
         }
 
+        $cacheHitPct = ($usage['prompt'] && $usage['cached'])
+            ? round(100 * $usage['cached'] / $usage['prompt'], 1)
+            : 0;
+
         Log::info('Main report API response stats', [
             'finish_reason'   => $finishReason,
             'parts_count'     => count($candidate['content']['parts'] ?? []),
             'text_length'     => strlen($text),
-            'usage'           => $usage ? [
-                'thoughts_tokens' => $usage['thoughtsTokenCount'] ?? null,
-                'candidates'      => $usage['candidatesTokenCount'] ?? null,
-                'total'           => $usage['totalTokenCount'] ?? null,
-            ] : null,
+            'prompt_tokens'   => $usage['prompt'],
+            'cached_tokens'   => $usage['cached'],
+            'cache_hit_pct'   => $cacheHitPct,
+            'output_tokens'   => $usage['output'],
+            'thoughts_tokens' => $usage['thoughts'],
+            'total_tokens'    => $usage['total'],
         ]);
+
+        $this->aiLogger->logRequest(
+            'gemini', $this->proModel, $url,
+            $data, $startTime, 'success', null,
+            ['stage' => 'main_report', 'cache_hit_pct' => $cacheHitPct]
+        );
 
         if ($finishReason === 'MAX_TOKENS') {
             $this->dumpMainReportFailure('max_tokens', $data, $text);
-            throw new \Exception("Main report truncated by MAX_TOKENS at {$usage['candidatesTokenCount']}/65536 tokens. Output length: " . strlen($text) . ' chars.');
+            throw new \Exception("Main report truncated by MAX_TOKENS at {$usage['output']}/65536 tokens. Output length: " . strlen($text) . ' chars.');
         }
 
         $cleaned = GeminiResponseFormatter::cleanMarkdown($text);
@@ -498,12 +592,17 @@ class GeminiService
      *                                 when each call counts the full cached context)
      * @return array<string, array<int, array>>  [playerName => blocks[]]
      */
-    public function generatePlayerReportBlocks(string $cacheId, array $playerNames, int $concurrency = 3): array
+    public function generatePlayerReportBlocks(string $contextContent, array $playerNames, int $concurrency = 3): array
     {
         $instructions = file_get_contents(resource_path('prompts/gemini_player_report.txt'));
         $url = $this->buildModelUrl($this->proModel);
         $results = [];
         $pendingRetry = []; // [name => attempts] for players that hit 429
+
+        // Stable prefix [context + instructions] is identical for every player
+        // call → Gemini implicit cache hits this prefix and we only pay for
+        // the variable suffix (TARGET_PLAYER + generate sentence).
+        $stablePrefix = $contextContent . "\n\n=== INSTRUCTIONS ===\n" . $instructions;
 
         foreach (array_chunk($playerNames, $concurrency) as $batchIndex => $batch) {
             Log::info('Generating player reports batch', [
@@ -512,7 +611,7 @@ class GeminiService
                 'players' => $batch,
             ]);
 
-            $batchResults = $this->dispatchPlayerBatch($cacheId, $url, $instructions, $batch);
+            $batchResults = $this->dispatchPlayerBatch($stablePrefix, $url, $batch);
             foreach ($batchResults as $name => $entry) {
                 if ($entry['status'] === 'ok') {
                     $results[$name] = $entry['blocks'];
@@ -541,7 +640,7 @@ class GeminiService
             $stillPending = [];
 
             foreach (array_chunk($retryNames, $concurrency) as $retryBatch) {
-                $retryResults = $this->dispatchPlayerBatch($cacheId, $url, $instructions, $retryBatch);
+                $retryResults = $this->dispatchPlayerBatch($stablePrefix, $url, $retryBatch);
                 foreach ($retryResults as $name => $entry) {
                     if ($entry['status'] === 'ok') {
                         $results[$name] = $entry['blocks'];
@@ -575,24 +674,22 @@ class GeminiService
      * @param string[] $playerNames
      * @return array<string, array{status:string, blocks?:array, retry_after?:int}>
      */
-    private function dispatchPlayerBatch(string $cacheId, string $url, string $instructions, array $playerNames): array
+    private function dispatchPlayerBatch(string $stablePrefix, string $url, array $playerNames): array
     {
+        $batchStart = microtime(true);
         $responses = Http::pool(fn (Pool $pool) => array_map(
             fn($name) => $pool->as($name)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->timeout(300)
                 ->post($url . '?key=' . $this->apiKey, [
-                    'cachedContent' => $cacheId,
                     'contents' => [[
                         'role' => 'user',
                         'parts' => [[
-                            'text' => $instructions . "\n\nTARGET_PLAYER: {$name}\n\nGenerate the personal report blocks for this player. Output strictly raw JSON of shape { \"blocks\": [...] }.",
+                            'text' => $stablePrefix
+                                . "\n\nTARGET_PLAYER: {$name}\n\nGenerate the personal report blocks for this player. Output strictly raw JSON of shape { \"blocks\": [...] }.",
                         ]],
                     ]],
-                    'generationConfig' => [
-                        'maxOutputTokens'  => 65536,
-                        'responseMimeType' => 'application/json',
-                    ],
+                    'generationConfig' => $this->buildGenerationConfig(65536, true),
                 ]),
             $playerNames
         ));
@@ -615,6 +712,11 @@ class GeminiService
                         'player'      => $name,
                         'retry_after' => $retryAfter,
                     ]);
+                    $this->aiLogger->logRequest(
+                        'gemini', $this->proModel, $url,
+                        $response->json(), $batchStart, 'error', $body,
+                        ['stage' => 'player_report', 'player' => $name, 'rate_limited' => true]
+                    );
                     $out[$name] = ['status' => 'rate_limited', 'retry_after' => $retryAfter];
                     continue;
                 }
@@ -624,6 +726,11 @@ class GeminiService
                     'status' => $status,
                     'body'   => mb_substr($body, 0, 500),
                 ]);
+                $this->aiLogger->logRequest(
+                    'gemini', $this->proModel, $url,
+                    $response->json(), $batchStart, 'error', $body,
+                    ['stage' => 'player_report', 'player' => $name]
+                );
                 $out[$name] = ['status' => 'failed'];
                 continue;
             }
@@ -631,6 +738,28 @@ class GeminiService
             $data = $response->json();
             $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
             $finishReason = $data['candidates'][0]['finishReason'] ?? null;
+            $usage = $this->extractUsage($data);
+
+            $cacheHitPct = ($usage['prompt'] && $usage['cached'])
+                ? round(100 * $usage['cached'] / $usage['prompt'], 1)
+                : 0;
+
+            Log::info('Player report API response stats', [
+                'player'          => $name,
+                'finish_reason'   => $finishReason,
+                'text_length'     => strlen((string) $text),
+                'prompt_tokens'   => $usage['prompt'],
+                'cached_tokens'   => $usage['cached'],
+                'cache_hit_pct'   => $cacheHitPct,
+                'output_tokens'   => $usage['output'],
+                'thoughts_tokens' => $usage['thoughts'],
+            ]);
+
+            $this->aiLogger->logRequest(
+                'gemini', $this->proModel, $url,
+                $data, $batchStart, 'success', null,
+                ['stage' => 'player_report', 'player' => $name, 'cache_hit_pct' => $cacheHitPct]
+            );
 
             if ($finishReason === 'MAX_TOKENS') {
                 Log::warning('Player report hit MAX_TOKENS — output truncated', [
@@ -774,14 +903,8 @@ class GeminiService
                     ],
                 ],
             ],
-            'generationConfig' => [
-                'maxOutputTokens' => $maxOutputTokens,
-            ],
+            'generationConfig' => $this->buildGenerationConfig($maxOutputTokens, $jsonMode),
         ];
-
-        if ($jsonMode) {
-            $payload['generationConfig']['responseMimeType'] = 'application/json';
-        }
 
         $modelName = 'unknown';
         if (preg_match('#/models/([^/:]+)#', $modelUrl, $matches)) {

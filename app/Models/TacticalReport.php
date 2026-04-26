@@ -61,17 +61,45 @@ class TacticalReport extends Model
         'prompt_version',
         'gemini_cache_id',
         'gemini_cache_expires_at',
+        'chat_activated_at',
+        'chat_active_until',
     ];
 
     protected $casts = [
         'difficulties'            => 'array',
         'ai_blocks'               => 'array',
         'gemini_cache_expires_at' => 'datetime',
+        'chat_activated_at'       => 'datetime',
+        'chat_active_until'       => 'datetime',
     ];
 
     public function isCacheActive(): bool
     {
         return $this->gemini_cache_id && $this->gemini_cache_expires_at?->isFuture();
+    }
+
+    /**
+     * Chat is currently usable: explicit cache exists and the activation
+     * window has not expired. Driven by manual activation — generation no
+     * longer pre-creates a chat cache.
+     */
+    public function isChatActive(): bool
+    {
+        return $this->isCacheActive() && $this->chat_active_until?->isFuture();
+    }
+
+    /**
+     * Chat can still be activated for this report:
+     *   - never activated yet (one-shot during the test period)
+     *   - payload file still exists on disk (not yet GC'd after 24h)
+     */
+    public function canActivateChat(): bool
+    {
+        if ($this->chat_activated_at !== null) {
+            return false;
+        }
+
+        return app(\App\Services\Analysis\RaidPayloadStorage::class)->exists($this->id);
     }
 
     public function staticGroup(): BelongsTo

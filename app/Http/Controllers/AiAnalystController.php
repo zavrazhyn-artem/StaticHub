@@ -3,15 +3,49 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AiAnalystRequest;
+use App\Models\StaticGroup;
 use App\Models\TacticalReport;
 use App\Services\Analysis\AiAnalystService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class AiAnalystController extends Controller
 {
     public function __construct(
         private readonly AiAnalystService $aiAnalystService
     ) {}
+
+    /**
+     * One-shot activation of the AI chat for a tactical report.
+     *
+     * `$static` is injected positionally by ResolveCurrentStatic middleware —
+     * it must precede route-bound models in the signature.
+     */
+    public function activate(StaticGroup $static, TacticalReport $report): JsonResponse
+    {
+        Gate::authorize('canActivateReportChat', $static);
+
+        if (!$report->canActivateChat()) {
+            return response()->json([
+                'error' => $report->chat_activated_at !== null
+                    ? 'already_activated'
+                    : 'payload_unavailable',
+            ], 409);
+        }
+
+        try {
+            $until = $this->aiAnalystService->activateChat($report);
+        } catch (\DomainException $e) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'activation_failed', 'message' => $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'chat_active_until' => $until->toIso8601String(),
+            'ttl_seconds'       => AiAnalystService::CHAT_TTL_SECONDS,
+        ]);
+    }
 
     public function ask(AiAnalystRequest $request): JsonResponse
     {

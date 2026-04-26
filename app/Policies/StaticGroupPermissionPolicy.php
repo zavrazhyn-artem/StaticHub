@@ -106,6 +106,16 @@ class StaticGroupPermissionPolicy
         return $this->getUserRoleInStatic($user, $static)?->isManager() ?? false;
     }
 
+    /**
+     * Activate the AI chat for a tactical report (one-shot, 30-min window).
+     * Required role: leader or officer. Members consume the activated session
+     * but cannot start it.
+     */
+    public function canActivateReportChat(User $user, StaticGroup $static): bool
+    {
+        return $this->getUserRoleInStatic($user, $static)?->isManager() ?? false;
+    }
+
     // -------------------------------------------------------------------------
     // Treasury
     // -------------------------------------------------------------------------

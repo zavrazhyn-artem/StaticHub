@@ -38,3 +38,6 @@ Schedule::command(PurgeOldLogsCommand::class)->daily()->at('05:00');
 Schedule::command(ProcessUserActivityLogsCommand::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
 Schedule::command(PurgeUserActivityLogsCommand::class)->daily()->at('05:15')->onOneServer();
 
+// Delete raid payload files older than 24h (locks chat activation for those reports).
+Schedule::command('ai:cleanup-payloads')->dailyAt('03:30')->onOneServer();
+

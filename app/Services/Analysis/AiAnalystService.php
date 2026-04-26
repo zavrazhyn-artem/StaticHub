@@ -16,10 +16,48 @@ class AiAnalystService
     /** How many recent messages to send as context to the AI */
     private const HISTORY_WINDOW = 6;
 
+    /** Chat session length in seconds after activation. */
+    public const CHAT_TTL_SECONDS = 1800;
+
     public function __construct(
-        private readonly GeminiService $geminiService,
-        private readonly WclService    $wclService
+        private readonly GeminiService        $geminiService,
+        private readonly WclService           $wclService,
+        private readonly RaidPayloadStorage   $payloadStorage,
     ) {}
+
+    /**
+     * One-shot chat activation: builds an explicit Gemini cache from the
+     * persisted raid payload, sets the activation window, returns the
+     * timestamp when the chat will expire.
+     *
+     * Throws on misuse (already activated, no payload file, cache create fail).
+     */
+    public function activateChat(TacticalReport $report): \Carbon\Carbon
+    {
+        if ($report->chat_activated_at !== null) {
+            throw new \DomainException('Chat already activated for this report.');
+        }
+
+        $payload = $this->payloadStorage->read($report->id);
+        if ($payload === null) {
+            throw new \DomainException('Raid payload no longer available — chat cannot be activated.');
+        }
+
+        $cache = $this->geminiService->createRaidCache($payload, self::CHAT_TTL_SECONDS);
+        if (!$cache || empty($cache['cache_id'])) {
+            throw new \RuntimeException('Failed to create Gemini cache for chat.');
+        }
+
+        $now = now();
+        $report->update([
+            'gemini_cache_id'         => $cache['cache_id'],
+            'gemini_cache_expires_at' => $cache['expires_at'] ? \Carbon\Carbon::parse($cache['expires_at']) : null,
+            'chat_activated_at'       => $now,
+            'chat_active_until'       => $now->copy()->addSeconds(self::CHAT_TTL_SECONDS),
+        ]);
+
+        return $report->chat_active_until;
+    }
 
     /**
      * Get the character IDs belonging to a user within a static group.
@@ -45,8 +83,7 @@ class AiAnalystService
 
         $history = $this->loadHistory($reportId, $user->id);
 
-        // Try cached context first
-        if ($report->isCacheActive()) {
+        if ($report->isChatActive()) {
             $reply = $this->chatWithCache($report, $message, $userIdentity, $history);
         } else {
             // Fallback: send full log data (legacy path)
@@ -78,8 +115,7 @@ class AiAnalystService
 
         $history = $this->loadHistory($reportId, $user->id);
 
-        // Try cached context first
-        if ($report->isCacheActive()) {
+        if ($report->isChatActive()) {
             // For members, add personal report restriction to the prompt
             $enrichedMessage = "IMPORTANT: This user is a regular member. Only discuss THEIR personal data. "
                 . "Do not reveal other players' performance or names.\n\n"
@@ -103,11 +139,12 @@ class AiAnalystService
     }
 
     /**
-     * Check if chat is available for a given report (cache still active).
+     * Check if chat is available for a given report (within the manual
+     * activation window).
      */
     public function isChatAvailable(TacticalReport $report): bool
     {
-        return $report->isCacheActive();
+        return $report->isChatActive();
     }
 
     /**

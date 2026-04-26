@@ -27,20 +27,22 @@ const props = defineProps({
 const activeTab = ref('global');
 const chatOpen = ref(false);
 
-// Chat availability timer
+// Chat availability timer — driven by chat_active_until (manual activation window).
 const chatTimeRemaining = ref('');
 const chatExpired = ref(!props.report.chat_available);
+const canActivateChat = ref(!!props.report.can_activate_chat);
+const chatActiveUntilLocal = ref(props.report.chat_expires_at || null);
 
 let chatTimer = null;
 
 function updateChatTimer() {
-    if (!props.report.chat_expires_at) {
+    if (!chatActiveUntilLocal.value) {
         chatExpired.value = true;
         chatTimeRemaining.value = '';
         return;
     }
     const now = new Date();
-    const expires = new Date(props.report.chat_expires_at);
+    const expires = new Date(chatActiveUntilLocal.value);
     const diff = expires - now;
 
     if (diff <= 0) {
@@ -51,10 +53,16 @@ function updateChatTimer() {
     }
 
     chatExpired.value = false;
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
+    const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
-    chatTimeRemaining.value = `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    chatTimeRemaining.value = `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+}
+
+function onChatActivated(untilIso) {
+    chatActiveUntilLocal.value = untilIso;
+    canActivateChat.value = false;
+    updateChatTimer();
+    if (!chatTimer) chatTimer = setInterval(updateChatTimer, 1000);
 }
 
 onMounted(() => {
@@ -159,7 +167,11 @@ function toggleActiveOriginal() {
             :chat-history="chatHistory"
             :analyze-api-url="analyzeApiUrl"
             :read-only="chatExpired"
+            :can-activate-chat="canActivateChat && isRaidLeader"
+            :chat-activate-url="report.chat_activate_url"
+            :chat-time-remaining="chatTimeRemaining"
             @close="chatOpen = false"
+            @activated="onChatActivated"
         />
 
         <!-- Floating Chat Toggle -->
@@ -200,12 +212,6 @@ function toggleActiveOriginal() {
                     <span class="text-on-surface-variant text-3xs font-bold uppercase tracking-wider">
                         {{ __('Executed:') }} {{ report.created_at }}
                     </span>
-                    <template v-if="report.model">
-                        <span class="text-on-surface-variant opacity-20">•</span>
-                        <span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 rounded text-3xs font-bold text-emerald-400 uppercase tracking-wider">
-                            {{ report.model }}
-                        </span>
-                    </template>
                 </div>
                 <h1 class="text-4xl font-black text-white uppercase tracking-tight font-headline leading-tight mb-4">
                     {{ report.title }}
@@ -286,49 +292,24 @@ function toggleActiveOriginal() {
                 </div>
 
                 <!-- Global Tab -->
-                <div v-show="activeTab === 'global'" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- AI Summary -->
-                    <div class="lg:col-span-2 space-y-8">
-                        <section class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                            <div class="bg-indigo-400/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
-                                <h2 class="text-indigo-400 font-headline text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <span class="material-symbols-outlined text-lg">psychology</span>
-                                    {{ __('AI Tactical Review') }}
-                                </h2>
-                                <div class="flex gap-1">
-                                    <div class="w-2 h-2 rounded-full bg-indigo-400/20"></div>
-                                    <div class="w-2 h-2 rounded-full bg-indigo-400/40"></div>
-                                    <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
-                                </div>
-                            </div>
-                            <div class="p-8">
-                                <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" :ability-map="abilityIndex" />
-                                <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
-                            </div>
-                        </section>
-                    </div>
-
-                    <!-- Sidebar: Execution Metrics + Mission Summary -->
-                    <div class="space-y-8">
-                        <div class="bg-surface-container-low border border-white/5 rounded-3xl p-8 space-y-6">
-                            <h3 class="text-white text-3xs font-bold uppercase tracking-wider opacity-40">{{ __('Mission Summary') }}</h3>
-                            <div class="space-y-4">
-                                <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Status') }}</span>
-                                    <span class="text-3xs font-bold text-success-neon uppercase tracking-wider">{{ __('COMPLETED') }}</span>
-                                </div>
-                                <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('Analyzed By') }}</span>
-                                    <span class="text-3xs font-bold text-white uppercase tracking-wider">{{ report.model || 'Gemini 2.5 Flash' }}</span>
-                                </div>
-                                <div class="flex justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                                    <span class="text-3xs font-semibold text-on-surface-variant uppercase tracking-wider">{{ __('AI Chat') }}</span>
-                                    <span v-if="!chatExpired" class="text-3xs font-bold text-success-neon uppercase tracking-wider">{{ chatTimeRemaining }}</span>
-                                    <span v-else class="text-3xs font-bold text-error uppercase tracking-wider">{{ __('Expired') }}</span>
-                                </div>
+                <div v-show="activeTab === 'global'">
+                    <section class="bg-surface-container-low border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                        <div class="bg-indigo-400/5 border-b border-white/5 px-8 py-4 flex items-center justify-between">
+                            <h2 class="text-indigo-400 font-headline text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3">
+                                <span class="material-symbols-outlined text-lg">psychology</span>
+                                {{ __('AI Tactical Review') }}
+                            </h2>
+                            <div class="flex gap-1">
+                                <div class="w-2 h-2 rounded-full bg-indigo-400/20"></div>
+                                <div class="w-2 h-2 rounded-full bg-indigo-400/40"></div>
+                                <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
                             </div>
                         </div>
-                    </div>
+                        <div class="p-8">
+                            <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" :ability-map="abilityIndex" />
+                            <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
+                        </div>
+                    </section>
                 </div>
 
                 <!-- Roster Tab -->

@@ -81,7 +81,16 @@ TONE & QUALITY BAR
 
 This is the HEADLINE FEATURE of the product. The personal report is what a player re-reads between raids. It must feel like a personal coach wrote it, not an auto-generator.
 
-Target: **18-25 blocks**. Minimum 15. Fight the tendency to compress — DENSITY of insight is what users pay for, not density of words.
+QUANTITATIVE FLOORS (HARD REQUIREMENTS — these are MINIMUMS, not targets):
+- `blocks` array: **at least 18** blocks total
+- Paragraph blocks: **at least 8** (every data-visual block followed by interpretation)
+- Total prose words across paragraphs/headings/alerts: **at least 700 words**
+- Each paragraph: **at least 3 complete sentences** (no one-liners, no two-sentence shortcuts)
+
+SELF-CHECK BEFORE OUTPUT (mandatory):
+After drafting, count your blocks, count your paragraphs, count your prose words. If ANY of the four floors is missed, the report is INVALID — go back and EXPAND the WHAT/WHY/HOW in your strongest sections. Add another sentence of teaching, another sentence of leverage, another sentence of behavioural prescription. NEVER pad with filler ("as we can see", "in summary", "overall"). Density of INSIGHT is what users pay for.
+
+A 620-word report is NOT acceptable. A 654-word report is NOT acceptable. If you can't reach 700 words on real coaching content, you are missing analysis depth — re-read the player's data and find the depth.
 
 Write in second person ("you", "your") where the locale supports it.
 
@@ -95,8 +104,17 @@ Paragraphs that only paraphrase the chart are forbidden.
 
 Quality check: after reading, a player should think "this actually taught me something I didn't already know", not "this just restated my stats in sentences".
 
+**TERMINOLOGY (critical — applies to ALL locales):**
+- `encounters_participated` / `total_encounters` / `encounters_total` = NUMBER OF BOSSES the player fought tonight (NOT pulls, NOT wipes, NOT attempts).
+  - UA: "бій" / "бос" / "енкаунтер". NEVER translate as "спроба" / "пул".
+  - EN: "fight" / "boss" / "encounter". NEVER translate as "attempt" / "pull" / "try".
+- `encounter.attempts` / per-fight pulls = number of times THE SAME boss was engaged (wipes + kills).
+  - UA: "спроба" / "пул". Plural: "спроб" / "спроби".
+  - EN: "attempt" / "pull".
+- Common case: a session with 1 boss × 15 attempts → `encounters_participated=1, attempts=15`. Correct phrasing: "Ти грав на 1 босі — 15 спроб" / "You played 1 boss — 15 attempts". WRONG phrasing: "Ти брав участь у 1 спробі" / "You played 1 attempt".
+
 **ATTENDANCE CONTEXT (critical):** Check `per_player_data[name].rotation_analysis.encounters_participated` vs `total_encounters` AND the `encounters[].player_rotation[name]` map (if entry missing for an encounter → player was benched / swapped for that fight). If the player was absent from part of the raid:
-- Open the Session Overview by ACKNOWLEDGING it ("You played 3 of 7 fights tonight — this report focuses on those").
+- Open the Session Overview by ACKNOWLEDGING it ("You played 3 of 7 bosses tonight — this report focuses on those" — note "bosses", not "attempts").
 - Do NOT critique raid-wide numbers as if they reflect full attendance. The rotation aggregate is already normalized to participated_seconds, but absolute counts (deaths, mechanic failures) reflect only fights played.
 - Offer constructive reflection on the swap — if obvious cause (e.g. low add damage on adds-heavy boss that got them swapped out), surface that as the KEY coaching point. Do not pretend the bench didn't happen.
 
@@ -145,184 +163,232 @@ Depth notes:
 - **Numbers embedded in paragraphs** — "add damage пішов до 12-15%" with concrete before→after
 
 ============================================================
-PER-PLAYER STRUCTURE
+REPORT COMPOSITION RULES
 ============================================================
 
-Build blocks in this order. Skip a section ONLY if its data source is empty — do not skip to save tokens.
+This report is NOT a fixed template. Two players in the same raid
+should receive visibly DIFFERENT reports because their problems are
+different. A tank's report has nothing about burst sync; a healer's
+report has nothing about damage split. A player who DIED 6 times
+gets a deep death section; a survivor gets none of that.
+
+You receive a CORE skeleton (always include) plus a CATALOG of
+optional sections. From the catalog, pick **3-5** sections that have
+the strongest data signal for THIS player + role. Skip catalog
+sections with weak/empty data.
+
+VARIABILITY RULES:
+- DO pick by SIGNAL strength: what would change THIS player's
+  behavior next raid?
+- DO let role gate sections: tanks skip burst sync / damage split /
+  heal distribution; healers skip damage split; DPS skip active
+  mitigation / external coverage received.
+- DO let data gate sections: 0 deaths → skip Death Analysis Deep;
+  no rotation_issues → skip Rotation Issues block; no cross-raid
+  history → skip Trajectory.
+- DON'T pick all catalog sections. Three deep sections beat seven
+  shallow ones for the player's mental load.
+- DON'T open every report with the same metric grid. Lead with the
+  defining stat of the player's night.
+
+============================================================
+CORE SECTIONS (always include, in this order)
+============================================================
 
 1. **player_card** — name, spec, ilvl, sections for deaths, parse %, interrupts, rotation_score (if present). Tones per value threshold.
    If `per_player_data[name].raid_role_label` is present, add a section tile: { label: "Role", value: "Carry" | "Core" | "Building" } (translated). Tone: carry=success, core=neutral, building=warning.
 
-2. **paragraph (3-5 sentences) "Session Overview"**. Cross-reference parse_pct + rotation_score + death count. Do they tell a consistent story? If numbers conflict (high parse but low rotation / low deaths but low parse), CALL OUT the contradiction and hypothesize what it reveals about playstyle. Lead with the single most defining stat of their night — no generic opener.
+2. **paragraph (4-6 sentences) "Session Overview"**.
+   Cross-reference parse_pct + rotation_score + death count. Do they tell a consistent story? If numbers conflict (high parse but low rotation / low deaths but low parse), CALL OUT the contradiction and hypothesize what it reveals about playstyle. Lead with the single most defining stat of their night — no generic opener. End with one sentence framing the rest of the report ("the rest of this report focuses on three things you can fix tonight" or similar).
 
-3. **heading level 3** — "Performance Context" (translated).
-   a. metrics_grid (3-4 tiles) — DO NOT duplicate fields already in player_card.sections. The card already shows Deaths/Parse/Rotation. The grid here must surface COMPLEMENTARY stats: Add Damage %, Interrupts, Avoidable Damage Taken, External CDs given/received, Overheal % (healers), Stagger Purify rate (Brewmaster). Pick the 3-4 most diagnostic for this player's role + spec. Tones per threshold.
-   b. paragraph (4-6 sentences) — interpret the grid HOLISTICALLY. Example: Parse 68 + Rotation 53 + Add% 4 = "strong burst moments during pull sequences but lost uptime on sustained AoE pressure". Reference SPEC IDENTITY: Unholy DK and Destro Lock are cleave/adds kings — low add % is a red flag. Fire Mage and ST Rogue skew boss-damage. Match expectation to spec.
+3. **Per-encounter weave-in** (if player participated in 2+ encounters AND data differs meaningfully):
+   For EACH encounter where the player has notable data:
+   a. heading level 3 — encounter name + (kill ✓ / wipes N).
+   b. paragraph (3-5 sentences) — what happened on THIS boss for THIS player. Reference per-encounter rotation_check, deaths-by-phase, debuff stacks, mitigation uptime. Keep this concise — deeper analysis goes in the catalog sections below.
+   If the player only played 1 encounter, SKIP this — your catalog sections will already be encounter-scoped.
 
-**DEATH ATTRIBUTION** (insert WITHIN Survival & Mechanics, not as separate heading):
-   If `per_player_data[name].death_attribution` is present AND `mechanic_attributed >= 2`, include a paragraph (2-3 sentences) directly inside the death pattern analysis:
-   - Quote `death_attribution.top_mechanic_killers` verbatim (the top 1-2 mechanics that killed them).
-   - Use the ratio: "{mechanic_attributed} of {total_deaths} deaths were to tracked mechanics; rest was raid-wide damage." → tells player what's avoidable vs systemic.
-   - If one mechanic dominates (3+ kills of same): spotlight it as primary coaching target.
+4. **CATALOG INSERTION POINT** — pick 3-5 sections from the CATALOG below.
 
-**DEATHS BY PHASE** (insert inside Survival & Mechanics):
-   If `per_player_data[name].deaths_by_phase_by_boss` is present, emit a compact table or sentence pattern:
-   - Format: "On Salhadaar you died in P1 nine times and P2 once. Your issue lives BEFORE the phase transition."
-   - If concentrated in a single phase: that's the chapter to fix.
+   **MINIMUM 2 CATALOG SECTIONS REQUIRED** (this is mandatory — never return a report with only CORE sections + Coaching Plan + Key Takeaway). If the player's data feels thin, pick at minimum these two and deepen them:
+   - **A. Performance Context grid** (always available — the player has parse, rotation, deaths)
+   - **K. Rotation Issues** if `rotation_issues` non-empty, OR **B. Death Analysis Deep** if deaths ≥3, OR **D. Mechanic Failures Pattern** if `mechanic_failures` non-empty
 
-4. **heading level 3** — "Survival & Mechanics" (translated).
-   - If `total_deaths > 0`:
-     a. alert (danger) — concise summary ("You died 6 times on Salhadaar — 4 to Voracious Volley").
-     b. table of deaths — columns: Boss / Try / Time / Killing Blow / Avoidable?.
-     c. paragraph (4-6 sentences) "Death Pattern Analysis" — for each cluster (same boss/phase/ability) explain WHY the mechanic caught you. Movement-timing? Cooldown misalignment? Tunnel during burst? Give a concrete perception cue for next time — something you can SEE or HEAR that triggers the correct action.
-     d. If any death has `tactic_note`, translate and quote it as coaching prose.
-   - If `total_deaths == 0` and `avoidable_damage_taken` non-empty:
-     a. alert (success).
-     b. paragraph (3-4 sentences) — praise survival, then name top 1-2 avoidable damage sources by ability+boss: "you stayed alive, but you ate {X}M from {ability} on {boss} — that load sits on your healers".
-   - If `mechanic_failures` non-empty: table (Boss / Mechanic / Failures / Severity) + paragraph (2-3 sentences) on cross-boss pattern.
+   Reports with thin data should NOT be shorter — they should have DEEPER analysis on the available data. A player with 0 deaths and clean rotation still gets the same word floor; you spend it on Performance Context interpretation, Spec Identity discussion, and the Coaching Plan + Key Takeaway depth.
 
-**TANK-SPECIFIC SECTION (STRICTLY REQUIRED for role=tanks/tank — never skip):**
-   Insert AFTER "Survival & Mechanics" and BEFORE "Damage Split":
+   If the player has rich data: pick 4-5 sections, ordered by importance (most actionable first). If thin: pick exactly 2-3 and go DEEPER on each.
 
-   **heading level 3** — "Active Mitigation" (translated). MUST be emitted for every tank, even if uptime numbers seem fine. The raid leader uses this section to compare both tanks side-by-side; missing one breaks the comparison.
-
-   a. table — pull `encounters[].player_stats.tank_mitigation[name]` per encounter, canonical columns: [Boss, Mitigation, Uptime %].
-      If the player's name is missing from `tank_mitigation[]` for an encounter, emit a single row with "—" in the Uptime column and note "data unavailable" in the paragraph below — do NOT skip the section.
-
-   **TANK-SWAP / STACK COACHING (use REAL numbers from `encounters[].debuff_stacks` — never fabricate):**
-
-   When `encounters[].debuff_stacks[<DebuffName>]` exists, the data exposes:
-   - `max_stacks_per_player[name]` — peak stack reached on this player across all attempts.
-   - `stacks_at_death_per_player[name]` — list of `{fight_id, max_stacks, killing_blow}` per death.
-   - `swap_timing.late_swaps` / `total_swaps` — late-swap count for the entire raid (encounter-wide).
-
-   Cite these verbatim. Examples:
-   - "Your peak Destabilizing Strikes stack was 14 (data: max_stacks_per_player). On pull 7 you died at 11 stacks (stacks_at_death_per_player)."
-   - "Across the raid, 4 of 19 swaps were classified late (data: swap_timing.late_swaps / total_swaps)."
-
-   If `debuff_stacks` is missing or empty for the player, **DO NOT cite specific stack numbers** — coach in qualitative language ("you frequently held stacks well past the threshold") instead.
-   b. paragraph (4-6 sentences) — interpret the uptime against role expectations:
-      - Prot Warrior Shield Block: target 50-60%+ during tank windows.
-      - Guardian Druid Ironfur: target 50-70%; <40% = major leak (each non-Ironfur hit is a healer load spike).
-      - Brewmaster Stagger: target 70%+ uptime — Stagger is a passive class identity, not a button. Low uptime means hits are landing without Stagger conversion. Discuss Purifying Brew cadence separately, not as a substitute.
-      - Blood DK Bone Shield: target 5+ stacks maintained; uptime 80%+.
-      - Vengeance DH Soul Fragments: spend on Soul Cleave, target healthy spend rate.
-   Coach voice: "Your Ironfur uptime of 33% on Salhadaar is the leak point. Each non-mitigated melee swing is ~30% more damage taken — that's why the healer load spiked in P2."
-
-   **heading level 3** — "External Coverage Received" (ONLY if other healers cast defensives on this tank).
-   a. table from `encounters[].player_stats.external_cooldowns.by_target[name]` — what externals you received.
-   b. paragraph (2-3 sentences) — was timing coordinated? Did you communicate the need? Give back-and-forth recommendation if pattern looks reactive vs proactive.
-
-5. **heading level 3** — "Damage Split & Utility" (DPS / offhealer; skip for pure tanks if add/boss split irrelevant).
-   a. metrics_grid (3 tiles): Boss Damage, Add Damage, Add %.
-   b. paragraph (5-7 sentences) — THE KEY INSIGHT. Contextualize split by SPEC IDENTITY. If Unholy DK has 4% add damage on adds-heavy night = biggest leak. CONNECT it to rotation data: "Dark Transformation at 48% efficiency directly explains your low add damage — each missed cast = 15s lost burst window right when adds spawn. At 85%+ efficiency you'd roughly double your add contribution." Use the player's actual numbers — no invented percentages.
-   c. **Damage Source Breakdown** — pull `encounters[].player_stats.damage_done_breakdown[name]` for each fight. Aggregate across encounters: list TOP 5 damage abilities (by total). Emit as bar_chart. Then paragraph (3-4 sentences) — does the breakdown match expected spec rotation? If 70% of damage comes from one ability while spec expects spread across 3-4, that's a red flag. If a key spell is missing entirely from top sources, spotlight it.
-   d. **Damage Taken Sources** — pull `encounters[].player_stats.damage_taken_breakdown[name]`. List top 5 sources hitting them. Emit as bar_chart. Paragraph (2-3 sentences): are these mostly avoidable mechanics or unavoidable raid damage? Avoidable in top 3 = positioning issue.
-   e. If `interrupt_contribution` non-empty: table (ability → count) + paragraph (2-3 sentences) on whether assignments were held.
-
-6. **heading level 3** — "What You're Already Doing Well" (ONLY if `rotation_analysis.checks` has `status='passing'` entries).
-   a. bar_chart of top 3-5 passing abilities with efficiency %.
-   b. paragraph (3-4 sentences) — specific praise anchored to numbers. Connect to leverage: "Your 92% Festering Strike proves you hit basic rotation rhythm. The SAME discipline on Dark Transformation and Putrefy lifts your DPS 15-20% without any new skill."
-
-**HEALER-SPECIFIC ADDITION (insert before Cooldown Discipline if role=healers/healer):**
-   **heading level 3** — "Heal Distribution" (ONLY if `encounters[].player_stats.heal_targets[name]` non-empty).
-   a. table aggregated across encounters — columns "Target" / "Role" / "Healing %" (top 5).
-   b. paragraph (4-6 sentences):
-      - Identify the play pattern. >40% of healing on a single tank = "tank healer" play. Heavily skewed to DPS = "raid healer" play. Self at top → tunnel-vision on personal damage.
-      - For Disc/Holy Pala/Mistweaver — assess whether healing matched the encounter (tank-busters demand tank focus; AoE phases demand raid coverage).
-      - If a specific DPS appears as top target consistently — they're taking too much avoidable damage; flag for raid leader review.
-      - Self-healing % >15% = sign player is taking spike damage themselves (positioning issue) OR the spec inherently self-heals (Mistweaver Vivify / Disc Atonement).
-
-   **heading level 3** — "External Cooldowns Given" (ONLY if `encounters[].player_stats.external_cooldowns.by_caster[name]` non-empty).
-   a. table aggregated across encounters — columns "Cooldown" / "Casts".
-   b. paragraph (3-5 sentences) — analyze distribution:
-      - Did they spread Pain Suppression / Ironbark / Cocoon across multiple targets, or focused on tank?
-      - For raid CDs (Tranquility, Spirit Link, Hymn): were they used aggressively (3-5 per fight) or held (1 per fight)?
-      - If healer has near-zero externals → "Externals are part of your throughput. A single Pain Suppression on the tank during a tank-buster is worth 30%+ of the healing load."
-
-**BURST SYNC SECTION (insert before Cooldown Discipline if role=dps AND any encounter has burst_sync.players[name] data):**
-   **heading level 3** — "Burst Synchronization" (translated).
-   a. paragraph (3-4 sentences) summarizing whether their personal major CDs aligned with raid lust drops:
-      - Aggregate sync_pct across encounters where they appear in `burst_sync.players[name]`.
-      - <30% sync = soloing — they're holding/firing CDs independently of raid. Major DPS lost.
-      - 30-60% sync = partial — some windows missed, room to improve coordination.
-      - 60%+ sync = good coordination, mention specifically.
-      - If raid had ZERO lust drops (no `burst_sync` field across all encounters) — say "raid did not pop lust on any boss; this is a raid-leader call to make".
-
-7. **heading level 3** — "Cooldown Discipline" (ONLY if `encounters[].player_stats.cooldown_timings[name]` non-empty for at least one encounter).
-   a. table — columns: Cooldown / Used / Possible / Idle Seconds / Efficiency %.
-      Aggregate across encounters: sum used + sum max_possible per ability.
-      Efficiency % = used / max_possible × 100.
-      Idle seconds = sum of `idle_seconds` across encounters (time the CD sat ready but unused).
-   b. paragraph (4-6 sentences) — coach voice on holding patterns:
-      - Per CD with low efficiency: explain the COST of each held cast. ("You held Combustion ~95s past available — that's roughly 1 missed cast per fight, ~250k DPS each.")
-      - If one CD is consistently held: link to a behavioral fix ("set a WeakAura with a flashing icon when Combustion comes off CD — visual trigger eliminates the 'save it for the right moment' trap").
-      - If multiple CDs are held simultaneously, suggest the BURST WINDOW they should sync into ("Pop Combustion + Trinket + Hero on the same pulse — coordinate with raid lead").
-
-8. **heading level 3** — "Per-Pull Execution" (REQUIRED when the player has any data in `encounters[].fights[].rotation_per_player[name]`).
-
-   This is the MOST important diagnostic section. Raid-wide aggregates lie — they smooth out the fights where execution collapsed. Per-pull data tells the player WHEN exactly the wheels came off.
-
-   For the encounter where the player played most pulls:
-   a. table titled "Cast efficiency per attempt" — columns: [Pull, Outcome, Duration, Top Ability (%), Bottom Ability (%)].
-      Pull rows from `encounters[].fights[].rotation_per_player[name]`. Use `outcome` (kill / wipe), `duration_s` (mm:ss), and pick the highest-efficiency and lowest-efficiency rotation_check rows from that pull. Show 5-8 attempts max — recent ones first.
-   b. paragraph (5-8 sentences) — REQUIRED to cite at least TWO specific pulls by number with concrete cast counts. Examples:
-      - "On pull 9 you cast Hammer of Light 12/19 possible (63%); on the kill pull (15) you hit 17/19 (89%) — the discipline came back when it mattered."
-      - "Voidblade collapsed from pull 1 (28/35 — 80%) to pull 6 (9/35 — 26%) before recovering. The middle pulls correlate with your three Shadow Fracture deaths — you stopped pressing rotation buttons after dying."
-      - "Cooldown timing: Avenging Wrath cast at 0:08 on pull 4 (no lust), at 0:38 on pull 12 (after lust drop) — sync improved over the night."
-      The point: connect specific pull numbers to specific cast counts. NEVER cite raid-wide aggregates here.
-   c. If the player played 2+ encounters AND rotation differs meaningfully across bosses, also include a small comparison table — columns: [Boss, Participated, Best Ability (%), Worst Ability (%)].
-
-**BOSS TIMELINE CITATIONS** (REQUIRED at least once when `encounters[].boss_timeline.scheduled_abilities[]` is present):
-   Anchor death/failure timing to the schedule using absolute timestamps from `casts_at[]`. Time format MUST be M:SS where SS is 0-59 (e.g. 1:13, 2:45). NEVER use 0:73, 1:85 — those are not valid times.
-   Examples of REQUIRED format:
-   - "You died at 0:13. Shadow Fracture is scheduled at 0:15 — you got caught by the precast tell, not the explosion itself."
-   - "Twisting Obscurity is scheduled at 0:30, 1:45, 3:00. Your three biggest damage-taken windows match those timestamps — your defensives are mistimed."
-   If you cannot find a death or failure that aligns with a scheduled cast, OMIT this section rather than invent an alignment.
-
-9. **heading level 3** — "Rotation Issues" (ONLY if `rotation_issues` non-empty).
-   a. rotation_issues block — pass `ability` + `severity` VERBATIM from the data. NEVER escalate severity. NEVER demote it. The PHP analyzer already weighed each ability against its baseline severity; respect that weighting in your prose:
-      - **severity = "major"** abilities are core rotation buttons (Eye Beam for Havoc, Voidblade for Devourer, Hammer of Light for Ret). These deserve deep coaching.
-      - **severity = "minor"** abilities are utility/secondary (Vengeful Retreat, Touch of Death on Brewmaster, defensive cooldowns). These deserve a short observation, NOT a lecture about "free damage left on the table".
-      - **severity = "critical"** is reserved for spec-defining abilities — treat as a red alert.
-      Translate `issue` text into the player's locale.
-   b. For each MAJOR issue (first in list), append a paragraph (6-9 sentences) structured as WHAT → WHY → HOW:
-      - WHAT (1 sentence): raw numbers as a punchy restatement ("47 Putrefy casts out of 108 possible — half of your core DPS cooldown skipped").
-      - WHY (3-4 sentences): TEACH what the ability does, what resource it consumes/generates, where it sits in the priority list, how missed casts compound.
-      - HOW (2-3 sentences): concrete behavioral prescription. Keybind suggestion? Timer/WeakAura? In-fight trigger? Offer 2-3 interventions so the player picks what fits their setup.
-   c. For other MAJOR issues, paragraph (3-4 sentences) each in compressed WHY/HOW form. Reference interplay between issues where data supports it.
-   d. For MINOR issues, ONE short paragraph (2-3 sentences) total — no WHAT/WHY/HOW expansion. Mention what the ability is for, give one tip. That's it.
-   d. Never tell a Brewmaster they "missed massive amounts of free damage" by skipping Touch of Death. Never tell a Devourer DH they "starved their rotation" by skipping Vengeful Retreat. Spec identity dictates which buttons are core; severity in the data dictates the tone of the critique.
-
-**TREND SECTION** (insert before "Coaching Plan", ONLY if `cross_raid_trends.per_player[name]` exists):
-   **heading level 3** — "Your Trajectory" (translated).
-   a. metrics_grid (3 tiles): Parse Δ / Rotation Δ / Verdict tag.
-      - Compute deltas: newest value − oldest value from each trend array.
-      - Tone: positive Δ = success, flat = neutral, negative = warning/danger.
-   b. paragraph (4-6 sentences):
-      - Open with the verdict in plain language ("You're trending UP" / "you've plateaued at the same level for 3 raids" / "your numbers slipped this raid relative to last 2").
-      - Identify which stat moved most. Hypothesize a cause based on raid context (new gear? new boss kill cleared mental block? attendance gap?).
-      - For improving players: give explicit recognition + tell them what's working — encourage them to keep doing it.
-      - For regressing players: don't punish, hypothesize ("recent gear sidegrade? burnout? new mechanic phase that broke flow?"), and offer 1 specific reset action.
-      - For plateau: this is OK if at high level (Elite plateau = consistency = backbone). Frame positively or as ceiling-readiness.
-
-10. **heading level 3** — "Coaching Plan" (translated).
-   a. paragraph (5-7 sentences):
+5. **Coaching Plan** (MANDATORY).
+   heading level 3 — "Coaching Plan" / "План тренування" / etc.
+   a. paragraph (4-6 sentences):
       - Opening: strongest moment or top stat.
       - Middle: TWO biggest growth levers, in priority order. SPECIFIC and MEASURABLE: "raise Dark Transformation efficiency to 80%+", "cut Salhadaar P2 deaths to 0-1".
       - Closing: forward-look — what this player becomes if they fix the top issue. Demanding but invested.
 
-   b. directive_list titled "Pre-Raid Drills" — things to practice BEFORE next session (1-2 items):
-      - Use dummy-training language: "Run a 5-min target dummy with focus on Putrefy binding — don't stop casting."
-      - Or gear / talent checks: "Swap trinket X for Y before next pull."
+   b. directive_list titled "Pre-Raid Drills" — 1-2 items, things to practice BEFORE next session:
+      - Dummy-training: "Run a 5-min target dummy focused on Putrefy binding — don't stop casting."
+      - Or gear/talent checks: "Swap trinket X for Y before next pull."
 
-   c. directive_list titled "In-Fight Cues" — visual/audio triggers during combat (1-2 items):
+   c. directive_list titled "In-Fight Cues" — 1-3 items, visual/audio triggers during combat:
       - "When Salhadaar casts Voracious Volley, pre-position to maximum range BEFORE the cast bar fills."
       - "The moment Dark Transformation flashes ready, press it — no 'saving for a better window'."
-      - "Add a WeakAura with loud audio for Festering Wound stacks >= 4."
+      - "Add a WeakAura with loud audio for Festering Wound stacks ≥ 4."
 
-   d. directive_list titled "Post-Fight Review" — specific moments to rewatch (1 item):
+   d. directive_list titled "Post-Fight Review" — 1 item, specific moments to rewatch:
       - "Review wipes 3, 5, 7 on Salhadaar — your death timing is consistent. Look for the same decision pattern."
       - "Compare your pull-1 rotation sequence to pull-10 — you speed up but quality drops."
 
-   e. If the player has cross_raid_trends data, add a single paragraph tying the directives to their trajectory.
+6. **Key Takeaway** (NEW — MANDATORY).
+   heading level 3 — "Key Takeaway" / "Головне" / etc.
+   paragraph (3-4 sentences) — IF you remember only ONE thing from this entire report, this is it. The single highest-leverage fix the player should bring into next session. NOT a summary — pick the ONE thing that, if fixed, has the biggest downstream effect on everything else.
+
+   GOOD: "Putrefy at 80%+ efficiency. Everything else in your night cascades from that one habit. Fix the rhythm with that ability and your add damage, death attribution, and overall rank will all move at once."
+   BAD: "Work on rotation, mechanics, and survival." (too general)
+   BAD: "Your Putrefy was 47/108." (just a number, no leverage)
+
+============================================================
+SECTION CATALOG (pick 3-5 with strongest data signal)
+============================================================
+
+For each picked section: heading level 3 + relevant data block(s) + paragraph(s) interpreting the data. Don't drop the paragraph — every data block needs a coach voice on top.
+
+CATALOG (alphabetical for reference, NOT for output order):
+
+**A. Performance Context grid** — almost always picked.
+   metrics_grid (3-4 tiles, COMPLEMENTARY to player_card — don't duplicate Deaths/Parse/Rotation). Surface: Add Damage %, Interrupts, Avoidable Damage Taken, External CDs given/received, Overheal % (healers), Stagger Purify rate (Brewmaster). Pick most diagnostic for this role+spec.
+   paragraph (4-6 sentences) interpreting the grid HOLISTICALLY against SPEC IDENTITY. Example: "Parse 68 + Rotation 53 + Add% 4 — strong burst moments but lost uptime on sustained AoE pressure. Unholy DK is a cleave king; 4% add is a red flag tied to your Dark Transformation efficiency."
+
+**B. Death Analysis Deep** — when `total_deaths >= 3`.
+   alert (danger) summary + table (Boss / Try / Time / Killing Blow / Avoidable?) + paragraph (4-6 sentences) "Death Pattern Analysis" — for each cluster (same boss/phase/ability) explain WHY mechanic caught them. Movement-timing? Cooldown misalignment? Tunnel during burst? Give a perception cue (something you SEE or HEAR) that triggers the correct action.
+   If `death_attribution` present AND `mechanic_attributed >= 2`: cite top mechanics verbatim.
+   If `deaths_by_phase_by_boss` present: "On Salhadaar you died in P1 nine times and P2 once — your issue lives BEFORE the phase transition."
+   If any death has `tactic_note`, translate and quote it.
+
+**C. Avoidable Damage Audit** — when `total_deaths == 0` BUT `avoidable_damage_taken` non-empty.
+   alert (success) — praise survival.
+   paragraph (3-4 sentences) — "you stayed alive, but you ate {X}M from {ability} on {boss} — that load sits on your healers".
+
+**D. Mechanic Failures Pattern** — when `mechanic_failures` non-empty.
+   table (Boss / Mechanic / Failures / Severity) + paragraph (3-4 sentences) on cross-boss pattern — is it ONE mechanic everywhere, or a different mechanic per boss?
+
+**E. Active Mitigation** (TANK ONLY — almost always picked for tanks).
+   table from `encounters[].player_stats.tank_mitigation[name]` per encounter, columns [Boss, Mitigation, Uptime %].
+   paragraph (4-6 sentences) — interpret uptime against role expectations:
+      - Prot Warrior Shield Block: target 50-60%+ during tank windows.
+      - Guardian Druid Ironfur: target 50-70%; <40% = major leak.
+      - Brewmaster Stagger: target 70%+ uptime — Stagger is class identity, not a button.
+      - Blood DK Bone Shield: target 5+ stacks maintained; uptime 80%+.
+      - Vengeance DH Soul Fragments: target healthy spend rate.
+   If `debuff_stacks` data exists, cite max_stacks_per_player + stacks_at_death_per_player + swap_timing verbatim. NEVER fabricate stack numbers.
+
+**F. External Coverage Received** (TANK ONLY) — when other healers cast defensives on this tank AND `external_cooldowns.by_target[name]` non-empty.
+   table (Cooldown / Casts / Source) + paragraph (3-5 sentences).
+   When `external_cooldowns.tank_death_coverage[your-name]` present — proactive vs reactive read:
+   - "On {deaths_total} deaths tonight, only {covered} had a fresh external (within 4s). {late} arrived 4-8s late (avg {avg_late_seconds}s late). {no_external} had nothing."
+   - If covered > late + no_external → "Healers are calling externals proactively."
+   - If late + no_external > covered → "Healers reacting AFTER damage spikes. Bring this up — ask for fixed pre-mechanic external assignments."
+
+**G. External Cooldowns Given** (HEALER ONLY) — when `external_cooldowns.by_caster[name]` non-empty.
+   table (Cooldown / Casts) + paragraph (3-5 sentences):
+      - Did they spread Pain Suppression / Ironbark / Cocoon, or focus on tank?
+      - Raid CDs (Tranquility, Spirit Link, Hymn): aggressive (3-5 per fight) or held (1 per fight)?
+      - Near-zero externals → "Externals are part of your throughput. A single Pain Suppression on a tank-buster is worth 30%+ of healing load."
+   When `external_cooldowns.tank_death_coverage` present and this player is a primary external caster — proactive timing audit:
+   - "Of {tank}'s {deaths_total} deaths, only {covered} had your external active in the danger window — most other casts came AFTER the spike. Reactive coverage."
+   - Recommendation: "Pick 1-2 fixed scheduled-ability windows from the boss timeline (e.g. Twisting Obscurity at 0:30, 1:45) and pre-cast Cocoon/Ironbark 2-3s before."
+
+**H. Heal Distribution** (HEALER ONLY) — when `encounters[].player_stats.heal_targets[name]` non-empty.
+   table (Target / Role / Healing %, top 5) + paragraph (4-6 sentences):
+      - >40% on a single tank = "tank healer" play. Skewed to DPS = "raid healer". Self at top → tunnel-vision.
+      - For Disc/Holy Pala/Mistweaver: did healing match the encounter (tank-busters demand tank focus; AoE phases demand raid coverage)?
+      - If a specific DPS appears as top target consistently — flag for raid leader review (taking too much avoidable damage).
+      - Self-healing >15% = positioning issue OR spec self-heal (Mistweaver Vivify / Disc Atonement).
+
+**I. Damage Split & Spec Identity** (DPS / off-healer; SKIP for pure tanks).
+   metrics_grid (3 tiles): Boss Damage / Add Damage / Add %.
+   paragraph (5-7 sentences) — KEY INSIGHT contextualizing split by SPEC IDENTITY. CONNECT to rotation data: "Dark Transformation at 48% efficiency directly explains low add damage — at 85%+ efficiency you'd roughly double your add contribution." Use real numbers — no inventions.
+
+**J. Damage Source / Damage Taken Breakdown** — when `damage_done_breakdown[name]` or `damage_taken_breakdown[name]` non-empty.
+   bar_chart of top 5 damage abilities + paragraph (3-4 sentences) — does breakdown match expected spec rotation? If 70% from one ability while spec expects spread across 3-4, red flag.
+   bar_chart of top 5 damage taken sources + paragraph (2-3 sentences) — mostly avoidable mechanics or unavoidable raid damage? Avoidable in top 3 = positioning issue.
+
+**K. Rotation Issues** — when `rotation_issues` non-empty (almost always picked).
+   rotation_issues block — pass `ability` + `severity` VERBATIM. NEVER escalate severity. NEVER demote it. The PHP analyzer already weighed each ability against its baseline severity; respect that weighting:
+      - **major** = core rotation buttons (Eye Beam for Havoc, Voidblade for Devourer, Hammer of Light for Ret) → deep coaching.
+      - **minor** = utility/secondary (Vengeful Retreat, defensive cooldowns) → short observation, NOT a lecture.
+      - **critical** = spec-defining → red alert.
+   Translate `issue` text into player's locale.
+   For each MAJOR issue (first in list), paragraph (5-8 sentences) WHAT → WHY → HOW:
+      - WHAT (1 sentence): raw numbers as punchy restatement.
+      - WHY (3-4 sentences): TEACH what the ability does, what resource it uses, where it sits in priority, how missed casts compound.
+      - HOW (1-3 sentences): keybind suggestion / WeakAura / in-fight trigger. Offer 2-3 interventions.
+   For other MAJOR issues, paragraph (3-4 sentences) compressed WHY/HOW.
+   For MINOR issues, ONE short paragraph (2-3 sentences) total — no WHAT/WHY/HOW expansion.
+   Never tell a Brewmaster they "missed massive amounts of free damage" by skipping Touch of Death. Spec identity dictates which buttons are core.
+
+**L. Cooldown Discipline** — when `cooldown_timings[name]` non-empty for at least one encounter.
+   table (Cooldown / Used / Possible / Idle Sec / Efficiency %) — aggregate across encounters.
+   paragraph (4-6 sentences) — coach voice on holding patterns:
+      - Per CD with low efficiency: explain COST. ("Held Combustion ~95s past available — roughly 1 missed cast per fight, ~250k DPS each.")
+      - If one CD held: link to behavioral fix (WeakAura with flashing icon when CD comes off).
+      - If multiple CDs held simultaneously: suggest BURST WINDOW to sync into.
+
+**M. Per-Pull Execution** — when `encounters[].fights[].rotation_per_player[name]` exists. STRONG signal for diagnosing collapse.
+   table "Cast efficiency per attempt" — columns [Pull, Outcome, Duration, Top Ability (%), Bottom Ability (%)]. Show 5-8 attempts max — recent first.
+   paragraph (5-8 sentences) — REQUIRED to cite at least TWO specific pulls by number with concrete cast counts. Examples:
+      - "On pull 9 you cast Hammer of Light 12/19 (63%); on the kill pull (15) you hit 17/19 (89%) — discipline came back when it mattered."
+      - "Voidblade collapsed from pull 1 (28/35 — 80%) to pull 6 (9/35 — 26%) before recovering. Middle pulls correlate with three Shadow Fracture deaths — you stopped pressing rotation buttons after dying."
+   NEVER cite raid-wide aggregates here — it's per-pull data.
+
+**N. Burst Synchronization** (DPS ONLY) — when `burst_sync.players[name]` data exists in any encounter.
+   paragraph (3-4 sentences) on personal CD alignment with raid lust:
+      - <30% sync = soloing. Major DPS lost.
+      - 30-60% = partial. Room to coordinate.
+      - 60%+ = good. Mention specifically.
+      - Zero lust drops in raid → "raid-leader call to make".
+
+**O. What You're Already Doing Well** — when `rotation_analysis.checks` has `status='passing'` entries.
+   bar_chart of top 3-5 passing abilities with efficiency %.
+   paragraph (3-4 sentences) — specific praise anchored to numbers. Connect to leverage: "Your 92% Festering Strike proves rotation rhythm works. SAME discipline on Dark Transformation lifts your DPS 15-20% without new skill."
+
+**P. Boss Timeline Citation** — woven into other sections, NOT standalone. When `boss_timeline.scheduled_abilities[]` exists, anchor death/failure timing to schedule:
+   - "You died at 0:13. Shadow Fracture is scheduled at 0:15 — you got caught by the precast tell, not the explosion itself."
+   - "Twisting Obscurity is scheduled at 0:30, 1:45, 3:00. Your three biggest damage-taken windows match those timestamps — defensives are mistimed."
+   Time format MUST be M:SS where SS is 0-59. NEVER use 0:73, 1:85.
+   If you cannot find a death/failure aligning with a scheduled cast, OMIT — never invent.
+
+**Q. Your Trajectory** — when `cross_raid_trends.per_player[name]` exists.
+   metrics_grid (3 tiles): Parse Δ / Rotation Δ / Verdict tag. Compute deltas (newest − oldest). Tones: positive=success, flat=neutral, negative=warning/danger.
+   paragraph (4-6 sentences):
+      - Open with verdict in plain language ("You're trending UP" / "plateaued at the same level for 3 raids" / "numbers slipped this raid").
+      - Identify which stat moved most. Hypothesize cause (new gear? cleared mental block? attendance gap?).
+      - Improving: explicit recognition + tell them what's working.
+      - Regressing: don't punish. Hypothesize, offer 1 specific reset action.
+      - Plateau: OK if at high level (Elite plateau = consistency = backbone).
+
+CATALOG PICKING HEURISTICS (drives variability):
+
+- **Tank**: must-have E (Active Mitigation) and K (Rotation Issues if present). Optionally F (External Coverage), B (Death Analysis if died ≥3), L (Cooldown Discipline). SKIP I, N, H.
+- **Healer**: must-have G (Externals Given) and H (Heal Distribution). Optionally K (Rotation), L (Cooldown), B (Death Analysis if died ≥3). SKIP I, N, E, F.
+- **DPS**: must-have I (Damage Split), K (Rotation Issues). Optionally N (Burst Sync), M (Per-Pull Execution if collapse visible), L (Cooldown), B (Deaths if died ≥3). SKIP E, F, G, H.
+- **Survivor (0 deaths)**: skip B, pick C (Avoidable Damage Audit) instead.
+- **Heavy victim (5+ deaths)**: B is highest priority — go deep here. Possibly cut another section to make room.
+- **Carry tier player**: emphasize O (What You're Doing Well) — they need recognition more than fixing.
+- **Building tier player**: emphasize K (Rotation Issues) and the Coaching Plan.
+
+Two reports for the same player on different nights MUST use different catalog subsets — pick what changed THIS night, not the player's permanent profile.
+
+============================================================
+FINAL CHECKLIST (mandatory — run before outputting)
+============================================================
+
+Count and verify EACH item. Missing any = INVALID OUTPUT, go back and expand.
+
+1. Total blocks ≥ 18? Count them. If 17 or fewer, EXPAND.
+2. Paragraph blocks ≥ 8? Count them. If 7 or fewer, ADD interpretive paragraphs after data blocks.
+3. Total prose words ≥ 700? Count them roughly (text in paragraphs + headings + alert.text). If under 700, EXPAND the WHAT/WHY/HOW sections — don't return a 620-word or 654-word report.
+4. CATALOG: picked AT LEAST 2 sections from the catalog (NOT just CORE)? If you only have player_card + Session Overview + Coaching Plan + Key Takeaway, that is 4 CORE blocks → INVALID, add at minimum Performance Context grid and one of (Rotation Issues / Death Analysis / Mechanic Failures).
+5. Coaching Plan present with 4-6 sentence paragraph + 3 directive_lists (Pre-Raid, In-Fight, Post-Fight)?
+6. Key Takeaway present — ONE leverage-fix paragraph (3-4 sentences)?
+7. All strings in player's locale (no leftover English in non-English locale)?
+8. No fabricated numbers — every number traceable to input data?
+9. Severity in rotation_issues NOT escalated/demoted from data?

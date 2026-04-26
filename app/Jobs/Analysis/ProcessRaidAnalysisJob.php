@@ -9,6 +9,7 @@ use App\Models\TacticalReport;
 use App\Services\Analysis\BlockSchema;
 use App\Services\Analysis\EncounterSnapshotService;
 use App\Services\Analysis\GeminiService;
+use App\Services\Analysis\RaidPayloadStorage;
 use App\Services\Analysis\TacticalDataAnalyzer;
 use App\Services\Analysis\TrendAnalyzer;
 use App\Services\Analysis\WclService;
@@ -47,7 +48,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         BlockSchema $blockSchema,
         EncounterSnapshotService $snapshotService,
         TrendAnalyzer $trendAnalyzer,
-        DiscordWebhookService $webhookService
+        DiscordWebhookService $webhookService,
+        RaidPayloadStorage $payloadStorage
     ): void {
         // Large preprocessed JSON + Gemini HTTP pool responses can briefly exceed
         // the default worker memory ceiling; cap within the job to stay well under
@@ -116,28 +118,31 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 'player_details' => $logData['player_details'] ?? [],
             ], JSON_UNESCAPED_UNICODE);
 
-            // Stage 3a: create shared cache once (reused by main + per-player generators + chat)
-            $cache = $geminiService->createRaidCache($preprocessedJson, $supplementary);
-            $cacheId = $cache['cache_id'] ?? null;
-            $cacheExpiresAt = $cache['expires_at'] ?? null;
+            // Stage 3a: build the stable context block + persist to disk so chat
+            // can recreate an explicit cache on demand. No paid Gemini cache here —
+            // generation relies on Gemini's free implicit prefix-cache across the
+            // 24+ calls in this batch.
+            $contextContent = $geminiService->buildRaidContextContent($preprocessedJson, $supplementary);
+            $payloadStorage->store($this->report->id, $contextContent);
 
-            if (!$cacheId) {
-                throw new \Exception('Gemini cache creation failed — cannot proceed with split generation');
-            }
+            Log::info('Raid payload stored for chat reactivation', [
+                'report_id'    => $this->report->id,
+                'context_size' => strlen($contextContent),
+            ]);
 
-            // Stage 3b: main raid-wide report (single call)
-            $main = $geminiService->generateMainReportBlocks($cacheId);
+            // Stage 3b: main raid-wide report (single call, inline content)
+            $main = $geminiService->generateMainReportBlocks($contextContent);
             $mainBlocks = $blockSchema->sanitize($main['main']);
             $title = $main['title'] ?: ($logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis');
 
             $this->report->update([
-                'title'                  => $title,
-                'difficulties'           => $difficulties,
-                'ai_blocks'              => $mainBlocks,
-                'model'                  => config('services.gemini.pro_model'),
-                'prompt_version'         => (string) config('ai_report.prompt_version', 'v1'),
-                'gemini_cache_id'        => $cacheId,
-                'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
+                'title'                   => $title,
+                'difficulties'            => $difficulties,
+                'ai_blocks'               => $mainBlocks,
+                'model'                   => config('services.gemini.pro_model'),
+                'prompt_version'          => (string) config('ai_report.prompt_version', 'v1'),
+                'gemini_cache_id'         => null,
+                'gemini_cache_expires_at' => null,
             ]);
 
             // Stage 3c: per-player reports (parallel batches via Http::pool)
@@ -151,7 +156,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             ));
 
             if (!empty($targetPlayers)) {
-                $playerReports = $geminiService->generatePlayerReportBlocks($cacheId, $targetPlayers, 5);
+                $playerReports = $geminiService->generatePlayerReportBlocks($contextContent, $targetPlayers, 5);
 
                 foreach ($playerReports as $playerName => $blocks) {
                     if (empty($blocks)) continue;
