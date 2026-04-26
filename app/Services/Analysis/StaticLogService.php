@@ -210,6 +210,10 @@ class StaticLogService
             'chatHistory'        => $chatHistory,
             'logsIndexUrl'       => route('statics.logs.index'),
             'abilityIndex'       => app(AbilityNameIndex::class)->all(),
+            // Relative paths so the fetch always lands on the page's own origin
+            // (prevents cross-host issues if the page is viewed on a vanity host).
+            'feedbackShowUrl'    => $user ? '/logs/' . $report->id . '/feedback' : null,
+            'feedbackStoreUrl'   => $user ? '/logs/' . $report->id . '/feedback' : null,
         ];
     }
 

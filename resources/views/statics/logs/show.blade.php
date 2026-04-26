@@ -12,5 +12,7 @@
         logs-index-url="{{ $logsIndexUrl }}"
         analyze-api-url="/api/logs/analyze"
         :ability-index='@json($abilityIndex ?? new \stdClass)'
+        feedback-show-url="{{ $feedbackShowUrl ?? '' }}"
+        feedback-store-url="{{ $feedbackStoreUrl ?? '' }}"
     ></log-show>
 </x-app-layout>

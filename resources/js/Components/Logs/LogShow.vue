@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import AiChatSidebar from './AiChatSidebar.vue';
 import ReportBlocks from './ReportBlocks.vue';
+import ReportFeedbackCard from './ReportFeedbackCard.vue';
 import SelectUserWithMain from '../UI/SelectUserWithMain.vue';
 const { __ } = useTranslation();
 
@@ -19,6 +20,8 @@ const props = defineProps({
     logsIndexUrl:        { type: String, required: true },
     analyzeApiUrl:       { type: String, required: true },
     abilityIndex:        { type: Object, default: () => ({}) },
+    feedbackShowUrl:     { type: String, default: '' },
+    feedbackStoreUrl:    { type: String, default: '' },
 });
 
 const activeTab = ref('global');
@@ -402,6 +405,17 @@ function toggleActiveOriginal() {
                     {{ __('Our tactical analyst is currently processing the combat logs. Deep neural patterns take time to stabilize. Check back shortly.') }}
                 </p>
             </div>
+
+            <!-- Feedback CTA — only after the user has something to rate -->
+            <ReportFeedbackCard
+                v-if="report.has_ai_analysis && feedbackShowUrl && feedbackStoreUrl"
+                :report-id="report.id"
+                :show-url-pattern="feedbackShowUrl"
+                :store-url-pattern="feedbackStoreUrl"
+            />
+
+            <!-- Bottom breathing room so the page doesn't end flush against the viewport -->
+            <div class="h-16"></div>
         </div>
     </div>
 </template>

@@ -135,6 +135,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 'difficulties'           => $difficulties,
                 'ai_blocks'              => $mainBlocks,
                 'model'                  => config('services.gemini.pro_model'),
+                'prompt_version'         => (string) config('ai_report.prompt_version', 'v1'),
                 'gemini_cache_id'        => $cacheId,
                 'gemini_cache_expires_at' => $cacheExpiresAt ? \Carbon\Carbon::parse($cacheExpiresAt) : null,
             ]);

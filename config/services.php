@@ -49,6 +49,9 @@ return [
         'client_secret' => env('DISCORD_CLIENT_SECRET'),
         'redirect' => env('DISCORD_REDIRECT_URI'),
         'webhook_url' => env('DISCORD_WEBHOOK_URL'),
+        // Optional: separate channel for critical (rating ≤ 2) report feedback
+        // alerts. When unset, alerts are silently skipped.
+        'feedback_webhook_url' => env('DISCORD_FEEDBACK_WEBHOOK_URL'),
     ],
 
     'wcl' => [

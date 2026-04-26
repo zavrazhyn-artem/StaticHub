@@ -28,7 +28,17 @@
                         <div v-if="n.body" class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">{{ n.body }}</div>
 
                         <div v-if="n.action" class="mt-2">
+                            <button
+                                v-if="typeof n.action.onClick === 'function'"
+                                @click="runAction(n)"
+                                type="button"
+                                class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-on-surface transition active:scale-95"
+                            >
+                                {{ n.action.label }}
+                                <span v-if="n.action.icon" class="material-symbols-outlined text-xs">{{ n.action.icon }}</span>
+                            </button>
                             <a
+                                v-else
                                 :href="n.action.href"
                                 :method="n.action.method"
                                 class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-on-surface transition active:scale-95"
@@ -57,6 +67,15 @@
 import { useNotifications } from '@/composables/useNotifications.js'
 
 const { state, dismiss } = useNotifications()
+
+function runAction(n) {
+    try {
+        n.action.onClick()
+    } catch (e) {
+        console.error('Notification action failed:', e)
+    }
+    if (n.action.dismissAfter !== false) dismiss(n.id)
+}
 
 const typeStyles = {
     info:    'bg-cyan-500/10 border-cyan-500/30',

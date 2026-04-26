@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAiLogController;
 use App\Http\Controllers\Admin\AdminApiLogController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminGhostController;
 use App\Http\Controllers\Admin\AdminInviteCodeController;
 use App\Http\Controllers\Admin\AdminStaticsController;
@@ -21,6 +22,8 @@ Route::middleware('admin_auth')->group(function () {
 
     Route::get('/ai-logs', [AdminAiLogController::class, 'index'])->name('admin.ai-logs');
     Route::get('/api-logs', [AdminApiLogController::class, 'index'])->name('admin.api-logs');
+
+    Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback');
 
     Route::get('/invite-codes', [AdminInviteCodeController::class, 'index'])->name('admin.invite-codes');
     Route::post('/invite-codes/generate', [AdminInviteCodeController::class, 'generate'])->name('admin.invite-codes.generate');

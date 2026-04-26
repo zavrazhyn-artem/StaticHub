@@ -58,6 +58,7 @@ class TacticalReport extends Model
         'ai_analysis',
         'ai_blocks',
         'model',
+        'prompt_version',
         'gemini_cache_id',
         'gemini_cache_expires_at',
     ];

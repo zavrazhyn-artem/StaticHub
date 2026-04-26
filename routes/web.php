@@ -15,6 +15,7 @@ use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
 use App\Http\Controllers\Static\StaticController;
 use App\Http\Controllers\Logs\LogTranslationController;
+use App\Http\Controllers\Logs\ReportFeedbackController;
 use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
@@ -110,6 +111,10 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::get('/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');
     Route::post('/logs/manual', [StaticLogsController::class, 'storeManual'])->name('statics.logs.manual.store');
     Route::get('/logs/{report}', [StaticLogsController::class, 'show'])->name('statics.logs.show');
+
+    // Report feedback (CTA + admin aggregation source)
+    Route::get('/logs/{report}/feedback', [ReportFeedbackController::class, 'show'])->name('statics.logs.feedback.show');
+    Route::post('/logs/{report}/feedback', [ReportFeedbackController::class, 'store'])->name('statics.logs.feedback.store');
 
     // Static management
     Route::post('/invite', [StaticController::class, 'generateInvite'])->name('statics.invite.generate');

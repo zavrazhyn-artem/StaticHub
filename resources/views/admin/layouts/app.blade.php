@@ -172,6 +172,11 @@
                     <span class="material-symbols-outlined" style="font-size: 20px;">insights</span>
                     User Activity
                 </a>
+                <a href="{{ route('admin.feedback') }}"
+                   class="admin-nav-link {{ request()->routeIs('admin.feedback') ? 'active' : '' }}">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">rate_review</span>
+                    Feedback
+                </a>
 
                 <div style="margin: 1rem 0; border-top: 1px solid rgba(255,255,255,0.06);"></div>
                 <span style="padding: 0 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555;">External Tools</span>

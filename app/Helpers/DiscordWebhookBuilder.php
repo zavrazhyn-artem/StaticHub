@@ -137,4 +137,66 @@ class DiscordWebhookBuilder
             ]
         ];
     }
+
+    /**
+     * Critical-feedback alert: a user rated an AI report ≤ 2.
+     * Embed includes rating, tags, comment excerpt, and a link back to the report.
+     *
+     * @param array{rating:int, chat_rating:?int, disliked_tags:array, comment:?string, user_name:string, report_title:string, report_url:string} $data
+     */
+    public static function buildCriticalFeedbackPayload(array $data): array
+    {
+        $rating = (int) $data['rating'];
+        $stars = str_repeat('★', $rating) . str_repeat('☆', max(0, 5 - $rating));
+
+        $fields = [
+            [
+                'name' => 'Rating',
+                'value' => "{$stars}  ({$rating}/5)",
+                'inline' => true,
+            ],
+            [
+                'name' => 'User',
+                'value' => $data['user_name'] ?: '—',
+                'inline' => true,
+            ],
+        ];
+
+        if (!empty($data['chat_rating'])) {
+            $fields[] = [
+                'name' => 'Chat Rating',
+                'value' => "{$data['chat_rating']}/5",
+                'inline' => true,
+            ];
+        }
+
+        if (!empty($data['disliked_tags'])) {
+            $fields[] = [
+                'name' => 'Disliked',
+                'value' => '`' . implode('` · `', $data['disliked_tags']) . '`',
+                'inline' => false,
+            ];
+        }
+
+        if (!empty($data['comment'])) {
+            $fields[] = [
+                'name' => 'Comment',
+                'value' => mb_substr($data['comment'], 0, 1000),
+                'inline' => false,
+            ];
+        }
+
+        return [
+            'embeds' => [
+                [
+                    'title'       => '⚠️ Critical AI Report Feedback',
+                    'description' => "**{$data['report_title']}** received {$rating}★. [Open report]({$data['report_url']})",
+                    'color'       => 15158332, // Red
+                    'fields'      => $fields,
+                    'footer'      => ['text' => 'Blast Your Raid • blastr.pro'],
+                    'timestamp'   => now()->toIso8601String(),
+                ]
+            ]
+        ];
+    }
 }
