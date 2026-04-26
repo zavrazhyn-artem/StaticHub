@@ -185,10 +185,16 @@ class RotationAnalyzer
             $status = 'major';
         } else {
             $status = 'minor';
-            if ($severityCfg === 'major' && $efficiency < $recommended - 0.10) {
-                // slightly stricter for abilities the baseline marks as major-priority
-                $status = 'minor';
-            }
+        }
+
+        // Cap status at the baseline severity. A utility ability flagged as
+        // `severity: minor` in the baseline (e.g. Vengeful Retreat) should
+        // never escalate to 'major' just because it's far below recommended —
+        // baseline already told us it's not a top-priority button. Without
+        // this cap, the AI sees `severity: major` and escalates the prose
+        // to lecture the player about a non-rotational ability.
+        if ($status === 'major' && $severityCfg !== 'major') {
+            $status = $severityCfg === 'critical' ? 'major' : 'minor';
         }
 
         $pct = (int) round($efficiency * 100);

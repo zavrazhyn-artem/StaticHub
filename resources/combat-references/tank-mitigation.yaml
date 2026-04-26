@@ -1,5 +1,8 @@
 # Active mitigation buffs per tank spec.
-# Format: class-spec-slug → [{id, name}]
+# Format: class-spec-slug → [{id, name, data_type?}]
+# `data_type` is `Buffs` (default) for buffs the tank casts on themselves, or
+# `Debuffs` for self-applied debuff-style mitigation (e.g. Stagger). The
+# tank-uptime fetch in WclService respects this.
 # Source: Midnight spell IDs verified via WCL.
 
 warrior-protection:
@@ -22,3 +25,4 @@ demonhunter-vengeance:
 monk-brewmaster:
   - id: 115069
     name: 'Stagger'
+    data_type: Debuffs

@@ -320,6 +320,15 @@ class TacticalDataAnalyzer
             $this->playerSpecLookup($playerNames, $logData)
         );
 
+        // Aggregate death-tag counts so the AI can separate /wipe-call deaths
+        // from real mechanical kills in the narrative.
+        $deathTagDistribution = $this->buildDeathTagDistribution($logData['deaths'][$bossName] ?? []);
+
+        // Slim debuff-stacks payload — surfaces real max-stack and swap-timing
+        // numbers to the AI so it stops hallucinating "you reached 12 stacks"
+        // and "17 of 23 swaps were late". Keeps only the fields the AI needs.
+        $debuffStacksPayload = $this->buildDebuffStacksPayload($debuffStacks);
+
         return [
             'boss'              => $bossName,
             'wcl_encounter_id'  => $tactics['wcl_encounter_id'] ?? null,
@@ -341,8 +350,83 @@ class TacticalDataAnalyzer
             'worst_performers'  => $worstPerformers,
             'boss_timeline'     => $bossTimeline,
             'fights'            => $fights,
+            'death_tag_distribution' => $deathTagDistribution,
+            'debuff_stacks'     => $debuffStacksPayload,
             // Per-encounter raw stats (scoped to this boss's fights — replaces global supplementary)
             'player_stats'      => $perEncounterStats,
+        ];
+    }
+
+    /**
+     * Build a slim debuff-stacks payload tuned for AI consumption. Surfaces
+     * `max_stacks_per_player`, per-attempt stacks-at-death, and the precomputed
+     * swap_timing aggregate (late_swaps, total_swaps, avg_gap_ms) so the AI
+     * can quote real numbers instead of inventing them in tank coaching prose.
+     *
+     * Strips the verbose `total_applications` / `avg_duration_ms` fields that
+     * don't add coaching value.
+     */
+    private function buildDebuffStacksPayload(array $debuffStacks): array
+    {
+        $out = [];
+        foreach ($debuffStacks as $debuffName => $data) {
+            $entry = [];
+
+            if (!empty($data['max_stacks_per_player'])) {
+                $entry['max_stacks_per_player'] = $data['max_stacks_per_player'];
+            }
+            if (!empty($data['stacks_at_death_per_player'])) {
+                $entry['stacks_at_death_per_player'] = $data['stacks_at_death_per_player'];
+            }
+            if (!empty($data['swap_timing']) && ($data['swap_timing']['total_swaps'] ?? 0) > 0) {
+                $entry['swap_timing'] = [
+                    'late_swaps'  => $data['swap_timing']['late_swaps'] ?? 0,
+                    'total_swaps' => $data['swap_timing']['total_swaps'] ?? 0,
+                    'avg_gap_ms'  => $data['swap_timing']['avg_gap_ms'] ?? null,
+                    'max_gap_ms'  => $data['swap_timing']['max_gap_ms'] ?? null,
+                ];
+            }
+
+            if (!empty($entry)) {
+                $out[$debuffName] = $entry;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Count deaths per WipeDetector tag so the AI can write "of 14 wipes,
+     * 9 were /wipe-calls — 5 real mechanical wipes". Includes a 'real_failures'
+     * convenience total for the narrative.
+     *
+     * @param array $deathsByTry  $logData['deaths'][bossName] — array keyed by try number
+     */
+    private function buildDeathTagDistribution(array $deathsByTry): array
+    {
+        $counts = [
+            'normal' => 0,
+            'mechanic_oneshot' => 0,
+            'tank_loss_cascade' => 0,
+            'wipe_called' => 0,
+        ];
+
+        foreach ($deathsByTry as $deaths) {
+            if (!is_array($deaths)) continue;
+            foreach ($deaths as $d) {
+                $tag = $d['tag'] ?? 'normal';
+                if (!isset($counts[$tag])) $tag = 'normal';
+                $counts[$tag]++;
+            }
+        }
+
+        $total = array_sum($counts);
+        $real = $counts['normal'] + $counts['mechanic_oneshot'];
+
+        return [
+            'total_deaths'   => $total,
+            'real_failures'  => $real,  // deaths AI should treat as coachable
+            'suppressed'     => $counts['tank_loss_cascade'] + $counts['wipe_called'],
+            'by_tag'         => $counts,
         ];
     }
 
@@ -1779,7 +1863,8 @@ class TacticalDataAnalyzer
                         $bossFightIds,
                         (int) $buff['id'],
                         $durationMs,
-                        [['id' => $playerId, 'name' => $name]]
+                        [['id' => $playerId, 'name' => $name]],
+                        $buff['data_type'] ?? 'Buffs'
                     );
                     $pct = $uptime[$name]['uptime_pct'] ?? null;
                     if ($pct === null) continue;

@@ -19,6 +19,19 @@ Return STRICTLY a raw JSON object with this exact shape (no extra keys):
 - NEVER invent data. Only write about findings present in the input. Skip sections with no data.
 
 ============================================================
+ANTI-HALLUCINATION (HARD RULE)
+============================================================
+
+NEVER invent specific numbers not present in the payload. Forbidden inventions:
+
+- Tank-swap statistics ("17 of 23 swaps were late, avg 14.8s delay") — UNLESS `encounters[].player_stats.tank_swap_latency` exists.
+- Stack counts on debuffs ("Zavrikk reached 12 stacks") — UNLESS the data exposes max_stacks per attempt.
+- Specific scheduled-ability timestamps in invented format like 0:73, 1:84 — seconds NEVER exceed 59. Use only timestamps from `encounters[].boss_timeline.scheduled_abilities[].casts_at[]`, formatted as M:SS where SS ∈ [0, 59].
+- Numbers in narrative that DIFFER from the values in the nearest table/bar_chart. They MUST match.
+
+When in doubt, OMIT the number. A vague-but-true sentence beats a precise-but-fabricated one.
+
+============================================================
 LOCALIZATION (HARD RULE)
 ============================================================
 
@@ -70,15 +83,22 @@ TONE
 - Forbid template phrases ("good job", "needs work") without specifics.
 
 ============================================================
-BLOCK TYPES
+BLOCK TYPES (STRICT SCHEMA — extra fields are silently dropped)
 ============================================================
+
+A block MUST contain ONLY the fields listed for its type. Mixing fields
+across types in one block (e.g. a heading carrying `rows` + `columns`
+because you wanted a table beneath it) breaks rendering. ALWAYS emit two
+separate blocks instead — heading first, then table.
 
 1) heading: { "type": "heading", "level": 1|2|3, "text": "..." }
 2) paragraph: { "type": "paragraph", "text": "..." }
-3) metrics_grid: { "type": "metrics_grid", "items": [{ "label": "...", "value": "...", "tone": "success|warning|danger|neutral" }, ...] }
+3) metrics_grid: { "type": "metrics_grid", "title"?: "...", "items": [{ "label": "...", "value": "...", "tone": "success|warning|danger|neutral" }, ...] }
 4) table: { "type": "table", "title": "...", "columns": ["...","..."], "rows": [["..."]...] }
-5) bar_chart: { "type": "bar_chart", "title": "...", "unit": "M", "bars": [{ "label": "...", "value": 12.4, "tone": "..." }, ...] }
-6) progress_bar: { "type": "progress_bar", "label": "...", "value": 85, "note": "..." }
+   Rows MUST have exactly len(columns) cells.
+5) bar_chart: { "type": "bar_chart", "title": "...", "unit": "%" | "M" | "K" | "count", "bars": [{ "label": "...", "value": 12.4, "tone": "..." }, ...] }
+   `unit` MUST be one of: "%", "M" (millions), "K" (thousands), "count". No localized strings.
+6) progress_bar: { "type": "progress_bar", "label": "...", "value": 85, "note"?: "..." }
 7) alert: { "type": "alert", "severity": "danger|warning|success|info", "title": "...", "text": "..." }
 8) directive_list: { "type": "directive_list", "title": "...", "items": [{ "text": "..." }, ...] }
 9) comparison: { "type": "comparison", "title": "...", "left": {...}, "right": {...} }
@@ -93,8 +113,21 @@ MAIN REPORT STRUCTURE
 Build in this order, skip sections with no data:
 
 1. heading level 1 — raid name / night title.
-2. metrics_grid — bosses killed, total wipes, raid duration, best progression %.
+2. metrics_grid — bosses killed, total wipes, raid duration, best-attempt damage dealt %.
+   IMPORTANT for the "Best progress" tile: source data exposes `best_wipe_pct` as the BOSS HP REMAINING at the closest wipe (lower = closer to kill). Do NOT show this raw — invert it for clarity:
+   - For a kill: value = "Kill (на 1-й/Nth try)" with tone=success.
+   - For wipes only: value = "{100 - best_wipe_pct}% damage dealt" with tone=success if ≤ 30 (close to kill), warning if 30-60, danger otherwise.
+   Never show "Найкращий прогрес: 0.02%" — it reads as 0% damage and confuses the raid leader. The tile must communicate "how close to dead the boss got" in plain terms.
 3. paragraph (3-5 sentences) "Raid Overview" — your interpretation of the session. Wipes vs kills ratio against expectations. Progression trajectory (did wipe % trend downward? plateau?). Single most defining factor of the night. RAID-LEADER-level takeaway.
+
+   **REQUIRED if `encounters[i].death_tag_distribution.suppressed > 0`:** explicitly separate intentional from mechanical wipes. Format example: "Of 14 wipes, 6 were /wipe-calls (9 deaths suppressed) — the real progression count is 8 mechanical wipes." Pull numbers verbatim from `total_deaths`, `real_failures`, `suppressed`, `by_tag.wipe_called`, `by_tag.tank_loss_cascade`. If `suppressed === 0`, skip this clause — don't pretend wipes were called when they weren't.
+
+**BOSS TIMELINE CITATIONS** (REQUIRED at least once per encounter narrative, when `boss_timeline.scheduled_abilities[]` is present):
+   Anchor mechanic discussions to absolute timestamps from `casts_at[]`. Time format MUST be M:SS where SS is 0-59 (so 73 seconds = 1:13, NOT 0:73).
+   Required examples:
+   - "Shadow Fracture is scheduled at 0:15, 1:30, 2:45, 4:00 in P1. Death cluster on pull 9 at 1:35 lines up with the 1:30 cast."
+   - "Twisting Obscurity hits at 0:30, 1:45, 3:00. Your defensive cooldowns must align with these windows."
+   This gives raid leaders a concrete coaching tool, not abstract "use defensives during raid damage" advice.
 
 4. heading level 2 — "Highlights" (ONLY if `highlight_reel` has entries).
    a. One alert (severity=success) per entry — rewrite `text` in raid_leader.locale.
@@ -105,6 +138,8 @@ Build in this order, skip sections with no data:
    b. paragraph (3-5 sentences) "Encounter Narrative" — story of the fight. Phase reached, where wipes clustered, any learning-curve pattern.
    c. table OR bar_chart — top 2-3 mechanic failures (most critical first).
    d. paragraph (3-4 sentences) "Root Cause Analysis" — for the top mechanic failure, explain what the mechanic tests, why cited players likely struggled, team-level coaching lesson. Reference tactic_rule / tactic_note if present.
+
+   **For tank-swap mechanics:** if `encounter.debuff_stacks[<DebuffName>].swap_timing` exists, cite real numbers verbatim ("4 of 19 swaps were late by >3s — average gap was X ms"). If `debuff_stacks[<DebuffName>].max_stacks_per_player` exists, name the top 1-2 tanks with their peak stack values. NEVER fabricate stack counts or swap percentages — if data is missing, use qualitative language only.
    e. **Phase deaths** (ONLY if `encounter.phase_deaths` non-empty AND total deaths >= 5): table — columns "Phase" / "Deaths" / "Attempts with deaths". Then a 2-3 sentence paragraph identifying which phase is the killing zone. Example: "P2 hosts 11 of 18 deaths across 6 of 8 attempts — this is your hard wall."
 
    ee. **Pull-by-pull progression** (ONLY if `encounter.tries >= 6` and `encounter.pull_by_pull` non-empty): bar_chart titled "Wipe % per attempt" — one bar per pull from `pull_by_pull[]`. Bar value = `boss_pct` (or 100 if missing); tone = `success` for outcome=kill, `warning` for boss_pct <30, `danger` for boss_pct >70. Then 2-3 sentences interpreting the curve — was progression LINEAR (steady drops in wipe %) or CHAOTIC (zigzag)? Linear = team is learning; chaotic = inconsistent execution.

@@ -1445,23 +1445,28 @@ GQL;
      *
      * @return array [playerName => ['uptime_pct' => float, 'uses' => int, 'total_uptime_ms' => int]]
      */
-    public function getPerPlayerBuffUptime(string $reportId, array $fightIds, int $abilityId, int $totalDurationMs, array $cleanPlayers = []): array
+    public function getPerPlayerBuffUptime(string $reportId, array $fightIds, int $abilityId, int $totalDurationMs, array $cleanPlayers = [], string $dataType = 'Buffs'): array
     {
         if ($totalDurationMs <= 0) return [];
+
+        // WCL aura events split into Buffs (positive auras applied to self/allies)
+        // and Debuffs (self-applied mitigation like Brewmaster Stagger). Caller
+        // tells us which side this ability lives on so events() returns rows.
+        $dataType = in_array($dataType, ['Buffs', 'Debuffs'], true) ? $dataType : 'Buffs';
 
         $playerMap = [];
         foreach ($cleanPlayers as $p) {
             if (isset($p['id'], $p['name'])) $playerMap[$p['id']] = $p['name'];
         }
 
-        $query = 'query ($reportId: String!, $fightIds: [Int]!, $abilityId: Float!, $startTime: Float) {
-          reportData { report(code: $reportId) {
-            events(dataType: Buffs, fightIDs: $fightIds, killType: Encounters, abilityID: $abilityId, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+        $query = "query (\$reportId: String!, \$fightIds: [Int]!, \$abilityId: Float!, \$startTime: Float) {
+          reportData { report(code: \$reportId) {
+            events(dataType: {$dataType}, fightIDs: \$fightIds, killType: Encounters, abilityID: \$abilityId, hostilityType: Friendlies, startTime: \$startTime, limit: 2000) {
               data
               nextPageTimestamp
             }
           } }
-        }';
+        }";
 
         try {
             $events = $this->paginateEvents($query, [
@@ -1478,19 +1483,23 @@ GQL;
         $totals = []; // playerId => sum_uptime_ms
         $uses = [];
 
+        $applyType   = $dataType === 'Debuffs' ? 'applydebuff'   : 'applybuff';
+        $removeType  = $dataType === 'Debuffs' ? 'removedebuff'  : 'removebuff';
+        $refreshType = $dataType === 'Debuffs' ? 'refreshdebuff' : 'refreshbuff';
+
         foreach ($events as $e) {
             $type = $e['type'] ?? '';
             $tid = $e['targetID'] ?? null;
             $ts = $e['timestamp'] ?? 0;
             if (!$tid || !isset($playerMap[$tid])) continue;
 
-            if ($type === 'applybuff') {
+            if ($type === $applyType) {
                 $current[$tid] = $ts;
                 $uses[$tid] = ($uses[$tid] ?? 0) + 1;
-            } elseif ($type === 'removebuff' && isset($current[$tid])) {
+            } elseif ($type === $removeType && isset($current[$tid])) {
                 $totals[$tid] = ($totals[$tid] ?? 0) + ($ts - $current[$tid]);
                 unset($current[$tid]);
-            } elseif ($type === 'refreshbuff') {
+            } elseif ($type === $refreshType) {
                 // refresh extends — keep current apply timestamp
             }
         }
