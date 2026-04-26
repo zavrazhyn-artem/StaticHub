@@ -61,6 +61,13 @@ docker compose -f docker-compose.prod.yml exec -T app php artisan view:cache
 echo "🎯 7. Стартуємо worker і scheduler (з уже готовим кешем)..."
 docker compose -f docker-compose.prod.yml up -d worker scheduler
 
+echo "🧽 8. Чистимо dangling images після build..."
+# Кожен build створює новий blastr-app:latest, попередній стає dangling (untagged).
+# Без цього за 10 деплоїв накопичується ~50 ГБ мертвих шарів.
+# -f без -a і без --volumes — НЕ чіпає активні образи і MySQL/vendor томи.
+docker image prune -f
+docker builder prune -f --keep-storage 2GB
+
 echo "========================================"
 echo "✅ Деплой успішно завершено!"
 echo "========================================"
