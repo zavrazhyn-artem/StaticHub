@@ -62,7 +62,7 @@ class BattleNetController extends Controller
         // Store token in session for API calls
         session(['battlenet_token' => $token]);
 
-        Auth::login($user);
+        Auth::login($user, remember: true);
 
         // Sync locale from session if user doesn't have one
         if (session()->has('locale') && (!$user->locale || $user->locale === 'en')) {

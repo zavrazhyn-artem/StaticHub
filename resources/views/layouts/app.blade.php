@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="gridinsoft-key" content="3nb7xludk7tjbqh2nuc0g466h5zwzzilqiwftrf42jj2df7znies5sc6qnsthh6z" />
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" href="/images/logo.svg" type="image/svg+xml">

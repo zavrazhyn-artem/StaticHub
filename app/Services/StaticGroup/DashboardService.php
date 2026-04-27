@@ -76,23 +76,40 @@ class DashboardService
     /**
      * Count confirmed (status=present|late) attendees on an event grouped by
      * spec role. Returns shape [tank, heal, mdps, rdps] => int.
+     * Mirrors categorizeRoster(): prefers per-raid spec, falls back to static main spec.
      */
-    private function countConfirmedRoles(int $eventId): array
+    private function countConfirmedRoles(int $eventId, int $staticId): array
     {
-        $specMap = config('wow_season.specializations', []);
         $counts = ['tank' => 0, 'heal' => 0, 'mdps' => 0, 'rdps' => 0];
 
-        \App\Models\RaidAttendance::query()
+        $attendances = \App\Models\RaidAttendance::query()
             ->where('event_id', $eventId)
             ->whereIn('status', ['present', 'late'])
-            ->whereNotNull('spec_id')
-            ->pluck('spec_id')
-            ->each(function ($specId) use ($specMap, &$counts) {
-                $role = $specMap[$specId] ?? null;
-                if ($role && isset($counts[$role])) {
-                    $counts[$role]++;
-                }
-            });
+            ->get(['character_id', 'spec_id']);
+
+        $rsvpSpecIds = $attendances->pluck('spec_id')->filter()->unique();
+        $specRoles = $rsvpSpecIds->isNotEmpty()
+            ? \App\Models\Specialization::whereIn('id', $rsvpSpecIds)->pluck('role', 'id')
+            : collect();
+
+        $noSpecCharIds = $attendances->whereNull('spec_id')->pluck('character_id');
+        $mainSpecRoles = $noSpecCharIds->isNotEmpty()
+            ? \App\Models\CharacterStaticSpec::where('static_id', $staticId)
+                ->whereIn('character_id', $noSpecCharIds)
+                ->where('is_main', true)
+                ->join('specializations', 'specializations.id', '=', 'character_static_specs.spec_id')
+                ->pluck('specializations.role', 'character_static_specs.character_id')
+            : collect();
+
+        foreach ($attendances as $attendance) {
+            $role = $attendance->spec_id
+                ? ($specRoles->get($attendance->spec_id) ?? 'rdps')
+                : ($mainSpecRoles->get($attendance->character_id) ?? 'rdps');
+
+            if (isset($counts[$role])) {
+                $counts[$role]++;
+            }
+        }
 
         return $counts;
     }
@@ -310,7 +327,7 @@ class DashboardService
                 'time'           => $nextRaid->start_time->setTimezone($static->timezone)->translatedFormat('H:i'),
                 'discordPosted'  => (bool) $nextRaid->discord_message_id,
                 'href'           => route('schedule.event.show', $nextRaid->id),
-                'confirmedRoles' => $this->countConfirmedRoles($nextRaid->id),
+                'confirmedRoles' => $this->countConfirmedRoles($nextRaid->id, $static->id),
                 'statusCounts'   => $this->countAttendanceStatuses($nextRaid->id),
                 'rsvpContext'    => auth()->user()
                     ? $this->eventPayloadService->buildRsvpModalPayload($nextRaid, auth()->user())
