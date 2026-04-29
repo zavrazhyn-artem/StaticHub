@@ -13,7 +13,7 @@ const tabs = computed(() => {
     return [
         {id: 'summary', labelKey: 'Summary', icon: 'dashboard'},
         {id: 'raids', labelKey: 'Raids', icon: 'swords'},
-        {id: 'gear', labelKey: 'Gear & Audit', icon: 'shield'},
+        {id: 'gear', labelKey: 'Спорядження', icon: 'shield'},
         {id: 'vault', labelKey: 'Vault', icon: 'inventory_2'},
     ];
 });
@@ -29,13 +29,13 @@ const difficulties = [
 <template>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- ── Tabs ─────────────────────────────────────────────────────── -->
-        <div class="flex items-center gap-1 bg-surface-container-high p-1 rounded-xl border border-white/5 w-fit">
+        <div class="flex items-center gap-1.5">
             <button v-for="tab in tabs" :key="tab.id"
                     @click="emit('update:activeTab', tab.id)"
-                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
-                    :class="activeTab === tab.id
-                        ? 'bg-emerald-400 text-white shadow-lg'
-                        : 'text-on-surface-variant hover:bg-white/5 hover:text-white'">
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-2xs font-black uppercase tracking-[0.06em] transition-all"
+                    :style="activeTab === tab.id
+                        ? { background: 'rgba(57,255,20,0.12)', border: '1px solid rgba(57,255,20,0.5)', color: '#39FF14' }
+                        : { background: 'transparent', border: '1px solid rgba(255,255,255,0.06)', color: '#adaaad' }">
                 <span class="material-symbols-outlined text-sm">{{ tab.icon }}</span>
                 {{ __(tab.labelKey) }}
             </button>

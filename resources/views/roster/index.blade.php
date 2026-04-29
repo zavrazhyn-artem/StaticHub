@@ -10,8 +10,8 @@
         </div>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-[1600px] mx-auto sm:px-6 lg:px-8">
+    <div class="py-3 h-[calc(100vh-110px)]">
+        <div class="max-w-[1600px] mx-auto sm:px-6 lg:px-8 h-full">
             <unified-roster
                 :static-id="{{ $static->id }}"
                 :initial-data='@json($rosterData)'

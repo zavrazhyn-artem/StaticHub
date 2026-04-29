@@ -127,6 +127,7 @@ class RosterService
             'current_week'        => $currentPeriodKey,
             'available_weeks'     => $availableWeeks,
             'raid_columns'        => $raidColumns,
+            'ilvl_tiers'          => config('wow_season.display_ilvl_tiers', []),
         ];
     }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, watch, onMounted, getCurrentInstance, provide } from 'vue';
 import axios from 'axios';
 import TabGear from './TabGear.vue';
 import RosterTabs from './UnifiedRoster/RosterTabs.vue';
@@ -344,7 +344,9 @@ watch(selectedDifficulty, val => localStorage.setItem('rosterSelectedDifficulty'
 // ---------------------------------------------------------------------------
 // Computed
 // ---------------------------------------------------------------------------
-const coreRoster = computed(() => roster.value.filter(m => m.roster_status === 'core'));
+const coreRoster  = computed(() => roster.value.filter(m => m.roster_status === 'core'));
+const coreCount   = computed(() => coreRoster.value.length);
+const totalCount  = computed(() => roster.value.length);
 
 const stats = computed(() => {
     const counts = { tank: 0, heal: 0, dps: 0 };
@@ -366,6 +368,9 @@ const groupedRoster = computed(() => {
 
 // Raid columns from backend config — always present regardless of weekly data
 const raidColumns = computed(() => props.initialData?.raid_columns ?? []);
+
+// iLvL colour tiers from season config — provided to all descendant cells
+provide('ilvlTiers', props.initialData?.ilvl_tiers ?? []);
 
 // ---------------------------------------------------------------------------
 // Management actions
@@ -415,33 +420,48 @@ const kickMember = async (member) => {
 </script>
 
 <template>
-    <div class="space-y-8">
+    <div class="h-full flex flex-col gap-3">
 
         <!-- ── Week Header + Role Summary ──────────────────────────────── -->
-        <div class="flex items-center justify-between bg-surface-container-high rounded-xl border border-white/5 px-4 py-2">
-            <!-- Status indicator (left) -->
-            <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between bg-surface-container-high rounded-xl border border-white/[0.06] px-4 py-2.5">
+            <!-- Left: live pill + role counts -->
+            <div class="flex items-center gap-3">
                 <template v-if="isLive">
-                    <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
-                    <span class="text-2xs font-bold uppercase tracking-wider text-green-400">{{ __('Live') }}</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-black uppercase tracking-[0.1em]"
+                          style="background: rgba(57,255,20,0.08); border: 1px solid rgba(57,255,20,0.3); color: #39FF14;">
+                        <span class="w-1.5 h-1.5 rounded-full"
+                              style="background: #39FF14; box-shadow: 0 0 0 3px rgba(57,255,20,0.2);"></span>
+                        {{ __('Live') }}
+                    </span>
                 </template>
                 <template v-else>
-                    <span class="material-symbols-outlined text-sm text-amber-400">history</span>
-                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-400">{{ __('Week') }} {{ weekNumber(selectedWeek) }}</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-black uppercase tracking-[0.1em] text-amber-400"
+                          style="border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.06);">
+                        <span class="material-symbols-outlined text-xs">history</span>
+                        {{ __('Week') }} {{ weekNumber(selectedWeek) }}
+                    </span>
                 </template>
-                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm text-emerald-400 ml-1">sync</span>
-            </div>
+                <span v-if="weekLoading" class="material-symbols-outlined animate-spin text-sm ml-1" style="color:#39FF14">sync</span>
 
-            <!-- Role counts (center) -->
-            <div class="flex items-center gap-4">
-                <div v-for="role in roles" :key="role.id" class="flex items-center gap-1.5">
-                    <img :src="roleIconSrc(role.id)" class="w-4 h-4 opacity-70" :alt="__(role.labelKey)">
-                    <span class="text-2xs font-semibold" :class="role.color">{{ stats[role.id] }}</span>
-                    <span class="text-3xs text-gray-600">/{{ role.max }}</span>
+                <!-- Role counts -->
+                <div class="flex items-center gap-3 font-mono font-bold text-2xs">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full" style="background: #3a8dff;"></span>
+                        <span style="color: #3a8dff;">{{ stats.tank }}/{{ roles.find(r => r.id === 'tank')?.max }}</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full" style="background: #4ADE80;"></span>
+                        <span style="color: #4ADE80;">{{ stats.heal }}/{{ roles.find(r => r.id === 'heal')?.max }}</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full" style="background: #ff5063;"></span>
+                        <span style="color: #ff5063;">{{ stats.dps }}/{{ roles.find(r => r.id === 'dps')?.max }}</span>
+                    </span>
+                    <span class="ml-1" style="color: #767577;">· {{ __('Core') }} {{ coreCount }}/{{ totalCount }}</span>
                 </div>
             </div>
 
-            <!-- Week selector (right) -->
+            <!-- Right: Week selector -->
             <div class="w-52">
                 <SearchableSelect
                     :model-value="selectedWeek"
@@ -467,7 +487,7 @@ const kickMember = async (member) => {
         </div>
 
         <!-- ── Content ──────────────────────────────────────────────────── -->
-        <div v-else class="space-y-4">
+        <div v-else class="flex-1 min-h-0 flex flex-col">
 
             <!-- ── Main Roster Table (all tabs including vault) ──────── -->
             <RosterTable

@@ -10,13 +10,12 @@ const props = defineProps({
 
 const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
-/**
- * Vault slot logic:
- *   M+ → vault_weekly_runs (sorted desc): slots at runs[0], runs[3], runs[7]
- *   Raid → vault_raid_slots: precomputed [slot1, slot2, slot3]
- *   World → vault_world_runs (sorted desc): slots at runs[1], runs[3], runs[7]
- */
+// Vault slot accessors — same logic as before
 const getVaultSlot = (category, slotIndex) => {
+    if (category === 'raid') {
+        const s = props.char?.vault_raid_slots;
+        return (s && s[slotIndex]) ? { ilvl: s[slotIndex].ilvl, track: s[slotIndex].track } : null;
+    }
     if (category === 'mythic') {
         const runs = props.char?.vault_weekly_runs || [];
         const needed = [1, 4, 8][slotIndex];
@@ -26,15 +25,6 @@ const getVaultSlot = (category, slotIndex) => {
         }
         return null;
     }
-
-    if (category === 'raid') {
-        const slots = props.char?.vault_raid_slots;
-        if (slots && slots[slotIndex]) {
-            return { ilvl: slots[slotIndex].ilvl, track: slots[slotIndex].track };
-        }
-        return null;
-    }
-
     if (category === 'world') {
         const runs = props.char?.vault_world_runs || [];
         const needed = [2, 4, 8][slotIndex];
@@ -44,49 +34,69 @@ const getVaultSlot = (category, slotIndex) => {
         }
         return null;
     }
-
     return null;
 };
 
-const trackColor = {
-    Myth:       'text-orange-400 font-bold',
-    Hero:       'text-purple-400 font-bold',
-    Champion:   'text-blue-400 font-bold',
-    Veteran:    'text-green-400 font-bold',
-    Adventurer: 'text-teal-400 font-bold',
+// Track → colour (matches gear scale)
+const TRACK_COLORS = {
+    Myth: '#FB923C', Hero: '#C084FC', Champion: '#60A5FA',
+    Veteran: '#4ADE80', Adventurer: '#2dd4bf',
 };
-
-const slotStyle = (slot) => {
-    if (!slot) return 'text-gray-700';
-    return trackColor[slot.track] || 'text-white font-bold';
-};
+const trackColor = (track) => TRACK_COLORS[track] ?? '#9ca3af';
 </script>
 
 <template>
-    <!-- Raid Slots -->
+    <!-- Raid Slots (0-2) -->
     <td v-for="i in [0, 1, 2]" :key="'vr-' + i"
-        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/5' : '']"
-        class="text-center font-mono text-sm">
-        <span :class="slotStyle(getVaultSlot('raid', i))">
-            {{ getVaultSlot('raid', i)?.ilvl || '-' }}
-        </span>
+        :class="[rh, 'text-center align-middle']"
+        :style="{ padding: '6px 8px', borderLeft: i === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }">
+        <template v-if="getVaultSlot('raid', i)">
+            <span :style="{
+                fontSize: isAlt ? '13px' : '16px',
+                fontWeight: 800,
+                fontFamily: '\'JetBrains Mono\', monospace',
+                letterSpacing: '-0.02em',
+                color: trackColor(getVaultSlot('raid', i)?.track),
+            }">{{ getVaultSlot('raid', i)?.ilvl }}</span>
+        </template>
+        <template v-else>
+            <span style="font-size:14px; color:#767577; opacity:0.4;">—</span>
+        </template>
     </td>
 
-    <!-- M+ Slots -->
+    <!-- M+ Slots (0-2) -->
     <td v-for="i in [0, 1, 2]" :key="'vm-' + i"
-        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/10' : '']"
-        class="text-center font-mono text-sm">
-        <span :class="slotStyle(getVaultSlot('mythic', i))">
-            {{ getVaultSlot('mythic', i)?.ilvl || '-' }}
-        </span>
+        :class="[rh, 'text-center align-middle']"
+        :style="{ padding: '6px 8px', borderLeft: i === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }">
+        <template v-if="getVaultSlot('mythic', i)">
+            <span :style="{
+                fontSize: isAlt ? '13px' : '16px',
+                fontWeight: 800,
+                fontFamily: '\'JetBrains Mono\', monospace',
+                letterSpacing: '-0.02em',
+                color: trackColor(getVaultSlot('mythic', i)?.track),
+            }">{{ getVaultSlot('mythic', i)?.ilvl }}</span>
+        </template>
+        <template v-else>
+            <span style="font-size:14px; color:#767577; opacity:0.4;">—</span>
+        </template>
     </td>
 
-    <!-- World Slots -->
+    <!-- World/Delve Slots (0-2) -->
     <td v-for="i in [0, 1, 2]" :key="'vw-' + i"
-        :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', i === 0 ? 'border-l border-white/10' : '']"
-        class="text-center font-mono text-sm">
-        <span :class="slotStyle(getVaultSlot('world', i))">
-            {{ getVaultSlot('world', i)?.ilvl || '-' }}
-        </span>
+        :class="[rh, 'text-center align-middle']"
+        :style="{ padding: '6px 8px', borderLeft: i === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }">
+        <template v-if="getVaultSlot('world', i)">
+            <span :style="{
+                fontSize: isAlt ? '13px' : '16px',
+                fontWeight: 800,
+                fontFamily: '\'JetBrains Mono\', monospace',
+                letterSpacing: '-0.02em',
+                color: trackColor(getVaultSlot('world', i)?.track),
+            }">{{ getVaultSlot('world', i)?.ilvl }}</span>
+        </template>
+        <template v-else>
+            <span style="font-size:14px; color:#767577; opacity:0.4;">—</span>
+        </template>
     </td>
 </template>

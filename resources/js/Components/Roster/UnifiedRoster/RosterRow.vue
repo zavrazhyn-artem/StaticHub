@@ -1,24 +1,27 @@
 <script setup>
-import { computed, inject, getCurrentInstance } from 'vue';
+import { computed, inject, ref, getCurrentInstance } from 'vue';
 import SummaryCells from './Cells/SummaryCells.vue';
 import RaidCells from './Cells/RaidCells.vue';
 import GearCells from './Cells/GearCells.vue';
 import VaultCells from './Cells/VaultCells.vue';
-import SearchableSelect from '@/Components/UI/SearchableSelect.vue';
 import GearSpecSwitcher from '@/Components/Roster/GearSpecSwitcher.vue';
 
 const { proxy } = getCurrentInstance();
 const __ = (key, replace = {}) => proxy.__(key, replace);
 
-const accessRoleOptions = computed(() => [
-    { id: 'officer', name: __('Officer') },
-    { id: 'member',  name: __('Member')  },
-]);
+// StatusPill config — labels, icons, colours per value
+const STATUS_CONFIG = {
+    core:  { label: 'ОСНОВНИЙ', icon: 'check',   color: '#39FF14' },
+    bench: { label: 'БЕНЧ',     icon: 'pause',   color: '#ff6e84' },
+};
+const ROLE_CONFIG = {
+    leader:  { label: 'ЛІДЕР',   icon: 'star',          color: '#fcf266' },
+    officer: { label: 'ОФІЦЕР',  icon: 'shield_person', color: '#fcf266' },
+    member:  { label: 'УЧАСНИК', icon: 'person',         color: '#767577' },
+};
 
-const rosterStatusOptions = computed(() => [
-    { id: 'core',  name: __('Core')  },
-    { id: 'bench', name: __('Bench') },
-]);
+const statusOpen = ref(false);
+const roleOpen   = ref(false);
 
 const props = defineProps({
     member: { type: Object, required: true },
@@ -48,6 +51,15 @@ const rowHeights = inject('rowHeights');
 const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
 
 const { getSpecData, selectSpec, getSpecOptions, getActiveSpec } = inject('specSwitch');
+
+const CLASS_HEX = {
+    'Death Knight': '#C41F3B', 'Demon Hunter': '#A330C9', 'Druid': '#FF7C0A',
+    'Evoker': '#33937F',       'Hunter': '#ABD473',       'Mage': '#3FC7EB',
+    'Monk': '#00FF98',         'Paladin': '#F48CBA',      'Priest': '#FFFFFF',
+    'Rogue': '#FFF468',        'Shaman': '#0070DD',       'Warlock': '#8788EE',
+    'Warrior': '#C69B6D',
+};
+const charClassColor = computed(() => CLASS_HEX[props.char?.class] ?? 'rgba(255,255,255,0.15)');
 const effectiveChar = computed(() => getSpecData(props.char));
 
 /** The spec object for the currently displayed spec (for icon). */
@@ -76,9 +88,13 @@ const emit = defineEmits([
 
 <template>
     <tr :class="[
-            isAlt ? 'bg-black/40 border-b border-white/5 text-2xs' : 'border-b border-gray-800 hover:bg-gray-800/40 transition-all group/row',
-            !isAlt && expanded ? 'bg-emerald-400/5' : '',
-            !isAlt && compareMode && compareSelected && !compareIsolated ? '!bg-emerald-400/10' : ''
+            isAlt ? 'text-2xs' : 'transition-colors group/row',
+            !isAlt && expanded ? 'bg-[#39FF14]/[0.04]' : '',
+            !isAlt && compareMode && compareSelected && !compareIsolated ? '!bg-[#39FF14]/[0.08]' : '',
+        ]"
+        :style="[
+            isAlt ? { borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,0,0,0.25)' } : { borderBottom: '1px solid rgba(255,255,255,0.06)' },
+            !isAlt && compareMode && compareSelected ? { borderLeft: '2px solid #39FF14' } : {},
         ]">
 
         <!-- Compare checkbox column -->
@@ -90,7 +106,7 @@ const emit = defineEmits([
                     @change="emit('toggle-compare')"
                     class="peer sr-only"
                 />
-                <span class="w-4 h-4 rounded border border-white/20 bg-white/5 flex items-center justify-center transition-all peer-checked:bg-emerald-400 peer-checked:border-emerald-400 peer-hover:border-emerald-400/60">
+                <span class="w-4 h-4 rounded border border-white/20 bg-white/5 flex items-center justify-center transition-all peer-checked:bg-[#39FF14] peer-checked:border-[#39FF14] peer-hover:border-[#39FF14]/60">
                     <span v-if="compareSelected" class="material-symbols-outlined text-gray-900 text-sm leading-none">check</span>
                 </span>
             </label>
@@ -106,14 +122,29 @@ const emit = defineEmits([
                     <div class="relative shrink-0">
                         <img v-if="char?.avatar_url"
                              :src="char.avatar_url"
-                             :class="isAlt ? 'w-5 h-5 rounded border border-white/10' : 'w-8 h-8 rounded-lg border border-white/10'"
+                             :class="isAlt ? 'w-5 h-5 rounded' : 'w-8 h-8 rounded-lg'"
+                             :style="{ border: `1.5px solid ${charClassColor}66` }"
                              :alt="char.name">
-                        <div v-else :class="isAlt ? 'w-5 h-5 rounded bg-white/5 border border-white/10' : 'w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center'">
-                            <span v-if="!isAlt" class="material-symbols-outlined text-gray-600 text-xs">person</span>
+                        <div v-else
+                             :class="isAlt ? 'w-5 h-5 rounded flex items-center justify-center' : 'w-8 h-8 rounded-lg flex items-center justify-center'"
+                             :style="{ background: charClassColor + '18', border: `1.5px solid ${charClassColor}55` }">
+                            <span class="font-black select-none"
+                                  :class="isAlt ? 'text-[9px]' : 'text-xs'"
+                                  :style="{ color: charClassColor }">
+                                {{ char?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+                            </span>
                         </div>
+                        <!-- Bench ribbon -->
                         <div v-if="!isAlt && member.roster_status === 'bench'"
-                             class="absolute -top-1 -right-1 bg-error-dim text-5xs font-semibold px-1 rounded uppercase border border-error">
+                             class="absolute -top-1 -left-1 px-1 rounded font-black uppercase leading-tight"
+                             style="background: #ff6e84; color: #fff; font-size: 6px; letter-spacing: 0.06em; transform: rotate(-6deg);">
                             {{ __('Bench') }}
+                        </div>
+                        <!-- Officer star -->
+                        <div v-if="!isAlt && (member.access_role === 'officer' || member.access_role === 'leader')"
+                             class="absolute -bottom-1 -right-1 w-[13px] h-[13px] rounded-full flex items-center justify-center font-black"
+                             style="background: #fcf266; border: 1.5px solid #0e0e10; font-size: 7px; color: #1a1a00;">
+                            ★
                         </div>
                     </div>
                     <div class="min-w-0">
@@ -184,59 +215,122 @@ const emit = defineEmits([
 
         <!-- Audit badge (summary only) -->
         <template v-if="activeTab === 'summary'">
-            <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
-                <span v-if="hasAuditIssues(effectiveChar)"
-                      @click="emit('open-audit-modal', effectiveChar)"
-                      :class="[isAlt ? 'text-5xs px-1' : 'text-3xs px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-semibold cursor-pointer hover:bg-amber-400/20 transition-colors']"
-                      :title="auditTitle(effectiveChar)">
-                    <span class="material-symbols-outlined text-xs">warning</span>
+            <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/[0.06]']">
+                <button v-if="hasAuditIssues(effectiveChar)"
+                        @click="emit('open-audit-modal', effectiveChar)"
+                        class="inline-flex items-center gap-1 font-bold uppercase tracking-[0.06em] rounded-md transition-all cursor-pointer hover:opacity-80"
+                        :class="isAlt ? 'text-[9px] px-1 py-0.5' : 'text-[10px] px-2 py-1'"
+                        style="background: rgba(255,110,132,0.10); border: 1px solid rgba(255,110,132,0.4); color: #ff6e84;"
+                        :title="auditTitle(effectiveChar)">
+                    <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">warning</span>
                     {{ (effectiveChar.missing_enchants_slots?.length ?? 0) + (effectiveChar.low_quality_enchants_slots?.length ?? 0) + (effectiveChar.empty_sockets_count ?? 0) }}
+                </button>
+                <span v-else
+                      class="inline-flex items-center gap-1 font-bold uppercase tracking-[0.06em]"
+                      :class="isAlt ? 'text-[9px]' : 'text-[10px]'"
+                      style="color: rgba(57,255,20,0.65);">
+                    <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">check_circle</span>
+                    <span v-if="!isAlt">ALL CLEAR</span>
                 </span>
-                <span v-else class="material-symbols-outlined text-gray-600 text-xs">check</span>
             </td>
 
-            <!-- Role / Status selects (summary only, main character only) -->
+            <!-- Role / Status pills (summary only, main character only) -->
             <template v-if="!isAlt">
-                <!-- Access Role -->
-                <td :class="[rh, 'p-2 w-[130px] border-l border-white/5 text-center']">
-                    <div v-if="canManageAccess && member.access_role !== 'leader'">
-                        <SearchableSelect
-                            :model-value="member.access_role"
-                            :options="accessRoleOptions"
-                            :use-search="false"
-                            :compact="true"
-                            icon="shield_person"
-                            :placeholder="__('Select role...')"
-                            accent-color="#a78bfa"
-                            @update:modelValue="emit('update-access-role', member, $event)"
-                        />
-                    </div>
-                    <div v-else class="text-center">
-                        <span class="text-4xs font-semibold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
-                            {{ member.access_role }}
-                        </span>
-                    </div>
-                </td>
+
                 <!-- Roster Status -->
-                <td :class="[rh, 'p-2 w-[130px] border-l border-white/5 text-center']">
-                    <div v-if="canManageStatus">
-                        <SearchableSelect
-                            :model-value="member.roster_status"
-                            :options="rosterStatusOptions"
-                            :use-search="false"
-                            :compact="true"
-                            icon="group"
-                            :placeholder="__('Select status...')"
-                            accent-color="#a78bfa"
-                            @update:modelValue="emit('update-roster-status', member, $event)"
-                        />
+                <td :class="[rh, 'px-2 w-[130px] border-l border-white/5 text-center']">
+                    <!-- Editable: pill button + dropdown -->
+                    <div v-if="canManageStatus" class="relative flex justify-center">
+                        <button
+                            @click="statusOpen = !statusOpen; roleOpen = false"
+                            class="inline-flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-opacity hover:opacity-80"
+                            style="font-size:9px; font-weight:800; letter-spacing:0.08em; font-family:Inter; line-height:1.2;"
+                            :style="{
+                                border: `1px solid ${(STATUS_CONFIG[member.roster_status]?.color ?? '#767577')}55`,
+                                color:  STATUS_CONFIG[member.roster_status]?.color ?? '#767577',
+                                background: 'transparent',
+                                borderRadius: '6px',
+                                width: '108px',
+                            }">
+                            <span class="material-symbols-outlined" style="font-size:11px;">{{ STATUS_CONFIG[member.roster_status]?.icon ?? 'circle' }}</span>
+                            <span class="flex-1 text-center">{{ STATUS_CONFIG[member.roster_status]?.label ?? member.roster_status?.toUpperCase() }}</span>
+                            <span class="material-symbols-outlined" style="font-size:11px; opacity:0.5;">expand_more</span>
+                        </button>
+                        <!-- Backdrop -->
+                        <div v-if="statusOpen" class="fixed inset-0 z-40" @click="statusOpen = false"/>
+                        <!-- Dropdown -->
+                        <div v-if="statusOpen"
+                             class="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-50 rounded-lg overflow-hidden shadow-2xl border border-white/10"
+                             style="background:#1a1a1d; min-width:120px;">
+                            <button v-for="opt in [{ id:'core', cfg: STATUS_CONFIG.core }, { id:'bench', cfg: STATUS_CONFIG.bench }]"
+                                    :key="opt.id"
+                                    @click="emit('update-roster-status', member, opt.id); statusOpen = false"
+                                    class="w-full flex items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-white/5"
+                                    style="font-size:10px; font-weight:700; font-family:Inter;"
+                                    :style="{ color: opt.cfg.color }">
+                                <span class="material-symbols-outlined" style="font-size:12px;">{{ opt.cfg.icon }}</span>
+                                {{ opt.cfg.label }}
+                            </button>
+                        </div>
                     </div>
-                    <div v-else class="text-center">
-                        <span class="text-4xs font-semibold uppercase tracking-wider text-gray-300 bg-white/5 px-8 py-1.5 rounded border border-white/10">
-                            {{ member.roster_status }}
+                    <!-- Static: same visual width, no interaction -->
+                    <div v-else class="flex justify-center">
+                        <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1"
+                              style="font-size:9px; font-weight:800; letter-spacing:0.08em; font-family:Inter; line-height:1.2; width:108px; border-radius:6px;"
+                              :style="{ color: STATUS_CONFIG[member.roster_status]?.color ?? '#767577' }">
+                            <span class="material-symbols-outlined" style="font-size:11px;">{{ STATUS_CONFIG[member.roster_status]?.icon ?? 'circle' }}</span>
+                            <span>{{ STATUS_CONFIG[member.roster_status]?.label ?? member.roster_status?.toUpperCase() }}</span>
                         </span>
                     </div>
                 </td>
+
+                <!-- Access Role -->
+                <td :class="[rh, 'px-2 w-[130px] border-l border-white/5 text-center']">
+                    <!-- Editable: pill button + dropdown -->
+                    <div v-if="canManageAccess && member.access_role !== 'leader'" class="relative flex justify-center">
+                        <button
+                            @click="roleOpen = !roleOpen; statusOpen = false"
+                            class="inline-flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-opacity hover:opacity-80"
+                            style="font-size:9px; font-weight:800; letter-spacing:0.08em; font-family:Inter; line-height:1.2;"
+                            :style="{
+                                border: `1px solid ${(ROLE_CONFIG[member.access_role]?.color ?? '#767577')}55`,
+                                color:  ROLE_CONFIG[member.access_role]?.color ?? '#767577',
+                                background: 'transparent',
+                                borderRadius: '6px',
+                                width: '108px',
+                            }">
+                            <span class="material-symbols-outlined" style="font-size:11px;">{{ ROLE_CONFIG[member.access_role]?.icon ?? 'person' }}</span>
+                            <span class="flex-1 text-center">{{ ROLE_CONFIG[member.access_role]?.label ?? member.access_role?.toUpperCase() }}</span>
+                            <span class="material-symbols-outlined" style="font-size:11px; opacity:0.5;">expand_more</span>
+                        </button>
+                        <!-- Backdrop -->
+                        <div v-if="roleOpen" class="fixed inset-0 z-40" @click="roleOpen = false"/>
+                        <!-- Dropdown -->
+                        <div v-if="roleOpen"
+                             class="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-50 rounded-lg overflow-hidden shadow-2xl border border-white/10"
+                             style="background:#1a1a1d; min-width:120px;">
+                            <button v-for="opt in [{ id:'officer', cfg: ROLE_CONFIG.officer }, { id:'member', cfg: ROLE_CONFIG.member }]"
+                                    :key="opt.id"
+                                    @click="emit('update-access-role', member, opt.id); roleOpen = false"
+                                    class="w-full flex items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-white/5"
+                                    style="font-size:10px; font-weight:700; font-family:Inter;"
+                                    :style="{ color: opt.cfg.color }">
+                                <span class="material-symbols-outlined" style="font-size:12px;">{{ opt.cfg.icon }}</span>
+                                {{ opt.cfg.label }}
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Static: leader or non-manager -->
+                    <div v-else class="flex justify-center">
+                        <span class="inline-flex items-center justify-center gap-1.5 px-2 py-1"
+                              style="font-size:9px; font-weight:800; letter-spacing:0.08em; font-family:Inter; line-height:1.2; width:108px; border-radius:6px;"
+                              :style="{ color: ROLE_CONFIG[member.access_role]?.color ?? '#767577' }">
+                            <span class="material-symbols-outlined" style="font-size:11px;">{{ ROLE_CONFIG[member.access_role]?.icon ?? 'person' }}</span>
+                            <span>{{ ROLE_CONFIG[member.access_role]?.label ?? member.access_role?.toUpperCase() }}</span>
+                        </span>
+                    </div>
+                </td>
+
                 <!-- Kick -->
                 <td v-if="canKick" :class="[rh, 'w-[60px] border-l border-white/5 text-center']">
                     <button v-if="member.access_role !== 'leader'"

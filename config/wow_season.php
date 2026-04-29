@@ -639,6 +639,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Equipped iLvL display colour tiers (roster UI)
+    |--------------------------------------------------------------------------
+    | Evaluated top-down by the frontend; first matching threshold wins.
+    | Hex colours mirror the gear-upgrade track colour scale so the roster
+    | colour ramp is consistent across every view.
+    */
+    'display_ilvl_tiers' => [
+        ['min' => 280, 'color' => '#FB923C'], // Myth  — orange
+        ['min' => 270, 'color' => '#C084FC'], // Hero  — purple
+        ['min' => 260, 'color' => '#60A5FA'], // Champion — blue
+        ['min' => 250, 'color' => '#4ADE80'], // Veteran  — green
+        ['min' =>   0, 'color' => '#9ca3af'], // below   — gray
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Item Upgrade Tracks — Season 17 Bonus IDs
     |--------------------------------------------------------------------------
     | Maps a Bonus ID to its upgrade track info.

@@ -1,13 +1,9 @@
 <script setup>
-import { inject, computed, getCurrentInstance } from 'vue';
+import { inject, computed } from 'vue';
 import { useWowheadIcons } from '@/composables/useWowheadIcons';
-
-const { proxy } = getCurrentInstance();
-const __ = (key, replace = {}) => proxy.__(key, replace);
 
 const rowHeights = inject('rowHeights');
 const { getIconUrl } = useWowheadIcons();
-
 
 const props = defineProps({
     char: { type: Object, required: true },
@@ -17,7 +13,6 @@ const props = defineProps({
 });
 
 const rh = computed(() => props.isAlt ? rowHeights.alt : rowHeights.main);
-
 const emit = defineEmits(['audit-click']);
 
 // WoW Equip Slots in order
@@ -27,39 +22,38 @@ const slots = [
     'TRINKET_1', 'TRINKET_2', 'MAIN_HAND', 'OFF_HAND'
 ];
 
-const getItem = (slot) => {
-    return (props.char?.equipment || []).find(i => i.slot === slot);
+const TIER_SLOTS = new Set(['HEAD', 'SHOULDER', 'CHEST', 'HANDS', 'LEGS']);
+
+const getItem = (slot) => (props.char?.equipment || []).find(i => i.slot === slot);
+
+const setItemIds = computed(() =>
+    (props.char?.equipment || []).filter(i => i.is_set_piece).map(i => i.id)
+);
+
+// ── Gear cell size — adjust these two values to resize all item cells ──
+const CELL_MAIN = 38; // px — main-row cell size
+const CELL_ALT  = 22; // px — alt-row cell size
+
+// Track colours — match gear-upgrade scale
+const TRACK_COLORS = {
+    Myth:       '#FB923C',
+    Hero:       '#C084FC',
+    Champion:   '#60A5FA',
+    Veteran:    '#4ADE80',
+    Adventurer: '#2dd4bf',
+};
+const TRACK_ABBREV = { Myth:'M', Hero:'H', Champion:'C', Veteran:'V', Adventurer:'A' };
+
+const craftedColor = (ilvl) => {
+    if (ilvl >= 275) return '#FB923C';
+    if (ilvl >= 262) return '#C084FC';
+    if (ilvl >= 246) return '#4ADE80';
+    return '#9ca3af';
 };
 
-const setItemIds = computed(() => {
-    return (props.char?.equipment || [])
-        .filter(i => i.is_set_piece)
-        .map(i => i.id);
-});
-
-const trackAbbreviations = {
-    Myth: 'M',
-    Hero: 'H',
-    Champion: 'C',
-    Veteran: 'V',
-    Adventurer: 'A',
-    null: 'Craft'
-};
-
-const trackColorMap = {
-    Myth: 'text-yellow-400',
-    Hero: 'text-purple-400',
-    Champion: 'text-blue-400',
-    Veteran: 'text-green-400',
-    Adventurer: 'text-gray-400'
-};
-
-const trackBorderMap = {
-    Myth: 'border-yellow-400',
-    Hero: 'border-purple-500',
-    Champion: 'border-blue-500',
-    Veteran: 'border-green-500',
-    Adventurer: 'border-gray-500'
+const trackColor = (item) => {
+    if (item.is_crafted) return craftedColor(item.ilvl);
+    return TRACK_COLORS[item.upgrade?.track] ?? '#6b7280';
 };
 
 const getWowheadData = (item) => {
@@ -75,110 +69,178 @@ const getWowheadData = (item) => {
     return parts.join('&');
 };
 
-const getQualityColor = (quality) => {
-    const map = {
-        'POOR':      'text-gray-400',
-        'COMMON':    'text-white',
-        'UNCOMMON':  'text-green-400',
-        'RARE':      'text-blue-400',
-        'EPIC':      'text-purple-400',
-        'LEGENDARY': 'text-orange-400',
-        'ARTIFACT':  'text-yellow-200',
-    };
-    return map[quality] ?? 'text-white';
+const isTierPiece  = (slot, item) => item && TIER_SLOTS.has(slot) && item.is_set_piece;
+const isMissEnchant = (slot) => (props.char?.missing_enchants_slots ?? []).includes(slot);
+const isLowEnchant  = (slot) => (props.char?.low_quality_enchants_slots ?? []).includes(slot);
+const hasEmptySock  = (slot, item) => item?.has_empty_socket === true;
+
+const problemDots = (slot, item) => {
+    if (!item) return [];
+    const dots = [];
+    if (isMissEnchant(slot)) dots.push({ icon: 'bolt',    color: '#ff6e84', title: 'Missing enchant' });
+    if (isLowEnchant(slot))  dots.push({ icon: 'bolt',    color: '#fbbf24', title: 'Low quality enchant' });
+    if (hasEmptySock(slot, item)) dots.push({ icon: 'diamond', color: '#fbbf24', title: 'Empty socket' });
+    return dots;
 };
 
-const getQualityClass = (quality) => {
-    const map = {
-        'POOR':      'border-gray-500',
-        'COMMON':    'border-white/10',
-        'UNCOMMON':  'border-green-500',
-        'RARE':      'border-blue-500',
-        'EPIC':      'border-purple-500',
-        'LEGENDARY': 'border-orange-500',
-        'ARTIFACT':  'border-gold-500',
-    };
-    return map[quality] ?? 'border-white/10';
-};
-
-const craftedColorClass = (ilvl) => {
-    if (ilvl >= 275) return 'text-yellow-400';
-    if (ilvl >= 262) return 'text-purple-400';
-    if (ilvl >= 246) return 'text-green-400';
-    return 'text-gray-400';
-};
-
-const craftedBorderClass = (ilvl) => {
-    if (ilvl >= 275) return 'border-yellow-400';
-    if (ilvl >= 262) return 'border-purple-500';
-    if (ilvl >= 246) return 'border-green-500';
-    return 'border-gray-500';
-};
-
-const ilvlColorClass = (item) => {
-    if (item.is_crafted) return craftedColorClass(item.ilvl);
-    if (item.upgrade?.track) return trackColorMap[item.upgrade.track] || 'text-gray-400';
-    return 'text-gray-400';
-};
-
-const borderClass = (item) => {
-    if (item.is_crafted) return craftedBorderClass(item.ilvl);
-    if (item.upgrade?.track) return trackBorderMap[item.upgrade.track] || 'border-gray-500';
-    return getQualityClass(item.quality);
+// Scale helper — proportional to current cell size vs design reference (44px main / 22px alt)
+const sp = (n) => {
+    const cell = props.isAlt ? CELL_ALT  : CELL_MAIN;
+    const ref  = props.isAlt ? 22        : 44;
+    return `${Math.round(n * cell / ref)}px`;
 };
 </script>
 
 <template>
     <!-- Audit column -->
-    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5']">
-        <span v-if="hasAuditIssues(char)"
-              @click="emit('audit-click')"
-              :class="[isAlt ? 'text-5xs px-1' : 'text-3xs px-2 py-1', 'inline-flex items-center gap-1 text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded font-semibold cursor-pointer hover:bg-amber-400/20 transition-colors']"
-              :title="auditTitle(char)">
-            <span class="material-symbols-outlined text-xs">warning</span>
+    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/[0.06]']">
+        <button v-if="hasAuditIssues(char)"
+                @click="emit('audit-click')"
+                class="inline-flex items-center gap-1 font-bold uppercase tracking-[0.06em] rounded-md transition-all cursor-pointer hover:opacity-80"
+                :class="isAlt ? 'text-[9px] px-1 py-0.5' : 'text-[10px] px-2 py-1'"
+                style="border: 1px solid rgba(255,110,132,0.4); color: rgba(57, 255, 20);"
+                :title="auditTitle(char)">
+            <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">warning</span>
             {{ (char.missing_enchants_slots?.length ?? 0) + (char.low_quality_enchants_slots?.length ?? 0) + (char.empty_sockets_count ?? 0) }}
+        </button>
+        <span v-else class="inline-flex items-center gap-1 font-bold uppercase tracking-[0.06em]"
+              :class="isAlt ? 'text-[9px]' : 'text-[10px]'"
+              style="color: rgba(57,255,20,0.65);">
+            <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">check_circle</span>
+            <span v-if="!isAlt">ALL CLEAR</span>
         </span>
-        <span v-else class="material-symbols-outlined text-gray-600 text-xs">check</span>
     </td>
+
+    <!-- Upgrades missing -->
     <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2.5', 'text-center border-l border-white/5 font-bold text-gray-300']">
         {{ char.upgrades_missing ?? 0 }}
     </td>
 
-    <td v-for="slot in slots" :key="slot" :class="rh" class="p-0.5 border-l border-white/5">
-        <div v-if="getItem(slot)" class="flex items-center justify-center h-full" :class="isAlt ? 'gap-1' : 'flex-col'">
-            <!-- ilvl badge above icon (main) or inline (alt) -->
-            <div :class="[isAlt ? 'text-5xs' : 'mb-0.5 text-3xs', 'font-semibold leading-none', ilvlColorClass(getItem(slot))]">
-                {{ getItem(slot).ilvl }}
+    <!-- Item slots -->
+    <td v-for="slot in slots" :key="slot" :class="rh" class="border-l border-white/5"
+        style="padding: 6px 4px; text-align: center; vertical-align: middle;">
+        <div class="inline-flex justify-center">
+            <!-- ── Filled slot ── -->
+            <div v-if="getItem(slot)"
+                 class="relative"
+                 :style="{
+                     width:  (isAlt ? CELL_ALT : CELL_MAIN) + 'px',
+                     height: (isAlt ? CELL_ALT : CELL_MAIN) + 'px',
+                 }">
+                <!-- Icon / wowhead link -->
+                <a :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
+                   target="_blank"
+                   class="block w-full h-full"
+                   :data-wowhead="getWowheadData(getItem(slot))"
+                   :title="`${slot} · ${getItem(slot).ilvl}`"
+                   :style="{
+                       borderRadius: '7px',
+                       border: `2px solid ${trackColor(getItem(slot))}aa`,
+                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(0,0,0,0.4)',
+                       overflow: 'hidden',
+                       display: 'block',
+                       background: '#1a1a1d',
+                   }">
+                    <img v-if="getIconUrl(getItem(slot).id)"
+                         :src="getIconUrl(getItem(slot).id)"
+                         class="w-full h-full object-cover"
+                         :alt="getItem(slot).name" />
+                    <span v-else class="flex items-center justify-center w-full h-full font-black uppercase"
+                          :style="{ fontSize: isAlt ? '8px' : '10px', color: 'rgba(255,255,255,0.35)', letterSpacing:'0.04em' }">
+                        {{ slot.substring(0, 4).toLowerCase() }}
+                    </span>
+                </a>
+
+                <!-- ilvl — inside icon, top-left corner overlay -->
+                <div v-if="!isAlt"
+                     :style="{
+                         position:'absolute', top:sp(-5), left:sp(-10),
+                         fontSize:sp(10), fontWeight:900,
+                         fontFamily:'\'JetBrains Mono\',monospace',
+                         color:'#ffffff',
+                         background:'rgba(0,0,0,0.62)',
+                         padding:`${sp(1)} ${sp(3)}`, borderRadius:sp(3),
+                         pointerEvents:'none', whiteSpace:'nowrap', zIndex:4,
+                         lineHeight:1.1,
+                         border: `1px solid ${trackColor(getItem(slot))}55`,
+                     }">
+                    {{ getItem(slot).ilvl }}
+                </div>
+                <div v-else
+                     :style="{
+                         position:'absolute', top:'1px', left:'1px',
+                         fontSize:sp(8), fontWeight:800,
+                         color:'#ffffff', background:'rgba(0,0,0,0.6)',
+                         padding:`0 ${sp(2)}`, borderRadius:sp(2),
+                         pointerEvents:'none', whiteSpace:'nowrap', zIndex:4,
+                     }">
+                    {{ getItem(slot).ilvl }}
+                </div>
+
+                <!-- Track / Craft badge — below icon, with breathing room -->
+                <div v-if="!isAlt"
+                     :style="{
+                         position:'absolute', bottom:sp(-6), left:'50%',
+                         transform:'translateX(-50%)',
+                         fontSize:sp(10), fontWeight:900, lineHeight:1,
+                         background:'#0e0e10',
+                         padding:`0 ${sp(5)}`, borderRadius:sp(3),
+                         whiteSpace:'nowrap', pointerEvents:'none', zIndex:2,
+                         letterSpacing:'0.06em',
+                         fontFamily: '\'JetBrains Mono\', monospace',
+                         color: trackColor(getItem(slot)),
+                         border: `1px solid ${trackColor(getItem(slot))}55`,
+                     }">
+                    <template v-if="getItem(slot).is_crafted">КРАФТ</template>
+                    <template v-else-if="getItem(slot).upgrade">
+                        {{ TRACK_ABBREV[getItem(slot).upgrade.track] || getItem(slot).upgrade.track }} {{ getItem(slot).upgrade.level }}/{{ getItem(slot).upgrade.max }}
+                    </template>
+                </div>
+
+                <!-- Tier T badge — outside top-right -->
+                <div v-if="!isAlt && isTierPiece(slot, getItem(slot))"
+                     :style="{
+                         position:'absolute', top:sp(-3), right:sp(-3),
+                         width:sp(14), height:sp(14), borderRadius:sp(4),
+                         background:'#fbbf24', color:'#0e0e10',
+                         fontSize:sp(8), fontWeight:900,
+                         display:'flex', alignItems:'center', justifyContent:'center',
+                         border:'1px solid #0e0e10',
+                         fontFamily:'\'JetBrains Mono\',monospace',
+                         pointerEvents:'none', zIndex:3,
+                     }"
+                     title="Tier piece">T</div>
+
+                <!-- Problem dots — further outside right -->
+                <div v-if="!isAlt && problemDots(slot, getItem(slot)).length"
+                     :style="{
+                         display:'flex', flexDirection:'column', gap:sp(2),
+                         pointerEvents:'none', zIndex:3,
+                         position:'absolute',
+                         top: isTierPiece(slot, getItem(slot)) ? sp(12) : sp(-3),
+                         right: sp(-3),
+                     }">
+                    <div v-for="(dot, di) in problemDots(slot, getItem(slot)).slice(0, 3)" :key="di"
+                         :title="dot.title"
+                         :style="{
+                             width:sp(13), height:sp(13),
+                             borderRadius:'50%', background:'#0e0e10',
+                             display:'flex', alignItems:'center', justifyContent:'center',
+                             border:`1.5px solid ${dot.color}`,
+                         }">
+                        <span class="material-symbols-outlined"
+                              :style="{ fontSize:sp(8), color:dot.color, lineHeight:1 }">{{ dot.icon }}</span>
+                    </div>
+                </div>
             </div>
 
-            <a :key="getItem(slot).id"
-               :href="`https://www.wowhead.com/item=${getItem(slot).id}`"
-               :class="[isAlt ? 'w-5 h-5' : 'w-[34px] h-[34px]', 'shrink-0 relative block bg-gray-800 border rounded transition-colors overflow-hidden group', borderClass(getItem(slot))]"
-               target="_blank"
-               :data-wowhead="getWowheadData(getItem(slot))">
-                <img v-if="getIconUrl(getItem(slot).id)"
-                     :src="getIconUrl(getItem(slot).id)"
-                     class="w-full h-full object-cover rounded"
-                     :alt="getItem(slot).name" />
-                <span v-else class="flex items-center justify-center w-full h-full text-5xs text-gray-400 font-semibold uppercase">
-                    {{ slot.substring(0, 2) }}
-                </span>
-            </a>
-
-            <!-- Track / Craft badge below icon (main only) -->
-            <div v-if="!isAlt" class="mt-0.5 h-[12px] flex items-center">
-                <div v-if="getItem(slot).is_crafted"
-                     :class="['font-bold text-4xs uppercase tracking-wide', craftedColorClass(getItem(slot).ilvl)]">
-                    {{ __('CRAFT') }}
-                </div>
-                <div v-else-if="getItem(slot).upgrade"
-                     :class="['font-semibold text-3xs', trackColorMap[getItem(slot).upgrade.track] || 'text-gray-400']">
-                    {{ trackAbbreviations[getItem(slot).upgrade.track] || getItem(slot).upgrade.track }} {{ getItem(slot).upgrade.level }}/{{ getItem(slot).upgrade.max }}
-                </div>
+            <!-- ── Empty slot ── -->
+            <div v-else
+                 class="flex items-center justify-center rounded border border-white/5 bg-black/20"
+                 :style="{ width: (isAlt ? CELL_ALT : CELL_MAIN) + 'px', height: (isAlt ? CELL_ALT : CELL_MAIN) + 'px' }"
+                 :title="slot">
+                <span :class="isAlt ? 'text-5xs' : 'text-4xs'" class="text-gray-700 font-semibold uppercase">{{ slot.substring(0, 3) }}</span>
             </div>
-        </div>
-        <div v-else :class="isAlt ? 'w-5 h-5' : 'w-[34px] h-[34px]'" class="mx-auto rounded border border-white/5 bg-black/20 flex items-center justify-center" :title="slot">
-            <span :class="isAlt ? 'text-5xs' : 'text-4xs'" class="text-gray-800 font-semibold uppercase">{{ slot.substring(0, 3) }}</span>
         </div>
     </td>
 </template>

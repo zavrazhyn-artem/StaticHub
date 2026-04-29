@@ -1,8 +1,11 @@
 <script setup>
-import { ref, computed, nextTick, provide } from 'vue';
+import { ref, computed, nextTick, provide, getCurrentInstance, onMounted, onBeforeUnmount, watch } from 'vue';
 import RosterRow from './RosterRow.vue';
 import InfoTooltip from '@/Components/UI/InfoTooltip.vue';
 import { useGearSpecSwitch } from '@/composables/useGearSpecSwitch';
+
+const { proxy } = getCurrentInstance();
+const __ = (key) => proxy.__(key);
 
 // ── Row height tokens (single source of truth) ──
 const ROW_HEIGHTS = {
@@ -101,13 +104,48 @@ const slots = [
     'TRINKET_1', 'TRINKET_2', 'MAIN_HAND', 'OFF_HAND'
 ];
 
+// ── Filter pills ──
+const activeFilter = ref('all');
+
+const ROLE_COLORS = { tank: '#3a8dff', heal: '#4ADE80', dps: '#ff5063' };
+const roleColor = (key) => ROLE_COLORS[key] ?? '#adaaad';
+
+const allMembers = computed(() => Object.values(props.groupedRoster).flat());
+
+const filterCounts = computed(() => ({
+    all:   allMembers.value.length,
+    tank:  (props.groupedRoster.tank  ?? []).length,
+    heal:  (props.groupedRoster.heal  ?? []).length,
+    dps:   (props.groupedRoster.dps   ?? []).length,
+    core:  allMembers.value.filter(m => m.roster_status === 'core').length,
+    bench: allMembers.value.filter(m => m.roster_status === 'bench').length,
+}));
+
+const filterPills = computed(() => [
+    { key: 'all',   label: __('All'),    color: '#4fd3f7' },
+    { key: 'tank',  label: __('Tanks'),  color: '#3a8dff' },
+    { key: 'heal',  label: __('Healers'),color: '#4ADE80' },
+    { key: 'dps',   label: __('DPS'),    color: '#ff5063' },
+    { key: 'core',  label: __('Core'),   color: '#39FF14' },
+    { key: 'bench', label: __('Bench'),  color: '#ff6e84' },
+]);
+
 const filteredRoster = computed(() => {
     const q = searchQuery.value.toLowerCase().trim();
     const isolating = isolated.value && selectedIds.value.size > 0;
-    if (!q && !isolating) return props.groupedRoster;
+    const f = activeFilter.value;
+
+    if (!q && !isolating && f === 'all') return props.groupedRoster;
+
     const result = {};
     for (const [roleKey, members] of Object.entries(props.groupedRoster)) {
+        if (['tank', 'heal', 'dps'].includes(f) && roleKey !== f) {
+            result[roleKey] = [];
+            continue;
+        }
         result[roleKey] = members.filter(m => {
+            if (f === 'core'  && m.roster_status !== 'core')  return false;
+            if (f === 'bench' && m.roster_status !== 'bench') return false;
             if (q && !m.main_character?.name?.toLowerCase().includes(q)) return false;
             if (isolating && !selectedIds.value.has(m.id)) return false;
             return true;
@@ -121,62 +159,104 @@ const slotLabels = {
     'HANDS': 'Hands', 'WAIST': 'Waist', 'LEGS': 'Legs', 'FEET': 'Feet', 'FINGER_1': 'Ring', 'FINGER_2': 'Ring',
     'TRINKET_1': 'Trinket', 'TRINKET_2': 'Trinket', 'MAIN_HAND': 'Main Hand', 'OFF_HAND': 'Off Hand'
 };
+
+// ── Thead height tracking — guard div mirrors actual thead height ──
+const theadEl = ref(null);
+const theadHeight = ref(54);
+let theadResizeObs = null;
+const measureThead = () => {
+    if (theadEl.value) theadHeight.value = theadEl.value.offsetHeight;
+};
+onMounted(() => {
+    nextTick(() => {
+        measureThead();
+        if (theadEl.value && typeof ResizeObserver !== 'undefined') {
+            theadResizeObs = new ResizeObserver(measureThead);
+            theadResizeObs.observe(theadEl.value);
+        }
+    });
+});
+onBeforeUnmount(() => {
+    if (theadResizeObs) theadResizeObs.disconnect();
+});
+watch(() => props.activeTab, () => nextTick(measureThead));
+
 </script>
 
 <template>
-    <div class="relative w-full">
-    <div class="w-full bg-surface-container-high rounded-2xl border border-white/5 max-h-[calc(90vh-220px)] overflow-y-auto overflow-x-auto roster-scroll">
+    <div class="relative w-full h-full flex flex-col">
+
+    <!-- ── Filter Pills ──────────────────────────────────────────────── -->
+    <div class="flex items-center gap-1.5 mb-2.5 flex-wrap shrink-0">
+        <button v-for="pill in filterPills" :key="pill.key"
+                @click="activeFilter = pill.key"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-2xs font-bold transition-all"
+                :style="activeFilter === pill.key
+                    ? { background: pill.color + '22', border: `1px solid ${pill.color}66`, color: pill.color }
+                    : { background: 'transparent', border: '1px solid rgba(255,255,255,0.06)', color: '#adaaad' }">
+            {{ pill.label }}
+            <span class="font-mono text-[9px] px-1 rounded"
+                  :style="activeFilter === pill.key
+                      ? { background: pill.color + '33', color: pill.color }
+                      : { background: 'rgba(255,255,255,0.04)', color: '#767577' }">
+                {{ filterCounts[pill.key] }}
+            </span>
+        </button>
+    </div>
+
+    <div class="w-full flex-1 min-h-0 overflow-y-auto overflow-x-auto roster-scroll relative">
+        <!-- Full-thead-area guard: opaque backdrop sized to actual thead height -->
+        <div class="sticky top-0 z-[19] pointer-events-none roster-thead-guard"
+             :style="{ height: theadHeight + 'px', marginBottom: -theadHeight + 'px' }"></div>
         <table class="text-left text-2xs border-collapse w-full">
             <!-- thead ──────────────────────────────────────── -->
-            <thead class="sticky top-0 z-20">
-                <!-- Group header row -->
-                <tr class="bg-[#1a1a1a] text-gray-400 text-5xs uppercase tracking-wider font-semibold h-8" style="box-shadow: inset 0 -1px 0 #222">
+            <thead ref="theadEl" class="sticky top-0 z-20 roster-thead-solid">
+                <!-- ── Row 1: Group / section labels ──────────────── -->
+                <tr class="text-5xs font-black uppercase tracking-[0.12em] h-[18px]"
+                    style="background: #131315; box-shadow: inset 0 -1px 0 rgba(255,255,255,0.06);">
                     <th class="compare-col" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'"></th>
-                    <th class="p-2 pl-4 w-[12.5rem] min-w-[12.5rem]">{{ __('Character') }}</th>
+                    <th class="p-2 pl-4 w-[12.5rem] min-w-[12.5rem]" style="color: #767577;">
+                        {{ __('Character') }}
+                    </th>
 
                     <template v-if="activeTab === 'summary'">
-                        <th class="p-2 text-center border-l border-[#222] w-[60px]">{{ __('iLvL') }}</th>
-                        <th colspan="6" class="p-2 text-center border-l border-[#222]">{{ __('Tier Pieces') }}</th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('M+ Runs') }}</th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('M+ Rating') }}</th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('Audit') }}</th>
-                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Access Role') }}</th>
-                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Roster Status') }}</th>
-                        <th v-if="canKick" class="p-2 text-center border-l border-[#222] w-[60px]"></th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[70px]" style="color: #767577;">ILVL</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[100px]" style="color: #767577;">{{ __('Tier Pieces') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[140px]" style="color: #767577;">M+ {{ __('Runs') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[90px]" style="color: #767577;">{{ __('Rating') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[120px]" style="color: #767577;">{{ __('Audit') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[130px]" style="color: #767577;">{{ __('Access Role') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] w-[130px]" style="color: #767577;">{{ __('Roster Status') }}</th>
+                        <th v-if="canKick" class="border-l border-white/[0.06] w-[60px]"></th>
                     </template>
 
-                    <!-- One spanning header per raid instance -->
                     <template v-if="activeTab === 'raids'">
                         <th v-for="raid in raidColumns" :key="'rh-' + raid.name"
                             :colspan="raid.bosses.length"
-                            class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400">
+                            class="p-1 text-center border-l border-white/[0.06]"
+                            style="color: #4fd3f7;">
                             {{ raid.name }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th :colspan="slots.length + 2" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400 w-[1000px]">
+                        <th :colspan="slots.length + 2" class="p-1 text-center border-l border-white/[0.06]" style="color: #767577;">
                             {{ __('Gear') }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'vault'">
-                        <th colspan="3" class="p-2 text-center border-l border-[#222] uppercase tracking-widest font-bold text-gray-400">
-                            {{ __('Raids') }}
-                        </th>
-                        <th colspan="3" class="p-2 text-center border-l border-white/10 uppercase tracking-widest font-bold text-gray-400">
-                            {{ __('M+ Dungeons') }}
-                        </th>
-                        <th colspan="3" class="p-2 text-center border-l border-white/10 uppercase tracking-widest font-bold text-gray-400">
-                            {{ __('Delves / World') }}
-                        </th>
+                        <th colspan="3" class="p-1 text-center border-l border-white/[0.06]" style="color: #a855f7;">{{ __('Raids') }}</th>
+                        <th colspan="3" class="p-1 text-center border-l border-white/[0.06]" style="color: #FB923C;">{{ __('M+ Dungeons') }}</th>
+                        <th colspan="3" class="p-1 text-center border-l border-white/[0.06]" style="color: #4fd3f7;">{{ __('Delves / World') }}</th>
                     </template>
                 </tr>
 
-                <!-- Column sub-header row -->
-                <tr class="bg-[#111111] text-emerald-400 text-4xs uppercase tracking-wider font-semibold h-10" style="box-shadow: inset 0 -1px 0 #222">
+                <!-- ── Row 2: Column sub-headers ──────────────────── -->
+                <tr class="text-4xs font-black uppercase tracking-[0.1em] h-9"
+                    style="background: #0e0e10; box-shadow: inset 0 -1px 0 rgba(255,255,255,0.06); color: #767577;">
                     <th class="compare-col text-center" :class="compareMode ? 'compare-col-open' : 'compare-col-closed'">
-                        <span class="material-symbols-outlined text-sm text-emerald-400 compare-col-content">compare_arrows</span>
+                        <span class="material-symbols-outlined text-sm compare-col-content" style="color: #39FF14;">compare_arrows</span>
                     </th>
                     <th class="px-4 py-1 w-[12.5rem] min-w-[12.5rem]">
                         <div class="flex items-center gap-1">
@@ -194,14 +274,15 @@ const slotLabels = {
                                 </button>
                             </template>
                             <template v-else>
-                                <span>{{ __('Name') }}</span>
+                                <span style="color: #767577;">{{ __('Name') }}</span>
                                 <span class="flex-1"></span>
                                 <button @click="toggleCompareMode"
-                                        :class="['transition-colors', compareMode ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-400']"
+                                        class="transition-colors"
+                                        :style="compareMode ? { color: '#39FF14' } : { color: '#767577' }"
                                         :title="__('Compare players')">
                                     <span class="material-symbols-outlined text-sm">compare_arrows</span>
                                 </button>
-                                <button @click="toggleSearch" class="text-gray-400 hover:text-emerald-400 transition-colors">
+                                <button @click="toggleSearch" class="transition-colors hover:text-white" style="color: #767577;">
                                     <span class="material-symbols-outlined text-sm">search</span>
                                 </button>
                             </template>
@@ -209,31 +290,31 @@ const slotLabels = {
                     </th>
 
                     <template v-if="activeTab === 'summary'">
-                        <th class="px-2 py-2 text-center w-[60px]">{{ __('Avg') }}</th>
-
-                        <th class="p-2 text-center border-l border-[#222] w-10">#</th>
-                        <th v-for="slot in ['H','S','C','G','L']" :key="slot"
-                            class="p-1 text-center text-on-surface-variant w-8">{{ slot }}</th>
-                        <th class="px-2 py-2 border-l border-[#222]">
-                            <span class="flex items-center justify-between">
-                                <span class="flex-1 text-center">{{ __('Runs') }}</span>
+                        <th class="px-2 py-1 text-center w-[70px] border-l border-white/[0.06]"></th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[100px]">
+                            <div class="inline-flex gap-1 justify-center" style="color: #52525b;">
+                                <span v-for="s in ['H','S','C','G','L']" :key="s" class="font-bold" style="font-size: 8px;">{{ s }}</span>
+                            </div>
+                        </th>
+                        <th class="px-2 py-1 border-l border-white/[0.06] w-[140px]">
+                            <span class="flex items-center justify-center gap-1">
+                                <span>{{ __('Runs') }}</span>
                                 <InfoTooltip :text="__('Only keys +10 and above are counted')" />
                             </span>
                         </th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('Rating') }}</th>
-                        <th class="p-2 text-center border-l border-[#222]">{{ __('Issues') }}</th>
-                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Role') }}</th>
-                        <th class="p-2 text-center border-l border-[#222] w-[130px]">{{ __('Status') }}</th>
-                        <th v-if="canKick" class="p-2 text-center border-l border-[#222] w-[60px]"></th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[90px]">{{ __('Rating') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[120px]">{{ __('Issues') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[130px]">{{ __('Role') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[130px]">{{ __('Status') }}</th>
+                        <th v-if="canKick" class="border-l border-white/[0.06] w-[60px]"></th>
                     </template>
 
-                    <!-- One column per boss, horizontal label -->
                     <template v-if="activeTab === 'raids'">
                         <template v-for="raid in raidColumns" :key="raid.name">
                             <th v-for="bossName in raid.bosses" :key="bossName"
                                 class="px-1 py-1 align-middle border-l border-white/[0.04] text-center min-w-[60px]"
                                 :title="bossName">
-                                <div class="mx-auto text-4xs text-on-surface-variant font-medium normal-case whitespace-normal break-words leading-tight">
+                                <div class="mx-auto normal-case font-medium whitespace-normal break-words leading-tight" style="font-size: 9px; color: #767577;">
                                     {{ bossName }}
                                 </div>
                             </th>
@@ -241,23 +322,24 @@ const slotLabels = {
                     </template>
 
                     <template v-if="activeTab === 'gear'">
-                        <th class="p-2 text-center border-l border-[#222] w-[6.25rem]">{{ __('Issues') }}</th>
-                        <th class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">{{ __('UPGRADES MISSING') }}</th>
-                        <th v-for="slot in slots" :key="slot" class="p-1 text-center border-l border-[#222] text-5xs min-w-[52px]">
+                        <th class="p-2 text-center border-l border-white/[0.06] w-[6.25rem]">{{ __('Issues') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[52px]" style="font-size: 8px;">{{ __('UPGRADES MISSING') }}</th>
+                        <th v-for="slot in slots" :key="slot"
+                            class="p-1 text-center border-l border-white/[0.06] min-w-[52px]" style="font-size: 8px;">
                             {{ __(slotLabels[slot]) }}
                         </th>
                     </template>
 
                     <template v-if="activeTab === 'vault'">
-                        <th class="p-2 text-center border-l border-[#222] w-auto">{{ __('Slot 1') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 2') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 3') }}</th>
-                        <th class="p-2 text-center border-l border-white/10 w-auto">{{ __('Slot 1') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 2') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 3') }}</th>
-                        <th class="p-2 text-center border-l border-white/10 w-auto">{{ __('Slot 1') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 2') }}</th>
-                        <th class="p-2 text-center w-auto">{{ __('Slot 3') }}</th>
+                        <th class="p-2 text-center border-l border-white/[0.06]">{{ __('Slot 1') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 2') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 3') }}</th>
+                        <th class="p-2 text-center border-l border-white/[0.06]">{{ __('Slot 1') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 2') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 3') }}</th>
+                        <th class="p-2 text-center border-l border-white/[0.06]">{{ __('Slot 1') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 2') }}</th>
+                        <th class="p-2 text-center">{{ __('Slot 3') }}</th>
                     </template>
                 </tr>
             </thead>
@@ -266,12 +348,24 @@ const slotLabels = {
             <tbody class="divide-y divide-white/5">
                 <template v-for="(members, roleKey) in filteredRoster" :key="roleKey">
                     <!-- Role group separator row -->
-                    <tr v-if="members.length > 0 && roleKey !== 'unknown'"
-                        class="bg-gray-800/80 border-y border-gray-700">
-                        <td colspan="100%" class="py-1 px-4 text-3xs font-semibold uppercase tracking-wider text-emerald-400">
+                    <tr v-if="members.length > 0 && roleKey !== 'unknown'">
+                        <td colspan="100%"
+                            class="py-1.5"
+                            :style="{
+                                paddingLeft: '14px',
+                                background: `linear-gradient(90deg, ${roleColor(roleKey)}18 0%, ${roleColor(roleKey)}06 50%, transparent 100%)`,
+                                borderTop: `1px solid ${roleColor(roleKey)}33`,
+                                borderBottom: `1px solid ${roleColor(roleKey)}22`,
+                                borderLeft: `3px solid ${roleColor(roleKey)}`,
+                            }">
                             <div class="flex items-center gap-2">
-                                <img :src="roleIconSrc(roleKey)" class="w-3 h-3 opacity-80" :alt="roleKey">
-                                <span>{{ __(roles.find(r => r.id === roleKey)?.labelKey || roleKey) }} ({{ members.length }})</span>
+                                <span class="text-3xs font-black uppercase tracking-[0.14em]"
+                                      :style="{ color: roleColor(roleKey) }">
+                                    {{ __(roles.find(r => r.id === roleKey)?.labelKey || roleKey) }}
+                                </span>
+                                <span class="font-mono text-3xs font-bold" style="color: #767577;">
+                                    ({{ members.length }})
+                                </span>
                             </div>
                         </td>
                     </tr>
@@ -356,7 +450,7 @@ const slotLabels = {
         <div v-if="compareMode"
              class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-surface-container-high/95 backdrop-blur border border-white/10 shadow-2xl">
             <div class="flex items-center gap-2 pr-3 border-r border-white/10">
-                <span class="material-symbols-outlined text-emerald-400 text-lg">compare_arrows</span>
+                <span class="material-symbols-outlined text-lg" style="color:#39FF14">compare_arrows</span>
                 <span class="text-2xs uppercase tracking-wider font-bold text-on-surface-variant">
                     {{ __('Selected') }}:
                 </span>
@@ -373,8 +467,8 @@ const slotLabels = {
                     selectedCount === 0
                         ? 'bg-white/5 text-gray-600 cursor-not-allowed'
                         : isolated
-                            ? 'bg-emerald-400 text-gray-900 hover:bg-emerald-300'
-                            : 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 hover:bg-emerald-400/20'
+                            ? 'bg-[#39FF14] text-gray-900 hover:opacity-80'
+                            : 'bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/30 hover:bg-[#39FF14]/20'
                 ]"
             >
                 <span class="material-symbols-outlined text-sm">
@@ -442,6 +536,14 @@ const slotLabels = {
     opacity: 1;
     transform: scale(1);
 }
+
+/* Visible vertical dividers in the sticky thead. Use real border-left (same mechanism
+   as body), just with a stronger opaque-equivalent colour so the line shows through
+   the per-cell background and the opaque guard behind. Same mechanism = pixel-perfect
+   alignment with body's border-l. */
+.roster-thead-solid > tr > th.border-l {
+    border-left-color: rgba(255, 255, 255, 0.10) !important;
+}
 </style>
 
 <style scoped>
@@ -472,9 +574,25 @@ const slotLabels = {
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-/* Ensure all header cells are opaque so content doesn't bleed through */
-thead th {
-    background: inherit;
+/* Sticky thead must be 100% opaque. Two issues: per-cell background, AND the 1px
+   transparent border-left between th cells (which lets body show through during scroll).
+   Fix: remove border-left and redraw the divider as inset box-shadow (no layout space,
+   cell background extends behind it). */
+.roster-thead-solid {
+    background-color: #0e0e10;
+}
+/* Full-area opaque mask under the entire thead. Sits below thead (z-19 < z-20)
+   but above body cells. Height is set inline from JS-measured thead height so it
+   tracks any tab/content changes that affect the header's actual size. */
+.roster-thead-guard {
+    width: 100%;
+    background-color: #0e0e10;
+}
+.roster-thead-solid > tr:nth-child(1) > th {
+    background-color: #131315;
+}
+.roster-thead-solid > tr:nth-child(2) > th {
+    background-color: #0e0e10;
 }
 
 </style>
