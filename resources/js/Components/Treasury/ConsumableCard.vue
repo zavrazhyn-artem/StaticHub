@@ -7,25 +7,12 @@ export default {
         canEdit: { type: Boolean, default: true },
     },
     emits: ['update:quantity'],
-    data() {
-        return { intervalId: null };
-    },
     methods: {
         increment() {
             if (this.quantity < 9) this.$emit('update:quantity', this.quantity + 1);
         },
         decrement() {
             if (this.quantity > 0) this.$emit('update:quantity', this.quantity - 1);
-        },
-        startInterval(fn) {
-            this.stopInterval();
-            this.intervalId = setInterval(fn, 100);
-        },
-        stopInterval() {
-            if (this.intervalId) {
-                clearInterval(this.intervalId);
-                this.intervalId = null;
-            }
         },
     },
 };
@@ -49,9 +36,6 @@ export default {
                 <button
                     type="button"
                     @click="decrement"
-                    @mousedown="startInterval(decrement)"
-                    @mouseup="stopInterval"
-                    @mouseleave="stopInterval"
                     :disabled="quantity <= 0"
                     class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
                 >
@@ -65,9 +49,6 @@ export default {
                 <button
                     type="button"
                     @click="increment"
-                    @mousedown="startInterval(increment)"
-                    @mouseup="stopInterval"
-                    @mouseleave="stopInterval"
                     :disabled="quantity >= 9"
                     class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-highest hover:bg-white/10 text-on-surface-variant transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
                 >

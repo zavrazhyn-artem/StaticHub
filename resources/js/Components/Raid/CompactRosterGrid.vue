@@ -233,7 +233,7 @@ const getAttendance = (charId) => {
 
                 <!-- Empty state -->
                 <div
-                    v-if="layoutData[roleKey].mainChars.length === 0 && layoutData[roleKey].absentChars.length === 0"
+                    v-if="layoutData[roleKey].mainChars.length === 0 && layoutData[roleKey].inactiveChars.length === 0"
                     class="text-4xs text-on-surface-variant/30 px-2 py-1 italic"
                 >{{ __('No players') }}</div>
             </div>
