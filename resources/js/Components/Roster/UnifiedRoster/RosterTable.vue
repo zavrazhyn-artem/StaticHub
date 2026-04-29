@@ -220,14 +220,14 @@ watch(() => props.activeTab, () => nextTick(measureThead));
                     </th>
 
                     <template v-if="activeTab === 'summary'">
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[70px]" style="color: #767577;">ILVL</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[100px]" style="color: #767577;">{{ __('Tier Pieces') }}</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[140px]" style="color: #767577;">M+ {{ __('Runs') }}</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[90px]" style="color: #767577;">{{ __('Rating') }}</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[120px]" style="color: #767577;">{{ __('Audit') }}</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[130px]" style="color: #767577;">{{ __('Access Role') }}</th>
-                        <th class="p-1 text-center border-l border-white/[0.06] w-[130px]" style="color: #767577;">{{ __('Roster Status') }}</th>
-                        <th v-if="canKick" class="border-l border-white/[0.06] w-[60px]"></th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[70px]" style="color: #767577;">ILVL</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[100px]" style="color: #767577;">{{ __('Tier Pieces') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[140px]" style="color: #767577;">M+ {{ __('Runs') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[90px]" style="color: #767577;">{{ __('Rating') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[120px]" style="color: #767577;">{{ __('Audit') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[130px]" style="color: #767577;">{{ __('Access Role') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[130px]" style="color: #767577;">{{ __('Roster Status') }}</th>
+                        <th v-if="canKick" class="border-l border-white/[0.06] min-w-[60px]"></th>
                     </template>
 
                     <template v-if="activeTab === 'raids'">
@@ -290,23 +290,23 @@ watch(() => props.activeTab, () => nextTick(measureThead));
                     </th>
 
                     <template v-if="activeTab === 'summary'">
-                        <th class="px-2 py-1 text-center w-[70px] border-l border-white/[0.06]"></th>
-                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[100px]">
+                        <th class="px-2 py-1 text-center min-w-[70px] border-l border-white/[0.06]"></th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[100px]">
                             <div class="inline-flex gap-1 justify-center" style="color: #52525b;">
                                 <span v-for="s in ['H','S','C','G','L']" :key="s" class="font-bold" style="font-size: 8px;">{{ s }}</span>
                             </div>
                         </th>
-                        <th class="px-2 py-1 border-l border-white/[0.06] w-[140px]">
+                        <th class="px-2 py-1 border-l border-white/[0.06] min-w-[140px]">
                             <span class="flex items-center justify-center gap-1">
                                 <span>{{ __('Runs') }}</span>
                                 <InfoTooltip :text="__('Only keys +10 and above are counted')" />
                             </span>
                         </th>
-                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[90px]">{{ __('Rating') }}</th>
-                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[120px]">{{ __('Issues') }}</th>
-                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[130px]">{{ __('Role') }}</th>
-                        <th class="px-2 py-1 text-center border-l border-white/[0.06] w-[130px]">{{ __('Status') }}</th>
-                        <th v-if="canKick" class="border-l border-white/[0.06] w-[60px]"></th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[90px]">{{ __('Rating') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[120px]">{{ __('Issues') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[130px]">{{ __('Role') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[130px]">{{ __('Status') }}</th>
+                        <th v-if="canKick" class="border-l border-white/[0.06] min-w-[60px]"></th>
                     </template>
 
                     <template v-if="activeTab === 'raids'">

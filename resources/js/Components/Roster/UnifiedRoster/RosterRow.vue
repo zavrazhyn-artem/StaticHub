@@ -238,7 +238,7 @@ const emit = defineEmits([
             <template v-if="!isAlt">
 
                 <!-- Roster Status -->
-                <td :class="[rh, 'px-2 w-[130px] border-l border-white/5 text-center']">
+                <td :class="[rh, 'px-2 min-w-[130px] border-l border-white/5 text-center']">
                     <!-- Editable: pill button + dropdown -->
                     <div v-if="canManageStatus" class="relative flex justify-center">
                         <button
@@ -285,7 +285,7 @@ const emit = defineEmits([
                 </td>
 
                 <!-- Access Role -->
-                <td :class="[rh, 'px-2 w-[130px] border-l border-white/5 text-center']">
+                <td :class="[rh, 'px-2 min-w-[130px] border-l border-white/5 text-center']">
                     <!-- Editable: pill button + dropdown -->
                     <div v-if="canManageAccess && member.access_role !== 'leader'" class="relative flex justify-center">
                         <button
@@ -332,7 +332,7 @@ const emit = defineEmits([
                 </td>
 
                 <!-- Kick -->
-                <td v-if="canKick" :class="[rh, 'w-[60px] border-l border-white/5 text-center']">
+                <td v-if="canKick" :class="[rh, 'min-w-[60px] border-l border-white/5 text-center']">
                     <button v-if="member.access_role !== 'leader'"
                             @click="emit('kick-member', member)"
                             class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-error/10 hover:bg-error text-error hover:text-white transition-all"
@@ -342,9 +342,9 @@ const emit = defineEmits([
                 </td>
             </template>
             <template v-else>
-                <td :class="[rh, 'w-[130px] border-l border-white/5']"></td>
-                <td :class="[rh, 'w-[130px] border-l border-white/5']"></td>
-                <td v-if="canKick" :class="[rh, 'w-[60px] border-l border-white/5']"></td>
+                <td :class="[rh, 'min-w-[130px] border-l border-white/5']"></td>
+                <td :class="[rh, 'min-w-[130px] border-l border-white/5']"></td>
+                <td v-if="canKick" :class="[rh, 'min-w-[60px] border-l border-white/5']"></td>
             </template>
         </template>
     </tr>
