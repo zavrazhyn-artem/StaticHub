@@ -115,32 +115,32 @@ return [
     /* ───────────── Evoker ───────────── */
 
     'evoker.preservation' => [
-        ['spell_id' => 363534, 'name' => 'Rewind',                  'icon' => 'ability_evoker_rewind',           'cooldown' => 240, 'type' => 'raid'],
-        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_zephyr',           'cooldown' => 120, 'type' => 'raid'],
-        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_emeraldcommunion', 'cooldown' => 180, 'type' => 'personal'],
-        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',     'cooldown' => 60,  'type' => 'external'],
-        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'ability_evoker_obsidianscales',   'cooldown' => 150, 'type' => 'personal'],
+        ['spell_id' => 363534, 'name' => 'Rewind',                  'icon' => 'ability_evoker_rewind',                'cooldown' => 240, 'type' => 'raid'],
+        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_hoverblack',            'cooldown' => 120, 'type' => 'raid'],
+        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_green_01',              'cooldown' => 180, 'type' => 'personal'],
+        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',          'cooldown' => 60,  'type' => 'external'],
+        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'inv_artifact_dragonscales',            'cooldown' => 150, 'type' => 'personal'],
     ],
 
     'evoker.devastation' => [
-        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'ability_evoker_obsidianscales',   'cooldown' => 150, 'type' => 'personal'],
-        ['spell_id' => 374348, 'name' => 'Renewing Blaze',          'icon' => 'ability_evoker_renewingblaze',    'cooldown' => 90,  'type' => 'personal'],
-        ['spell_id' => 363534, 'name' => 'Rewind',                  'icon' => 'ability_evoker_rewind',           'cooldown' => 240, 'type' => 'personal', 'requires_talent' => true],
-        ['spell_id' => 360995, 'name' => 'Verdant Embrace',         'icon' => 'ability_evoker_rescue',           'cooldown' => 24,  'type' => 'personal', 'requires_talent' => true],
-        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_emeraldcommunion', 'cooldown' => 180, 'type' => 'personal', 'requires_talent' => true],
-        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_zephyr',           'cooldown' => 120, 'type' => 'raid', 'requires_talent' => true],
-        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',     'cooldown' => 60,  'type' => 'external', 'requires_talent' => true],
-        ['spell_id' => 357210, 'name' => 'Deep Breath',             'icon' => 'ability_evoker_deepbreath',       'cooldown' => 120, 'type' => 'utility'],
+        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'inv_artifact_dragonscales',            'cooldown' => 150, 'type' => 'personal'],
+        ['spell_id' => 374348, 'name' => 'Renewing Blaze',          'icon' => 'ability_evoker_masterylifebinder_red', 'cooldown' => 90,  'type' => 'personal'],
+        ['spell_id' => 363534, 'name' => 'Rewind',                  'icon' => 'ability_evoker_rewind',                'cooldown' => 240, 'type' => 'personal', 'requires_talent' => true],
+        ['spell_id' => 360995, 'name' => 'Verdant Embrace',         'icon' => 'ability_evoker_rescue',                'cooldown' => 24,  'type' => 'personal', 'requires_talent' => true],
+        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_green_01',              'cooldown' => 180, 'type' => 'personal', 'requires_talent' => true],
+        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_hoverblack',            'cooldown' => 120, 'type' => 'raid', 'requires_talent' => true],
+        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',          'cooldown' => 60,  'type' => 'external', 'requires_talent' => true],
+        ['spell_id' => 357210, 'name' => 'Deep Breath',             'icon' => 'ability_evoker_deepbreath',            'cooldown' => 120, 'type' => 'utility'],
     ],
 
     'evoker.augmentation' => [
-        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'ability_evoker_obsidianscales',   'cooldown' => 150, 'type' => 'personal'],
-        ['spell_id' => 374348, 'name' => 'Renewing Blaze',          'icon' => 'ability_evoker_renewingblaze',    'cooldown' => 90,  'type' => 'personal'],
-        ['spell_id' => 360995, 'name' => 'Verdant Embrace',         'icon' => 'ability_evoker_rescue',           'cooldown' => 24,  'type' => 'personal', 'requires_talent' => true],
-        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_emeraldcommunion', 'cooldown' => 180, 'type' => 'personal', 'requires_talent' => true],
-        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_zephyr',           'cooldown' => 120, 'type' => 'raid', 'requires_talent' => true],
-        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',     'cooldown' => 60,  'type' => 'external', 'requires_talent' => true],
-        ['spell_id' => 408092, 'name' => 'Time Stop',               'icon' => 'ability_evoker_timestop',         'cooldown' => 90,  'type' => 'external', 'requires_talent' => true],
+        ['spell_id' => 363916, 'name' => 'Obsidian Scales',         'icon' => 'inv_artifact_dragonscales',            'cooldown' => 150, 'type' => 'personal'],
+        ['spell_id' => 374348, 'name' => 'Renewing Blaze',          'icon' => 'ability_evoker_masterylifebinder_red', 'cooldown' => 90,  'type' => 'personal'],
+        ['spell_id' => 360995, 'name' => 'Verdant Embrace',         'icon' => 'ability_evoker_rescue',                'cooldown' => 24,  'type' => 'personal', 'requires_talent' => true],
+        ['spell_id' => 370960, 'name' => 'Emerald Communion',       'icon' => 'ability_evoker_green_01',              'cooldown' => 180, 'type' => 'personal', 'requires_talent' => true],
+        ['spell_id' => 374227, 'name' => 'Zephyr',                  'icon' => 'ability_evoker_hoverblack',            'cooldown' => 120, 'type' => 'raid', 'requires_talent' => true],
+        ['spell_id' => 357170, 'name' => 'Time Dilation',           'icon' => 'ability_evoker_timedilation',          'cooldown' => 60,  'type' => 'external', 'requires_talent' => true],
+        ['spell_id' => 404977, 'name' => 'Time Skip',               'icon' => 'ability_evoker_timeskip',              'cooldown' => 60,  'type' => 'external', 'requires_talent' => true],
     ],
 
     /* ───────────── Hunter ───────────── */
@@ -252,7 +252,7 @@ return [
         ['spell_id' => 62618,  'name' => 'Power Word: Barrier',     'icon' => 'spell_holy_powerwordbarrier',     'cooldown' => 180, 'type' => 'raid'],
         ['spell_id' => 47536,  'name' => 'Rapture',                 'icon' => 'spell_holy_rapture',              'cooldown' => 90,  'type' => 'raid'],
         ['spell_id' => 19236,  'name' => 'Desperate Prayer',        'icon' => 'spell_holy_testoffaith',          'cooldown' => 90,  'type' => 'personal'],
-        ['spell_id' => 271466, 'name' => 'Luminous Barrier',        'icon' => 'ability_priest_powerwordbarrier', 'cooldown' => 180, 'type' => 'raid', 'requires_talent' => true],
+        ['spell_id' => 271466, 'name' => 'Luminous Barrier',        'icon' => 'spell_priest_burningwill',        'cooldown' => 180, 'type' => 'raid', 'requires_talent' => true],
         ['spell_id' => 586,    'name' => 'Fade',                    'icon' => 'spell_magic_lesserinvisibilty',   'cooldown' => 30,  'type' => 'personal'],
     ],
 

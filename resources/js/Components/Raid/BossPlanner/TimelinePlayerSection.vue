@@ -230,6 +230,7 @@ const renderTimeFor = (a) => isDraggingAssignment(a.id) ? previewTime.value : a.
 </script>
 
 <template>
+    <div class="relative" :style="{ width: (viewportWidth + leftWidth + rightPadding) + 'px', height: sectionHeight + 'px' }">
     <svg :width="viewportWidth + leftWidth + rightPadding" :height="sectionHeight"
         class="select-none block bg-[#0a0a0c]"
         @mousedown="onMouseDown" @click="onClick"
@@ -427,4 +428,26 @@ const renderTimeFor = (a) => isDraggingAssignment(a.id) ? previewTime.value : a.
                 pointer-events="none" />
         </g>
     </svg>
+
+    <!-- Wowhead tooltip overlay: invisible HTML <a> covers the full left-panel
+         sub-row (CD icon + name) so the tooltip triggers anywhere on the row.
+         tooltips.js scans HTML anchors only, so we layer transparent links on
+         top instead of putting data-wowhead on SVG (it's ignored there). -->
+    <div class="absolute inset-0 pointer-events-none">
+        <template v-for="row in rowLayout" :key="'wh-row' + row.char.id">
+            <a v-for="(cd, j) in (row.expanded ? row.cds : [])" :key="'wh' + row.char.id + cd.spell_id"
+                :href="'https://www.wowhead.com/spell=' + cd.spell_id"
+                target="_blank" rel="noopener noreferrer"
+                data-wh-rename-link="false"
+                draggable="false"
+                class="absolute pointer-events-auto block"
+                :style="{
+                    left: '0px',
+                    top: (row.y + HEADER_ROW + j * SUB_ROW) + 'px',
+                    width: (leftWidth - 4) + 'px',
+                    height: SUB_ROW + 'px',
+                }"></a>
+        </template>
+    </div>
+    </div>
 </template>

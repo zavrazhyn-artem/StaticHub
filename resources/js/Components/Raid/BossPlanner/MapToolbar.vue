@@ -182,11 +182,15 @@ const panelDefs = computed(() => ({
     ]},
     abilities: { title: __('Abilities'), sections: [
         { id: 'class_abilities', label: __('Class Abilities'), items: [
-            { id: 'warlock-gateway', type: 'ability', img: '/images/raidplan/stickers/gateway-fs8.png', label: '' },
+            { id: 'warlock-gateway', type: 'ability', img: '/images/raidplan/stickers/gateway-fs8.png', label: '', displayName: __('Demonic Gateway') },
         ]},
-        { id: 'boss', label: __('Boss Abilities'), items: props.abilities.map(a => ({
-            id: a, type: 'ability', img: `/images/raidplan/icons/${a}.png`, label: '',
-        })) },
+        { id: 'boss', label: __('Boss Abilities'), items: props.abilities.map(a => {
+            // Backend now sends { icon, name } objects; strings remain
+            // supported as a backward-compat fallback.
+            const icon = typeof a === 'string' ? a : a.icon;
+            const name = typeof a === 'string' ? a : a.name;
+            return { id: icon, type: 'ability', img: `/images/raidplan/icons/${icon}.png`, label: '', displayName: name };
+        }) },
     ]},
     icons: { title: __('Icons'), sections: [
         { id: 'roles', label: __('Roles'), items: [
@@ -196,9 +200,11 @@ const panelDefs = computed(() => ({
             { id: 'role-rdps', type: 'class', img: '/images/raidplan/role/rdps.svg', label: '', displayName: __('Ranged DPS') },
         ]},
         { id: 'class', label: __('Classes'), items: classIcons.value.map(c => ({ ...c, type: 'class', img: `/images/raidplan/class/${c.id}.png`, label: '' })) },
-        ...(props.bossPortraits.length ? [{ id: 'portraits', label: __('Boss Portraits'), items: props.bossPortraits.map((url, i) => ({
-            id: `portrait-${i}`, type: 'portrait', img: url, label: '',
-        })) }] : []),
+        ...(props.bossPortraits.length ? [{ id: 'portraits', label: __('Boss Portraits'), items: props.bossPortraits.map((p, i) => {
+            const url = typeof p === 'string' ? p : p.url;
+            const name = typeof p === 'string' ? '' : p.name;
+            return { id: `portrait-${i}`, type: 'portrait', img: url, label: '', displayName: name };
+        }) }] : []),
     ]},
     roster: { title: __('Roster'), sections: [
         ...(rosterItems.value.length ? [{ id: 'groups', label: __('Groups'), items: rosterItems.value }] : []),
@@ -229,6 +235,7 @@ const iconSrcFor = (item) => {
 };
 const onItemPointerDown = (item, e) => {
     if (e.button !== 0) return;
+    hoveredItem.value = null;
     const startX = e.clientX;
     const startY = e.clientY;
     let started = false;
@@ -250,6 +257,19 @@ const onItemPointerDown = (item, e) => {
     e.preventDefault();
     e.stopPropagation();
 };
+
+// Hover-tooltip for toolbar items (icons in floating panels are tiny w-8 h-8
+// tiles with no inline label — show the human name in a floating chip instead
+// of relying on the browser's native title delay).
+const hoveredItem = ref(null);
+const hoveredPos = ref({ x: 0, y: 0 });
+const itemDisplayName = (item) => item?.displayName || item?.label || item?.id || '';
+const onItemEnter = (item, e) => {
+    hoveredItem.value = item;
+    const r = e.currentTarget.getBoundingClientRect();
+    hoveredPos.value = { x: r.left + r.width / 2, y: r.top };
+};
+const onItemLeave = () => { hoveredItem.value = null; };
 
 const customEmoji = ref('');
 const addCustomEmoji = () => {
@@ -346,9 +366,10 @@ const colorClasses = {
                         <div v-if="section.id === 'shapes'" class="grid grid-cols-4 gap-1">
                             <button v-for="item in section.items" :key="item.id"
                                 @mousedown="onItemPointerDown(item, $event)"
+                                @mouseenter="onItemEnter(item, $event)"
+                                @mouseleave="onItemLeave"
                                 class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg transition-all hover:bg-white/10"
-                                :class="activeTool === item.id ? 'bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30' : 'text-on-surface-variant'"
-                                :title="item.label">
+                                :class="activeTool === item.id ? 'bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30' : 'text-on-surface-variant'">
                                 <svg v-if="item.icon === 'sector_svg'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M12 12 L12 3 A9 9 0 0 0 4.2 7.5 Z"/>
                                 </svg>
@@ -360,8 +381,9 @@ const colorClasses = {
                         <div v-else-if="section.id === 'groups'" class="grid grid-cols-4 gap-1">
                             <button v-for="item in section.items" :key="item.id"
                                 @mousedown="onItemPointerDown(item, $event)"
-                                class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg transition-all hover:bg-white/10 border border-transparent"
-                                :title="(item.displayName || item.label) + ' (' + item.count + 'p)'">
+                                @mouseenter="onItemEnter({ ...item, displayName: (item.displayName || item.label) + ' (' + item.count + 'p)' }, $event)"
+                                @mouseleave="onItemLeave"
+                                class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg transition-all hover:bg-white/10 border border-transparent">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center border-2"
                                     :style="{ borderColor: item.color, backgroundColor: item.color + '20' }">
                                     <span class="text-3xs font-bold" :style="{ color: item.color }">{{ item.displayName || item.label }}</span>
@@ -373,6 +395,8 @@ const colorClasses = {
                         <div v-else-if="section.id === 'players'" class="grid grid-cols-2 gap-1">
                             <button v-for="item in section.items" :key="item.id"
                                 @mousedown="onItemPointerDown(item, $event)"
+                                @mouseenter="onItemEnter(item, $event)"
+                                @mouseleave="onItemLeave"
                                 class="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all hover:bg-white/5 text-left">
                                 <img v-if="item.img" :src="item.img" class="w-6 h-6 rounded object-cover border border-white/10 shrink-0">
                                 <div class="min-w-0">
@@ -384,8 +408,9 @@ const colorClasses = {
                         <div v-else class="grid grid-cols-8 gap-1">
                             <button v-for="item in section.items" :key="item.id"
                                 @mousedown="onItemPointerDown(item, $event)"
-                                class="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/10 hover:scale-110 border border-transparent"
-                                :title="item.label || item.id">
+                                @mouseenter="onItemEnter(item, $event)"
+                                @mouseleave="onItemLeave"
+                                class="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/10 hover:scale-110 border border-transparent">
                                 <span v-if="item.type === 'emoji'" class="text-lg leading-none">{{ item.emoji }}</span>
                                 <img v-else :src="item.img" class="w-6 h-6 rounded" :alt="item.id">
                             </button>
@@ -411,6 +436,18 @@ const colorClasses = {
                 </div>
             </div>
         </template>
+    </Teleport>
+
+    <!-- Floating hover label for toolbar tile items (shows next to the cursor
+         instead of the slow native title tooltip). -->
+    <Teleport to="body">
+        <div v-if="hoveredItem && itemDisplayName(hoveredItem)"
+            class="fixed z-[9999] pointer-events-none"
+            :style="{ left: hoveredPos.x + 'px', top: (hoveredPos.y - 8) + 'px', transform: 'translate(-50%, -100%)' }">
+            <div class="bg-[#1a1a1e] border border-white/15 rounded px-2 py-1 text-3xs font-semibold text-white shadow-2xl whitespace-nowrap">
+                {{ itemDisplayName(hoveredItem) }}
+            </div>
+        </div>
     </Teleport>
 </template>
 

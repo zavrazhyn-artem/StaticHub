@@ -6,9 +6,13 @@ namespace App\Services\Raid;
 
 use App\Models\RaidPlan;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\File;
 
 class BossPlannerService
 {
+    /** @var array{by_icon?: array<string, list<string>>}|null */
+    private ?array $abilityNameCache = null;
+
     public function __construct(
         private readonly BossTimelineService $timelineService,
     ) {}
@@ -177,10 +181,12 @@ class BossPlannerService
                 $slug = \Illuminate\Support\Str::slug($bossName);
                 $plan = $plans->first(fn (RaidPlan $p) => $p->encounter_slug === $slug);
                 $bossData = $encounterBosses[$slug] ?? [];
-                $portraits = array_map(
-                    fn (int $id) => "/images/raidplan/portraits/{$id}.png",
-                    $bossData['portraits'] ?? []
+                $portraits = $this->enrichPortraits(
+                    $bossName,
+                    $bossData['portraits'] ?? [],
+                    $bossData['portrait_names'] ?? []
                 );
+                $abilities = $this->enrichAbilities($bossData['abilities'] ?? []);
 
                 $bossPlans = $plans->filter(fn (RaidPlan $p) => $p->encounter_slug === $slug)->values();
 
@@ -201,9 +207,9 @@ class BossPlannerService
                     'encounter_id' => $encounterIdByName[$bossName] ?? null,
                     'instance' => $instanceName,
                     'maps' => $encounterMaps[$slug] ?? [],
-                    'portrait' => $portraits[0] ?? null,
+                    'portrait' => $portraits[0]['url'] ?? null,
                     'portraits' => $portraits,
-                    'abilities' => $bossData['abilities'] ?? [],
+                    'abilities' => $abilities,
                     'boss_ability_timings' => $timingsByDiff,
                     'phase_segments' => $phasesByDiff,
                     'conditional_abilities' => $conditionalsByDiff,
@@ -248,5 +254,93 @@ class BossPlannerService
             'arrows' => [],
             'labels' => [],
         ];
+    }
+
+    /**
+     * Attach human-readable names to a list of icon filenames so the boss-
+     * planner toolbar can show "Void Howl" instead of "inv_cosmicvoid_orb".
+     * Names come from storage/app/wow/boss_ability_names.json which is
+     * populated by `php artisan boss-planner:sync-names` (resolves YAML
+     * spell_ids → Wowhead nether tooltip → icon). Falls back to a
+     * pretty-printed filename when the icon isn't in the cache.
+     *
+     * @param  list<string>  $iconFilenames
+     * @return list<array{icon: string, name: string}>
+     */
+    private function enrichAbilities(array $iconFilenames): array
+    {
+        $cache = $this->loadAbilityNameCache();
+        $byIcon = $cache['by_icon'] ?? [];
+        $out = [];
+        foreach ($iconFilenames as $icon) {
+            $name = $byIcon[$icon][0] ?? $this->prettifyIconFilename($icon);
+            $out[] = ['icon' => $icon, 'name' => $name];
+        }
+        return $out;
+    }
+
+    /**
+     * Convert raw portrait IDs into URL+name objects. The IDs in
+     * `wow_season.encounter_bosses[*].portraits` are arbitrary asset numbers
+     * (matching `/images/raidplan/portraits/{id}.png`) — they are NOT
+     * Wowhead NPC IDs, so names can't be looked up automatically. Names come
+     * from the encounter's `portrait_names` array (manually curated, same
+     * order as `portraits`); when missing we fall back to the boss name for
+     * index 0 and "Boss · #N" for the rest so the toolbar isn't blank.
+     *
+     * @param  list<int>  $ids
+     * @param  list<string>  $names
+     * @return list<array{url: string, name: string}>
+     */
+    private function enrichPortraits(string $bossName, array $ids, array $names = []): array
+    {
+        $out = [];
+        foreach ($ids as $i => $id) {
+            $name = $names[$i] ?? null;
+            if (!$name) {
+                $name = $i === 0 ? $bossName : ($bossName . ' · #' . ($i + 1));
+            }
+            $out[] = [
+                'url' => "/images/raidplan/portraits/{$id}.png",
+                'name' => $name,
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Turn a Blizzard icon filename like `inv_cosmicvoid_orb` into a readable
+     * "Cosmic Void Orb". Drops the leading category token (inv_/spell_/
+     * ability_/sha_/achievement_/etc.) and title-cases the rest. Used as a
+     * fallback when the YAML+Wowhead lookup can't resolve a real spell name.
+     */
+    private function prettifyIconFilename(string $filename): string
+    {
+        // Strip extension if present
+        $name = preg_replace('/\.(png|jpg|jpeg)$/i', '', $filename) ?? $filename;
+        // Drop the leading prefix token if it's one of the standard
+        // Blizzard category prefixes — they're noise, not part of the name.
+        $name = preg_replace(
+            '/^(inv|spell|ability|sha|achievement|warlock|talent|trade|item)_(\d+_)?/',
+            '',
+            $name
+        ) ?? $name;
+        $name = str_replace(['_', '-'], ' ', $name);
+        $name = trim(preg_replace('/\s+/', ' ', $name) ?? $name);
+        return $name === '' ? $filename : ucwords($name);
+    }
+
+    /**
+     * @return array{by_spell?: array<int, array{name:string,icon:string}>, by_icon?: array<string, list<string>>}
+     */
+    private function loadAbilityNameCache(): array
+    {
+        if ($this->abilityNameCache !== null) return $this->abilityNameCache;
+        $path = storage_path('app/wow/boss_ability_names.json');
+        if (!File::exists($path)) {
+            return $this->abilityNameCache = [];
+        }
+        $data = json_decode((string) File::get($path), true);
+        return $this->abilityNameCache = is_array($data) ? $data : [];
     }
 }

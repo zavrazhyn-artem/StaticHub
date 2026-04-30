@@ -89,6 +89,7 @@ const onClick = (e) => {
 </script>
 
 <template>
+    <div class="relative" :style="{ width: (viewportWidth + leftWidth + rightPadding) + 'px', height: sectionHeight() + 'px' }">
     <svg :width="viewportWidth + leftWidth + rightPadding" :height="sectionHeight()"
         class="select-none block bg-[#0a0a0c]"
         @mousedown="onMouseDown" @wheel.prevent="onWheel" @click="onClick"
@@ -221,4 +222,28 @@ const onClick = (e) => {
             </text>
         </g>
     </svg>
+
+    <!-- Wowhead tooltip overlay: invisible HTML <a> covers the full left-panel
+         row (icon + ability name) so the tooltip triggers anywhere on the row,
+         not just over the icon. tooltips.js scans HTML anchors only, so SVG
+         data-wowhead is ignored — we layer transparent links on top instead.
+         Right-click is forwarded to the underlying toggle-hidden-ability
+         action (the SVG rect handler is shadowed by our overlay). -->
+    <div class="absolute inset-0 pointer-events-none">
+        <a v-for="(ab, i) in abilities" :key="'wh' + ab.spell_id"
+            v-show="ab.spell_id"
+            :href="'https://www.wowhead.com/spell=' + ab.spell_id"
+            target="_blank" rel="noopener noreferrer"
+            data-wh-rename-link="false"
+            draggable="false"
+            class="absolute pointer-events-auto block"
+            @contextmenu.prevent="canManage && emit('toggle-hidden-ability', ab.spell_id)"
+            :style="{
+                left: '0px',
+                top: (TOP_PADDING + i * ROW_HEIGHT - 2) + 'px',
+                width: (leftWidth - 4) + 'px',
+                height: ROW_HEIGHT + 'px',
+            }"></a>
+    </div>
+    </div>
 </template>
