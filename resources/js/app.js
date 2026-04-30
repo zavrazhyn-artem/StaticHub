@@ -24,6 +24,18 @@ Sentry.init({
     tracesSampleRate: 1.0,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+
+    // Drop transactions faster than 2s to keep event quota for actual slowdowns.
+    beforeSendTransaction(transaction) {
+        const start = transaction.start_timestamp;
+        const end = transaction.timestamp;
+
+        if (start == null || end == null) {
+            return null;
+        }
+
+        return (end - start) >= 2 ? transaction : null;
+    },
 });
 
 app.config.globalProperties.__ = (key, replace = {}) => {
