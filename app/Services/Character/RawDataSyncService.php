@@ -102,6 +102,8 @@ class RawDataSyncService
                     $existingSpecs[$specName] = $updates['bnet_equipment'];
                     $rawData->update(['bnet_equipment_by_spec' => $existingSpecs]);
                 }
+
+                \App\Jobs\Gear\SyncCurrentGearListJob::dispatch($character->id);
             }
 
             if (isset($updates['bnet_achievement_statistics'])) {

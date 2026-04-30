@@ -42,6 +42,7 @@ class BlizzardCharacterApiService
         $endpoints = [
             'bnet_profile'                => '',
             'bnet_equipment'              => '/equipment',
+            'bnet_statistics'             => '/statistics',
             'bnet_media'                  => '/character-media',
             'bnet_mplus'                  => '/mythic-keystone-profile',
             'bnet_raid'                   => '/encounters/raids',
@@ -140,6 +141,22 @@ class BlizzardCharacterApiService
         $characterName = mb_strtolower($characterName);
 
         $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/equipment?namespace=profile-{$region}&locale=en_US";
+
+        $response = $this->loggedGet($url);
+
+        return $response->failed() ? null : $response->json();
+    }
+
+    /**
+     * Get character statistics — ilvl, primary stats, secondaries (crit/haste/etc.),
+     * defensive stats. Used by the Gear tab paper-doll center panel.
+     */
+    public function getCharacterStatistics(string $region, string $realmSlug, string $characterName): ?array
+    {
+        $realmSlug = strtolower($realmSlug);
+        $characterName = mb_strtolower($characterName);
+
+        $url = "https://{$region}.api.blizzard.com/profile/wow/character/{$realmSlug}/{$characterName}/statistics?namespace=profile-{$region}&locale=en_US";
 
         $response = $this->loggedGet($url);
 

@@ -204,8 +204,9 @@ class BlizzardGameDataApiService
 
         $name = $data['name']['en_US'] ?? $data['name'] ?? "Item #{$itemId}";
         $iconUrl = $this->fetchItemIcon($itemId, $data);
+        $quality = $data['quality']['type'] ?? null;
 
-        Item::query()->updateMetadata($itemId, $name, $iconUrl);
+        Item::query()->updateMetadata($itemId, $name, $iconUrl, $quality);
     }
 
     private function fetchItemData(int $itemId): array

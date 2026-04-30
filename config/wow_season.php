@@ -631,6 +631,19 @@ return [
     | Each entry: [min_ilvl, max_ilvl, css_color_class].
     | Evaluated top-down, first match wins.
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Wishlist sources to exclude from the Gear / Wishlist tab
+    |--------------------------------------------------------------------------
+    | Raidbots emits separate "instance" IDs for Catalyst (tier conversion)
+    | items even though they're already covered by the underlying raid drop.
+    | List those instance raid_slugs here to hide their duplicate-with-lower-
+    | accuracy entries from the wishlist table.
+    */
+    'wishlist_excluded_raid_slugs' => [
+        'instance-1314', // Matrix Catalyst — Midnight Season 1
+    ],
+
     'crafted_ilvl_tiers' => [
         ['min' => 275, 'max' => 285, 'color' => 'text-orange-400'],
         ['min' => 262, 'max' => 274, 'color' => 'text-purple-400'],
@@ -668,41 +681,41 @@ return [
     |   world_advanced:12769..12774  (Adventurer)
     */
     'item_upgrade_tracks' => [
-        // Myth (6 levels)
-        12801 => ['track' => 'Myth', 'level' => 1, 'max' => 6],
-        12802 => ['track' => 'Myth', 'level' => 2, 'max' => 6],
-        12803 => ['track' => 'Myth', 'level' => 3, 'max' => 6],
-        12804 => ['track' => 'Myth', 'level' => 4, 'max' => 6],
-        12805 => ['track' => 'Myth', 'level' => 5, 'max' => 6],
-        12806 => ['track' => 'Myth', 'level' => 6, 'max' => 6],
-        // Hero (6 levels)
-        12793 => ['track' => 'Hero', 'level' => 1, 'max' => 6],
-        12794 => ['track' => 'Hero', 'level' => 2, 'max' => 6],
-        12795 => ['track' => 'Hero', 'level' => 3, 'max' => 6],
-        12796 => ['track' => 'Hero', 'level' => 4, 'max' => 6],
-        12797 => ['track' => 'Hero', 'level' => 5, 'max' => 6],
-        12798 => ['track' => 'Hero', 'level' => 6, 'max' => 6],
-        // Champion / normal (6 levels)
-        12785 => ['track' => 'Champion', 'level' => 1, 'max' => 6],
-        12786 => ['track' => 'Champion', 'level' => 2, 'max' => 6],
-        12787 => ['track' => 'Champion', 'level' => 3, 'max' => 6],
-        12788 => ['track' => 'Champion', 'level' => 4, 'max' => 6],
-        12789 => ['track' => 'Champion', 'level' => 5, 'max' => 6],
-        12790 => ['track' => 'Champion', 'level' => 6, 'max' => 6],
-        // Veteran / raid_finder (6 levels)
-        12777 => ['track' => 'Veteran', 'level' => 1, 'max' => 6],
-        12778 => ['track' => 'Veteran', 'level' => 2, 'max' => 6],
-        12779 => ['track' => 'Veteran', 'level' => 3, 'max' => 6],
-        12780 => ['track' => 'Veteran', 'level' => 4, 'max' => 6],
-        12781 => ['track' => 'Veteran', 'level' => 5, 'max' => 6],
-        12782 => ['track' => 'Veteran', 'level' => 6, 'max' => 6],
-        // Adventurer / world_advanced (6 levels)
-        12769 => ['track' => 'Adventurer', 'level' => 1, 'max' => 6],
-        12770 => ['track' => 'Adventurer', 'level' => 2, 'max' => 6],
-        12771 => ['track' => 'Adventurer', 'level' => 3, 'max' => 6],
-        12772 => ['track' => 'Adventurer', 'level' => 4, 'max' => 6],
-        12773 => ['track' => 'Adventurer', 'level' => 5, 'max' => 6],
-        12774 => ['track' => 'Adventurer', 'level' => 6, 'max' => 6],
+        // Myth (6 levels) — raid mythic / mythic+ vault
+        12801 => ['track' => 'Myth', 'level' => 1, 'max' => 6, 'ilvl' => 272],
+        12802 => ['track' => 'Myth', 'level' => 2, 'max' => 6, 'ilvl' => 276],
+        12803 => ['track' => 'Myth', 'level' => 3, 'max' => 6, 'ilvl' => 279],
+        12804 => ['track' => 'Myth', 'level' => 4, 'max' => 6, 'ilvl' => 282],
+        12805 => ['track' => 'Myth', 'level' => 5, 'max' => 6, 'ilvl' => 285],
+        12806 => ['track' => 'Myth', 'level' => 6, 'max' => 6, 'ilvl' => 289],
+        // Hero (4 levels) — raid heroic / mythic+ vault
+        12793 => ['track' => 'Hero', 'level' => 1, 'max' => 6, 'ilvl' => 259],
+        12794 => ['track' => 'Hero', 'level' => 2, 'max' => 6, 'ilvl' => 263],
+        12795 => ['track' => 'Hero', 'level' => 3, 'max' => 6, 'ilvl' => 266],
+        12796 => ['track' => 'Hero', 'level' => 4, 'max' => 6, 'ilvl' => 269],
+        12797 => ['track' => 'Hero', 'level' => 5, 'max' => 6, 'ilvl' => 272],
+        12798 => ['track' => 'Hero', 'level' => 6, 'max' => 6, 'ilvl' => 276],
+        // Champion (4 levels) — raid normal / heroic dungeons
+        12785 => ['track' => 'Champion', 'level' => 1, 'max' => 6, 'ilvl' => 246],
+        12786 => ['track' => 'Champion', 'level' => 2, 'max' => 6, 'ilvl' => 250],
+        12787 => ['track' => 'Champion', 'level' => 3, 'max' => 6, 'ilvl' => 253],
+        12788 => ['track' => 'Champion', 'level' => 4, 'max' => 6, 'ilvl' => 256],
+        12789 => ['track' => 'Champion', 'level' => 5, 'max' => 6, 'ilvl' => 259],
+        12790 => ['track' => 'Champion', 'level' => 6, 'max' => 6, 'ilvl' => 263],
+        // Veteran (4 levels) — raid finder / normal dungeons
+        12777 => ['track' => 'Veteran', 'level' => 1, 'max' => 6, 'ilvl' => 233],
+        12778 => ['track' => 'Veteran', 'level' => 2, 'max' => 6, 'ilvl' => 237],
+        12779 => ['track' => 'Veteran', 'level' => 3, 'max' => 6, 'ilvl' => 240],
+        12780 => ['track' => 'Veteran', 'level' => 4, 'max' => 6, 'ilvl' => 243],
+        12781 => ['track' => 'Veteran', 'level' => 5, 'max' => 6, 'ilvl' => 246],
+        12782 => ['track' => 'Veteran', 'level' => 6, 'max' => 6, 'ilvl' => 250],
+        // Adventurer (4 levels) — world / explorer
+        12769 => ['track' => 'Adventurer', 'level' => 1, 'max' => 6, 'ilvl' => 220],
+        12770 => ['track' => 'Adventurer', 'level' => 2, 'max' => 6, 'ilvl' => 224],
+        12771 => ['track' => 'Adventurer', 'level' => 3, 'max' => 6, 'ilvl' => 227],
+        12772 => ['track' => 'Adventurer', 'level' => 4, 'max' => 6, 'ilvl' => 230],
+        12773 => ['track' => 'Adventurer', 'level' => 5, 'max' => 6, 'ilvl' => 233],
+        12774 => ['track' => 'Adventurer', 'level' => 6, 'max' => 6, 'ilvl' => 237],
     ],
 
     /*

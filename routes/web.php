@@ -21,6 +21,8 @@ use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
 use App\Http\Controllers\Settings\StaticSettingsController;
 use App\Http\Controllers\Gear\GearController;
+use App\Http\Controllers\Gear\GearListController;
+use App\Http\Controllers\Gear\WishlistController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
@@ -88,6 +90,17 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
 
     // Gear Management
     Route::get('/gear', [GearController::class, 'index'])->name('statics.gear');
+    Route::post('/gear/wishlists', [WishlistController::class, 'store'])->name('statics.gear.wishlists.store');
+    Route::delete('/gear/wishlists/{wishlist}', [WishlistController::class, 'destroy'])->name('statics.gear.wishlists.destroy');
+
+    Route::get('/gear/lists/summaries', [GearListController::class, 'summaries'])->name('statics.gear.lists.summaries');
+    Route::get('/gear/lists/{list}/payload', [GearListController::class, 'activePayload'])->name('statics.gear.lists.payload');
+    Route::post('/gear/lists', [GearListController::class, 'store'])->name('statics.gear.lists.store');
+    Route::patch('/gear/lists/{list}', [GearListController::class, 'update'])->name('statics.gear.lists.update');
+    Route::delete('/gear/lists/{list}', [GearListController::class, 'destroy'])->name('statics.gear.lists.destroy');
+    Route::patch('/gear/lists/{list}/slot', [GearListController::class, 'setSlot'])->name('statics.gear.lists.set-slot');
+    Route::post('/gear/lists/{list}/simc', [GearListController::class, 'importSimc'])->name('statics.gear.lists.import-simc');
+    Route::post('/gear/bis', [GearListController::class, 'importBis'])->name('statics.gear.lists.import-bis');
 
     // Settings
     Route::get('/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
