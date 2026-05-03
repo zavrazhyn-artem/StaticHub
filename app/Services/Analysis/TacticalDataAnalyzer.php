@@ -30,6 +30,8 @@ class TacticalDataAnalyzer
         private readonly BossTimelineLoader $bossTimelineLoader,
         private readonly WipeDetector $wipeDetector,
         private readonly FightBreakdownBuilder $fightBreakdownBuilder,
+        private readonly DeathStateAssembler $deathStateAssembler,
+        private readonly DeathAttributionBuilder $deathAttributionBuilder,
     ) {}
 
     /**
@@ -41,7 +43,6 @@ class TacticalDataAnalyzer
      */
     public function analyze(array $logData, array $localization = [], array $rosterNames = [], ?string $reportId = null): array
     {
-        $difficulty = $this->resolveDifficulty($logData);
         $bossNames = array_keys($logData['phase_summary'] ?? []);
 
         // Apply roster filter to player list if provided
@@ -68,7 +69,8 @@ class TacticalDataAnalyzer
 
         $encounters = [];
         foreach ($bossNames as $bossName) {
-            $encounters[] = $this->analyzeEncounter($bossName, $difficulty, $logData, $playerNames, $rosterNames, $reportId);
+            $encounterDifficulty = $this->resolveEncounterDifficulty($bossName, $logData);
+            $encounters[] = $this->analyzeEncounter($bossName, $encounterDifficulty, $logData, $playerNames, $rosterNames, $reportId);
         }
 
         // Per-player consumable audit (who used flask/food/augment rune)
@@ -91,7 +93,7 @@ class TacticalDataAnalyzer
             }
         }
 
-        $raidSummary = $this->buildRaidSummary($logData, $difficulty, $encounters);
+        $raidSummary = $this->buildRaidSummary($logData, $this->resolveDominantDifficulty($logData), $encounters);
         $perPlayerData = $this->buildPerPlayerData($logData, $encounters, $players);
 
         // Enrich per-player data with rotation_analysis + rotation_issues, AND attach
@@ -123,6 +125,17 @@ class TacticalDataAnalyzer
         $highlightReel     = $this->insightsBuilder->buildHighlightReel($encounters, $perPlayerData, $raidSummary);
         $playerPerformance = $this->insightsBuilder->buildPlayerPerformanceSummary($encounters, $perPlayerData);
 
+        // Static skill tier — adapts coaching tone (progressing/core/cutting_edge).
+        // Computed after playerPerformance so we can use parse data + tier signals.
+        $raidSummary['static_tier'] = $this->computeStaticTier($raidSummary, $playerPerformance, $encounters);
+
+        // Per-death attribution — deterministic classification of each death's
+        // primary cause (missed_external / missed_interrupt / missed_dispel /
+        // soak_uncovered / defensive_unused / raid_coordination / unavoidable /
+        // self_mechanic_miss). Mutates encounters[].fights[].deaths[] in place
+        // by adding `attribution` field.
+        $this->applyDeathAttribution($encounters, $logData, $playerNames, $playerDetailsForRoster = ($logData['player_details'] ?? []));
+
         return [
             'raid_summary'                => $raidSummary,
             'encounters'                  => $encounters,
@@ -138,7 +151,27 @@ class TacticalDataAnalyzer
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function resolveDifficulty(array $logData): string
+    /**
+     * Difficulty for a specific encounter key — read from the first try's
+     * difficulty field (all tries under one key share difficulty after
+     * buildPhaseSummary's split). Falls back to the raid-wide dominant
+     * difficulty when a try has no difficulty info attached.
+     */
+    private function resolveEncounterDifficulty(string $bossName, array $logData): string
+    {
+        $tries = $logData['phase_summary'][$bossName] ?? [];
+        $diff = $tries[0]['difficulty'] ?? null;
+        if ($diff !== null) {
+            return mb_strtolower($diff);
+        }
+        return $this->resolveDominantDifficulty($logData);
+    }
+
+    /**
+     * Raid-wide highest difficulty seen — used for the raid_summary header
+     * when the raid mixes difficulties.
+     */
+    private function resolveDominantDifficulty(array $logData): string
     {
         $diffs = $logData['difficulties'] ?? [];
         if (in_array('mythic', $diffs)) return 'mythic';
@@ -483,11 +516,15 @@ class TacticalDataAnalyzer
 
     private function loadTacticsForBoss(string $bossName, array $logData): array
     {
+        // Strip the " (Heroic|Mythic|Normal)" suffix that buildPhaseSummary
+        // appends when the same boss is pulled at multiple difficulties.
+        $rawBoss = preg_replace('/\s+\((Normal|Heroic|Mythic)\)\s*$/i', '', $bossName) ?? $bossName;
+
         // Try resolving encounter_id via config mapping
         $configMap = config('wow_season.wcl_encounter_ids', []);
         $encounterId = null;
         foreach ($configMap as $id => $name) {
-            if ($this->bossNameMatches($name, $bossName)) {
+            if ($this->bossNameMatches($name, $rawBoss)) {
                 $encounterId = $id;
                 break;
             }
@@ -497,7 +534,7 @@ class TacticalDataAnalyzer
             return $this->tacticsLoader->loadByEncounterId($encounterId);
         }
 
-        return $this->tacticsLoader->loadByBossName($bossName);
+        return $this->tacticsLoader->loadByBossName($rawBoss);
     }
 
     private function bossNameMatches(string $a, string $b): bool
@@ -1414,6 +1451,118 @@ class TacticalDataAnalyzer
             'difficulty'           => $difficulty,
             'overall_assessment'   => $assessment,
         ];
+    }
+
+    /**
+     * Classify the static's current execution band so the AI can adapt its
+     * coaching tone:
+     *
+     *   progressing — still learning the fight; many wipes, low parses, kill rate < 0.4.
+     *                 Coaching focus = survival, basic CDs, mechanic execution. Patience.
+     *   core        — consistent execution, room for optimization; standard role baselines.
+     *   cutting_edge — clean kills, high parses, near-perfect runs.
+     *                  Coaching focus = micro-optimization, parse margin, edge tech.
+     *
+     * Heuristic combines kill rate, wipes-per-kill, and average parse % when
+     * available. None of the inputs are perfect on their own, but together
+     * they're directionally correct.
+     */
+    private function computeStaticTier(array $raidSummary, array $playerPerformance, array $encounters): array
+    {
+        $kills = (int) ($raidSummary['total_kills'] ?? 0);
+        $wipes = (int) ($raidSummary['total_wipes'] ?? 0);
+        $bosses = count($encounters);
+
+        $parses = [];
+        foreach ($playerPerformance as $entry) {
+            $parse = $entry['parse_pct'] ?? null;
+            if (is_numeric($parse)) {
+                $parses[] = (float) $parse;
+            }
+        }
+        $avgParse = !empty($parses) ? round(array_sum($parses) / count($parses), 1) : null;
+
+        $wipesPerKill = $kills > 0 ? round($wipes / $kills, 2) : null;
+        $killRate = $bosses > 0 ? round($kills / $bosses, 2) : 0;
+
+        $tier = 'core';
+        if ($bosses === 0 || $kills === 0) {
+            $tier = 'progressing';
+        } elseif (
+            ($wipesPerKill !== null && $wipesPerKill > 4)
+            || ($avgParse !== null && $avgParse < 60)
+            || $killRate < 0.4
+        ) {
+            $tier = 'progressing';
+        } elseif (
+            ($wipesPerKill !== null && $wipesPerKill < 1.5)
+            && ($avgParse === null || $avgParse > 80)
+            && $killRate > 0.85
+        ) {
+            $tier = 'cutting_edge';
+        }
+
+        return [
+            'tier'           => $tier,
+            'avg_parse'      => $avgParse,
+            'wipes_per_kill' => $wipesPerKill,
+            'kill_rate'      => $killRate,
+            'coaching_lens'  => $this->coachingLensForTier($tier),
+        ];
+    }
+
+    private function coachingLensForTier(string $tier): string
+    {
+        return match ($tier) {
+            'progressing' => 'Static is in active progression — many pulls per kill, low/mid parses. Coach with patience: prioritise survival, basic CD usage, mechanic execution. Many deaths are SHARED failures (coordination, assignment, pre-pull tempo) rather than personal skill gaps. Avoid asking for parse 90+ optimization or micro-rotation tweaks. Acknowledge progress trajectory.',
+            'core'        => 'Static executes consistently — kills are reliable, parses solid. Coach role baselines: rotation discipline, CD efficiency, role-specific identity (add damage balance, healing efficiency, mitigation uptime). Mix mechanic + optimization advice in proportion to data signal.',
+            'cutting_edge' => 'Static performs near the ceiling — clean kills, high parses. Coach micro-optimization: parse margins, edge-case scenarios, spec-identity nuance, fight-specific edge tech. Treat mechanic survival as table-stakes; focus on output and timing precision.',
+            default       => 'Standard tone.',
+        };
+    }
+
+    /**
+     * Build per-death state snapshots and feed them to DeathAttributionBuilder.
+     * Mutates `encounters[].fights[].deaths[]` in place — adds `attribution`.
+     */
+    private function applyDeathAttribution(array &$encounters, array $logData, array $playerNames, array $playerDetails): void
+    {
+        // Flat death list in the SAME iteration order DeathAttributionBuilder uses.
+        $rosterDeaths = [];
+        foreach ($encounters as $enc) {
+            foreach ($enc['fights'] ?? [] as $fight) {
+                foreach ($fight['deaths'] ?? [] as $death) {
+                    $rosterDeaths[] = $death;
+                }
+            }
+        }
+
+        if (empty($rosterDeaths)) return;
+
+        $playerIdToName = [];
+        foreach ($logData['players'] ?? [] as $p) {
+            if (isset($p['id'], $p['name'])) {
+                $playerIdToName[$p['id']] = $p['name'];
+            }
+        }
+
+        $playerNameToClass = [];
+        foreach ($playerDetails as $name => $details) {
+            if (!empty($details['class'])) {
+                $playerNameToClass[$name] = (string) $details['class'];
+            }
+        }
+
+        $deathState = $this->deathStateAssembler->assemble(
+            $logData['death_event_coords'] ?? [],
+            $logData['player_coord_snapshots'] ?? [],
+            $playerIdToName,
+            $playerNameToClass,
+            $logData['fight_start_times'] ?? [],
+            $rosterDeaths
+        );
+
+        $this->deathAttributionBuilder->attribute($encounters, $deathState);
     }
 
     private function buildPhaseProgression(array $tries): array

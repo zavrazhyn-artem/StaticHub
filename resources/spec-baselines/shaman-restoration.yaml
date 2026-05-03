@@ -8,28 +8,28 @@ rotation_checks:
     ability_id: 108280
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Spirit Link Totem'
     ability_id: 98008
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Mana Tide Totem'
     ability_id: 16191
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Ascendance
     ability_id: 114052
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: major
   -
     ability: 'Cloudburst Totem'
@@ -43,14 +43,14 @@ rotation_checks:
     ability_id: 207399
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Earthen Wall Totem'
     ability_id: 198838
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Primordial Wave'
@@ -71,21 +71,21 @@ rotation_checks:
     ability_id: 1267016
     check: cast_efficiency
     cooldown_seconds: 50.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: major
   -
     ability: Wellspring
     ability_id: 197995
     check: cast_efficiency
     cooldown_seconds: 40.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: Riptide
     ability_id: 61295
     check: cast_efficiency
     cooldown_seconds: 6.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Healing Stream Totem'
@@ -99,7 +99,7 @@ rotation_checks:
     ability_id: 73920
     check: cast_efficiency
     cooldown_seconds: 18.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Unleash Life'
@@ -120,47 +120,104 @@ rotation_checks:
     ability_id: 378081
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: Downpour
     ability_id: 462603
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Astral Shift'
     ability_id: 108271
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Earth Elemental'
     ability_id: 198103
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Stone Bulwark Totem'
     ability_id: 108270
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Bloodlust
     ability_id: 2825
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Heroism
     ability_id: 32182
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    1064:
+      name: 'Chain Heal'
+      cpm_median: 9.87
+      cpm_p95: 13.43
+      casts_median: 72
+      casts_p95: 91
+      sample: 24
+      description: 'Heals the friendly target for 887, then jumps up to 20 yards to heal the 3 most injured nearby allies. Healing is reduced by 30% with each jump.'
+    61295:
+      name: Riptide
+      cpm_median: 8.53
+      cpm_p95: 10.18
+      casts_median: 64
+      casts_p95: 75
+      sample: 22
+      description: 'Restorative waters wash over a friendly target, healing them for 1,803 and an additional 1,018 over 18 sec.'
+    51505:
+      name: 'Lava Burst'
+      cpm_median: 5.54
+      cpm_p95: 10.42
+      casts_median: 36
+      casts_p95: 52
+      sample: 30
+      description: 'Hurls molten lava at the target, dealing 525 Fire damage. Lava Burst will always critically strike if the target is affected by Flame Shock and its damage is increased by your critical strike chance.'
+    5394:
+      name: 'Healing Stream Totem'
+      cpm_median: 3.33
+      cpm_p95: 3.62
+      casts_median: 26
+      casts_p95: 29
+      sample: 17
+      description: 'Summons a totem at your feet for 15 sec that heals an injured party or raid member within 40 yards for 255 every 1.8 sec. If you already know Healing Stream Totem, instead gain 1 additional charge of Healing Stream Totem.'
+    188389:
+      name: 'Flame Shock'
+      cpm_median: 4.2
+      cpm_p95: 5.11
+      casts_median: 23
+      casts_p95: 28
+      sample: 20
+      description: null
+    188196:
+      name: 'Lightning Bolt'
+      cpm_median: 9.16
+      cpm_p95: 13.29
+      casts_median: 47
+      casts_p95: 61
+      sample: 11
+      description: 'Hurls a bolt of lightning at the target, dealing 497 Nature damage.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

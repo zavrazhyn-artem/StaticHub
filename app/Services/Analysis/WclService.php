@@ -124,6 +124,86 @@ GQL;
     /**
      * Fetch all encounters in a WCL zone.
      */
+    /**
+     * Fetch top parsers for one (encounter, class, spec, metric, difficulty)
+     * combination. Used by the empirical spec-baseline refresh.
+     *
+     * @param string $metric  CharacterRankingMetricType — 'dps' / 'hps' / 'playerscore'
+     * @param int    $difficulty  3=Normal / 4=Heroic / 5=Mythic
+     * @return array<int, array>  Rankings entries with name/server/amount/percentile/talents/gear/report{code,fightID,startTime}
+     */
+    public function fetchCharacterRankings(int $encounterId, string $className, string $specName, string $metric = 'dps', int $difficulty = 5, int $page = 1): array
+    {
+        $query = 'query ($encounterId: Int!, $metric: CharacterRankingMetricType!, $difficulty: Int!, $class: String, $spec: String, $page: Int) {
+          worldData {
+            encounter(id: $encounterId) {
+              characterRankings(metric: $metric, difficulty: $difficulty, className: $class, specName: $spec, page: $page)
+            }
+          }
+        }';
+
+        try {
+            $resp = $this->executeGraphql($query, [
+                'encounterId' => $encounterId,
+                'metric'      => $metric,
+                'difficulty'  => $difficulty,
+                'class'       => $className,
+                'spec'        => $specName,
+                'page'        => $page,
+            ]);
+        } catch (\Throwable $e) {
+            return [];
+        }
+
+        $payload = $resp['worldData']['encounter']['characterRankings'] ?? null;
+        // characterRankings returns a JSON-string-encoded blob in some queries;
+        // normalise both shapes.
+        if (is_string($payload)) {
+            $decoded = json_decode($payload, true);
+            $payload = is_array($decoded) ? $decoded : [];
+        }
+        return $payload['rankings'] ?? [];
+    }
+
+    /**
+     * Fetch a single parser's casts table + playerDetails for one fight.
+     * Used to derive empirical CPM / talent loadout / ability mix per top parser.
+     *
+     * @return array{casts: array, playerDetails: array, fight_duration_s: int}|null
+     */
+    public function fetchParserCasts(string $reportCode, int $fightId): ?array
+    {
+        $query = 'query ($reportCode: String!, $fightIds: [Int]!) {
+          reportData {
+            report(code: $reportCode) {
+              casts: table(dataType: Casts, fightIDs: $fightIds, hostilityType: Friendlies)
+              playerDetails(fightIDs: $fightIds)
+              fights(fightIDs: $fightIds) { id, startTime, endTime, kill }
+            }
+          }
+        }';
+
+        try {
+            $report = $this->executeGraphql($query, [
+                'reportCode' => $reportCode,
+                'fightIds'   => [$fightId],
+            ])['reportData']['report'] ?? null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if (!$report) return null;
+
+        $fight = $report['fights'][0] ?? null;
+        $duration = $fight ? (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000) : 0;
+
+        return [
+            'casts'             => $report['casts']['data'] ?? [],
+            'playerDetails'     => $report['playerDetails']['data']['playerDetails'] ?? [],
+            'fight_duration_s'  => $duration,
+        ];
+    }
+
     public function fetchZoneEncounters(int $zoneId): array
     {
         $query = <<<'GQL'
@@ -634,13 +714,32 @@ GQL;
             $fightStartTimes
         );
 
+        // Shared player cast snapshots (x/y per cast). Used both for debuff-removal
+        // coord correlation and for fight-centroid → death compass annotation.
+        $playerIdToName = [];
+        foreach ($cleanPlayers as $p) {
+            if (isset($p['id'], $p['name'])) $playerIdToName[$p['id']] = $p['name'];
+        }
+        $playerCoordSnapshots = $this->fetchPlayerCoordSnapshots($reportId, $fightIds, $playerIdToName);
+
         // Player coordinate tracking during key debuffs (proxy for puddle placement etc.)
         $playerCoords = $this->extractPlayerCoordsOnDebuffRemoval(
             $reportId,
             $fightIds,
             $tablesData['debuffs']['data']['auras'] ?? [],
             $cleanPlayers,
-            $fightStartTimes
+            $fightStartTimes,
+            $playerCoordSnapshots
+        );
+
+        // Death event coords + compass/distance annotation relative to per-fight raid centroid.
+        $fightCentroids = WclReportParserHelper::computeFightCentroids($playerCoordSnapshots);
+        $deathEventCoords = $this->fetchDeathEventCoords($reportId, $fightIds);
+        $cleanDeaths = WclReportParserHelper::annotateDeathsWithCompass(
+            $cleanDeaths,
+            $deathEventCoords,
+            $playerIdToName,
+            $fightCentroids
         );
 
 
@@ -694,10 +793,13 @@ GQL;
             'difficulties'        => $difficulties,
             'has_kills'           => $hasKills,
             'fight_durations'     => $durations,
+            'fight_start_times'   => $fightStartTimes,
             'phase_summary'       => $phaseSummary,
             'players'             => $cleanPlayers,
             'player_details'      => $playerDetails,
             'deaths'              => $cleanDeaths,
+            'death_event_coords'  => $deathEventCoords,
+            'player_coord_snapshots' => $playerCoordSnapshots,
             'major_damage_taken'  => array_slice($cleanDamageTaken, 0, 50),
             'target_damage'       => $targetDamage,
             'interrupts'          => $interrupts,
@@ -873,7 +975,7 @@ GQL;
      *
      * @return array [debuffName => ['applications' => int, 'positions' => [...], 'center_avg' => [x,y], 'outlier_drops' => int]]
      */
-    private function extractPlayerCoordsOnDebuffRemoval(string $reportId, array $fightIds, array $debuffAuras, array $cleanPlayers, array $fightStartTimes): array
+    private function extractPlayerCoordsOnDebuffRemoval(string $reportId, array $fightIds, array $debuffAuras, array $cleanPlayers, array $fightStartTimes, ?array $preFetchedSnapshots = null): array
     {
         // Debuffs whose expiration drops a puddle or positions matter
         $keywords = [
@@ -920,9 +1022,10 @@ GQL;
 
             // Fetch all player cast events with coords in this fight range
             // Query casts table and fetch events per fight for coords
+            $snapshots = $preFetchedSnapshots ?? $this->fetchPlayerCoordSnapshots($reportId, $fightIds, $playerMap);
             $positions = WclReportParserHelper::correlatePlayerCoordsWithEvents(
                 $removals,
-                $this->fetchPlayerCoordSnapshots($reportId, $fightIds, $playerMap),
+                $snapshots,
                 $playerMap,
                 $fightStartTimes
             );
@@ -966,17 +1069,19 @@ GQL;
                 $page = $data['reportData']['report']['events'] ?? [];
                 $events = $page['data'] ?? [];
 
-                // Filter immediately to keep only useful events — reduces memory pressure
+                // Filter immediately to keep only useful events — reduces memory pressure.
+                // abilityGameID is retained so DeathAttributionBuilder can detect
+                // defensive-CD usage (or absence) within death windows.
                 foreach ($events as $e) {
                     if (!isset($playerMap[$e['sourceID'] ?? null])) continue;
                     if (!isset($e['x'], $e['y'])) continue;
-                    // Keep only essential fields to save memory
                     $filtered[] = [
-                        'timestamp' => $e['timestamp'] ?? 0,
-                        'sourceID'  => $e['sourceID'],
-                        'fight'     => $e['fight'] ?? null,
-                        'x'         => $e['x'],
-                        'y'         => $e['y'],
+                        'timestamp'      => $e['timestamp'] ?? 0,
+                        'sourceID'       => $e['sourceID'],
+                        'fight'          => $e['fight'] ?? null,
+                        'x'              => $e['x'],
+                        'y'              => $e['y'],
+                        'abilityGameID'  => $e['abilityGameID'] ?? null,
                     ];
                 }
                 unset($events, $data, $page);
@@ -991,6 +1096,63 @@ GQL;
         }
 
         return $filtered;
+    }
+
+    /**
+     * Fetch death events with x/y per player. WCL Deaths events are sparse (one
+     * per player-death) so a single page is usually enough.
+     *
+     * @return array<int, array{timestamp: int, fight: int|null, targetID: int|null, x: int, y: int}>
+     */
+    private function fetchDeathEventCoords(string $reportId, array $fightIds): array
+    {
+        $query = 'query ($reportId: String!, $fightIds: [Int]!, $startTime: Float) {
+          reportData { report(code: $reportId) {
+            events(dataType: Deaths, fightIDs: $fightIds, killType: Encounters, includeResources: true, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+              data
+              nextPageTimestamp
+            }
+          } }
+        }';
+
+        $coords = [];
+        $startTime = 0.0;
+        $pagesFetched = 0;
+        $maxPages = 5;
+
+        try {
+            do {
+                $data = $this->executeGraphql($query, [
+                    'reportId'  => $reportId,
+                    'fightIds'  => $fightIds,
+                    'startTime' => $startTime,
+                ]);
+
+                $page = $data['reportData']['report']['events'] ?? [];
+                $events = $page['data'] ?? [];
+
+                foreach ($events as $e) {
+                    if (!isset($e['x'], $e['y'])) continue;
+                    $coords[] = [
+                        'timestamp' => $e['timestamp'] ?? 0,
+                        'fight'     => $e['fight'] ?? null,
+                        'targetID'  => $e['targetID'] ?? null,
+                        'x'         => (int) $e['x'],
+                        'y'         => (int) $e['y'],
+                    ];
+                }
+                unset($events, $data);
+
+                $next = $page['nextPageTimestamp'] ?? null;
+                $pagesFetched++;
+                if ($next === null || $next <= $startTime || $pagesFetched >= $maxPages) break;
+                $startTime = (float) $next;
+            } while (true);
+        } catch (\Exception $e) {
+            return $coords;
+        }
+
+        return $coords;
     }
 
     /**

@@ -112,6 +112,8 @@ class StaticGroup extends Model
         'rio_last_synced_at',
         'wcl_last_synced_at',
         'plan_tier',
+        'ai_tone',
+        'ai_death_cutoff',
     ];
 
     protected $casts = [
@@ -126,6 +128,8 @@ class StaticGroup extends Model
         'rio_last_synced_at' => 'datetime',
         'wcl_last_synced_at' => 'datetime',
         'plan_tier' => 'string',
+        'ai_tone' => 'string',
+        'ai_death_cutoff' => 'integer',
     ];
 
     public function newEloquentBuilder($query): StaticGroupBuilder

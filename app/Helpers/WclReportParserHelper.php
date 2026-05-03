@@ -903,7 +903,11 @@ class WclReportParserHelper
             }
         }
 
-        $summary = [];
+        $difficultyMap = [3 => 'Normal', 4 => 'Heroic', 5 => 'Mythic'];
+
+        // Group tries by raw boss name first; we may split into per-difficulty
+        // keys below if the same boss was attempted at multiple difficulties.
+        $byBoss = [];
         foreach ($raidFights as $fight) {
             $boss     = $fight['name'] ?? 'Unknown';
             $encId    = $fight['encounterID'] ?? 0;
@@ -912,6 +916,7 @@ class WclReportParserHelper
             $outcome   = ($fight['kill'] ?? false) ? 'kill' : 'wipe';
             $bossPct   = $fight['bossPercentage'] ?? null;
             $durationS = (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000);
+            $difficulty = $difficultyMap[$fight['difficulty'] ?? null] ?? null;
 
             // Skip accidental pulls / commanded wipes (short fight + boss barely damaged)
             if ($outcome === 'wipe' && $durationS < 30 && $bossPct !== null && $bossPct >= 90) {
@@ -924,13 +929,32 @@ class WclReportParserHelper
                     ?? ($isInter ? "Intermission {$lastPhase}" : "Phase {$lastPhase}");
             }
 
-            $summary[$boss][] = [
+            $byBoss[$boss][] = [
                 'fight_id'   => $fight['id'],
                 'outcome'    => $outcome,
                 'last_phase' => $phaseName,
                 'duration_s' => $durationS,
                 'boss_pct'   => $bossPct,
+                'difficulty' => $difficulty,
             ];
+        }
+
+        // Split same-boss-multiple-difficulties into separate encounter keys
+        // ("Salhadaar (Heroic)" / "Salhadaar (Mythic)") so the AI gets a
+        // distinct report per difficulty. Single-difficulty bosses keep their
+        // original name.
+        $summary = [];
+        foreach ($byBoss as $boss => $tries) {
+            $diffs = array_unique(array_filter(array_column($tries, 'difficulty')));
+            if (count($diffs) <= 1) {
+                $summary[$boss] = $tries;
+                continue;
+            }
+            foreach ($tries as $try) {
+                $diff = $try['difficulty'] ?? null;
+                $key  = $diff !== null ? "$boss ($diff)" : $boss;
+                $summary[$key][] = $try;
+            }
         }
 
         return $summary;
@@ -1522,5 +1546,114 @@ class WclReportParserHelper
         if ($ms === null) return null;
         $seconds = (int) round($ms / 1000);
         return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
+    }
+
+    /**
+     * Compute median (x,y) per fight from player cast snapshots. Used as
+     * raid-stack-point proxy for boss-relative compass calculation. Most raids
+     * stack near the boss so this is a good first approximation.
+     *
+     * @param array $playerCoordSnapshots [{timestamp, sourceID, fight, x, y}, ...]
+     * @return array<int, array{x: int, y: int}>  fight_id => centroid
+     */
+    public static function computeFightCentroids(array $playerCoordSnapshots): array
+    {
+        $byFight = [];
+        foreach ($playerCoordSnapshots as $snap) {
+            $f = $snap['fight'] ?? null;
+            if ($f === null) continue;
+            $byFight[$f]['x'][] = $snap['x'];
+            $byFight[$f]['y'][] = $snap['y'];
+        }
+
+        $centroids = [];
+        foreach ($byFight as $f => $axes) {
+            sort($axes['x']);
+            sort($axes['y']);
+            $n = count($axes['x']);
+            if ($n === 0) continue;
+            $centroids[$f] = [
+                'x' => (int) $axes['x'][intdiv($n, 2)],
+                'y' => (int) $axes['y'][intdiv($n, 2)],
+            ];
+        }
+        return $centroids;
+    }
+
+    /**
+     * Annotate each death with compass direction + distance bucket relative to
+     * the per-fight centroid. WCL coordinates are in 1/100-yard units
+     * (100 units = 1 yard). Compass uses 8-rose: N/NE/E/SE/S/SW/W/NW + center
+     * if death is at the centroid (rare).
+     *
+     * Distance bands (yards): close < 10 → 'close'; 10-30 → 'mid'; >30 → 'far'.
+     *
+     * @param array $groupedDeaths      bossName => tryKey => [death, ...]
+     * @param array $deathEventCoords   [{timestamp, fight, targetID, x, y}, ...]
+     * @param array $playerIdToName     [actorID => name]
+     * @param array $fightCentroids     fight_id => {x, y}
+     * @return array
+     */
+    public static function annotateDeathsWithCompass(
+        array $groupedDeaths,
+        array $deathEventCoords,
+        array $playerIdToName,
+        array $fightCentroids
+    ): array {
+        $byFightPlayer = [];
+        foreach ($deathEventCoords as $e) {
+            $name = $playerIdToName[$e['targetID']] ?? null;
+            if (!$name) continue;
+            $byFightPlayer[$e['fight']][$name][] = $e;
+        }
+
+        foreach ($groupedDeaths as $boss => &$tries) {
+            foreach ($tries as $tryKey => &$deaths) {
+                foreach ($deaths as &$death) {
+                    $fid  = $death['fight_id'] ?? null;
+                    $name = $death['player'] ?? null;
+                    if ($fid === null || !$name) continue;
+
+                    $candidates = $byFightPlayer[$fid][$name] ?? [];
+                    $centroid   = $fightCentroids[$fid] ?? null;
+                    if (empty($candidates) || !$centroid) continue;
+
+                    $coord = $candidates[0];
+                    $dx = $coord['x'] - $centroid['x'];
+                    $dy = $coord['y'] - $centroid['y'];
+
+                    $death['coord_compass']  = self::compassFromDelta($dx, $dy);
+                    $death['coord_distance'] = self::bucketDistance(sqrt($dx * $dx + $dy * $dy));
+                }
+            }
+        }
+        unset($tries, $deaths, $death);
+
+        return $groupedDeaths;
+    }
+
+    /**
+     * Convert delta (dx, dy) in WCL units to 8-rose compass direction.
+     * WCL axes: +x = east, +y = north (game-screen north).
+     */
+    private static function compassFromDelta(float $dx, float $dy): string
+    {
+        if ($dx == 0.0 && $dy == 0.0) return 'center';
+        $angleRad = atan2($dx, $dy);  // 0 = north, π/2 = east
+        $angleDeg = fmod($angleRad * 180.0 / M_PI + 360.0, 360.0);
+        $directions = ['N','NE','E','SE','S','SW','W','NW','N'];
+        $idx = (int) round($angleDeg / 45.0);
+        return $directions[$idx];
+    }
+
+    /**
+     * Bucket WCL-unit distance into yard bands. 100 units = 1 yard.
+     */
+    private static function bucketDistance(float $distUnits): string
+    {
+        $yards = $distUnits / 100.0;
+        if ($yards < 10) return 'close';
+        if ($yards < 30) return 'mid';
+        return 'far';
     }
 }

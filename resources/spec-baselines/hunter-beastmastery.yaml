@@ -101,3 +101,60 @@ rotation_checks:
     cooldown_seconds: 360.0
     recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Fallen-King Salhadaar'
+    - Vorasius
+    - 'Lightblinded Vanguard'
+  sample_size: 30
+  abilities:
+    34026:
+      name: 'Kill Command'
+      cpm_median: 17.72
+      cpm_p95: 19.38
+      casts_median: 101
+      casts_p95: 134
+      sample: 30
+      description: 'Give the command to kill, causing your pet to charge your target and savagely deal 72 Physical damage to the enemy.'
+    193455:
+      name: 'Cobra Shot'
+      cpm_median: 10.47
+      cpm_p95: 18.19
+      casts_median: 68
+      casts_p95: 92
+      sample: 30
+      description: 'A quick shot causing 109 Physical damage. Reduces the cooldown of Kill Command by 1 sec.'
+    217200:
+      name: 'Barbed Shot'
+      cpm_median: 10.9
+      cpm_p95: 13.89
+      casts_median: 54
+      casts_p95: 102
+      sample: 30
+      description: 'Fire a shot that tears through your enemy, causing them to bleed for 136 damage over 12 sec. If Barbed Shot is reapplied, any remaining damage will be added to the new Barbed Shot. Generates 20 Focus over 8 sec.'
+    1264359:
+      name: 'Wild Thrash'
+      cpm_median: 6.2
+      cpm_p95: 6.97
+      casts_median: 46
+      casts_p95: 52
+      sample: 17
+      description: 'Command your pet to thrash all enemies within 10 yds, dealing 66 Physical damage to them. Damage is increased by 200% if Wild Thrash hits 2 or more enemies. Deals reduced damage beyond 8 targets.'
+    1283818:
+      name: 'Dire Beast'
+      cpm_median: 4.62
+      cpm_p95: 11.14
+      casts_median: 33
+      casts_p95: 59
+      sample: 18
+      description: null
+    19574:
+      name: 'Bestial Wrath'
+      cpm_median: 2.0
+      cpm_p95: 2.12
+      casts_median: 9
+      casts_p95: 14
+      sample: 16
+      description: 'Sends you and your pet into a rage, instantly dealing 280 Physical damage to its target, and increasing all damage you both deal by 20% for 15 sec. Removes all crowd control effects from your pet.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

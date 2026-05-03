@@ -6,6 +6,7 @@ use App\Enums\Locale;
 use App\Helpers\DiscordWebhookBuilder;
 use App\Models\PersonalTacticalReport;
 use App\Models\TacticalReport;
+use App\Services\Analysis\AiDeathSuppressor;
 use App\Services\Analysis\BlockSchema;
 use App\Services\Analysis\EncounterSnapshotService;
 use App\Services\Analysis\GeminiService;
@@ -23,8 +24,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $timeout = 1200;
-    public int $uniqueFor = 1800;
+    public int $timeout = 2400;
+    public int $uniqueFor = 3000;
     public int $tries = 1;
     public int $backoff = 60;
 
@@ -49,7 +50,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
         EncounterSnapshotService $snapshotService,
         TrendAnalyzer $trendAnalyzer,
         DiscordWebhookService $webhookService,
-        RaidPayloadStorage $payloadStorage
+        RaidPayloadStorage $payloadStorage,
+        AiDeathSuppressor $deathSuppressor
     ): void {
         // Large preprocessed JSON + Gemini HTTP pool responses can briefly exceed
         // the default worker memory ceiling; cap within the job to stay well under
@@ -111,7 +113,15 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 }
             }
 
-            $preprocessedJson = json_encode($preprocessed, JSON_UNESCAPED_UNICODE);
+            // AI-only filter: cascade-suppress deaths in the last 10s of each pull,
+            // cap to first N (per-static setting), drop pulls < 20s. Snapshots and
+            // trends above use the unfiltered $preprocessed.
+            $aiPreprocessed = $deathSuppressor->suppress(
+                $preprocessed,
+                (int) ($static->ai_death_cutoff ?? 5)
+            );
+
+            $preprocessedJson = json_encode($aiPreprocessed, JSON_UNESCAPED_UNICODE);
 
             // Player details + raid-wide consumables stay raid-wide (don't change per encounter)
             $supplementary = json_encode([
@@ -119,9 +129,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             ], JSON_UNESCAPED_UNICODE);
 
             // Stage 3a: build the stable context block + persist to disk so chat
-            // can recreate an explicit cache on demand. No paid Gemini cache here —
-            // generation relies on Gemini's free implicit prefix-cache across the
-            // 24+ calls in this batch.
+            // can recreate an explicit cache on demand.
             $contextContent = $geminiService->buildRaidContextContent($preprocessedJson, $supplementary);
             $payloadStorage->store($this->report->id, $contextContent);
 
@@ -130,50 +138,114 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 'context_size' => strlen($contextContent),
             ]);
 
-            // Stage 3b: main raid-wide report (single call, inline content)
-            $main = $geminiService->generateMainReportBlocks($contextContent);
-            $mainBlocks = $blockSchema->sanitize($main['main']);
-            $title = $main['title'] ?: ($logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis');
+            // Stage 3a.5: explicit cache scoped to this generation run. Preview-tier
+            // models have a tight TPM bucket — sending the full ~290K-token context
+            // inline 17 times forced ~40s-per-call recovery and stretched the job to
+            // 15 minutes. Caching the prefix server-side cuts each per-call payload
+            // to ~10K (instructions only) and lifts the TPM ceiling. Storage cost is
+            // ~$1/M-tokens-stored × ~5 minutes ≈ a few cents per raid — far below
+            // the time savings.
+            $tone = $static->ai_tone ?? 'neutral';
+            $genCache = $geminiService->createRaidCache($contextContent, 600);
+            $genCacheId = $genCache['cache_id'] ?? null;
+            if ($genCacheId) {
+                Log::info('Generation cache created', [
+                    'report_id'  => $this->report->id,
+                    'cache_id'   => $genCacheId,
+                    'expires_at' => $genCache['expires_at'] ?? null,
+                ]);
+            } else {
+                Log::warning('Generation cache creation failed — falling back to inline path', [
+                    'report_id' => $this->report->id,
+                ]);
+            }
 
-            $this->report->update([
-                'title'                   => $title,
-                'difficulties'            => $difficulties,
-                'ai_blocks'               => $mainBlocks,
-                'model'                   => config('services.gemini.pro_model'),
-                'prompt_version'          => (string) config('ai_report.prompt_version', 'v1'),
-                'gemini_cache_id'         => null,
-                'gemini_cache_expires_at' => null,
-            ]);
+            try {
+                // Stage 3b: main raid-wide report
+                $raidLeaderLocale = $localization['raid_leader']['locale'] ?? 'English';
+                $main = $geminiService->generateMainReportBlocks($contextContent, $tone, $genCacheId, $raidLeaderLocale);
+                $mainBlocks = $blockSchema->sanitize($main['main']);
+                $title = $main['title'] ?: ($logData['raid_title'] ?? $this->report->title ?? 'Raid Analysis');
 
-            // Stage 3c: per-player reports (parallel batches via Http::pool)
-            $rosterCharacters = $static->characters;
-            $actualParticipantNames = array_column($logData['players'] ?? [], 'name');
+                $this->report->update([
+                    'title'                   => $title,
+                    'difficulties'            => $difficulties,
+                    'ai_blocks'               => $mainBlocks,
+                    'model'                   => config('services.gemini.pro_model'),
+                    'prompt_version'          => (string) config('ai_report.prompt_version', 'v1'),
+                    'format_version'          => 2,
+                    'gemini_cache_id'         => null,
+                    'gemini_cache_expires_at' => null,
+                ]);
 
-            // Only generate for players who are in BOTH the log AND the roster
-            $targetPlayers = array_values(array_filter(
-                $actualParticipantNames,
-                fn($name) => $rosterCharacters->contains(fn($c) => strtolower($c->name) === strtolower(trim($name)))
-            ));
+                // Stage 3c: per-player reports (parallel via Http::pool)
+                $rosterCharacters = $static->characters;
+                $actualParticipantNames = array_column($logData['players'] ?? [], 'name');
 
-            if (!empty($targetPlayers)) {
-                $playerReports = $geminiService->generatePlayerReportBlocks($contextContent, $targetPlayers, 5);
+                // Only generate for players who are in BOTH the log AND the roster
+                $targetPlayers = array_values(array_filter(
+                    $actualParticipantNames,
+                    fn($name) => $rosterCharacters->contains(fn($c) => strtolower($c->name) === strtolower(trim($name)))
+                ));
 
-                foreach ($playerReports as $playerName => $blocks) {
-                    if (empty($blocks)) continue;
+                if (!empty($targetPlayers)) {
+                    $concurrency = $genCacheId ? 5 : 1;
+                    $reportId = $this->report->id;
 
-                    $character = $rosterCharacters->first(
-                        fn($c) => strtolower($c->name) === strtolower(trim($playerName))
+                    // Pre-resolved per-player locale map. Without this the
+                    // model has to look up the player in the cached
+                    // localization map and ~19% picked the wrong language.
+                    $playerLocales = [];
+                    foreach ($localization['participants'] ?? [] as $entry) {
+                        if (!empty($entry['name']) && !empty($entry['locale'])) {
+                            $playerLocales[$entry['name']] = $entry['locale'];
+                        }
+                    }
+
+                    // Stream-save each successful personal report the moment
+                    // its API call returns. If the job hits its timeout while
+                    // the rest are still rate-limit-waiting, the saved ones
+                    // survive — earlier behaviour lost everything when timeout
+                    // hit during the batch loop.
+                    $onPlayerComplete = function (string $playerName, array $blocks) use (
+                        $rosterCharacters, $blockSchema, $reportId
+                    ): void {
+                        if (empty($blocks)) return;
+
+                        $character = $rosterCharacters->first(
+                            fn($c) => strtolower($c->name) === strtolower(trim($playerName))
+                        );
+                        if (!$character) return;
+
+                        $sanitized = $blockSchema->sanitize($blocks);
+                        PersonalTacticalReport::updateOrCreate(
+                            [
+                                'tactical_report_id' => $reportId,
+                                'character_id'       => $character->id,
+                            ],
+                            ['ai_blocks' => $sanitized]
+                        );
+                    };
+
+                    $geminiService->generatePlayerReportBlocks(
+                        $contextContent,
+                        $targetPlayers,
+                        $concurrency,
+                        $tone,
+                        $genCacheId,
+                        $onPlayerComplete,
+                        $playerLocales
                     );
-                    if (!$character) continue;
-
-                    $sanitized = $blockSchema->sanitize($blocks);
-                    PersonalTacticalReport::updateOrCreate(
-                        [
-                            'tactical_report_id' => $this->report->id,
-                            'character_id'       => $character->id,
-                        ],
-                        ['ai_blocks' => $sanitized]
-                    );
+                }
+            } finally {
+                // Always release the generation cache — chat creates its own
+                // explicit cache via AiAnalystService::activateChat().
+                if ($genCacheId) {
+                    $geminiService->deleteCachedContext($genCacheId);
+                    Log::info('Generation cache released', [
+                        'report_id' => $this->report->id,
+                        'cache_id'  => $genCacheId,
+                    ]);
                 }
             }
 

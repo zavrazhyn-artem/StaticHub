@@ -79,4 +79,24 @@ class GeminiResponseFormatter
         // caller's json_decode failure carries useful diagnostic preview.
         return substr($text, $start);
     }
+
+    /**
+     * Repair the `{ "<type-name>", ...` typo where the model dropped the
+     * `"type":` key but kept the type name as a bare string. Pattern is always
+     * malformed JSON (a quoted key must be followed by `:`, never `,`), so
+     * this transform is safe — it only matches genuinely broken structures.
+     *
+     * @param string   $json
+     * @param string[] $knownTypes  Known block type identifiers (BlockSchema::TYPES)
+     */
+    public static function repairBareTypeKeys(string $json, array $knownTypes): string
+    {
+        if (empty($knownTypes)) return $json;
+        $alt = implode('|', array_map('preg_quote', $knownTypes));
+        return preg_replace(
+            '/(\{\s*)"(' . $alt . ')"\s*,/',
+            '$1"type": "$2",',
+            $json
+        );
+    }
 }

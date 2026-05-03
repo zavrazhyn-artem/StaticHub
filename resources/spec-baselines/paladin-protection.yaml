@@ -8,35 +8,35 @@ rotation_checks:
     ability_id: 31884
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Sentinel
     ability_id: 389539
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Divine Toll'
     ability_id: 375576
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Eye of Tyr'
     ability_id: 387174
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Moment of Glory'
     ability_id: 327193
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Bastion of Light'
@@ -50,14 +50,14 @@ rotation_checks:
     ability_id: 31935
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Holy Armaments'
     ability_id: 432459
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Judgment
@@ -71,14 +71,14 @@ rotation_checks:
     ability_id: 1241288
     check: cast_efficiency
     cooldown_seconds: 7.5
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: Consecration
     ability_id: 26573
     check: cast_efficiency
     cooldown_seconds: 4.5
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Blessed Hammer'
@@ -92,40 +92,89 @@ rotation_checks:
     ability_id: 31850
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.60
+    recommended_efficiency: 0.6
     severity: minor
   -
     ability: 'Guardian of Ancient Kings'
     ability_id: 86659
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Blessing of Spellwarding'
     ability_id: 204018
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Lay on Hands'
     ability_id: 633
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.10
+    recommended_efficiency: 0.1
     severity: minor
   -
     ability: 'Divine Shield'
     ability_id: 642
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Blessing of Sacrifice'
     ability_id: 6940
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 28
+  abilities:
+    53600:
+      name: 'Shield of the Righteous'
+      cpm_median: 21.01
+      cpm_p95: 23.72
+      casts_median: 132
+      casts_p95: 175
+      sample: 28
+      description: 'Slams enemies in front of you with your shield, causing 33 Holy damage, and increasing your Armor by 608 for 4.5 sec.'
+    204019:
+      name: 'Blessed Hammer'
+      cpm_median: 15.91
+      cpm_p95: 17.22
+      casts_median: 97
+      casts_p95: 141
+      sample: 28
+      description: 'Throws a Blessed Hammer that spirals outward, dealing 8 Holy damage to enemies and reducing the next damage they deal to you by 11. Generates 1 Holy Power.'
+    275779:
+      name: Judgment
+      cpm_median: 10.97
+      cpm_p95: 12.33
+      casts_median: 74
+      casts_p95: 95
+      sample: 28
+      description: 'Judges the target, dealing 707 Holy damage.'
+    1241413:
+      name: 'Hammer of Wrath'
+      cpm_median: 6.73
+      cpm_p95: 8.35
+      casts_median: 45
+      casts_p95: 58
+      sample: 27
+      description: null
+    31935:
+      name: "Avenger's Shield"
+      cpm_median: 5.71
+      cpm_p95: 6.53
+      casts_median: 37
+      casts_p95: 49
+      sample: 23
+      description: 'Hurls your shield at an enemy target, dealing 54 Holy damage, interrupting and silencing the non-Player target for 3 sec, and then jumping to 2 additional nearby enemies.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

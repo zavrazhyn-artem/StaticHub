@@ -8,49 +8,49 @@ rotation_checks:
     ability_id: 106951
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Incarnation: Avatar of Ashamane'
     ability_id: 102543
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: "Tiger's Fury"
     ability_id: 5217
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Convoke the Spirits'
     ability_id: 391528
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Feral Frenzy'
     ability_id: 274837
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Frantic Frenzy'
     ability_id: 1243807
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Chomp
     ability_id: 1244258
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Adaptive Swarm'
@@ -64,19 +64,68 @@ rotation_checks:
     ability_id: 22812
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Survival Instincts'
     ability_id: 61336
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Renewal
     ability_id: 108238
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    5221:
+      name: Shred
+      cpm_median: 14.82
+      cpm_p95: 17.36
+      casts_median: 79
+      casts_p95: 126
+      sample: 30
+      description: 'Shred the target, causing 75 Physical damage to the target. Awards 1 combo point.'
+    22568:
+      name: 'Ferocious Bite'
+      cpm_median: 10.78
+      cpm_p95: 13.67
+      casts_median: 63
+      casts_p95: 90
+      sample: 30
+      description: 'Finishing move that causes Physical damage per combo point and consumes up to 25 additional Energy to increase damage by up to 100%. 1 point : 9 damage 2 points: 19 damage 3 points: 27 damage 4 points: 37 damage 5 points: 46 damage'
+    155625:
+      name: Moonfire
+      cpm_median: 4.77
+      cpm_p95: 6.89
+      casts_median: 29
+      casts_p95: 52
+      sample: 29
+      description: null
+    1822:
+      name: Rake
+      cpm_median: 5.28
+      cpm_p95: 7.68
+      casts_median: 33
+      casts_p95: 43
+      sample: 30
+      description: 'Rake the target for 10 Bleed damage and an additional 57 Bleed damage over 15 sec. Awards 1 combo point.'
+    1079:
+      name: Rip
+      cpm_median: 3.48
+      cpm_p95: 5.24
+      casts_median: 22
+      casts_p95: 30
+      sample: 21
+      description: 'Finishing move that causes Bleed damage over time. Lasts longer per combo point. 1 point : 8 over 1 sec 2 points: 12 over 2 sec 3 points: 16 over 3 sec 4 points: 20 over 3 sec 5 points: 24 over 4 sec'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

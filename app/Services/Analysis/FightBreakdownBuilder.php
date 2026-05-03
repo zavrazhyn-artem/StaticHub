@@ -65,6 +65,7 @@ class FightBreakdownBuilder
                 'duration_s'          => $duration,
                 'boss_hp_end_pct'     => isset($t['boss_pct']) ? (float) $t['boss_pct'] : null,
                 'last_phase'          => $t['last_phase'] ?? null,
+                'difficulty'          => $t['difficulty'] ?? null,
                 'deaths'              => $deaths,
                 'wipe_called_count'   => $wipeCalled,
                 'tank_loss_count'     => $tankLoss,

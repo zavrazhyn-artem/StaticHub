@@ -8,14 +8,14 @@ rotation_checks:
     ability_id: 115310
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Restoral
     ability_id: 388615
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: "Invoke Yu'lon, the Jade Serpent"
@@ -36,7 +36,7 @@ rotation_checks:
     ability_id: 443028
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Mana Tea'
@@ -50,14 +50,14 @@ rotation_checks:
     ability_id: 116849
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Thunder Focus Tea'
     ability_id: 116680
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Renewing Mist'
@@ -71,7 +71,7 @@ rotation_checks:
     ability_id: 399491
     check: cast_efficiency
     cooldown_seconds: 8.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Jadefire Stomp'
@@ -85,33 +85,88 @@ rotation_checks:
     ability_id: 107428
     check: cast_efficiency
     cooldown_seconds: 12.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Rushing Wind Kick'
     ability_id: 467307
     check: cast_efficiency
     cooldown_seconds: 12.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Fortifying Brew'
     ability_id: 115203
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Diffuse Magic'
     ability_id: 1243287
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Dampen Harm'
     ability_id: 122278
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+  sample_size: 8
+  abilities:
+    399491:
+      name: "Sheilun's Gift"
+      cpm_median: 15.13
+      cpm_p95: 15.67
+      casts_median: 132
+      casts_p95: 138
+      sample: 6
+      description: null
+    467307:
+      name: 'Rushing Wind Kick'
+      cpm_median: 9.69
+      cpm_p95: 11.22
+      casts_median: 86
+      casts_p95: 98
+      sample: 8
+      description: null
+    115151:
+      name: 'Renewing Mist'
+      cpm_median: 5.09
+      cpm_p95: 10.58
+      casts_median: 44
+      casts_p95: 92
+      sample: 8
+      description: null
+    124682:
+      name: 'Enveloping Mist'
+      cpm_median: 5.95
+      cpm_p95: 7.77
+      casts_median: 52
+      casts_p95: 68
+      sample: 8
+      description: 'Wraps the target in healing mists, healing for 3,189 over 6 sec, and increasing healing received from your other spells by 10%.'
+    115175:
+      name: 'Soothing Mist'
+      cpm_median: 3.64
+      cpm_p95: 4.04
+      casts_median: 32
+      casts_p95: 35
+      sample: 5
+      description: 'Heals the target for 6,386 over 7.1 sec. While channeling, Enveloping Mist and Vivify may be cast instantly on the target.'
+    115294:
+      name: 'Mana Tea'
+      cpm_median: 3.9
+      cpm_p95: 4.55
+      casts_median: 34
+      casts_p95: 39
+      sample: 3
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

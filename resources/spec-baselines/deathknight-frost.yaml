@@ -87,3 +87,52 @@ rotation_checks:
     cooldown_seconds: 120.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 29
+  abilities:
+    49020:
+      name: Obliterate
+      cpm_median: 16.83
+      cpm_p95: 22.69
+      casts_median: 99
+      casts_p95: 147
+      sample: 29
+      description: 'A brutal attack that deals 42 Physical and 41 Frost damage.'
+    49143:
+      name: 'Frost Strike'
+      cpm_median: 13.41
+      cpm_p95: 15.33
+      casts_median: 74
+      casts_p95: 96
+      sample: 29
+      description: 'Chill your weapon with icy power and quickly strike the enemy, dealing 47 Frost damage.'
+    49184:
+      name: 'Howling Blast'
+      cpm_median: 9.72
+      cpm_p95: 11.79
+      casts_median: 55
+      casts_p95: 75
+      sample: 29
+      description: 'Blast the target with a frigid wind, dealing 8 Frost damage to that foe, and reduced damage to all other enemies within 10 yards, infecting all targets with Frost Fever. Frost Fever A disease that deals 59 Frost damage over 24 sec and ha...'
+    47568:
+      name: 'Empower Rune Weapon'
+      cpm_median: 6.61
+      cpm_p95: 7.34
+      casts_median: 37
+      casts_p95: 50
+      sample: 29
+      description: 'Drain the will of your enemy to empower your rune weapon, dealing 70 Shadowfrost damage and reduced damage to enemies nearby, gaining 40 Runic Power, and grants you Killing Machine.'
+    441424:
+      name: Exterminate
+      cpm_median: 3.73
+      cpm_p95: 4.23
+      casts_median: 21
+      casts_p95: 30
+      sample: 26
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

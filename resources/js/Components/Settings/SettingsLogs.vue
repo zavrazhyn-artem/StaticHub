@@ -11,6 +11,8 @@ const props = defineProps({
     guildInfo:              { type: Object, default: null },
     autoFetchLogs:          { type: Boolean, default: false },
     autoFetchDelayMinutes:  { type: Number, default: 30 },
+    aiTone:                 { type: String, default: 'neutral' },
+    aiDeathCutoff:          { type: Number, default: 5 },
     updateUrl:              { type: String, required: true },
     connectGuildUrl:        { type: String, required: true },
     disconnectGuildUrl:     { type: String, required: true },
@@ -34,6 +36,16 @@ const connectError = ref('');
 const autoFetch = ref(props.autoFetchLogs);
 const delayMinutes = ref(props.autoFetchDelayMinutes);
 
+// === AI tuning ===
+const aiTone = ref(props.aiTone);
+const aiDeathCutoff = ref(props.aiDeathCutoff);
+
+const toneOptions = [
+    { value: 'friendly', label: __('Friendly'),  hint: __('Encouraging, supportive language.') },
+    { value: 'neutral',  label: __('Neutral'),   hint: __('Direct and analytical.') },
+    { value: 'strict',   label: __('Strict'),    hint: __('Blunt, no hand-holding.') },
+];
+
 // === Info modal ===
 const showInfoModal = ref(false);
 
@@ -56,6 +68,8 @@ function autoSave() {
             body: JSON.stringify({
                 auto_fetch_logs: autoFetch.value,
                 auto_fetch_delay_minutes: delayMinutes.value,
+                ai_tone: aiTone.value,
+                ai_death_cutoff: aiDeathCutoff.value,
             }),
         });
     }, 500);
@@ -63,6 +77,8 @@ function autoSave() {
 
 watch(autoFetch, autoSave);
 watch(delayMinutes, autoSave);
+watch(aiTone, autoSave);
+watch(aiDeathCutoff, autoSave);
 
 // === Guild connect ===
 async function connectGuild() {
@@ -275,6 +291,48 @@ async function disconnectGuild() {
                                 {{ __('Auto-fetch logs enabled') }}
                             </span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tone selector -->
+                <div class="bg-black/20 rounded-xl p-6 border border-white/5 space-y-4">
+                    <div>
+                        <p class="text-3xs text-white font-black uppercase tracking-widest font-headline">{{ __('Report Tone') }}</p>
+                        <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider mt-0.5">{{ __('Applies to all AI reports generated for this static.') }}</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button
+                            v-for="opt in toneOptions"
+                            :key="opt.value"
+                            type="button"
+                            @click="aiTone = opt.value"
+                            class="px-4 py-3 rounded-lg border text-left transition-all"
+                            :class="aiTone === opt.value
+                                ? 'bg-slate-400/10 border-slate-400/40 text-white'
+                                : 'bg-black/20 border-white/5 text-on-surface-variant hover:text-white hover:border-white/20'">
+                            <p class="text-xs font-bold uppercase tracking-wider">{{ opt.label }}</p>
+                            <p class="text-4xs font-medium opacity-70 mt-1 leading-relaxed">{{ opt.hint }}</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Death cutoff -->
+                <div class="bg-black/20 rounded-xl p-6 border border-white/5 space-y-4">
+                    <div class="flex items-end justify-between gap-6">
+                        <div>
+                            <p class="text-3xs text-white font-black uppercase tracking-widest font-headline">{{ __('Deaths Tracked Per Pull') }}</p>
+                            <p class="text-4xs text-on-surface-variant font-medium uppercase tracking-wider mt-0.5">{{ __('How many of the first deaths in each pull the AI sees. UI still shows all deaths.') }}</p>
+                        </div>
+                        <div class="bg-surface-container-highest border border-white/5 rounded-lg px-4 py-2 font-headline text-lg font-bold text-white tracking-widest min-w-[64px] text-center">
+                            {{ aiDeathCutoff }}
+                        </div>
+                    </div>
+                    <input type="range"
+                           v-model.number="aiDeathCutoff"
+                           min="3" max="10" step="1"
+                           class="w-full accent-slate-400">
+                    <div class="flex justify-between text-4xs text-on-surface-variant/60 font-semibold uppercase tracking-wider">
+                        <span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
                     </div>
                 </div>
             </div>

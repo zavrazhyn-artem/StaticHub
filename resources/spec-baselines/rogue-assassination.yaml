@@ -8,35 +8,35 @@ rotation_checks:
     ability_id: 360194
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Kingsbane
     ability_id: 385627
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Shiv
     ability_id: 5938
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Echoing Reprimand'
     ability_id: 385616
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Sepsis
     ability_id: 328547
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Exsanguinate
@@ -50,7 +50,7 @@ rotation_checks:
     ability_id: 382245
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Indiscriminate Carnage'
@@ -64,7 +64,7 @@ rotation_checks:
     ability_id: 1856
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Thistle Tea'
@@ -78,40 +78,97 @@ rotation_checks:
     ability_id: 703
     check: cast_efficiency
     cooldown_seconds: 6.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Cloak of Shadows'
     ability_id: 31224
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Evasion
     ability_id: 5277
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Feint
     ability_id: 1966
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Crimson Vial'
     ability_id: 185311
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Kick
     ability_id: 1766
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    1329:
+      name: Mutilate
+      cpm_median: 17.85
+      cpm_p95: 19.2
+      casts_median: 93
+      casts_p95: 159
+      sample: 30
+      description: 'Attack with both weapons, dealing a total of 42 Physical damage. Awards 2 combo points.'
+    32645:
+      name: Envenom
+      cpm_median: 13.88
+      cpm_p95: 15.82
+      casts_median: 81
+      casts_p95: 107
+      sample: 30
+      description: 'Finishing move that drives your poisoned blades in deep, dealing instant Nature damage and increasing your poison application chance by 30%. Damage and duration increased per combo point. 1 point : 13 damage, 1 sec 2 points: 27 damage, 2...'
+    452536:
+      name: 'Hand of Fate'
+      cpm_median: 11.11
+      cpm_p95: 13.7
+      casts_median: 68
+      casts_p95: 94
+      sample: 30
+      description: 'Flip a Fatebound Coin each time a finishing move consumes 5 or more combo points. Heads increases the damage of your attacks by 10%, lasting 15 sec or until you flip Tails. Tails deals 58 Cosmic damage to your target. For each time the s...'
+    8676:
+      name: Ambush
+      cpm_median: 5.13
+      cpm_p95: 6.55
+      casts_median: 32
+      casts_p95: 44
+      sample: 23
+      description: 'Ambush the target, causing 95 Physical damage. Awards 2 combo points.'
+    703:
+      name: Garrote
+      cpm_median: 2.93
+      cpm_p95: 4.23
+      casts_median: 23
+      casts_p95: 26
+      sample: 16
+      description: 'Garrote the enemy, causing 159 Bleed damage over 18 sec. Awards 1 combo point.'
+    1247227:
+      name: 'Crimson Tempest'
+      cpm_median: 4.13
+      cpm_p95: 5.4
+      casts_median: 20
+      casts_p95: 33
+      sample: 16
+      description: 'Slash all enemies within 10 yds dealing 38 damage. Deals reduced damage beyond 5 targets. Copy the longest Garrote and Rupture on the enemies you hit onto up to 2 other enemies. Awards 1 combo point.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

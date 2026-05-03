@@ -129,3 +129,52 @@ rotation_checks:
     cooldown_seconds: 15.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    184367:
+      name: Rampage
+      cpm_median: 17.12
+      cpm_p95: 19.4
+      casts_median: 109
+      casts_p95: 148
+      sample: 30
+      description: 'Unleash a series of 4 brutal strikes for a total of 104 Physical damage. Enrages you.'
+    385060:
+      name: "Odyn's Fury"
+      cpm_median: 9.49
+      cpm_p95: 10.78
+      casts_median: 60
+      casts_p95: 88
+      sample: 29
+      description: null
+    6343:
+      name: 'Thunder Clap'
+      cpm_median: 12.29
+      cpm_p95: 16.83
+      casts_median: 89
+      casts_p95: 103
+      sample: 30
+      description: 'Blasts all enemies within 8 yards for 81 Physical damage and reduces their movement speed by 20% for 10 sec. Deals reduced damage beyond 5 targets. If you know Rend, inflicts Rend on all targets.'
+    23881:
+      name: Bloodthirst
+      cpm_median: 10.92
+      cpm_p95: 13.12
+      casts_median: 71
+      casts_p95: 84
+      sample: 30
+      description: 'Assault the target in a bloodthirsty craze, dealing 146 Physical damage and restoring 3% of your health. Generates 8 Rage and has a 30% chance to Enrage you.'
+    335096:
+      name: Bloodbath
+      cpm_median: 6.15
+      cpm_p95: 7.49
+      casts_median: 41
+      casts_p95: 54
+      sample: 23
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

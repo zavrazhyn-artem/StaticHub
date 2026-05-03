@@ -52,3 +52,60 @@ rotation_checks:
     cooldown_seconds: 25.0
     recommended_efficiency: 0.75
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    201427:
+      name: Annihilation
+      cpm_median: 11.72
+      cpm_p95: 15.52
+      casts_median: 75
+      casts_p95: 95
+      sample: 30
+      description: null
+    162794:
+      name: 'Chaos Strike'
+      cpm_median: 11.58
+      cpm_p95: 13.71
+      casts_median: 76
+      casts_p95: 93
+      sample: 30
+      description: 'Slice your target for 27 Chaos damage. Chaos Strike has a 20% chance to refund 20 Fury.'
+    185123:
+      name: 'Throw Glaive'
+      cpm_median: 8.04
+      cpm_p95: 9.17
+      casts_median: 56
+      casts_p95: 68
+      sample: 17
+      description: 'Throw a demonic glaive at the target, dealing 17 Physical damage. The glaive can ricochet to an additional enemy within 10 yards.'
+    210152:
+      name: 'Death Sweep'
+      cpm_median: 6.75
+      cpm_p95: 8.15
+      casts_median: 44
+      casts_p95: 57
+      sample: 30
+      description: null
+    258920:
+      name: 'Immolation Aura'
+      cpm_median: 5.27
+      cpm_p95: 6.01
+      casts_median: 34
+      casts_p95: 44
+      sample: 26
+      description: 'Engulf yourself in flames, radiating 28 Fire damage over 6 sec.'
+    232893:
+      name: Felblade
+      cpm_median: 3.44
+      cpm_p95: 5.5
+      casts_median: 19
+      casts_p95: 33
+      sample: 13
+      description: 'Charge to your target and deal 43 Fire damage. Generates 15 Fury.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

@@ -1,0 +1,13 @@
+============================================================
+TONE: FRIENDLY
+============================================================
+
+Voice rules for ALL prose, alerts, directives, and callouts in this report:
+
+- Encouraging, supportive, growth-oriented language. Frame mistakes as learning opportunities, not failures.
+- Lead callouts with what worked or improved before raising what could be better.
+- Use inclusive framing when appropriate ("our pre-pull preparation", "the raid's positioning") rather than blaming individuals.
+- Soften blunt verbs: "missed an opportunity", "could improve", "would benefit from", "ran into trouble with" — instead of "failed", "blew up", "wasted", "ignored".
+- Coaching Plan items still concrete and actionable, but phrased as offers ("Try popping CDs sooner — we left ~6% extra DPS on the table").
+- ZERO sarcasm, condescension, or back-handed compliments.
+- Specificity is non-negotiable — friendly does NOT mean vague. Always cite the exact moment, ability, or pull.

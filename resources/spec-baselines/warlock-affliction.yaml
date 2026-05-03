@@ -8,14 +8,14 @@ rotation_checks:
     ability_id: 205180
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Dark Harvest'
     ability_id: 1257052
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Haunt
@@ -50,54 +50,119 @@ rotation_checks:
     ability_id: 386997
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Mortal Coil'
     ability_id: 6789
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Howl of Terror'
     ability_id: 5484
     check: cast_efficiency
     cooldown_seconds: 40.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Shadowfury
     ability_id: 30283
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Unending Resolve'
     ability_id: 104773
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Dark Pact'
     ability_id: 108416
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Demonic Circle: Teleport'
     ability_id: 48020
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Fel Domination'
     ability_id: 333889
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 21
+  abilities:
+    1259790:
+      name: 'Unstable Affliction'
+      cpm_median: 14.77
+      cpm_p95: 18.58
+      casts_median: 86
+      casts_p95: 121
+      sample: 21
+      description: 'Afflicts the target with 1,072 Shadow damage over 8 sec. Multiple uses of this ability may overlap. If dispelled, deals 12,375 damage to the dispeller and silences them for 4 sec. This damage is increased by 15% per stack on the target. ...'
+    686:
+      name: 'Shadow Bolt'
+      cpm_median: 13.23
+      cpm_p95: 14.21
+      casts_median: 74
+      casts_p95: 89
+      sample: 8
+      description: 'Sends a shadowy bolt at the enemy, causing 658 Shadow damage.'
+    980:
+      name: Agony
+      cpm_median: 7.75
+      cpm_p95: 9.23
+      casts_median: 41
+      casts_p95: 61
+      sample: 21
+      description: 'Inflicts increasing agony on the target, causing up to 2,162 Shadow damage over 18 sec. Damage starts low and increases over the duration. Refreshing Agony maintains its current damage level. Agony damage sometimes generates 1 Soul Shard.'
+    48181:
+      name: Haunt
+      cpm_median: 3.53
+      cpm_p95: 3.99
+      casts_median: 20
+      casts_p95: 25
+      sample: 21
+      description: "A ghostly soul haunts a single target, dealing 2,734 Shadow damage and increasing your damage dealt to the target by 12% for 18 sec. If the target dies, Haunt's cooldown is reset."
+    172:
+      name: Corruption
+      cpm_median: 1.88
+      cpm_p95: 2.39
+      casts_median: 10
+      casts_p95: 14
+      sample: 7
+      description: 'Corrupts the target, causing 112 Shadow damage and an additional 820 Shadow damage over 14 sec.'
+    198590:
+      name: 'Drain Soul'
+      cpm_median: 8.94
+      cpm_p95: 10.08
+      casts_median: 47
+      casts_p95: 59
+      sample: 13
+      description: "Replaces Shadow Bolt. Drains the target's soul, causing 2,117 Shadow damage over 4.5 sec. Damage is increased by 100% against enemies below 20% health. Generates 1 Soul Shard if the target dies during this effect."
+    27243:
+      name: 'Seed of Corruption'
+      cpm_median: 4.83
+      cpm_p95: 6.29
+      casts_median: 26
+      casts_p95: 38
+      sample: 9
+      description: 'Embeds a demon seed in the enemy target that will explode after 10.7 sec, dealing 819 Shadow damage to all enemies within 10 yards and applying Corruption to them. Damage reduced beyond 8 targets. The seed will detonate early if the targ...'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

@@ -22,7 +22,7 @@ rotation_checks:
     ability_id: 263165
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Halo
@@ -57,7 +57,7 @@ rotation_checks:
     ability_id: 451235
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Shadow Word: Death'
@@ -71,47 +71,104 @@ rotation_checks:
     ability_id: 8122
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Silence
     ability_id: 15487
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Dispersion
     ability_id: 47585
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Desperate Prayer'
     ability_id: 19236
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Fade
     ability_id: 586
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Vampiric Embrace'
     ability_id: 15286
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Mass Dispel'
     ability_id: 32375
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    8092:
+      name: 'Mind Blast'
+      cpm_median: 10.6
+      cpm_p95: 11.96
+      casts_median: 59
+      casts_p95: 91
+      sample: 30
+      description: "Blast the target's mind for 297 Shadow damage. Costs a high amount of mana."
+    335467:
+      name: 'Shadow Word: Madness'
+      cpm_median: 9.73
+      cpm_p95: 11.37
+      casts_median: 56
+      casts_p95: 82
+      sample: 30
+      description: "A word of madness haunts the target's mind, dealing 864 Shadow damage instantly plus an additional 2,905 Shadow damage over 6 sec. Heals you for 30% of damage dealt. When reapplied to a target, all remaining damage is added to the new ef..."
+    15407:
+      name: 'Mind Flay'
+      cpm_median: 8.25
+      cpm_p95: 11.56
+      casts_median: 50
+      casts_p95: 77
+      sample: 30
+      description: "Assaults the target's mind with Shadow energy, causing 2,740 Shadow damage over 4.0 sec and slowing their movement speed by 50%. Generates 18 Insanity over the duration."
+    589:
+      name: 'Shadow Word: Pain'
+      cpm_median: 4.64
+      cpm_p95: 5.87
+      casts_median: 40
+      casts_p95: 51
+      sample: 10
+      description: 'A word of darkness that causes 64 Shadow damage instantly, and an additional 424 Shadow damage over 16 sec.'
+    1227280:
+      name: 'Tentacle Slam'
+      cpm_median: 3.91
+      cpm_p95: 4.09
+      casts_median: 22
+      casts_p95: 35
+      sample: 29
+      description: 'Summons a massive shadowy appendage to slam the ground, dealing 260 Shadow damage in front of you and 8 yds around your target. Applies Vampiric Touch to up to 6 enemies, prioritizing ones without Vampiric Touch. Generates 6 Insanity.'
+    391403:
+      name: 'Mind Flay: Insanity'
+      cpm_median: 4.19
+      cpm_p95: 4.32
+      casts_median: 23
+      casts_p95: 24
+      sample: 21
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

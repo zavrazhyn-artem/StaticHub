@@ -146,9 +146,19 @@ class RotationAnalyzer
         $checks = $baseline['rotation_checks'] ?? [];
         if (empty($checks)) return [];
 
+        // Empirical p95 thresholds keyed by ability_id (top WCL parsers).
+        // Falls back to theoretical when sample is too thin.
+        $empirical = [];
+        foreach (($baseline['empirical']['abilities'] ?? []) as $abilityId => $entry) {
+            if (!is_array($entry)) continue;
+            $sample = (int) ($entry['sample'] ?? 0);
+            if ($sample < 5) continue;
+            $empirical[(int) $abilityId] = $entry;
+        }
+
         $rows = [];
         foreach ($checks as $check) {
-            $row = $this->evaluateCheck($check, $playerCasts, $durationSec);
+            $row = $this->evaluateCheck($check, $playerCasts, $durationSec, $empirical);
             if ($row !== null) $rows[] = $row;
         }
         return $rows;
@@ -158,11 +168,12 @@ class RotationAnalyzer
      * Evaluate a single check against a (player_casts, duration_seconds) pair.
      * Returns null if the ability isn't cast at all (likely not talented).
      */
-    private function evaluateCheck(array $check, array $playerCasts, int $durationSec): ?array
+    private function evaluateCheck(array $check, array $playerCasts, int $durationSec, array $empirical = []): ?array
     {
         if (($check['check'] ?? null) !== 'cast_efficiency') return null;
 
         $ability     = $check['ability'] ?? null;
+        $abilityId   = (int) ($check['ability_id'] ?? 0);
         $cooldown    = $check['cooldown_seconds'] ?? null;
         $recommended = (float) ($check['recommended_efficiency'] ?? 0.80);
         $severityCfg = $check['severity'] ?? 'minor';
@@ -176,6 +187,26 @@ class RotationAnalyzer
         if ($actual === 0) return null; // not talented / not in rotation this encounter
 
         $efficiency = $actual / $maxCasts;
+
+        // Empirical override: if top WCL parsers achieve a different threshold
+        // than icy-veins theory says, prefer the empirical p95 floor.
+        // Formula: empirical_target = cpm_p95 * cooldown_seconds / 60 (capped 0.99).
+        // E.g. cpm_p95 of 0.95 on a 60s CD → 95% expected efficiency.
+        $empiricalSource = null;
+        $empiricalCpmP95 = null;
+        $empiricalCpmMedian = null;
+        if ($abilityId > 0 && isset($empirical[$abilityId])) {
+            $empiricalCpmP95 = (float) ($empirical[$abilityId]['cpm_p95'] ?? 0);
+            $empiricalCpmMedian = (float) ($empirical[$abilityId]['cpm_median'] ?? 0);
+            if ($empiricalCpmP95 > 0) {
+                $empiricalTarget = min(0.99, ($empiricalCpmP95 * (float) $cooldown) / 60);
+                if ($empiricalTarget > 0.4) {
+                    $recommended = $empiricalTarget;
+                    $empiricalSource = 'wcl-p95';
+                }
+            }
+        }
+
         $minorThreshold = $recommended - self::MINOR_DOWNSTEP;
         $majorThreshold = $recommended - self::MAJOR_DOWNSTEP;
 
@@ -203,7 +234,7 @@ class RotationAnalyzer
 
         $summary = "{$ability} cast efficiency {$pct}% (target {$recommendedPct}%+) — {$actual} casts of a possible {$maxInt}.";
 
-        return [
+        $row = [
             'ability'          => $ability,
             'ability_id'       => $check['ability_id'] ?? null,
             'cooldown_seconds' => (float) $cooldown,
@@ -214,6 +245,17 @@ class RotationAnalyzer
             'status'           => $status,
             'summary'          => $summary,
         ];
+
+        // Surface the source of the threshold + raw empirical numbers so the
+        // AI can cite "top parsers run X CPM" instead of vague qualitative
+        // language. Only present when empirical data was used.
+        if ($empiricalSource !== null) {
+            $row['threshold_source']  = $empiricalSource;
+            $row['empirical_cpm_p95']    = $empiricalCpmP95;
+            $row['empirical_cpm_median'] = $empiricalCpmMedian;
+        }
+
+        return $row;
     }
 
     /**

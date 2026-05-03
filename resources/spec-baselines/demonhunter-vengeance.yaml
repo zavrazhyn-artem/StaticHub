@@ -87,3 +87,52 @@ rotation_checks:
     cooldown_seconds: 300.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    204255:
+      name: 'Soul Fragment'
+      cpm_median: 56.27
+      cpm_p95: 65.58
+      casts_median: 348
+      casts_p95: 446
+      sample: 30
+      description: null
+    263642:
+      name: Fracture
+      cpm_median: 17.38
+      cpm_p95: 19.18
+      casts_median: 105
+      casts_p95: 136
+      sample: 30
+      description: 'Rapidly slash your target for 40 Physical damage, and shatter 2 Lesser Soul Fragments from them. Generates 25 Fury.'
+    228477:
+      name: 'Soul Cleave'
+      cpm_median: 14.96
+      cpm_p95: 19.32
+      casts_median: 96
+      casts_p95: 122
+      sample: 30
+      description: 'Viciously strike an enemy and all other enemies in front of you for 73 Physical damage and heal yourself for 83. Deals reduced damage beyond 5 targets. Consumes up to 2 Soul Fragments, increasing damage by 20% per fragment consumed.'
+    203720:
+      name: 'Demon Spikes'
+      cpm_median: 5.7
+      cpm_p95: 6.75
+      casts_median: 38
+      casts_p95: 56
+      sample: 22
+      description: 'Surge with fel power, increasing your Armor by 75.'
+    258920:
+      name: 'Immolation Aura'
+      cpm_median: 4.54
+      cpm_p95: 5.09
+      casts_median: 27
+      casts_p95: 40
+      sample: 28
+      description: 'Engulf yourself in flames, radiating 28 Fire damage over 6 sec.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

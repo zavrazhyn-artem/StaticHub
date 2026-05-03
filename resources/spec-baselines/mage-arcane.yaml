@@ -101,3 +101,52 @@ rotation_checks:
     cooldown_seconds: 300.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 24
+  abilities:
+    30451:
+      name: 'Arcane Blast'
+      cpm_median: 25.22
+      cpm_p95: 27.93
+      casts_median: 148
+      casts_p95: 178
+      sample: 24
+      description: 'Blasts the target with energy, dealing 464 Arcane damage. Each Arcane Charge increases damage by 84% and mana cost by 100%, and reduces cast time by 8%. Generates 1 Arcane Charge.'
+    44425:
+      name: 'Arcane Barrage'
+      cpm_median: 8.39
+      cpm_p95: 9.89
+      casts_median: 49
+      casts_p95: 63
+      sample: 24
+      description: 'Launches bolts of arcane energy at the enemy target, causing 338 Arcane damage. For each Arcane Charge, deals 107% additional damage. Consumes all Arcane Charges.'
+    153626:
+      name: 'Arcane Orb'
+      cpm_median: 6.4
+      cpm_p95: 7.2
+      casts_median: 37
+      casts_p95: 52
+      sample: 24
+      description: 'Launches an Arcane Orb forward from your position, traveling up to 40 yds, dealing 1,107 Arcane damage to enemies it passes through. Grants 1 Arcane Charge when cast and every time it deals damage.'
+    212653:
+      name: Shimmer
+      cpm_median: 1.65
+      cpm_p95: 2.35
+      casts_median: 11
+      casts_p95: 17
+      sample: 24
+      description: 'Teleports you 20 yds forward, unless something is in the way. Unaffected by the global cooldown and castable while casting.'
+    321507:
+      name: 'Touch of the Magi'
+      cpm_median: 1.21
+      cpm_p95: 1.38
+      casts_median: 7
+      casts_p95: 8
+      sample: 18
+      description: 'Applies Touch of the Magi to your current target, accumulating 20% of the damage you deal to the target for 12 sec, and then exploding for that amount of Arcane damage to the target and reduced damage to all nearby enemies. Generates 4 A...'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

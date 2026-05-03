@@ -306,7 +306,7 @@ function toggleActiveOriginal() {
                             </div>
                         </div>
                         <div class="p-8">
-                            <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" :ability-map="abilityIndex" />
+                            <ReportBlocks v-if="report.ai_blocks" :blocks="report.ai_blocks" :ability-map="abilityIndex" :format-version="report.format_version || 1" />
                             <div v-else class="prose prose-invert prose-tactical max-w-none text-gray-300" v-html="report.ai_html"></div>
                         </div>
                     </section>
