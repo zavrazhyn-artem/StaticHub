@@ -29,7 +29,7 @@ rotation_checks:
     ability_id: 370452
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Deep Breath'
@@ -57,19 +57,68 @@ rotation_checks:
     ability_id: 363916
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Renewing Blaze'
     ability_id: 374348
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Zephyr
     ability_id: 374227
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 29
+  abilities:
+    356995:
+      name: Disintegrate
+      cpm_median: 14.73
+      cpm_p95: 17.04
+      casts_median: 84
+      casts_p95: 125
+      sample: 29
+      description: 'Tear into an enemy with a blast of blue magic, inflicting 2,410 Spellfrost damage over 2.7 sec, and slowing their movement speed by 50% for 3 sec.'
+    359073:
+      name: 'Eternity Surge'
+      cpm_median: 6.58
+      cpm_p95: 7.8
+      casts_median: 38
+      casts_p95: 56
+      sample: 29
+      description: 'Focus your energies to release a salvo of pure magic, dealing 4,115 Spellfrost damage to an enemy. Damages additional enemies within 25 yds when empowered. I: Damages 1 enemy. II: Damages 2 enemies. III: Damages 3 enemies.'
+    1265872:
+      name: 'Azure Sweep'
+      cpm_median: 6.65
+      cpm_p95: 7.84
+      casts_median: 38
+      casts_p95: 54
+      sample: 29
+      description: null
+    357208:
+      name: 'Fire Breath'
+      cpm_median: 5.59
+      cpm_p95: 6.33
+      casts_median: 31
+      casts_p95: 44
+      sample: 28
+      description: 'Inhale, stoking your inner flame. Release to exhale, burning enemies in a cone in front of you for 2,312 Fire damage, reduced beyond 5 targets. Empowering causes more of the damage to be dealt immediately instead of over time. I: Deals 6...'
+    361469:
+      name: 'Living Flame'
+      cpm_median: 4.22
+      cpm_p95: 6.28
+      casts_median: 24
+      casts_p95: 34
+      sample: 20
+      description: 'Send a flickering flame towards your target, dealing 893 Fire damage to an enemy or healing an ally for 2,282.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

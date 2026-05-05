@@ -4,6 +4,8 @@
         :guild-info='@json($guildInfo)'
         :auto-fetch-logs="{{ json_encode($autoFetchLogs) }}"
         :auto-fetch-delay-minutes="{{ $autoFetchDelayMinutes }}"
+        ai-tone="{{ $aiTone }}"
+        :ai-death-cutoff="{{ $aiDeathCutoff }}"
         update-url="{{ route('statics.settings.logs.update') }}"
         connect-guild-url="{{ route('statics.settings.logs.connect-guild') }}"
         disconnect-guild-url="{{ route('statics.settings.logs.disconnect-guild') }}"

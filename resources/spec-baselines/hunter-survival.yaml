@@ -94,3 +94,52 @@ rotation_checks:
     cooldown_seconds: 360.0
     recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 29
+  abilities:
+    186270:
+      name: 'Raptor Strike'
+      cpm_median: 19.6
+      cpm_p95: 22.43
+      casts_median: 123
+      casts_p95: 144
+      sample: 29
+      description: 'A vicious slash dealing 138 Physical damage.'
+    259489:
+      name: 'Kill Command'
+      cpm_median: 14.28
+      cpm_p95: 14.85
+      casts_median: 89
+      casts_p95: 115
+      sample: 29
+      description: 'Give the command to kill, causing your pet to savagely deal 105 Physical damage to the enemy. Generates 15 Focus.'
+    259495:
+      name: 'Wildfire Bomb'
+      cpm_median: 6.19
+      cpm_p95: 6.91
+      casts_median: 41
+      casts_p95: 54
+      sample: 29
+      description: 'Hurl a bomb at the target, exploding for 54 Fire damage in a cone and coating enemies in wildfire, scorching them for 44 Fire damage over 6 sec. Deals reduced damage beyond 8 targets. Deals 80% increased damage to your primary target.'
+    1261193:
+      name: Boomstick
+      cpm_median: 1.41
+      cpm_p95: 1.69
+      casts_median: 9
+      casts_p95: 14
+      sample: 28
+      description: 'Unload a series of 4 shotgun blasts 20 yds in front of you, dealing 851 Physical damage over 2.7 sec. Deals reduced damage beyond 8 targets.'
+    1250646:
+      name: Takedown
+      cpm_median: 0.89
+      cpm_p95: 1.12
+      casts_median: 5
+      casts_p95: 8
+      sample: 20
+      description: 'You and your pet leap to your target and strike as one, dealing 630 Physical damage. Your pet frees itself from roots when it leaps. For the next 8 sec, the damage dealt by you and your pet is increased by 20%. Generates 50 Focus.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

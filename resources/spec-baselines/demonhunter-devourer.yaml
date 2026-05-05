@@ -52,3 +52,52 @@ rotation_checks:
     cooldown_seconds: 300.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    1217610:
+      name: Devour
+      cpm_median: 18.27
+      cpm_p95: 21.85
+      casts_median: 118
+      casts_p95: 160
+      sample: 30
+      description: null
+    473662:
+      name: Consume
+      cpm_median: 8.46
+      cpm_p95: 10.03
+      casts_median: 54
+      casts_p95: 75
+      sample: 30
+      description: 'Drain the essence from your target, dealing 750 Cosmic damage. Castable while moving. Generates 8 Fury.'
+    473728:
+      name: 'Void Ray'
+      cpm_median: 6.54
+      cpm_p95: 7.15
+      casts_median: 41
+      casts_p95: 57
+      sample: 30
+      description: 'Requires 100 Fury Unleash a beam of concentrated void energy, dealing 75 Cosmic damage and consuming 5 Fury every 0.1 sec. Effect ends after 2.7 sec or upon reaching 0 Fury.'
+    1221150:
+      name: 'Collapsing Star'
+      cpm_median: 3.3
+      cpm_p95: 3.78
+      casts_median: 21
+      casts_p95: 28
+      sample: 30
+      description: null
+    1241937:
+      name: 'Soul Immolation'
+      cpm_median: 1.84
+      cpm_p95: 2.17
+      casts_median: 12
+      casts_p95: 16
+      sample: 30
+      description: 'Light your soul aflame, healing yourself for 24% of your maximum health, generating 30 Fury and shattering 3 Soul Fragments over 5 sec.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

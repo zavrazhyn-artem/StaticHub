@@ -115,3 +115,52 @@ rotation_checks:
     cooldown_seconds: 360.0
     recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    185358:
+      name: 'Arcane Shot'
+      cpm_median: 6.48
+      cpm_p95: 12.73
+      casts_median: 32
+      casts_p95: 108
+      sample: 30
+      description: 'A quick shot that causes 73 Arcane damage.'
+    19434:
+      name: 'Aimed Shot'
+      cpm_median: 9.37
+      cpm_p95: 11.26
+      casts_median: 50
+      casts_p95: 87
+      sample: 30
+      description: 'A powerful aimed shot that deals 281 Physical damage.'
+    56641:
+      name: 'Steady Shot'
+      cpm_median: 7.16
+      cpm_p95: 8.95
+      casts_median: 40
+      casts_p95: 65
+      sample: 30
+      description: 'A steady shot that causes 56 Physical damage. Usable while moving. Generates 20 Focus.'
+    257044:
+      name: 'Rapid Fire'
+      cpm_median: 4.08
+      cpm_p95: 4.38
+      casts_median: 22
+      casts_p95: 31
+      sample: 30
+      description: 'Shoot a stream of 7 shots at your target over 1.8 sec, dealing a total of 147 Physical damage. Usable while moving. Each shot generates 3 Focus.'
+    466930:
+      name: 'Black Arrow'
+      cpm_median: 7.98
+      cpm_p95: 8.98
+      casts_median: 40
+      casts_p95: 46
+      sample: 18
+      description: 'You attempt to finish off a wounded target, dealing 121 Shadow damage and 140 Shadow damage over 8 sec. Only usable on enemies above 80% health or below 20% health.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

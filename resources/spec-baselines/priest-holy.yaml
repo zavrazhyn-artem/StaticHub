@@ -15,7 +15,7 @@ rotation_checks:
     ability_id: 265202
     check: cast_efficiency
     cooldown_seconds: 720.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Holy Word: Sanctify'
@@ -36,21 +36,21 @@ rotation_checks:
     ability_id: 88625
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: major
   -
     ability: 'Symbol of Hope'
     ability_id: 64901
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Divine Hymn'
     ability_id: 64843
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Lightwell
@@ -64,7 +64,7 @@ rotation_checks:
     ability_id: 47788
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: major
   -
     ability: Mindbender
@@ -106,26 +106,99 @@ rotation_checks:
     ability_id: 132157
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Mass Dispel'
     ability_id: 32375
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Desperate Prayer'
     ability_id: 19236
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Fade
     ability_id: 586
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 27
+  abilities:
+    596:
+      name: 'Prayer of Healing'
+      cpm_median: 7.83
+      cpm_p95: 11.81
+      casts_median: 49
+      casts_p95: 89
+      sample: 20
+      description: 'A powerful prayer that heals your target and 4 injured allies within 40 yards for 2,202.'
+    2050:
+      name: 'Holy Word: Serenity'
+      cpm_median: 5.82
+      cpm_p95: 7.73
+      casts_median: 37
+      casts_p95: 67
+      sample: 24
+      description: 'Perform a miracle, healing an ally for 6,855. Cooldown reduced by 6 sec when you cast Flash Heal.'
+    585:
+      name: Smite
+      cpm_median: 7.48
+      cpm_p95: 15.55
+      casts_median: 51
+      casts_p95: 80
+      sample: 27
+      description: 'Smites an enemy for 369 Holy damage.'
+    33076:
+      name: 'Prayer of Mending'
+      cpm_median: 4.53
+      cpm_p95: 5.91
+      casts_median: 30
+      casts_p95: 42
+      sample: 20
+      description: 'Places a ward on an ally that heals them for 226 the next time they take damage, and then jumps to another ally within 30 yds. Jumps up to 4 times and lasts 30 sec after each jump.'
+    1262763:
+      name: Benediction
+      cpm_median: 4.56
+      cpm_p95: 7.1
+      casts_median: 35
+      casts_p95: 52
+      sample: 12
+      description: null
+    2061:
+      name: 'Flash Heal'
+      cpm_median: 5.12
+      cpm_p95: 9.04
+      casts_median: 45
+      casts_p95: 56
+      sample: 9
+      description: 'A fast spell that heals an ally for 2,592.'
+    14914:
+      name: 'Holy Fire'
+      cpm_median: 13.66
+      cpm_p95: 17.78
+      casts_median: 69
+      casts_p95: 100
+      sample: 16
+      description: 'Consumes the enemy in Holy flames that cause 1,146 Holy damage and an additional 421 Holy damage over 7 sec.'
+    88625:
+      name: 'Holy Word: Chastise'
+      cpm_median: 5.54
+      cpm_p95: 7.07
+      casts_median: 29
+      casts_p95: 40
+      sample: 12
+      description: 'Chastises the target for 1,457 Holy damage and incapacitates them for 4 sec.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

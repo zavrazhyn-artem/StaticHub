@@ -113,43 +113,78 @@ class GeminiService
             'ttl' => "{$ttlSeconds}s",
         ];
 
-        try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->timeout(30)
-                ->post(self::CACHE_API_URL . '?key=' . $this->apiKey, $payload);
+        // Cache creation itself counts toward TPM (it sends the full content
+        // server-side). On 429 we honour the server's retry_after and retry.
+        // 8 attempts × cap-180s wait — for development bursts (multiple regens
+        // in a row) the bucket may stay depleted for several minutes.
+        $maxAttempts = 8;
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                    ->timeout(60)
+                    ->post(self::CACHE_API_URL . '?key=' . $this->apiKey, $payload);
 
-            if ($response->failed()) {
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $cacheId = $data['name'] ?? null;
+                    $expireTime = $data['expireTime'] ?? null;
+
+                    if (!$cacheId) {
+                        Log::error('Gemini cache creation returned no ID', ['response' => $data]);
+                        return null;
+                    }
+
+                    Log::info('Gemini cached context created', [
+                        'cache_id'   => $cacheId,
+                        'model'      => $model,
+                        'ttl'        => $ttlSeconds,
+                        'expires_at' => $expireTime,
+                        'attempt'    => $attempt,
+                    ]);
+
+                    return [
+                        'cache_id'   => $cacheId,
+                        'expires_at' => $expireTime,
+                    ];
+                }
+
+                $status = $response->status();
+                $body   = $response->body();
+
+                if ($status === 429 && $attempt < $maxAttempts) {
+                    $retryAfter = $this->parseRetryAfter($body);
+                    // Cap at 180s, floor scaled with attempt # — early
+                    // attempts wait ~30s, later attempts wait longer.
+                    $minWait = min(150, 25 + $attempt * 20);
+                    $waitSeconds = max($minWait, min(180, $retryAfter + 10));
+                    Log::warning("Gemini cache creation rate-limited (429) — sleeping {$waitSeconds}s", [
+                        'attempt'     => $attempt,
+                        'retry_after' => $retryAfter,
+                    ]);
+                    sleep($waitSeconds);
+                    continue;
+                }
+
                 Log::error('Gemini cache creation failed', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
+                    'status'  => $status,
+                    'body'    => $body,
+                    'attempt' => $attempt,
                 ]);
                 return null;
-            }
-
-            $data = $response->json();
-            $cacheId = $data['name'] ?? null;
-            $expireTime = $data['expireTime'] ?? null;
-
-            if (!$cacheId) {
-                Log::error('Gemini cache creation returned no ID', ['response' => $data]);
+            } catch (\Exception $e) {
+                Log::error('Gemini cache creation exception', [
+                    'message' => $e->getMessage(),
+                    'attempt' => $attempt,
+                ]);
+                if ($attempt < $maxAttempts) {
+                    sleep(15);
+                    continue;
+                }
                 return null;
             }
-
-            Log::info('Gemini cached context created', [
-                'cache_id'   => $cacheId,
-                'model'      => $model,
-                'ttl'        => $ttlSeconds,
-                'expires_at' => $expireTime,
-            ]);
-
-            return [
-                'cache_id'   => $cacheId,
-                'expires_at' => $expireTime,
-            ];
-        } catch (\Exception $e) {
-            Log::error('Gemini cache creation exception', ['message' => $e->getMessage()]);
-            return null;
         }
+
+        return null;
     }
 
     /**
@@ -429,6 +464,18 @@ class GeminiService
     }
 
     /**
+     * Load a prompt and substitute the {{TONE_DIRECTIVES}} placeholder with
+     * the matching tone block. Unknown tones fall back to neutral.
+     */
+    public function loadPromptWithTone(string $promptFile, string $tone): string
+    {
+        $tone = in_array($tone, ['friendly', 'neutral', 'strict'], true) ? $tone : 'neutral';
+        $instructions = file_get_contents(resource_path("prompts/{$promptFile}"));
+        $toneBlock = file_get_contents(resource_path("prompts/tone_{$tone}.txt"));
+        return str_replace('{{TONE_DIRECTIVES}}', trim($toneBlock), $instructions);
+    }
+
+    /**
      * Generate ONLY the raid-wide `main` report + title via a single Gemini call.
      * Sends the context inline so Gemini's implicit prefix-cache can dedupe
      * the same context across the 24+ calls in one analysis pass — no explicit
@@ -436,30 +483,53 @@ class GeminiService
      *
      * @return array{title: string, main: array<int, array>}
      */
-    public function generateMainReportBlocks(string $contextContent): array
+    public function generateMainReportBlocks(string $contextContent, string $tone = 'neutral', ?string $cacheId = null, ?string $raidLeaderLocale = null): array
     {
-        $instructions = file_get_contents(resource_path('prompts/gemini_main_report.txt'));
+        $instructions = $this->loadPromptWithTone('gemini_main_report.txt', $tone);
         $url = $this->buildModelUrl($this->proModel);
 
         Log::info('Generating main report blocks', [
             'context_chars' => strlen($contextContent),
             'model'         => $this->proModel,
+            'cached'        => (bool) $cacheId,
         ]);
 
-        // Single text part with stable prefix [context + instructions] so
-        // Gemini implicit caching can reuse it across player calls. Only the
-        // trailing "Generate ..." sentence varies between calls.
-        $text = $contextContent
-            . "\n\n=== INSTRUCTIONS ===\n" . $instructions
-            . "\n\nGenerate the raid-wide main report now. Output strictly raw JSON.";
+        // Pre-resolved locale injected inline so the model can't pick the
+        // wrong language by accident. Same anti-hallucination pattern used
+        // in player reports.
+        $locale = $raidLeaderLocale ?: 'English';
+        $generateSentence = "Generate the raid-wide main report now. EVERY string in EVERY block (title, headings, paragraphs, table cells, alert text, directive items, metrics labels) MUST be in {$locale} — no other language anywhere. Output strictly raw JSON.";
 
-        $payload = [
-            'contents' => [[
-                'role' => 'user',
-                'parts' => [['text' => $text]],
-            ]],
-            'generationConfig' => $this->buildGenerationConfig(65536, true),
-        ];
+        if ($cacheId) {
+            // Cached path — only send instructions + generate sentence per call.
+            // The bulky context lives server-side under $cacheId.
+            $userPrompt = "=== INSTRUCTIONS ===\n" . $instructions
+                . "\n\nRAID_LEADER_LOCALE: {$locale}\n\n{$generateSentence}";
+
+            $payload = [
+                'cachedContent' => $cacheId,
+                'contents' => [[
+                    'role' => 'user',
+                    'parts' => [['text' => $userPrompt]],
+                ]],
+                'generationConfig' => $this->buildGenerationConfig(65536, true),
+            ];
+        } else {
+            // Inline path — used when cache creation failed. Stable prefix
+            // [context + instructions] still benefits from Gemini's implicit
+            // prefix-cache across the player calls.
+            $text = $contextContent
+                . "\n\n=== INSTRUCTIONS ===\n" . $instructions
+                . "\n\nRAID_LEADER_LOCALE: {$locale}\n\n{$generateSentence}";
+
+            $payload = [
+                'contents' => [[
+                    'role' => 'user',
+                    'parts' => [['text' => $text]],
+                ]],
+                'generationConfig' => $this->buildGenerationConfig(65536, true),
+            ];
+        }
 
         $startTime = microtime(true);
         $response = Http::withHeaders(['Content-Type' => 'application/json'])
@@ -523,6 +593,7 @@ class GeminiService
         }
 
         $cleaned = GeminiResponseFormatter::cleanMarkdown($text);
+        $cleaned = GeminiResponseFormatter::repairBareTypeKeys($cleaned, BlockSchema::TYPES);
         $decoded = json_decode($cleaned, true);
 
         // Gemini 3 sometimes appends trailing garbage (extra `}`, partial
@@ -592,71 +663,105 @@ class GeminiService
      *                                 when each call counts the full cached context)
      * @return array<string, array<int, array>>  [playerName => blocks[]]
      */
-    public function generatePlayerReportBlocks(string $contextContent, array $playerNames, int $concurrency = 3): array
+    public function generatePlayerReportBlocks(string $contextContent, array $playerNames, int $concurrency = 1, string $tone = 'neutral', ?string $cacheId = null, ?callable $onPlayerComplete = null, array $playerLocales = []): array
     {
-        $instructions = file_get_contents(resource_path('prompts/gemini_player_report.txt'));
+        $instructions = $this->loadPromptWithTone('gemini_player_report.txt', $tone);
         $url = $this->buildModelUrl($this->proModel);
         $results = [];
-        $pendingRetry = []; // [name => attempts] for players that hit 429
+        $attempts = []; // [name => attempts] for players that hit 429
 
-        // Stable prefix [context + instructions] is identical for every player
-        // call → Gemini implicit cache hits this prefix and we only pay for
-        // the variable suffix (TARGET_PLAYER + generate sentence).
-        $stablePrefix = $contextContent . "\n\n=== INSTRUCTIONS ===\n" . $instructions;
+        // With explicit cache: per-call payload is just instructions +
+        // TARGET_PLAYER + generate sentence (~10K tokens). Without it:
+        // ~290K-token full inline prefix on every call.
+        $stablePrefix = $cacheId
+            ? "=== INSTRUCTIONS ===\n" . $instructions
+            : $contextContent . "\n\n=== INSTRUCTIONS ===\n" . $instructions;
 
-        foreach (array_chunk($playerNames, $concurrency) as $batchIndex => $batch) {
+        // Cached calls bypass the TPM hot-path almost entirely — boost
+        // concurrency and drop pacing. Inline calls keep the conservative
+        // settings that survived prior 429 storms.
+        if ($cacheId) {
+            $concurrency = max($concurrency, 5);
+        }
+
+        $maxRetries = 6;
+        $batches = array_chunk($playerNames, $concurrency);
+
+        foreach ($batches as $batchIndex => $batch) {
             Log::info('Generating player reports batch', [
                 'batch'   => $batchIndex + 1,
+                'of'      => count($batches),
                 'size'    => count($batch),
                 'players' => $batch,
             ]);
 
-            $batchResults = $this->dispatchPlayerBatch($stablePrefix, $url, $batch);
-            foreach ($batchResults as $name => $entry) {
-                if ($entry['status'] === 'ok') {
-                    $results[$name] = $entry['blocks'];
-                } elseif ($entry['status'] === 'rate_limited') {
-                    $pendingRetry[$name] = ['attempts' => 0, 'retry_after' => $entry['retry_after']];
-                } else {
-                    $results[$name] = [];
-                }
-            }
-        }
+            $remaining = $batch;
+            while (!empty($remaining)) {
+                $batchResults = $this->dispatchPlayerBatch($stablePrefix, $url, $remaining, $cacheId, $playerLocales);
+                $stillPending = [];
+                $maxRetryAfter = 0;
 
-        // Retry players that hit 429. Up to 3 total attempts each.
-        $maxRetries = 3;
-        while (!empty($pendingRetry)) {
-            // Wait for the longest suggested retry window in this batch.
-            $waitSeconds = max(array_column($pendingRetry, 'retry_after'));
-            // Cap at 90s so we don't sit forever on a runaway response; quota windows
-            // typically reset within a minute.
-            $waitSeconds = max(5, min(90, $waitSeconds + 2));
-            Log::warning("Player report 429 — sleeping {$waitSeconds}s before retry", [
-                'players' => array_keys($pendingRetry),
-            ]);
-            sleep($waitSeconds);
-
-            $retryNames = array_keys($pendingRetry);
-            $stillPending = [];
-
-            foreach (array_chunk($retryNames, $concurrency) as $retryBatch) {
-                $retryResults = $this->dispatchPlayerBatch($stablePrefix, $url, $retryBatch);
-                foreach ($retryResults as $name => $entry) {
+                foreach ($batchResults as $name => $entry) {
                     if ($entry['status'] === 'ok') {
                         $results[$name] = $entry['blocks'];
-                    } elseif ($entry['status'] === 'rate_limited' && $pendingRetry[$name]['attempts'] + 1 < $maxRetries) {
-                        $stillPending[$name] = [
-                            'attempts'    => $pendingRetry[$name]['attempts'] + 1,
-                            'retry_after' => $entry['retry_after'],
-                        ];
+                        // Stream save — flush each successful player to the
+                        // caller IMMEDIATELY so a downstream timeout doesn't
+                        // lose work that's already been generated.
+                        if ($onPlayerComplete !== null) {
+                            try {
+                                $onPlayerComplete($name, $entry['blocks']);
+                            } catch (\Throwable $t) {
+                                Log::warning('onPlayerComplete callback threw', [
+                                    'player' => $name,
+                                    'error'  => $t->getMessage(),
+                                ]);
+                            }
+                        }
+                    } elseif ($entry['status'] === 'rate_limited') {
+                        $attempts[$name] = ($attempts[$name] ?? 0) + 1;
+                        if ($attempts[$name] < $maxRetries) {
+                            $stillPending[] = $name;
+                            $maxRetryAfter = max($maxRetryAfter, (int) $entry['retry_after']);
+                        } else {
+                            Log::error('Player report giving up after retries', [
+                                'player'   => $name,
+                                'attempts' => $attempts[$name],
+                            ]);
+                            $results[$name] = [];
+                        }
                     } else {
-                        Log::error('Player report giving up after retries', ['player' => $name]);
                         $results[$name] = [];
                     }
                 }
+
+                $remaining = $stillPending;
+                if (!empty($remaining)) {
+                    // Cap at 180s — paid-tier quota windows usually clear in
+                    // ~60s but sometimes the bucket needs longer when many
+                    // calls were rejected.
+                    $waitSeconds = max(5, min(180, $maxRetryAfter + 5));
+                    Log::warning("Player report 429 — sleeping {$waitSeconds}s before retry", [
+                        'players' => $remaining,
+                    ]);
+                    sleep($waitSeconds);
+                }
             }
 
-            $pendingRetry = $stillPending;
+            // Pacing between batches:
+            //   - Cached path: per-call payload is ~10K tokens; TPM is not
+            //     the bottleneck. 1s pacing keeps RPM under control.
+            //   - Inline path: ~290K-token call empties the preview-tier
+            //     bucket; sleep ~40s pre-emptively unless the batch already
+            //     paid the retry tax.
+            if ($batchIndex < count($batches) - 1) {
+                if ($cacheId) {
+                    sleep(1);
+                } else {
+                    $lastPlayer = end($batch);
+                    $hadRateLimit = isset($attempts[$lastPlayer]) && $attempts[$lastPlayer] > 0;
+                    sleep($hadRateLimit ? 5 : 40);
+                }
+            }
         }
 
         return $results;
@@ -674,23 +779,37 @@ class GeminiService
      * @param string[] $playerNames
      * @return array<string, array{status:string, blocks?:array, retry_after?:int}>
      */
-    private function dispatchPlayerBatch(string $stablePrefix, string $url, array $playerNames): array
+    private function dispatchPlayerBatch(string $stablePrefix, string $url, array $playerNames, ?string $cacheId = null, array $playerLocales = []): array
     {
         $batchStart = microtime(true);
         $responses = Http::pool(fn (Pool $pool) => array_map(
-            fn($name) => $pool->as($name)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->timeout(300)
-                ->post($url . '?key=' . $this->apiKey, [
+            function ($name) use ($pool, $url, $stablePrefix, $cacheId, $playerLocales) {
+                // Pre-resolve locale and inject INLINE next to TARGET_PLAYER.
+                // Without this the model has to look up the player in the
+                // cached localization map and ~19% of calls picked the wrong
+                // language. Inline injection eliminates the lookup.
+                $locale = $playerLocales[$name] ?? 'English';
+                $userText = $stablePrefix
+                    . "\n\nTARGET_PLAYER: {$name}\nTARGET_LOCALE: {$locale}"
+                    . "\n\nGenerate the personal report blocks for {$name}. EVERY string in EVERY block MUST be in {$locale} — no other language anywhere. Output strictly raw JSON of shape { \"blocks\": [...] }.";
+
+                $payload = [
                     'contents' => [[
                         'role' => 'user',
-                        'parts' => [[
-                            'text' => $stablePrefix
-                                . "\n\nTARGET_PLAYER: {$name}\n\nGenerate the personal report blocks for this player. Output strictly raw JSON of shape { \"blocks\": [...] }.",
-                        ]],
+                        'parts' => [['text' => $userText]],
                     ]],
                     'generationConfig' => $this->buildGenerationConfig(65536, true),
-                ]),
+                ];
+
+                if ($cacheId) {
+                    $payload['cachedContent'] = $cacheId;
+                }
+
+                return $pool->as($name)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->timeout(300)
+                    ->post($url . '?key=' . $this->apiKey, $payload);
+            },
             $playerNames
         ));
 
@@ -771,6 +890,7 @@ class GeminiService
             }
 
             $cleaned = GeminiResponseFormatter::cleanMarkdown((string) $text);
+            $cleaned = GeminiResponseFormatter::repairBareTypeKeys($cleaned, BlockSchema::TYPES);
             $decoded = json_decode($cleaned, true);
 
             // Gemini 3 sometimes appends trailing garbage after the closing

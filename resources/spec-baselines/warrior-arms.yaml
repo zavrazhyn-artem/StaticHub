@@ -108,3 +108,52 @@ rotation_checks:
     cooldown_seconds: 15.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    12294:
+      name: 'Mortal Strike'
+      cpm_median: 13.86
+      cpm_p95: 17.49
+      casts_median: 86
+      casts_p95: 121
+      sample: 30
+      description: 'A vicious strike that deals 184 Physical damage and reduces the effectiveness of healing on the target by 50% for 10 sec.'
+    281000:
+      name: Execute
+      cpm_median: 10.55
+      cpm_p95: 13.61
+      casts_median: 73
+      casts_p95: 88
+      sample: 20
+      description: null
+    7384:
+      name: Overpower
+      cpm_median: 9.95
+      cpm_p95: 13.31
+      casts_median: 67
+      casts_p95: 85
+      sample: 30
+      description: 'Overpower the enemy, dealing 110 Physical damage. Cannot be blocked, dodged, or parried.'
+    1269383:
+      name: 'Heroic Strike'
+      cpm_median: 5.09
+      cpm_p95: 6.85
+      casts_median: 32
+      casts_p95: 45
+      sample: 30
+      description: null
+    1464:
+      name: Slam
+      cpm_median: 3.93
+      cpm_p95: 6.59
+      casts_median: 25
+      casts_p95: 41
+      sample: 30
+      description: 'Slams an opponent, causing 105 Physical damage.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

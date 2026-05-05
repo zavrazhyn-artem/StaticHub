@@ -15,14 +15,14 @@ rotation_checks:
     ability_id: 62618
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Pain Suppression'
     ability_id: 33206
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Evangelism
@@ -57,7 +57,7 @@ rotation_checks:
     ability_id: 8092
     check: cast_efficiency
     cooldown_seconds: 28.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: major
   -
     ability: Voidwraith
@@ -71,7 +71,7 @@ rotation_checks:
     ability_id: 421453
     check: cast_efficiency
     cooldown_seconds: 240.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Shadow Word: Death'
@@ -85,26 +85,83 @@ rotation_checks:
     ability_id: 47540
     check: cast_efficiency
     cooldown_seconds: 9.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Mass Dispel'
     ability_id: 32375
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Desperate Prayer'
     ability_id: 19236
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Fade
     ability_id: 586
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    47540:
+      name: Penance
+      cpm_median: 8.1
+      cpm_p95: 9.42
+      casts_median: 48
+      casts_p95: 74
+      sample: 30
+      description: 'Launches a volley of holy light at the target, causing 934 Holy damage to an enemy or 4,072 healing to an ally over 1.8 sec. Castable while moving. When you heal with Penance, everyone with your Atonement is healed for 71.'
+    585:
+      name: Smite
+      cpm_median: 11.07
+      cpm_p95: 21.53
+      casts_median: 69
+      casts_p95: 124
+      sample: 30
+      description: 'Smites an enemy for 369 Holy damage.'
+    2061:
+      name: 'Flash Heal'
+      cpm_median: 5.13
+      cpm_p95: 6.6
+      casts_median: 36
+      casts_p95: 52
+      sample: 18
+      description: 'A fast spell that heals an ally for 2,592.'
+    589:
+      name: 'Shadow Word: Pain'
+      cpm_median: 4.88
+      cpm_p95: 6.65
+      casts_median: 35
+      casts_p95: 46
+      sample: 21
+      description: 'A word of darkness that causes 64 Shadow damage instantly, and an additional 424 Shadow damage over 16 sec.'
+    32379:
+      name: 'Shadow Word: Death'
+      cpm_median: 4.14
+      cpm_p95: 5.14
+      casts_median: 28
+      casts_p95: 35
+      sample: 23
+      description: 'A word of dark binding that inflicts 321 Shadow damage to your target. If your target is not killed by Shadow Word: Death, you take backlash damage equal to 5% of your maximum health. Damage increased by 150% to targets below 20% health.'
+    194509:
+      name: 'Power Word: Radiance'
+      cpm_median: 3.87
+      cpm_p95: 4.12
+      casts_median: 24
+      casts_p95: 32
+      sample: 18
+      description: 'A burst of light heals the target and 4 injured allies within 40 yards for 2,147, and applies Atonement for 60% of its normal duration.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

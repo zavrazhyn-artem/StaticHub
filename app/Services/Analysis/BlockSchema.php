@@ -26,21 +26,25 @@ class BlockSchema
         'rotation_issues',
         'player_card',
         'divider',
+        'pull_breakdown',
+        'recurring_failures',
     ];
 
     private const REQUIRED = [
-        'heading'         => ['level', 'text'],
-        'paragraph'       => ['text'],
-        'metrics_grid'    => ['items'],
-        'table'           => ['columns', 'rows'],
-        'bar_chart'       => ['bars'],
-        'progress_bar'    => ['label', 'value'],
-        'alert'           => ['severity', 'text'],
-        'directive_list'  => ['items'],
-        'comparison'      => ['left', 'right'],
-        'rotation_issues' => ['issues'],
-        'player_card'     => ['name', 'sections'],
-        'divider'         => [],
+        'heading'            => ['level', 'text'],
+        'paragraph'          => ['text'],
+        'metrics_grid'       => ['items'],
+        'table'              => ['columns', 'rows'],
+        'bar_chart'          => ['bars'],
+        'progress_bar'       => ['label', 'value'],
+        'alert'              => ['severity', 'text'],
+        'directive_list'     => ['items'],
+        'comparison'         => ['left', 'right'],
+        'rotation_issues'    => ['issues'],
+        'player_card'        => ['name', 'sections'],
+        'divider'            => [],
+        'pull_breakdown'     => ['pulls'],
+        'recurring_failures' => ['items'],
     ];
 
     /**
@@ -49,19 +53,36 @@ class BlockSchema
      * (e.g. a heading carrying rows + columns from a table it forgot to split).
      */
     private const ALLOWED = [
-        'heading'         => ['type', 'level', 'text'],
-        'paragraph'       => ['type', 'text'],
-        'metrics_grid'    => ['type', 'title', 'items'],
-        'table'           => ['type', 'title', 'columns', 'rows'],
-        'bar_chart'       => ['type', 'title', 'unit', 'bars'],
-        'progress_bar'    => ['type', 'label', 'value', 'note', 'tone'],
-        'alert'           => ['type', 'severity', 'title', 'text'],
-        'directive_list'  => ['type', 'title', 'items'],
-        'comparison'      => ['type', 'title', 'left', 'right'],
-        'rotation_issues' => ['type', 'title', 'issues'],
-        'player_card'     => ['type', 'name', 'spec', 'class', 'role', 'ilvl', 'sections'],
-        'divider'         => ['type'],
+        'heading'            => ['type', 'level', 'text'],
+        'paragraph'          => ['type', 'text'],
+        'metrics_grid'       => ['type', 'title', 'items'],
+        'table'              => ['type', 'title', 'columns', 'rows'],
+        'bar_chart'          => ['type', 'title', 'unit', 'bars'],
+        'progress_bar'       => ['type', 'label', 'value', 'note', 'tone'],
+        'alert'              => ['type', 'severity', 'title', 'text'],
+        'directive_list'     => ['type', 'title', 'items'],
+        'comparison'         => ['type', 'title', 'left', 'right'],
+        'rotation_issues'    => ['type', 'title', 'issues'],
+        'player_card'        => ['type', 'name', 'spec', 'class', 'role', 'ilvl', 'sections'],
+        'divider'            => ['type'],
+        'pull_breakdown'     => ['type', 'encounter', 'pulls'],
+        'recurring_failures' => ['type', 'title', 'items'],
     ];
+
+    private const PULL_ALLOWED_FIELDS = [
+        'pull_number', 'outcome', 'wipe_pct', 'duration_s', 'phase',
+        'summary', 'key_deaths', 'mechanic_failures', 'pattern_note',
+    ];
+
+    private const KEY_DEATH_ALLOWED_FIELDS = [
+        'player', 'ability', 'time',
+        'compass', 'distance', 'distance_yards',
+        'cluster', 'nearby', 'movement',
+        'cause',
+    ];
+    private const MECHANIC_FAILURE_ALLOWED_FIELDS = ['mechanic', 'detail'];
+    private const RECURRING_ITEM_ALLOWED_FIELDS = ['name', 'frequency', 'severity', 'detail'];
+    private const RECURRING_SEVERITIES = ['critical', 'major', 'minor'];
 
     private const ALERT_SEVERITIES = ['danger', 'warning', 'success', 'info'];
     private const HEADING_LEVELS = [1, 2, 3];
@@ -123,13 +144,78 @@ class BlockSchema
         $block = array_intersect_key($block, array_flip($allowed));
 
         return match ($type) {
-            'heading'         => $this->sanitizeHeading($block),
-            'alert'           => $this->sanitizeAlert($block),
-            'progress_bar'    => $this->sanitizeProgressBar($block),
-            'bar_chart'       => $this->sanitizeBarChart($block),
-            'table'           => $this->sanitizeTable($block),
-            default           => $block,
+            'heading'            => $this->sanitizeHeading($block),
+            'alert'              => $this->sanitizeAlert($block),
+            'progress_bar'       => $this->sanitizeProgressBar($block),
+            'bar_chart'          => $this->sanitizeBarChart($block),
+            'table'              => $this->sanitizeTable($block),
+            'pull_breakdown'     => $this->sanitizePullBreakdown($block),
+            'recurring_failures' => $this->sanitizeRecurringFailures($block),
+            default              => $block,
         };
+    }
+
+    private function sanitizePullBreakdown(array $block): array
+    {
+        $pulls = is_array($block['pulls'] ?? null) ? $block['pulls'] : [];
+        $cleanPulls = [];
+
+        foreach ($pulls as $pull) {
+            if (!is_array($pull)) continue;
+
+            $pull = array_intersect_key($pull, array_flip(self::PULL_ALLOWED_FIELDS));
+
+            if (isset($pull['outcome']) && !in_array($pull['outcome'], ['wipe', 'kill'], true)) {
+                $pull['outcome'] = 'wipe';
+            }
+
+            if (isset($pull['key_deaths']) && is_array($pull['key_deaths'])) {
+                $pull['key_deaths'] = array_values(array_map(
+                    fn($d) => is_array($d)
+                        ? array_intersect_key($d, array_flip(self::KEY_DEATH_ALLOWED_FIELDS))
+                        : [],
+                    array_filter($pull['key_deaths'], 'is_array')
+                ));
+            } else {
+                $pull['key_deaths'] = [];
+            }
+
+            if (isset($pull['mechanic_failures']) && is_array($pull['mechanic_failures'])) {
+                $pull['mechanic_failures'] = array_values(array_map(
+                    fn($m) => is_array($m)
+                        ? array_intersect_key($m, array_flip(self::MECHANIC_FAILURE_ALLOWED_FIELDS))
+                        : [],
+                    array_filter($pull['mechanic_failures'], 'is_array')
+                ));
+            } else {
+                $pull['mechanic_failures'] = [];
+            }
+
+            $cleanPulls[] = $pull;
+        }
+
+        $block['pulls'] = $cleanPulls;
+        return $block;
+    }
+
+    private function sanitizeRecurringFailures(array $block): array
+    {
+        $items = is_array($block['items'] ?? null) ? $block['items'] : [];
+        $cleanItems = [];
+
+        foreach ($items as $item) {
+            if (!is_array($item)) continue;
+            $item = array_intersect_key($item, array_flip(self::RECURRING_ITEM_ALLOWED_FIELDS));
+
+            if (isset($item['severity']) && !in_array($item['severity'], self::RECURRING_SEVERITIES, true)) {
+                $item['severity'] = 'major';
+            }
+
+            $cleanItems[] = $item;
+        }
+
+        $block['items'] = $cleanItems;
+        return $block;
     }
 
     private function sanitizeHeading(array $block): array

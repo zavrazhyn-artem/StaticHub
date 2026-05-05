@@ -129,3 +129,52 @@ rotation_checks:
     cooldown_seconds: 120.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    6343:
+      name: 'Thunder Clap'
+      cpm_median: 17.91
+      cpm_p95: 22.16
+      casts_median: 115
+      casts_p95: 147
+      sample: 30
+      description: 'Blasts all enemies within 8 yards for 81 Physical damage and reduces their movement speed by 20% for 10 sec. Deals reduced damage beyond 5 targets. If you know Rend, inflicts Rend on all targets.'
+    23922:
+      name: 'Shield Slam'
+      cpm_median: 17.08
+      cpm_p95: 21.09
+      casts_median: 109
+      casts_p95: 138
+      sample: 30
+      description: 'Slams the target with your shield, causing 79 Physical damage. Generates 15 Rage.'
+    6572:
+      name: Revenge
+      cpm_median: 10.17
+      cpm_p95: 17.47
+      casts_median: 63
+      casts_p95: 94
+      sample: 30
+      description: 'Swing in a wide arc, dealing 82 Physical damage to all enemies in front of you. Deals reduced damage beyond 5 targets. Your successful dodges and parries have a chance to make your next Revenge cost no Rage.'
+    190456:
+      name: 'Ignore Pain'
+      cpm_median: 15.86
+      cpm_p95: 19.54
+      casts_median: 94
+      casts_p95: 151
+      sample: 30
+      description: 'Fight through the pain, ignoring 50% of damage taken for 12 sec sec or until 418 damage has been prevented.'
+    2565:
+      name: 'Shield Block'
+      cpm_median: 5.54
+      cpm_p95: 6.0
+      casts_median: 31
+      casts_p95: 44
+      sample: 28
+      description: 'Raise your shield, blocking all melee attacks against you for 6 sec.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

@@ -71,40 +71,97 @@ rotation_checks:
     ability_id: 470057
     check: cast_efficiency
     cooldown_seconds: 10.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Astral Shift'
     ability_id: 108271
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Earth Elemental'
     ability_id: 198103
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Stone Bulwark Totem'
     ability_id: 108270
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Bloodlust
     ability_id: 2825
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Heroism
     ability_id: 32182
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    188196:
+      name: 'Lightning Bolt'
+      cpm_median: 16.83
+      cpm_p95: 20.14
+      casts_median: 98
+      casts_p95: 157
+      sample: 30
+      description: 'Hurls a bolt of lightning at the target, dealing 497 Nature damage.'
+    51505:
+      name: 'Lava Burst'
+      cpm_median: 9.91
+      cpm_p95: 10.54
+      casts_median: 55
+      casts_p95: 92
+      sample: 30
+      description: 'Hurls molten lava at the target, dealing 525 Fire damage. Lava Burst will always critically strike if the target is affected by Flame Shock and its damage is increased by your critical strike chance.'
+    117014:
+      name: 'Elemental Blast'
+      cpm_median: 5.47
+      cpm_p95: 6.87
+      casts_median: 38
+      casts_p95: 45
+      sample: 30
+      description: 'Harnesses the raw power of the elements, dealing 771 Elemental damage and increasing your Critical Strike or Haste by 3% or Mastery by 6% for 10 sec.'
+    452201:
+      name: Tempest
+      cpm_median: 3.77
+      cpm_p95: 4.24
+      casts_median: 23
+      casts_p95: 28
+      sample: 30
+      description: null
+    188389:
+      name: 'Flame Shock'
+      cpm_median: 3.16
+      cpm_p95: 4.17
+      casts_median: 22
+      casts_p95: 34
+      sample: 13
+      description: null
+    188443:
+      name: 'Chain Lightning'
+      cpm_median: 4.06
+      cpm_p95: 5.84
+      casts_median: 26
+      casts_p95: 34
+      sample: 17
+      description: 'Hurls a lightning bolt at the enemy, dealing 280 Nature damage and then jumping to additional nearby enemies. Affects 3 total targets'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

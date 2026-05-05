@@ -22,49 +22,49 @@ rotation_checks:
     ability_id: 13877
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: major
   -
     ability: 'Killing Spree'
     ability_id: 51690
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Ghostly Strike'
     ability_id: 196937
     check: cast_efficiency
     cooldown_seconds: 35.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Blade Rush'
     ability_id: 271877
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Echoing Reprimand'
     ability_id: 385616
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Sepsis
     ability_id: 328547
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Marked for Death'
     ability_id: 137619
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Between the Eyes'
@@ -92,47 +92,94 @@ rotation_checks:
     ability_id: 381989
     check: cast_efficiency
     cooldown_seconds: 360.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Preparation
     ability_id: 1277933
     check: cast_efficiency
     cooldown_seconds: 240.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: 'Cloak of Shadows'
     ability_id: 31224
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Evasion
     ability_id: 5277
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Feint
     ability_id: 1966
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Crimson Vial'
     ability_id: 185311
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Kick
     ability_id: 1766
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+  sample_size: 10
+  abilities:
+    185763:
+      name: 'Pistol Shot'
+      cpm_median: 22.52
+      cpm_p95: 26.69
+      casts_median: 194
+      casts_p95: 231
+      sample: 10
+      description: "Draw a concealed pistol and fire a quick shot at an enemy, dealing 29 Physical damage and reducing the target's movement speed by 30% for 6 sec. Awards 1 combo point."
+    193315:
+      name: 'Sinister Strike'
+      cpm_median: 13.63
+      cpm_p95: 15.05
+      casts_median: 119
+      casts_p95: 130
+      sample: 10
+      description: 'Viciously strike an enemy, causing 43 Physical damage. Awards 1 combo point each time it strikes.'
+    315341:
+      name: 'Between the Eyes'
+      cpm_median: 7.78
+      cpm_p95: 8.44
+      casts_median: 67
+      casts_p95: 73
+      sample: 10
+      description: 'Finishing move that blasts your target with your pistol, dealing Physical damage and increasing your damage dealt by 4%. Multiple instances of this bonus can overlap. 1 point : 18 damage, 4 sec 2 points: 37 damage, 6 sec 3 points: 55 dam...'
+    2098:
+      name: Dispatch
+      cpm_median: 7.76
+      cpm_p95: 8.45
+      casts_median: 67
+      casts_p95: 73
+      sample: 10
+      description: 'Finishing move that dispatches the enemy, dealing damage per combo point: 1 point : 21 damage 2 points: 43 damage 3 points: 65 damage 4 points: 87 damage 5 points: 105 damage'
+    271877:
+      name: 'Blade Rush'
+      cpm_median: 4.17
+      cpm_p95: 4.68
+      casts_median: 36
+      casts_p95: 41
+      sample: 10
+      description: 'Charge to your target with your blades out, dealing 304 Physical damage to the target and 131 to all other nearby enemies. Damage reduced beyond 8 targets. While Blade Flurry is active, damage to non-primary targets is increased by 100%....'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

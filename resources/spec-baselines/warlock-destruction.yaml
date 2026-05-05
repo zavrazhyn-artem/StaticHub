@@ -8,7 +8,7 @@ rotation_checks:
     ability_id: 1122
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Cataclysm
@@ -36,82 +36,131 @@ rotation_checks:
     ability_id: 6353
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Shadowburn
     ability_id: 17877
     check: cast_efficiency
     cooldown_seconds: 12.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: minor
   -
     ability: 'Dimensional Rift'
     ability_id: 1280868
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Havoc
     ability_id: 80240
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: Malevolence
     ability_id: 442726
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Mortal Coil'
     ability_id: 6789
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Howl of Terror'
     ability_id: 5484
     check: cast_efficiency
     cooldown_seconds: 40.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Shadowfury
     ability_id: 30283
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Unending Resolve'
     ability_id: 104773
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Dark Pact'
     ability_id: 108416
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Demonic Circle: Teleport'
     ability_id: 48020
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Fel Domination'
     ability_id: 333889
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    17877:
+      name: Shadowburn
+      cpm_median: 10.3
+      cpm_p95: 13.45
+      casts_median: 50
+      casts_p95: 116
+      sample: 30
+      description: 'Blasts a target for 1,877 Shadowflame damage. Only usable on enemies that have less than 20% health. Restores 1 Soul Shard and refunds a charge if the target dies within 5 sec.'
+    29722:
+      name: Incinerate
+      cpm_median: 11.22
+      cpm_p95: 16.57
+      casts_median: 67
+      casts_p95: 93
+      sample: 30
+      description: 'Draws fire toward the enemy, dealing 1,689 Fire damage. Generates 2 Soul Shard Fragments and an additional 1 on critical strikes.'
+    17962:
+      name: Conflagrate
+      cpm_median: 8.37
+      cpm_p95: 9.21
+      casts_median: 46
+      casts_p95: 72
+      sample: 30
+      description: 'Triggers an explosion on the target, dealing 1,357 Fire damage. Generates 5 Soul Shard Fragments.'
+    116858:
+      name: 'Chaos Bolt'
+      cpm_median: 10.4
+      cpm_p95: 12.03
+      casts_median: 55
+      casts_p95: 76
+      sample: 30
+      description: 'Unleashes a devastating blast of chaos, dealing a critical strike for 3,094 Chaos damage. Damage is further increased by your critical strike chance.'
+    445468:
+      name: Wither
+      cpm_median: 4.24
+      cpm_p95: 6.33
+      casts_median: 27
+      casts_p95: 46
+      sample: 25
+      description: 'Bestows a vile malediction upon the target, burning the sinew and muscle of its host, dealing 75 Shadowflame damage immediately and an additional 1,281 Shadowflame damage over 18 sec. Replaces Corruption.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

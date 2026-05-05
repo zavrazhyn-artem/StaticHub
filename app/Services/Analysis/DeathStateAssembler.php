@@ -1,0 +1,354 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Analysis;
+
+/**
+ * Builds a per-death state snapshot from already-fetched WCL events.
+ *
+ * Output per death:
+ *   - dying_player_id, dying_player_name, position {x, y}
+ *   - nearby_players[]: friends within 30y at the death timestamp, with their
+ *     positions and recent (±5s) cast events
+ *   - recent_casts_by_actor[]: per-actor casts in [death-5s, death+1s]
+ *   - personal_defensives_available[]: defensive CDs across the roster that
+ *     were OFF cooldown at the death moment (last cast > cooldown_s ago, or
+ *     never cast in this fight)
+ *
+ * No new WCL queries — the assembler operates on cast snapshots already
+ * collected by WclService::fetchPlayerCoordSnapshots(). Each cast retains x/y
+ * + abilityGameID, so we approximate "where did the player die" by taking the
+ * latest pre-death cast position.
+ *
+ * Coordinates are in WCL units (100 units = 1 yard).
+ */
+class DeathStateAssembler
+{
+    private const NEARBY_RADIUS_YARDS = 30;
+    private const WINDOW_BEFORE_MS = 5_000;
+    private const WINDOW_AFTER_MS  = 1_000;
+
+    public function __construct(
+        private readonly CombatReferenceLoader $combatRefs,
+    ) {}
+
+    /**
+     * @param array $playerCoordSnapshots  fetchPlayerCoordSnapshots() output (cast events with x/y)
+     * @param array $playerHealSnapshots   fetchPlayerHealSnapshots() output (heal events targeting friends)
+     * @param array $playerIdToName  actorID => name
+     * @param array $playerNameToClass  name => class (DeathKnight, DemonHunter, ...)
+     * @param array $playerNameToId  name => actorID (inverse of $playerIdToName)
+     * @param array $fightStartTimes  fight_id => absolute startTime ms
+     * @param array $rosterDeaths  list of parsed deaths with player + fight_id + time_ms_relative
+     * @return array<int, array>  death_index => state-snapshot
+     */
+    public function assemble(
+        array $playerCoordSnapshots,
+        array $playerHealSnapshots,
+        array $playerIdToName,
+        array $playerNameToClass,
+        array $playerNameToId,
+        array $fightStartTimes,
+        array $rosterDeaths
+    ): array {
+        $defensivesById = $this->combatRefs->personalDefensivesById();
+
+        // Pre-index cast snapshots by fight for O(1) per-fight scans during death iteration.
+        $castsByFight = $this->indexCastsByFight($playerCoordSnapshots);
+        // Same for heals.
+        $healsByFightTarget = $this->indexHealsByFightTarget($playerHealSnapshots);
+
+        $out = [];
+        foreach ($rosterDeaths as $idx => $death) {
+            $fightId = $death['fight_id'] ?? null;
+            $playerName = $death['player'] ?? null;
+            $relativeMs = $death['time_ms_relative'] ?? null;
+
+            if ($fightId === null || $playerName === null || $relativeMs === null) {
+                $out[$idx] = null;
+                continue;
+            }
+
+            $fightStartMs = $fightStartTimes[$fightId] ?? null;
+            $absoluteMs = $fightStartMs !== null ? $fightStartMs + $relativeMs : null;
+            if ($absoluteMs === null) {
+                $out[$idx] = null;
+                continue;
+            }
+
+            // WCL `events(Deaths)` doesn't carry x/y on the death event itself,
+            // so we approximate via the latest cast snapshot from the dying
+            // player ≤ death timestamp.
+            $dyingCoord = $this->latestCastBeforeForPlayer(
+                $castsByFight[$fightId] ?? [],
+                $absoluteMs,
+                $playerName,
+                $playerIdToName
+            );
+            $nearby = $this->nearbyPlayersAt(
+                $absoluteMs,
+                $dyingCoord,
+                $playerName,
+                $castsByFight[$fightId] ?? [],
+                $playerIdToName
+            );
+
+            $recentCasts = $this->castsInWindow(
+                $castsByFight[$fightId] ?? [],
+                $absoluteMs - self::WINDOW_BEFORE_MS,
+                $absoluteMs + self::WINDOW_AFTER_MS,
+                $playerIdToName
+            );
+
+            $availableDefensives = $this->defensivesAvailable(
+                $absoluteMs,
+                $castsByFight[$fightId] ?? [],
+                $playerIdToName,
+                $playerNameToClass,
+                $defensivesById,
+                $fightStartMs ?? 0
+            );
+
+            // Phase 2: heal received in [death-5s, death]. If close to zero on
+            // a non-tank with a gradual-bleed death, healers were not focused
+            // on this player.
+            $dyingPlayerId = $playerNameToId[$playerName] ?? null;
+            $healReceived = $this->healReceivedInWindow(
+                $healsByFightTarget[$fightId][$dyingPlayerId] ?? [],
+                $absoluteMs - self::WINDOW_BEFORE_MS,
+                $absoluteMs
+            );
+
+            $out[$idx] = [
+                'dying_player'                  => $playerName,
+                'dying_position'                => $dyingCoord
+                    ? ['x' => $dyingCoord['x'], 'y' => $dyingCoord['y']]
+                    : null,
+                'absolute_timestamp_ms'         => $absoluteMs,
+                'nearby_players'                => $nearby,
+                'recent_casts'                  => $recentCasts,
+                'personal_defensives_available' => $availableDefensives,
+                'heal_received_5s'              => $healReceived,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Index heal events by fight + target player ID so per-death lookups are O(1).
+     *
+     * @return array<int, array<int, list<array{timestamp:int, amount:int}>>>  fight_id => targetID => events
+     */
+    private function indexHealsByFightTarget(array $healSnapshots): array
+    {
+        $idx = [];
+        foreach ($healSnapshots as $heal) {
+            $fight = $heal['fight'] ?? null;
+            $target = $heal['targetID'] ?? null;
+            if ($fight === null || $target === null) continue;
+            $idx[$fight][$target][] = [
+                'timestamp' => (int) ($heal['timestamp'] ?? 0),
+                'amount'    => (int) ($heal['amount'] ?? 0),
+            ];
+        }
+        return $idx;
+    }
+
+    /**
+     * Sum heal amount landed on a target between [startMs, endMs] (inclusive).
+     */
+    private function healReceivedInWindow(array $heals, int $startMs, int $endMs): int
+    {
+        $total = 0;
+        foreach ($heals as $h) {
+            $ts = $h['timestamp'] ?? 0;
+            if ($ts < $startMs || $ts > $endMs) continue;
+            $total += $h['amount'] ?? 0;
+        }
+        return $total;
+    }
+
+    /**
+     * Find the latest cast snapshot from the named player at or before the
+     * given absolute timestamp. Returns null if the player never cast in this
+     * fight or all casts are after the death (possible when player died in the
+     * first second).
+     *
+     * @param array<int,array> $fightCasts   cast snapshots scoped to one fight
+     * @param array<int,string> $playerIdToName
+     * @return array{x:int, y:int, timestamp:int}|null
+     */
+    private function latestCastBeforeForPlayer(
+        array $fightCasts,
+        int $absoluteMs,
+        string $playerName,
+        array $playerIdToName
+    ): ?array {
+        $best = null;
+        foreach ($fightCasts as $cast) {
+            $name = $playerIdToName[$cast['sourceID'] ?? null] ?? null;
+            if ($name !== $playerName) continue;
+            $ts = $cast['timestamp'] ?? null;
+            if ($ts === null || $ts > $absoluteMs) continue;
+            if ($best === null || $ts > ($best['timestamp'] ?? 0)) {
+                $best = $cast;
+            }
+        }
+        return $best;
+    }
+
+    /**
+     * Re-index cast snapshots by fight for O(1) per-fight scans during death iteration.
+     *
+     * @return array<int, list<array>>
+     */
+    private function indexCastsByFight(array $playerCoordSnapshots): array
+    {
+        $idx = [];
+        foreach ($playerCoordSnapshots as $cast) {
+            $fight = $cast['fight'] ?? null;
+            if ($fight === null) continue;
+            $idx[$fight][] = $cast;
+        }
+        return $idx;
+    }
+
+    /**
+     * Find friends within $NEARBY_RADIUS_YARDS of the dying player at absolute
+     * timestamp. Uses each friend's most recent cast within ±2s as a position
+     * proxy — WCL only has positions on cast events, so we approximate.
+     *
+     * @return list<array{name:string, x:int, y:int, distance_yards:float}>
+     */
+    private function nearbyPlayersAt(
+        int $absoluteMs,
+        ?array $dyingCoord,
+        string $dyingPlayer,
+        array $fightCasts,
+        array $playerIdToName
+    ): array {
+        if (!$dyingCoord) return [];
+
+        $radiusUnits = self::NEARBY_RADIUS_YARDS * 100; // WCL units = 1/100 yard
+        $proxyWindow = 2_000;
+
+        // Per-player most recent cast within proxy window
+        $latestPerPlayer = [];
+        foreach ($fightCasts as $cast) {
+            $name = $playerIdToName[$cast['sourceID']] ?? null;
+            if (!$name || $name === $dyingPlayer) continue;
+            $ts = (int) ($cast['timestamp'] ?? 0);
+            if (abs($ts - $absoluteMs) > $proxyWindow) continue;
+
+            if (!isset($latestPerPlayer[$name]) || abs($ts - $absoluteMs) < abs($latestPerPlayer[$name]['timestamp'] - $absoluteMs)) {
+                $latestPerPlayer[$name] = $cast;
+            }
+        }
+
+        $nearby = [];
+        foreach ($latestPerPlayer as $name => $cast) {
+            $dx = (int) $cast['x'] - (int) $dyingCoord['x'];
+            $dy = (int) $cast['y'] - (int) $dyingCoord['y'];
+            $distUnits = sqrt($dx * $dx + $dy * $dy);
+            $distYards = $distUnits / 100;
+            if ($distUnits > $radiusUnits) continue;
+            $nearby[] = [
+                'name'           => $name,
+                'x'              => (int) $cast['x'],
+                'y'              => (int) $cast['y'],
+                'distance_yards' => round($distYards, 1),
+            ];
+        }
+        usort($nearby, fn($a, $b) => $a['distance_yards'] <=> $b['distance_yards']);
+        return $nearby;
+    }
+
+    /**
+     * @return list<array{actor:string, ability_id:?int, timestamp_ms:int, ms_before_death:int}>
+     */
+    private function castsInWindow(array $fightCasts, int $startMs, int $endMs, array $playerIdToName): array
+    {
+        $deathMs = $endMs - self::WINDOW_AFTER_MS;
+        $rows = [];
+        foreach ($fightCasts as $cast) {
+            $ts = (int) ($cast['timestamp'] ?? 0);
+            if ($ts < $startMs || $ts > $endMs) continue;
+            $name = $playerIdToName[$cast['sourceID']] ?? null;
+            if (!$name) continue;
+            $rows[] = [
+                'actor'           => $name,
+                'ability_id'      => $cast['abilityGameID'] ?? null,
+                'timestamp_ms'    => $ts,
+                'ms_before_death' => $deathMs - $ts,
+            ];
+        }
+        usort($rows, fn($a, $b) => $a['timestamp_ms'] <=> $b['timestamp_ms']);
+        return $rows;
+    }
+
+    /**
+     * For each roster member, list their personal defensives that were OFF
+     * cooldown at the death moment (never cast this fight, or last cast was
+     * earlier than `cooldown_s` ago).
+     *
+     * @return list<array{player:string, ability_id:int, ability_name:string, last_cast_s_ago:?float}>
+     */
+    private function defensivesAvailable(
+        int $absoluteMs,
+        array $fightCasts,
+        array $playerIdToName,
+        array $playerNameToClass,
+        array $defensivesById,
+        int $fightStartMs
+    ): array {
+        // Build {player => ability_id => last_cast_ms}
+        $lastCast = [];
+        foreach ($fightCasts as $cast) {
+            $name = $playerIdToName[$cast['sourceID']] ?? null;
+            if (!$name) continue;
+            $abilityId = (int) ($cast['abilityGameID'] ?? 0);
+            if (!isset($defensivesById[$abilityId])) continue;
+            $ts = (int) ($cast['timestamp'] ?? 0);
+            if ($ts > $absoluteMs) continue;
+            if (!isset($lastCast[$name][$abilityId]) || $ts > $lastCast[$name][$abilityId]) {
+                $lastCast[$name][$abilityId] = $ts;
+            }
+        }
+
+        $available = [];
+        foreach ($playerNameToClass as $name => $class) {
+            foreach ($defensivesById as $abilityId => $entry) {
+                if (($entry['class'] ?? '') !== $class) continue;
+                $cooldownMs = (int) ($entry['cooldown_s'] ?? 60) * 1000;
+                $lastMs = $lastCast[$name][$abilityId] ?? null;
+
+                if ($lastMs === null) {
+                    // Never cast this fight — treat as available if the fight
+                    // has been going long enough (avoids false positives on
+                    // CDs that may have been on cooldown from a prior fight).
+                    if ($absoluteMs - $fightStartMs < $cooldownMs) continue;
+                    $available[] = [
+                        'player'          => $name,
+                        'ability_id'      => $abilityId,
+                        'ability_name'    => (string) ($entry['name'] ?? ''),
+                        'last_cast_s_ago' => null,
+                    ];
+                    continue;
+                }
+
+                if (($absoluteMs - $lastMs) >= $cooldownMs) {
+                    $available[] = [
+                        'player'          => $name,
+                        'ability_id'      => $abilityId,
+                        'ability_name'    => (string) ($entry['name'] ?? ''),
+                        'last_cast_s_ago' => round(($absoluteMs - $lastMs) / 1000, 1),
+                    ];
+                }
+            }
+        }
+
+        return $available;
+    }
+}

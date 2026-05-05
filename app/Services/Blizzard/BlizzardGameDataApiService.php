@@ -34,6 +34,55 @@ class BlizzardGameDataApiService
     }
 
     /**
+     * Fetch a single spell's metadata (name, description, cast time, school).
+     * Used by the spec-baseline refresh pipeline to enrich abilities with
+     * descriptions the AI can read.
+     *
+     * @return array{id:int,name:string,description:string,cast_time?:string,powerCost?:string,cooldown?:string}|null
+     */
+    public function getSpell(int $spellId): ?array
+    {
+        $region = $this->authService->getRegion();
+        $url = "https://{$region}.api.blizzard.com/data/wow/spell/{$spellId}";
+
+        try {
+            $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        $data = $response->json();
+        return [
+            'id'          => (int) ($data['id'] ?? $spellId),
+            'name'        => $this->extractLocalized($data['name'] ?? null, 'en_US'),
+            'description' => $this->extractLocalized($data['description'] ?? null, 'en_US'),
+            'cast_time'   => $this->extractLocalized($data['cast_time'] ?? null, 'en_US'),
+            'power_cost'  => $this->extractLocalized($data['power_cost'] ?? null, 'en_US'),
+            'cooldown'    => $this->extractLocalized($data['cooldown'] ?? null, 'en_US'),
+            'range'       => $this->extractLocalized($data['range'] ?? null, 'en_US'),
+        ];
+    }
+
+    /**
+     * Blizzard returns localized strings as { en_US: "...", de_DE: "...", ... }.
+     * Pull the requested locale, or the first available, or '' if absent.
+     */
+    private function extractLocalized(mixed $field, string $preferred = 'en_US'): string
+    {
+        if (is_string($field)) return $field;
+        if (!is_array($field)) return '';
+        if (isset($field[$preferred])) return (string) $field[$preferred];
+        foreach ($field as $value) {
+            if (is_string($value) && $value !== '') return $value;
+        }
+        return '';
+    }
+
+    /**
      * Fetch all realms for the current region.
      */
     public function getRealms(): array

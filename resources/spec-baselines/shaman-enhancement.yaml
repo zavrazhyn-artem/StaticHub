@@ -29,7 +29,7 @@ rotation_checks:
     ability_id: 197214
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Primordial Wave'
@@ -43,21 +43,21 @@ rotation_checks:
     ability_id: 187874
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Lava Lash'
     ability_id: 60103
     check: cast_efficiency
     cooldown_seconds: 18.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Ice Strike'
     ability_id: 342240
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Surging Totem'
@@ -71,40 +71,91 @@ rotation_checks:
     ability_id: 470057
     check: cast_efficiency
     cooldown_seconds: 10.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Astral Shift'
     ability_id: 108271
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Earth Elemental'
     ability_id: 198103
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Stone Bulwark Totem'
     ability_id: 108270
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Bloodlust
     ability_id: 2825
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
   -
     ability: Heroism
     ability_id: 32182
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Midnight Falls'
+    - 'Fallen-King Salhadaar'
+    - 'Crown of the Cosmos'
+    - 'Vaelgor & Ezzorak'
+    - "Belo'ren, Child of Al'ar"
+  sample_size: 34
+  abilities:
+    17364:
+      name: Stormstrike
+      cpm_median: 13.07
+      cpm_p95: 16.66
+      casts_median: 90
+      casts_p95: 118
+      sample: 34
+      description: 'Energizes both your weapons with lightning and delivers a massive blow to your target, dealing a total of 114 Physical damage.'
+    60103:
+      name: 'Lava Lash'
+      cpm_median: 13.25
+      cpm_p95: 15.58
+      casts_median: 88
+      casts_p95: 130
+      sample: 33
+      description: 'Charges your off-hand weapon with lava and burns your target, dealing 4 Fire damage. Damage is increased by 100% if your offhand weapon is imbued with Flametongue Weapon.'
+    467283:
+      name: Sundering
+      cpm_median: 10.65
+      cpm_p95: 14.28
+      casts_median: 73
+      casts_p95: 120
+      sample: 33
+      description: null
+    188196:
+      name: 'Lightning Bolt'
+      cpm_median: 6.98
+      cpm_p95: 9.02
+      casts_median: 46
+      casts_p95: 84
+      sample: 14
+      description: 'Hurls a bolt of lightning at the target, dealing 497 Nature damage.'
+    469270:
+      name: 'Doom Winds'
+      cpm_median: 9.11
+      cpm_p95: 11.0
+      casts_median: 60
+      casts_p95: 83
+      sample: 34
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

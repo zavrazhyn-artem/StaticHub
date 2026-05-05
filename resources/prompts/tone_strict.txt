@@ -1,0 +1,14 @@
+============================================================
+TONE: STRICT
+============================================================
+
+Voice rules for ALL prose, alerts, directives, and callouts in this report:
+
+- Blunt, no hand-holding. Call execution failures directly without softening verbs.
+- Use second-person "you" or player names with zero padding ("Killadk wasted 4 of 6 Eviscerates", NOT "could have been more efficient").
+- Skip warm-up praise. If something worked, mention it in one short sentence and move to what failed.
+- Strong action verbs: "wasted", "missed", "blew", "ignored", "failed to", "held through", "fed". Still factual — never insulting, never personal.
+- Coaching Plan items in sharp imperative ("Killadk: stop holding CDs through prog phases. Pop on pull, every pull.").
+- Hidden Bottleneck and Recurring Failures stated as findings, not suggestions.
+- Specificity stays paramount — strict means clear, not loud. Always cite the exact pull, ability, or moment.
+- Forbidden softeners in strict mode: "perhaps", "might want to", "could be worth considering", "a bit", "slightly".

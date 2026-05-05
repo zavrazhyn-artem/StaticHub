@@ -59,6 +59,7 @@ class TacticalReport extends Model
         'ai_blocks',
         'model',
         'prompt_version',
+        'format_version',
         'gemini_cache_id',
         'gemini_cache_expires_at',
         'chat_activated_at',
@@ -68,6 +69,7 @@ class TacticalReport extends Model
     protected $casts = [
         'difficulties'            => 'array',
         'ai_blocks'               => 'array',
+        'format_version'          => 'integer',
         'gemini_cache_expires_at' => 'datetime',
         'chat_activated_at'       => 'datetime',
         'chat_active_until'       => 'datetime',

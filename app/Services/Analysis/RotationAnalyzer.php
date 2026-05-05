@@ -86,9 +86,6 @@ class RotationAnalyzer
             $baseline = $this->loader->load($entry['class'] ?? null, $entry['spec'] ?? null);
             if (!$baseline) continue;
 
-            $checks = $baseline['rotation_checks'] ?? [];
-            if (!is_array($checks) || empty($checks)) continue;
-
             $playerCasts = $castsByPlayer[$name] ?? [];
             if (empty($playerCasts)) continue;
 
@@ -101,31 +98,36 @@ class RotationAnalyzer
             ));
             $totalEncounters = count($encounters);
 
-            $analysis = [];
-            $issues = [];
-            foreach ($checks as $check) {
-                $row = $this->evaluateCheck($check, $playerCasts, $playerDuration);
-                if ($row === null) continue;
-                $analysis[] = $row;
-                if ($row['status'] !== 'passing') {
-                    $issues[] = [
-                        'ability'  => $row['ability'],
-                        'issue'    => $row['summary'],
-                        'severity' => $row['status'],
-                    ];
-                }
-            }
+            // Delegate evaluation (theoretical + empirical-only) to the shared
+            // entry point. This keeps the per-pull and raid-wide paths
+            // consistent and surfaces empirical-only abilities (e.g. Devourer's
+            // Devour/Consume) in the raid-wide aggregate too.
+            $analysis = $this->evaluatePlayerRotation(
+                $entry['class'] ?? null,
+                $entry['spec'] ?? null,
+                $playerCasts,
+                $playerDuration
+            );
+            if (empty($analysis)) continue;
 
-            if (!empty($analysis)) {
-                $entry['rotation_analysis'] = [
-                    'source'                   => $baseline['source'] ?? 'WoWAnalyzer-midnight',
-                    'participated_seconds'     => $playerDuration,
-                    'total_raid_seconds'       => $totalDurationSeconds,
-                    'encounters_participated'  => $encountersParticipated,
-                    'total_encounters'         => $totalEncounters,
-                    'checks'                   => $analysis,
+            $issues = [];
+            foreach ($analysis as $row) {
+                if (($row['status'] ?? 'passing') === 'passing') continue;
+                $issues[] = [
+                    'ability'  => $row['ability'],
+                    'issue'    => $row['summary'],
+                    'severity' => $row['status'],
                 ];
             }
+
+            $entry['rotation_analysis'] = [
+                'source'                   => $baseline['source'] ?? 'WoWAnalyzer-midnight',
+                'participated_seconds'     => $playerDuration,
+                'total_raid_seconds'       => $totalDurationSeconds,
+                'encounters_participated'  => $encountersParticipated,
+                'total_encounters'         => $totalEncounters,
+                'checks'                   => $analysis,
+            ];
             if (!empty($issues)) {
                 $entry['rotation_issues'] = $issues;
             }
@@ -144,25 +146,99 @@ class RotationAnalyzer
         if ($durationSec < 30 || empty($playerCasts)) return [];
         $baseline = $this->loader->load($class, $spec);
         $checks = $baseline['rotation_checks'] ?? [];
-        if (empty($checks)) return [];
+
+        // Empirical p95 thresholds keyed by ability_id (top WCL parsers).
+        // Falls back to theoretical when sample is too thin.
+        $empirical = [];
+        foreach (($baseline['empirical']['abilities'] ?? []) as $abilityId => $entry) {
+            if (!is_array($entry)) continue;
+            $sample = (int) ($entry['sample'] ?? 0);
+            if ($sample < 5) continue;
+            $empirical[(int) $abilityId] = $entry;
+        }
 
         $rows = [];
+        $checkedAbilityIds = [];
         foreach ($checks as $check) {
-            $row = $this->evaluateCheck($check, $playerCasts, $durationSec);
+            $row = $this->evaluateCheck($check, $playerCasts, $durationSec, $empirical);
+            if ($row !== null) {
+                $rows[] = $row;
+                $checkedAbilityIds[(int) ($check['ability_id'] ?? 0)] = true;
+            }
+        }
+
+        // Surface empirical-only abilities — those that top WCL parsers spam
+        // heavily but icy-veins rotation_checks don't list. Without this, brand
+        // new specs (e.g. Devourer, where rotation_checks and empirical share
+        // ZERO ability IDs) get no empirical signal at all.
+        foreach ($empirical as $abilityId => $entry) {
+            if (isset($checkedAbilityIds[$abilityId])) continue;
+            $row = $this->evaluateEmpiricalCpm((int) $abilityId, $entry, $playerCasts, $durationSec);
             if ($row !== null) $rows[] = $row;
         }
+
         return $rows;
+    }
+
+    /**
+     * Evaluate a top-parser-empirical ability that has no rotation_check entry.
+     * Compares the player's CPM (casts per minute) against the empirical p95
+     * and median from real WCL top parses. Returns null if the player never
+     * cast the ability (likely not talented or different build).
+     */
+    private function evaluateEmpiricalCpm(int $abilityId, array $entry, array $playerCasts, int $durationSec): ?array
+    {
+        $name        = $entry['name'] ?? null;
+        $cpmP95      = (float) ($entry['cpm_p95'] ?? 0);
+        $cpmMedian   = (float) ($entry['cpm_median'] ?? 0);
+        if (!$name || $cpmP95 <= 0 || $durationSec < 30) return null;
+
+        $actual = (int) ($playerCasts[$name] ?? 0);
+        if ($actual === 0) return null;
+
+        $actualCpm = ($actual * 60.0) / $durationSec;
+
+        // Status thresholds — empirical-relative, not absolute.
+        // p95 is the 95th-percentile target (top parsers); median is the typical
+        // top parser. Below median × 0.5 = noticeably under-casting, below
+        // median = mild under-casting, at-or-above median = passing.
+        if ($actualCpm >= $cpmMedian) {
+            $status = 'passing';
+        } elseif ($actualCpm < ($cpmMedian * 0.5)) {
+            $status = 'major';
+        } else {
+            $status = 'minor';
+        }
+
+        $actualCpmRounded = round($actualCpm, 1);
+        $p95Rounded       = round($cpmP95, 1);
+        $medianRounded    = round($cpmMedian, 1);
+        $summary = "{$name}: {$actualCpmRounded} CPM vs top-parser median {$medianRounded} / p95 {$p95Rounded}.";
+
+        return [
+            'ability'              => $name,
+            'ability_id'           => $abilityId,
+            'check_type'           => 'cpm_comparison',
+            'actual_casts'         => $actual,
+            'actual_cpm'           => $actualCpmRounded,
+            'empirical_cpm_p95'    => $p95Rounded,
+            'empirical_cpm_median' => $medianRounded,
+            'status'               => $status,
+            'threshold_source'     => 'wcl-empirical-only',
+            'summary'              => $summary,
+        ];
     }
 
     /**
      * Evaluate a single check against a (player_casts, duration_seconds) pair.
      * Returns null if the ability isn't cast at all (likely not talented).
      */
-    private function evaluateCheck(array $check, array $playerCasts, int $durationSec): ?array
+    private function evaluateCheck(array $check, array $playerCasts, int $durationSec, array $empirical = []): ?array
     {
         if (($check['check'] ?? null) !== 'cast_efficiency') return null;
 
         $ability     = $check['ability'] ?? null;
+        $abilityId   = (int) ($check['ability_id'] ?? 0);
         $cooldown    = $check['cooldown_seconds'] ?? null;
         $recommended = (float) ($check['recommended_efficiency'] ?? 0.80);
         $severityCfg = $check['severity'] ?? 'minor';
@@ -176,6 +252,26 @@ class RotationAnalyzer
         if ($actual === 0) return null; // not talented / not in rotation this encounter
 
         $efficiency = $actual / $maxCasts;
+
+        // Empirical override: if top WCL parsers achieve a different threshold
+        // than icy-veins theory says, prefer the empirical p95 floor.
+        // Formula: empirical_target = cpm_p95 * cooldown_seconds / 60 (capped 0.99).
+        // E.g. cpm_p95 of 0.95 on a 60s CD → 95% expected efficiency.
+        $empiricalSource = null;
+        $empiricalCpmP95 = null;
+        $empiricalCpmMedian = null;
+        if ($abilityId > 0 && isset($empirical[$abilityId])) {
+            $empiricalCpmP95 = (float) ($empirical[$abilityId]['cpm_p95'] ?? 0);
+            $empiricalCpmMedian = (float) ($empirical[$abilityId]['cpm_median'] ?? 0);
+            if ($empiricalCpmP95 > 0) {
+                $empiricalTarget = min(0.99, ($empiricalCpmP95 * (float) $cooldown) / 60);
+                if ($empiricalTarget > 0.4) {
+                    $recommended = $empiricalTarget;
+                    $empiricalSource = 'wcl-p95';
+                }
+            }
+        }
+
         $minorThreshold = $recommended - self::MINOR_DOWNSTEP;
         $majorThreshold = $recommended - self::MAJOR_DOWNSTEP;
 
@@ -203,7 +299,7 @@ class RotationAnalyzer
 
         $summary = "{$ability} cast efficiency {$pct}% (target {$recommendedPct}%+) — {$actual} casts of a possible {$maxInt}.";
 
-        return [
+        $row = [
             'ability'          => $ability,
             'ability_id'       => $check['ability_id'] ?? null,
             'cooldown_seconds' => (float) $cooldown,
@@ -214,6 +310,17 @@ class RotationAnalyzer
             'status'           => $status,
             'summary'          => $summary,
         ];
+
+        // Surface the source of the threshold + raw empirical numbers so the
+        // AI can cite "top parsers run X CPM" instead of vague qualitative
+        // language. Only present when empirical data was used.
+        if ($empiricalSource !== null) {
+            $row['threshold_source']  = $empiricalSource;
+            $row['empirical_cpm_p95']    = $empiricalCpmP95;
+            $row['empirical_cpm_median'] = $empiricalCpmMedian;
+        }
+
+        return $row;
     }
 
     /**

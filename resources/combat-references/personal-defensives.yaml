@@ -1,0 +1,78 @@
+# Personal defensive cooldowns — abilities a player casts on THEMSELVES.
+# Used by DeathAttributionBuilder to detect "could have used a defensive but didn't".
+# Format: list of {id, name, class, cooldown_s} for each major personal CD.
+# Spell IDs verified for Midnight (12.0) expansion; cooldowns are baseline (talents may reduce).
+
+# === Death Knight ===
+- { id: 48792,  name: 'Icebound Fortitude',     class: DeathKnight, cooldown_s: 180 }
+- { id: 55233,  name: 'Vampiric Blood',         class: DeathKnight, cooldown_s: 90  }
+- { id: 48707,  name: 'Anti-Magic Shell',       class: DeathKnight, cooldown_s: 60  }
+- { id: 49028,  name: 'Dancing Rune Weapon',    class: DeathKnight, cooldown_s: 120 }
+
+# === Demon Hunter ===
+- { id: 198589, name: 'Blur',                   class: DemonHunter, cooldown_s: 60 }
+- { id: 196555, name: 'Netherwalk',             class: DemonHunter, cooldown_s: 180 }
+- { id: 187827, name: 'Metamorphosis (DPS)',    class: DemonHunter, cooldown_s: 240 }
+- { id: 203720, name: 'Demon Spikes',           class: DemonHunter, cooldown_s: 20 }
+
+# === Druid ===
+- { id: 22812,  name: 'Barkskin',               class: Druid, cooldown_s: 60 }
+- { id: 61336,  name: 'Survival Instincts',     class: Druid, cooldown_s: 240 }
+- { id: 22842,  name: 'Frenzied Regeneration',  class: Druid, cooldown_s: 36 }
+- { id: 102558, name: 'Incarnation: Guardian',  class: Druid, cooldown_s: 180 }
+
+# === Evoker ===
+- { id: 374348, name: 'Renewing Blaze',         class: Evoker, cooldown_s: 90 }
+- { id: 363916, name: 'Obsidian Scales',        class: Evoker, cooldown_s: 150 }
+
+# === Hunter ===
+- { id: 186265, name: 'Aspect of the Turtle',   class: Hunter, cooldown_s: 180 }
+- { id: 109304, name: 'Exhilaration',           class: Hunter, cooldown_s: 120 }
+- { id: 264735, name: 'Survival of the Fittest',class: Hunter, cooldown_s: 180 }
+
+# === Mage ===
+- { id: 45438,  name: 'Ice Block',              class: Mage, cooldown_s: 240 }
+- { id: 235313, name: 'Blazing Barrier',        class: Mage, cooldown_s: 25 }
+- { id: 11426,  name: 'Ice Barrier',            class: Mage, cooldown_s: 25 }
+- { id: 235450, name: 'Prismatic Barrier',      class: Mage, cooldown_s: 25 }
+- { id: 113862, name: 'Greater Invisibility',   class: Mage, cooldown_s: 120 }
+
+# === Monk ===
+- { id: 122470, name: 'Touch of Karma',         class: Monk, cooldown_s: 90 }
+- { id: 122278, name: 'Dampen Harm',            class: Monk, cooldown_s: 120 }
+- { id: 122783, name: 'Diffuse Magic',          class: Monk, cooldown_s: 90 }
+- { id: 115203, name: 'Fortifying Brew',        class: Monk, cooldown_s: 360 }
+
+# === Paladin ===
+- { id: 642,    name: 'Divine Shield',          class: Paladin, cooldown_s: 300 }
+- { id: 498,    name: 'Divine Protection',      class: Paladin, cooldown_s: 60 }
+- { id: 633,    name: 'Lay on Hands',           class: Paladin, cooldown_s: 600 }
+- { id: 31850,  name: 'Ardent Defender',        class: Paladin, cooldown_s: 120 }
+- { id: 86659,  name: 'Guardian of Ancient Kings', class: Paladin, cooldown_s: 300 }
+
+# === Priest ===
+- { id: 19236,  name: 'Desperate Prayer',       class: Priest, cooldown_s: 90 }
+- { id: 47585,  name: 'Dispersion',             class: Priest, cooldown_s: 120 }
+- { id: 586,    name: 'Fade',                   class: Priest, cooldown_s: 30 }
+
+# === Rogue ===
+- { id: 31224,  name: 'Cloak of Shadows',       class: Rogue, cooldown_s: 120 }
+- { id: 5277,   name: 'Evasion',                class: Rogue, cooldown_s: 120 }
+- { id: 1856,   name: 'Vanish',                 class: Rogue, cooldown_s: 120 }
+- { id: 185311, name: 'Crimson Vial',           class: Rogue, cooldown_s: 30 }
+- { id: 1966,   name: 'Feint',                  class: Rogue, cooldown_s: 15 }
+
+# === Shaman ===
+- { id: 108271, name: 'Astral Shift',           class: Shaman, cooldown_s: 90 }
+- { id: 30884,  name: 'Nature''s Guardian',     class: Shaman, cooldown_s: 60 }
+
+# === Warlock ===
+- { id: 104773, name: 'Unending Resolve',       class: Warlock, cooldown_s: 180 }
+- { id: 108416, name: 'Dark Pact',              class: Warlock, cooldown_s: 60 }
+
+# === Warrior ===
+- { id: 871,    name: 'Shield Wall',            class: Warrior, cooldown_s: 240 }
+- { id: 12975,  name: 'Last Stand',             class: Warrior, cooldown_s: 180 }
+- { id: 23920,  name: 'Spell Reflection',       class: Warrior, cooldown_s: 25 }
+- { id: 184364, name: 'Enraged Regeneration',   class: Warrior, cooldown_s: 120 }
+- { id: 118038, name: 'Die by the Sword',       class: Warrior, cooldown_s: 120 }

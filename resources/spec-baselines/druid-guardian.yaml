@@ -36,21 +36,21 @@ rotation_checks:
     ability_id: 61336
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Barkskin
     ability_id: 22812
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Bristling Fur'
     ability_id: 155835
     check: cast_efficiency
     cooldown_seconds: 40.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Red Moon'
@@ -59,3 +59,60 @@ rotation_checks:
     cooldown_seconds: 30.0
     recommended_efficiency: 0.85
     severity: major
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 29
+  abilities:
+    33917:
+      name: Mangle
+      cpm_median: 19.57
+      cpm_p95: 21.76
+      casts_median: 98
+      casts_p95: 143
+      sample: 29
+      description: 'Mangle the target for 70 Physical damage. Generates 12 Rage.'
+    77758:
+      name: Thrash
+      cpm_median: 10.27
+      cpm_p95: 11.39
+      casts_median: 52
+      casts_p95: 87
+      sample: 29
+      description: 'Strikes all nearby enemies, dealing 33 Bleed damage and an additional 12 Bleed damage over 15 sec. When applied from Bear Form, this effect can stack up to 3 times. Generates 5 Rage.'
+    441605:
+      name: Ravage
+      cpm_median: 4.9
+      cpm_p95: 6.44
+      casts_median: 28
+      casts_p95: 36
+      sample: 29
+      description: null
+    400254:
+      name: Raze
+      cpm_median: 5.48
+      cpm_p95: 7.0
+      casts_median: 27
+      casts_p95: 37
+      sample: 21
+      description: 'Strike with the might of Ursoc, dealing 87 Physical damage to your target and 48 to all other enemies in front of you. Damage reduced beyond 5 targets.'
+    192081:
+      name: Ironfur
+      cpm_median: 5.54
+      cpm_p95: 9.89
+      casts_median: 37
+      casts_p95: 77
+      sample: 18
+      description: 'Increases armor by 124 for 7 sec.'
+    213771:
+      name: Swipe
+      cpm_median: 4.03
+      cpm_p95: 7.48
+      casts_median: 19
+      casts_p95: 60
+      sample: 11
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

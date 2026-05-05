@@ -22,14 +22,14 @@ rotation_checks:
     ability_id: 31821
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.60
+    recommended_efficiency: 0.6
     severity: minor
   -
     ability: 'Divine Toll'
     ability_id: 375576
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: "Tyr's Deliverance"
@@ -43,7 +43,7 @@ rotation_checks:
     ability_id: 1242008
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Beacon of Virtue'
@@ -64,7 +64,7 @@ rotation_checks:
     ability_id: 432459
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Holy Shock'
@@ -78,7 +78,7 @@ rotation_checks:
     ability_id: 275773
     check: cast_efficiency
     cooldown_seconds: 12.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Crusader Strike'
@@ -92,26 +92,83 @@ rotation_checks:
     ability_id: 6940
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Lay on Hands'
     ability_id: 633
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.10
+    recommended_efficiency: 0.1
     severity: minor
   -
     ability: 'Divine Protection'
     ability_id: 498
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Divine Shield'
     ability_id: 642
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    275773:
+      name: Judgment
+      cpm_median: 7.3
+      cpm_p95: 9.78
+      casts_median: 41
+      casts_p95: 66
+      sample: 26
+      description: 'Judges the target, dealing 473 Holy damage.'
+    85222:
+      name: 'Light of Dawn'
+      cpm_median: 8.42
+      cpm_p95: 13.36
+      casts_median: 73
+      casts_p95: 116
+      sample: 16
+      description: 'Unleashes Holy energy, healing up to 5 injured allies within a 40 yd radius around you for 1,674.'
+    20473:
+      name: 'Holy Shock'
+      cpm_median: 9.92
+      cpm_p95: 15.69
+      casts_median: 63
+      casts_p95: 126
+      sample: 30
+      description: 'Triggers a burst of Light on the target, dealing 812 Holy damage to an enemy, or 2,526 healing to an ally. Generates 1 Holy Power.'
+    415091:
+      name: 'Shield of the Righteous'
+      cpm_median: 17.28
+      cpm_p95: 21.06
+      casts_median: 100
+      casts_p95: 114
+      sample: 19
+      description: 'Slams enemies in front of you with your shield, causing 69 Holy damage, and reducing the cooldown of Holy Shock by 2.0 sec and granting 360 mana.'
+    1241413:
+      name: 'Hammer of Wrath'
+      cpm_median: 4.34
+      cpm_p95: 5.41
+      casts_median: 23
+      casts_p95: 32
+      sample: 18
+      description: null
+    1279187:
+      name: 'Crusader Strike'
+      cpm_median: 4.63
+      cpm_p95: 6.7
+      casts_median: 29
+      casts_p95: 38
+      sample: 10
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

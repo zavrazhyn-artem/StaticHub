@@ -1270,5 +1270,19 @@
 
     "Leave a feedback for this report": "Залиште відгук про цей звіт",
     "At the bottom of the page is a feedback form — your rating shapes the next AI iteration.": "Внизу сторінки є форма відгуку — ваша оцінка формує наступну ітерацію ШІ.",
-    "Scroll to feedback": "Перемотати в кінець"
+    "Scroll to feedback": "Перемотати в кінець",
+    "pulls.cluster.alone": "Сам",
+    "pulls.cluster.with_friends": "З друзями",
+    "pulls.cluster.in_stack": "У стеку",
+    "pulls.movement.outward": "Розширюється",
+    "pulls.movement.inward": "Збігається",
+    "pulls.movement.lateral": "Бічний рух",
+    "pulls.movement.static": "Стояв",
+    "Report Tone": "Тон звіту",
+    "Applies to all AI reports generated for this static.": "Застосовується до всіх ШІ-звітів цього статика.",
+    "Encouraging, supportive language.": "Підтримуюча, дружня манера.",
+    "Direct and analytical.": "Прямий, аналітичний тон.",
+    "Blunt, no hand-holding.": "Жорстко, без сюсюкання.",
+    "Deaths Tracked Per Pull": "Смертей на пулл",
+    "How many of the first deaths in each pull the AI sees. UI still shows all deaths.": "Скільки перших смертей у кожному пулі бачить ШІ. UI показує всі смерті."
 }
