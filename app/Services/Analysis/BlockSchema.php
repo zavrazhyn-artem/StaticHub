@@ -74,7 +74,12 @@ class BlockSchema
         'summary', 'key_deaths', 'mechanic_failures', 'pattern_note',
     ];
 
-    private const KEY_DEATH_ALLOWED_FIELDS = ['player', 'ability', 'time', 'compass', 'distance', 'cause'];
+    private const KEY_DEATH_ALLOWED_FIELDS = [
+        'player', 'ability', 'time',
+        'compass', 'distance', 'distance_yards',
+        'cluster', 'nearby', 'movement',
+        'cause',
+    ];
     private const MECHANIC_FAILURE_ALLOWED_FIELDS = ['mechanic', 'detail'];
     private const RECURRING_ITEM_ALLOWED_FIELDS = ['name', 'frequency', 'severity', 'detail'];
     private const RECURRING_SEVERITIES = ['critical', 'major', 'minor'];

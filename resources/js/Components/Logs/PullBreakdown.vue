@@ -42,7 +42,12 @@ function compassLabel(d) {
     if (!d) return '';
     const parts = [];
     if (d.compass) parts.push(d.compass);
-    if (d.distance) parts.push(`@ ${d.distance}`);
+    // Prefer exact yards over the close/mid/far enum when both present.
+    if (typeof d.distance_yards === 'number') {
+        parts.push(`@ ${d.distance_yards}y`);
+    } else if (d.distance) {
+        parts.push(`@ ${d.distance}`);
+    }
     return parts.join(' ');
 }
 
@@ -50,6 +55,22 @@ const compassMap = {
     N: '↑', NE: '↗', E: '→', SE: '↘',
     S: '↓', SW: '↙', W: '←', NW: '↖',
     center: '•',
+};
+
+// NOTE: namespaced translation keys (`pulls.cluster.*` / `pulls.movement.*`)
+// to avoid collisions — bare "Static" / "Group" already have unrelated
+// translations elsewhere in the app (e.g. "Static" → "Статик" for static-group module).
+const clusterStyle = {
+    alone:        { icon: 'person', tone: 'text-amber-300 bg-amber-500/10 border-amber-500/30',     label: __('pulls.cluster.alone') },
+    with_friends: { icon: 'group',  tone: 'text-sky-300 bg-sky-500/10 border-sky-500/30',           label: __('pulls.cluster.with_friends') },
+    in_stack:     { icon: 'groups', tone: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30', label: __('pulls.cluster.in_stack') },
+};
+
+const movementStyle = {
+    outward:  { icon: 'open_in_full',     tone: 'text-rose-300 bg-rose-500/10 border-rose-500/30',         label: __('pulls.movement.outward') },
+    inward:   { icon: 'close_fullscreen', tone: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30', label: __('pulls.movement.inward') },
+    lateral:  { icon: 'swap_horiz',       tone: 'text-sky-300 bg-sky-500/10 border-sky-500/30',            label: __('pulls.movement.lateral') },
+    static:   { icon: 'do_not_disturb_on',tone: 'text-amber-300 bg-amber-500/10 border-amber-500/30',      label: __('pulls.movement.static') },
 };
 </script>
 
@@ -144,19 +165,45 @@ const compassMap = {
                 <div class="text-4xs font-bold uppercase tracking-wider text-on-surface-variant">
                     {{ __('Key deaths') }}
                 </div>
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                     <div v-for="(d, j) in activePull.key_deaths" :key="j"
-                         class="flex items-center gap-3 px-3 py-2 rounded-lg bg-black/20 border border-white/5">
-                        <span class="text-xs font-bold text-white min-w-[100px]">{{ d.player }}</span>
-                        <span v-if="d.time" class="text-3xs font-mono text-on-surface-variant">{{ d.time }}</span>
-                        <span v-if="d.compass"
-                              class="text-3xs font-bold text-indigo-400 inline-flex items-center gap-1">
-                            <span>{{ compassMap[d.compass] || d.compass }}</span>
-                            <span class="opacity-70">{{ compassLabel(d) }}</span>
-                        </span>
-                        <span class="text-xs text-gray-300 flex-1" v-html="linkify(d.ability || '')"></span>
-                        <span v-if="d.cause"
-                              class="text-3xs text-on-surface-variant italic">— {{ d.cause }}</span>
+                         class="px-3 py-2.5 rounded-lg bg-black/20 border border-white/5 space-y-1.5">
+
+                        <!-- Top row: player + time + position badges + ability -->
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-xs font-bold text-white min-w-[100px]">{{ d.player }}</span>
+                            <span v-if="d.time" class="text-3xs font-mono text-on-surface-variant">{{ d.time }}</span>
+
+                            <!-- Compass + yards -->
+                            <span v-if="d.compass"
+                                  class="text-3xs font-bold text-indigo-400 inline-flex items-center gap-1">
+                                <span>{{ compassMap[d.compass] || d.compass }}</span>
+                                <span class="opacity-70">{{ compassLabel(d) }}</span>
+                            </span>
+
+                            <!-- Cluster badge -->
+                            <span v-if="d.cluster && clusterStyle[d.cluster]"
+                                  :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded text-4xs font-bold uppercase tracking-wider border', clusterStyle[d.cluster].tone]"
+                                  :title="Array.isArray(d.nearby) && d.nearby.length ? d.nearby.join(', ') : ''">
+                                <span class="material-symbols-outlined text-[12px]">{{ clusterStyle[d.cluster].icon }}</span>
+                                <span>{{ clusterStyle[d.cluster].label }}</span>
+                            </span>
+
+                            <!-- Movement badge -->
+                            <span v-if="d.movement && movementStyle[d.movement]"
+                                  :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded text-4xs font-bold uppercase tracking-wider border', movementStyle[d.movement].tone]">
+                                <span class="material-symbols-outlined text-[12px]">{{ movementStyle[d.movement].icon }}</span>
+                                <span>{{ movementStyle[d.movement].label }}</span>
+                            </span>
+
+                            <span class="text-xs text-gray-300 flex-1 min-w-0" v-html="linkify(d.ability || '')"></span>
+                        </div>
+
+                        <!-- Bottom row: cause narrative -->
+                        <p v-if="d.cause"
+                           class="text-xs text-on-surface-variant leading-relaxed pl-[100px] -mt-0.5">
+                            {{ d.cause }}
+                        </p>
                     </div>
                 </div>
             </div>

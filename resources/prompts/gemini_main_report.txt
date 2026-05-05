@@ -64,13 +64,18 @@ CROSS-PLAYER ATTRIBUTION (HARD RULE)
 ```
 {
   "category": "missed_external" | "missed_interrupt" | "missed_dispel"
-            | "raid_coordination" | "defensive_unused" | "soak_uncovered"
+            | "defensive_predictable_miss" | "defensive_unused"
+            | "soak_uncovered" | "healer_lapse" | "raid_coordination"
             | "unavoidable" | "self_mechanic_miss",
   "evidence": "Plain-text explanation citing data signals.",
   "responsible_players": ["Mcmorrio", "Lumiral"],
   "confidence": "high" | "medium" | "low"
 }
 ```
+
+Category meanings (Phase 2 additions surface dynamics the older lanes missed):
+- `defensive_predictable_miss` — the killing blow was a SCHEDULED boss cast (cadence-predictable from boss timeline) AND the player had their own defensive off cooldown for N seconds. "You knew it was coming and didn't press your button."
+- `healer_lapse` — non-tank gradual-bleed death (tag=normal, killed by sustained ticks not a oneshot) with ZERO or near-zero healing landed in the [death-5s, death] window despite alive healers in the roster. The death is on healer attention, not on the dying player.
 
 **Use `attribution` as source-of-truth for the cause of each death.** Do NOT guess your own cause — narrate what attribution already said. Translate `category` to natural language (in the raid leader's locale) and surface the `evidence` and `responsible_players` directly.
 
@@ -177,7 +182,10 @@ The user already has WarcraftLogs and WowAnalyzer open. If a section of THIS rep
 
 When data is the ONLY thing you have for a section (e.g. mechanic_failures table) — keep the table for traceability, but the surrounding paragraph MUST add context, causality, or fairness reframe. Tables alone are commodity.
 
-**Empirical benchmarks** — `per_player_data[name].rotation_issues[]` entries may carry `threshold_source: "wcl-p95"` + `empirical_cpm_p95` / `empirical_cpm_median`. When present, you may compare individual rotation gaps against real top-parser numbers in narrative ("DPS rotation flagged Killadk's Eviscerate CPM at 5.2 vs the 98-99-100 percentile median of 7.8 — closing that 33% gap is half a parse tier on this fight"). Without `threshold_source`, the row uses theoretical icy-veins thresholds — don't make "top parsers" claims for those.
+**Empirical benchmarks** — `per_player_data[name].rotation_issues[]` entries may carry empirical top-parser data in two shapes:
+- `threshold_source: "wcl-p95"` + `empirical_cpm_p95` / `empirical_cpm_median` — empirical-tightened threshold for an ability that's also on the icy-veins rotation_check list. Use to cite "Player at X% efficiency / Y CPM vs top-parser p95 of Z CPM".
+- `threshold_source: "wcl-empirical-only"` + `check_type: "cpm_comparison"` + `actual_cpm` / `empirical_cpm_p95` / `empirical_cpm_median` — ability heavily spammed by top parsers but missing from theoretical rotation_checks (common for new Midnight specs where guides are stale). Cite the CPM gap directly: "Mørw's Devour at 11.9 CPM — top Devourer parses sit at 18.3 median; that's where the resource gap closes."
+Without `threshold_source`, the row uses theoretical icy-veins thresholds — don't make "top parsers" claims for those.
 
 ============================================================
 BLOCK TYPES (STRICT SCHEMA — extra fields are silently dropped)
@@ -218,8 +226,30 @@ separate blocks instead — heading first, then table.
   "phase": "P1",                                       // optional; mirror `last_phase` from data
   "summary": "2-6 sentences. Depth varies by signal: 2-3 for routine pulls, 4-6 for critical / kill / pattern-defining pulls.",
   "key_deaths": [
-    { "player": "Killadk", "ability": "Despotic Command", "time": "1:23", "compass": "NE", "distance": "mid", "cause": "stood in puddle" }
+    {
+      "player": "Killadk",
+      "ability": "Despotic Command",
+      "time": "1:23",
+      "compass": "NE",
+      "distance_yards": 32,                          // INTEGER — exact yards from raid centroid (mirror `coord_distance_yards` from source death)
+      "cluster": "alone",                            // "alone" | "with_friends" | "in_stack" — mirror `position_cluster`
+      "nearby": ["Yazh (15y)", "Dex (19y)"],         // OPTIONAL — top 2-3 closest friends with yards (only when cluster is "with_friends" or "in_stack")
+      "movement": "outward",                         // "outward" | "inward" | "lateral" | "static" — mirror `movement_pattern`
+      "cause": "Витягнувся на 32y від групи (поруч нікого в 15y), рухаючись назовні — Despotic Command зловила під час перебіжки повз стіну puddle."
+    }
   ],                                                   // 1:1 mirror of `fights[i].deaths` — same length, same order, same players. Empty ONLY when `fights[i].deaths` is empty.
+                                                       //
+                                                       // STRUCTURED FIELDS (compass / distance_yards / cluster / nearby / movement) — mirror what's on the source death (`fights[i].deaths[k]`). Don't invent values; if a field is absent on source, omit it.
+                                                       //
+                                                       // `cause` field RULES (HARD):
+                                                       //   1. MUST be written in the raid leader's locale (`localization.raid_leader.locale`). Ukrainian report → Ukrainian cause. English report → English. Russian report → Russian. NEVER leave English fragments like "missed mechanic" / "stood in puddle" / "soak fail" in a non-English report — those auto-translate to bad UX.
+                                                       //   2. ANSWER TWO QUESTIONS in this order: (a) WHAT mechanic killed them and HOW that mechanic works, (b) WHY this player got hit by it (positioning / soak miss / stood-in-fire / movement-into-it / didn't dispel / didn't get external). The mechanic name + why-hit IS the headline, NOT "didn't press CD".
+                                                       //   3. Defensive cooldown notes are SECONDARY (a tail at the end, optional, only when the kit gap is the actual lesson — e.g. predictable scheduled cast). DO NOT lead with "didn't use Ice Barrier" / "не використав CD" — that's commodity output that any tool can produce. Lead with the WHY.
+                                                       //   4. Use cluster/movement when present to explain WHY: "in_stack + soak mechanic" → "you ate the soak with the group — split assignment broke"; "alone + soak mechanic" → "isolated 25y from group when soak called — no soak partners"; "outward + sweep mechanic" → "extended past the cleave wall while it was casting"; "static + telegraphed cast" → "didn't reposition during the 4s cast bar".
+                                                       //   5. Length: 12-30 words (target). One-word causes or "didn't use defensive CD" FAIL validation.
+                                                       //   6. Pull-specific. Don't paste the same phrase across entries — each death has its own mechanic + positional story.
+                                                       //   7. FORBIDDEN openings (auto-fail validation): "Не використав…", "Didn't use…", "Missed mechanic", "Failed to press…", "No defensive…". Replace with mechanic + why-hit narrative.
+                                                       //   8. NEVER quote the internal `tag` value verbatim ("normal" / "mechanic_oneshot" / "wipe_called" / "tank_loss_cascade"). Those are PHP-side WipeDetector labels, not player vocabulary. If the tag adds meaning, paraphrase semantically (e.g. `mechanic_oneshot` → "одношотова механіка" / "boss landed a one-shot"; `wipe_called` → "під час call для reset" / "during the wipe call"). The default `normal` tag carries no information — never mention it at all.
   "mechanic_failures": [
     { "mechanic": "Twisting Obscurity", "detail": "3-grouping never formed, 8 hits raid-wide" }
   ],                                                   // MAY be empty when no specific story; not bound to deaths length
@@ -317,6 +347,20 @@ CORE SECTIONS (always include, in this order)
       Data sourcing rules (HARD):
       - Never invent deaths not in `fights[i].deaths`. Never list deaths that aren't there.
       - When a death has `coord_compass` and `coord_distance`, cite both compactly ("died NE @ mid"). When missing, omit the position phrase silently — never invent a direction.
+      - **POSITIONAL CONTEXT (use to make death analysis specific instead of vague):** each death may carry these structured fields beyond compass/distance. Use them to upgrade prose from "Oaran died SW" to "Oaran died alone SW edge, moving outward when Umbral Beams caught him."
+        - `coord_distance_yards` (int) — exact yards from raid centroid. Cite when the band ("close/mid/far") loses precision: "32y from raid" hits harder than "far".
+        - `position_cluster` — `"alone"` | `"with_friends"` | `"in_stack"`.
+          - `alone` = no friend within 15y. Frame as isolation: "died alone, no soak partner / no healer within range." Strong evidence of positioning issue if killing-blow is a soak/share mechanic.
+          - `in_stack` = 3+ friends within 8y. Frame as group damage: "died in the stack — soak/share mechanic hit the whole pack." Removes individual blame.
+          - `with_friends` = 1-2 friends within 15y. Neutral; cite if relevant.
+        - `position_nearby[]` — list of `{name, distance_yards}` (≤5 closest). Cite specific names when narrating cluster context: "in stack with Dexster (2y), Zavrikk (5y), Chong (8y)" beats "in a stack."
+        - `movement_pattern` — `"outward"` | `"inward"` | `"lateral"` | `"static"`.
+          - `outward` = was running away from raid. Caused most "extending into mechanic" deaths. "Moving outward when caught — extending away from group" is a CONCRETE coaching point.
+          - `inward` = was running toward raid (often a positive sign — attempting to stack/regroup before death).
+          - `lateral` = sideways movement, no net distance change (e.g. dodging).
+          - `static` = barely moved (≤5y spread). Often "stuck in animation" or "didn't react in time."
+        - `movement_summary` — short pre-rendered text. Quote it directly when it conveys the picture better than your own paraphrase ("moving outward (+12y over 4 casts)").
+      - Combining the four signals when they all fire is what turns vague into actionable. Example narrative: "Oaran died SW @ 32y, alone (no friend within 15y), moving outward (+8y over 3 casts) — Umbral Beams swept the south while he was extending away from group. Coaching point: don't break stack during P2." That single sentence is the goal — uses position + cluster + movement + mechanic together. Aim for this density on critical deaths; routine pulls can use just compass+cluster.
       - `mechanic_failures[]` per pull: only mechanics that failed IN THIS pull — cross-reference `fights[i].deaths[].killing_blow` and the encounter's `mechanic_failures[]` for context. Don't recycle the encounter-level top-3 list verbatim.
       - `pattern_note` on pull P: ONLY include when the same mechanic/error appeared in ≥2 pulls earlier in this encounter. Reference the trail ("3rd pull in a row this fails — see pulls 3, 5"). Don't invent recurrence.
 
@@ -549,3 +593,20 @@ FINAL CHECKLIST (run before outputting)
 12. Each block in `main` starts with `"type": "<exact-type-name>"` as first key — no bare type names, no renamed keys, no missing `type`.
 13. **Every player named in a role-grouped sentence ("Tanks: ...", "Healers: ...", "DPS: ...") matches their `per_player_data[name].role`.** Cross-check before output — putting a `dps` in a "Healers:" group is a validation failure.
 14. **No interrupt directives go to players whose cast list is empty of interrupt abilities.** Verify in encounter interrupts data before assigning interrupt duty.
+14a. **Every `key_deaths[].cause` MUST**: (a) be in raid_leader.locale, (b) be 12-30 words, (c) explain the mechanic + WHY this player got hit (positioning / soak miss / movement-into-it), NOT what defensive could have helped. Validation failures: causes that lead with "Не використав…" / "Didn't use…" / "Missed mechanic" / "Failed to press…" — those are commodity strings, the cluster + movement context is the value-add. Defensive CD notes are at most a tail clause, never the headline.
+14b. **No `cause` (or any prose anywhere) contains literal internal tag values: "normal", "mechanic_oneshot", "wipe_called", "tank_loss_cascade".** These are PHP labels — paraphrase semantically or omit. The string "(normal)" appearing inside any cause is an automatic validation failure.
+15. **CLASS-SPEC GATING — every ability you cite for a player MUST belong to that player's exact class+spec.** Before naming a spell in a directive, recurring_failure, or coaching plan, check `per_player_data[name].class` + `per_player_data[name].spec` against the spell. Cross-class advice is a validation failure.
+    - Example failure modes seen in past runs (do not repeat):
+      - Telling a Resto Druid (Ahrni) to use **Fortifying Brew** or **Life Cocoon** — those are Monk spells. Druid has Ironbark / Cenarion Ward / Tranquility / Barkskin instead.
+      - Telling a Mistweaver Monk (Yazhneloh) and a Resto Druid (Ahrni) to share advice in one sentence about Monk-only cooldowns — the spell only applies to one of them.
+      - Listing a Resto Druid as a "missed Voidbolt kicks" failure when she has 15 Skull Bash interrupts — assigning blame to a healer who already over-delivers on interrupts is a misread of the data.
+    - Rule: if you want to call out a behaviour for "all healers" or "all DPS", either (a) phrase it generically without naming a class spell, or (b) split into per-class sentences each citing only that class's actual spells.
+    - Anchor list (the most-confused subset — verify against `per_player_data[name].class` + `.spec`):
+      - **Fortifying Brew, Life Cocoon, Soothing Mist, Vivify, Renewing Mist, Enveloping Mist, Touch of Death, Tiger Palm, Rising Sun Kick, Spinning Crane Kick** = Monk only.
+      - **Ironbark, Tranquility, Cenarion Ward, Wild Growth, Rejuvenation, Lifebloom, Wrath, Starsurge, Mangle, Thrash, Frenzied Regeneration** = Druid only.
+      - **Pain Suppression, Power Word: Shield, Power Word: Barrier, Vampiric Embrace, Halo, Mind Blast** = Priest only.
+      - **Spirit Link Totem, Healing Tide Totem, Healing Stream Totem, Wind Shear, Riptide** = Shaman only.
+      - **Beacon of Light, Lay on Hands, Aura Mastery, Holy Shock, Word of Glory, Hammer of Justice, Avenger's Shield** = Paladin only.
+      - **Disrupt, Eye Beam, Vengeful Retreat, Voidblade, Reap, The Hunt, Felblade, Blur, Darkness** = Demon Hunter only.
+      - **Skull Bash** is Druid only (Bear/Cat form). **Mind Freeze** is DK only. **Counter Shot** is Hunter only. **Counterspell** is Mage only. **Pummel** is Warrior only. **Kick** is Rogue only. **Solar Beam** is Balance Druid only. **Spear Hand Strike** is Monk only. **Rebuke** is Paladin only. **Silence** is Priest only.
+    - When in doubt, cite the data observation only ("12 missed kicks on Voidbolt") and let the player figure out what spell to use, rather than guessing the wrong spell.

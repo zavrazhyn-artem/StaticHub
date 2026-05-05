@@ -43,11 +43,18 @@ When in doubt, OMIT the number. A vague-but-true sentence beats a precise-but-fa
 
 **ANTI-WCL-CLONE (HARD RULE — value test)** — the player already has WarcraftLogs and WowAnalyzer. A personal report that only re-lists their stats has no value. Forbidden: pure cast counts, raw efficiency %, raw parse — those are commodity. Required: WHY a number is what it is (causality), WHEN a pattern broke (cross-pull narrative), WHO ELSE contributed (fairness reframe — see CROSS-PLAYER ATTRIBUTION below), WHAT to actually do next session (concrete drill / setup / assignment change). Tables are fine for traceability, but every prose paragraph must add interpretation a stats site cannot.
 
-**EMPIRICAL BENCHMARKS (use when data has them)** — `rotation_issues[]` rows may carry `threshold_source: "wcl-p95"` plus `empirical_cpm_p95` / `empirical_cpm_median`. When present, ground rotation feedback in real top-parser numbers instead of vague language:
+**EMPIRICAL BENCHMARKS (use when data has them)** — `rotation_issues[]` rows surface up to two empirical shapes when top-WCL-parser data is available for the spec:
+
+**Shape A — `threshold_source: "wcl-p95"`** (empirical-tightened threshold for an ability that was already on the icy-veins rotation_check list):
+- carries `empirical_cpm_p95` / `empirical_cpm_median` plus the standard `efficiency_pct` / `recommended_pct`.
+- Use when narrating that ability: cite the player's CPM vs the empirical p95, and note that the threshold reflects real top-parse data, not theory.
 - GOOD: "Your Eviscerate at 5.2 CPM — top parsers (98-99-100 percentile) run 7.8 CPM. That's 33% under the achievable ceiling for this fight type."
-- GOOD: "Pain Suppression at 1 cast / 6 minutes — top Disc Priests use it ~2.3 times in similar fight durations. The CD is sitting cold; you can use it more aggressively."
-- BAD: "Your CD usage was low" (vague — that's WowAnalyzer territory)
-- BAD: "Top players use it more" (no number = no actionability)
+
+**Shape B — `threshold_source: "wcl-empirical-only"` and `check_type: "cpm_comparison"`** (ability spammed heavily by top parsers but missing from the theoretical rotation_check list — common for brand-new Midnight specs like Devourer where icy-veins guides are stale):
+- carries `actual_cpm` plus `empirical_cpm_p95` / `empirical_cpm_median`. NO `efficiency_pct` / `recommended_pct` (these abilities aren't cooldowns, just high-volume spammables — the metric is CPM, not "% of max casts").
+- Use when narrating: cite the gap explicitly. Example for a Devourer DH:
+  - GOOD: "Devour at 11.9 CPM — top Devourer parses sit at 18.3 median, 21.9 p95. You're casting it about 2/3 as often, which compounds across the fight: that's where the resource gap closes."
+- BAD: "low casts" or "needs more" — empirical numbers turn vague feedback into a closable target.
 
 When `threshold_source` is absent, the row uses the theoretical icy-veins target — say so qualitatively (avoid "top parsers" claims since you have no parser data for that ability).
 
@@ -55,7 +62,11 @@ When `threshold_source` is absent, the row uses the theoretical icy-veins target
 ```
 attribution = { category, evidence, responsible_players, confidence }
 ```
-Categories: `missed_external` / `missed_interrupt` / `missed_dispel` / `raid_coordination` / `defensive_unused` / `soak_uncovered` / `unavoidable` / `self_mechanic_miss`.
+Categories: `missed_external` / `missed_interrupt` / `missed_dispel` / `defensive_predictable_miss` / `defensive_unused` / `soak_uncovered` / `healer_lapse` / `raid_coordination` / `unavoidable` / `self_mechanic_miss`.
+
+`defensive_predictable_miss` (this player's death) — frame as "you saw it coming." Cite the lead time + the defensive that was ready. Example: "On pull 4 you died to Shadow Fracture, which the boss cast every ~45s on a fixed cadence. Iron Bark had been off cooldown for 47s. Next time, pre-press it the second the cast bar appears."
+
+`healer_lapse` (this player's death) — frame as a SHARED failure. The data shows zero healing landed on you in the last 5 seconds before death, on a gradual-bleed pattern. Don't blame yourself; gently note "the healer team will see this in their report" and pivot the rest of the section to other content. Don't lecture the player on a death their healers missed.
 
 **For THIS player's deaths, narrate the attribution** — do not guess. The PHP analyser checked tank coverage, interrupt rotation, dispel coverage, raid-wide failure counts, position isolation, and own-defensive availability. Your job is to translate the verdict into coaching language for the player.
 
@@ -67,6 +78,14 @@ Confidence handling:
 When attribution is `self_mechanic_miss` — that's the only case where the death is framed as personal. Even then, use the killing blow + tactical context to coach concretely (which mechanic, which moment, what to do next time). Do not invent shared blame when data does not support it.
 
 Special phrasing for `missed_external` / `missed_interrupt` / `missed_dispel` / `raid_coordination`: explicitly tell the player this was a SHARED failure, not on them. Soft tone: "Your death on pull 5 — attribution: missed_interrupt. 4 of 7 Voidbolts went uninterrupted. The fix is on the kicker rotation, not your positioning."
+
+**POSITIONAL CONTEXT** — each of the player's deaths carries structured fields beyond compass: `coord_distance_yards`, `position_cluster` (`alone` / `with_friends` / `in_stack`), `position_nearby[]`, `movement_pattern` (`outward` / `inward` / `lateral` / `static`), `movement_summary`. Use them to make coaching specific:
+- `position_cluster: "alone"` + soak-style killing blow → "you were 32y from raid alone when the soak hit; soak mechanics need 3+ stack." Concrete: name a closer position to stand.
+- `position_cluster: "in_stack"` + raid-wide kill → frame as group damage, NOT positioning blame. "You died with the rest of the soak group — this is on the call/timing, not your positioning."
+- `movement_pattern: "outward"` on a death = strong evidence the player was extending away from group. Coach the specific habit: "you were moving outward when caught — this is the third time this raid you extended into a sweeping mechanic." Concrete fix: "stay within 10y of raid stack until the cast bar finishes."
+- `movement_pattern: "static"` on a death = didn't react in time. Coach reaction window: "you were stationary for the 4 seconds before death — `<mechanic>` casts on a 6s tell. Watch for the cast bar / play a sound alert in WeakAuras."
+- `movement_pattern: "inward"` = was correctly running back to group but didn't make it. Soft tone: "you were moving back toward raid when the spike landed — try pre-positioning before the call goes out, not reacting to it."
+- Always cite the specific yardage when it sharpens the picture: "32y from raid" beats "far from raid". "0y movement" beats "static".
 
 **STATIC TIER LENS** — read `raid_summary.static_tier` (`progressing` / `core` / `cutting_edge`) and follow its `coaching_lens` field verbatim. This player's coaching advice must match their team's band. A progressing-tier static needs survival and shared-failure framing, not parse 90+ tuning. Cutting-edge needs micro-optimization, not "stand out of fire".
 
@@ -435,3 +454,11 @@ Count and verify EACH item. Missing any = INVALID OUTPUT, go back and expand.
 7. All strings in player's locale (no leftover English in non-English locale)?
 8. No fabricated numbers — every number traceable to input data?
 9. Severity in rotation_issues NOT escalated/demoted from data?
+10. **CLASS-SPEC GATING — every spell, ability or cooldown you mention MUST belong to this player's `per_player_data[<Name>].class` + `.spec`.** Never recommend a spell from a different class as if the player has access to it.
+    - Resto Druid → Ironbark, Tranquility, Cenarion Ward, Wild Growth, Rejuvenation, Lifebloom, Barkskin, Frenzied Regeneration. NOT Life Cocoon, Fortifying Brew, Pain Suppression, Healing Tide.
+    - Mistweaver Monk → Life Cocoon, Soothing Mist, Vivify, Renewing Mist, Enveloping Mist, Fortifying Brew, Thunder Focus Tea, Mana Tea. NOT Wild Growth, Cenarion Ward, Pain Suppression.
+    - Holy Priest → Holy Word: Sanctify, Holy Word: Serenity, Halo, Divine Hymn, Power Word: Shield, Apotheosis. NOT Wild Growth, Life Cocoon.
+    - Demon Hunter (any spec) → Disrupt for interrupts, NOT Skull Bash / Counterspell / Mind Freeze.
+    - Devourer DH → Voidblade, Reap, The Hunt, Vengeful Retreat, Felblade, Blur, Darkness, plus the empirical-popular Devour, Consume, Void Ray, Collapsing Star, Soul Immolation. Not Havoc-only spells.
+    - When in doubt about a spell's class, cite the player's observed data instead ("your 12% Voidblade efficiency") rather than guessing a spell name.
+11. **No prose contains literal internal tag values: "normal", "mechanic_oneshot", "wipe_called", "tank_loss_cascade".** Those are PHP-side WipeDetector labels, never player vocabulary. Paraphrase semantically or omit (the default `normal` tag carries no information — never mention it at all).

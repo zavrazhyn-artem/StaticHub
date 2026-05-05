@@ -574,6 +574,16 @@ GQL;
         // Build fightId → startTimeMs map for death timestamp normalisation
         $fightStartTimes = array_column($raidFights, 'startTime', 'id');
 
+        // WCL `table(dataType: Deaths)` silently caps at ~200 entries per query
+        // and does not accept a `limit` argument. A heavy raid night easily
+        // blows past that, leaving later pulls with zero deaths in the payload.
+        // Fix: fetch deaths per-encounter and merge — each encounter rarely
+        // exceeds the cap on its own.
+        $deathEntriesByEncounter = $this->fetchDeathsByEncounter($reportId, $phaseSummary);
+        if (!empty($deathEntriesByEncounter)) {
+            $tablesData['deaths']['data']['entries'] = $deathEntriesByEncounter;
+        }
+
         // Deaths (grouped by boss/try, wipe deaths filtered out)
         $raidSize = count($rosterNames) ?: count($cleanPlayers);
         $cleanDeaths = WclReportParserHelper::parseDeaths(
@@ -722,6 +732,10 @@ GQL;
         }
         $playerCoordSnapshots = $this->fetchPlayerCoordSnapshots($reportId, $fightIds, $playerIdToName);
 
+        // Heal events per-fight — sparse list (one per landed heal). Used by
+        // DeathAttributionBuilder Phase 2 to detect `healer_lapse` deaths.
+        $playerHealSnapshots = $this->fetchPlayerHealSnapshots($reportId, $fightIds, $playerIdToName);
+
         // Player coordinate tracking during key debuffs (proxy for puddle placement etc.)
         $playerCoords = $this->extractPlayerCoordsOnDebuffRemoval(
             $reportId,
@@ -732,12 +746,14 @@ GQL;
             $playerCoordSnapshots
         );
 
-        // Death event coords + compass/distance annotation relative to per-fight raid centroid.
+        // Compass/distance annotation relative to per-fight raid centroid.
+        // WCL `events(Deaths)` doesn't carry x/y, so we derive death position
+        // from the latest Cast snapshot from that player before death — same
+        // dataset already loaded for fight-centroid computation, no extra query.
         $fightCentroids = WclReportParserHelper::computeFightCentroids($playerCoordSnapshots);
-        $deathEventCoords = $this->fetchDeathEventCoords($reportId, $fightIds);
         $cleanDeaths = WclReportParserHelper::annotateDeathsWithCompass(
             $cleanDeaths,
-            $deathEventCoords,
+            $playerCoordSnapshots,
             $playerIdToName,
             $fightCentroids
         );
@@ -798,8 +814,8 @@ GQL;
             'players'             => $cleanPlayers,
             'player_details'      => $playerDetails,
             'deaths'              => $cleanDeaths,
-            'death_event_coords'  => $deathEventCoords,
             'player_coord_snapshots' => $playerCoordSnapshots,
+            'player_heal_snapshots'  => $playerHealSnapshots,
             'major_damage_taken'  => array_slice($cleanDamageTaken, 0, 50),
             'target_damage'       => $targetDamage,
             'interrupts'          => $interrupts,
@@ -1044,9 +1060,13 @@ GQL;
      */
     private function fetchPlayerCoordSnapshots(string $reportId, array $fightIds, array $playerMap): array
     {
-        $query = 'query ($reportId: String!, $fightIds: [Int]!, $startTime: Float) {
+        // Per-fight pagination: WCL `events()` returns `nextPageTimestamp=null`
+        // after the first fight in a multi-fight query, so multi-fight + paged
+        // requests silently truncate after the first fight. Iterating one fight
+        // at a time is the only reliable way to cover the full report.
+        $query = 'query ($reportId: String!, $fightId: Int!, $startTime: Float) {
           reportData { report(code: $reportId) {
-            events(dataType: Casts, fightIDs: $fightIds, killType: Encounters, includeResources: true, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+            events(dataType: Casts, fightIDs: [$fightId], killType: Encounters, includeResources: true, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
               data
               nextPageTimestamp
             }
@@ -1054,105 +1074,167 @@ GQL;
         }';
 
         $filtered = [];
-        $startTime = 0.0;
-        $pagesFetched = 0;
-        $maxPages = 10; // cap ~20,000 events total to bound memory
+        $maxPagesPerFight = 5; // 5 × 2000 = 10K events per fight — enough for any pull
 
-        try {
-            do {
-                $data = $this->executeGraphql($query, [
-                    'reportId'  => $reportId,
-                    'fightIds'  => $fightIds,
-                    'startTime' => $startTime,
-                ]);
+        foreach ($fightIds as $fightId) {
+            $startTime = 0.0;
+            $pagesFetched = 0;
 
-                $page = $data['reportData']['report']['events'] ?? [];
-                $events = $page['data'] ?? [];
+            try {
+                do {
+                    $data = $this->executeGraphql($query, [
+                        'reportId'  => $reportId,
+                        'fightId'   => (int) $fightId,
+                        'startTime' => $startTime,
+                    ]);
 
-                // Filter immediately to keep only useful events — reduces memory pressure.
-                // abilityGameID is retained so DeathAttributionBuilder can detect
-                // defensive-CD usage (or absence) within death windows.
-                foreach ($events as $e) {
-                    if (!isset($playerMap[$e['sourceID'] ?? null])) continue;
-                    if (!isset($e['x'], $e['y'])) continue;
-                    $filtered[] = [
-                        'timestamp'      => $e['timestamp'] ?? 0,
-                        'sourceID'       => $e['sourceID'],
-                        'fight'          => $e['fight'] ?? null,
-                        'x'              => $e['x'],
-                        'y'              => $e['y'],
-                        'abilityGameID'  => $e['abilityGameID'] ?? null,
-                    ];
-                }
-                unset($events, $data, $page);
+                    $page = $data['reportData']['report']['events'] ?? [];
+                    $events = $page['data'] ?? [];
 
-                $next = $page['nextPageTimestamp'] ?? null;
-                $pagesFetched++;
-                if ($next === null || $next <= $startTime || $pagesFetched >= $maxPages) break;
-                $startTime = (float) $next;
-            } while (true);
-        } catch (\Exception $e) {
-            return $filtered;
+                    // Filter immediately to keep only useful events — reduces memory pressure.
+                    // abilityGameID is retained so DeathAttributionBuilder can detect
+                    // defensive-CD usage (or absence) within death windows.
+                    foreach ($events as $e) {
+                        if (!isset($playerMap[$e['sourceID'] ?? null])) continue;
+                        if (!isset($e['x'], $e['y'])) continue;
+                        $filtered[] = [
+                            'timestamp'      => $e['timestamp'] ?? 0,
+                            'sourceID'       => $e['sourceID'],
+                            'fight'          => $e['fight'] ?? null,
+                            'x'              => $e['x'],
+                            'y'              => $e['y'],
+                            'abilityGameID'  => $e['abilityGameID'] ?? null,
+                        ];
+                    }
+
+                    $next = $page['nextPageTimestamp'] ?? null;
+                    unset($events, $data, $page);
+                    $pagesFetched++;
+                    if ($next === null || $next <= $startTime || $pagesFetched >= $maxPagesPerFight) break;
+                    $startTime = (float) $next;
+                } while (true);
+            } catch (\Exception $e) {
+                continue; // non-fatal — skip this fight, keep going
+            }
         }
 
         return $filtered;
     }
 
     /**
-     * Fetch death events with x/y per player. WCL Deaths events are sparse (one
-     * per player-death) so a single page is usually enough.
+     * Per-fight heal events for friend-on-friend healing. Used by
+     * DeathAttributionBuilder Phase 2 to detect `healer_lapse` deaths —
+     * gradual-HP-bleed kills where no targeted healing landed in the last 5
+     * seconds before death.
      *
-     * @return array<int, array{timestamp: int, fight: int|null, targetID: int|null, x: int, y: int}>
+     * Returned events keep just what we need: timestamp, fight, targetID,
+     * amount. Source id and ability id are dropped since we only need to
+     * know "did anyone heal X in [death-5s, death]" to fire the signal.
+     *
+     * @return array<int, array{timestamp:int, fight:int|null, targetID:int|null, amount:int}>
      */
-    private function fetchDeathEventCoords(string $reportId, array $fightIds): array
+    private function fetchPlayerHealSnapshots(string $reportId, array $fightIds, array $playerMap): array
     {
-        $query = 'query ($reportId: String!, $fightIds: [Int]!, $startTime: Float) {
+        $query = 'query ($reportId: String!, $fightId: Int!, $startTime: Float) {
           reportData { report(code: $reportId) {
-            events(dataType: Deaths, fightIDs: $fightIds, killType: Encounters, includeResources: true, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
+            events(dataType: Healing, fightIDs: [$fightId], killType: Encounters, hostilityType: Friendlies, startTime: $startTime, limit: 2000) {
               data
               nextPageTimestamp
             }
           } }
         }';
 
-        $coords = [];
-        $startTime = 0.0;
-        $pagesFetched = 0;
-        $maxPages = 5;
+        $filtered = [];
+        $maxPagesPerFight = 5;
 
-        try {
-            do {
-                $data = $this->executeGraphql($query, [
-                    'reportId'  => $reportId,
-                    'fightIds'  => $fightIds,
-                    'startTime' => $startTime,
-                ]);
+        foreach ($fightIds as $fightId) {
+            $startTime = 0.0;
+            $pagesFetched = 0;
 
-                $page = $data['reportData']['report']['events'] ?? [];
-                $events = $page['data'] ?? [];
+            try {
+                do {
+                    $data = $this->executeGraphql($query, [
+                        'reportId'  => $reportId,
+                        'fightId'   => (int) $fightId,
+                        'startTime' => $startTime,
+                    ]);
 
-                foreach ($events as $e) {
-                    if (!isset($e['x'], $e['y'])) continue;
-                    $coords[] = [
-                        'timestamp' => $e['timestamp'] ?? 0,
-                        'fight'     => $e['fight'] ?? null,
-                        'targetID'  => $e['targetID'] ?? null,
-                        'x'         => (int) $e['x'],
-                        'y'         => (int) $e['y'],
-                    ];
-                }
-                unset($events, $data);
+                    $page = $data['reportData']['report']['events'] ?? [];
+                    $events = $page['data'] ?? [];
 
-                $next = $page['nextPageTimestamp'] ?? null;
-                $pagesFetched++;
-                if ($next === null || $next <= $startTime || $pagesFetched >= $maxPages) break;
-                $startTime = (float) $next;
-            } while (true);
-        } catch (\Exception $e) {
-            return $coords;
+                    foreach ($events as $e) {
+                        $targetId = $e['targetID'] ?? null;
+                        if ($targetId === null) continue;
+                        // Only keep heals targeting roster players.
+                        if (!isset($playerMap[$targetId])) continue;
+                        $filtered[] = [
+                            'timestamp' => (int) ($e['timestamp'] ?? 0),
+                            'fight'     => $e['fight'] ?? null,
+                            'targetID'  => $targetId,
+                            'amount'    => (int) ($e['amount'] ?? 0),
+                        ];
+                    }
+
+                    $next = $page['nextPageTimestamp'] ?? null;
+                    unset($events, $data, $page);
+                    $pagesFetched++;
+                    if ($next === null || $next <= $startTime || $pagesFetched >= $maxPagesPerFight) break;
+                    $startTime = (float) $next;
+                } while (true);
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
-        return $coords;
+        return $filtered;
+    }
+
+    /**
+     * Workaround for WCL `table(dataType: Deaths)` silently capping at ~200
+     * entries (no `limit` argument is accepted). A heavy progression boss with
+     * 13+ pulls × 20 raid deaths each easily blows past that on a single call,
+     * so we chunk fightIDs into small batches and merge.
+     *
+     * Empirical: 5 fights × max ~25 deaths/fight = 125 entries — comfortably
+     * under the cap. Per-encounter chunking proved insufficient (Vaelgor alone
+     * exceeded 200 deaths).
+     *
+     * @param array<string, array<int, array{fight_id: int}>> $phaseSummary
+     * @return array<int, array<string, mixed>>  Combined `entries[]`
+     */
+    private function fetchDeathsByEncounter(string $reportId, array $phaseSummary): array
+    {
+        if (empty($phaseSummary)) return [];
+
+        $query = 'query ($reportId: String!, $fightIds: [Int]!) {
+          reportData { report(code: $reportId) {
+            deaths: table(dataType: Deaths, fightIDs: $fightIds, killType: Encounters)
+          } }
+        }';
+
+        $chunkSize = 5;
+        $merged = [];
+        foreach ($phaseSummary as $bossName => $tries) {
+            $bossFightIds = array_values(array_filter(array_column($tries, 'fight_id')));
+            if (empty($bossFightIds)) continue;
+
+            foreach (array_chunk($bossFightIds, $chunkSize) as $batch) {
+                try {
+                    $resp = $this->executeGraphql($query, [
+                        'reportId' => $reportId,
+                        'fightIds' => $batch,
+                    ]);
+                    $entries = $resp['reportData']['report']['deaths']['data']['entries'] ?? [];
+                    foreach ($entries as $e) $merged[] = $e;
+                } catch (\Throwable $e) {
+                    // Non-fatal — fall back to whatever the bulk query returned.
+                    continue;
+                }
+            }
+        }
+
+        usort($merged, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
+        return $merged;
     }
 
     /**

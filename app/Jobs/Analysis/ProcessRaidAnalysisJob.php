@@ -118,7 +118,7 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             // trends above use the unfiltered $preprocessed.
             $aiPreprocessed = $deathSuppressor->suppress(
                 $preprocessed,
-                (int) ($static->ai_death_cutoff ?? 5)
+                (int) ($static->ai_death_cutoff ?? 3)
             );
 
             $preprocessedJson = json_encode($aiPreprocessed, JSON_UNESCAPED_UNICODE);

@@ -23,7 +23,7 @@ class UpdateLogsRequest extends FormRequest
             'auto_fetch_logs' => 'nullable|boolean',
             'auto_fetch_delay_minutes' => 'nullable|integer|min:5|max:120',
             'ai_tone' => 'nullable|in:friendly,neutral,strict',
-            'ai_death_cutoff' => 'nullable|integer|min:3|max:10',
+            'ai_death_cutoff' => 'nullable|integer|min:1|max:5',
         ];
     }
 

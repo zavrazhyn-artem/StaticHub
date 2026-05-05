@@ -1540,9 +1540,11 @@ class TacticalDataAnalyzer
         if (empty($rosterDeaths)) return;
 
         $playerIdToName = [];
+        $playerNameToId = [];
         foreach ($logData['players'] ?? [] as $p) {
             if (isset($p['id'], $p['name'])) {
                 $playerIdToName[$p['id']] = $p['name'];
+                $playerNameToId[$p['name']] = $p['id'];
             }
         }
 
@@ -1554,15 +1556,38 @@ class TacticalDataAnalyzer
         }
 
         $deathState = $this->deathStateAssembler->assemble(
-            $logData['death_event_coords'] ?? [],
             $logData['player_coord_snapshots'] ?? [],
+            $logData['player_heal_snapshots'] ?? [],
             $playerIdToName,
             $playerNameToClass,
+            $playerNameToId,
             $logData['fight_start_times'] ?? [],
             $rosterDeaths
         );
 
-        $this->deathAttributionBuilder->attribute($encounters, $deathState);
+        // Healer roster needed for healer_lapse signal — count alive healers.
+        $healerNames = [];
+        foreach ($playerDetails as $name => $details) {
+            if (($details['role'] ?? '') === 'healers') {
+                $healerNames[] = $name;
+            }
+        }
+
+        // Tank roster needed to skip healer_lapse for tanks (their deaths
+        // belong to the tank-coverage / oneshot lanes, not healer attention).
+        $tankNames = [];
+        foreach ($playerDetails as $name => $details) {
+            if (($details['role'] ?? '') === 'tanks') {
+                $tankNames[] = $name;
+            }
+        }
+
+        $this->deathAttributionBuilder->attribute(
+            $encounters,
+            $deathState,
+            $healerNames,
+            $tankNames
+        );
     }
 
     private function buildPhaseProgression(array $tries): array

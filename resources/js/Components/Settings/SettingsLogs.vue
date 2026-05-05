@@ -12,7 +12,7 @@ const props = defineProps({
     autoFetchLogs:          { type: Boolean, default: false },
     autoFetchDelayMinutes:  { type: Number, default: 30 },
     aiTone:                 { type: String, default: 'neutral' },
-    aiDeathCutoff:          { type: Number, default: 5 },
+    aiDeathCutoff:          { type: Number, default: 3 },
     updateUrl:              { type: String, required: true },
     connectGuildUrl:        { type: String, required: true },
     disconnectGuildUrl:     { type: String, required: true },
@@ -329,10 +329,10 @@ async function disconnectGuild() {
                     </div>
                     <input type="range"
                            v-model.number="aiDeathCutoff"
-                           min="3" max="10" step="1"
+                           min="1" max="5" step="1"
                            class="w-full accent-slate-400">
                     <div class="flex justify-between text-4xs text-on-surface-variant/60 font-semibold uppercase tracking-wider">
-                        <span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                     </div>
                 </div>
             </div>

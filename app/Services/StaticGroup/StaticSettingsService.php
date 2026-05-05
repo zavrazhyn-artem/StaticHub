@@ -150,7 +150,7 @@ class StaticSettingsService
             'autoFetchLogs'         => (bool) ($automation['auto_fetch_logs'] ?? false),
             'autoFetchDelayMinutes' => (int) ($automation['auto_fetch_delay_minutes'] ?? config('tactical_logs.auto_fetch_delay_minutes')),
             'aiTone'                => $static->ai_tone ?? 'neutral',
-            'aiDeathCutoff'         => (int) ($static->ai_death_cutoff ?? 5),
+            'aiDeathCutoff'         => (int) ($static->ai_death_cutoff ?? 3),
         ];
     }
 

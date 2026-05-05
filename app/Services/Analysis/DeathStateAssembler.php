@@ -16,11 +16,10 @@ namespace App\Services\Analysis;
  *     were OFF cooldown at the death moment (last cast > cooldown_s ago, or
  *     never cast in this fight)
  *
- * No new WCL queries — the assembler operates on snapshots already collected
- * by WclService:
- *   - $playerCoordSnapshots from fetchPlayerCoordSnapshots() (now retains
- *     abilityGameID after the recent extension)
- *   - $deathEventCoords from fetchDeathEventCoords()
+ * No new WCL queries — the assembler operates on cast snapshots already
+ * collected by WclService::fetchPlayerCoordSnapshots(). Each cast retains x/y
+ * + abilityGameID, so we approximate "where did the player die" by taking the
+ * latest pre-death cast position.
  *
  * Coordinates are in WCL units (100 units = 1 yard).
  */
@@ -35,27 +34,30 @@ class DeathStateAssembler
     ) {}
 
     /**
-     * @param array $deathEventCoords  fetchDeathEventCoords() output
-     * @param array $playerCoordSnapshots  fetchPlayerCoordSnapshots() output
+     * @param array $playerCoordSnapshots  fetchPlayerCoordSnapshots() output (cast events with x/y)
+     * @param array $playerHealSnapshots   fetchPlayerHealSnapshots() output (heal events targeting friends)
      * @param array $playerIdToName  actorID => name
      * @param array $playerNameToClass  name => class (DeathKnight, DemonHunter, ...)
+     * @param array $playerNameToId  name => actorID (inverse of $playerIdToName)
      * @param array $fightStartTimes  fight_id => absolute startTime ms
      * @param array $rosterDeaths  list of parsed deaths with player + fight_id + time_ms_relative
      * @return array<int, array>  death_index => state-snapshot
      */
     public function assemble(
-        array $deathEventCoords,
         array $playerCoordSnapshots,
+        array $playerHealSnapshots,
         array $playerIdToName,
         array $playerNameToClass,
+        array $playerNameToId,
         array $fightStartTimes,
         array $rosterDeaths
     ): array {
         $defensivesById = $this->combatRefs->personalDefensivesById();
 
-        // Pre-index event lookups for O(1) per-death access.
-        $coordsByFightPlayer = $this->indexCoordsByFightPlayer($deathEventCoords, $playerIdToName);
+        // Pre-index cast snapshots by fight for O(1) per-fight scans during death iteration.
         $castsByFight = $this->indexCastsByFight($playerCoordSnapshots);
+        // Same for heals.
+        $healsByFightTarget = $this->indexHealsByFightTarget($playerHealSnapshots);
 
         $out = [];
         foreach ($rosterDeaths as $idx => $death) {
@@ -75,7 +77,15 @@ class DeathStateAssembler
                 continue;
             }
 
-            $dyingCoord = $coordsByFightPlayer[$fightId][$playerName][0] ?? null;
+            // WCL `events(Deaths)` doesn't carry x/y on the death event itself,
+            // so we approximate via the latest cast snapshot from the dying
+            // player ≤ death timestamp.
+            $dyingCoord = $this->latestCastBeforeForPlayer(
+                $castsByFight[$fightId] ?? [],
+                $absoluteMs,
+                $playerName,
+                $playerIdToName
+            );
             $nearby = $this->nearbyPlayersAt(
                 $absoluteMs,
                 $dyingCoord,
@@ -100,6 +110,16 @@ class DeathStateAssembler
                 $fightStartMs ?? 0
             );
 
+            // Phase 2: heal received in [death-5s, death]. If close to zero on
+            // a non-tank with a gradual-bleed death, healers were not focused
+            // on this player.
+            $dyingPlayerId = $playerNameToId[$playerName] ?? null;
+            $healReceived = $this->healReceivedInWindow(
+                $healsByFightTarget[$fightId][$dyingPlayerId] ?? [],
+                $absoluteMs - self::WINDOW_BEFORE_MS,
+                $absoluteMs
+            );
+
             $out[$idx] = [
                 'dying_player'                  => $playerName,
                 'dying_position'                => $dyingCoord
@@ -109,6 +129,7 @@ class DeathStateAssembler
                 'nearby_players'                => $nearby,
                 'recent_casts'                  => $recentCasts,
                 'personal_defensives_available' => $availableDefensives,
+                'heal_received_5s'              => $healReceived,
             ];
         }
 
@@ -116,19 +137,66 @@ class DeathStateAssembler
     }
 
     /**
-     * @param array $deathEventCoords
-     * @param array<int,string> $playerIdToName
-     * @return array<int, array<string, list<array>>>  fight_id => playerName => [coord, ...]
+     * Index heal events by fight + target player ID so per-death lookups are O(1).
+     *
+     * @return array<int, array<int, list<array{timestamp:int, amount:int}>>>  fight_id => targetID => events
      */
-    private function indexCoordsByFightPlayer(array $deathEventCoords, array $playerIdToName): array
+    private function indexHealsByFightTarget(array $healSnapshots): array
     {
         $idx = [];
-        foreach ($deathEventCoords as $e) {
-            $name = $playerIdToName[$e['targetID']] ?? null;
-            if ($name === null) continue;
-            $idx[$e['fight']][$name][] = $e;
+        foreach ($healSnapshots as $heal) {
+            $fight = $heal['fight'] ?? null;
+            $target = $heal['targetID'] ?? null;
+            if ($fight === null || $target === null) continue;
+            $idx[$fight][$target][] = [
+                'timestamp' => (int) ($heal['timestamp'] ?? 0),
+                'amount'    => (int) ($heal['amount'] ?? 0),
+            ];
         }
         return $idx;
+    }
+
+    /**
+     * Sum heal amount landed on a target between [startMs, endMs] (inclusive).
+     */
+    private function healReceivedInWindow(array $heals, int $startMs, int $endMs): int
+    {
+        $total = 0;
+        foreach ($heals as $h) {
+            $ts = $h['timestamp'] ?? 0;
+            if ($ts < $startMs || $ts > $endMs) continue;
+            $total += $h['amount'] ?? 0;
+        }
+        return $total;
+    }
+
+    /**
+     * Find the latest cast snapshot from the named player at or before the
+     * given absolute timestamp. Returns null if the player never cast in this
+     * fight or all casts are after the death (possible when player died in the
+     * first second).
+     *
+     * @param array<int,array> $fightCasts   cast snapshots scoped to one fight
+     * @param array<int,string> $playerIdToName
+     * @return array{x:int, y:int, timestamp:int}|null
+     */
+    private function latestCastBeforeForPlayer(
+        array $fightCasts,
+        int $absoluteMs,
+        string $playerName,
+        array $playerIdToName
+    ): ?array {
+        $best = null;
+        foreach ($fightCasts as $cast) {
+            $name = $playerIdToName[$cast['sourceID'] ?? null] ?? null;
+            if ($name !== $playerName) continue;
+            $ts = $cast['timestamp'] ?? null;
+            if ($ts === null || $ts > $absoluteMs) continue;
+            if ($best === null || $ts > ($best['timestamp'] ?? 0)) {
+                $best = $cast;
+            }
+        }
+        return $best;
     }
 
     /**
