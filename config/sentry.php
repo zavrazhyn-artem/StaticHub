@@ -35,24 +35,10 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#profiles_sample_rate
     'profiles_sample_rate' => env('SENTRY_PROFILES_SAMPLE_RATE') === null ? null : (float) env('SENTRY_PROFILES_SAMPLE_RATE'),
 
-    // Skip CLI/queue/scheduler contexts so only HTTP transactions are sampled.
-    'traces_sampler' => function (\Sentry\Tracing\SamplingContext $context): float {
-        return app()->runningInConsole() ? 0.0 : 1.0;
-    },
+    // `traces_sampler` and `before_send_transaction` are wired in AppServiceProvider::boot()
+    // because closures in this file would break `php artisan config:cache`.
 
-    // Drop web transactions faster than 2s to keep event quota for actual slowdowns.
-    'before_send_transaction' => function (\Sentry\Event $transaction): ?\Sentry\Event {
-        $start = $transaction->getStartTimestamp();
-        $end = $transaction->getTimestamp();
-
-        if ($start === null || $end === null) {
-            return null;
-        }
-
-        return ($end - $start) >= 2.0 ? $transaction : null;
-    },
-
-    // Only continue incoming traces when the organization IDs are compatible with this SDK instance.
+// Only continue incoming traces when the organization IDs are compatible with this SDK instance.
     'strict_trace_continuation' => env('SENTRY_STRICT_TRACE_CONTINUATION', false),
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#enable_logs
