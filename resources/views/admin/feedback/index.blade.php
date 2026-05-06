@@ -197,6 +197,7 @@
                         <th>Rating</th>
                         <th>Chat</th>
                         <th>User</th>
+                        <th>Static</th>
                         <th>Report</th>
                         <th>Tags</th>
                         <th>Comment</th>
@@ -204,16 +205,39 @@
                 </thead>
                 <tbody>
                     @foreach ($data['critical_recent'] as $fb)
+                        @php
+                            $report = $fb->tacticalReport;
+                            $static = $report?->staticGroup;
+                            $reportLabel = $report ? ($report->title ?? $report->wcl_report_id) : null;
+                            $hasLongComment = $fb->comment && mb_strlen($fb->comment) > 200;
+                        @endphp
                         <tr>
                             <td style="white-space:nowrap;">{{ $fb->created_at?->diffForHumans() }}</td>
                             <td>{!! $renderRating($fb->report_rating) !!}</td>
                             <td>{!! $renderRating($fb->chat_rating) !!}</td>
-                            <td style="color:#ddd;">{{ $fb->user?->name ?? '—' }}</td>
+                            <td style="white-space:nowrap;">
+                                @php $char = $fb->viewer_character; @endphp
+                                @if ($char)
+                                    <div style="color: {{ \App\Helpers\WowClassHelper::hex($char->playable_class) }}; font-weight:500;">
+                                        {{ $char->name }}
+                                    </div>
+                                    <div style="color:#888; font-size:0.7rem; margin-top:0.1rem;">{{ $fb->user?->name ?? '—' }}</div>
+                                @else
+                                    <div style="color:#ddd;">{{ $fb->user?->name ?? '—' }}</div>
+                                @endif
+                            </td>
+                            <td style="color:#ddd; white-space:nowrap;">{{ $static?->name ?? '—' }}</td>
                             <td>
-                                @if ($fb->tacticalReport)
-                                    <a href="{{ env('APP_URL') }}/logs/{{ $fb->tacticalReport->id }}" target="_blank" style="color:#60a5fa; text-decoration:none;">
-                                        {{ Str::limit($fb->tacticalReport->title ?? $fb->tacticalReport->wcl_report_id, 40) }}
-                                    </a>
+                                @if ($report && $static)
+                                    {{-- Ghost-mode jump: activates ghost for this report's static and
+                                         opens the log in a new tab. Posted because it mutates session. --}}
+                                    <form method="POST" action="{{ route('admin.ghost.enter-report', ['static' => $static->id, 'report' => $report->id]) }}" target="_blank" style="display:inline; margin:0;">
+                                        @csrf
+                                        <button type="submit" style="background:none; border:none; padding:0; color:#60a5fa; cursor:pointer; text-decoration:none; font: inherit;">
+                                            {{ Str::limit($reportLabel, 40) }}
+                                            <span class="material-symbols-outlined" style="font-size:14px; vertical-align:-2px; opacity:0.7;">open_in_new</span>
+                                        </button>
+                                    </form>
                                 @else
                                     —
                                 @endif
@@ -224,12 +248,84 @@
                                 @endforeach
                             </td>
                             <td style="color:#ccc; font-size:0.825rem; max-width: 300px;">
-                                {{ $fb->comment ? Str::limit($fb->comment, 200) : '—' }}
+                                @if (!$fb->comment)
+                                    —
+                                @else
+                                    {{ Str::limit($fb->comment, 200) }}
+                                    @if ($hasLongComment)
+                                        @php
+                                            $metaParts = array_filter([
+                                                $char?->name,
+                                                $fb->user?->name,
+                                                $static?->name,
+                                                $fb->created_at?->toDayDateTimeString(),
+                                            ]);
+                                        @endphp
+                                        <button type="button"
+                                                class="js-show-feedback-comment"
+                                                data-comment="{{ $fb->comment }}"
+                                                data-meta="{{ implode(' · ', $metaParts) }}"
+                                                style="display:inline-block; margin-left:0.25rem; background:none; border:none; padding:0; color:#60a5fa; cursor:pointer; font: inherit; text-decoration:underline;">
+                                            Read full
+                                        </button>
+                                    @endif
+                                @endif
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+
+            {{-- Full-comment modal: cells truncate to 200 chars; clicking
+                 "Read full" populates and shows this overlay. One shared modal
+                 keeps the table light and avoids per-row hidden DOM. --}}
+            <div id="feedback-comment-modal"
+                 style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:50; align-items:center; justify-content:center; padding:2rem;">
+                <div style="background:#181820; border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; max-width:720px; width:100%; max-height:80vh; display:flex; flex-direction:column;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <div>
+                            <div style="font-family: 'Space Grotesk', sans-serif; font-size: 1rem; color:#fff;">Feedback comment</div>
+                            <div id="feedback-comment-modal-meta" style="font-size:0.75rem; color:#888; margin-top:0.15rem;"></div>
+                        </div>
+                        <button type="button" id="feedback-comment-modal-close" class="admin-btn admin-btn-ghost" style="padding:0.35rem 0.6rem;">
+                            <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+                        </button>
+                    </div>
+                    <div id="feedback-comment-modal-body" style="padding:1.25rem; overflow-y:auto; white-space:pre-wrap; color:#ddd; font-size:0.9rem; line-height:1.55;"></div>
+                </div>
+            </div>
+
+            <script>
+                (function () {
+                    const modal = document.getElementById('feedback-comment-modal');
+                    const body = document.getElementById('feedback-comment-modal-body');
+                    const meta = document.getElementById('feedback-comment-modal-meta');
+                    const close = document.getElementById('feedback-comment-modal-close');
+
+                    function openModal(comment, metaText) {
+                        body.textContent = comment;
+                        meta.textContent = metaText || '';
+                        modal.style.display = 'flex';
+                    }
+                    function closeModal() {
+                        modal.style.display = 'none';
+                        body.textContent = '';
+                    }
+
+                    document.querySelectorAll('.js-show-feedback-comment').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            openModal(btn.dataset.comment || '', btn.dataset.meta || '');
+                        });
+                    });
+                    close.addEventListener('click', closeModal);
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === modal) closeModal();
+                    });
+                    document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+                    });
+                })();
+            </script>
         @endif
     </div>
 @endsection

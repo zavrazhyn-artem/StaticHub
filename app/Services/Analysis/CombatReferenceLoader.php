@@ -15,6 +15,7 @@ class CombatReferenceLoader
     private ?array $tankMitigation = null;
     private ?array $externalCds = null;
     private ?array $raidBurst = null;
+    private ?array $personalDefensives = null;
 
     /**
      * @return array<int, array{id:int,name:string}> Mitigation buffs for the given class-spec slug
@@ -42,6 +43,29 @@ class CombatReferenceLoader
     public function raidBurstCooldowns(): array
     {
         return $this->raidBurst ??= $this->loadYaml('raid-burst.yaml');
+    }
+
+    /**
+     * Personal defensive cooldowns (self-cast survival CDs) per class.
+     * @return array<int, array{id:int,name:string,class:string,cooldown_s:int}>
+     */
+    public function personalDefensives(): array
+    {
+        return $this->personalDefensives ??= $this->loadYaml('personal-defensives.yaml');
+    }
+
+    /**
+     * Indexed lookup: ability_id => personal defensive entry.
+     */
+    public function personalDefensivesById(): array
+    {
+        $idx = [];
+        foreach ($this->personalDefensives() as $entry) {
+            if (isset($entry['id'])) {
+                $idx[(int) $entry['id']] = $entry;
+            }
+        }
+        return $idx;
     }
 
     private function loadYaml(string $file): array

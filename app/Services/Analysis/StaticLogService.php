@@ -181,6 +181,7 @@ class StaticLogService
             'has_ai_analysis'   => (bool) ($aiBlocks || $report->ai_analysis),
             'ai_blocks'         => $aiBlocks,
             'ai_html'           => $aiHtml,
+            'format_version'    => (int) ($report->format_version ?? 1),
             'duration_hours'    => $report->event
                 ? $report->event->start_time->diffInHours($report->event->end_time)
                 : null,

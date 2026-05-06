@@ -2,12 +2,19 @@
 import { computed } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { useAbilityLinker } from '@/composables/useAbilityLinker';
+import PullBreakdown from './PullBreakdown.vue';
+import RecurringFailures from './RecurringFailures.vue';
 
 const { __ } = useTranslation();
 
 const props = defineProps({
     blocks: { type: Array, default: () => [] },
     abilityMap: { type: Object, default: () => ({}) },
+    // Stored on the report so future schema changes can swap renderers without
+    // touching call sites. v1 = legacy bag-of-sections, v2 = pull_breakdown +
+    // recurring_failures. Both versions currently render through the same
+    // template since v2 only adds new block types — older reports ignore them.
+    formatVersion: { type: Number, default: 1 },
 });
 
 const { linkify } = useAbilityLinker(props.abilityMap);
@@ -243,6 +250,18 @@ const empty = computed(() => !Array.isArray(props.blocks) || props.blocks.length
                     </div>
                 </div>
             </div>
+
+            <!-- pull_breakdown -->
+            <PullBreakdown v-else-if="block.type === 'pull_breakdown'"
+                           :encounter="block.encounter"
+                           :pulls="block.pulls"
+                           :ability-map="abilityMap" />
+
+            <!-- recurring_failures -->
+            <RecurringFailures v-else-if="block.type === 'recurring_failures'"
+                               :title="block.title"
+                               :items="block.items"
+                               :ability-map="abilityMap" />
 
             <!-- unknown fallback -->
             <p v-else class="text-3xs text-on-surface-variant italic opacity-50">

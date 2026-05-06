@@ -15,14 +15,14 @@ rotation_checks:
     ability_id: 395152
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Prescience
     ability_id: 409311
     check: cast_efficiency
     cooldown_seconds: 12.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Upheaval
@@ -64,26 +64,83 @@ rotation_checks:
     ability_id: 408233
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Obsidian Scales'
     ability_id: 363916
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Renewing Blaze'
     ability_id: 374348
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Zephyr
     ability_id: 374227
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    395160:
+      name: Eruption
+      cpm_median: 19.23
+      cpm_p95: 21.59
+      casts_median: 84
+      casts_p95: 138
+      sample: 30
+      description: "Cause a violent eruption beneath an enemy's feet, dealing 1,064 Volcanic damage split between them and nearby enemies."
+    361469:
+      name: 'Living Flame'
+      cpm_median: 7.27
+      cpm_p95: 9.22
+      casts_median: 58
+      casts_p95: 76
+      sample: 11
+      description: 'Send a flickering flame towards your target, dealing 893 Fire damage to an enemy or healing an ally for 2,282.'
+    409311:
+      name: Prescience
+      cpm_median: 6.5
+      cpm_p95: 6.92
+      casts_median: 27
+      casts_p95: 46
+      sample: 30
+      description: 'Grant an ally the gift of foresight, increasing their critical strike chance by 3% for 18 sec. Affects the nearest ally within 25 yds, preferring damage dealers with their cooldowns active, if you do not have an ally targeted.'
+    396286:
+      name: Upheaval
+      cpm_median: 5.06
+      cpm_p95: 5.69
+      casts_median: 22
+      casts_p95: 36
+      sample: 29
+      description: "Gather earthen power beneath your enemy's feet and send them hurtling upwards, dealing 1,627 Volcanic damage to the target and nearby enemies. Empowering expands the area of effect. I: 3 yd radius. II: 6 yd radius. III: 9 yd radius."
+    357208:
+      name: 'Fire Breath'
+      cpm_median: 4.98
+      cpm_p95: 5.57
+      casts_median: 22
+      casts_p95: 36
+      sample: 30
+      description: 'Inhale, stoking your inner flame. Release to exhale, burning enemies in a cone in front of you for 2,312 Fire damage, reduced beyond 5 targets. Empowering causes more of the damage to be dealt immediately instead of over time. I: Deals 6...'
+    431443:
+      name: 'Chrono Flames'
+      cpm_median: 11.57
+      cpm_p95: 12.94
+      casts_median: 41
+      casts_p95: 51
+      sample: 19
+      description: null
+  top_talents: {  }
+  fetched_at: '2026-05-01'

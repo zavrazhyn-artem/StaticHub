@@ -101,3 +101,52 @@ rotation_checks:
     cooldown_seconds: 120.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    30455:
+      name: 'Ice Lance'
+      cpm_median: 23.1
+      cpm_p95: 26.28
+      casts_median: 139
+      casts_p95: 191
+      sample: 30
+      description: 'Quickly fling a shard of ice at the target, dealing 694 Frost damage. Shatters 4 stacks of Freezing.'
+    116:
+      name: Frostbolt
+      cpm_median: 6.62
+      cpm_p95: 8.05
+      casts_median: 39
+      casts_p95: 58
+      sample: 30
+      description: 'Launches a bolt of frost at the enemy, causing 917 Frost damage and slowing movement speed by 50% for 8 sec.'
+    44614:
+      name: Flurry
+      cpm_median: 7.17
+      cpm_p95: 8.12
+      casts_median: 43
+      casts_p95: 61
+      sample: 30
+      description: 'Unleash a flurry of ice, striking the target 3 times for a total of 1,435 Frost damage. Applies 3 stacks of Freezing.'
+    199786:
+      name: 'Glacial Spike'
+      cpm_median: 2.15
+      cpm_p95: 2.43
+      casts_median: 13
+      casts_p95: 19
+      sample: 30
+      description: null
+    84714:
+      name: 'Frozen Orb'
+      cpm_median: 1.84
+      cpm_p95: 2.08
+      casts_median: 11
+      casts_p95: 15
+      sample: 21
+      description: 'Launches an orb of swirling ice in front of you, dealing up to 5,153 Frost damage to all enemies it passes through over 15 sec. After a short delay, Frozen Orb will pursue its target. Deals reduced damage beyond 8 targets. Enemies damage...'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

@@ -73,3 +73,52 @@ rotation_checks:
     cooldown_seconds: 240.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 22
+  abilities:
+    11366:
+      name: Pyroblast
+      cpm_median: 24.27
+      cpm_p95: 27.89
+      casts_median: 139
+      casts_p95: 193
+      sample: 22
+      description: 'Hurls an immense fiery boulder that causes 2,091 Fire damage.'
+    108853:
+      name: 'Fire Blast'
+      cpm_median: 23.22
+      cpm_p95: 25.85
+      casts_median: 132
+      casts_p95: 162
+      sample: 22
+      description: 'Blasts the enemy, critically striking for 746 Fire damage. Castable while casting other spells.'
+    133:
+      name: Fireball
+      cpm_median: 10.92
+      cpm_p95: 14.29
+      casts_median: 62
+      casts_p95: 90
+      sample: 22
+      description: 'Throws a fiery ball that causes 1,481 Fire damage.'
+    2948:
+      name: Scorch
+      cpm_median: 9.2
+      cpm_p95: 11.86
+      casts_median: 52
+      casts_p95: 75
+      sample: 22
+      description: 'Scorches an enemy for 381 Fire damage. When cast on a target below 30% health, Scorch is a guaranteed critical strike. Castable while moving.'
+    2120:
+      name: Flamestrike
+      cpm_median: 3.75
+      cpm_p95: 6.44
+      casts_median: 20
+      casts_p95: 37
+      sample: 16
+      description: 'Calls down a pillar of fire, burning all enemies within the area for 1,145 Fire damage. Deals reduced damage beyond 8 targets. This spell is cast at a selected location.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

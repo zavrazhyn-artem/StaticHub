@@ -36,14 +36,14 @@ rotation_checks:
     ability_id: 202770
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'New Moon'
     ability_id: 274281
     check: cast_efficiency
     cooldown_seconds: 25.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Wild Mushroom'
@@ -64,19 +64,68 @@ rotation_checks:
     ability_id: 22812
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Survival Instincts'
     ability_id: 61336
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Renewal
     ability_id: 108238
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    190984:
+      name: Wrath
+      cpm_median: 18.73
+      cpm_p95: 23.59
+      casts_median: 112
+      casts_p95: 158
+      sample: 30
+      description: 'Hurl a ball of energy at the target, dealing 501 Nature damage.'
+    78674:
+      name: Starsurge
+      cpm_median: 12.19
+      cpm_p95: 14.67
+      casts_median: 65
+      casts_p95: 116
+      sample: 30
+      description: 'Launch a surge of stellar energies at the target, dealing 1,305 Astral damage.'
+    191034:
+      name: Starfall
+      cpm_median: 7.89
+      cpm_p95: 10.72
+      casts_median: 50
+      casts_p95: 71
+      sample: 30
+      description: 'Calls down waves of falling stars upon enemies within 40 yds, dealing 873 Astral damage over 8 sec. Multiple uses of this ability may overlap.'
+    93402:
+      name: Sunfire
+      cpm_median: 5.13
+      cpm_p95: 6.81
+      casts_median: 32
+      casts_p95: 49
+      sample: 30
+      description: 'A quick beam of solar light burns the enemy for 81 Nature damage and then an additional 705 Nature damage over 18 sec.'
+    8921:
+      name: Moonfire
+      cpm_median: 3.28
+      cpm_p95: 4.3
+      casts_median: 20
+      casts_p95: 35
+      sample: 29
+      description: 'A quick beam of lunar light burns the enemy for 82 Arcane damage and then an additional 705 Arcane damage over 18 sec.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

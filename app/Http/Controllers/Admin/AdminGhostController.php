@@ -30,4 +30,20 @@ class AdminGhostController extends Controller
 
         return redirect()->route('admin.dashboard');
     }
+
+    /**
+     * Activate ghost for the report's static and land directly on the log
+     * page. Posted in a target=_blank form from the admin feedback dashboard
+     * so triage can happen without leaving the dashboard tab.
+     */
+    public function enterReport(int $static, int $report): RedirectResponse
+    {
+        abort_unless($this->ghost->canActivate(), 403, 'Ghost mode not available for this user.');
+
+        $target = StaticGroup::withoutGlobalScopes()->findOrFail($static);
+
+        $this->ghost->enter($target->id);
+
+        return redirect("/logs/{$report}");
+    }
 }

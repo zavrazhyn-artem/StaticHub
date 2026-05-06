@@ -101,3 +101,52 @@ rotation_checks:
     cooldown_seconds: 120.0
     recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    55090:
+      name: 'Scourge Strike'
+      cpm_median: 21.57
+      cpm_p95: 23.93
+      casts_median: 138
+      casts_p95: 173
+      sample: 30
+      description: 'An unholy strike that deals 47 Shadow damage and causing your plagues on the target to erupt, dealing their damage an additional time at 35% effectiveness. Applies Virulent Plague or spreads it to a nearby enemy.'
+    47541:
+      name: 'Death Coil'
+      cpm_median: 10.48
+      cpm_p95: 12.17
+      casts_median: 70
+      casts_p95: 88
+      sample: 29
+      description: 'Fires a blast of unholy energy at the target, causing 75 Shadow damage to an enemy or healing an Undead ally for 163 health. Extends the duration of Dread Plague and Virulent Plague by 1.5 sec.'
+    1242174:
+      name: 'Necrotic Coil'
+      cpm_median: 6.31
+      cpm_p95: 9.08
+      casts_median: 36
+      casts_p95: 77
+      sample: 30
+      description: null
+    458128:
+      name: 'Festering Scythe'
+      cpm_median: 2.67
+      cpm_p95: 3.09
+      casts_median: 18
+      casts_p95: 20
+      sample: 22
+      description: null
+    85948:
+      name: 'Festering Strike'
+      cpm_median: 2.68
+      cpm_p95: 3.08
+      casts_median: 18
+      casts_p95: 20
+      sample: 24
+      description: "Slash the enemy for 71 Physical damage and corrupt your weapon with blight, causing your next 2-3 Scourge Strikes to summon a Lesser Ghoul. Lesser Ghoul A mindless servant of the Scourge, raised to obey its master's commands for 6 sec."
+  top_talents: {  }
+  fetched_at: '2026-05-01'

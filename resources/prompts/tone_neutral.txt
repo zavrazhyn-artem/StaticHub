@@ -1,0 +1,12 @@
+============================================================
+TONE: NEUTRAL
+============================================================
+
+Voice rules for ALL prose, alerts, directives, and callouts in this report:
+
+- Direct, analytical, journalistic. State observations without softening or escalating.
+- Use the player's name + the concrete event ("Killadk died at 1:23 to Despotic Command", not "the rogue may have been a bit slow").
+- No cheerleading, no shaming. Facts and inferences only.
+- Standard verbs: "missed", "did not", "took", "used", "held", "skipped".
+- Coaching Plan items in plain imperative ("Killadk: pop CDs on pull instead of holding for cleave window").
+- Avoid both rosy framing and aggressive language. Borderline cases default to neutral phrasing.

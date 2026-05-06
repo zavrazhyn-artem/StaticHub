@@ -15,14 +15,14 @@ rotation_checks:
     ability_id: 121471
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Symbols of Death'
     ability_id: 212283
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Secret Technique'
@@ -36,7 +36,7 @@ rotation_checks:
     ability_id: 1264764
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: Vanish
@@ -50,28 +50,28 @@ rotation_checks:
     ability_id: 328547
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Echoing Reprimand'
     ability_id: 385616
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Cold Blood'
     ability_id: 382245
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: "Goremaw's Bite"
     ability_id: 426591
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Thistle Tea'
@@ -85,33 +85,98 @@ rotation_checks:
     ability_id: 31224
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Evasion
     ability_id: 5277
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Feint
     ability_id: 1966
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Crimson Vial'
     ability_id: 185311
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Kick
     ability_id: 1766
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    196819:
+      name: Eviscerate
+      cpm_median: 13.2
+      cpm_p95: 15.3
+      casts_median: 79
+      casts_p95: 126
+      sample: 30
+      description: 'Finishing move that disembowels the target, causing damage per combo point. 1 point : 13 damage 2 points: 27 damage 3 points: 39 damage 4 points: 53 damage 5 points: 64 damage'
+    185438:
+      name: Shadowstrike
+      cpm_median: 8.8
+      cpm_p95: 10.52
+      casts_median: 55
+      casts_p95: 88
+      sample: 30
+      description: 'Strike the target, dealing 199 Physical damage. While Stealthed, you strike through the shadows and appear behind your target up to 25 yds away, dealing 25% additional damage. Awards 2 combo points.'
+    53:
+      name: Backstab
+      cpm_median: 8.79
+      cpm_p95: 13.48
+      casts_median: 58
+      casts_p95: 75
+      sample: 30
+      description: 'Stab the target, causing 38 Physical damage. Damage increased by 20% when you are behind your target. Awards 1 combo point.'
+    185313:
+      name: 'Shadow Dance'
+      cpm_median: 3.06
+      cpm_p95: 3.22
+      casts_median: 25
+      casts_p95: 26
+      sample: 16
+      description: 'Allows use of all Stealth abilities and grants all the combat benefits of Stealth for 6 sec. Effect not broken from taking damage or attacking.'
+    441776:
+      name: 'Coup de Grace'
+      cpm_median: 3.13
+      cpm_p95: 3.73
+      casts_median: 22
+      casts_p95: 27
+      sample: 19
+      description: null
+    197835:
+      name: 'Shuriken Storm'
+      cpm_median: 4.7
+      cpm_p95: 6.65
+      casts_median: 30
+      casts_p95: 41
+      sample: 14
+      description: 'Sprays shurikens at all enemies within 10 yards, dealing 22 Physical damage. Deals reduced damage beyond 8 targets. Awards 1 combo point per target hit.'
+    319175:
+      name: 'Black Powder'
+      cpm_median: 5.11
+      cpm_p95: 7.0
+      casts_median: 31
+      casts_p95: 43
+      sample: 11
+      description: 'Finishing move that launches explosive Black Powder at all nearby enemies dealing Physical damage. Deals reduced damage beyond 8 targets. 1 point : 6 damage 2 points: 13 damage 3 points: 19 damage 4 points: 26 damage 5 points: 32 damage'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

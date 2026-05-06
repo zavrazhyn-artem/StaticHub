@@ -1141,5 +1141,19 @@
     "File too large (max 5 MB): :name": "File too large (max 5 MB): :name",
     "Upload failed.": "Upload failed.",
     "Uploading…": "Uploading…",
-    "Remove": "Remove"
+    "Remove": "Remove",
+    "pulls.cluster.alone": "Alone",
+    "pulls.cluster.with_friends": "With friends",
+    "pulls.cluster.in_stack": "In stack",
+    "pulls.movement.outward": "Moving outward",
+    "pulls.movement.inward": "Moving inward",
+    "pulls.movement.lateral": "Lateral movement",
+    "pulls.movement.static": "Static",
+    "Report Tone": "Report Tone",
+    "Applies to all AI reports generated for this static.": "Applies to all AI reports generated for this static.",
+    "Encouraging, supportive language.": "Encouraging, supportive language.",
+    "Direct and analytical.": "Direct and analytical.",
+    "Blunt, no hand-holding.": "Blunt, no hand-holding.",
+    "Deaths Tracked Per Pull": "Deaths Tracked Per Pull",
+    "How many of the first deaths in each pull the AI sees. UI still shows all deaths.": "How many of the first deaths in each pull the AI sees. UI still shows all deaths."
 }

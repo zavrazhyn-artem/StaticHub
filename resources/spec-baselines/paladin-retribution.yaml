@@ -29,28 +29,28 @@ rotation_checks:
     ability_id: 343527
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Final Reckoning'
     ability_id: 343721
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Divine Toll'
     ability_id: 375576
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Hammer of Wrath'
     ability_id: 1241288
     check: cast_efficiency
     cooldown_seconds: 7.5
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Blade of Justice'
@@ -78,7 +78,7 @@ rotation_checks:
     ability_id: 427453
     check: cast_efficiency
     cooldown_seconds: 7.5
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Eye of Tyr'
@@ -99,26 +99,75 @@ rotation_checks:
     ability_id: 184662
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Divine Protection'
     ability_id: 403876
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Lay on Hands'
     ability_id: 633
     check: cast_efficiency
     cooldown_seconds: 600.0
-    recommended_efficiency: 0.10
+    recommended_efficiency: 0.1
     severity: minor
   -
     ability: 'Divine Shield'
     ability_id: 642
     check: cast_efficiency
     cooldown_seconds: 300.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    408385:
+      name: 'Crusading Strikes'
+      cpm_median: 32.67
+      cpm_p95: 35.88
+      casts_median: 202
+      casts_p95: 231
+      sample: 30
+      description: null
+    383328:
+      name: 'Final Verdict'
+      cpm_median: 18.07
+      cpm_p95: 20.74
+      casts_median: 110
+      casts_p95: 165
+      sample: 30
+      description: 'Unleashes a powerful weapon strike that deals 141 Holy damage to an enemy target, Final Verdict has a 15% chance to reset the cooldown of Judgment.'
+    184575:
+      name: 'Blade of Justice'
+      cpm_median: 8.62
+      cpm_p95: 9.8
+      casts_median: 56
+      casts_p95: 70
+      sample: 30
+      description: 'Pierce an enemy with a blade of light, dealing 48 Holy damage. Generates 1 Holy Power.'
+    20271:
+      name: Judgment
+      cpm_median: 5.9
+      cpm_p95: 7.49
+      casts_median: 39
+      casts_p95: 52
+      sample: 30
+      description: 'Judges the target, dealing 253 Holy damage.'
+    24275:
+      name: 'Hammer of Wrath'
+      cpm_median: 5.25
+      cpm_p95: 6.83
+      casts_median: 37
+      casts_p95: 45
+      sample: 27
+      description: 'Hurls a divine hammer that strikes an enemy for 50 Holy damage. Generates 1 Holy Power.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

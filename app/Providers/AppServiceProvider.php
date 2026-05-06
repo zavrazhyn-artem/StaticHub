@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Sentry\Event as SentryEvent;
+use Sentry\SentrySdk;
+use Sentry\Tracing\SamplingContext;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Battlenet\Provider as BattlenetProvider;
 use SocialiteProviders\Discord\Provider as DiscordProvider;
@@ -48,6 +51,33 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->configureJobRateLimiters();
+        $this->configureSentryCallbacks();
+    }
+
+    private function configureSentryCallbacks(): void
+    {
+        $client = SentrySdk::getCurrentHub()->getClient();
+
+        if ($client === null) {
+            return;
+        }
+
+        $options = $client->getOptions();
+
+        $options->setTracesSampler(
+            fn (SamplingContext $context): float => app()->runningInConsole() ? 0.0 : 1.0,
+        );
+
+        $options->setBeforeSendTransactionCallback(function (SentryEvent $transaction): ?SentryEvent {
+            $start = $transaction->getStartTimestamp();
+            $end = $transaction->getTimestamp();
+
+            if ($start === null || $end === null) {
+                return null;
+            }
+
+            return ($end - $start) >= 2.0 ? $transaction : null;
+        });
     }
 
     /**

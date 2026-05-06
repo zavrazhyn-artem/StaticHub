@@ -47,6 +47,7 @@ class WclReportParserHelper
                 'killing_blow_guid' => $d['killingBlow']['guid'] ?? null,
                 'time_into_fight'   => self::msToFightTime($relativeMs),
                 'time_ms_relative'  => $relativeMs,
+                'timestamp_abs'     => $timestampMs,
             ];
         }, $entries));
 
@@ -903,7 +904,11 @@ class WclReportParserHelper
             }
         }
 
-        $summary = [];
+        $difficultyMap = [3 => 'Normal', 4 => 'Heroic', 5 => 'Mythic'];
+
+        // Group tries by raw boss name first; we may split into per-difficulty
+        // keys below if the same boss was attempted at multiple difficulties.
+        $byBoss = [];
         foreach ($raidFights as $fight) {
             $boss     = $fight['name'] ?? 'Unknown';
             $encId    = $fight['encounterID'] ?? 0;
@@ -912,6 +917,7 @@ class WclReportParserHelper
             $outcome   = ($fight['kill'] ?? false) ? 'kill' : 'wipe';
             $bossPct   = $fight['bossPercentage'] ?? null;
             $durationS = (int) round((($fight['endTime'] ?? 0) - ($fight['startTime'] ?? 0)) / 1000);
+            $difficulty = $difficultyMap[$fight['difficulty'] ?? null] ?? null;
 
             // Skip accidental pulls / commanded wipes (short fight + boss barely damaged)
             if ($outcome === 'wipe' && $durationS < 30 && $bossPct !== null && $bossPct >= 90) {
@@ -924,13 +930,32 @@ class WclReportParserHelper
                     ?? ($isInter ? "Intermission {$lastPhase}" : "Phase {$lastPhase}");
             }
 
-            $summary[$boss][] = [
+            $byBoss[$boss][] = [
                 'fight_id'   => $fight['id'],
                 'outcome'    => $outcome,
                 'last_phase' => $phaseName,
                 'duration_s' => $durationS,
                 'boss_pct'   => $bossPct,
+                'difficulty' => $difficulty,
             ];
+        }
+
+        // Split same-boss-multiple-difficulties into separate encounter keys
+        // ("Salhadaar (Heroic)" / "Salhadaar (Mythic)") so the AI gets a
+        // distinct report per difficulty. Single-difficulty bosses keep their
+        // original name.
+        $summary = [];
+        foreach ($byBoss as $boss => $tries) {
+            $diffs = array_unique(array_filter(array_column($tries, 'difficulty')));
+            if (count($diffs) <= 1) {
+                $summary[$boss] = $tries;
+                continue;
+            }
+            foreach ($tries as $try) {
+                $diff = $try['difficulty'] ?? null;
+                $key  = $diff !== null ? "$boss ($diff)" : $boss;
+                $summary[$key][] = $try;
+            }
         }
 
         return $summary;
@@ -1522,5 +1547,318 @@ class WclReportParserHelper
         if ($ms === null) return null;
         $seconds = (int) round($ms / 1000);
         return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
+    }
+
+    /**
+     * Compute median (x,y) per fight from player cast snapshots. Used as
+     * raid-stack-point proxy for boss-relative compass calculation. Most raids
+     * stack near the boss so this is a good first approximation.
+     *
+     * @param array $playerCoordSnapshots [{timestamp, sourceID, fight, x, y}, ...]
+     * @return array<int, array{x: int, y: int}>  fight_id => centroid
+     */
+    public static function computeFightCentroids(array $playerCoordSnapshots): array
+    {
+        $byFight = [];
+        foreach ($playerCoordSnapshots as $snap) {
+            $f = $snap['fight'] ?? null;
+            if ($f === null) continue;
+            $byFight[$f]['x'][] = $snap['x'];
+            $byFight[$f]['y'][] = $snap['y'];
+        }
+
+        $centroids = [];
+        foreach ($byFight as $f => $axes) {
+            sort($axes['x']);
+            sort($axes['y']);
+            $n = count($axes['x']);
+            if ($n === 0) continue;
+            $centroids[$f] = [
+                'x' => (int) $axes['x'][intdiv($n, 2)],
+                'y' => (int) $axes['y'][intdiv($n, 2)],
+            ];
+        }
+        return $centroids;
+    }
+
+    /**
+     * Annotate each death with compass direction + distance bucket relative to
+     * the per-fight centroid. WCL coordinates are in 1/100-yard units
+     * (100 units = 1 yard). Compass uses 8-rose: N/NE/E/SE/S/SW/W/NW + center
+     * if death is at the centroid (rare).
+     *
+     * Distance bands (yards): close < 10 → 'close'; 10-30 → 'mid'; >30 → 'far'.
+     *
+     * NOTE: WCL `events(dataType: Deaths)` does NOT carry x/y on the death
+     * event itself, so we approximate the death position from the latest Cast
+     * event from that player in that fight before the death timestamp. The
+     * cast snapshots are the same dataset used to compute fight centroids, so
+     * they're already loaded — no extra WCL query.
+     *
+     * @param array $groupedDeaths   bossName => tryKey => [death, ...]
+     * @param array $coordSnapshots  [{timestamp, sourceID, fight, x, y}, ...] — sorted ascending by timestamp
+     * @param array $playerIdToName  [actorID => playerName]
+     * @param array $fightCentroids  fight_id => {x, y}
+     * @return array
+     */
+    public static function annotateDeathsWithCompass(
+        array $groupedDeaths,
+        array $coordSnapshots,
+        array $playerIdToName,
+        array $fightCentroids
+    ): array {
+        // Index snapshots by fight + playerName, preserving timestamp order.
+        $byFightPlayer = [];
+        foreach ($coordSnapshots as $s) {
+            $name = $playerIdToName[$s['sourceID'] ?? null] ?? null;
+            if (!$name) continue;
+            $fid = $s['fight'] ?? null;
+            if ($fid === null) continue;
+            $byFightPlayer[$fid][$name][] = $s;
+        }
+        // Sort each per-player list by timestamp ascending so we can do a
+        // simple linear scan to find the last snapshot ≤ death timestamp.
+        foreach ($byFightPlayer as $fid => &$byPlayer) {
+            foreach ($byPlayer as &$snaps) {
+                usort($snaps, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
+            }
+        }
+        unset($byPlayer, $snaps);
+
+        foreach ($groupedDeaths as $boss => &$tries) {
+            foreach ($tries as $tryKey => &$deaths) {
+                foreach ($deaths as &$death) {
+                    $fid  = $death['fight_id'] ?? null;
+                    $name = $death['player'] ?? null;
+                    $deathTs = $death['timestamp_abs'] ?? null;
+                    if ($fid === null || !$name || $deathTs === null) continue;
+
+                    $candidates = $byFightPlayer[$fid][$name] ?? [];
+                    $centroid   = $fightCentroids[$fid] ?? null;
+                    if (empty($candidates) || !$centroid) continue;
+
+                    // Find latest snapshot at or before the death timestamp.
+                    $best = null;
+                    foreach ($candidates as $snap) {
+                        if (($snap['timestamp'] ?? 0) > $deathTs) break;
+                        $best = $snap;
+                    }
+                    // Fallback: if no snapshot exists before death (player died
+                    // before casting anything), use the earliest one — better
+                    // than nothing.
+                    if ($best === null) $best = $candidates[0];
+
+                    $dx = $best['x'] - $centroid['x'];
+                    $dy = $best['y'] - $centroid['y'];
+                    $distUnits = sqrt($dx * $dx + $dy * $dy);
+
+                    $death['coord_compass']        = self::compassFromDelta($dx, $dy);
+                    $death['coord_distance']       = self::bucketDistance($distUnits);
+                    $death['coord_distance_yards'] = (int) round($distUnits / 100);
+
+                    // ─────────────────────────────────────────────────────
+                    // A: cluster context — who else is near the dying player
+                    // ─────────────────────────────────────────────────────
+                    $cluster = self::computeClusterContext(
+                        $best,
+                        $name,
+                        $deathTs,
+                        $byFightPlayer[$fid] ?? []
+                    );
+                    $death['position_nearby']    = $cluster['nearby'];
+                    $death['position_cluster']   = $cluster['cluster'];
+
+                    // ─────────────────────────────────────────────────────
+                    // C: movement vector — was the dying player running
+                    //    toward, away, or stuck before the killing blow?
+                    // ─────────────────────────────────────────────────────
+                    $movement = self::computeMovementVector(
+                        $candidates,
+                        $deathTs,
+                        $centroid
+                    );
+                    if ($movement !== null) {
+                        $death['movement_pattern'] = $movement['pattern'];
+                        $death['movement_summary'] = $movement['summary'];
+                    }
+                }
+            }
+        }
+        unset($tries, $deaths, $death);
+
+        return $groupedDeaths;
+    }
+
+    /**
+     * Compute "alone" / "with_friends" / "in_stack" classification + names of
+     * the closest friends within 30y at the death moment. Each candidate
+     * friend's position is their latest cast snapshot ≤ deathTs in the same
+     * fight (best position proxy WCL gives us).
+     *
+     * Thresholds (WCL units, 100 = 1 yard):
+     *   isolation_radius = 15y → no one within = "alone"
+     *   stack_radius     = 15y, count >= 3 nearby = "in_stack"
+     *
+     * @param array $dyingSnap   {x, y, timestamp, sourceID, ...}
+     * @param string $dyingName
+     * @param int $deathTs       absolute ms
+     * @param array<string, list<array>> $byPlayer  playerName => snapshots (ts-sorted)
+     * @return array{cluster:string, nearby:list<array{name:string, distance_yards:int}>}
+     */
+    private static function computeClusterContext(
+        array $dyingSnap,
+        string $dyingName,
+        int $deathTs,
+        array $byPlayer
+    ): array {
+        // WoW mechanic semantics:
+        //   "in_stack" → soak/share group (typically 3+ players within 8y)
+        //   "alone"    → isolated, no help nearby (no friend within 15y)
+        //   "with_friends" → at least 1 friend nearby but not in stack
+        $stackRadiusUnits     = 800;  // 8y — soak partner range
+        $isolationRadiusUnits = 1500; // 15y — "no friend nearby" threshold
+        $proximityRadiusUnits = 3000; // 30y — outer surface for AI context
+
+        $nearby = [];
+        foreach ($byPlayer as $otherName => $snaps) {
+            if ($otherName === $dyingName) continue;
+
+            // Find their latest cast at or before deathTs.
+            $otherSnap = null;
+            foreach ($snaps as $s) {
+                if (($s['timestamp'] ?? 0) > $deathTs) break;
+                $otherSnap = $s;
+            }
+            if ($otherSnap === null) continue;
+
+            $dx = (int) $otherSnap['x'] - (int) $dyingSnap['x'];
+            $dy = (int) $otherSnap['y'] - (int) $dyingSnap['y'];
+            $dist = sqrt($dx * $dx + $dy * $dy);
+            if ($dist > $proximityRadiusUnits) continue;
+
+            $nearby[] = [
+                'name'           => $otherName,
+                'distance_yards' => (int) round($dist / 100),
+                '_units'         => $dist,
+            ];
+        }
+        usort($nearby, fn($a, $b) => $a['_units'] <=> $b['_units']);
+
+        $within15y = array_filter($nearby, fn($n) => $n['_units'] <= $isolationRadiusUnits);
+        $within8y  = array_filter($nearby, fn($n) => $n['_units'] <= $stackRadiusUnits);
+        $cluster = match (true) {
+            count($within8y)  >= 3  => 'in_stack',
+            count($within15y) === 0 => 'alone',
+            default                 => 'with_friends',
+        };
+
+        // Strip private `_units` field, cap to top 5 friends for prompt brevity.
+        $nearbyOut = array_map(
+            fn($n) => ['name' => $n['name'], 'distance_yards' => $n['distance_yards']],
+            array_slice($nearby, 0, 5)
+        );
+
+        return ['cluster' => $cluster, 'nearby' => $nearbyOut];
+    }
+
+    /**
+     * Classify the dying player's movement in the seconds leading up to
+     * death. Looks at up to 5 cast snapshots in [deathTs - 6s, deathTs] and
+     * compares each to the fight centroid. Outputs:
+     *   - pattern: "outward" | "inward" | "lateral" | "static"
+     *   - summary: short text the AI can quote ("moving outward (+12y over 3 casts)")
+     *
+     * Returns null if too few snapshots to make a call.
+     *
+     * @param array $candidates dying player's cast snapshots (ts-sorted ascending)
+     * @param int $deathTs
+     * @param array $centroid {x, y}
+     * @return ?array{pattern:string, summary:string}
+     */
+    private static function computeMovementVector(array $candidates, int $deathTs, array $centroid): ?array
+    {
+        $windowMs = 6_000; // last 6 seconds
+        $startTs = $deathTs - $windowMs;
+        $window = [];
+        foreach ($candidates as $s) {
+            $ts = $s['timestamp'] ?? 0;
+            if ($ts < $startTs) continue;
+            if ($ts > $deathTs) break;
+            $window[] = $s;
+        }
+        if (count($window) < 2) return null;
+
+        // Compute centroid distance for each snapshot.
+        $distances = array_map(function ($s) use ($centroid) {
+            $dx = (int) $s['x'] - (int) $centroid['x'];
+            $dy = (int) $s['y'] - (int) $centroid['y'];
+            return sqrt($dx * $dx + $dy * $dy);
+        }, $window);
+
+        // Position spread: max XY range across the window.
+        $xs = array_map(fn($s) => (int) $s['x'], $window);
+        $ys = array_map(fn($s) => (int) $s['y'], $window);
+        $spreadUnits = max(max($xs) - min($xs), max($ys) - min($ys));
+        $spreadYards = (int) round($spreadUnits / 100);
+
+        $startDist = $distances[0];
+        $endDist   = end($distances);
+        $deltaUnits = $endDist - $startDist;
+        $deltaYards = (int) round($deltaUnits / 100);
+        $sampleCount = count($window);
+
+        // Static: position barely moved (≤ 5y spread).
+        if ($spreadUnits <= 500) {
+            return [
+                'pattern' => 'static',
+                'summary' => "static (spread {$spreadYards}y over {$sampleCount} casts)",
+            ];
+        }
+
+        // Outward / inward / lateral.
+        if (abs($deltaUnits) < 500) {
+            return [
+                'pattern' => 'lateral',
+                'summary' => "lateral movement (spread {$spreadYards}y, no net distance change)",
+            ];
+        }
+
+        if ($deltaUnits > 0) {
+            return [
+                'pattern' => 'outward',
+                'summary' => "moving outward (+{$deltaYards}y over {$sampleCount} casts)",
+            ];
+        }
+
+        $absDelta = abs($deltaYards);
+        return [
+            'pattern' => 'inward',
+            'summary' => "moving inward (-{$absDelta}y over {$sampleCount} casts)",
+        ];
+    }
+
+    /**
+     * Convert delta (dx, dy) in WCL units to 8-rose compass direction.
+     * WCL axes: +x = east, +y = north (game-screen north).
+     */
+    private static function compassFromDelta(float $dx, float $dy): string
+    {
+        if ($dx == 0.0 && $dy == 0.0) return 'center';
+        $angleRad = atan2($dx, $dy);  // 0 = north, π/2 = east
+        $angleDeg = fmod($angleRad * 180.0 / M_PI + 360.0, 360.0);
+        $directions = ['N','NE','E','SE','S','SW','W','NW','N'];
+        $idx = (int) round($angleDeg / 45.0);
+        return $directions[$idx];
+    }
+
+    /**
+     * Bucket WCL-unit distance into yard bands. 100 units = 1 yard.
+     */
+    private static function bucketDistance(float $distUnits): string
+    {
+        $yards = $distUnits / 100.0;
+        if ($yards < 10) return 'close';
+        if ($yards < 30) return 'mid';
+        return 'far';
     }
 }

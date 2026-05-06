@@ -37,5 +37,6 @@ Route::middleware('admin_auth')->group(function () {
     Route::get('/user-activity/users/{user}', [AdminUserActivityController::class, 'show'])->name('admin.user-activity.show');
 
     Route::post('/ghost/enter/{static}', [AdminGhostController::class, 'enter'])->name('admin.ghost.enter');
+    Route::post('/ghost/enter/{static}/log/{report}', [AdminGhostController::class, 'enterReport'])->name('admin.ghost.enter-report');
     Route::post('/ghost/exit', [AdminGhostController::class, 'exit'])->name('admin.ghost.exit');
 });

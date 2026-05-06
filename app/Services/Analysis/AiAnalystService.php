@@ -165,8 +165,10 @@ class AiAnalystService
             $prompt .= "\n";
         }
 
-        $chatSystemPromptPath = resource_path('prompts/gemini_chat_analyst.txt');
-        $chatSystemPrompt = file_exists($chatSystemPromptPath) ? file_get_contents($chatSystemPromptPath) : '';
+        $tone = $report->staticGroup?->ai_tone ?? 'neutral';
+        $chatSystemPrompt = file_exists(resource_path('prompts/gemini_chat_analyst.txt'))
+            ? $this->geminiService->loadPromptWithTone('gemini_chat_analyst.txt', $tone)
+            : '';
 
         $prompt .= "=== INSTRUCTIONS ===\n{$chatSystemPrompt}\n\n"
             . "=== USER MESSAGE ===\n{$message}\n\n"

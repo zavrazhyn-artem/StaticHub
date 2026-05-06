@@ -22,6 +22,8 @@ class UpdateLogsRequest extends FormRequest
             'wcl_realm' => 'nullable|string|max:100',
             'auto_fetch_logs' => 'nullable|boolean',
             'auto_fetch_delay_minutes' => 'nullable|integer|min:5|max:120',
+            'ai_tone' => 'nullable|in:friendly,neutral,strict',
+            'ai_death_cutoff' => 'nullable|integer|min:1|max:5',
         ];
     }
 

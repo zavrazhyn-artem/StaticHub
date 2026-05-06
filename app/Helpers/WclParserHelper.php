@@ -35,7 +35,7 @@ class WclParserHelper
         }
 
         // Format: /guild/REGION/SERVER/NAME
-        if (preg_match('#/guild/([a-z]{2})/([^/]+)/([^/?#]+)#i', $url, $m)) {
+        if (preg_match('~/guild/([a-z]{2})/([^/]+)/([^/?#]+)~i', $url, $m)) {
             return [
                 'type'   => 'name',
                 'region' => strtolower($m[1]),

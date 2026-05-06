@@ -8,42 +8,42 @@ rotation_checks:
     ability_id: 265187
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Call Dreadstalkers'
     ability_id: 104316
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Summon Vilefiend'
     ability_id: 1251778
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Summon Charhound'
     ability_id: 455476
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Summon Gloomhound'
     ability_id: 455465
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Power Siphon'
     ability_id: 264130
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Demonic Strength'
@@ -78,21 +78,21 @@ rotation_checks:
     ability_id: 1276452
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Grimoire: Fel Ravager'
     ability_id: 1276467
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Soul Strike'
     ability_id: 264057
     check: cast_efficiency
     cooldown_seconds: 10.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: Implosion
@@ -106,47 +106,96 @@ rotation_checks:
     ability_id: 6789
     check: cast_efficiency
     cooldown_seconds: 45.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Howl of Terror'
     ability_id: 5484
     check: cast_efficiency
     cooldown_seconds: 40.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: Shadowfury
     ability_id: 30283
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Unending Resolve'
     ability_id: 104773
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Dark Pact'
     ability_id: 108416
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Demonic Circle: Teleport'
     ability_id: 48020
     check: cast_efficiency
     cooldown_seconds: 30.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Fel Domination'
     ability_id: 333889
     check: cast_efficiency
     cooldown_seconds: 180.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    105174:
+      name: "Hand of Gul'dan"
+      cpm_median: 14.85
+      cpm_p95: 16.64
+      casts_median: 90
+      casts_p95: 122
+      sample: 30
+      description: 'Calls down a demonic meteor full of Wild Imps which burst forth to attack the target. Deals up to 586 Shadowflame damage on impact to all enemies within 8 yds of the target and summons 3 Wild Imps.'
+    264178:
+      name: Demonbolt
+      cpm_median: 11.28
+      cpm_p95: 13.23
+      casts_median: 70
+      casts_p95: 97
+      sample: 30
+      description: 'Send the fiery soul of a fallen demon at the enemy, causing 1,522 Shadowflame damage.'
+    686:
+      name: 'Shadow Bolt'
+      cpm_median: 9.66
+      cpm_p95: 12.35
+      casts_median: 64
+      casts_p95: 77
+      sample: 30
+      description: 'Sends a shadowy bolt at the enemy, causing 658 Shadow damage.'
+    104316:
+      name: 'Call Dreadstalkers'
+      cpm_median: 2.85
+      cpm_p95: 3.03
+      casts_median: 17
+      casts_p95: 25
+      sample: 30
+      description: 'Summons 2 ferocious Dreadstalkers to attack the target for 12 sec.'
+    196277:
+      name: Implosion
+      cpm_median: 3.29
+      cpm_p95: 3.62
+      casts_median: 20
+      casts_p95: 28
+      sample: 30
+      description: 'Demonic forces suck 6 of your Wild Imps toward the target, and then cause them to violently explode, dealing 518 Shadowflame damage to all enemies within 8 yards.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'

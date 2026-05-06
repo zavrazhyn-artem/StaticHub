@@ -22,7 +22,7 @@ rotation_checks:
     ability_id: 325153
     check: cast_efficiency
     cooldown_seconds: 60.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Empty the Cellar'
@@ -43,7 +43,7 @@ rotation_checks:
     ability_id: 115181
     check: cast_efficiency
     cooldown_seconds: 15.0
-    recommended_efficiency: 0.90
+    recommended_efficiency: 0.9
     severity: major
   -
     ability: 'Celestial Conduit'
@@ -64,14 +64,14 @@ rotation_checks:
     ability_id: 119582
     check: cast_efficiency
     cooldown_seconds: 20.0
-    recommended_efficiency: 0.70
+    recommended_efficiency: 0.7
     severity: minor
   -
     ability: 'Touch of Death'
     ability_id: 322109
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.80
+    recommended_efficiency: 0.8
     severity: minor
   -
     ability: 'Rushing Jade Wind'
@@ -85,19 +85,68 @@ rotation_checks:
     ability_id: 115203
     check: cast_efficiency
     cooldown_seconds: 360.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Diffuse Magic'
     ability_id: 1243287
     check: cast_efficiency
     cooldown_seconds: 90.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
   -
     ability: 'Dampen Harm'
     ability_id: 122278
     check: cast_efficiency
     cooldown_seconds: 120.0
-    recommended_efficiency: 0.50
+    recommended_efficiency: 0.5
     severity: minor
+empirical:
+  bosses_sampled:
+    - 'Crown of the Cosmos'
+    - 'Fallen-King Salhadaar'
+    - 'Imperator Averzian'
+  sample_size: 30
+  abilities:
+    121253:
+      name: 'Keg Smash'
+      cpm_median: 12.79
+      cpm_p95: 14.85
+      casts_median: 78
+      casts_p95: 105
+      sample: 30
+      description: 'Smash a keg of brew, dealing 100 Physical damage to your primary target and 67 Physical damage to all other enemies within 8 yds, and reducing their movement speed by 20% for 15 sec. Deals reduced damage beyond 5 targets.'
+    115181:
+      name: 'Breath of Fire'
+      cpm_median: 11.66
+      cpm_p95: 14.36
+      casts_median: 71
+      casts_p95: 92
+      sample: 29
+      description: 'Breathe fire on targets in front of you, causing 35 Fire damage. Deals reduced damage to secondary targets. Targets affected by Keg Smash will also burn, taking 23 Fire damage and dealing 5% reduced damage to you for 12 sec.'
+    205523:
+      name: 'Blackout Kick'
+      cpm_median: 10.88
+      cpm_p95: 13.14
+      casts_median: 67
+      casts_p95: 97
+      sample: 30
+      description: null
+    100780:
+      name: 'Tiger Palm'
+      cpm_median: 10.88
+      cpm_p95: 13.03
+      casts_median: 67
+      casts_p95: 98
+      sample: 30
+      description: 'Strike with the palm of your hand, dealing 31 Physical damage.'
+    119582:
+      name: 'Purifying Brew'
+      cpm_median: 7.1
+      cpm_p95: 8.84
+      casts_median: 43
+      casts_p95: 61
+      sample: 30
+      description: 'Clears 50% of your Staggered damage, or a minimum of 8% of your maximum health.'
+  top_talents: {  }
+  fetched_at: '2026-05-01'
