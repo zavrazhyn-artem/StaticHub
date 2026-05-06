@@ -1,6 +1,6 @@
 ---
 boss: "Belo'ren, Child of Al'ar"
-wcl_encounter_id: null
+wcl_encounter_id: 3182
 difficulty_variants: [normal, heroic, mythic]
 mechanics:
   - name: "Voidlight Convergence"

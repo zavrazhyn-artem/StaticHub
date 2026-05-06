@@ -1,6 +1,6 @@
 ---
 boss: Midnight Falls
-wcl_encounter_id: null
+wcl_encounter_id: 3183
 difficulty_variants: [normal, heroic, mythic]
 mechanics:
   phase_1:
