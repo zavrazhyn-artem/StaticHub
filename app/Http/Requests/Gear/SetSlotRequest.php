@@ -24,6 +24,11 @@ class SetSlotRequest extends FormRequest
             'enchant_id'  => ['nullable', 'integer', 'min:0'],
             'bonus_ids'   => ['nullable', 'array'],
             'bonus_ids.*' => ['integer'],
+            // When supplied, server resolves (track, level) → bonus_id + ilvl
+            // from wow_season.item_upgrade_tracks. Used by the slot picker so
+            // the client doesn't need to embed the upgrade-track config.
+            'track'       => ['nullable', 'string'],
+            'level'       => ['nullable', 'integer', 'min:1', 'max:6'],
         ];
     }
 }

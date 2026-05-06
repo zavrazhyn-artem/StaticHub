@@ -8,6 +8,11 @@ const props = defineProps({
     editable: { type: Boolean, default: false },
     mirror: { type: Boolean, default: false },
     audit: { type: Boolean, default: false },
+    // Forwarded to wowhead so the tooltip resolves hybrid stats and tier
+    // bonuses against the character's actual class/spec instead of a generic
+    // "+N Agility or Intellect".
+    classId: { type: [Number, null], default: null },
+    specId: { type: [Number, null], default: null },
 });
 
 const emit = defineEmits(['edit', 'clear']);
@@ -36,25 +41,27 @@ const iconUrl = computed(() => {
         : `https://wow.zamimg.com/images/wow/icons/medium/${raw}.jpg`;
 });
 
+const wowheadParams = computed(() => {
+    if (!props.item) return [];
+    const parts = [];
+    if (props.item.item_level) parts.push(`ilvl=${props.item.item_level}`);
+    if (props.item.enchant_id) parts.push(`ench=${props.item.enchant_id}`);
+    if (props.item.gem_ids?.length) parts.push(`gems=${props.item.gem_ids.join(':')}`);
+    if (props.item.bonus_ids?.length) parts.push(`bonus=${props.item.bonus_ids.join(':')}`);
+    if (props.classId) parts.push(`cl=${props.classId}`);
+    if (props.specId) parts.push(`spec=${props.specId}`);
+    return parts;
+});
+
 const wowheadHref = computed(() => {
     if (!props.item) return null;
-    const params = [];
-    if (props.item.item_level) params.push(`ilvl=${props.item.item_level}`);
-    if (props.item.enchant_id) params.push(`ench=${props.item.enchant_id}`);
-    if (props.item.gem_ids?.length) params.push(`gems=${props.item.gem_ids.join(':')}`);
-    if (props.item.bonus_ids?.length) params.push(`bonus=${props.item.bonus_ids.join(':')}`);
-    const query = params.length ? `?${params.join('&')}` : '';
+    const query = wowheadParams.value.length ? `?${wowheadParams.value.join('&')}` : '';
     return `https://www.wowhead.com/item=${props.item.item_id}${query}`;
 });
 
 const wowheadDataAttr = computed(() => {
     if (!props.item) return null;
-    const parts = [`item=${props.item.item_id}`];
-    if (props.item.item_level) parts.push(`ilvl=${props.item.item_level}`);
-    if (props.item.enchant_id) parts.push(`ench=${props.item.enchant_id}`);
-    if (props.item.gem_ids?.length) parts.push(`gems=${props.item.gem_ids.join(':')}`);
-    if (props.item.bonus_ids?.length) parts.push(`bonus=${props.item.bonus_ids.join(':')}`);
-    return parts.join('&');
+    return [`item=${props.item.item_id}`, ...wowheadParams.value].join('&');
 });
 
 const displayName = computed(() => {
@@ -85,22 +92,33 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
         hasMissingOptimization ? '!border-red-500/60 shadow-[0_0_8px_-4px_rgba(239,68,68,0.6)]' : '',
         mirror ? 'flex-row-reverse text-right' : 'text-left'
     ]">
-        <!-- Empty -->
+        <!-- Empty: editable rows turn the whole card into a click target,
+             with the + symbol sitting where the item icon would normally be. -->
         <template v-if="!item">
-            <div class="w-8 h-8 rounded bg-surface-container/40 ring-1 ring-white/5 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <span class="material-symbols-outlined text-base">add</span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="text-[11px] text-on-surface-variant/50 italic">empty</div>
-            </div>
             <button
                 v-if="editable"
                 type="button"
                 @click="emit('edit')"
-                class="text-[10px] text-cyan-300/80 hover:text-cyan-200 font-headline font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-cyan-400/30 hover:border-cyan-400/60 transition shrink-0"
+                :class="[
+                    'flex items-center gap-2 flex-1 min-w-0 group/add',
+                    mirror ? 'flex-row-reverse text-right' : 'text-left'
+                ]"
             >
-                Add
+                <div class="w-8 h-8 rounded ring-1 ring-cyan-400/30 bg-cyan-500/5 flex items-center justify-center text-cyan-300/70 group-hover/add:ring-cyan-400/60 group-hover/add:bg-cyan-500/15 group-hover/add:text-cyan-200 transition shrink-0">
+                    <span class="material-symbols-outlined text-lg leading-none">add</span>
+                </div>
+                <div class="flex-1 min-w-0 text-[11px] text-on-surface-variant/50 italic group-hover/add:text-on-surface-variant transition">
+                    empty
+                </div>
             </button>
+            <template v-else>
+                <div class="w-8 h-8 rounded bg-surface-container/40 ring-1 ring-white/5 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                    <span class="material-symbols-outlined text-base">remove</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-on-surface-variant/50 italic">empty</div>
+                </div>
+            </template>
         </template>
 
         <!-- Filled -->

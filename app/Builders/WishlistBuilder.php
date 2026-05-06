@@ -26,6 +26,21 @@ class WishlistBuilder extends Builder
         });
     }
 
+    /**
+     * Restrict to wishlists whose raid_slug refers to a real raid in the
+     * season catalogue. Excludes M+ dungeon, Catalyst, Crafted, Delve and
+     * any other source — the wishlist UI is intentionally raid-only.
+     */
+    public function raidsOnly(): self
+    {
+        return $this->whereIn('raid_slug', function ($q) {
+            $q->select('source_slug')
+                ->from('season_items')
+                ->where('source_type', 'raid')
+                ->distinct();
+        });
+    }
+
     public function findLatest(
         int $characterId,
         int $specId,

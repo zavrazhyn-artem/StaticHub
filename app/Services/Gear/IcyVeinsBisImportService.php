@@ -34,6 +34,7 @@ final class IcyVeinsBisImportService
         'shoulder'   => 'shoulder',
         'shoulders'  => 'shoulder',
         'cloak'      => 'back',
+        'cape'       => 'back',
         'back'       => 'back',
         'chest'      => 'chest',
         'bracers'    => 'wrist',
@@ -55,6 +56,28 @@ final class IcyVeinsBisImportService
         'trinket 1'  => 'trinket_1',
         'trinket #2' => 'trinket_2',
         'trinket 2'  => 'trinket_2',
+    ];
+
+    /**
+     * Slot labels that pack two items in a single row (either listed as a
+     * `<ul>` of recommendations or just both items in the same cell). The
+     * parser splits them across the paired slots in order.
+     */
+    private const PAIRED_SLOTS = [
+        'rings'    => ['finger_1', 'finger_2'],
+        'trinkets' => ['trinket_1', 'trinket_2'],
+        'fingers'  => ['finger_1', 'finger_2'],
+    ];
+
+    /**
+     * Bare ambiguous labels — rows are written as "Ring" twice in a row
+     * instead of "Ring #1" / "Ring #2". Tracked via a per-label counter at
+     * parse time.
+     */
+    private const POSITIONAL_SLOTS = [
+        'ring'    => ['finger_1', 'finger_2'],
+        'trinket' => ['trinket_1', 'trinket_2'],
+        'finger'  => ['finger_1', 'finger_2'],
     ];
 
     public function isOwnUrl(string $url): bool
@@ -116,24 +139,35 @@ final class IcyVeinsBisImportService
         return $response->body();
     }
 
+    /**
+     * Locate the Overall BiS table on the page. Across legacy and current
+     * layouts the table always starts with the same `<th>Slot</th>
+     * <th>Item</th><th>Source/Note</th>` header — we anchor on that pattern
+     * directly and ignore any surrounding section markup, which has shifted
+     * between `id="area_1"` anchors, h3 headers, and other variants over
+     * time.
+     */
     private function extractOverallBisSection(string $html): string
     {
         $html = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
         $html = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $html);
 
-        $start = strpos($html, 'id="area_1"');
-        if ($start === false) {
-            throw WishlistImportException::invalidPayload(
-                'icy-veins page layout changed — area_1 anchor missing.'
-            );
+        // Walk every <table> and return the first one whose header row reads
+        // Slot / Item / Source/Note (Overall BiS is always the first such
+        // table; the M+ and Raid subtables come later and use the same shape,
+        // so first-match is what we want).
+        if (preg_match_all('/<table[^>]*>(.+?)<\/table>/is', $html, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[1] as $table) {
+                $body = $table[0];
+                if (preg_match('/<th[^>]*>\s*Slot\s*<\/th>\s*<th[^>]*>\s*Item\s*<\/th>\s*<th[^>]*>\s*Source\s*\/\s*Note\s*<\/th>/i', $body)) {
+                    return $body;
+                }
+            }
         }
 
-        $end = strpos($html, 'id="area_2"', $start);
-        if ($end === false) {
-            $end = $start + 50000;
-        }
-
-        return substr($html, $start, $end - $start);
+        throw WishlistImportException::invalidPayload(
+            'icy-veins page layout changed — no Slot/Item/Source-Note table found.'
+        );
     }
 
     /**
@@ -146,41 +180,95 @@ final class IcyVeinsBisImportService
         }
 
         $items = [];
+        $positionalCounts = [];
+
         foreach ($rows[1] as $rowHtml) {
             preg_match_all('/<td[^>]*>(.*?)<\/td>/is', $rowHtml, $cells);
-            if (count($cells[1]) < 2) {
-                continue;
-            }
+            if (count($cells[1]) < 2) continue;
 
             $slotLabel = strtolower(trim(strip_tags($cells[1][0])));
+            $itemCell  = $cells[1][1];
+            $sourceNote = isset($cells[1][2])
+                ? trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($cells[1][2]))))
+                : '';
+
+            // Paired slots — single row containing 2+ items (e.g. <ul> of
+            // trinket recommendations). Pull the first N item entries from
+            // the cell and distribute across the paired slots in order.
+            if (isset(self::PAIRED_SLOTS[$slotLabel])) {
+                $slots = self::PAIRED_SLOTS[$slotLabel];
+                $entries = $this->extractItemEntries($itemCell);
+                foreach ($slots as $i => $slot) {
+                    if (! isset($entries[$i])) break;
+                    $items[] = [
+                        'slot'        => $slot,
+                        'item_id'     => $entries[$i]['item_id'],
+                        'name'        => $entries[$i]['name'],
+                        'source_note' => $sourceNote,
+                    ];
+                }
+                continue;
+            }
+
+            // Positional slots — bare label that repeats across rows;
+            // counter assigns finger_1 then finger_2, trinket_1 then _2, etc.
+            if (isset(self::POSITIONAL_SLOTS[$slotLabel])) {
+                $idx  = $positionalCounts[$slotLabel] ?? 0;
+                $slot = self::POSITIONAL_SLOTS[$slotLabel][$idx] ?? null;
+                $positionalCounts[$slotLabel] = $idx + 1;
+                if (! $slot) continue;
+                $entries = $this->extractItemEntries($itemCell);
+                if (! $entries) continue;
+                $items[] = [
+                    'slot'        => $slot,
+                    'item_id'     => $entries[0]['item_id'],
+                    'name'        => $entries[0]['name'],
+                    'source_note' => $sourceNote,
+                ];
+                continue;
+            }
+
             $slot = self::SLOT_MAP[$slotLabel] ?? null;
-            if (! $slot) {
-                continue;
-            }
+            if (! $slot) continue;
 
-            if (! preg_match('/data-wowhead=["\']item=(\d+)/i', $cells[1][1], $idMatch)) {
-                continue;
-            }
-            $itemId = (int) $idMatch[1];
-
-            $name = '';
-            if (preg_match('/<span[^>]*class=["\'][^"\']*q\d[^"\']*["\'][^>]*>(.*?)<\/span>/is', $cells[1][1], $nameMatch)) {
-                $name = trim(html_entity_decode(strip_tags($nameMatch[1])));
-            }
-
-            $sourceNote = '';
-            if (isset($cells[1][2])) {
-                $sourceNote = trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($cells[1][2]))));
-            }
-
+            $entries = $this->extractItemEntries($itemCell);
+            if (! $entries) continue;
             $items[] = [
                 'slot'        => $slot,
-                'item_id'     => $itemId,
-                'name'        => $name,
+                'item_id'     => $entries[0]['item_id'],
+                'name'        => $entries[0]['name'],
                 'source_note' => $sourceNote,
             ];
         }
 
         return $items;
+    }
+
+    /**
+     * Pull every item entry (id + name) out of a cell. Multiple-recommendation
+     * cells use `<li>` per choice; single-item cells just have one inline
+     * `<span data-wowhead="item=…">`.
+     *
+     * @return list<array{item_id:int, name:string}>
+     */
+    private function extractItemEntries(string $cellHtml): array
+    {
+        if (preg_match_all(
+            '/<span[^>]*data-wowhead=["\']item=(\d+)[^"\']*["\'][^>]*class=["\'][^"\']*q\d[^"\']*["\'][^>]*>(.*?)<\/span>/is',
+            $cellHtml,
+            $m,
+            PREG_SET_ORDER
+        )) {
+            return array_map(fn (array $entry) => [
+                'item_id' => (int) $entry[1],
+                'name'    => trim(html_entity_decode(strip_tags($entry[2]))),
+            ], $m);
+        }
+
+        // Fallback: pick up bare data-wowhead ids without a matching name span.
+        if (preg_match_all('/data-wowhead=["\']item=(\d+)/i', $cellHtml, $idsOnly)) {
+            return array_map(fn ($id) => ['item_id' => (int) $id, 'name' => ''], $idsOnly[1]);
+        }
+        return [];
     }
 }

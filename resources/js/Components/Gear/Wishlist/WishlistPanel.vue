@@ -3,14 +3,27 @@ import { ref, computed, watch } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import EmptyState from '@/Components/UI/EmptyState.vue';
 import WishlistItemCard from './WishlistItemCard.vue';
+import WishlistClaimantsModal from './WishlistClaimantsModal.vue';
 
 const { __ } = useTranslation();
 
 const props = defineProps({
     payload: { type: Array, required: true },
+    // Full list of the viewer's own characters in this static. Used so that
+    // the empty-state lookup includes characters that don't have a wishlist
+    // yet — those then get an "Import for this character" CTA.
+    characters: { type: Array, default: () => [] },
+    // Character + spec are owned by the parent so they stay in sync with the
+    // Gear tab. specId may not match any imported wishlist (when none exist
+    // yet for the chosen spec) — we fall back to availableSpecs[0] in that
+    // case while leaving the parent's selection untouched.
+    characterId: { type: [Number, String, null], default: null },
+    specId: { type: [Number, String, null], default: null },
     csrfToken: { type: String, required: true },
     destroyUrlTemplate: { type: String, required: true },
 });
+
+const emit = defineEmits(['open-import', 'update:characterId', 'update:specId']);
 
 const SLOT_ORDER = [
     'head', 'neck', 'shoulder', 'back', 'chest', 'wrist',
@@ -33,26 +46,98 @@ const DIFFICULTIES = [
     { id: 'raid_finder', label: 'LFR', short: 'R', accent: 'border-emerald-300/60 text-emerald-200 bg-emerald-500/10' },
 ];
 
-const selectedCharacterId = ref(null);
 const selectedDifficulty = ref('mythic');
-const selectedSpecId = ref(null);
 
-const characters = computed(() => props.payload);
+// Claimants modal — opens when a card is clicked. Holds the item that was
+// clicked so the modal can render its claimants list without a refetch.
+const claimantsItem = ref(null);
+const showClaimantsModal = computed(() => claimantsItem.value !== null);
+const openClaimants = (item) => { claimantsItem.value = item; };
+const closeClaimants = () => { claimantsItem.value = null; };
 
-watch(characters, (list) => {
-    if (!list.length) { selectedCharacterId.value = null; return; }
-    if (!list.find(c => c.character.id === selectedCharacterId.value)) {
-        selectedCharacterId.value = list[0].character.id;
-    }
-}, { immediate: true });
+// Group items either by paper-doll slot or by boss they drop from. Choice
+// is persisted across sessions so a user who prefers boss grouping doesn't
+// have to switch every time they open the wishlist.
+const GROUP_STORAGE_KEY = 'blastr.wishlist.groupBy.v1';
+const groupBy = ref(localStorage.getItem(GROUP_STORAGE_KEY) || 'boss');
+watch(groupBy, (v) => localStorage.setItem(GROUP_STORAGE_KEY, v));
+
+const GROUP_TABS = [
+    { id: 'boss', label: 'By boss', icon: 'skull' },
+    { id: 'slot', label: 'By slot', icon: 'view_module' },
+];
+
+// Wishlists are spec-bound: a Holy wishlist and a Discipline wishlist for
+// the same character are independent. Filter strictly by the parent's spec —
+// if no wishlist exists for it, the empty-state CTA prompts the user to
+// import one rather than silently showing some other spec's data.
+const effectiveSpecId = computed(() => props.specId ?? null);
+
+// Merge the wishlist payload with the full character roster so the empty
+// state for a character without wishlists still resolves correctly.
+const characters = computed(() => {
+    const byId = new Map();
+    props.payload.forEach(entry => byId.set(entry.character.id, entry));
+
+    if (!props.characters.length) return Array.from(byId.values());
+
+    return props.characters.map(ch => {
+        const existing = byId.get(ch.id);
+        if (existing) return existing;
+        return {
+            character: {
+                id: ch.id,
+                name: ch.name,
+                realm: ch.realm,
+                playable_class: ch.playable_class,
+                avatar_url: ch.avatar_url,
+                is_own: ch.is_own,
+            },
+            wishlists: [],
+        };
+    });
+});
 
 const currentCharacter = computed(() =>
-    characters.value.find(c => c.character.id === selectedCharacterId.value) ?? null);
+    characters.value.find(c => c.character.id === props.characterId) ?? null);
 
-const availableDifficulties = computed(() => {
-    if (!currentCharacter.value) return new Set();
-    return new Set(currentCharacter.value.wishlists.map(w => w.difficulty));
+// "Has data" is per (character, spec) pair — flipping spec must surface the
+// import CTA when that specific spec has no wishlist yet.
+const wishlistsForSpec = computed(() => {
+    if (!currentCharacter.value || !effectiveSpecId.value) return [];
+    return currentCharacter.value.wishlists.filter(w => w.spec_id === effectiveSpecId.value);
 });
+
+const hasAnyWishlist = computed(() => wishlistsForSpec.value.length > 0);
+
+// Resolve the spec.role of the parent's selected spec so the empty-state CTA
+// can switch from "Run a Droptimizer on raidbots" → "Run an Upgrade Report on
+// QE Live" for healers (Raidbots doesn't sim healer throughput; QE does).
+const currentRole = computed(() => {
+    const ctxChar = props.characters.find(c => c.id === props.characterId);
+    if (!ctxChar) return null;
+    const spec = ctxChar.specs?.find(s => s.id === props.specId)
+        ?? ctxChar.specs?.find(s => s.is_main)
+        ?? ctxChar.specs?.[0];
+    return spec?.role?.toLowerCase() ?? null;
+});
+
+const isHealer = computed(() => currentRole.value === 'heal' || currentRole.value === 'healer');
+
+const currentSpecName = computed(() => {
+    const ctxChar = props.characters.find(c => c.id === props.characterId);
+    return ctxChar?.specs?.find(s => s.id === props.specId)?.name ?? '';
+});
+
+const importTargetLabel = computed(() => {
+    const charName = currentCharacter.value?.character.name ?? '';
+    return currentSpecName.value
+        ? `${charName} (${currentSpecName.value})`
+        : charName;
+});
+
+const availableDifficulties = computed(() =>
+    new Set(wishlistsForSpec.value.map(w => w.difficulty)));
 
 const availableSpecs = computed(() => {
     if (!currentCharacter.value) return [];
@@ -62,13 +147,6 @@ const availableSpecs = computed(() => {
     });
     return Array.from(seen.values());
 });
-
-watch(availableSpecs, (specs) => {
-    if (!specs.length) { selectedSpecId.value = null; return; }
-    if (!specs.find(s => s.id === selectedSpecId.value)) {
-        selectedSpecId.value = specs[0].id;
-    }
-}, { immediate: true });
 
 watch(availableDifficulties, (difficulties) => {
     if (!difficulties.has(selectedDifficulty.value)) {
@@ -81,14 +159,14 @@ const activeWishlists = computed(() => {
     if (!currentCharacter.value) return [];
     return currentCharacter.value.wishlists.filter(w =>
         w.difficulty === selectedDifficulty.value
-        && (!selectedSpecId.value || w.spec_id === selectedSpecId.value)
+        && (!effectiveSpecId.value || w.spec_id === effectiveSpecId.value)
     );
 });
 
-const itemsBySlot = computed(() => {
-    // Items can be sim'd in multiple wishlists (e.g. catalyst items appear
-    // in two raid instances). Keep one entry per item_id — the highest-
-    // value one — so the UI doesn't show the same item twice in the same slot.
+// Items dedup'd by item_id (best value across difficulties/raids) — both
+// groupings work off the same source list so switching the toggle doesn't
+// re-derive item identity.
+const dedupedItems = computed(() => {
     const bestById = new Map();
     activeWishlists.value.forEach(w => {
         w.items.forEach(item => {
@@ -98,25 +176,64 @@ const itemsBySlot = computed(() => {
             }
         });
     });
+    return Array.from(bestById.values());
+});
 
-    const buckets = {};
-    bestById.forEach(item => {
-        const slot = (item.item_slot || 'unknown').toLowerCase();
-        buckets[slot] ??= [];
-        buckets[slot].push(item);
+// Group by encounter — boss section header, items sorted by value desc,
+// bosses sorted by their top-value item so the most useful drop surfaces.
+const itemsByBoss = computed(() => {
+    const buckets = new Map();
+    dedupedItems.value.forEach(item => {
+        const key = item.encounter_id ?? `__no_boss_${item.item_slot ?? 'unknown'}`;
+        if (!buckets.has(key)) {
+            buckets.set(key, {
+                key,
+                label: item.boss_name || 'Other',
+                icon: 'skull',
+                accent: 'text-orange-300/80',
+                items: [],
+                topValue: 0,
+            });
+        }
+        const bucket = buckets.get(key);
+        bucket.items.push(item);
+        bucket.topValue = Math.max(bucket.topValue, Number(item.value) || 0);
     });
-    Object.values(buckets).forEach(list => list.sort((a, b) => Number(b.value) - Number(a.value)));
-    return buckets;
+    buckets.forEach(b => b.items.sort((a, b2) => Number(b2.value) - Number(a.value)));
+    return Array.from(buckets.values()).sort((a, b) => b.topValue - a.topValue);
 });
 
-const renderedSlots = computed(() => {
-    const present = new Set(Object.keys(itemsBySlot.value));
-    return SLOT_ORDER.filter(s => present.has(s)).concat(
-        Array.from(present).filter(s => !SLOT_ORDER.includes(s))
-    );
+// Group by paper-doll slot — same shape as boss buckets so the template
+// renders both via a single v-for over the active grouping.
+const itemsBySlot = computed(() => {
+    const buckets = new Map();
+    dedupedItems.value.forEach(item => {
+        const slot = (item.item_slot || 'unknown').toLowerCase();
+        if (!buckets.has(slot)) {
+            buckets.set(slot, {
+                key: slot,
+                label: SLOT_LABELS[slot] || slot.replace(/_/g, ' '),
+                icon: 'checkroom',
+                accent: 'text-cyan-300/80',
+                items: [],
+                topValue: 0,
+                slotOrder: SLOT_ORDER.indexOf(slot),
+            });
+        }
+        const bucket = buckets.get(slot);
+        bucket.items.push(item);
+        bucket.topValue = Math.max(bucket.topValue, Number(item.value) || 0);
+    });
+    buckets.forEach(b => b.items.sort((a, b2) => Number(b2.value) - Number(a.value)));
+    // Stable slot order (head → ... → ranged); unknown slots fall to the end.
+    return Array.from(buckets.values()).sort((a, b) => {
+        if (a.slotOrder === -1) return 1;
+        if (b.slotOrder === -1) return -1;
+        return a.slotOrder - b.slotOrder;
+    });
 });
 
-const slotLabel = (s) => SLOT_LABELS[s] || s.replace(/_/g, ' ');
+const activeGrouping = computed(() => groupBy.value === 'slot' ? itemsBySlot.value : itemsByBoss.value);
 
 const difficultyShort = computed(() => {
     const d = DIFFICULTIES.find(d => d.id === selectedDifficulty.value);
@@ -156,44 +273,16 @@ const deleteWishlist = (wishlistId) => {
     <div v-if="!characters.length" class="bg-surface-container-low border border-white/5 rounded-xl p-12">
         <EmptyState
             icon="list_alt"
-            :title="__('No wishlists yet')"
-            :description="__('Import a Raidbots Droptimizer URL to start tracking gear upgrades.')"
+            :title="__('No characters in this static')"
+            :description="__('Invite members and assign characters to start tracking gear upgrades.')"
         />
     </div>
 
     <div v-else class="space-y-5">
-        <!-- Filter bar -->
-        <div class="bg-surface-container-low border border-white/5 rounded-xl p-4 flex flex-wrap items-center gap-4">
-            <!-- Character selector -->
-            <div v-if="characters.length > 1" class="flex items-center gap-2">
-                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">{{ __('Character') }}</span>
-                <select
-                    v-model="selectedCharacterId"
-                    class="bg-surface-container border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-400"
-                >
-                    <option v-for="c in characters" :key="c.character.id" :value="c.character.id">
-                        {{ c.character.name }}
-                    </option>
-                </select>
-            </div>
-
-            <div v-else-if="currentCharacter" class="flex items-center gap-2">
-                <img
-                    v-if="currentCharacter.character.avatar_url"
-                    :src="currentCharacter.character.avatar_url"
-                    alt=""
-                    class="w-8 h-8 rounded-full ring-1 ring-white/10"
-                />
-                <div>
-                    <div class="text-sm font-bold text-white">{{ currentCharacter.character.name }}</div>
-                    <div class="text-[10px] text-on-surface-variant uppercase tracking-widest">
-                        {{ currentCharacter.character.realm }} · {{ currentCharacter.character.playable_class }}
-                    </div>
-                </div>
-            </div>
-
+        <!-- Filter bar (character is picked at the top level) -->
+        <div v-if="hasAnyWishlist" class="bg-surface-container-low border border-white/5 rounded-xl p-4 flex flex-wrap items-center gap-4">
             <!-- Difficulty pills -->
-            <div class="flex items-center gap-1 ml-auto">
+            <div class="flex items-center gap-1">
                 <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest mr-2">{{ __('Difficulty') }}</span>
                 <button
                     v-for="d in DIFFICULTIES"
@@ -213,34 +302,57 @@ const deleteWishlist = (wishlistId) => {
                 </button>
             </div>
 
-            <!-- Spec switcher -->
-            <div v-if="availableSpecs.length > 1" class="flex items-center gap-1">
-                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest mr-2">{{ __('Spec') }}</span>
+            <!-- Group-by toggle -->
+            <div class="flex items-center gap-1">
+                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest mr-2">{{ __('Group') }}</span>
                 <button
-                    v-for="s in availableSpecs"
-                    :key="s.id"
+                    v-for="g in GROUP_TABS"
+                    :key="g.id"
                     type="button"
-                    @click="selectedSpecId = s.id"
+                    @click="groupBy = g.id"
                     :class="[
-                        'px-3 py-1.5 rounded-full text-[11px] font-bold border transition',
-                        selectedSpecId === s.id
+                        'px-3 py-1.5 rounded-full font-headline text-[11px] font-bold uppercase tracking-widest border flex items-center gap-1.5 transition',
+                        groupBy === g.id
                             ? 'border-cyan-400/60 bg-cyan-500/10 text-cyan-100'
                             : 'border-white/5 text-on-surface-variant/60 hover:text-white'
                     ]"
                 >
-                    {{ s.name }}
+                    <span class="material-symbols-outlined text-base">{{ g.icon }}</span>
+                    {{ __(g.label) }}
                 </button>
             </div>
 
             <!-- Last update -->
-            <div v-if="lastImportedAt" class="flex items-center gap-2 text-on-surface-variant text-[11px]">
+            <div v-if="lastImportedAt" class="ml-auto flex items-center gap-2 text-on-surface-variant text-[11px]">
                 <span class="material-symbols-outlined text-base">schedule</span>
                 <span>{{ formatDate(lastImportedAt) }}</span>
             </div>
         </div>
 
-        <!-- Empty state if no wishlist for filter -->
-        <div v-if="!activeWishlists.length" class="bg-surface-container-low border border-white/5 rounded-xl p-12">
+        <!-- Empty state when current character has no wishlists at all yet.
+             Wording flips for healer specs: Raidbots doesn't sim healer
+             throughput, but QE Live does — so we point them there instead. -->
+        <div v-if="!hasAnyWishlist" class="bg-surface-container-low border border-white/5 rounded-xl p-12 text-center">
+            <EmptyState
+                icon="list_alt"
+                :title="__('No wishlist for :name', { name: importTargetLabel })"
+                :description="isHealer
+                    ? __('Run an Upgrade Report on questionablyepic.com/live for this character, then paste the report URL to import.')
+                    : __('Run a Droptimizer on raidbots.com for this character, then paste the report URL to import.')"
+            />
+            <button
+                v-if="currentCharacter?.character.is_own"
+                type="button"
+                @click="emit('open-import')"
+                class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-100 font-headline text-xs font-bold uppercase tracking-widest hover:bg-cyan-500/20 transition"
+            >
+                <span class="material-symbols-outlined text-base">add_link</span>
+                {{ __('Import for :name', { name: importTargetLabel }) }}
+            </button>
+        </div>
+
+        <!-- Empty state when wishlists exist but none match the chosen filter -->
+        <div v-else-if="!activeWishlists.length" class="bg-surface-container-low border border-white/5 rounded-xl p-12">
             <EmptyState
                 icon="filter_alt_off"
                 :title="__('No data for this filter')"
@@ -248,27 +360,29 @@ const deleteWishlist = (wishlistId) => {
             />
         </div>
 
-        <!-- Slot-grouped grid -->
+        <!-- Grouped sections — header label/icon depends on the active group-by mode -->
         <div v-else class="space-y-4">
             <section
-                v-for="slot in renderedSlots"
-                :key="slot"
+                v-for="bucket in activeGrouping"
+                :key="bucket.key"
                 class="bg-surface-container-low/60 border border-white/5 rounded-xl px-5 py-4"
             >
                 <header class="flex items-baseline justify-between mb-3 pb-2 border-b border-white/5">
                     <h3 class="font-headline text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                        {{ slotLabel(slot) }}
+                        <span :class="['material-symbols-outlined text-base', bucket.accent]">{{ bucket.icon }}</span>
+                        {{ bucket.label }}
                         <span class="text-[10px] text-on-surface-variant font-normal normal-case tracking-normal">
-                            ({{ itemsBySlot[slot].length }})
+                            ({{ bucket.items.length }})
                         </span>
                     </h3>
                 </header>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                     <WishlistItemCard
-                        v-for="item in itemsBySlot[slot]"
+                        v-for="item in bucket.items"
                         :key="`${item.item_id}-${item.value}`"
                         :item="item"
                         :difficulty-letter="difficultyShort"
+                        @open-claimants="openClaimants"
                     />
                 </div>
             </section>
@@ -289,4 +403,12 @@ const deleteWishlist = (wishlistId) => {
             </button>
         </div>
     </div>
+
+    <!-- Claimants modal — opens from any item card; shows everyone in the
+         static who has this item in their wishlist for the current bucket. -->
+    <WishlistClaimantsModal
+        :show="showClaimantsModal"
+        :item="claimantsItem"
+        @close="closeClaimants"
+    />
 </template>

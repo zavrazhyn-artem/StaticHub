@@ -4,10 +4,13 @@ import { useTranslation } from '@/composables/useTranslation';
 import EmptyState from '@/Components/UI/EmptyState.vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
 import GearGrid from './GearGrid.vue';
+import SlotItemPicker from './SlotItemPicker.vue';
 
 const { __ } = useTranslation();
 
 const props = defineProps({
+    characterId: { type: [Number, String, null], default: null },
+    specId: { type: [Number, String, null], default: null },
     context: { type: Array, required: true },
     enchantableSlots: { type: Array, default: () => [] },
     csrfToken: { type: String, required: true },
@@ -16,57 +19,22 @@ const props = defineProps({
     gearListStoreUrl: { type: String, required: true },
     gearListDestroyUrlTemplate: { type: String, required: true },
     gearListSetSlotUrlTemplate: { type: String, required: true },
+    gearListPickerUrlTemplate: { type: String, required: true },
+    gearListExportSimcUrlTemplate: { type: String, required: true },
     gearListImportSimcUrlTemplate: { type: String, required: true },
     gearBisImportUrl: { type: String, required: true },
 });
 
+const emit = defineEmits(['update:characterId', 'update:specId']);
+
 // ---------------------------------------------------------------------------
-// Active context (character + spec) — persisted to localStorage
+// Active context — character + spec both owned by the parent so they stay in
+// sync between Gear and Wishlist tabs. Persistence handled at parent level.
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = 'blastr.gear.context.v1';
-
-const selectedCharacterId = ref(null);
-const selectedSpecId = ref(null);
-
-const restoreFromStorage = () => {
-    try {
-        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-        if (stored?.charId && props.context.find(c => c.id === stored.charId)) {
-            selectedCharacterId.value = stored.charId;
-            const char = props.context.find(c => c.id === stored.charId);
-            if (stored.specId && char.specs.find(s => s.id === stored.specId)) {
-                selectedSpecId.value = stored.specId;
-            }
-        }
-    } catch (e) { /* ignore */ }
-};
-
-const persist = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        charId: selectedCharacterId.value,
-        specId: selectedSpecId.value,
-    }));
-};
-
-const ownChars = computed(() => props.context.filter(c => c.is_own));
 const allChars = computed(() => props.context);
-
-const currentCharacter = computed(() => allChars.value.find(c => c.id === selectedCharacterId.value) ?? null);
-
+const currentCharacter = computed(() => allChars.value.find(c => c.id === props.characterId) ?? null);
 const availableSpecs = computed(() => currentCharacter.value?.specs ?? []);
-
-watch(selectedCharacterId, (id) => {
-    persist();
-    const char = allChars.value.find(c => c.id === id);
-    if (!char) { selectedSpecId.value = null; return; }
-    if (!char.specs.find(s => s.id === selectedSpecId.value)) {
-        const main = char.specs.find(s => s.is_main) || char.specs[0];
-        selectedSpecId.value = main?.id ?? null;
-    }
-});
-
-watch(selectedSpecId, () => persist());
 
 // ---------------------------------------------------------------------------
 // Lists
@@ -79,7 +47,7 @@ const activeList = ref(null);
 const loadingActive = ref(false);
 
 const fetchSummaries = async () => {
-    if (!selectedCharacterId.value || !selectedSpecId.value) {
+    if (!props.characterId || !props.specId) {
         listSummaries.value = [];
         activeListId.value = null;
         activeList.value = null;
@@ -87,7 +55,7 @@ const fetchSummaries = async () => {
     }
     loadingSummaries.value = true;
     try {
-        const url = `${props.listSummariesUrl}?character_id=${selectedCharacterId.value}&spec_id=${selectedSpecId.value}`;
+        const url = `${props.listSummariesUrl}?character_id=${props.characterId}&spec_id=${props.specId}`;
         const resp = await fetch(url, { headers: { Accept: 'application/json' } });
         const data = await resp.json();
         listSummaries.value = data.lists ?? [];
@@ -116,7 +84,7 @@ const fetchActiveList = async () => {
     }
 };
 
-watch([selectedCharacterId, selectedSpecId], () => fetchSummaries());
+watch(() => [props.characterId, props.specId], () => fetchSummaries(), { immediate: true });
 watch(activeListId, () => fetchActiveList());
 
 // ---------------------------------------------------------------------------
@@ -126,9 +94,13 @@ watch(activeListId, () => fetchActiveList());
 const showNewListModal = ref(false);
 const showImportBisModal = ref(false);
 const showImportSimcModal = ref(false);
+const showExportSimcModal = ref(false);
 const newListName = ref('');
 const bisUrl = ref('');
 const simcText = ref('');
+const exportText = ref('');
+const exportLoading = ref(false);
+const exportCopied = ref(false);
 
 const customCount = computed(() => listSummaries.value.filter(l => l.type === 'custom').length);
 
@@ -156,8 +128,8 @@ const submitFormDelete = (action) => {
 const createList = () => {
     if (!newListName.value.trim()) return;
     submitFormPost(props.gearListStoreUrl, {
-        character_id: selectedCharacterId.value,
-        spec_id: selectedSpecId.value,
+        character_id: props.characterId,
+        spec_id: props.specId,
         name: newListName.value.trim(),
     });
 };
@@ -165,8 +137,8 @@ const createList = () => {
 const importBis = () => {
     if (!bisUrl.value.trim()) return;
     submitFormPost(props.gearBisImportUrl, {
-        character_id: selectedCharacterId.value,
-        spec_id: selectedSpecId.value,
+        character_id: props.characterId,
+        spec_id: props.specId,
         url: bisUrl.value.trim(),
     });
 };
@@ -177,37 +149,95 @@ const importSimc = () => {
     submitFormPost(url, { simc: simcText.value });
 };
 
+const openExportSimc = async () => {
+    if (!activeListId.value) return;
+    exportText.value = '';
+    exportCopied.value = false;
+    exportLoading.value = true;
+    showExportSimcModal.value = true;
+    try {
+        const url = props.gearListExportSimcUrlTemplate.replace('__ID__', activeListId.value);
+        const resp = await fetch(url, { headers: { Accept: 'application/json' } });
+        const data = await resp.json();
+        exportText.value = data.simc ?? '';
+    } catch (e) {
+        exportText.value = '# Failed to load: ' + (e?.message ?? e);
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+const copyExportSimc = async () => {
+    if (!exportText.value) return;
+    try {
+        await navigator.clipboard.writeText(exportText.value);
+        exportCopied.value = true;
+        setTimeout(() => { exportCopied.value = false; }, 2000);
+    } catch {
+        // Clipboard API may be blocked (insecure context); manual select fallback.
+        const ta = document.querySelector('#simc-export-textarea');
+        ta?.select();
+        document.execCommand?.('copy');
+        exportCopied.value = true;
+        setTimeout(() => { exportCopied.value = false; }, 2000);
+    }
+};
+
 const deleteList = (listId) => {
     if (!confirm(__('Delete this list?'))) return;
     submitFormDelete(props.gearListDestroyUrlTemplate.replace('__ID__', listId));
 };
 
-const clearSlot = (slot) => {
+const clearSlot = async (slot) => {
     if (!activeListId.value) return;
     if (!confirm(__('Clear this slot?'))) return;
     const url = props.gearListSetSlotUrlTemplate.replace('__ID__', activeListId.value);
-    submitFormPost(url, { _method: 'PATCH', slot, item_id: '' });
+    try {
+        const resp = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': props.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ slot, item_id: null }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.success === false) {
+            alert(data.error || __('Failed to clear slot'));
+            return;
+        }
+        if (data.list) activeList.value = data.list;
+    } catch (e) {
+        alert(String(e.message || e));
+    }
 };
 
-const editSlot = () => {
-    alert(__('Slot editing UI coming with the season seed pipeline. For now, fill custom lists via the Import simc paste.'));
+const pickerSlot = ref(null);
+const showPickerModal = computed(() => pickerSlot.value !== null);
+
+const editSlot = (slot) => {
+    if (!activeListId.value) return;
+    pickerSlot.value = slot;
+};
+const closePicker = () => { pickerSlot.value = null; };
+
+// Picker emits the refreshed list payload so we update in-place — no page reload.
+const onPicked = (updatedList) => {
+    if (updatedList) {
+        activeList.value = updatedList;
+        // The list-summaries sidebar also shows item_count; if it changed,
+        // refresh that too. Cheap GET.
+        fetchSummaries();
+    } else {
+        fetchActiveList();
+    }
 };
 
 const isOwnContext = computed(() => currentCharacter.value?.is_own ?? false);
 
-// Boot
-onMounted(() => {
-    restoreFromStorage();
-    if (!selectedCharacterId.value) {
-        const first = ownChars.value[0] || allChars.value[0];
-        if (first) {
-            selectedCharacterId.value = first.id;
-            const main = first.specs.find(s => s.is_main) || first.specs[0];
-            selectedSpecId.value = main?.id ?? null;
-        }
-    }
-    fetchSummaries();
-});
+// Initial fetch happens via the immediate watch on [characterId, specId].
 
 // Helpers for sidebar
 const sourceBadge = (source) => ({
@@ -240,40 +270,8 @@ const typeColor = (type) => ({
     </div>
 
     <div v-else class="space-y-5">
-        <!-- Context selector -->
-        <div class="bg-surface-container-low border border-white/5 rounded-xl p-4 flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">{{ __('Character') }}</span>
-                <select
-                    v-model="selectedCharacterId"
-                    class="bg-surface-container border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-400 max-w-[220px]"
-                >
-                    <option v-for="c in allChars" :key="c.id" :value="c.id">
-                        {{ c.name }} {{ c.is_own ? '★' : '' }}
-                    </option>
-                </select>
-            </div>
-
-            <div v-if="availableSpecs.length" class="flex items-center gap-1">
-                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest mr-1">{{ __('Spec') }}</span>
-                <button
-                    v-for="s in availableSpecs"
-                    :key="s.id"
-                    type="button"
-                    @click="selectedSpecId = s.id"
-                    :class="[
-                        'px-3 py-1.5 rounded-full text-[11px] font-bold border transition',
-                        selectedSpecId === s.id
-                            ? 'border-cyan-400/60 bg-cyan-500/10 text-cyan-100'
-                            : 'border-white/5 text-on-surface-variant/60 hover:text-white'
-                    ]"
-                >
-                    {{ s.name }}
-                    <span v-if="s.is_main" class="ml-1 text-[9px] opacity-60">main</span>
-                </button>
-            </div>
-
-            <div v-if="isOwnContext" class="ml-auto flex items-center gap-2">
+        <!-- Action bar (character + spec are picked at the top level) -->
+        <div v-if="isOwnContext" class="bg-surface-container-low border border-white/5 rounded-xl p-4 flex flex-wrap items-center justify-end gap-2">
                 <button
                     type="button"
                     @click="bisUrl = ''; showImportBisModal = true"
@@ -292,7 +290,6 @@ const typeColor = (type) => ({
                     <span class="material-symbols-outlined text-base">add</span>
                     {{ __('New List') }} ({{ customCount }}/10)
                 </button>
-            </div>
         </div>
 
         <!-- Sidebar + active list -->
@@ -359,24 +356,38 @@ const typeColor = (type) => ({
                                 {{ __('Synced') }}: {{ new Date(activeList.imported_at).toLocaleString() }}
                             </div>
                         </div>
-                        <button
-                            v-if="isOwnContext && activeList.editable"
-                            type="button"
-                            @click="simcText = ''; showImportSimcModal = true"
-                            class="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-100 font-headline text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-cyan-500/20 transition"
-                        >
-                            <span class="material-symbols-outlined text-base">content_paste</span>
-                            {{ __('Fill from /simc') }}
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button
+                                v-if="isOwnContext"
+                                type="button"
+                                @click="openExportSimc"
+                                class="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-400/40 text-emerald-100 font-headline text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-emerald-500/20 transition"
+                                :title="__('Copy a SimC string for this list — paste into Raidbots')"
+                            >
+                                <span class="material-symbols-outlined text-base">ios_share</span>
+                                {{ __('Export /simc') }}
+                            </button>
+                            <button
+                                v-if="isOwnContext && activeList.editable"
+                                type="button"
+                                @click="simcText = ''; showImportSimcModal = true"
+                                class="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-100 font-headline text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-cyan-500/20 transition"
+                            >
+                                <span class="material-symbols-outlined text-base">content_paste</span>
+                                {{ __('Fill from /simc') }}
+                            </button>
+                        </div>
                     </header>
 
                     <GearGrid
                         :slots="activeList.slots"
                         :stats="activeList.stats"
-                        :stats-placeholder="activeList.type === 'current' ? __('Sync your character to populate stats.') : __('Stats are only available for the Current Equipment list.')"
+                        :stats-placeholder="activeList.type === 'current' ? __('Sync your character to populate stats.') : __('Pick items via the slot picker to see set totals.')"
                         :enchantable-slots="enchantableSlots"
                         :audit="activeList.type === 'current'"
                         :editable="isOwnContext && activeList.editable"
+                        :class-id="activeList.class_id"
+                        :spec-id="activeList.spec_id"
                         @edit="editSlot"
                         @clear="clearSlot"
                     />
@@ -475,4 +486,65 @@ const typeColor = (type) => ({
             </div>
         </form>
     </GlassModal>
+
+    <!-- Export SimC modal — read-only paste-and-copy textarea for Raidbots -->
+    <GlassModal :show="showExportSimcModal" @close="showExportSimcModal = false" max-width="max-w-2xl">
+        <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-300 text-base">ios_share</span>
+                {{ __('Export /simc') }}
+            </h3>
+            <button type="button" @click="showExportSimcModal = false" class="text-on-surface-variant hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </header>
+        <div class="p-6 space-y-4">
+            <p class="text-[11px] text-on-surface-variant/80">
+                {{ __('Copy this and paste it into:') }}
+                <a href="https://www.raidbots.com/simbot/topgear" target="_blank" rel="noopener" class="text-cyan-300 hover:text-cyan-200 underline">raidbots.com</a>
+                {{ __('(DPS / Tank — Top Gear / Droptimizer)') }}
+                {{ __('or') }}
+                <a href="https://questionablyepic.com/live" target="_blank" rel="noopener" class="text-cyan-300 hover:text-cyan-200 underline">questionablyepic.com/live</a>
+                {{ __('(Healers — Top Gear / Upgrade Finder).') }}
+            </p>
+            <div v-if="exportLoading" class="text-center py-8 text-on-surface-variant">
+                <span class="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
+            </div>
+            <textarea
+                v-else
+                id="simc-export-textarea"
+                :value="exportText"
+                readonly
+                rows="14"
+                class="w-full px-4 py-2.5 bg-surface-container border border-white/10 rounded-lg text-white text-xs font-mono focus:outline-none focus:border-cyan-400 resize-y"
+                @click="$event.target.select()"
+            ></textarea>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="showExportSimcModal = false" class="px-4 py-2 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold uppercase tracking-widest hover:bg-white/5">
+                    {{ __('Close') }}
+                </button>
+                <button
+                    type="button"
+                    @click="copyExportSimc"
+                    :disabled="!exportText || exportLoading"
+                    class="px-5 py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/30 disabled:opacity-50 flex items-center gap-1.5 transition"
+                >
+                    <span class="material-symbols-outlined text-base">{{ exportCopied ? 'check' : 'content_copy' }}</span>
+                    {{ exportCopied ? __('Copied!') : __('Copy') }}
+                </button>
+            </div>
+        </div>
+    </GlassModal>
+
+    <!-- Slot picker — opens when the user clicks an editable slot in GearGrid -->
+    <SlotItemPicker
+        :show="showPickerModal"
+        :list-id="activeListId"
+        :slot="pickerSlot ?? ''"
+        :picker-url-template="gearListPickerUrlTemplate"
+        :set-slot-url-template="gearListSetSlotUrlTemplate"
+        :csrf-token="csrfToken"
+        @close="closePicker"
+        @picked="onPicked"
+    />
 </template>

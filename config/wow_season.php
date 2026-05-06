@@ -635,14 +635,14 @@ return [
     |--------------------------------------------------------------------------
     | Wishlist sources to exclude from the Gear / Wishlist tab
     |--------------------------------------------------------------------------
-    | Raidbots emits separate "instance" IDs for Catalyst (tier conversion)
-    | items even though they're already covered by the underlying raid drop.
-    | List those instance raid_slugs here to hide their duplicate-with-lower-
-    | accuracy entries from the wishlist table.
+    | Reserved for future use. Earlier Midnight S1 entry "instance-1314" was
+    | removed once the seeded items table proved that 1314 = The Dreamrift
+    | (a real raid), not Catalyst — Catalyst items live under their own
+    | source_type=catalyst with non-overlapping item ids. Cross-raid
+    | duplicate entries from Raidbots (same item id in two raid simulations)
+    | are collapsed at render-time by WishlistPanel's dedup-by-item_id.
     */
-    'wishlist_excluded_raid_slugs' => [
-        'instance-1314', // Matrix Catalyst — Midnight Season 1
-    ],
+    'wishlist_excluded_raid_slugs' => [],
 
     'crafted_ilvl_tiers' => [
         ['min' => 275, 'max' => 285, 'color' => 'text-orange-400'],

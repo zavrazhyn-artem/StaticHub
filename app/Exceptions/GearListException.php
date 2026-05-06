@@ -37,4 +37,19 @@ class GearListException extends Exception
     {
         return new self("Specialization #{$specId} does not belong to {$className}.");
     }
+
+    public static function unknownTrack(string $track): self
+    {
+        return new self("Unknown upgrade track '{$track}'.");
+    }
+
+    public static function trackLevelOutOfRange(string $track, int $level): self
+    {
+        return new self("Level {$level} is not valid for track '{$track}'.");
+    }
+
+    public static function itemNotInSeasonCatalog(int $itemId): self
+    {
+        return new self("Item #{$itemId} is not in the season catalog.");
+    }
 }

@@ -10,6 +10,8 @@
         :gear-list-destroy-url-template="'{{ url('/gear/lists') }}/__ID__'"
         :gear-list-rename-url-template="'{{ url('/gear/lists') }}/__ID__'"
         :gear-list-set-slot-url-template="'{{ url('/gear/lists') }}/__ID__/slot'"
+        :gear-list-picker-url-template="'{{ url('/gear/lists') }}/__ID__/picker'"
+        :gear-list-export-simc-url-template="'{{ url('/gear/lists') }}/__ID__/export-simc'"
         :gear-list-import-simc-url-template="'{{ url('/gear/lists') }}/__ID__/simc'"
         gear-bis-import-url="{{ route('statics.gear.lists.import-bis') }}"
         list-summaries-url="{{ route('statics.gear.lists.summaries') }}"

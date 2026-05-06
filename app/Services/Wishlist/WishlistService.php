@@ -26,6 +26,7 @@ final class WishlistService
 {
     public function __construct(
         private readonly RaidbotsImportService $raidbots,
+        private readonly QELiveImportService $qeLive,
     ) {}
 
     /**
@@ -37,8 +38,9 @@ final class WishlistService
      */
     public function importFromUrl(User $user, string $url): Collection
     {
-        $dto = match (true) {
-            $this->raidbots->isOwnUrl($url) => $this->raidbots->importFromUrl($url),
+        [$dto, $source] = match (true) {
+            $this->raidbots->isOwnUrl($url) => [$this->raidbots->importFromUrl($url), Wishlist::SOURCE_RAIDBOTS],
+            $this->qeLive->isOwnUrl($url)   => [$this->qeLive->importFromUrl($url), Wishlist::SOURCE_QE_LIVE],
             default => throw WishlistImportException::unsupportedSource($url),
         };
 
@@ -65,7 +67,7 @@ final class WishlistService
                 $spec,
                 $sim['raid_slug'],
                 $sim['difficulty'],
-                Wishlist::SOURCE_RAIDBOTS,
+                $source,
                 $dto['source_url'],
                 $dto['source_report_id'],
                 null, // raw_payload kept off in Phase 0 — column reserved for future debug flag
@@ -124,6 +126,70 @@ final class WishlistService
         }
 
         return $spec;
+    }
+
+    /**
+     * For each (raid_slug, difficulty, item_id) tuple in the static, build
+     * the list of claimants — characters who have that exact item in their
+     * wishlist for the same raid/difficulty bucket. Powers the loot-council
+     * modal: counter on the card, full breakdown on click.
+     *
+     * Each claimant carries:
+     *  - role           : 'main' | 'alt' (character_static.role pivot)
+     *  - is_main_spec   : true if the wishlist's spec is this character's
+     *                     main spec in the static — false means it's an
+     *                     off-spec wishlist (e.g. Disc on a Holy main)
+     *  - is_bis         : the wishlist's own status is "best" for this slot
+     *  - value/percent  : sim'd upgrade gain in that wishlist
+     *
+     * Two queries: one for the static-role pivot, one for the main-spec
+     * pivot. Lookup map → no N+1 in the per-item loop.
+     *
+     * @return array<string, list<array<string, mixed>>>
+     */
+    private function buildClaimantsLookup(Collection $wishlists, int $staticId): array
+    {
+        if ($wishlists->isEmpty()) {
+            return [];
+        }
+
+        $charIds = $wishlists->pluck('character_id')->unique()->values()->all();
+
+        $charRoles = DB::table('character_static')
+            ->whereIn('character_id', $charIds)
+            ->where('static_id', $staticId)
+            ->pluck('role', 'character_id')
+            ->all();
+
+        $mainSpecByChar = DB::table('character_static_specs')
+            ->whereIn('character_id', $charIds)
+            ->where('static_id', $staticId)
+            ->where('is_main', true)
+            ->pluck('spec_id', 'character_id')
+            ->all();
+
+        $lookup = [];
+        foreach ($wishlists as $w) {
+            foreach ($w->items as $i) {
+                $key = "{$w->raid_slug}|{$w->difficulty}|{$i->item_id}";
+                $lookup[$key] ??= [];
+                $lookup[$key][] = [
+                    'character_id'   => $w->character_id,
+                    'character_name' => $w->character->name,
+                    'playable_class' => $w->character->playable_class,
+                    'avatar_url'     => $w->character->avatar_url,
+                    'role'           => $charRoles[$w->character_id] ?? 'alt',
+                    'spec_id'        => $w->spec_id,
+                    'spec_name'      => $w->specialization?->name,
+                    'is_main_spec'   => isset($mainSpecByChar[$w->character_id])
+                        && (int) $mainSpecByChar[$w->character_id] === (int) $w->spec_id,
+                    'is_bis'         => $i->status === WishlistItem::STATUS_BIS,
+                    'value'          => (int) $i->value,
+                    'percent'        => (float) $i->percent,
+                ];
+            }
+        }
+        return $lookup;
     }
 
     /**
@@ -371,8 +437,12 @@ final class WishlistService
     {
         $excluded = (array) config('wow_season.wishlist_excluded_raid_slugs', []);
 
+        // raidsOnly() is the product rule — wishlist excludes M+/Catalyst/etc
+        // even if older imports populated those buckets. Defensive on top of
+        // the import-time filters so legacy DB rows don't surface.
         $wishlists = Wishlist::query()
             ->forStatic($staticId)
+            ->raidsOnly()
             ->when(! empty($excluded), fn ($q) => $q->whereNotIn('raid_slug', $excluded))
             ->withDisplayRelations()
             ->orderBy('character_id')
@@ -383,6 +453,23 @@ final class WishlistService
         // Pre-load "listed in" lookup: for each (char_id, spec_id) build a map
         // item_id => array of gear list names. Avoids N+1 queries in the loop.
         $listedIn = $this->buildListedInLookup($wishlists);
+
+        // Pre-load boss + encounter metadata for every referenced item id —
+        // wishlist UI groups by boss, and each item card shows the boss name
+        // alongside the source raid. Single query, keyed for O(1) lookup.
+        $itemIds = $wishlists->flatMap(fn ($w) => $w->items->pluck('item_id'))->unique()->values()->all();
+        $bossByItemId = empty($itemIds)
+            ? []
+            : \App\Models\SeasonItem::query()
+                ->whereIn('id', $itemIds)
+                ->get(['id', 'boss_name', 'encounter_id', 'inventory_type'])
+                ->keyBy('id');
+
+        // Pre-build the claimants lookup so the per-item loop can attach
+        // {character, role, spec, is_bis, value} entries without N+1 queries.
+        // Keyed by (raid_slug, difficulty, item_id) — each card is for that
+        // exact tuple, so claimants for one tuple don't bleed into another.
+        $claimantsByItem = $this->buildClaimantsLookup($wishlists, $staticId);
 
         $grouped = [];
         foreach ($wishlists as $w) {
@@ -409,20 +496,27 @@ final class WishlistService
                 'source_url'      => $w->source_url,
                 'generated_at'    => $w->generated_at?->toIso8601String(),
                 'imported_at'     => $w->imported_at->toIso8601String(),
-                'items'           => $w->items->map(function (WishlistItem $i) use ($w, $listedIn) {
+                'items'           => $w->items->map(function (WishlistItem $i) use ($w, $listedIn, $bossByItemId, $claimantsByItem) {
                     $key = $w->character_id . ':' . $w->spec_id;
+                    $catalog = $bossByItemId[$i->item_id] ?? null;
+                    $claimants = $claimantsByItem["{$w->raid_slug}|{$w->difficulty}|{$i->item_id}"] ?? [];
                     return [
-                        'item_id'    => $i->item_id,
-                        'item_name'  => $i->item->name,
-                        'item_icon'  => $i->item->icon,
-                        'item_slot'  => $i->item->slot,
-                        'item_level' => $i->item_level,
-                        'enchant_id' => $i->enchant_id,
-                        'value'      => $i->value,
-                        'percent'    => $i->percent,
-                        'status'     => $i->status,
-                        'comment'    => $i->comment,
-                        'listed_in'  => $listedIn[$key][$i->item_id] ?? [],
+                        'item_id'         => $i->item_id,
+                        'item_name'       => $i->item->name,
+                        'item_icon'       => $i->item->icon,
+                        'item_slot'       => $i->item->slot,
+                        'item_level'      => $i->item_level,
+                        'enchant_id'      => $i->enchant_id,
+                        'value'           => $i->value,
+                        'percent'         => $i->percent,
+                        'status'          => $i->status,
+                        'comment'         => $i->comment,
+                        'listed_in'       => $listedIn[$key][$i->item_id] ?? [],
+                        'boss_name'       => $catalog?->boss_name,
+                        'encounter_id'    => $catalog?->encounter_id,
+                        'claimants'       => $claimants,
+                        'claimant_count'  => count($claimants),
+                        'bis_count'       => count(array_filter($claimants, fn ($c) => $c['is_bis'] ?? false)),
                     ];
                 })->values()->all(),
             ];

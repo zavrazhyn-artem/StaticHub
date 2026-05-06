@@ -15,6 +15,8 @@ use App\Models\GearList;
 use App\Models\StaticGroup;
 use App\Services\Gear\GearListService;
 use App\Services\Gear\GearViewService;
+use App\Services\Gear\SimcExportService;
+use App\Services\Gear\SlotItemPickerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +27,43 @@ class GearListController extends Controller
     public function __construct(
         private readonly GearListService $service,
         private readonly GearViewService $viewService,
+        private readonly SlotItemPickerService $picker,
+        private readonly SimcExportService $simcExport,
     ) {}
+
+    /**
+     * Returns a Raidbots-ready SimulationCraft string for the list. Owner check
+     * mirrors the picker endpoint — only the user who owns the underlying
+     * character can pull the export.
+     */
+    public function exportSimc(StaticGroup $static, GearList $list, Request $request): JsonResponse
+    {
+        if ($list->character?->user_id !== $request->user()?->id) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        return response()->json(['simc' => $this->simcExport->export($list)]);
+    }
+
+    /**
+     * Returns the season-catalog items eligible for the (list, slot) pair —
+     * filtered by character class + spec role, sorted by name — together with
+     * the upgrade-track dropdown options the modal needs to render.
+     */
+    public function pickerOptions(StaticGroup $static, GearList $list, Request $request): JsonResponse
+    {
+        $slot = (string) $request->query('slot');
+        if ($slot === '') {
+            return response()->json(['error' => 'slot is required'], 422);
+        }
+
+        // Authorization: must own the character backing this list.
+        if ($list->character?->user_id !== $request->user()?->id) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        return response()->json($this->picker->buildPayload($list, $slot));
+    }
 
     public function summaries(StaticGroup $static, Request $request): JsonResponse
     {
@@ -33,6 +71,17 @@ class GearListController extends Controller
         $specId = (int) $request->query('spec_id');
         if ($characterId <= 0 || $specId <= 0) {
             return response()->json(['lists' => []]);
+        }
+
+        // Auto-create the Current + empty BiS singletons if missing so a
+        // freshly added character's Gear tab isn't blank — the user expects
+        // to see the two slots ready immediately on character switch.
+        // Silently skip on ownership/spec errors — non-own characters still
+        // return their existing summaries below.
+        try {
+            $this->service->ensureInitialLists($request->user(), $characterId, $specId);
+        } catch (GearListException $e) {
+            // not the user's own character — fall through to read-only summaries
         }
 
         return response()->json([
@@ -90,23 +139,58 @@ class GearListController extends Controller
         return back()->with('success', 'List deleted.');
     }
 
-    public function setSlot(StaticGroup $static, GearList $list, SetSlotRequest $request): RedirectResponse
+    public function setSlot(StaticGroup $static, GearList $list, SetSlotRequest $request): RedirectResponse|JsonResponse
     {
+        $itemLevel = $request->filled('item_level') ? (int) $request->validated('item_level') : null;
+        $bonusIds  = $request->validated('bonus_ids');
+
+        // If the picker submitted track+level, resolve to bonus_id + ilvl
+        // server-side so the upgrade-track config stays out of the client.
+        if ($request->filled('track') && $request->filled('level')) {
+            try {
+                [$bonusId, $ilvl] = $this->picker->resolveTrackLevel(
+                    (string) $request->validated('track'),
+                    (int) $request->validated('level'),
+                );
+                $bonusIds  = [$bonusId];
+                $itemLevel = $ilvl;
+            } catch (GearListException $e) {
+                return $this->slotErrorResponse($request, $e->getMessage());
+            }
+        }
+
         try {
             $this->service->setSlot(
                 $request->user(),
                 $list->id,
                 (string) $request->validated('slot'),
                 $request->filled('item_id') ? (int) $request->validated('item_id') : null,
-                $request->filled('item_level') ? (int) $request->validated('item_level') : null,
+                $itemLevel,
                 $request->filled('enchant_id') ? (int) $request->validated('enchant_id') : null,
-                $request->validated('bonus_ids'),
+                $bonusIds,
             );
         } catch (GearListException $e) {
-            return back()->withErrors(['slot' => $e->getMessage()]);
+            return $this->slotErrorResponse($request, $e->getMessage());
+        }
+
+        // AJAX callers (slot picker, clear-slot button) get the refreshed list
+        // payload back so the UI can re-render without a navigation.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'list'    => $this->viewService->activeList($list->id),
+            ]);
         }
 
         return back()->with('success', 'Slot updated.');
+    }
+
+    private function slotErrorResponse(\Illuminate\Http\Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        if ($request->wantsJson()) {
+            return response()->json(['success' => false, 'error' => $message], 422);
+        }
+        return back()->withErrors(['slot' => $message]);
     }
 
     public function importBis(StaticGroup $static, ImportBisRequest $request): RedirectResponse

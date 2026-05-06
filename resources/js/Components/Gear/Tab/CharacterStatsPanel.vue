@@ -10,6 +10,11 @@ const fmt = (v) => Number(v ?? 0).toLocaleString();
 const fmtPercent = (v) => `${Number(v ?? 0).toFixed(2)}%`;
 
 const hasStats = computed(() => !!props.stats);
+
+// Set-total mode (BiS / Custom lists): values are summed raw stat budget
+// points scaled by ilvl, not actual rating percentages — render as integers.
+const isSetTotal = computed(() => !!props.stats?.is_set_total);
+const fmtEnhancement = (v) => isSetTotal.value ? fmt(v) : fmtPercent(v);
 </script>
 
 <template>
@@ -52,7 +57,7 @@ const hasStats = computed(() => !!props.stats);
                         class="flex items-center justify-between text-[12px]"
                     >
                         <span class="text-on-surface-variant font-medium">{{ e.label }}</span>
-                        <span class="font-mono tabular-nums text-white">{{ fmtPercent(e.value) }}</span>
+                        <span class="font-mono tabular-nums text-white">{{ fmtEnhancement(e.value) }}</span>
                     </li>
                 </ul>
             </section>

@@ -9,6 +9,10 @@ const props = defineProps({
     enchantableSlots: { type: Array, default: () => [] },
     audit: { type: Boolean, default: false },
     editable: { type: Boolean, default: false },
+    // Forwarded to GearSlotCard so wowhead tooltips resolve hybrid stats
+    // and tier-set bonuses against the character's actual class+spec.
+    classId: { type: [Number, null], default: null },
+    specId: { type: [Number, null], default: null },
 });
 
 const emit = defineEmits(['edit', 'clear']);
@@ -32,6 +36,8 @@ const BOTTOM_ROW = ['main_hand', 'off_hand'];
                     :enchantable-slots="enchantableSlots"
                     :audit="audit"
                     :editable="editable"
+                    :class-id="classId"
+                    :spec-id="specId"
                     @edit="emit('edit', slot)"
                     @clear="emit('clear', slot)"
                 />
@@ -54,6 +60,8 @@ const BOTTOM_ROW = ['main_hand', 'off_hand'];
                 :enchantable-slots="enchantableSlots"
                 :audit="audit"
                 :editable="editable"
+                :class-id="classId"
+                :spec-id="specId"
                 mirror
                 @edit="emit('edit', slot)"
                 @clear="emit('clear', slot)"
@@ -71,6 +79,8 @@ const BOTTOM_ROW = ['main_hand', 'off_hand'];
                     :enchantable-slots="enchantableSlots"
                     :audit="audit"
                     :editable="editable"
+                    :class-id="classId"
+                    :spec-id="specId"
                     @edit="emit('edit', slot)"
                     @clear="emit('clear', slot)"
                 />

@@ -52,7 +52,13 @@ const toggle = () => {
 };
 
 const select = (member) => {
-    emit('update:modelValue', String(member.id));
+    // Emit member.id in its original type — string-casting here would silently
+    // change v-model type from Number → String for callers that pass numeric
+    // IDs, breaking strict equality comparisons in their reactive code.
+    // Internal comparisons in this component already coerce via String(), and
+    // the optional hidden form input stringifies via HTML serialization, so
+    // form-based callers (Treasury) are unaffected.
+    emit('update:modelValue', member.id);
     open.value = false;
 };
 
@@ -87,7 +93,7 @@ defineExpose({ close });
                           :style="{ color: getClassColor(selectedMember.character?.playable_class) }">
                         {{ selectedMember.character?.name || selectedMember.name }}
                     </span>
-                    <span v-if="selectedMember.character" class="text-4xs text-gray-400 font-semibold truncate">
+                    <span v-if="selectedMember.character && selectedMember.name && selectedMember.name !== selectedMember.character.name" class="text-4xs text-gray-400 font-semibold truncate">
                         ({{ selectedMember.name }})
                     </span>
                 </div>
@@ -154,7 +160,7 @@ defineExpose({ close });
                                  :style="{ color: getClassColor(member.character?.playable_class) }">
                                 {{ member.character?.name || member.name }}
                             </div>
-                            <div v-if="member.character" class="text-4xs text-gray-400 font-semibold uppercase tracking-wider truncate">
+                            <div v-if="member.character && member.name && member.name !== member.character.name" class="text-4xs text-gray-400 font-semibold uppercase tracking-wider truncate">
                                 {{ member.name }}
                             </div>
                         </div>

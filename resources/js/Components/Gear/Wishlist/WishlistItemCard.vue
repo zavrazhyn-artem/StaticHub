@@ -6,6 +6,11 @@ const props = defineProps({
     difficultyLetter: { type: String, default: '' },
 });
 
+const emit = defineEmits(['open-claimants']);
+
+const claimantCount = computed(() => Number(props.item.claimant_count ?? 0));
+const bisCount = computed(() => Number(props.item.bis_count ?? 0));
+
 const isBis = computed(() => props.item.status === 'b');
 const isDowngrade = computed(() => Number(props.item.value) < 0);
 const isOutdated = computed(() => props.item.status === 'o');
@@ -66,13 +71,12 @@ const percentClass = computed(() => {
 </script>
 
 <template>
-    <a
-        :href="wowheadHref"
+    <button
+        type="button"
+        @click="emit('open-claimants', item)"
         :data-wowhead="wowheadDataAttr"
-        target="_blank"
-        rel="noopener"
-        :class="['group relative flex items-center gap-3 px-3 py-2.5 rounded-lg border transition', cardClass]"
-        :title="valueLabel"
+        :class="['group relative flex items-center gap-3 px-3 py-2.5 rounded-lg border transition w-full text-left cursor-pointer hover:brightness-110', cardClass]"
+        :title="`${valueLabel} — ${claimantCount} claimant${claimantCount === 1 ? '' : 's'}`"
     >
         <div class="shrink-0">
             <img
@@ -92,6 +96,10 @@ const percentClass = computed(() => {
                 <span class="font-mono">{{ item.item_level || '—' }}</span>
                 <span v-if="difficultyLetter" class="opacity-70">·</span>
                 <span v-if="difficultyLetter" class="font-headline font-bold uppercase tracking-widest">{{ difficultyLetter }}</span>
+                <template v-if="item.boss_name">
+                    <span class="opacity-70">·</span>
+                    <span class="text-orange-300/80 font-medium truncate">{{ item.boss_name }}</span>
+                </template>
             </div>
         </div>
 
@@ -99,14 +107,31 @@ const percentClass = computed(() => {
             <div :class="['font-mono text-sm font-bold tabular-nums', percentClass]">
                 {{ percentLabel }}
             </div>
+            <!-- Loot-council counter: total claimants + how many of them
+                 have this as their BiS. Click on the card opens the modal
+                 with the full breakdown. -->
+            <div
+                v-if="claimantCount > 0"
+                class="flex items-center gap-1.5 text-[10px] font-headline font-bold uppercase tracking-widest"
+                :title="`${claimantCount} claimant${claimantCount === 1 ? '' : 's'}, ${bisCount} BiS`"
+            >
+                <span class="flex items-center gap-0.5 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[12px]">groups</span>
+                    {{ claimantCount }}
+                </span>
+                <span v-if="bisCount > 0" class="flex items-center gap-0.5 text-yellow-300">
+                    <span class="material-symbols-outlined text-[12px]">star</span>
+                    {{ bisCount }}
+                </span>
+            </div>
             <div
                 v-if="item.listed_in?.length"
                 class="text-[9px] font-headline font-bold uppercase tracking-widest text-yellow-300/90 flex items-center gap-1"
                 :title="item.listed_in.map(e => typeof e === 'string' ? e : (e.name + (e.tier ? ` (${e.tier})` : ''))).join(', ')"
             >
-                <span class="material-symbols-outlined text-[12px]">star</span>
+                <span class="material-symbols-outlined text-[12px]">checklist</span>
                 <span>{{ item.listed_in.map(e => typeof e === 'string' ? e : (e.name + (e.tier ? ` ${e.tier}` : ''))).join(' · ') }}</span>
             </div>
         </div>
-    </a>
+    </button>
 </template>
