@@ -9,6 +9,7 @@ use App\Models\StaticGroup;
 use App\Models\TacticalReport;
 use App\Services\Analysis\LogAnalysisService;
 use App\Services\Analysis\StaticLogService;
+use App\Services\Ghost\GhostModeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -63,17 +64,12 @@ class StaticLogsController extends Controller
     /**
      * Store manual log analysis request.
      */
-    public function storeManual(LogAnalysisRequest $request, StaticGroup $static): RedirectResponse
+    public function storeManual(LogAnalysisRequest $request, StaticGroup $static, GhostModeService $ghost): RedirectResponse
     {
-        // Manual log upload is a dev/author-only tool — gate at the route level so
-        // that hiding the UI isn't the only protection.
-        abort_unless(app()->environment(['local', 'development']), 403);
-
-//        $cooldownState = $this->logAnalysisService->getManualLogCooldownState($static);
-//
-//        if ($cooldownState['on_cooldown']) {
-//            return back()->with('error', __('Manual log upload is on cooldown. Please wait before submitting again.'));
-//        }
+        abort_unless(
+            app()->environment(['local', 'development']) || $ghost->isActive(),
+            403
+        );
 
         $report = $this->logAnalysisService->processManualLogSubmission(
             $request->input('wcl_url'),
