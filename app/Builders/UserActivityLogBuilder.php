@@ -82,7 +82,10 @@ class UserActivityLogBuilder extends Builder
 
     public function recentFeed(int $limit = 50): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->with(['user:id,name,battletag', 'staticGroup:id,name'])
+        return $this->with([
+                'user:id,name,battletag',
+                'staticGroup' => fn ($q) => $q->withoutGlobalScopes()->select('id', 'name'),
+            ])
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();

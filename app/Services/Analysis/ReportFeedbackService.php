@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Analysis;
 
 use App\Models\AiChatMessage;
+use App\Models\Character;
 use App\Models\ReportFeedback;
 use App\Models\TacticalReport;
 
@@ -136,12 +137,33 @@ class ReportFeedbackService
         $tagsNegative = ReportFeedback::query()->tagBreakdownByRating('negative', now()->subDays(30));
 
         // Recent low-rating feedback (≤3) for the queue of "things to fix".
+        // Static name is eager-loaded so admins can see *which* static the
+        // signal comes from when triaging — different statics have different
+        // skill/log shapes, and that context matters when reading a comment.
         $criticalRecent = ReportFeedback::query()
             ->withRatingAtMost(3)
-            ->with(['user:id,name', 'tacticalReport:id,title,wcl_report_id,static_id'])
+            ->with([
+                'user:id,name',
+                'tacticalReport:id,title,wcl_report_id,static_id',
+                'tacticalReport.staticGroup:id,name',
+            ])
             ->latest()
             ->limit(20)
             ->get();
+
+        // Attach the character that this user actually raided with for each
+        // report — admins triaging a comment about "wrong spec advice" need
+        // to see whose spec it was. limit(20) so per-row queries are fine.
+        foreach ($criticalRecent as $fb) {
+            $report = $fb->tacticalReport;
+            $fb->setAttribute('viewer_character', $report
+                ? Character::query()->findUserCharacterInReport(
+                    (int) $fb->user_id,
+                    (int) $report->static_id,
+                    (int) $report->id,
+                )
+                : null);
+        }
 
         $byVersion = ReportFeedback::query()->aggregateByPromptVersion();
 
