@@ -168,17 +168,48 @@ final class WishlistService
             ->pluck('spec_id', 'character_id')
             ->all();
 
+        // For alt characters, resolve "whose alt" — find the user's main
+        // character in the same static. Lets the modal render
+        // "Alt of Zavrikk" instead of a bare "Alt" badge.
+        $charUserIds = $wishlists->mapWithKeys(fn ($w) => [
+            $w->character_id => $w->character?->user_id,
+        ])->filter()->all();
+
+        $mainCharByUser = empty($charUserIds)
+            ? []
+            : DB::table('characters')
+                ->join('character_static', 'characters.id', '=', 'character_static.character_id')
+                ->whereIn('characters.user_id', array_values(array_unique($charUserIds)))
+                ->where('character_static.static_id', $staticId)
+                ->where('character_static.role', 'main')
+                ->pluck('characters.name', 'characters.user_id')
+                ->all();
+
         $lookup = [];
         foreach ($wishlists as $w) {
             foreach ($w->items as $i) {
                 $key = "{$w->raid_slug}|{$w->difficulty}|{$i->item_id}";
                 $lookup[$key] ??= [];
+                $role = $charRoles[$w->character_id] ?? 'alt';
+                $userId = $charUserIds[$w->character_id] ?? null;
+                // "Alt of X" only makes sense when the alt's owner has a
+                // main character that is itself in this static. Same-named
+                // owner-of-self collapses to null so we don't render
+                // "Alt of Zaavrik" on Zaavrik's own row.
+                $mainName = ($role === 'alt' && $userId !== null)
+                    ? ($mainCharByUser[$userId] ?? null)
+                    : null;
+                if ($mainName === $w->character->name) {
+                    $mainName = null;
+                }
+
                 $lookup[$key][] = [
                     'character_id'   => $w->character_id,
                     'character_name' => $w->character->name,
                     'playable_class' => $w->character->playable_class,
                     'avatar_url'     => $w->character->avatar_url,
-                    'role'           => $charRoles[$w->character_id] ?? 'alt',
+                    'role'           => $role,
+                    'main_of'        => $mainName,
                     'spec_id'        => $w->spec_id,
                     'spec_name'      => $w->specialization?->name,
                     'is_main_spec'   => isset($mainSpecByChar[$w->character_id])

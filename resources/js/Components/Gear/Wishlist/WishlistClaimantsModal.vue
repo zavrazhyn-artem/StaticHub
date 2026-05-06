@@ -133,11 +133,16 @@ const fmtPercent = (v) => {
                             :style="{ color: classColor(c.playable_class) }"
                         >{{ c.character_name }}</span>
                         <span
-                            class="px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-widest border shrink-0"
+                            class="px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-widest border shrink-0 truncate max-w-[180px]"
                             :class="c.role === 'main'
                                 ? 'border-yellow-300/60 bg-yellow-500/10 text-yellow-200'
                                 : 'border-white/10 bg-white/5 text-on-surface-variant/70'"
-                        >{{ c.role === 'main' ? __('Main') : __('Alt') }}</span>
+                            :title="c.role === 'alt' && c.main_of ? __('Alt of :name', { name: c.main_of }) : ''"
+                        >
+                            <template v-if="c.role === 'main'">{{ __('Main') }}</template>
+                            <template v-else-if="c.main_of">{{ __('Alt of :name', { name: c.main_of }) }}</template>
+                            <template v-else>{{ __('Alt') }}</template>
+                        </span>
                     </div>
                     <div class="flex items-center gap-1.5 text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">
                         <span>{{ c.spec_name }}</span>
