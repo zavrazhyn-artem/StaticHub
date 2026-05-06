@@ -140,12 +140,15 @@ class ReportFeedbackService
         // Static name is eager-loaded so admins can see *which* static the
         // signal comes from when triaging — different statics have different
         // skill/log shapes, and that context matters when reading a comment.
+        // StaticGroup has a global "member" scope that filters out statics the
+        // viewer doesn't belong to. The admin dashboard explicitly needs to
+        // see every static's signal, so bypass that scope on the eager load.
         $criticalRecent = ReportFeedback::query()
             ->withRatingAtMost(3)
             ->with([
                 'user:id,name',
                 'tacticalReport:id,title,wcl_report_id,static_id',
-                'tacticalReport.staticGroup:id,name',
+                'tacticalReport.staticGroup' => fn ($q) => $q->withoutGlobalScope('member')->select('id', 'name'),
             ])
             ->latest()
             ->limit(20)
