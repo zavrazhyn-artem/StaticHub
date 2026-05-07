@@ -41,6 +41,29 @@ class WishlistBuilder extends Builder
         });
     }
 
+    /**
+     * Wishlists eligible for bridge sync to a static. Includes only
+     * raid-source wishlists (the addon-loot-council UI deals with raid
+     * loot exclusively) and any character currently rostered in the
+     * given static, regardless of role.
+     *
+     * Eager-loads what the sync formatter needs in one round-trip:
+     * items + character + spec + realm.
+     */
+    public function syncableForStatic(int $staticId, ?\DateTimeInterface $since = null): self
+    {
+        $q = $this
+            ->with(['items', 'character.realm', 'specialization'])
+            ->raidsOnly()
+            ->whereHas('character.statics', fn ($qq) => $qq->where('statics.id', $staticId));
+
+        if ($since !== null) {
+            $q = $q->where('imported_at', '>', $since);
+        }
+
+        return $q;
+    }
+
     public function findLatest(
         int $characterId,
         int $specId,

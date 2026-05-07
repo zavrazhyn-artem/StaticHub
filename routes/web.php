@@ -26,6 +26,7 @@ use App\Http\Controllers\Gear\WishlistController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
+use App\Http\Controllers\Auth\OAuthDeviceApprovalController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedbackCommentController;
 use App\Http\Controllers\FeedbackSubtaskController;
@@ -219,6 +220,16 @@ Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('pla
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');
 Route::get('/auth/battlenet/callback', [BattleNetController::class, 'callback'])->name('battlenet.callback');
+
+// OAuth Device Authorization Grant (browser side). The bridge sends users
+// here with ?user_code=ABCD-EFGH; show() bounces guests through Bnet
+// OAuth and brings them back. approve()/deny() require an authenticated
+// session.
+Route::get('/oauth/device', [OAuthDeviceApprovalController::class, 'show'])->name('oauth.device.show');
+Route::middleware('auth')->group(function () {
+    Route::post('/oauth/device/approve', [OAuthDeviceApprovalController::class, 'approve'])->name('oauth.device.approve');
+    Route::post('/oauth/device/deny',    [OAuthDeviceApprovalController::class, 'deny'])->name('oauth.device.deny');
+});
 
 // ----- Feedback / Roadmap --------------------------------------------------
 // Public browsing (guests see everything, but can't act).
