@@ -4,6 +4,7 @@ use App\Http\Controllers\AiAnalystController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Api\DiscordInteractionController;
 use App\Http\Controllers\Api\Sync\OAuthDeviceController;
+use App\Http\Controllers\Api\Sync\LootHistoryController;
 use App\Http\Controllers\Api\Sync\WishlistController;
 use App\Http\Middleware\VerifyDiscordSignature;
 use Illuminate\Support\Facades\Route;
@@ -42,3 +43,10 @@ Route::middleware('auth:sanctum')
 Route::middleware('auth:sanctum')
     ->get('/v1/sync/wishlists', [WishlistController::class, 'index'])
     ->name('api.sync.wishlists');
+
+// Loot-history push — bridge drains BlastROutboxEvents into this and
+// drops the events from the SV on a 200 response. Idempotent on
+// per-event UUIDs so retries are safe.
+Route::middleware('auth:sanctum')
+    ->post('/v1/sync/loot-history', [LootHistoryController::class, 'store'])
+    ->name('api.sync.loot-history');

@@ -46,7 +46,11 @@ will read from the same source without bridge changes.
 ```lua
 -- Schema version. The addon refuses to load if this exceeds its known
 -- maximum. The bridge always writes the current version.
-BlastRSchema = 1
+--
+-- Bumped to 2 (2026-05-07): added per-item raid_slug/raid_name; added
+-- character-level bis_items, current_items, list_items maps sourced
+-- from GearLists (bis | current | custom).
+BlastRSchema = 2
 
 -- ISO-8601 UTC timestamp of the moment this snapshot was minted on the
 -- backend. Addon shows it in the loot frame as "last sync".
@@ -71,6 +75,25 @@ BlastRWishlistData = {
     user_id = 1,                       -- backend numeric user id
     role = "main",                     -- main | alt
     last_updated_at = "2026-04-30T12:00:00Z",  -- max(imported_at) over this char's wishlists
+
+    -- Items in this character's curated Best-in-Slot GearList. Drives
+    -- the addon's BiS column ★ marker — DECOUPLED from the wishlist
+    -- `status='b'` flag (which is just whatever the upstream sim
+    -- happened to label top — not the player's deliberate pick).
+    bis_items = { [210000] = true, [210001] = true },
+
+    -- Items currently equipped (Battle.net inventory snapshot, kept by
+    -- the existing GearList type=current sync). Drives the Eq warning.
+    current_items = { [210099] = true },
+
+    -- Item id → list of human-readable names of custom GearLists
+    -- ("M+ keys", "PvP", off-spec, …) that contain this item. Drives
+    -- the List column marker; tooltip names every list.
+    list_items = {
+      [210050] = { "M+ keys" },
+      [210051] = { "PvP", "Off-spec" },
+    },
+
     -- Per spec block; spec_id is the Blizzard spec id.
     specs = {
       [257] = {                        -- Holy
@@ -82,12 +105,14 @@ BlastRWishlistData = {
             items = {
               -- Keyed by item id (numeric).
               [210000] = {
-                status  = "b",         -- b | n | o (Best | Not best | Outdated)
-                value   = 12500,       -- absolute upgrade DPS/HPS
-                percent = 3.21,        -- relative upgrade %
-                source  = "raid",      -- raid | mplus | crafted | catalyst | delve
-                boss    = "Sikran",    -- nullable; raid items only
-                note    = "...",       -- free text from the upstream sim
+                status    = "b",       -- b | n | o (Best | Not best | Outdated)
+                value     = 12500,     -- absolute upgrade DPS/HPS
+                percent   = 3.21,      -- relative upgrade %
+                source    = "raidbots",-- raidbots | qe-live | icy-veins | manual | …
+                boss      = "Sikran",  -- nullable; raid items only
+                note      = "...",     -- free text from the upstream sim
+                raid_slug = "instance-1307",      -- bnet raid slug from the wishlist row
+                raid_name = "The Voidspire",      -- resolved display name (SeasonItem::SOURCE_DISPLAY_NAMES)
               },
               ...
             },
@@ -114,9 +139,18 @@ BlastRWishlistData = {
   item name as `Sikran ▸ Weight of Command`.
 - **`note`** — free text. Addon shows on hover.
 
-> Markers (`In BiS list`, `In custom list`, `Equipped lower ilvl`)
-> are deferred to the addon-development phase and will be added as
-> additional fields here when their semantics are finalized.
+#### Marker fields (per character)
+
+- **`bis_items`** — flat `{itemId = true}` map sourced from the user's
+  curated Best-in-Slot `GearList` (type=bis). Powers the BiS column ★.
+  The wishlist `status='b'` flag intentionally does NOT drive the marker
+  — sim-flagged ≠ player-curated.
+- **`current_items`** — `{itemId = true}` from `GearList` type=current
+  (Battle.net inventory snapshot). Powers the Eq column ⚠ warning
+  ("candidate already has this equipped").
+- **`list_items`** — `{itemId = {listName, …}}` from `GearList`
+  type=custom. Powers the List column ◆; tooltip enumerates every
+  list the item lives in (e.g. "M+ keys", "PvP").
 
 ---
 
@@ -131,8 +165,15 @@ successful push to `/api/v1/sync/loot-history`.
 BlastROutboxSchema = 1
 BlastROutboxEvents = {
   {
+    -- Per-event UUID stamped by the addon at write time. Backend
+    -- enforces uniqueness so retries (network blip mid-push) cannot
+    -- create duplicates regardless of how many cycles a single event
+    -- ends up living in the outbox.
+    event_uuid = "8f3a2bec-91d4-4a7e-9c12-1234567890ab",
+
     -- Monotonic sequence number per session; resets on /reload.
-    -- Used for de-duplication if a push partially fails.
+    -- Helps the addon decide which in-memory events have been
+    -- confirmed-pushed when the outbox is rewritten by the bridge.
     seq = 17,
 
     kind = "loot_award",       -- only kind in Phase 1
