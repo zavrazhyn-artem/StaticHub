@@ -179,7 +179,7 @@
                                         <img v-if="row.spec_icon" :src="row.spec_icon" :alt="row.spec_name || ''"
                                              class="w-7 h-7 rounded border border-white/10 shrink-0" />
                                         <div class="flex flex-col leading-tight min-w-0">
-                                            <span class="text-xs font-bold truncate"
+                                            <span class="text-xs font-bold truncate cursor-default"
                                                   :style="{ color: getClassTextColor(row.recipient_class) }">
                                                 {{ row.recipient_display }}
                                             </span>

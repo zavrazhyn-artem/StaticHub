@@ -21,7 +21,7 @@
                 <tbody class="divide-y divide-white/5">
                     <tr v-for="r in rows" :key="r.character_id || r.name" class="hover:bg-white/5">
                         <td class="px-4 py-2">
-                            <span class="text-xs font-bold" :style="{ color: getClassTextColor(r.class) }">
+                            <span class="text-xs font-bold cursor-default" :style="{ color: getClassTextColor(r.class) }">
                                 {{ r.name }}
                             </span>
                         </td>

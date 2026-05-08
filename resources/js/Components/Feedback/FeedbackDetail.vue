@@ -122,7 +122,7 @@ function formatDate(iso) {
                                 :alt="post.author.name"
                                 class="h-6 w-6 rounded-full object-cover"
                             />
-                            <span class="font-medium" :style="{ color: authorColor }">{{ post.author.name }}</span>
+                            <span class="font-medium cursor-default" :style="{ color: authorColor }">{{ post.author.name }}</span>
                             <span v-if="post.author.static_name" class="text-on-surface-variant/70">[{{ post.author.static_name }}]</span>
                         </div>
                         <span>· {{ formatDate(post.created_at) }}</span>

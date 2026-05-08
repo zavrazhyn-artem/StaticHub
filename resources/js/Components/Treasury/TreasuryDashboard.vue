@@ -90,7 +90,7 @@
                     <div v-for="status in sortedWeeklyStatus" :key="status.user_id" class="flex items-center justify-between p-3 rounded-sm bg-surface-container-lowest border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full" :class="status.is_paid ? 'bg-success-neon shadow-[0_0_8px_rgba(0,255,153,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(255,68,68,0.5)]'"></div>
-                            <span class="text-sm font-medium"
+                            <span class="text-sm font-medium cursor-default"
                                   :style="{ color: getClassTextColor(status.playable_class) }">
                                 {{ status.display_name }}
                             </span>
@@ -131,7 +131,7 @@
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold"
+                                <span class="text-xs font-bold cursor-default"
                                       :style="{ color: getClassTextColor(tx.playable_class) }">
                                     {{ tx.display_name }}
                                 </span>

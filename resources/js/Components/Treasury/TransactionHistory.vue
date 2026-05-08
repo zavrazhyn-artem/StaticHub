@@ -45,7 +45,7 @@
                                 {{ formatDate(tx.created_at) }}
                             </td>
                             <td class="px-4 py-4">
-                                <span class="text-xs font-bold"
+                                <span class="text-xs font-bold cursor-default"
                                       :style="{ color: getClassTextColor(tx.playable_class) }">
                                     {{ tx.display_name }}
                                 </span>

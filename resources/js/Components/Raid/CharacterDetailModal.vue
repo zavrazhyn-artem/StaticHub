@@ -85,7 +85,7 @@ const countKills = (charId) => {
                 <img :src="character.avatar_url" class="w-12 h-12 rounded-lg border border-white/10 object-cover">
                 <div>
                     <div
-                        class="text-sm font-bold"
+                        class="text-sm font-bold cursor-default"
                         :class="'text-wow-' + (character.playable_class || '').toLowerCase().replace(/ /g, '-')"
                     >{{ character.name }}</div>
                     <div class="text-3xs text-on-surface-variant flex items-center gap-2">

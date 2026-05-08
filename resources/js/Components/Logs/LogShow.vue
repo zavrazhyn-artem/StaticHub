@@ -237,7 +237,7 @@ function toggleActiveOriginal() {
                                 <span :class="`material-symbols-outlined text-${personalReport.char_class_css}`">person</span>
                             </div>
                             <div>
-                                <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1">
+                                <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1 cursor-default">
                                     {{ personalReport.char_name }}
                                 </h2>
                                 <p :class="`text-4xs font-bold text-${personalReport.char_class_css} uppercase tracking-wider`">
@@ -322,7 +322,7 @@ function toggleActiveOriginal() {
                                     <span :class="`material-symbols-outlined text-${activePersonalReport.char_class_css}`">person</span>
                                 </div>
                                 <div>
-                                    <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1">
+                                    <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em] leading-none mb-1 cursor-default">
                                         {{ activePersonalReport.char_name }}
                                     </h2>
                                     <p :class="`text-4xs font-bold text-${activePersonalReport.char_class_css} uppercase tracking-wider`">

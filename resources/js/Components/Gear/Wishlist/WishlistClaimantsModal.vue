@@ -129,7 +129,7 @@ const fmtPercent = (v) => {
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5 min-w-0">
                         <span
-                            class="font-headline text-sm font-bold truncate"
+                            class="font-headline text-sm font-bold truncate cursor-default"
                             :style="{ color: classColor(c.playable_class) }"
                         >{{ c.character_name }}</span>
                         <span
