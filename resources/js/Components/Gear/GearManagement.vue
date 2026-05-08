@@ -7,6 +7,7 @@ import SelectUserWithMain from '@/Components/UI/SelectUserWithMain.vue';
 import ToastNotification from '@/Components/UI/ToastNotification.vue';
 import GearTab from './Tab/GearTab.vue';
 import WishlistPanel from './Wishlist/WishlistPanel.vue';
+import LootHistoryPanel from './LootHistory/LootHistoryPanel.vue';
 
 const { __ } = useTranslation();
 
@@ -27,6 +28,9 @@ const props = defineProps({
     gearBisImportUrl: { type: String, required: true },
     listSummariesUrl: { type: String, required: true },
     activeListUrlTemplate: { type: String, required: true },
+    lootHistoryPayloadUrl: { type: String, required: true },
+    initialTab: { type: String, default: 'gear' },
+    tabUrls: { type: Object, default: () => ({}) },
     csrfToken: { type: String, required: true },
     flashSuccess: { type: String, default: '' },
     flashError: { type: String, default: '' },
@@ -36,7 +40,17 @@ const showImportModal = ref(false);
 const submitting = ref(false);
 const importForm = ref(null);
 const urlInput = ref('');
-const activeTab = ref('gear');
+const activeTab = ref(props.initialTab || 'gear');
+
+// Sync tab → URL so refresh / back-button preserves the active tab and
+// the URL is shareable. replaceState (not pushState) — switching tabs
+// shouldn't clutter browser history with N entries per session.
+watch(activeTab, (id) => {
+    const url = props.tabUrls?.[id];
+    if (url && window.location.pathname !== new URL(url, window.location.origin).pathname) {
+        window.history.replaceState({}, '', url);
+    }
+});
 
 // Top-level character + spec selection — drives BOTH the Gear and Wishlist
 // tabs so changes in one are reflected in the other. Both are persisted in
@@ -107,7 +121,7 @@ const toast = ref({ show: false, message: '', icon: 'check_circle', iconClass: '
 const tabs = [
     { id: 'gear', icon: 'checkroom', label: 'Gear' },
     { id: 'wishlist', icon: 'list_alt', label: 'Wishlist' },
-    { id: 'loot', icon: 'history', label: 'Loot History', disabled: true },
+    { id: 'loot-history', icon: 'history', label: 'Loot History' },
     { id: 'vault', icon: 'inventory_2', label: 'Vault Optimizer', disabled: true },
 ];
 
@@ -269,6 +283,11 @@ onMounted(() => {
         :csrf-token="csrfToken"
         :destroy-url-template="destroyUrlTemplate"
         @open-import="urlInput = ''; showImportModal = true"
+    />
+
+    <LootHistoryPanel
+        v-else-if="activeTab === 'loot-history'"
+        :payload-url="lootHistoryPayloadUrl"
     />
 
     <div v-else class="bg-surface-container-low border border-white/5 rounded-xl p-12">

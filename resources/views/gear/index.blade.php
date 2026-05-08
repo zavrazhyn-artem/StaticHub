@@ -1,3 +1,10 @@
+@php
+    $tabUrls = [
+        'gear'         => route('statics.gear'),
+        'wishlist'     => route('statics.gear.tab', ['tab' => 'wishlist']),
+        'loot-history' => route('statics.gear.tab', ['tab' => 'loot-history']),
+    ];
+@endphp
 <x-app-layout>
     <gear-management
         static-name="{{ $static->name }}"
@@ -16,6 +23,9 @@
         gear-bis-import-url="{{ route('statics.gear.lists.import-bis') }}"
         list-summaries-url="{{ route('statics.gear.lists.summaries') }}"
         :active-list-url-template="'{{ url('/gear/lists') }}/__ID__/payload'"
+        loot-history-payload-url="{{ route('statics.gear.loot-history.payload') }}"
+        initial-tab="{{ $initialTab }}"
+        :tab-urls='@json($tabUrls)'
         csrf-token="{{ csrf_token() }}"
         flash-success="{{ session('success', '') }}"
         flash-error="{{ ($errors ?? new \Illuminate\Support\MessageBag())->first() }}"

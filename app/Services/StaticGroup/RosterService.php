@@ -14,6 +14,7 @@ use App\Models\CharacterWeeklySnapshot;
 use App\Models\Specialization;
 use App\Models\StaticGroup;
 use App\Models\User;
+use App\Services\Loot\LootHistoryBackfillService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -316,6 +317,12 @@ class RosterService
         ]);
 
         $this->autoSetMainSpecIfMissing($character, $staticId);
+
+        // Re-link any orphan loot rows for this character — awards
+        // captured before this assignment land with character_id NULL
+        // and only recipient_name to identify them. One-shot here keeps
+        // history consistent without a periodic sweep.
+        app(LootHistoryBackfillService::class)->backfillForCharacter($character, $staticId);
     }
 
     /**

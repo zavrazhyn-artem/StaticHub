@@ -48,6 +48,24 @@ class SeasonItemBuilder extends Builder
         return $this->where('season_slug', $seasonSlug);
     }
 
+    /**
+     * Batch-resolve item id → inventory_type so the loot ingest path can
+     * stamp item_slot without one query per row.
+     *
+     * @param  list<int>  $itemIds
+     * @return array<int, string>
+     */
+    public function inventoryTypesByItemIds(array $itemIds): array
+    {
+        if (empty($itemIds)) {
+            return [];
+        }
+        return $this->whereIn('id', $itemIds)
+            ->whereNotNull('inventory_type')
+            ->pluck('inventory_type', 'id')
+            ->all();
+    }
+
     public function forSlot(string $slot): self
     {
         $types = self::inventoryTypesForSlot($slot);

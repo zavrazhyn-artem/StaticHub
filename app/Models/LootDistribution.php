@@ -11,40 +11,51 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $event_uuid
+ * @property string $external_id
  * @property int $static_id
  * @property Carbon $awarded_at
- * @property string $raid_slug
  * @property string $raid_difficulty
- * @property string|null $boss_name
+ * @property int|null $encounter_id
  * @property string|null $pull_id
+ * @property bool $is_test_mode
  * @property string $recipient_name
  * @property int|null $recipient_character_id
+ * @property int|null $recipient_spec_id
  * @property string|null $awarded_by_name
  * @property int $item_id
+ * @property string|null $item_slot
  * @property int|null $item_level
  * @property array|null $bonus_ids
  * @property int|null $enchant_id
  * @property array|null $gem_ids
  * @property string $method
+ * @property string|null $response_text
+ * @property string|null $response_color
+ * @property int|null $council_same_vote
+ * @property bool $is_award_reason
  * @property string|null $note
  * @property Carbon $received_at
  */
 class LootDistribution extends Model
 {
     protected $fillable = [
-        'event_uuid', 'static_id', 'awarded_at',
-        'raid_slug', 'raid_difficulty', 'boss_name', 'pull_id',
-        'recipient_name', 'recipient_character_id', 'awarded_by_name',
-        'item_id', 'item_level', 'bonus_ids', 'enchant_id', 'gem_ids',
-        'method', 'note', 'received_at',
+        'external_id', 'static_id', 'awarded_at',
+        'raid_difficulty', 'encounter_id', 'pull_id',
+        'recipient_name', 'recipient_character_id', 'recipient_spec_id',
+        'awarded_by_name',
+        'item_id', 'item_slot', 'item_level', 'bonus_ids', 'enchant_id', 'gem_ids',
+        'method', 'response_text', 'response_color', 'council_same_vote', 'is_award_reason',
+        'is_test_mode',
+        'note', 'received_at',
     ];
 
     protected $casts = [
-        'awarded_at'  => 'datetime',
-        'received_at' => 'datetime',
-        'bonus_ids'   => 'array',
-        'gem_ids'     => 'array',
+        'awarded_at'      => 'datetime',
+        'received_at'     => 'datetime',
+        'bonus_ids'       => 'array',
+        'gem_ids'         => 'array',
+        'is_award_reason' => 'boolean',
+        'is_test_mode'    => 'boolean',
     ];
 
     public function static(): BelongsTo

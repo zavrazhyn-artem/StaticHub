@@ -156,48 +156,59 @@ BlastRWishlistData = {
 
 ## `BlastROutbox.lua` (addon → bridge)
 
-The addon **appends** events; the bridge **drains** them on every
-successful push to `/api/v1/sync/loot-history`.
+The addon batch-scans `RCLootCouncilLootDB` (RC's persistent loot
+history) on every trigger — `PLAYER_LOGIN`, `RCMLLootHistorySend`
+(real-time post-award), and the `/blastr scanloot` slash command.
+Entries it hasn't seen before are appended to `BlastROutboxEvents`;
+the bridge **drains** them on every successful push to
+`/api/v1/sync/loot-history`.
+
+Idempotency is on RC's own `entry.id` (epoch-counter string the master
+looter stamps at award time), not a bridge-generated UUID. The local
+`BlastRSeenExternalIds` set keeps repeat scans cheap; the backend's
+UNIQUE on `external_id` is the real correctness guard.
 
 ### Globals
 
 ```lua
 BlastROutboxSchema = 1
+
+-- Set of RC entry ids the addon has already enqueued. Survives /reload
+-- so re-scans don't re-emit the same row. Bridge does not touch this.
+BlastRSeenExternalIds = {
+  ["1746649671-1"] = true,
+  ["1746649671-2"] = true,
+}
+
 BlastROutboxEvents = {
   {
-    -- Per-event UUID stamped by the addon at write time. Backend
-    -- enforces uniqueness so retries (network blip mid-push) cannot
-    -- create duplicates regardless of how many cycles a single event
-    -- ends up living in the outbox.
-    event_uuid = "8f3a2bec-91d4-4a7e-9c12-1234567890ab",
+    -- RC's own per-award id (epoch-counter string). Unique across all
+    -- masters; backend dedups on this.
+    external_id = "1746649671-1",
 
-    -- Monotonic sequence number per session; resets on /reload.
-    -- Helps the addon decide which in-memory events have been
-    -- confirmed-pushed when the outbox is rewritten by the bridge.
+    -- Monotonic sequence number per session; bridge reads it for
+    -- diagnostics, server-side dedup uses external_id.
     seq = 17,
 
     kind = "loot_award",       -- only kind in Phase 1
 
-    -- Wall-clock UTC at the moment RC fired the event.
+    -- Wall-clock at award time, derived from RC's date+time fields.
     awarded_at = "2026-05-07T20:14:32Z",
 
-    -- The raid this happened in. The addon resolves it from the
-    -- current instance + boss kill context.
     raid = {
-      slug       = "manaforge-omega",
-      difficulty = "M",
-      boss       = "Plexus Sentinel",
-      pull_id    = "M+omega:1746649671",   -- our own id, see addon code
+      slug         = "manaforge-omega",
+      difficulty   = "M",         -- M | H | N | R
+      boss         = "Plexus Sentinel",
+      encounter_id = nil,         -- RC v3 doesn't persist journal id
+      pull_id      = nil,
     },
 
-    -- The character who received the item. Same naming convention as
-    -- the wishlist payload.
-    recipient = "Zaavrik-tarren-mill",
+    -- Recipient (lootDB top-level key) and awarder if known.
+    recipient         = "Zaavrik-TarrenMill",
+    recipient_class   = "PRIEST",  -- Blizzard token from entry.class
+    recipient_spec_id = nil,       -- RC doesn't persist spec id
+    awarded_by        = "Zavrikk-TarrenMill",
 
-    -- The character (master looter) who awarded it.
-    awarded_by = "Zavrikk-tarren-mill",
-
-    -- Item details. bonus_ids ordered exactly as Blizzard returned them.
     item = {
       id        = 210000,
       ilvl      = 645,
@@ -206,15 +217,23 @@ BlastROutboxEvents = {
       gems      = { 213423 },
     },
 
-    -- How RC labelled the award. One of:
-    --   "ms"  — main spec
-    --   "os"  — off spec
-    --   "bis" — wishlist BiS
-    --   "trash" — disenchant / vendor
-    --   "free" — free-roll / random
+    -- Bucketed method (bis | ms | os | trash | free) for fast filters.
     method = "bis",
 
-    -- Optional free-text reason the loot master typed in RC.
+    -- Full RC response label and its colour, surfaced verbatim in the UI.
+    response = {
+      text  = "BiS",          -- "Mainspec", "Disenchant", custom labels…
+      color = "#39ff14",      -- "#rrggbb"; null when RC didn't ship one
+    },
+
+    -- Number of council members who voted the same response as the
+    -- winner — RC's `entry.votes`. Drives the "consensus" signal.
+    council_same_vote = 3,
+
+    -- True for "Award Reason"-style rows (Disenchant, Bank, Free) —
+    -- false for normal vote awards. Used to filter "real" awards.
+    is_award_reason = false,
+
     note = nil,
   },
   ...

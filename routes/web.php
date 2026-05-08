@@ -15,6 +15,7 @@ use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
 use App\Http\Controllers\Static\StaticController;
 use App\Http\Controllers\Logs\LogTranslationController;
+use App\Http\Controllers\Loot\LootHistoryController;
 use App\Http\Controllers\Logs\ReportFeedbackController;
 use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
@@ -89,8 +90,14 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::patch('/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
     Route::patch('/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
-    // Gear Management
+    // Gear Management — single controller, tab passed via URL so refreshes
+    // land back on the same tab and the URL is shareable. The {tab} regex
+    // excludes "wishlists" / "lists" so the existing CRUD routes below
+    // keep matching first.
     Route::get('/gear', [GearController::class, 'index'])->name('statics.gear');
+    Route::get('/gear/{tab}', [GearController::class, 'index'])
+        ->where('tab', 'wishlist|loot-history')
+        ->name('statics.gear.tab');
     Route::post('/gear/wishlists', [WishlistController::class, 'store'])->name('statics.gear.wishlists.store');
     Route::delete('/gear/wishlists/{wishlist}', [WishlistController::class, 'destroy'])->name('statics.gear.wishlists.destroy');
 
@@ -104,6 +111,11 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::patch('/gear/lists/{list}/slot', [GearListController::class, 'setSlot'])->name('statics.gear.lists.set-slot');
     Route::post('/gear/lists/{list}/simc', [GearListController::class, 'importSimc'])->name('statics.gear.lists.import-simc');
     Route::post('/gear/bis', [GearListController::class, 'importBis'])->name('statics.gear.lists.import-bis');
+
+    // Loot history (RC awards captured by the BlastR addon → bridge → here)
+    // Lives as a tab inside the Gear page; this is the JSON endpoint the
+    // tab fetches lazily on activation.
+    Route::get('/gear/loot-history/payload', [LootHistoryController::class, 'payload'])->name('statics.gear.loot-history.payload');
 
     // Settings
     Route::get('/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');

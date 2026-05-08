@@ -18,15 +18,18 @@ class GearController extends Controller
         private readonly GearViewService $gearView,
     ) {}
 
-    public function index(StaticGroup $static): View
+    public function index(StaticGroup $static, ?string $tab = null): View
     {
         $userId = (int) Auth::id();
+        // Whitelist enforced at the route layer; default to the gear tab.
+        $initialTab = in_array($tab, ['wishlist', 'loot-history'], true) ? $tab : 'gear';
 
         return view('gear.index', [
             'static'            => $static,
             'wishlistPayload'   => $this->wishlists->buildGearViewPayload($static->id, $userId),
             'gearContext'       => $this->gearView->buildContextPayload($static->id, $userId),
             'enchantableSlots'  => $this->gearView->enchantableSlots(),
+            'initialTab'        => $initialTab,
         ]);
     }
 }
