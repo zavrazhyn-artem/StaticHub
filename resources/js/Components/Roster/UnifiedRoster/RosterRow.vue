@@ -230,7 +230,7 @@ const emit = defineEmits([
                       :class="isAlt ? 'text-[9px]' : 'text-[10px]'"
                       style="color: rgba(57,255,20,0.65);">
                     <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">check_circle</span>
-                    <span v-if="!isAlt">ALL CLEAR</span>
+                    <span v-if="!isAlt">{{ __('ALL CLEAR') }}</span>
                 </span>
             </td>
 

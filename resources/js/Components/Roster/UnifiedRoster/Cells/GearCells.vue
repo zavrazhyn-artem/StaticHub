@@ -1,6 +1,9 @@
 <script setup>
 import { inject, computed } from 'vue';
 import { useWowheadIcons } from '@/composables/useWowheadIcons';
+import { useTranslation } from '@/composables/useTranslation';
+
+const { __ } = useTranslation();
 
 const rowHeights = inject('rowHeights');
 const { getIconUrl } = useWowheadIcons();
@@ -107,7 +110,7 @@ const sp = (n) => {
               :class="isAlt ? 'text-[9px]' : 'text-[10px]'"
               style="color: rgba(57,255,20,0.65);">
             <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">check_circle</span>
-            <span v-if="!isAlt">ALL CLEAR</span>
+            <span v-if="!isAlt">{{ __('ALL CLEAR') }}</span>
         </span>
     </td>
 
