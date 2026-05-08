@@ -96,11 +96,11 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                 <div v-show="!collapsed[group.id]" class="pb-1 px-1.5"
                     @drop="handleGroupDrop($event, group.id)" @dragover="handleGroupDragOver">
                     <div v-for="memberId in (group.members || [])" :key="memberId"
-                        class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 transition-colors group/member"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors group/member"
                         draggable="true" @dragstart="handleDragStart($event, memberId)">
-                        <div class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: group.color }"></div>
-                        <img v-if="getChar(memberId)?.avatar_url" :src="getChar(memberId).avatar_url" class="w-4 h-4 rounded object-cover">
-                        <span class="text-4xs font-semibold truncate flex-1"
+                        <div class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: group.color }"></div>
+                        <img v-if="getChar(memberId)?.avatar_url" :src="getChar(memberId).avatar_url" class="w-6 h-6 rounded object-cover">
+                        <span class="text-sm font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(getChar(memberId)?.playable_class)">{{ getChar(memberId)?.name || memberId }}</span>
                         <button v-if="canManage" @click.stop="emit('remove-from-group', { characterId: memberId, groupId: group.id })"
                             class="opacity-0 group-hover/member:opacity-100 text-on-surface-variant/40 hover:text-red-400 transition-all">
@@ -132,10 +132,10 @@ const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replac
                 </div>
                 <div class="pb-1 px-1.5">
                     <div v-for="char in unassignedCharacters" :key="char.id"
-                        class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 cursor-grab transition-colors group/member"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 cursor-grab transition-colors group/member"
                         draggable="true" @dragstart="handleDragStart($event, char.id)">
-                        <img v-if="char.avatar_url" :src="char.avatar_url" class="w-4 h-4 rounded object-cover border border-white/10">
-                        <span class="text-4xs font-semibold truncate flex-1"
+                        <img v-if="char.avatar_url" :src="char.avatar_url" class="w-6 h-6 rounded object-cover border border-white/10">
+                        <span class="text-sm font-semibold truncate flex-1"
                             :class="'text-wow-' + classSlug(char.playable_class)">{{ char.name }}</span>
                         <!-- Quick-assign buttons -->
                         <div v-if="canManage && groupEntries.length > 0"

@@ -1360,7 +1360,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             <!-- Canvas + palette -->
                             <div class="flex-1 flex overflow-hidden">
                                 <!-- Player palette with groups -->
-                                <div class="w-56 shrink-0 border-r border-white/5 overflow-y-auto">
+                                <div class="w-72 shrink-0 border-r border-white/5 overflow-y-auto">
                                     <PlayerPalette
                                         :characters="roster"
                                         :groups="currentGroups"

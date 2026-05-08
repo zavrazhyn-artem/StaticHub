@@ -388,9 +388,9 @@ const renderTimeFor = (a) => isDraggingAssignment(a.id) ? previewTime.value : a.
                 pointer-events="none" />
             <text
                 :x="leftWidth - LEFT_PADDING - AVATAR_SIZE - 6"
-                :y="row.y + (row.expanded ? HEADER_ROW : COLLAPSED_ROW) / 2 + 4"
+                :y="row.y + (row.expanded ? HEADER_ROW : COLLAPSED_ROW) / 2 + 5"
                 :fill="classColor(row.char.playable_class)"
-                font-size="11" font-weight="600" text-anchor="end" pointer-events="none">
+                font-size="14" font-weight="600" text-anchor="end" pointer-events="none">
                 {{ row.char.name }}
             </text>
 
