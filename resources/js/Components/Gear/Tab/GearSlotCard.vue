@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+
+const { __ } = useTranslation();
 
 const props = defineProps({
     slot: { type: String, required: true },
@@ -66,7 +69,7 @@ const wowheadDataAttr = computed(() => {
 
 const displayName = computed(() => {
     if (!props.item) return null;
-    return props.item.item_name || `Item #${props.item.item_id}`;
+    return props.item.item_name || __('Item #:id', { id: props.item.item_id });
 });
 
 const qualityClass = computed(() => {
@@ -108,7 +111,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span class="material-symbols-outlined text-lg leading-none">add</span>
                 </div>
                 <div class="flex-1 min-w-0 text-[11px] text-on-surface-variant/50 italic group-hover/add:text-on-surface-variant transition">
-                    empty
+                    {{ __('empty') }}
                 </div>
             </button>
             <template v-else>
@@ -116,7 +119,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span class="material-symbols-outlined text-base">remove</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] text-on-surface-variant/50 italic">empty</div>
+                    <div class="text-[11px] text-on-surface-variant/50 italic">{{ __('empty') }}</div>
                 </div>
             </template>
         </template>
@@ -153,7 +156,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span
                         v-if="hasMissingOptimization"
                         class="absolute -top-1.5 -right-1.5 bg-red-600 rounded-full w-3 h-3 flex items-center justify-center border border-[#0e0e10] z-10 shadow-sm"
-                        :title="missingEnchant && missingSocket ? 'Missing enchant + empty socket' : (missingEnchant ? 'Missing enchant' : 'Empty socket')"
+                        :title="missingEnchant && missingSocket ? __('Missing enchant + empty socket') : (missingEnchant ? __('Missing enchant') : __('Empty socket'))"
                     >
                         <span class="text-[8px] text-white font-bold leading-none">!</span>
                     </span>
@@ -161,7 +164,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span
                         v-if="item.is_bis_match"
                         class="absolute -bottom-1.5 -right-1.5 bg-success-neon/90 px-1 py-px rounded text-[8px] font-headline font-black uppercase tracking-widest text-black leading-none border border-[#0e0e10] z-10 shadow-sm"
-                        title="Matches your BiS list"
+                        :title="__('Matches your BiS list')"
                     >BIS</span>
                 </div>
 
@@ -170,9 +173,9 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                         {{ displayName }}
                     </div>
                     <div v-if="showEnchantTag || missingSocket" :class="['text-[9px] flex items-center gap-1 leading-tight', mirror ? 'justify-end' : '']">
-                        <span v-if="showEnchantTag && item.enchant_id" class="text-emerald-300/80">ench</span>
-                        <span v-else-if="showEnchantTag" class="text-red-400/70">no ench</span>
-                        <span v-if="missingSocket" class="text-red-400/70">empty gem</span>
+                        <span v-if="showEnchantTag && item.enchant_id" class="text-emerald-300/80">{{ __('ench') }}</span>
+                        <span v-else-if="showEnchantTag" class="text-red-400/70">{{ __('no ench') }}</span>
+                        <span v-if="missingSocket" class="text-red-400/70">{{ __('empty gem') }}</span>
                     </div>
                 </div>
             </a>
@@ -182,7 +185,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     type="button"
                     @click.stop="emit('edit')"
                     class="p-0.5 text-on-surface-variant hover:text-cyan-300 transition"
-                    title="Edit"
+                    :title="__('Edit')"
                 >
                     <span class="material-symbols-outlined text-sm">edit</span>
                 </button>
@@ -190,7 +193,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     type="button"
                     @click.stop="emit('clear')"
                     class="p-0.5 text-on-surface-variant hover:text-error transition"
-                    title="Clear"
+                    :title="__('Clear')"
                 >
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>

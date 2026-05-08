@@ -188,7 +188,7 @@ const itemsByBoss = computed(() => {
         if (!buckets.has(key)) {
             buckets.set(key, {
                 key,
-                label: item.boss_name || 'Other',
+                label: item.boss_name || __('Other'),
                 icon: 'skull',
                 accent: 'text-orange-300/80',
                 items: [],
@@ -212,7 +212,7 @@ const itemsBySlot = computed(() => {
         if (!buckets.has(slot)) {
             buckets.set(slot, {
                 key: slot,
-                label: SLOT_LABELS[slot] || slot.replace(/_/g, ' '),
+                label: __(SLOT_LABELS[slot] || slot.replace(/_/g, ' ')),
                 icon: 'checkroom',
                 accent: 'text-cyan-300/80',
                 items: [],
@@ -298,7 +298,7 @@ const deleteWishlist = (wishlistId) => {
                         availableDifficulties.has(d.id) ? 'cursor-pointer hover:text-white' : 'opacity-30 cursor-not-allowed',
                     ]"
                 >
-                    {{ d.label }}
+                    {{ __(d.label) }}
                 </button>
             </div>
 

@@ -457,7 +457,7 @@ const recipientMembers = computed(() => {
     const list = payload.value?.rosterCharacters ?? [];
     return list.map(c => ({
         id: c.id,
-        name: c.name + (c.role === 'alt' ? ' (alt)' : ''),
+        name: c.name + (c.role === 'alt' ? ` (${__('alt')})` : ''),
         character: { name: c.name, playable_class: c.class, avatar_url: c.avatar_url },
     }));
 });

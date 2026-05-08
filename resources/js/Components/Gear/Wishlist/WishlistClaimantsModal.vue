@@ -150,7 +150,7 @@ const fmtPercent = (v) => {
                             v-if="!c.is_main_spec"
                             class="px-1.5 py-px rounded text-[9px] font-bold normal-case tracking-normal border border-purple-400/40 bg-purple-500/10 text-purple-200"
                             :title="__('Off-spec wishlist')"
-                        >off-spec</span>
+                        >{{ __('off-spec') }}</span>
                     </div>
                 </div>
 
@@ -159,7 +159,7 @@ const fmtPercent = (v) => {
                         {{ fmtPercent(c.percent) }}
                     </div>
                     <div v-if="c.is_bis" class="flex items-center gap-0.5 text-[9px] font-headline font-black uppercase tracking-widest text-success-neon">
-                        <span class="material-symbols-outlined text-[11px]">star</span>BIS
+                        <span class="material-symbols-outlined text-[11px]">star</span>{{ __('BiS') }}
                     </div>
                     <div v-else class="text-[9px] font-mono text-on-surface-variant/60 tabular-nums">
                         {{ fmtValue(c.value) }}

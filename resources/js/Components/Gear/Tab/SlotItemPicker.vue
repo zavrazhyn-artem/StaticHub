@@ -64,7 +64,7 @@ const selectedLevel = ref(6);
 const activeTab = ref('all');
 const submitting = ref(false);
 
-const slotLabel = computed(() => SLOT_LABELS[props.slot] || props.slot);
+const slotLabel = computed(() => __(SLOT_LABELS[props.slot] || props.slot));
 
 const selectedTrack = computed(() => tracks.value.find(t => t.name === selectedTrackName.value) ?? null);
 
@@ -247,7 +247,7 @@ const pickItem = async (item) => {
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || data.success === false) {
-            pickError.value = data.error || 'Failed to update slot';
+            pickError.value = data.error || __('Failed to update slot');
             submitting.value = false;
             return;
         }
@@ -375,7 +375,7 @@ const close = () => {
                                         class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border"
                                         :class="sourceBadgeClass(item.source_type)"
                                     >
-                                        {{ r }}
+                                        {{ __(r) }}
                                     </span>
                                 </div>
                                 <div class="text-[10px] text-on-surface-variant truncate">

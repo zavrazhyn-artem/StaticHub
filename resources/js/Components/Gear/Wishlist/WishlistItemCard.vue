@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from 'vue';
+import { useTranslation } from '@/composables/useTranslation';
+
+const { __ } = useTranslation();
 
 const props = defineProps({
     item: { type: Object, required: true },
@@ -24,10 +27,10 @@ const percentLabel = computed(() => {
 const valueLabel = computed(() => {
     const n = Number(props.item.value);
     if (Number.isNaN(n)) return '';
-    return `${n > 0 ? '+' : ''}${n.toLocaleString()} dps`;
+    return `${n > 0 ? '+' : ''}${n.toLocaleString()} ${__('dps')}`;
 });
 
-const displayName = computed(() => props.item.item_name || `Item #${props.item.item_id}`);
+const displayName = computed(() => props.item.item_name || __('Item #:id', { id: props.item.item_id }));
 
 const wowheadHref = computed(() => {
     const params = [];
@@ -76,7 +79,7 @@ const percentClass = computed(() => {
         @click="emit('open-claimants', item)"
         :data-wowhead="wowheadDataAttr"
         :class="['group relative flex items-center gap-3 px-3 py-2.5 rounded-lg border transition w-full text-left cursor-pointer hover:brightness-110', cardClass]"
-        :title="`${valueLabel} — ${claimantCount} claimant${claimantCount === 1 ? '' : 's'}`"
+        :title="`${valueLabel} — ${claimantCount} ${claimantCount === 1 ? __('claimant') : __('claimants')}`"
     >
         <div class="shrink-0">
             <img
@@ -113,7 +116,7 @@ const percentClass = computed(() => {
             <div
                 v-if="claimantCount > 0"
                 class="flex items-center gap-1.5 text-[10px] font-headline font-bold uppercase tracking-widest"
-                :title="`${claimantCount} claimant${claimantCount === 1 ? '' : 's'}, ${bisCount} BiS`"
+                :title="`${claimantCount} ${claimantCount === 1 ? __('claimant') : __('claimants')}, ${bisCount} ${__('BiS')}`"
             >
                 <span class="flex items-center gap-0.5 text-on-surface-variant">
                     <span class="material-symbols-outlined text-[12px]">groups</span>

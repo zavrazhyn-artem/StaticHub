@@ -161,7 +161,7 @@ const openExportSimc = async () => {
         const data = await resp.json();
         exportText.value = data.simc ?? '';
     } catch (e) {
-        exportText.value = '# Failed to load: ' + (e?.message ?? e);
+        exportText.value = '# ' + __('Failed to load:') + ' ' + (e?.message ?? e);
     } finally {
         exportLoading.value = false;
     }
@@ -412,7 +412,7 @@ const typeColor = (type) => ({
                     type="text"
                     maxlength="80"
                     required
-                    placeholder="My M+ Setup"
+                    :placeholder="__('My M+ Setup')"
                     class="w-full px-4 py-2.5 bg-surface-container border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400"
                 />
             </div>

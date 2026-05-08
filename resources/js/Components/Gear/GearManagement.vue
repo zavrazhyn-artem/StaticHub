@@ -200,7 +200,7 @@ onMounted(() => {
             >
                 <span class="material-symbols-outlined text-base">{{ tab.icon }}</span>
                 {{ __(tab.label) }}
-                <span v-if="tab.disabled" class="text-[10px] text-on-surface-variant/60 normal-case font-normal">(soon)</span>
+                <span v-if="tab.disabled" class="text-[10px] text-on-surface-variant/60 normal-case font-normal">({{ __('soon') }})</span>
             </button>
         </nav>
 
