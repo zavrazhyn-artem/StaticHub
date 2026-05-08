@@ -36,6 +36,19 @@ const QUALITY_COLORS = {
 // audit) — falls back to a sane built-in if the prop is empty.
 const FALLBACK_ENCHANTABLE = ['head', 'shoulder', 'chest', 'legs', 'feet', 'finger_1', 'finger_2', 'main_hand', 'off_hand'];
 
+// Mirrors SlotItemPicker / WishlistPanel — kept duplicated rather than
+// extracted because each consumer slices the set slightly differently
+// (here we don't need the slug-cleanup fallback). When an empty slot
+// renders, we fall through to this so users see "Head" / "Голова"
+// instead of a blank "empty" placeholder.
+const SLOT_LABELS = {
+    head: 'Head', neck: 'Neck', shoulder: 'Shoulder', back: 'Back', chest: 'Chest',
+    wrist: 'Wrist', hands: 'Hands', waist: 'Waist', legs: 'Legs', feet: 'Feet',
+    finger_1: 'Finger', finger_2: 'Finger', trinket_1: 'Trinket', trinket_2: 'Trinket',
+    main_hand: 'Main Hand', off_hand: 'Off Hand', ranged: 'Ranged',
+};
+const slotLabel = computed(() => __(SLOT_LABELS[props.slot] || props.slot));
+
 const iconUrl = computed(() => {
     if (!props.item?.item_icon) return null;
     const raw = props.item.item_icon;
@@ -111,7 +124,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span class="material-symbols-outlined text-lg leading-none">add</span>
                 </div>
                 <div class="flex-1 min-w-0 text-[11px] text-on-surface-variant/50 italic group-hover/add:text-on-surface-variant transition">
-                    {{ __('empty') }}
+                    {{ slotLabel }}
                 </div>
             </button>
             <template v-else>
@@ -119,7 +132,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <span class="material-symbols-outlined text-base">remove</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] text-on-surface-variant/50 italic">{{ __('empty') }}</div>
+                    <div class="text-[11px] text-on-surface-variant/50 italic">{{ slotLabel }}</div>
                 </div>
             </template>
         </template>
