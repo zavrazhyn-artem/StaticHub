@@ -11,12 +11,14 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Builds the SavedVariables-shaped payload that the BlastR Desktop
- * bridge consumes from GET /api/v1/sync/wishlists.
+ * Builds the SavedVariables-shaped wishlist payload nested inside the
+ * unified GET /api/desktop/sync response. {@see DesktopSyncService}
+ * is the actual envelope; this service stays focused on the wishlist
+ * shape so the contract docs in external/_spec/savedvariables.md keep
+ * pointing at one well-bounded source.
  *
- * The shape is mirrored exactly in external/_spec/savedvariables.md;
- * see that doc for the contract. When fields here change, bump the
- * BlastRSchema constant and update the addon side in lockstep.
+ * When fields here change, bump SCHEMA_VERSION and update the addon
+ * side in lockstep.
  */
 final class WishlistSyncService
 {

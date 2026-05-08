@@ -84,6 +84,7 @@ app.component('landing-page',              lazy(() => import('./Components/Landi
 app.component('feedback-list',             lazy(() => import('./Components/Feedback/FeedbackList.vue')));
 app.component('feedback-detail',           lazy(() => import('./Components/Feedback/FeedbackDetail.vue')));
 app.component('roadmap-kanban',            lazy(() => import('./Components/Feedback/RoadmapKanban.vue')));
+app.component('desktop-download-page',     lazy(() => import('./Components/Desktop/DownloadPage.vue')));
 
 // Mount Vue to the element with id="app" if it exists
 if (document.getElementById('app')) {

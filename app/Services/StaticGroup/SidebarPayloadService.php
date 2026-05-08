@@ -213,6 +213,7 @@ class SidebarPayloadService
         return [
             $this->navItem(__('My Characters'), 'shield_person', route('characters.index'), 'characters.*'),
             $settingsItem,
+            $this->navItem(__('Download App'), 'download', route('desktop.index'), 'desktop.*'),
         ];
     }
 

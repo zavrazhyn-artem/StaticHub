@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 
-#[Fillable(['name', 'email', 'locale', 'password', 'battlenet_id', 'battletag', 'hide_battletag', 'avatar', 'discord_id', 'discord_username'])]
+#[Fillable(['name', 'email', 'locale', 'password', 'battlenet_id', 'battletag', 'hide_battletag', 'avatar', 'discord_id', 'discord_username', 'desktop_settings'])]
 #[Hidden(['password', 'remember_token'])]
 /**
  * @property int $id
@@ -141,6 +141,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'hide_battletag' => 'boolean',
+            'desktop_settings' => 'array',
+        ];
+    }
+
+    /**
+     * BlastR Desktop bridge settings, merged with defaults so callers
+     * always get a complete shape regardless of what's stored.
+     *
+     * @return array{
+     *   sync_interval_minutes:int,
+     *   pre_raid_sync_enabled:bool,
+     *   pre_raid_sync_offset_minutes:int,
+     *   auto_update_enabled:bool
+     * }
+     */
+    public function getDesktopSettings(): array
+    {
+        return array_replace(self::desktopSettingsDefaults(), $this->desktop_settings ?? []);
+    }
+
+    /**
+     * Defaults are also the reset target — kept here so /api/desktop/sync
+     * and the settings PATCH endpoint share one source of truth.
+     */
+    public static function desktopSettingsDefaults(): array
+    {
+        return [
+            'sync_interval_minutes'        => 60,
+            'pre_raid_sync_enabled'        => true,
+            'pre_raid_sync_offset_minutes' => 5,
+            'auto_update_enabled'          => true,
         ];
     }
     public function transactions(): HasMany

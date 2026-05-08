@@ -28,6 +28,7 @@ use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
 use App\Http\Controllers\Auth\OAuthDeviceApprovalController;
+use App\Http\Controllers\Desktop\DownloadController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedbackCommentController;
 use App\Http\Controllers\FeedbackSubtaskController;
@@ -134,6 +135,9 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::post('/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
     Route::post('/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
     Route::post('/settings/logs/disconnect-guild', [StaticSettingsController::class, 'disconnectGuild'])->name('statics.settings.logs.disconnect-guild');
+
+    // BlastR Desktop bridge — public landing for the installer + onboarding.
+    Route::get('/desktop', [DownloadController::class, 'index'])->name('desktop.index');
 
     // Logs
     Route::get('/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');

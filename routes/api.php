@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\AiAnalystController;
+use App\Http\Controllers\Api\Desktop\DesktopController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Api\DiscordInteractionController;
 use App\Http\Controllers\Api\Sync\OAuthDeviceController;
 use App\Http\Controllers\Api\Sync\LootHistoryController;
-use App\Http\Controllers\Api\Sync\WishlistController;
 use App\Http\Middleware\VerifyDiscordSignature;
 use Illuminate\Support\Facades\Route;
 
@@ -38,11 +38,14 @@ Route::middleware('auth:sanctum')
     })
     ->name('api.sync.me');
 
-// Wishlist pull — bridge polls this on its 30s loop and transcodes the
-// payload into the BlastR_RCLootCouncil SavedVariables file.
-Route::middleware('auth:sanctum')
-    ->get('/v1/sync/wishlists', [WishlistController::class, 'index'])
-    ->name('api.sync.wishlists');
+// Bridge unified heartbeat: wishlists + settings + schedule + manifest.
+// Replaces the old /v1/sync/wishlists — bridge does one round-trip per
+// cycle and gets everything it needs (data to write, runtime knobs to
+// honour, next raid for pre-RT sync, version manifest for self-update).
+Route::middleware('auth:sanctum')->prefix('desktop')->group(function () {
+    Route::get('/sync', [DesktopController::class, 'sync'])->name('api.desktop.sync');
+    Route::patch('/settings', [DesktopController::class, 'updateSettings'])->name('api.desktop.settings.update');
+});
 
 // Loot-history push — bridge drains BlastROutboxEvents into this and
 // drops the events from the SV on a 200 response. Idempotent on
