@@ -168,7 +168,7 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <!-- Missing-optimization badge (enchant and/or socket) -->
                     <span
                         v-if="hasMissingOptimization"
-                        class="absolute -top-1.5 -right-1.5 bg-red-600 rounded-full w-3 h-3 flex items-center justify-center border border-[#0e0e10] z-10 shadow-sm"
+                        class="absolute -top-1.5 -right-1.5 bg-red-500 rounded-full w-3 h-3 flex items-center justify-center border border-[#0e0e10] z-10 shadow-sm"
                         :title="missingEnchant && missingSocket ? __('Missing enchant + empty socket') : (missingEnchant ? __('Missing enchant') : __('Empty socket'))"
                     >
                         <span class="text-[8px] text-white font-bold leading-none">!</span>
@@ -187,8 +187,8 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     </div>
                     <div v-if="showEnchantTag || missingSocket" :class="['text-[9px] flex items-center gap-1 leading-tight', mirror ? 'justify-end' : '']">
                         <span v-if="showEnchantTag && item.enchant_id" class="text-emerald-300/80">{{ __('ench') }}</span>
-                        <span v-else-if="showEnchantTag" class="text-red-400/70">{{ __('no ench') }}</span>
-                        <span v-if="missingSocket" class="text-red-400/70">{{ __('empty gem') }}</span>
+                        <span v-else-if="showEnchantTag" class="text-red-500">{{ __('no ench') }}</span>
+                        <span v-if="missingSocket" class="text-red-500">{{ __('empty gem') }}</span>
                     </div>
                 </div>
             </a>
