@@ -234,10 +234,19 @@ final class GearViewService
 
     /**
      * Stats panel:
-     *  - Current list  → real in-game stats from bnet_statistics
-     *  - BiS / Custom  → set total computed from picked items' season_stats,
-     *                    each scaled by 1.083^((item_ilvl-289)/15) so the user
-     *                    sees how the build evolves as they pick higher tiers.
+     *  - Current list  → real in-game stats from bnet_statistics (% values
+     *                    that mirror what the player sees in-game)
+     *  - BiS / Custom  → DELTA against the current list, computed by
+     *                    aggregating both lists' real_stats (rating units)
+     *                    and subtracting. We pick deltas over absolute totals
+     *                    so the user immediately sees how a build differs
+     *                    from what's equipped right now — the absolute number
+     *                    "+150 Haste" is more actionable than "2400 Haste"
+     *                    when the question is "should I run this set tonight".
+     *
+     * If there's no current list to baseline against (BNet not synced yet,
+     * spec was just created, etc), we fall back to the absolute aggregate
+     * so the user still sees something meaningful.
      */
     private function resolveStats(GearList $list): ?array
     {
@@ -253,7 +262,49 @@ final class GearViewService
             );
         }
 
-        return $this->aggregateSeasonStats($list);
+        $listAggregate = $this->aggregateSeasonStats($list);
+        if ($listAggregate === null) {
+            return null;
+        }
+
+        $current = GearList::query()
+            ->findCurrent((int) $list->character_id, (int) $list->spec_id);
+        if ($current === null) {
+            return $listAggregate;
+        }
+        $current->load('items');
+        $currentAggregate = $this->aggregateSeasonStats($current);
+        if ($currentAggregate === null) {
+            return $listAggregate;
+        }
+
+        return $this->subtractAggregates($listAggregate, $currentAggregate);
+    }
+
+    /**
+     * Element-wise list - current. Both inputs share the same schema (the
+     * one returned by aggregateSeasonStats), so we can zip attributes /
+     * enhancements pairwise without remapping by label.
+     *
+     * is_delta=true tells CharacterStatsPanel to render with sign + colour
+     * cues (green/red/grey for positive/negative/zero).
+     */
+    private function subtractAggregates(array $list, array $current): array
+    {
+        $sub = function (array $a, array $b): array {
+            return array_map(fn ($x, $y) => [
+                'label'   => $x['label'],
+                'value'   => (int) ($x['value'] ?? 0) - (int) ($y['value'] ?? 0),
+                'is_main' => $x['is_main'] ?? false,
+            ], $a, $b);
+        };
+
+        return [
+            'item_level'   => (int) ($list['item_level'] ?? 0) - (int) ($current['item_level'] ?? 0),
+            'attributes'   => $sub($list['attributes'] ?? [], $current['attributes'] ?? []),
+            'enhancements' => $sub($list['enhancements'] ?? [], $current['enhancements'] ?? []),
+            'is_delta'     => true,
+        ];
     }
 
     /**
