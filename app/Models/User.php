@@ -174,6 +174,7 @@ class User extends Authenticatable
             'auto_update_enabled'          => true,
             'auto_update_addons_enabled'   => true,
             'notifications_enabled'        => true,
+            'start_with_windows'           => false,
         ];
     }
     public function transactions(): HasMany

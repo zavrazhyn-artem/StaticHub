@@ -56,6 +56,7 @@ final class DesktopController extends Controller
             'auto_update_enabled'          => ['sometimes', 'boolean'],
             'auto_update_addons_enabled'   => ['sometimes', 'boolean'],
             'notifications_enabled'        => ['sometimes', 'boolean'],
+            'start_with_windows'           => ['sometimes', 'boolean'],
         ]);
 
         // Merge into existing settings so partial PATCH keeps untouched
