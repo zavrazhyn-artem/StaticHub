@@ -30,17 +30,25 @@ VERSION="$1"
     exit 1
 }
 
-# Refuse to ship a dev build pointing at local.blastr.pro — that string
-# only exists when DefaultAPIBase wasn't overridden via -ldflags. The
-# release build incantation:
+# Refuse to ship a dev build. The literal string "local.blastr.pro"
+# is always present (it's a constant in hostIsProduction's whitelist),
+# so we can't grep for it directly. Instead we look at the recorded
+# -ldflags in the Go build info — a prod build always contains the
+# explicit `DefaultAPIBase=https://blastr.pro` -X assignment.
+#
+# Release build incantation:
 #
 #   wails build -platform windows/amd64 \
 #     -ldflags "-X github.com/zavrazhyn-artem/blastr-desktop/internal/config.DefaultAPIBase=https://blastr.pro \
 #               -X github.com/zavrazhyn-artem/blastr-desktop/internal/config.Version=$VERSION"
-if strings "$SOURCE_EXE" | grep -q "local\.blastr\.pro"; then
+# `grep -q` exits early on match → strings gets SIGPIPE → pipefail
+# turns the success into a failure. `grep -c` reads the whole stream
+# so the pipe drains cleanly.
+PROD_HITS=$(strings "$SOURCE_EXE" | grep -c -- "-X github.com/zavrazhyn-artem/blastr-desktop/internal/config\.DefaultAPIBase=https://blastr\.pro" || true)
+if [[ "$PROD_HITS" -eq 0 ]]; then
     cat >&2 <<EOF
-Refusing to publish: $SOURCE_EXE points to local.blastr.pro.
-Rebuild with prod ldflags (see comment in tools/publish-bridge.sh).
+Refusing to publish: $SOURCE_EXE was not built with prod ldflags.
+Rebuild with the wails build incantation in tools/publish-bridge.sh.
 EOF
     exit 1
 fi

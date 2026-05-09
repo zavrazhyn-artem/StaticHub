@@ -32,16 +32,20 @@ VERSION="$1"
     exit 1
 }
 
-# Sister-bridge sanity: NSIS bundles the freshly built blastr.exe, so
-# if that one points at local.blastr.pro, this installer ships the
-# same broken URL. Refuse to publish unless the matching bridge.exe
-# was already published with the same prod-ldflags build.
+# Sister-bridge sanity: NSIS bundles the freshly built blastr.exe.
+# Verify it was built with prod -ldflags — the recorded build flags
+# in the binary string table must contain the prod DefaultAPIBase
+# -X assignment, otherwise the installer ships a dev URL.
 SISTER_BRIDGE="$REPO_ROOT/external/desktop/build/bin/blastr.exe"
-if [[ -f "$SISTER_BRIDGE" ]] && strings "$SISTER_BRIDGE" | grep -q "local\.blastr\.pro"; then
+SISTER_HITS=0
+if [[ -f "$SISTER_BRIDGE" ]]; then
+    SISTER_HITS=$(strings "$SISTER_BRIDGE" | grep -c -- "-X github.com/zavrazhyn-artem/blastr-desktop/internal/config\.DefaultAPIBase=https://blastr\.pro" || true)
+fi
+if [[ -f "$SISTER_BRIDGE" && "$SISTER_HITS" -eq 0 ]]; then
     cat >&2 <<EOF
-Refusing to publish: bundled blastr.exe points to local.blastr.pro.
-Rebuild bridge + installer with prod ldflags first
-(see tools/publish-bridge.sh for the wails build incantation).
+Refusing to publish: bundled blastr.exe was not built with prod ldflags.
+Rebuild bridge + installer with the wails build incantation in
+tools/publish-bridge.sh.
 EOF
     exit 1
 fi
