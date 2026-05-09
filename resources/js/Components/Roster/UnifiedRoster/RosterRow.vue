@@ -149,7 +149,7 @@ const emit = defineEmits([
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-1">
-                            <span class="font-bold tracking-tight truncate"
+                            <span class="font-bold tracking-tight truncate cursor-default"
                                   :class="[classColors[char?.class] ?? 'text-white', isAlt ? 'text-xs' : 'text-base']">
                                 {{ char?.name || (isAlt ? __('Unknown') : member.name) }}
                             </span>
@@ -163,7 +163,7 @@ const emit = defineEmits([
                                 </span>
                             </button>
                         </div>
-                        <div v-if="!isAlt && member.name !== char?.name" class="text-4xs text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight">
+                        <div v-if="!isAlt && member.name !== char?.name" class="text-4xs text-on-surface-variant font-medium uppercase tracking-tighter truncate leading-tight cursor-default">
                             {{ member.name }}
                         </div>
                     </div>
@@ -230,7 +230,7 @@ const emit = defineEmits([
                       :class="isAlt ? 'text-[9px]' : 'text-[10px]'"
                       style="color: rgba(57,255,20,0.65);">
                     <span class="material-symbols-outlined leading-none" :class="isAlt ? 'text-xs' : 'text-sm'">check_circle</span>
-                    <span v-if="!isAlt">ALL CLEAR</span>
+                    <span v-if="!isAlt">{{ __('ALL CLEAR') }}</span>
                 </span>
             </td>
 

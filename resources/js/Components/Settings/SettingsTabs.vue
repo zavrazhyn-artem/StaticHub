@@ -3,11 +3,12 @@ import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
 
 defineProps({
-    profileUrl:  { type: String, required: true },
-    scheduleUrl: { type: String, required: true },
-    discordUrl:  { type: String, required: true },
-    logsUrl:     { type: String, required: true },
-    activeTab:   { type: String, required: true }, // 'profile' | 'schedule' | 'discord' | 'logs'
+    profileUrl:         { type: String, required: true },
+    scheduleUrl:        { type: String, required: true },
+    discordUrl:         { type: String, required: true },
+    logsUrl:            { type: String, required: true },
+    wishlistConfigsUrl: { type: String, default: '' },
+    activeTab:   { type: String, required: true }, // 'profile' | 'schedule' | 'discord' | 'logs' | 'wishlist-configs'
     canManage:   { type: Boolean, default: false },
 });
 </script>
@@ -55,6 +56,16 @@ defineProps({
                     {{ __('Warcraft Logs & AI') }}
                 </div>
                 <div v-if="activeTab === 'logs'"
+                     class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+            </a>
+            <a v-if="wishlistConfigsUrl" :href="wishlistConfigsUrl"
+               :class="['px-6 py-4 font-headline text-xs font-bold uppercase tracking-widest transition-all relative group',
+                        activeTab === 'wishlist-configs' ? 'text-slate-400' : 'text-on-surface-variant hover:text-white']">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-m">tune</span>
+                    {{ __('Wishlist Configs') }}
+                </div>
+                <div v-if="activeTab === 'wishlist-configs'"
                      class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
             </a>
         </template>

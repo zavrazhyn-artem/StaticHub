@@ -38,7 +38,7 @@
             >
                 <div class="flex items-center gap-1">
                     <span
-                        class="text-[13px] font-extrabold truncate"
+                        class="text-[13px] font-extrabold truncate cursor-default"
                         :style="{ color: classColor }"
                     >{{ user.name }}</span>
                     <span

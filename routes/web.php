@@ -15,15 +15,20 @@ use App\Http\Controllers\Raid\ScheduleController;
 use App\Http\Controllers\Static\JoinStaticController;
 use App\Http\Controllers\Static\StaticController;
 use App\Http\Controllers\Logs\LogTranslationController;
+use App\Http\Controllers\Loot\LootHistoryController;
 use App\Http\Controllers\Logs\ReportFeedbackController;
 use App\Http\Controllers\Logs\StaticLogsController;
 use App\Http\Controllers\Static\RosterController;
 use App\Http\Controllers\Static\StaticRosterController;
 use App\Http\Controllers\Settings\StaticSettingsController;
 use App\Http\Controllers\Gear\GearController;
+use App\Http\Controllers\Gear\GearListController;
+use App\Http\Controllers\Gear\WishlistController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
+use App\Http\Controllers\Auth\OAuthDeviceApprovalController;
+use App\Http\Controllers\Desktop\DownloadController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedbackCommentController;
 use App\Http\Controllers\FeedbackSubtaskController;
@@ -37,6 +42,11 @@ Route::get('/', function () {
 });
 
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
+
+// Public installer download — no auth gate. Bridge auto-update flows
+// through /api/desktop/bridge under sanctum auth instead; this is the
+// first-install bootstrap for users who haven't paired anything yet.
+Route::get('/desktop/install.exe', [DownloadController::class, 'installer'])->name('desktop.installer');
 
 // Lightweight health/ping endpoint.
 // Default: returns {"message":"ok"} with no Sentry side-effect — safe for uptime monitors.
@@ -86,11 +96,42 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::patch('/treasury/{transaction}', [TreasuryController::class, 'update'])->name('statics.treasury.update');
     Route::patch('/treasury-settings', [TreasuryController::class, 'updateSettings'])->name('statics.treasury.settings.update');
 
-    // Gear Management
+    // Gear Management — single controller, tab passed via URL so refreshes
+    // land back on the same tab and the URL is shareable. The {tab} regex
+    // excludes "wishlists" / "lists" so the existing CRUD routes below
+    // keep matching first.
     Route::get('/gear', [GearController::class, 'index'])->name('statics.gear');
+    Route::get('/gear/{tab}', [GearController::class, 'index'])
+        ->where('tab', 'wishlist|loot-history')
+        ->name('statics.gear.tab');
+    Route::post('/gear/wishlists', [WishlistController::class, 'store'])->name('statics.gear.wishlists.store');
+    Route::delete('/gear/wishlists/{wishlist}', [WishlistController::class, 'destroy'])->name('statics.gear.wishlists.destroy');
+
+    // Allowed Droptimizer configurations — per-static, managed in settings
+    Route::get('/wishlist-configs', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'index'])->name('statics.wishlist-configs.index');
+    Route::post('/wishlist-configs', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'store'])->name('statics.wishlist-configs.store');
+    Route::patch('/wishlist-configs/{config}', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'update'])->name('statics.wishlist-configs.update');
+    Route::delete('/wishlist-configs/{config}', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'destroy'])->name('statics.wishlist-configs.destroy');
+
+    Route::get('/gear/lists/summaries', [GearListController::class, 'summaries'])->name('statics.gear.lists.summaries');
+    Route::get('/gear/lists/{list}/payload', [GearListController::class, 'activePayload'])->name('statics.gear.lists.payload');
+    Route::post('/gear/lists', [GearListController::class, 'store'])->name('statics.gear.lists.store');
+    Route::patch('/gear/lists/{list}', [GearListController::class, 'update'])->name('statics.gear.lists.update');
+    Route::delete('/gear/lists/{list}', [GearListController::class, 'destroy'])->name('statics.gear.lists.destroy');
+    Route::get('/gear/lists/{list}/picker', [GearListController::class, 'pickerOptions'])->name('statics.gear.lists.picker');
+    Route::get('/gear/lists/{list}/export-simc', [GearListController::class, 'exportSimc'])->name('statics.gear.lists.export-simc');
+    Route::patch('/gear/lists/{list}/slot', [GearListController::class, 'setSlot'])->name('statics.gear.lists.set-slot');
+    Route::post('/gear/lists/{list}/simc', [GearListController::class, 'importSimc'])->name('statics.gear.lists.import-simc');
+    Route::post('/gear/bis', [GearListController::class, 'importBis'])->name('statics.gear.lists.import-bis');
+
+    // Loot history (RC awards captured by the BlastR addon → bridge → here)
+    // Lives as a tab inside the Gear page; this is the JSON endpoint the
+    // tab fetches lazily on activation.
+    Route::get('/gear/loot-history/payload', [LootHistoryController::class, 'payload'])->name('statics.gear.loot-history.payload');
 
     // Settings
     Route::get('/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
+    Route::get('/settings/wishlist-configs', [StaticSettingsController::class, 'wishlistConfigs'])->name('statics.settings.wishlist-configs');
     Route::get('/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::patch('/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
     Route::get('/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
@@ -106,6 +147,9 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::post('/settings/logs', [StaticSettingsController::class, 'updateLogs'])->name('statics.settings.logs.update');
     Route::post('/settings/logs/connect-guild', [StaticSettingsController::class, 'connectGuild'])->name('statics.settings.logs.connect-guild');
     Route::post('/settings/logs/disconnect-guild', [StaticSettingsController::class, 'disconnectGuild'])->name('statics.settings.logs.disconnect-guild');
+
+    // BlastR Desktop bridge — public landing for the installer + onboarding.
+    Route::get('/desktop', [DownloadController::class, 'index'])->name('desktop.index');
 
     // Logs
     Route::get('/logs', [StaticLogsController::class, 'index'])->name('statics.logs.index');
@@ -204,6 +248,23 @@ Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('pla
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');
 Route::get('/auth/battlenet/callback', [BattleNetController::class, 'callback'])->name('battlenet.callback');
+
+// OAuth Device Authorization Grant (browser side). The bridge sends users
+// here with ?user_code=ABCD-EFGH; show() bounces guests through Bnet
+// OAuth and brings them back. approve()/deny() require an authenticated
+// session.
+// Tight throttle on the approve view + actions — without this an
+// authenticated session could brute-force user_codes (8 chars × 32
+// alphabet ≈ 10^12 space). The /api/v1/oauth/device endpoints are
+// already throttled but the browser approval surface wasn't, which
+// would have given an attacker a quiet side channel.
+Route::middleware('throttle:30,1')->group(function () {
+    Route::get('/oauth/device', [OAuthDeviceApprovalController::class, 'show'])->name('oauth.device.show');
+});
+Route::middleware(['auth', 'throttle:30,1'])->group(function () {
+    Route::post('/oauth/device/approve', [OAuthDeviceApprovalController::class, 'approve'])->name('oauth.device.approve');
+    Route::post('/oauth/device/deny',    [OAuthDeviceApprovalController::class, 'deny'])->name('oauth.device.deny');
+});
 
 // ----- Feedback / Roadmap --------------------------------------------------
 // Public browsing (guests see everything, but can't act).

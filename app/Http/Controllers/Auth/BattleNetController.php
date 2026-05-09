@@ -93,6 +93,16 @@ class BattleNetController extends Controller
             }
         }
 
+        // Device-flow round-trip: bridge sent the user to /oauth/device, we
+        // bounced them through Bnet OAuth, now hand them back to the
+        // approval page with the original user_code intact.
+        if ($returnTo = session('oauth_device_return_to')) {
+            session()->forget('oauth_device_return_to');
+            if ($this->isSafePublicPath($returnTo)) {
+                return redirect($returnTo);
+            }
+        }
+
         if (User::query()->hasMainCharacter($user->id)) {
             return redirect()->route('dashboard');
         }
@@ -111,6 +121,6 @@ class BattleNetController extends Controller
 
         $pathOnly = parse_url($path, PHP_URL_PATH) ?? '';
 
-        return (bool) preg_match('#^/(feedback|roadmap|changelog|help)(?:/|$)#', $pathOnly);
+        return (bool) preg_match('#^/(feedback|roadmap|changelog|help|oauth/device)(?:/|$)#', $pathOnly);
     }
 }

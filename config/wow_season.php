@@ -631,6 +631,19 @@ return [
     | Each entry: [min_ilvl, max_ilvl, css_color_class].
     | Evaluated top-down, first match wins.
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Wishlist sources to exclude from the Gear / Wishlist tab
+    |--------------------------------------------------------------------------
+    | Reserved for future use. Earlier Midnight S1 entry "instance-1314" was
+    | removed once the seeded items table proved that 1314 = The Dreamrift
+    | (a real raid), not Catalyst — Catalyst items live under their own
+    | source_type=catalyst with non-overlapping item ids. Cross-raid
+    | duplicate entries from Raidbots (same item id in two raid simulations)
+    | are collapsed at render-time by WishlistPanel's dedup-by-item_id.
+    */
+    'wishlist_excluded_raid_slugs' => [],
+
     'crafted_ilvl_tiers' => [
         ['min' => 275, 'max' => 285, 'color' => 'text-orange-400'],
         ['min' => 262, 'max' => 274, 'color' => 'text-purple-400'],
@@ -667,42 +680,134 @@ return [
     |   raid_finder:   12777..12782
     |   world_advanced:12769..12774  (Adventurer)
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Crafted Item Quality Tiers — Season 17
+    |--------------------------------------------------------------------------
+    | Crafted gear ilvl is a function of TWO independent reagent choices:
+    |   1. Concentration / Spark tier — determines the base ilvl band
+    |      (None = Champion, Heroic Spark = Hero, Mythic Spark = Myth-ish)
+    |   2. Quality 1-5 — crafter skill / reagent quality bumps ilvl within
+    |      that band
+    |
+    | Picker presents each spark band as a separate "track" (Mythic/
+    | Heroic/Base) and the level dropdown is the 1-5 quality.
+    |
+    | Source: Wowhead patch notes for Midnight S1 crafted gear ilvl curve.
+    | Numbers are the published values; verify after each season patch.
+    */
+    'crafted_tracks' => [
+        'Mythic' => [
+            1 => 272, 2 => 275, 3 => 279, 4 => 282, 5 => 285,
+        ],
+        'Heroic' => [
+            1 => 259, 2 => 263, 3 => 266, 4 => 269, 5 => 272,
+        ],
+        'Base' => [
+            1 => 246, 2 => 250, 3 => 253, 4 => 256, 5 => 259,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Missive bonus IDs — Midnight Season 17
+    |--------------------------------------------------------------------------
+    | When a user picks 2 of 4 secondaries on a Missive-socket crafted item,
+    | we append the matching bonus_id to the gear_list_item's bonus_ids
+    | array. The slot card forwards bonus_ids to Wowhead's tooltip so the
+    | hover shows "+81 Crit, +81 Haste" instead of "Random Stat 1/2".
+    |
+    | Keys are the alphabetised stat pair (always lower-cased, alphabetical).
+    | Set 0 to disable the tooltip rewrite for an unknown pair.
+    |
+    | TODO: replace the zeros with the real Midnight S1 IDs. Quickest way to
+    | grab them: load any crafted item with that exact missive on Wowhead
+    | (or `https://www.wowhead.com/item={id}?bonus=...`) and read the bonus
+    | number from the URL bar after toggling the missive.
+    */
+    /*
+    |--------------------------------------------------------------------------
+    | Upgrade-level pickers — wowaudit-style "Myth 6/6", "Hero 3/6" …
+    |--------------------------------------------------------------------------
+    | Used by the per-static "Allowed Droptimizer configurations" tab so
+    | raid leads pick a friendly track name and the matcher / Raidbots
+    | deep-link resolve it to an ilvl through this table. "Base level"
+    | maps to level 1 of each track; the rest are levels 2-6.
+    */
+    'wishlist_upgrade_levels' => [
+        'mythic' => [
+            'Base level' => 272, 'Myth 2/6' => 276, 'Myth 3/6' => 279,
+            'Myth 4/6'   => 282, 'Myth 5/6' => 285, 'Myth 6/6'  => 289,
+        ],
+        'heroic' => [
+            'Base level' => 259, 'Hero 2/6' => 263, 'Hero 3/6' => 266,
+            'Hero 4/6'   => 269, 'Hero 5/6' => 272, 'Hero 6/6'  => 276,
+        ],
+        'normal' => [
+            'Base level'   => 246, 'Champion 2/6' => 250, 'Champion 3/6' => 253,
+            'Champion 4/6' => 256, 'Champion 5/6' => 259, 'Champion 6/6' => 263,
+        ],
+        'lfr' => [
+            'Base level'  => 233, 'Veteran 2/6' => 237, 'Veteran 3/6' => 240,
+            'Veteran 4/6' => 243, 'Veteran 5/6' => 246, 'Veteran 6/6' => 250,
+        ],
+    ],
+
+    'crafted_missive_bonus_ids' => [
+        'crit_haste'          => 8790,
+        'crit_mastery'        => 8791,
+        'crit_versatility'    => 8795,
+        'haste_mastery'       => 8793,
+        'haste_versatility'   => 8792,
+        'mastery_versatility' => 8794,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Crafted "season" bonus_id — Midnight S1
+    |--------------------------------------------------------------------------
+    | Stamps the "Radiance Crafted" green caption on crafted items in the
+    | Wowhead tooltip. Appended to bonus_ids for every is_craftable pick
+    | regardless of whether a missive was chosen.
+    */
+    'crafted_season_bonus_id' => 12066,
+
     'item_upgrade_tracks' => [
-        // Myth (6 levels)
-        12801 => ['track' => 'Myth', 'level' => 1, 'max' => 6],
-        12802 => ['track' => 'Myth', 'level' => 2, 'max' => 6],
-        12803 => ['track' => 'Myth', 'level' => 3, 'max' => 6],
-        12804 => ['track' => 'Myth', 'level' => 4, 'max' => 6],
-        12805 => ['track' => 'Myth', 'level' => 5, 'max' => 6],
-        12806 => ['track' => 'Myth', 'level' => 6, 'max' => 6],
-        // Hero (6 levels)
-        12793 => ['track' => 'Hero', 'level' => 1, 'max' => 6],
-        12794 => ['track' => 'Hero', 'level' => 2, 'max' => 6],
-        12795 => ['track' => 'Hero', 'level' => 3, 'max' => 6],
-        12796 => ['track' => 'Hero', 'level' => 4, 'max' => 6],
-        12797 => ['track' => 'Hero', 'level' => 5, 'max' => 6],
-        12798 => ['track' => 'Hero', 'level' => 6, 'max' => 6],
-        // Champion / normal (6 levels)
-        12785 => ['track' => 'Champion', 'level' => 1, 'max' => 6],
-        12786 => ['track' => 'Champion', 'level' => 2, 'max' => 6],
-        12787 => ['track' => 'Champion', 'level' => 3, 'max' => 6],
-        12788 => ['track' => 'Champion', 'level' => 4, 'max' => 6],
-        12789 => ['track' => 'Champion', 'level' => 5, 'max' => 6],
-        12790 => ['track' => 'Champion', 'level' => 6, 'max' => 6],
-        // Veteran / raid_finder (6 levels)
-        12777 => ['track' => 'Veteran', 'level' => 1, 'max' => 6],
-        12778 => ['track' => 'Veteran', 'level' => 2, 'max' => 6],
-        12779 => ['track' => 'Veteran', 'level' => 3, 'max' => 6],
-        12780 => ['track' => 'Veteran', 'level' => 4, 'max' => 6],
-        12781 => ['track' => 'Veteran', 'level' => 5, 'max' => 6],
-        12782 => ['track' => 'Veteran', 'level' => 6, 'max' => 6],
-        // Adventurer / world_advanced (6 levels)
-        12769 => ['track' => 'Adventurer', 'level' => 1, 'max' => 6],
-        12770 => ['track' => 'Adventurer', 'level' => 2, 'max' => 6],
-        12771 => ['track' => 'Adventurer', 'level' => 3, 'max' => 6],
-        12772 => ['track' => 'Adventurer', 'level' => 4, 'max' => 6],
-        12773 => ['track' => 'Adventurer', 'level' => 5, 'max' => 6],
-        12774 => ['track' => 'Adventurer', 'level' => 6, 'max' => 6],
+        // Myth (6 levels) — raid mythic / mythic+ vault
+        12801 => ['track' => 'Myth', 'level' => 1, 'max' => 6, 'ilvl' => 272],
+        12802 => ['track' => 'Myth', 'level' => 2, 'max' => 6, 'ilvl' => 276],
+        12803 => ['track' => 'Myth', 'level' => 3, 'max' => 6, 'ilvl' => 279],
+        12804 => ['track' => 'Myth', 'level' => 4, 'max' => 6, 'ilvl' => 282],
+        12805 => ['track' => 'Myth', 'level' => 5, 'max' => 6, 'ilvl' => 285],
+        12806 => ['track' => 'Myth', 'level' => 6, 'max' => 6, 'ilvl' => 289],
+        // Hero (4 levels) — raid heroic / mythic+ vault
+        12793 => ['track' => 'Hero', 'level' => 1, 'max' => 6, 'ilvl' => 259],
+        12794 => ['track' => 'Hero', 'level' => 2, 'max' => 6, 'ilvl' => 263],
+        12795 => ['track' => 'Hero', 'level' => 3, 'max' => 6, 'ilvl' => 266],
+        12796 => ['track' => 'Hero', 'level' => 4, 'max' => 6, 'ilvl' => 269],
+        12797 => ['track' => 'Hero', 'level' => 5, 'max' => 6, 'ilvl' => 272],
+        12798 => ['track' => 'Hero', 'level' => 6, 'max' => 6, 'ilvl' => 276],
+        // Champion (4 levels) — raid normal / heroic dungeons
+        12785 => ['track' => 'Champion', 'level' => 1, 'max' => 6, 'ilvl' => 246],
+        12786 => ['track' => 'Champion', 'level' => 2, 'max' => 6, 'ilvl' => 250],
+        12787 => ['track' => 'Champion', 'level' => 3, 'max' => 6, 'ilvl' => 253],
+        12788 => ['track' => 'Champion', 'level' => 4, 'max' => 6, 'ilvl' => 256],
+        12789 => ['track' => 'Champion', 'level' => 5, 'max' => 6, 'ilvl' => 259],
+        12790 => ['track' => 'Champion', 'level' => 6, 'max' => 6, 'ilvl' => 263],
+        // Veteran (4 levels) — raid finder / normal dungeons
+        12777 => ['track' => 'Veteran', 'level' => 1, 'max' => 6, 'ilvl' => 233],
+        12778 => ['track' => 'Veteran', 'level' => 2, 'max' => 6, 'ilvl' => 237],
+        12779 => ['track' => 'Veteran', 'level' => 3, 'max' => 6, 'ilvl' => 240],
+        12780 => ['track' => 'Veteran', 'level' => 4, 'max' => 6, 'ilvl' => 243],
+        12781 => ['track' => 'Veteran', 'level' => 5, 'max' => 6, 'ilvl' => 246],
+        12782 => ['track' => 'Veteran', 'level' => 6, 'max' => 6, 'ilvl' => 250],
+        // Adventurer (4 levels) — world / explorer
+        12769 => ['track' => 'Adventurer', 'level' => 1, 'max' => 6, 'ilvl' => 220],
+        12770 => ['track' => 'Adventurer', 'level' => 2, 'max' => 6, 'ilvl' => 224],
+        12771 => ['track' => 'Adventurer', 'level' => 3, 'max' => 6, 'ilvl' => 227],
+        12772 => ['track' => 'Adventurer', 'level' => 4, 'max' => 6, 'ilvl' => 230],
+        12773 => ['track' => 'Adventurer', 'level' => 5, 'max' => 6, 'ilvl' => 233],
+        12774 => ['track' => 'Adventurer', 'level' => 6, 'max' => 6, 'ilvl' => 237],
     ],
 
     /*

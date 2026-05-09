@@ -165,6 +165,23 @@ class CharacterBuilder extends Builder
     }
 
     /**
+     * Look up a character by name + realm. Realm match is tried as slug first
+     * (Raidbots/QE Live emit slugs like "argent-dawn") then by display name.
+     * Name match is case-insensitive to match in-game UI behavior.
+     */
+    public function findByNameAndRealm(string $name, string $realm): ?Character
+    {
+        $realmSlug = strtolower($realm);
+
+        return $this->whereRaw('LOWER(characters.name) = ?', [strtolower($name)])
+            ->whereHas('realm', function ($query) use ($realmSlug, $realm) {
+                $query->where('slug', $realmSlug)
+                    ->orWhere('name', $realm);
+            })
+            ->first();
+    }
+
+    /**
      * Return each given user's main character in the static, keyed by user_id.
      */
     public function mainsForUsersInStatic(array $userIds, int $staticId): Collection

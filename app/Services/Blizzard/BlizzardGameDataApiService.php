@@ -253,11 +253,22 @@ class BlizzardGameDataApiService
 
         $name = $data['name']['en_US'] ?? $data['name'] ?? "Item #{$itemId}";
         $iconUrl = $this->fetchItemIcon($itemId, $data);
+        $quality = $data['quality']['type'] ?? null;
 
-        Item::query()->updateMetadata($itemId, $name, $iconUrl);
+        Item::query()->updateMetadata($itemId, $name, $iconUrl, $quality);
     }
 
     private function fetchItemData(int $itemId): array
+    {
+        return $this->getItemData($itemId);
+    }
+
+    /**
+     * Public accessor for the raw `/data/wow/item/{id}` payload — needed by
+     * the craftable-item sync service to read inventory_type, stats, and
+     * preview_item.level on top of the metadata fetcher's name/icon/quality.
+     */
+    public function getItemData(int $itemId): array
     {
         $region = $this->authService->getRegion();
         $url = "https://{$region}.api.blizzard.com/data/wow/item/{$itemId}";
@@ -265,6 +276,11 @@ class BlizzardGameDataApiService
         $response = $this->loggedGet($url, ['Battlenet-Namespace' => "static-{$region}"]);
 
         return $response->successful() ? $response->json() : [];
+    }
+
+    public function getItemIcon(int $itemId, array $itemData): ?string
+    {
+        return $this->fetchItemIcon($itemId, $itemData);
     }
 
     private function fetchItemIcon(int $itemId, array $itemData): ?string

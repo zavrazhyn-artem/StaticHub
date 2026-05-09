@@ -161,7 +161,7 @@ function mainSpecName(charId) {
                         >
                     </div>
                     <div>
-                        <div class="font-headline font-bold text-base tracking-tight leading-none mb-1 flex items-center gap-2"
+                        <div class="font-headline font-bold text-base tracking-tight leading-none mb-1 flex items-center gap-2 cursor-default"
                              :class="classColor(char.playable_class)">
                             {{ char.name }}
                             <span

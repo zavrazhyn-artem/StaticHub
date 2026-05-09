@@ -33,4 +33,10 @@ WoWAnalyzer-midnight
 viserio_source
 NorthernSkyRaidTools
 BlastR_redising
-external
+external/*
+!external/_spec/
+
+# Windows alternate-data-stream artefacts that creep in via WSL/Explorer.
+*:Zone.Identifier
+ingame.png
+

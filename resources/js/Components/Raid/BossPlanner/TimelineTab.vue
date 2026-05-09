@@ -193,7 +193,7 @@ const derivedPhaseMarkers = computed(() =>
     })
 );
 
-const LEFT_WIDTH = 180;
+const LEFT_WIDTH = 230;
 const RIGHT_PADDING = 24;
 
 // Fight duration is derived from segments (sum of durations)

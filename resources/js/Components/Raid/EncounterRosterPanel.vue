@@ -305,7 +305,7 @@ const previousBossName = computed(() => {
                                 >
                                 <div>
                                     <div
-                                        class="text-2xs font-semibold leading-none"
+                                        class="text-2xs font-semibold leading-none cursor-default"
                                         :class="'text-wow-' + (entry.class_name || '').toLowerCase().replace(' ', '-')"
                                     >{{ entry.character_name }}</div>
                                     <div class="text-5xs text-on-surface-variant mt-0.5">{{ entry.spec?.name || '' }}</div>
@@ -347,7 +347,7 @@ const previousBossName = computed(() => {
                                 :class="getClassColor(entry.class_name)"></div>
                             <div>
                                 <div
-                                    class="text-2xs font-semibold leading-none"
+                                    class="text-2xs font-semibold leading-none cursor-default"
                                     :class="'text-wow-' + (entry.class_name || '').toLowerCase().replace(' ', '-')"
                                 >{{ entry.character_name }}</div>
                             </div>

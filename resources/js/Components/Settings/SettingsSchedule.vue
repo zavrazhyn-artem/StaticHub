@@ -13,6 +13,7 @@ const props = defineProps({
     scheduleTabUrl: { type: String, required: true },
     discordTabUrl:  { type: String, required: true },
     logsTabUrl:     { type: String, required: true },
+    wishlistConfigsTabUrl: { type: String, default: '' },
     canManage:      { type: Boolean, default: false },
 });
 
@@ -131,7 +132,7 @@ const days = {
             <p class="text-on-surface-variant font-medium mt-1 uppercase tracking-widest text-xs">{{ scheduleData.static_name }}</p>
         </div>
 
-        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="schedule" :can-manage="canManage" />
+        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" :wishlist-configs-url="wishlistConfigsTabUrl" active-tab="schedule" :can-manage="canManage" />
 
         <div class="bg-surface-container-low border border-white/5 rounded-xl p-8 shadow-2xl backdrop-blur-sm">
             <div class="space-y-8">

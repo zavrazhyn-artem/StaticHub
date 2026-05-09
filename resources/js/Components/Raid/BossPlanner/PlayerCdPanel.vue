@@ -99,8 +99,8 @@ const cdsByType = computed(() => {
                         class="w-6 h-6 rounded object-cover border"
                         :style="{ borderColor: classColor }">
                     <div class="min-w-0">
-                        <div class="text-[10px] font-bold truncate" :style="{ color: classColor }">{{ character.name }}</div>
-                        <div class="text-[8px] text-on-surface-variant/50 truncate">
+                        <div class="text-sm font-bold truncate" :style="{ color: classColor }">{{ character.name }}</div>
+                        <div class="text-xs text-on-surface-variant/50 truncate">
                             {{ character.spec_name || '?' }} {{ character.playable_class }}
                         </div>
                     </div>

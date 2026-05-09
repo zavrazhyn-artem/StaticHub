@@ -19,7 +19,7 @@
                 }"
             >{{ initial }}</div>
             <div class="min-w-0">
-                <div class="text-[11px] uppercase tracking-[0.16em] font-bold" :style="{ color: classColor }">
+                <div class="text-[11px] uppercase tracking-[0.16em] font-bold cursor-default" :style="{ color: classColor }">
                     {{ __('You') }} · {{ me.characterName }}
                 </div>
                 <div class="text-sm font-extrabold mt-0.5">{{ specLabel }}</div>
