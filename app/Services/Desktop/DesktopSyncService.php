@@ -50,7 +50,7 @@ final class DesktopSyncService
             'settings'  => $user->getDesktopSettings(),
             'schedule'  => $this->resolveSchedule($user),
             'manifest'  => $this->resolveManifest(),
-            'spec'      => $this->spec->build(),
+            'spec'      => $this->spec->build($wishlists),
         ];
     }
 
