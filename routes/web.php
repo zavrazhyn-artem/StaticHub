@@ -43,6 +43,11 @@ Route::get('/', function () {
 
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
 
+// Public installer download — no auth gate. Bridge auto-update flows
+// through /api/desktop/bridge under sanctum auth instead; this is the
+// first-install bootstrap for users who haven't paired anything yet.
+Route::get('/desktop/install.exe', [DownloadController::class, 'installer'])->name('desktop.installer');
+
 // Lightweight health/ping endpoint.
 // Default: returns {"message":"ok"} with no Sentry side-effect — safe for uptime monitors.
 // Pass ?throw=1 to raise an uncaught exception end-to-end (for GlitchTip pipeline testing).

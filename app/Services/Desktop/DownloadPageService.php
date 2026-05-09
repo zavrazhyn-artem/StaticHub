@@ -7,6 +7,7 @@ namespace App\Services\Desktop;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Builds the props payload for the /desktop download page.
@@ -34,21 +35,34 @@ final class DownloadPageService
      */
     private const BRIDGE_TOKEN_NAME = 'BlastR Desktop';
 
+    public function __construct(
+        private readonly InstallerReleaseService $installer,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
     public function buildPayload(User $user): array
     {
         $bridge = config('blastr_desktop.bridge');
+        $installerReady = $this->installer->exists();
+
+        // When a published installer file exists, link straight at
+        // the public download endpoint and surface the actual file
+        // version + checksum from disk. Falls back to env-driven
+        // bridge config (mostly null today) so the page never
+        // 500s on a fresh deploy without a published installer.
+        $manifest = [
+            'latest_version' => $this->installer->version() ?? ($bridge['latest_version'] ?? null),
+            'download_url'   => $installerReady ? URL::route('desktop.installer') : ($bridge['download_url'] ?? null),
+            'sha256'         => $this->installer->sha256() ?? ($bridge['sha256'] ?? null),
+            'size_bytes'     => $this->installer->size(),
+            'changelog_url'  => $bridge['changelog_url'] ?? null,
+        ];
 
         return [
-            'manifest' => [
-                'latest_version' => $bridge['latest_version'] ?? null,
-                'download_url'   => $bridge['download_url'] ?? null,
-                'sha256'         => $bridge['sha256'] ?? null,
-                'changelog_url'  => $bridge['changelog_url'] ?? null,
-            ],
-            'connection' => $this->resolveConnection($user),
+            'manifest'         => $manifest,
+            'connection'       => $this->resolveConnection($user),
             'onboarding_steps' => $this->onboardingSteps(),
         ];
     }

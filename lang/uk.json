@@ -1418,5 +1418,18 @@
     "Dodge": "Ухилення",
     "Parry": "Парирування",
     "Block": "Блок",
-    "ALL CLEAR": "ВСЕ ЧИСТО"
+    "ALL CLEAR": "ВСЕ ЧИСТО",
+    "Windows 10/11 · per-user install · no admin required": "Windows 10/11 · встановлення для користувача · без прав адміністратора",
+    "Verify the file hash if you want extra confidence:": "Перевірте hash файлу для додаткової впевненості:",
+    "What the installer does": "Що робить інсталятор",
+    "Per-user install — no admin prompt.": "Встановлення для користувача — без UAC.",
+    "Lands under": "Розпаковується в",
+    "Pulls the BlastR addon from blastr.pro after you sign in": "Скачує BlastR addon з blastr.pro після авторизації",
+    "drops it straight into your WoW": "кладе його напряму у вашу WoW",
+    "folder. New addon releases install themselves silently in the background.": "папку. Нові релізи аддону встановлюються тихо у фоновому режимі.",
+    "Auto-launches with Windows, hidden in the system tray.": "Запускається автоматично з Windows, прихований в системному треї.",
+    "You can turn this off in Settings any time.": "Можна вимкнути в Налаштуваннях у будь-який час.",
+    "Self-updates from blastr.pro.": "Самооновлюється з blastr.pro.",
+    "Bridge releases install in the background without admin rights or a re-download by you. Toggle off in Settings if you prefer manual.": "Релізи мосту встановлюються у фоні без прав адміна та без повторного завантаження. Вимкніть в Налаштуваннях, якщо віддаєте перевагу ручному.",
+    "BlastR Desktop is Windows-only for now. Mac and Linux support are tracked but unscheduled — let us know if you'd use them.": "BlastR Desktop поки що тільки для Windows. Підтримка Mac та Linux у планах, але без конкретних дат — дайте знати, якщо будете користуватись."
 }

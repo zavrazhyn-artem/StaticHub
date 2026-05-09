@@ -30,6 +30,19 @@ function relativeTime(iso) {
     if (diff < 86400) return __(':n h ago', { n: Math.floor(diff / 3600) });
     return __(':n d ago', { n: Math.floor(diff / 86400) });
 }
+
+function formatBytes(n) {
+    if (!n || n <= 0) return null;
+    const mb = n / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(1)} MB`;
+    return `${Math.round(n / 1024)} KB`;
+}
+
+const installerSize = computed(() => formatBytes(manifest.value?.size_bytes));
+const sha256Short = computed(() => {
+    const s = manifest.value?.sha256;
+    return s ? `${s.slice(0, 8)}…${s.slice(-8)}` : null;
+});
 </script>
 
 <template>
@@ -54,12 +67,14 @@ function relativeTime(iso) {
                     <p class="mt-3 text-on-surface-variant leading-relaxed max-w-xl">
                         {{ __('The bridge keeps wishlists synced into your addons and pushes RCLootCouncil awards back to blastr.pro automatically — no copy-paste, no manual exports.') }}
                     </p>
-                    <p
-                        v-if="manifest.latest_version"
-                        class="mt-3 font-mono text-xs text-on-surface-variant/70 tabular"
+                    <div
+                        v-if="manifest.latest_version || installerSize"
+                        class="mt-3 flex items-center gap-3 font-mono text-[10px] text-on-surface-variant/70 tabular"
                     >
-                        {{ __('Latest version:') }} v{{ manifest.latest_version }}
-                    </p>
+                        <span v-if="manifest.latest_version">v{{ manifest.latest_version }}</span>
+                        <span v-if="installerSize" class="opacity-60">· {{ installerSize }}</span>
+                        <span v-if="sha256Short" class="opacity-60" :title="manifest.sha256">· sha256 {{ sha256Short }}</span>
+                    </div>
                 </div>
                 <div class="flex flex-col items-stretch md:items-end gap-3 min-w-0 md:min-w-[280px]">
                     <a
@@ -79,6 +94,9 @@ function relativeTime(iso) {
                         <span class="material-symbols-outlined">hourglass_empty</span>
                         {{ __('Coming soon') }}
                     </button>
+                    <p class="text-[10px] text-on-surface-variant/60 text-center md:text-right">
+                        {{ __('Windows 10/11 · per-user install · no admin required') }}
+                    </p>
                     <a
                         v-if="manifest.changelog_url"
                         :href="manifest.changelog_url"
@@ -144,7 +162,7 @@ function relativeTime(iso) {
                 </p>
                 <ol class="list-decimal pl-5 space-y-2">
                     <li>
-                        {{ __('When you double-click') }} <code class="font-mono bg-white/5 px-1.5 py-0.5 rounded">blastr.exe</code>,
+                        {{ __('When you double-click') }} <code class="font-mono bg-white/5 px-1.5 py-0.5 rounded">BlastR-Desktop-Setup.exe</code>,
                         {{ __('a blue dialog says') }} <em>{{ __('"Windows protected your PC"') }}</em>.
                     </li>
                     <li>
@@ -154,6 +172,14 @@ function relativeTime(iso) {
                 </ol>
                 <p>
                     {{ __("The bridge runs from then on without further prompts. We're working on a Microsoft Store release that skips this step entirely.") }}
+                </p>
+                <p
+                    v-if="manifest.sha256"
+                    class="rounded-md border border-white/5 bg-white/[0.03] px-3 py-2 font-mono text-[10px] text-on-surface-variant/70 break-all"
+                >
+                    {{ __('Verify the file hash if you want extra confidence:') }}
+                    <br />
+                    sha256: {{ manifest.sha256 }}
                 </p>
             </div>
         </section>
@@ -187,13 +213,54 @@ function relativeTime(iso) {
             </div>
         </section>
 
+        <!-- What gets installed -->
+        <section class="rounded-xl border border-white/10 bg-surface-container/40 p-6">
+            <h3 class="font-headline text-sm font-bold uppercase tracking-widest text-on-surface mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">folder_managed</span>
+                {{ __('What the installer does') }}
+            </h3>
+            <ul class="space-y-3 text-[12px] text-on-surface-variant leading-relaxed">
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">install_desktop</span>
+                    <div>
+                        <strong class="text-on-surface">{{ __('Per-user install — no admin prompt.') }}</strong>
+                        {{ __('Lands under') }}
+                        <code class="font-mono bg-white/5 px-1.5 py-0.5 rounded text-[11px]">%LOCALAPPDATA%\Programs\BlastR</code>.
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">extension</span>
+                    <div>
+                        <strong class="text-on-surface">{{ __('Pulls the BlastR addon from blastr.pro after you sign in') }}</strong>
+                        — {{ __('drops it straight into your WoW') }}
+                        <code class="font-mono bg-white/5 px-1.5 py-0.5 rounded text-[11px]">Interface\AddOns\</code>
+                        {{ __('folder. New addon releases install themselves silently in the background.') }}
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">power_settings_new</span>
+                    <div>
+                        <strong class="text-on-surface">{{ __('Auto-launches with Windows, hidden in the system tray.') }}</strong>
+                        {{ __('You can turn this off in Settings any time.') }}
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">system_update</span>
+                    <div>
+                        <strong class="text-on-surface">{{ __('Self-updates from blastr.pro.') }}</strong>
+                        {{ __('Bridge releases install in the background without admin rights or a re-download by you. Toggle off in Settings if you prefer manual.') }}
+                    </div>
+                </li>
+            </ul>
+        </section>
+
         <!-- Tech footnote -->
         <section
             class="rounded-xl border border-white/5 bg-white/[0.02] px-5 py-4 text-[11px] text-on-surface-variant/70 leading-snug flex items-start gap-3"
         >
             <span class="material-symbols-outlined text-on-surface-variant/60">info</span>
             <div>
-                {{ __("BlastR Desktop is Windows-only for now. Mac and Linux support are tracked but unscheduled — let us know if you'd use them. The bundled BlastR addon installs automatically when the bridge runs; no separate addon download is needed.") }}
+                {{ __("BlastR Desktop is Windows-only for now. Mac and Linux support are tracked but unscheduled — let us know if you'd use them.") }}
             </div>
         </section>
     </div>
