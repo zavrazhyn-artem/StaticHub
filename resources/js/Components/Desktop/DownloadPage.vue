@@ -60,8 +60,8 @@ const sha256Short = computed(() => {
             <div class="p-8 md:p-10 grid md:grid-cols-[1fr_auto] gap-8 items-center">
                 <div>
                     <h1 class="font-slogan text-3xl md:text-4xl font-black uppercase tracking-tight italic">
-                        <span class="text-white">Blast</span>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-300">R</span>
+                        <span class="text-white">Blast</span><!--
+                     --><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-300 pr-[0.12em]">R</span>
                         <span class="text-white"> Desktop</span>
                     </h1>
                     <p class="mt-3 text-on-surface-variant leading-relaxed max-w-xl">
