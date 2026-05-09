@@ -83,7 +83,7 @@ const sha256Short = computed(() => {
                         class="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold uppercase tracking-widest text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                     >
                         <span class="material-symbols-outlined">download</span>
-                        {{ manifest.is_portable ? __('Download Portable') : __('Download for Windows') }}
+                        {{ __('Download for Windows') }}
                     </a>
                     <button
                         v-else
@@ -95,9 +95,7 @@ const sha256Short = computed(() => {
                         {{ __('Coming soon') }}
                     </button>
                     <p class="text-[10px] text-on-surface-variant/60 text-center md:text-right">
-                        {{ manifest.is_portable
-                            ? __('Windows 10/11 · portable .exe · no installer, no admin')
-                            : __('Windows 10/11 · per-user install · no admin required') }}
+                        {{ __('Windows 10/11 · per-user install · no admin required') }}
                     </p>
                     <a
                         v-if="manifest.changelog_url"

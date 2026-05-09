@@ -37,7 +37,6 @@ final class DownloadPageService
 
     public function __construct(
         private readonly InstallerReleaseService $installer,
-        private readonly BridgeReleaseService $bridge,
     ) {}
 
     /**
@@ -45,45 +44,21 @@ final class DownloadPageService
      */
     public function buildPayload(User $user): array
     {
-        $bridgeCfg      = config('blastr_desktop.bridge');
+        $bridge = config('blastr_desktop.bridge');
         $installerReady = $this->installer->exists();
-        $bridgeReady    = $this->bridge->exists();
 
-        // Three-tier fallback for the download CTA:
-        //   1. Published NSIS installer — preferred path
-        //   2. Published portable bridge.exe — works without admin,
-        //      no shortcuts/registry but the bridge auto-installs
-        //      everything else on first run
-        //   3. Env-configured manifest (mostly empty today)
-        //   4. null — UI shows "Coming soon"
-        if ($installerReady) {
-            $manifest = [
-                'latest_version' => $this->installer->version(),
-                'download_url'   => URL::route('desktop.installer'),
-                'sha256'         => $this->installer->sha256(),
-                'size_bytes'     => $this->installer->size(),
-                'is_portable'    => false,
-                'changelog_url'  => $bridgeCfg['changelog_url'] ?? null,
-            ];
-        } elseif ($bridgeReady) {
-            $manifest = [
-                'latest_version' => $this->bridge->version(),
-                'download_url'   => URL::route('desktop.bridge.portable'),
-                'sha256'         => $this->bridge->sha256(),
-                'size_bytes'     => $this->bridge->size(),
-                'is_portable'    => true,
-                'changelog_url'  => $bridgeCfg['changelog_url'] ?? null,
-            ];
-        } else {
-            $manifest = [
-                'latest_version' => $bridgeCfg['latest_version'] ?? null,
-                'download_url'   => $bridgeCfg['download_url'] ?? null,
-                'sha256'         => $bridgeCfg['sha256'] ?? null,
-                'size_bytes'     => null,
-                'is_portable'    => false,
-                'changelog_url'  => $bridgeCfg['changelog_url'] ?? null,
-            ];
-        }
+        // When a published installer file exists, link straight at
+        // the public download endpoint and surface the actual file
+        // version + checksum from disk. Falls back to env-driven
+        // bridge config (mostly null today) so the page never
+        // 500s on a fresh deploy without a published installer.
+        $manifest = [
+            'latest_version' => $this->installer->version() ?? ($bridge['latest_version'] ?? null),
+            'download_url'   => $installerReady ? URL::route('desktop.installer') : ($bridge['download_url'] ?? null),
+            'sha256'         => $this->installer->sha256() ?? ($bridge['sha256'] ?? null),
+            'size_bytes'     => $this->installer->size(),
+            'changelog_url'  => $bridge['changelog_url'] ?? null,
+        ];
 
         return [
             'manifest'         => $manifest,

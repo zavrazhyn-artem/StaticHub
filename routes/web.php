@@ -47,11 +47,6 @@ Route::post('/language/switch', [LanguageController::class, 'switch'])->name('la
 // through /api/desktop/bridge under sanctum auth instead; this is the
 // first-install bootstrap for users who haven't paired anything yet.
 Route::get('/desktop/install.exe', [DownloadController::class, 'installer'])->name('desktop.installer');
-// Portable bridge fallback — same exe as /api/desktop/bridge but
-// unauthenticated, so a brand-new user can grab a runnable .exe even
-// when no NSIS installer is published. The download page surfaces it
-// as the "portable" alternative while the installer is missing.
-Route::get('/desktop/bridge.exe', [DownloadController::class, 'portableBridge'])->name('desktop.bridge.portable');
 
 // Lightweight health/ping endpoint.
 // Default: returns {"message":"ok"} with no Sentry side-effect — safe for uptime monitors.
