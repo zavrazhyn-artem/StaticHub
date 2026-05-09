@@ -39,3 +39,6 @@ external/*
 # Windows alternate-data-stream artefacts that creep in via WSL/Explorer.
 *:Zone.Identifier
 ingame.png
+
+# Symlink to the latest local-dev bridge build for one-click launch
+blastr-local.exe
