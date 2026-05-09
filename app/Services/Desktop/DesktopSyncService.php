@@ -30,6 +30,7 @@ final class DesktopSyncService
     public function __construct(
         private readonly WishlistSyncService $wishlists,
         private readonly AddonReleaseService $addons,
+        private readonly SyncSpecService $spec,
     ) {}
 
     /**
@@ -49,6 +50,7 @@ final class DesktopSyncService
             'settings'  => $user->getDesktopSettings(),
             'schedule'  => $this->resolveSchedule($user),
             'manifest'  => $this->resolveManifest(),
+            'spec'      => $this->spec->build(),
         ];
     }
 
