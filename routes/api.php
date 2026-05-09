@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')
 Route::middleware('auth:sanctum')->prefix('desktop')->group(function () {
     Route::get('/sync', [DesktopController::class, 'sync'])->name('api.desktop.sync');
     Route::patch('/settings', [DesktopController::class, 'updateSettings'])->name('api.desktop.settings.update');
+    Route::get('/addon', [DesktopController::class, 'downloadAddon'])->name('api.desktop.addon.download');
 });
 
 // Loot-history push — bridge drains BlastROutboxEvents into this and

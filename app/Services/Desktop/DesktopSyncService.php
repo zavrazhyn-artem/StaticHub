@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Services\Sync\WishlistSyncService;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Builds the unified payload that `GET /api/desktop/sync` returns to
@@ -28,6 +29,7 @@ final class DesktopSyncService
 {
     public function __construct(
         private readonly WishlistSyncService $wishlists,
+        private readonly AddonReleaseService $addons,
     ) {}
 
     /**
@@ -76,13 +78,30 @@ final class DesktopSyncService
     }
 
     /**
+     * Bridge manifest stays env-driven (releases live on our server,
+     * no automation yet). Addon manifest is computed live from the
+     * file in `resources/desktop/`: replacing the zip is enough to
+     * publish a new version, no env edits needed.
+     *
      * @return array<string, mixed>
      */
     private function resolveManifest(): array
     {
+        $addonVersion = $this->addons->version();
+        $addonSha     = $this->addons->sha256();
+        $addonReady   = $this->addons->exists();
+
         return [
             'bridge' => config('blastr_desktop.bridge'),
-            'addon'  => config('blastr_desktop.addon'),
+            'addon'  => [
+                'latest_version' => $addonVersion,
+                // URL points at the auth-protected download endpoint;
+                // bridge sends Bearer token + gets the bytes streamed.
+                // Null when no zip is published yet — bridge skips
+                // install attempt rather than 404-ing.
+                'download_url'   => $addonReady ? URL::route('api.desktop.addon.download') : null,
+                'sha256'         => $addonSha,
+            ],
         ];
     }
 }
