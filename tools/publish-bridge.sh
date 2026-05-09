@@ -30,6 +30,21 @@ VERSION="$1"
     exit 1
 }
 
+# Refuse to ship a dev build pointing at local.blastr.pro — that string
+# only exists when DefaultAPIBase wasn't overridden via -ldflags. The
+# release build incantation:
+#
+#   wails build -platform windows/amd64 \
+#     -ldflags "-X github.com/zavrazhyn-artem/blastr-desktop/internal/config.DefaultAPIBase=https://blastr.pro \
+#               -X github.com/zavrazhyn-artem/blastr-desktop/internal/config.Version=$VERSION"
+if strings "$SOURCE_EXE" | grep -q "local\.blastr\.pro"; then
+    cat >&2 <<EOF
+Refusing to publish: $SOURCE_EXE points to local.blastr.pro.
+Rebuild with prod ldflags (see comment in tools/publish-bridge.sh).
+EOF
+    exit 1
+fi
+
 mkdir -p "$DEST_DIR"
 cp "$SOURCE_EXE" "$DEST_EXE"
 printf '%s\n' "$VERSION" > "$DEST_VERSION"
