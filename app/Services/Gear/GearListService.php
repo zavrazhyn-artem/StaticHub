@@ -151,6 +151,7 @@ final class GearListService
         ?int $itemLevel = null,
         ?int $enchantId = null,
         ?array $bonusIds = null,
+        ?array $chosenStats = null,
     ): GearList {
         $list = $this->loadOwnedList($user, $listId);
         if ($list->type === GearList::TYPE_CURRENT) {
@@ -173,13 +174,39 @@ final class GearListService
             $seasonItem?->icon,
         );
 
+        // chosen_stats is only meaningful for crafted items; clear it for
+        // non-craftables so a stale pick doesn't leak across an item swap.
+        $persistedChosenStats = $seasonItem?->is_craftable ? $chosenStats : null;
+
+        // For crafted items, stamp the season's "Radiance Crafted" bonus
+        // (always) plus the matching missive bonus_id (when a pair was
+        // chosen). Wowhead resolves both in tooltip rendering — green
+        // "Radiance Crafted" caption and concrete secondary names.
+        $bonusIdsToStore = is_array($bonusIds) ? array_values($bonusIds) : [];
+        if ($seasonItem?->is_craftable) {
+            $seasonBonus = (int) config('wow_season.crafted_season_bonus_id', 0);
+            if ($seasonBonus > 0 && ! in_array($seasonBonus, $bonusIdsToStore, true)) {
+                $bonusIdsToStore[] = $seasonBonus;
+            }
+        }
+        if ($persistedChosenStats !== null && count($persistedChosenStats) === 2) {
+            $sorted = $persistedChosenStats;
+            sort($sorted);
+            $key = implode('_', $sorted);
+            $missiveBonus = (int) config("wow_season.crafted_missive_bonus_ids.{$key}", 0);
+            if ($missiveBonus > 0 && ! in_array($missiveBonus, $bonusIdsToStore, true)) {
+                $bonusIdsToStore[] = $missiveBonus;
+            }
+        }
+
         GearListItem::query()->updateOrCreate(
             ['list_id' => $list->id, 'slot' => $slot],
             [
-                'item_id'    => $itemId,
-                'item_level' => $itemLevel,
-                'enchant_id' => ($enchantId ?? 0) > 0 ? $enchantId : null,
-                'bonus_ids'  => $bonusIds,
+                'item_id'      => $itemId,
+                'item_level'   => $itemLevel,
+                'enchant_id'   => ($enchantId ?? 0) > 0 ? $enchantId : null,
+                'bonus_ids'    => empty($bonusIdsToStore) ? null : $bonusIdsToStore,
+                'chosen_stats' => $persistedChosenStats,
             ],
         );
 

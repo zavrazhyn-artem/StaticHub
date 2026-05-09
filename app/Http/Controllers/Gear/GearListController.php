@@ -168,6 +168,7 @@ class GearListController extends Controller
                 $itemLevel,
                 $request->filled('enchant_id') ? (int) $request->validated('enchant_id') : null,
                 $bonusIds,
+                $request->validated('chosen_stats'),
             );
         } catch (GearListException $e) {
             return $this->slotErrorResponse($request, $e->getMessage());

@@ -104,6 +104,24 @@ const exportCopied = ref(false);
 
 const customCount = computed(() => listSummaries.value.filter(l => l.type === 'custom').length);
 
+// Calc-caveats shown via an info icon next to the list title (hover
+// tooltip). Current uses its own dataset so no caveats apply; backfill
+// always-on for BiS/Custom; crafted-projection only when the list has
+// at least one is_craftable slot. Joining the lines into a single
+// title= keeps the markup minimal — native browser tooltip handles
+// rendering, no positioning logic needed.
+const slotItems = computed(() => Object.values(activeList.value?.slots ?? {}).filter(Boolean));
+const listNotesText = computed(() => {
+    if (activeList.value?.type === 'current') return '';
+    const lines = [
+        '• ' + __('Empty slots are filled from your current equipment when totals are calculated.'),
+    ];
+    if (slotItems.value.some(i => i.is_craftable)) {
+        lines.push('• ' + __('Crafted items use projected secondaries — totals may be off by ~1 per stat versus in-game.'));
+    }
+    return lines.join('\n');
+});
+
 const submitFormPost = (action, data) => {
     const form = document.createElement('form');
     form.method = 'POST';
@@ -351,6 +369,15 @@ const typeColor = (type) => ({
                             <h3 class="font-headline text-base font-black text-white uppercase tracking-widest flex items-center gap-2">
                                 <span :class="['material-symbols-outlined text-lg', typeColor(activeList.type)]">{{ typeIcon(activeList.type) }}</span>
                                 {{ activeList.name }}
+                                <!-- Calc-caveats info icon: hover for combined
+                                     backfill + crafted-secondary disclaimers.
+                                     Shown only on BiS/Custom (current is its
+                                     own dataset, no backfill or projection). -->
+                                <span
+                                    v-if="listNotesText"
+                                    class="material-symbols-outlined text-base text-on-surface-variant/50 hover:text-cyan-300 cursor-help transition"
+                                    :title="listNotesText"
+                                >info</span>
                             </h3>
                             <div v-if="activeList.imported_at" class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">
                                 {{ __('Synced') }}: {{ new Date(activeList.imported_at).toLocaleString() }}

@@ -24,28 +24,28 @@ const fmtDelta = (v) => {
 
 const hasStats = computed(() => !!props.stats);
 
-// Three render modes the panel supports:
-//  - delta:    BiS/Custom vs current. Signed integers, colour-coded.
-//  - setTotal: rare fallback when there's no current to baseline against.
-//              Plain integers, no sign.
-//  - real:    current equipment from BNet — secondaries are real %, the
-//              rest are absolute values from the in-game sheet.
-const isDelta = computed(() => !!props.stats?.is_delta);
+// Render modes:
+//  - deltaMode: BiS/Custom — absolute value plus signed delta in parens.
+//               Backend backfilled missing slots with current's items so
+//               value reflects the full equipped-after-swap loadout.
+//  - setTotal:  Current/raw aggregate — plain integers from rating-based
+//               sum (no real % conversion since we don't have BNet data).
+//  - real:      Current equipment from BNet (legacy path) — secondaries
+//               are %, rest are absolute. Kept for backward compat in case
+//               anything still feeds the panel that shape.
+const isDeltaMode = computed(() => !!props.stats?.is_delta_mode);
 const isSetTotal = computed(() => !!props.stats?.is_set_total);
 
-const fmtAttribute = (v) => isDelta.value ? fmtDelta(v) : fmt(v);
+const fmtAttribute = (v) => fmt(v);
 const fmtEnhancement = (v) => {
-    if (isDelta.value) return fmtDelta(v);
-    if (isSetTotal.value) return fmt(v);
+    if (isDeltaMode.value || isSetTotal.value) return fmt(v);
     return fmtPercent(v);
 };
-const fmtItemLevel = (v) => isDelta.value ? fmtDelta(v) : fmt(v);
+const fmtItemLevel = (v) => fmt(v);
 
 // Tailwind colour for a signed delta — green when the new build adds,
-// red when it loses. Zero stays neutral so the eye groups them with
-// "no change" rather than wins or losses.
+// red when it loses, neutral on zero.
 const deltaClass = (v) => {
-    if (!isDelta.value) return '';
     const n = Math.round(Number(v ?? 0));
     if (n > 0) return 'text-green-400';
     if (n < 0) return 'text-red-400';
@@ -64,17 +64,15 @@ const deltaClass = (v) => {
         <template v-else>
             <!-- Item Level -->
             <section class="rounded-lg bg-surface-container border border-white/10 px-4 py-3 text-center">
-                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-1">
-                    {{ isDelta ? __('Item Level Δ') : __('Item Level') }}
-                </h4>
-                <div :class="['text-3xl font-black font-headline tabular-nums leading-none', isDelta ? deltaClass(stats.item_level) || 'text-cyan-300' : 'text-cyan-300']">{{ fmtItemLevel(stats.item_level) }}</div>
+                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-1">{{ __('Item Level') }}</h4>
+                <div class="text-3xl font-black font-headline tabular-nums leading-none text-cyan-300">
+                    {{ fmtItemLevel(stats.item_level) }}<span v-if="isDeltaMode && stats.item_level_delta !== 0" :class="['text-base font-bold ml-1', deltaClass(stats.item_level_delta)]">({{ fmtDelta(stats.item_level_delta) }})</span>
+                </div>
             </section>
 
             <!-- Attributes -->
             <section class="rounded-lg bg-surface-container border border-white/10 px-4 py-3">
-                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2 text-center">
-                    {{ isDelta ? __('Attributes Δ') : __('Attributes') }}
-                </h4>
+                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2 text-center">{{ __('Attributes') }}</h4>
                 <ul class="space-y-1">
                     <li
                         v-for="a in stats.attributes"
@@ -82,16 +80,17 @@ const deltaClass = (v) => {
                         class="flex items-center justify-between text-[12px]"
                     >
                         <span :class="['font-medium', a.is_main ? 'text-cyan-200' : 'text-on-surface-variant']">{{ __(a.label) }}</span>
-                        <span :class="['font-mono tabular-nums', isDelta ? deltaClass(a.value) : (a.is_main ? 'text-cyan-100 font-bold' : 'text-white')]">{{ fmtAttribute(a.value) }}</span>
+                        <span class="font-mono tabular-nums">
+                            <span :class="a.is_main ? 'text-cyan-100 font-bold' : 'text-white'">{{ fmtAttribute(a.value) }}</span>
+                            <span v-if="isDeltaMode && a.delta !== 0" :class="['ml-1', deltaClass(a.delta)]">({{ fmtDelta(a.delta) }})</span>
+                        </span>
                     </li>
                 </ul>
             </section>
 
             <!-- Enhancements -->
             <section class="rounded-lg bg-surface-container border border-white/10 px-4 py-3">
-                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2 text-center">
-                    {{ isDelta ? __('Enhancements Δ') : __('Enhancements') }}
-                </h4>
+                <h4 class="text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2 text-center">{{ __('Enhancements') }}</h4>
                 <ul class="space-y-1">
                     <li
                         v-for="e in stats.enhancements"
@@ -99,7 +98,10 @@ const deltaClass = (v) => {
                         class="flex items-center justify-between text-[12px]"
                     >
                         <span class="text-on-surface-variant font-medium">{{ __(e.label) }}</span>
-                        <span :class="['font-mono tabular-nums', isDelta ? deltaClass(e.value) : 'text-white']">{{ fmtEnhancement(e.value) }}</span>
+                        <span class="font-mono tabular-nums">
+                            <span class="text-white">{{ fmtEnhancement(e.value) }}</span>
+                            <span v-if="isDeltaMode && e.delta !== 0" :class="['ml-1', deltaClass(e.delta)]">({{ fmtDelta(e.delta) }})</span>
+                        </span>
                     </li>
                 </ul>
             </section>

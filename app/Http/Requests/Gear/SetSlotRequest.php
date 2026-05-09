@@ -27,8 +27,13 @@ class SetSlotRequest extends FormRequest
             // When supplied, server resolves (track, level) → bonus_id + ilvl
             // from wow_season.item_upgrade_tracks. Used by the slot picker so
             // the client doesn't need to embed the upgrade-track config.
-            'track'       => ['nullable', 'string'],
-            'level'       => ['nullable', 'integer', 'min:1', 'max:6'],
+            'track'         => ['nullable', 'string'],
+            'level'         => ['nullable', 'integer', 'min:1', 'max:6'],
+            // Crafted-item secondary picks: exactly two of crit/haste/mastery/
+            // versatility. Stored on gear_list_items.chosen_stats; the
+            // aggregator distributes the secondary budget across them.
+            'chosen_stats'   => ['nullable', 'array', 'size:2'],
+            'chosen_stats.*' => ['string', Rule::in(['crit', 'haste', 'mastery', 'versatility'])],
         ];
     }
 }

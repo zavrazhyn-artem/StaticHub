@@ -102,6 +102,7 @@ final class GearViewService
                 'id'             => $char->id,
                 'name'           => $char->name,
                 'realm'          => $char->realm?->slug,
+                'region'         => $char->realm?->region,
                 'playable_class' => $char->playable_class,
                 'avatar_url'     => $char->avatar_url,
                 'is_own'         => $userId !== null && $char->user_id === $userId,
@@ -233,77 +234,131 @@ final class GearViewService
     }
 
     /**
-     * Stats panel:
-     *  - Current list  → real in-game stats from bnet_statistics (% values
-     *                    that mirror what the player sees in-game)
-     *  - BiS / Custom  → DELTA against the current list, computed by
-     *                    aggregating both lists' real_stats (rating units)
-     *                    and subtracting. We pick deltas over absolute totals
-     *                    so the user immediately sees how a build differs
-     *                    from what's equipped right now — the absolute number
-     *                    "+150 Haste" is more actionable than "2400 Haste"
-     *                    when the question is "should I run this set tonight".
+     * Stats panel. Every list type uses rating-based aggregation from
+     * season_items.real_stats × ilvl-scale factor.
      *
-     * If there's no current list to baseline against (BNet not synced yet,
-     * spec was just created, etc), we fall back to the absolute aggregate
-     * so the user still sees something meaningful.
+     * For BiS/Custom we backfill missing slots from current so a partial
+     * list still aggregates against a full loadout. Each slot in the
+     * comparison must satisfy two preconditions:
+     *   1. The merged item (list pick or current backfill) is in the
+     *      season_items catalog so we can compute its stats.
+     *   2. The current item in the same slot is also in the catalog so
+     *      there's an honest baseline to subtract.
+     * Slots failing either are dropped from BOTH sides — without this
+     * we'd report fake −Stamina deltas like "−979" simply because BiS
+     * picked an item we don't have stat data for, while current's same-
+     * slot item was fully cataloged (and the mirror case for current
+     * gaps).
+     *
+     * Returns null when nothing comparable remains.
      */
     private function resolveStats(GearList $list): ?array
     {
-        if ($list->type === GearList::TYPE_CURRENT) {
-            $raw = $list->character?->serviceRawData;
-            if (! $raw) {
-                return null;
-            }
-            return $this->statsExtractor->extract(
-                $raw->bnet_statistics,
-                $raw->bnet_profile,
-                $list->specialization?->role,
-            );
-        }
-
-        $listAggregate = $this->aggregateSeasonStats($list);
-        if ($listAggregate === null) {
-            return null;
-        }
+        $mainStat = $this->mainStatForSpec(
+            (string) $list->character?->playable_class,
+            (string) $list->specialization?->name,
+        );
 
         $current = GearList::query()
             ->findCurrent((int) $list->character_id, (int) $list->spec_id);
-        if ($current === null) {
-            return $listAggregate;
-        }
-        $current->load('items');
-        $currentAggregate = $this->aggregateSeasonStats($current);
-        if ($currentAggregate === null) {
-            return $listAggregate;
+        if ($current !== null && $current->id !== $list->id) {
+            $current->load('items');
         }
 
-        return $this->subtractAggregates($listAggregate, $currentAggregate);
+        // One catalog query covers both sides — keeps slot-inclusion
+        // decisions consistent across the two aggregates.
+        $catalog = $this->loadCatalog(
+            collect()
+                ->merge($list->items->pluck('item_id'))
+                ->merge($current?->items->pluck('item_id') ?? collect())
+                ->filter()
+                ->unique()
+                ->all()
+        );
+
+        if ($list->type === GearList::TYPE_CURRENT) {
+            $items = ($current ?? $list)->items->filter(fn ($li) => $catalog->has($li->item_id));
+            return $items->isEmpty() ? null : $this->aggregateFromItems($items, $mainStat, $catalog);
+        }
+
+        $listBySlot    = $list->items->keyBy('slot');
+        $currentBySlot = $current ? $current->items->keyBy('slot') : collect();
+        $allSlots      = $listBySlot->keys()->merge($currentBySlot->keys())->unique();
+
+        $mergedItems  = collect();
+        $currentItems = collect();
+        foreach ($allSlots as $slot) {
+            if (empty($slot)) continue;
+            $listLi    = $listBySlot[$slot] ?? null;
+            $currentLi = $currentBySlot[$slot] ?? null;
+
+            // Merged side: prefer list's pick when stat-known; otherwise
+            // backfill from current (matches the "honest swap" semantic).
+            $picked = ($listLi && $catalog->has($listLi->item_id)) ? $listLi : $currentLi;
+            if ($picked === null || ! $catalog->has($picked->item_id)) continue;
+
+            // Current side must also be stat-known for the slot to be
+            // comparable — drop slot from BOTH sides otherwise.
+            if ($current !== null) {
+                if ($currentLi === null || ! $catalog->has($currentLi->item_id)) continue;
+                $currentItems->push($currentLi);
+            }
+            $mergedItems->push($picked);
+        }
+
+        if ($mergedItems->isEmpty()) return null;
+
+        $listAggregate = $this->aggregateFromItems($mergedItems, $mainStat, $catalog);
+        if ($listAggregate === null) return null;
+
+        if ($current === null || $currentItems->isEmpty()) return $listAggregate;
+
+        $currentAggregate = $this->aggregateFromItems($currentItems, $mainStat, $catalog);
+        if ($currentAggregate === null) return $listAggregate;
+
+        return $this->withDeltas($listAggregate, $currentAggregate);
     }
 
     /**
-     * Element-wise list - current. Both inputs share the same schema (the
-     * one returned by aggregateSeasonStats), so we can zip attributes /
-     * enhancements pairwise without remapping by label.
-     *
-     * is_delta=true tells CharacterStatsPanel to render with sign + colour
-     * cues (green/red/grey for positive/negative/zero).
+     * @param array<int,int> $itemIds
+     * @return \Illuminate\Support\Collection<int,\App\Models\SeasonItem>
      */
-    private function subtractAggregates(array $list, array $current): array
+    private function loadCatalog(array $itemIds): \Illuminate\Support\Collection
     {
-        $sub = function (array $a, array $b): array {
+        if (empty($itemIds)) return collect();
+        return \App\Models\SeasonItem::query()
+            ->whereIn('id', $itemIds)
+            ->get(['id', 'stats', 'real_stats', 'base_item_level', 'is_craftable'])
+            ->keyBy('id');
+    }
+
+    /**
+     * Pair each list stat with its delta against current. The list
+     * aggregate already carries the "absolute" value (post-backfill);
+     * we just attach a `delta` field so the frontend can render
+     * "2400 (+150)" without doing the math again.
+     *
+     * is_delta_mode=true tells CharacterStatsPanel to render the
+     * paired format. Distinct from the legacy `is_delta` flag, which
+     * meant "value field IS the delta" — different semantics.
+     */
+    private function withDeltas(array $list, array $current): array
+    {
+        $attach = function (array $a, array $b): array {
             return array_map(fn ($x, $y) => [
                 'label'   => $x['label'],
-                'value'   => (int) ($x['value'] ?? 0) - (int) ($y['value'] ?? 0),
+                'value'   => (int) ($x['value'] ?? 0),
+                'delta'   => (int) ($x['value'] ?? 0) - (int) ($y['value'] ?? 0),
                 'is_main' => $x['is_main'] ?? false,
             ], $a, $b);
         };
 
         return [
-            'item_level'   => (int) ($list['item_level'] ?? 0) - (int) ($current['item_level'] ?? 0),
-            'attributes'   => $sub($list['attributes'] ?? [], $current['attributes'] ?? []),
-            'enhancements' => $sub($list['enhancements'] ?? [], $current['enhancements'] ?? []),
-            'is_delta'     => true,
+            'item_level'       => (int) ($list['item_level'] ?? 0),
+            'item_level_delta' => (int) ($list['item_level'] ?? 0) - (int) ($current['item_level'] ?? 0),
+            'attributes'       => $attach($list['attributes'] ?? [], $current['attributes'] ?? []),
+            'enhancements'     => $attach($list['enhancements'] ?? [], $current['enhancements'] ?? []),
+            'is_delta_mode'    => true,
         ];
     }
 
@@ -319,33 +374,18 @@ final class GearViewService
      *
      * Returns null when no slots have items mapped to season_items.
      */
-    private function aggregateSeasonStats(GearList $list): ?array
+    private function aggregateFromItems(\Illuminate\Support\Collection $items, string $mainStat, \Illuminate\Support\Collection $catalog): ?array
     {
-        $itemIds = $list->items->pluck('item_id')->filter()->unique()->all();
-        if (empty($itemIds)) {
+        if ($items->isEmpty() || $catalog->isEmpty()) {
             return null;
         }
-
-        $catalog = \App\Models\SeasonItem::query()
-            ->whereIn('id', $itemIds)
-            ->get(['id', 'stats', 'real_stats', 'base_item_level'])
-            ->keyBy('id');
-
-        if ($catalog->isEmpty()) {
-            return null;
-        }
-
-        $mainStat = $this->mainStatForSpec(
-            (string) $list->character?->playable_class,
-            (string) $list->specialization?->name,
-        );
 
         $totals = ['intellect' => 0, 'agility' => 0, 'strength' => 0, 'stamina' => 0,
                    'crit' => 0, 'haste' => 0, 'mastery' => 0, 'versatility' => 0];
         $totalIlvl = 0;
         $countedSlots = 0;
 
-        foreach ($list->items as $li) {
+        foreach ($items as $li) {
             $entry = $catalog->get($li->item_id);
             if (! $entry) continue;
 
@@ -360,18 +400,56 @@ final class GearViewService
             }
             if (! is_array($stats)) continue;
 
-            $ilvl   = (int) ($li->item_level ?? $baseIlvl);
-            $factor = pow(1.083, ($ilvl - $baseIlvl) / 15);
+            $ilvl = (int) ($li->item_level ?? $baseIlvl);
+            $delta15 = ($ilvl - $baseIlvl) / 15;
+            // Midnight S1 stat scaling — three separate curves derived
+            // empirically from BNet preview_item.stats sampled across the
+            // crafted-item quality ladder (Silvermoon Mantle 246→285 in
+            // user-supplied tooltips):
+            //   primary   ×1.45 over 39 ilvls  → 1.154^(Δ/15)
+            //   stamina   ×1.63 over 39 ilvls  → 1.208^(Δ/15)
+            //   secondary ×1.22 over 39 ilvls  → 1.084^(Δ/15)  (slower!)
+            // Stamina scales faster than combat stats, secondaries scale
+            // slower — using one curve for everything (the old behaviour)
+            // misreports BiS deltas by 30-40% on big ilvl jumps.
+            $factorPrimary   = pow(1.154, $delta15);
+            $factorStamina   = pow(1.208, $delta15);
+            $factorSecondary = pow(1.084, $delta15);
 
-            // Stamina + secondaries: always sum.
-            foreach (['stamina', 'crit', 'haste', 'mastery', 'versatility'] as $k) {
-                $totals[$k] += (int) round((float) ($stats[$k] ?? 0) * $factor);
+            $isCraftable = (bool) ($entry->is_craftable ?? false);
+            $chosenStats = is_array($li->chosen_stats ?? null) ? $li->chosen_stats : [];
+
+            // Pre-existing concrete secondaries on the item (raid drops,
+            // fixed-secondary crafted items like Arcanoweave Cloak) use
+            // the secondary curve. For Missive-socket crafted items the
+            // sync stripped these from real_stats so this loop adds zero
+            // and we project from secondary_per_stat_at_base instead.
+            $secondaryKeys = ['crit', 'haste', 'mastery', 'versatility'];
+            foreach ($secondaryKeys as $k) {
+                $totals[$k] += (int) round((float) ($stats[$k] ?? 0) * $factorSecondary);
             }
+            if ($isCraftable && count($chosenStats) === 2) {
+                // Both chosen stats receive the SAME value at craft time
+                // (it's how missives work), so each gets the full per-
+                // stat amount — no /2 split.
+                $perStatAtBase = (float) ($stats['secondary_per_stat_at_base'] ?? 0);
+                if ($perStatAtBase > 0) {
+                    $perStat = (int) round($perStatAtBase * $factorSecondary);
+                    foreach ($chosenStats as $picked) {
+                        if (in_array($picked, $secondaryKeys, true)) {
+                            $totals[$picked] += $perStat;
+                        }
+                    }
+                }
+            }
+
+            $totals['stamina'] += (int) round((float) ($stats['stamina'] ?? 0) * $factorStamina);
+
             // Primary: only the spec's mainstat. Hybrid-primary items have
             // both keys populated; we take only one to avoid double-count.
             $primaryValue = (float) ($stats[$mainStat] ?? 0);
             if ($primaryValue > 0) {
-                $totals[$mainStat] += (int) round($primaryValue * $factor);
+                $totals[$mainStat] += (int) round($primaryValue * $factorPrimary);
             }
 
             $totalIlvl += $ilvl;
@@ -436,8 +514,31 @@ final class GearViewService
             'enchant_id'       => $li->enchant_id,
             'bonus_ids'        => $li->bonus_ids,
             'gem_ids'          => $li->gem_ids,
+            'chosen_stats'     => $li->chosen_stats,
             'has_empty_socket' => (bool) $li->has_empty_socket,
+            // Surface is_craftable on the slot payload so the GearTab
+            // header can show the "stat math is approximate" disclaimer
+            // when any slot in a list is a Missive crafted item.
+            'is_craftable'     => $this->isItemCraftable((int) $li->item_id),
         ];
+    }
+
+    /**
+     * Cached lookup: item_id → is_craftable flag from season_items.
+     * The DTO loop hits this many times per list payload; the static
+     * cache turns N selects into 1 per request lifetime.
+     */
+    private array $craftableItemIdCache = [];
+
+    private function isItemCraftable(int $itemId): bool
+    {
+        if ($itemId <= 0) return false;
+        if (! array_key_exists($itemId, $this->craftableItemIdCache)) {
+            $this->craftableItemIdCache[$itemId] = (bool) \App\Models\SeasonItem::query()
+                ->where('id', $itemId)
+                ->value('is_craftable');
+        }
+        return $this->craftableItemIdCache[$itemId];
     }
 
     /**

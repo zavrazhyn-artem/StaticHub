@@ -76,13 +76,16 @@ class SeasonItem extends Model
         'role', 'stats', 'real_stats', 'base_item_level',
         'source_type', 'source_slug', 'encounter_slug', 'encounter_id', 'boss_name',
         'season_slug', 'is_tier',
+        'is_craftable', 'secondary_pool',
     ];
 
     protected $casts = [
-        'role'       => 'array',
-        'stats'      => 'array',
-        'real_stats' => 'array',
-        'is_tier'    => 'bool',
+        'role'           => 'array',
+        'stats'          => 'array',
+        'real_stats'     => 'array',
+        'is_tier'        => 'bool',
+        'is_craftable'   => 'bool',
+        'secondary_pool' => 'array',
     ];
 
     public function newEloquentBuilder($query): SeasonItemBuilder

@@ -90,6 +90,17 @@ const qualityClass = computed(() => {
     return QUALITY_COLORS[q] ?? 'text-white';
 });
 
+// Crafted item secondary picks rendered as a short label ("Crit/Haste")
+// so the user sees what was committed without having to open Wowhead's
+// tooltip — Wowhead displays "Random Stat 1/2" for missive sockets that
+// our backend doesn't translate into a bonus_id yet.
+const STAT_ABBR = { crit: 'Crit', haste: 'Haste', mastery: 'Mast', versatility: 'Vers' };
+const chosenStatsLabel = computed(() => {
+    const cs = props.item?.chosen_stats;
+    if (!Array.isArray(cs) || cs.length === 0) return '';
+    return cs.map(s => STAT_ABBR[s] ?? s).join('/');
+});
+
 const enchantableSet = computed(() => new Set(
     (props.enchantableSlots?.length ? props.enchantableSlots : FALLBACK_ENCHANTABLE)
 ));
@@ -185,7 +196,8 @@ const showEnchantTag = computed(() => props.audit && !!props.item && isEnchantab
                     <div :class="['text-[11px] font-medium truncate leading-tight group-hover:text-cyan-200 transition', qualityClass]">
                         {{ displayName }}
                     </div>
-                    <div v-if="showEnchantTag || missingSocket" :class="['text-[9px] flex items-center gap-1 leading-tight', mirror ? 'justify-end' : '']">
+                    <div v-if="showEnchantTag || missingSocket || chosenStatsLabel" :class="['text-[9px] flex items-center gap-1 leading-tight', mirror ? 'justify-end' : '']">
+                        <span v-if="chosenStatsLabel" class="text-emerald-300/90 font-headline font-bold uppercase tracking-wider">{{ chosenStatsLabel }}</span>
                         <span v-if="showEnchantTag && item.enchant_id" class="text-emerald-300/80">{{ __('ench') }}</span>
                         <span v-else-if="showEnchantTag" class="text-red-500">{{ __('no ench') }}</span>
                         <span v-if="missingSocket" class="text-red-500">{{ __('empty gem') }}</span>

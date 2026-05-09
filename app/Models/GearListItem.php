@@ -33,12 +33,14 @@ class GearListItem extends Model
         'bonus_ids',
         'has_empty_socket',
         'gem_ids',
+        'chosen_stats',
         'position',
     ];
 
     protected $casts = [
         'bonus_ids' => 'array',
         'gem_ids' => 'array',
+        'chosen_stats' => 'array',
         'item_level' => 'integer',
         'enchant_id' => 'integer',
         'has_empty_socket' => 'boolean',
