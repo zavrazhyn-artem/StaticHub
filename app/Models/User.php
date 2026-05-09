@@ -172,6 +172,7 @@ class User extends Authenticatable
             'pre_raid_sync_enabled'        => true,
             'pre_raid_sync_offset_minutes' => 5,
             'auto_update_enabled'          => true,
+            'auto_update_addons_enabled'   => true,
         ];
     }
     public function transactions(): HasMany

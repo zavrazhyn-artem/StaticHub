@@ -52,6 +52,7 @@ final class DesktopController extends Controller
             'pre_raid_sync_enabled'        => ['sometimes', 'boolean'],
             'pre_raid_sync_offset_minutes' => ['sometimes', 'integer', 'min:1', 'max:120'],
             'auto_update_enabled'          => ['sometimes', 'boolean'],
+            'auto_update_addons_enabled'   => ['sometimes', 'boolean'],
         ]);
 
         // Merge into existing settings so partial PATCH keeps untouched
