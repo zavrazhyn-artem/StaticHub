@@ -141,7 +141,12 @@ final class WishlistSyncService
             'schema'     => self::SCHEMA_VERSION,
             'team_id'    => $static->id,
             'synced_at'  => CarbonImmutable::now('UTC')->toIso8601String(),
-            'characters' => $characters,
+            // Cast to object so an empty $characters serialises as `{}`
+            // (JSON object) instead of `[]` (JSON array) — the bridge
+            // unmarshals this field as `map[string]any` and trips on
+            // an empty array. Non-empty assoc arrays already encode as
+            // objects; the cast is a no-op for the populated case.
+            'characters' => (object) $characters,
         ];
     }
 
