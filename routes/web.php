@@ -246,8 +246,15 @@ Route::get('/auth/battlenet/callback', [BattleNetController::class, 'callback'])
 // here with ?user_code=ABCD-EFGH; show() bounces guests through Bnet
 // OAuth and brings them back. approve()/deny() require an authenticated
 // session.
-Route::get('/oauth/device', [OAuthDeviceApprovalController::class, 'show'])->name('oauth.device.show');
-Route::middleware('auth')->group(function () {
+// Tight throttle on the approve view + actions — without this an
+// authenticated session could brute-force user_codes (8 chars × 32
+// alphabet ≈ 10^12 space). The /api/v1/oauth/device endpoints are
+// already throttled but the browser approval surface wasn't, which
+// would have given an attacker a quiet side channel.
+Route::middleware('throttle:30,1')->group(function () {
+    Route::get('/oauth/device', [OAuthDeviceApprovalController::class, 'show'])->name('oauth.device.show');
+});
+Route::middleware(['auth', 'throttle:30,1'])->group(function () {
     Route::post('/oauth/device/approve', [OAuthDeviceApprovalController::class, 'approve'])->name('oauth.device.approve');
     Route::post('/oauth/device/deny',    [OAuthDeviceApprovalController::class, 'deny'])->name('oauth.device.deny');
 });
