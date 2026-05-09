@@ -42,15 +42,20 @@ Route::middleware('auth:sanctum')
 // Replaces the old /v1/sync/wishlists — bridge does one round-trip per
 // cycle and gets everything it needs (data to write, runtime knobs to
 // honour, next raid for pre-RT sync, version manifest for self-update).
+//
+// Drain ingest endpoints also live under /api/desktop/ so the bridge's
+// trust-boundary check (post_url must start with /api/desktop/) covers
+// every spec-driven POST in one rule. New ingest = add a route here +
+// a SyncSpecService entry, no bridge update needed.
 Route::middleware('auth:sanctum')->prefix('desktop')->group(function () {
     Route::get('/sync', [DesktopController::class, 'sync'])->name('api.desktop.sync');
     Route::patch('/settings', [DesktopController::class, 'updateSettings'])->name('api.desktop.settings.update');
     Route::get('/addon', [DesktopController::class, 'downloadAddon'])->name('api.desktop.addon.download');
+    Route::post('/loot-history', [LootHistoryController::class, 'store'])->name('api.desktop.loot-history');
 });
 
-// Loot-history push — bridge drains BlastROutboxEvents into this and
-// drops the events from the SV on a 200 response. Idempotent on
-// per-event UUIDs so retries are safe.
+// Legacy alias kept so existing pre-spec bridges (anything before the
+// Phase A spec runner) keep working until everyone has updated.
 Route::middleware('auth:sanctum')
     ->post('/v1/sync/loot-history', [LootHistoryController::class, 'store'])
     ->name('api.sync.loot-history');
