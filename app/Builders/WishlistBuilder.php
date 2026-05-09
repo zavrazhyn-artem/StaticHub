@@ -94,7 +94,8 @@ class WishlistBuilder extends Builder
         ?string $sourceReportId,
         ?array $rawPayload,
         ?\DateTimeInterface $generatedAt,
-        array $items
+        array $items,
+        ?int $matchedConfigId = null,
     ): Wishlist {
         return DB::transaction(function () use (
             $character,
@@ -106,7 +107,8 @@ class WishlistBuilder extends Builder
             $sourceReportId,
             $rawPayload,
             $generatedAt,
-            $items
+            $items,
+            $matchedConfigId
         ) {
             $wishlist = Wishlist::query()->updateOrCreate(
                 [
@@ -122,6 +124,7 @@ class WishlistBuilder extends Builder
                     'raw_payload' => $rawPayload,
                     'generated_at' => $generatedAt,
                     'imported_at' => now(),
+                    'matched_config_id' => $matchedConfigId,
                 ]
             );
 

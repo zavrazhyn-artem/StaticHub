@@ -46,7 +46,13 @@ class Wishlist extends Model
         'raw_payload',
         'generated_at',
         'imported_at',
+        'matched_config_id',
     ];
+
+    public function matchedConfig(): BelongsTo
+    {
+        return $this->belongsTo(WishlistDroptimizerConfig::class, 'matched_config_id');
+    }
 
     protected $casts = [
         'raw_payload' => 'array',

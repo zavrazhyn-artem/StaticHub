@@ -20,6 +20,7 @@ const props = defineProps({
     scheduleTabUrl: { type: String, required: true },
     discordTabUrl:  { type: String, required: true },
     logsTabUrl:     { type: String, required: true },
+    wishlistConfigsTabUrl: { type: String, default: '' },
     canManage:      { type: Boolean, default: false },
     ownershipTransferred: { type: Boolean, default: false },
 });
@@ -126,6 +127,7 @@ const unlinkDiscord = async () => {
             :schedule-url="scheduleTabUrl"
             :discord-url="discordTabUrl"
             :logs-url="logsTabUrl"
+            :wishlist-configs-url="wishlistConfigsTabUrl"
             active-tab="profile"
             :can-manage="canManage"
         />

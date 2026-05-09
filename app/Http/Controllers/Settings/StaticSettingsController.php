@@ -95,6 +95,25 @@ class StaticSettingsController extends Controller
         ));
     }
 
+    /**
+     * "Allowed Droptimizer configurations" — per-static list of fight
+     * styles the raid lead accepts when members import wishlists.
+     * Backed by WishlistConfigController for the JSON CRUD; this view
+     * just renders the Vue settings tab.
+     */
+    public function wishlistConfigs(StaticGroup $static): View
+    {
+        Gate::authorize('canAccessSettings', $static);
+
+        return view('statics.settings.wishlist_configs', [
+            'static'          => $static,
+            'configs'         => \App\Models\WishlistDroptimizerConfig::query()->forStatic($static->id)->get(),
+            'fight_styles'    => \App\Models\WishlistDroptimizerConfig::FIGHT_STYLES,
+            'ops'             => \App\Models\WishlistDroptimizerConfig::OPS,
+            'upgrade_levels'  => \App\Models\WishlistDroptimizerConfig::upgradeLevelOptions(),
+        ]);
+    }
+
     public function updateLogs(UpdateLogsRequest $request, StaticGroup $static): JsonResponse
     {
         Gate::authorize('canAccessSettings', $static);

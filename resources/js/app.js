@@ -70,6 +70,7 @@ app.component('settings-logs',             lazy(() => import('./Components/Setti
 app.component('settings-schedule',         lazy(() => import('./Components/Settings/SettingsSchedule.vue')));
 app.component('settings-discord',          lazy(() => import('./Components/Settings/SettingsDiscord.vue')));
 app.component('settings-profile',          lazy(() => import('./Components/Settings/SettingsProfile.vue')));
+app.component('wishlist-configs-settings', lazy(() => import('./Components/Statics/Settings/WishlistConfigsSettings.vue')));
 app.component('gear-management',           lazy(() => import('./Components/Gear/GearManagement.vue')));
 app.component('static-setup',              lazy(() => import('./Components/Statics/StaticSetup.vue')));
 app.component('consumables-planner',       lazy(() => import('./Components/Treasury/ConsumablesPlanner.vue')));

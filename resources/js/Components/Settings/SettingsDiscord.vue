@@ -32,6 +32,7 @@ const props = defineProps({
     scheduleTabUrl:   { type: String,  required: true },
     discordTabUrl:    { type: String,  required: true },
     logsTabUrl:       { type: String,  required: true },
+    wishlistConfigsTabUrl: { type: String, default: '' },
     canManage:        { type: Boolean, default: false },
 });
 
@@ -551,7 +552,7 @@ const roleSelectDisabled = computed(() => contextError.value || (roleBusy.value 
             </div>
         </div>
 
-        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" active-tab="discord" :can-manage="canManage" />
+        <SettingsTabs :profile-url="profileTabUrl" :schedule-url="scheduleTabUrl" :discord-url="discordTabUrl" :logs-url="logsTabUrl" :wishlist-configs-url="wishlistConfigsTabUrl" active-tab="discord" :can-manage="canManage" />
 
         <div class="space-y-4">
 

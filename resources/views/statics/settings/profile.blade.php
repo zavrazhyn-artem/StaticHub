@@ -12,6 +12,7 @@
         schedule-tab-url="{{ route('statics.settings.schedule') }}"
         discord-tab-url="{{ route('statics.settings.discord') }}"
         logs-tab-url="{{ route('statics.settings.logs') }}"
+        wishlist-configs-tab-url="{{ route('statics.settings.wishlist-configs') }}"
         :can-manage="{{ json_encode($canManage) }}"
         :ownership-transferred="{{ json_encode(session('status') === 'ownership-transferred') }}"
     ></settings-profile>

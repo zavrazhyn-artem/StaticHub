@@ -107,6 +107,12 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::post('/gear/wishlists', [WishlistController::class, 'store'])->name('statics.gear.wishlists.store');
     Route::delete('/gear/wishlists/{wishlist}', [WishlistController::class, 'destroy'])->name('statics.gear.wishlists.destroy');
 
+    // Allowed Droptimizer configurations — per-static, managed in settings
+    Route::get('/wishlist-configs', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'index'])->name('statics.wishlist-configs.index');
+    Route::post('/wishlist-configs', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'store'])->name('statics.wishlist-configs.store');
+    Route::patch('/wishlist-configs/{config}', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'update'])->name('statics.wishlist-configs.update');
+    Route::delete('/wishlist-configs/{config}', [\App\Http\Controllers\Gear\WishlistConfigController::class, 'destroy'])->name('statics.wishlist-configs.destroy');
+
     Route::get('/gear/lists/summaries', [GearListController::class, 'summaries'])->name('statics.gear.lists.summaries');
     Route::get('/gear/lists/{list}/payload', [GearListController::class, 'activePayload'])->name('statics.gear.lists.payload');
     Route::post('/gear/lists', [GearListController::class, 'store'])->name('statics.gear.lists.store');
@@ -125,6 +131,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
 
     // Settings
     Route::get('/settings/profile', [StaticSettingsController::class, 'profile'])->name('statics.settings.profile');
+    Route::get('/settings/wishlist-configs', [StaticSettingsController::class, 'wishlistConfigs'])->name('statics.settings.wishlist-configs');
     Route::get('/settings/schedule', [StaticSettingsController::class, 'schedule'])->name('statics.settings.schedule');
     Route::patch('/settings/schedule', [StaticSettingsController::class, 'updateSchedule'])->name('statics.settings.schedule.update');
     Route::get('/settings/discord', [StaticSettingsController::class, 'discord'])->name('statics.settings.discord');
