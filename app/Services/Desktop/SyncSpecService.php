@@ -47,7 +47,7 @@ final class SyncSpecService
             'spec_version' => self::SPEC_VERSION,
             'drain'        => $this->buildDrain(),
             'writes'       => $this->buildWrites($wishlistPayload),
-            'globs'        => [],   // Phase C
+            'file_writes'  => $this->buildFileWrites(),
         ];
     }
 
@@ -172,5 +172,35 @@ final class SyncSpecService
                 'min_addon_version' => '0.0.0',
             ],
         ];
+    }
+
+    /**
+     * File-write entries — bridge writes a Lua source file under
+     * `Interface/AddOns/<addon>/<rel_path>`. Targets the new
+     * `ServerData/In/` convention: every addon ships a TOC entry
+     * pointing at each file it expects to load, the bridge fills the
+     * file with the data the server provided.
+     *
+     * Each entry:
+     *   id                — opaque
+     *   addon             — addon name (must be in whitelist)
+     *   rel_path          — path under `Interface/AddOns/<addon>/`.
+     *                       Bridge enforces: starts with
+     *                       `ServerData/In/`, ends with `.lua`, no
+     *                       `..` traversal.
+     *   vars              — same shape as spec.writes.vars; bridge
+     *                       serializes to Lua assignments.
+     *   min_addon_version — graceful skip on older installs.
+     *
+     * Empty array today — first real consumer will be a future
+     * feature (season catalog, boss timeline data, …). Wired now so
+     * the bridge ships with the runner already in place; adding the
+     * first entry won't need a bridge update.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function buildFileWrites(): array
+    {
+        return [];
     }
 }
