@@ -30,6 +30,7 @@ final class DesktopSyncService
     public function __construct(
         private readonly WishlistSyncService $wishlists,
         private readonly AddonReleaseService $addons,
+        private readonly BridgeReleaseService $bridges,
         private readonly SyncSpecService $spec,
     ) {}
 
@@ -89,20 +90,36 @@ final class DesktopSyncService
      */
     private function resolveManifest(): array
     {
-        $addonVersion = $this->addons->version();
-        $addonSha     = $this->addons->sha256();
-        $addonReady   = $this->addons->exists();
+        $addonReady  = $this->addons->exists();
+        $bridgeReady = $this->bridges->exists();
+
+        // Bridge manifest stays env-tunable (rollout_pct,
+        // min_required_version) but version + url + sha256 come from
+        // the published file when present. Lets us roll a new bridge
+        // by committing resources/desktop/bridge.exe + bumping
+        // bridge-version.txt — same drop-and-deploy flow as the
+        // addon release.
+        $bridgeConfig = config('blastr_desktop.bridge');
+        $bridgeVersion = $this->bridges->version();
+        $bridge = [
+            'latest_version'       => $bridgeVersion ?? ($bridgeConfig['latest_version'] ?? null),
+            'download_url'         => $bridgeReady ? URL::route('api.desktop.bridge.download') : ($bridgeConfig['download_url'] ?? null),
+            'sha256'               => $this->bridges->sha256() ?? ($bridgeConfig['sha256'] ?? null),
+            'min_required_version' => $bridgeConfig['min_required_version'] ?? null,
+            'rollout_pct'          => $bridgeConfig['rollout_pct'] ?? 100,
+            'changelog_url'        => $bridgeConfig['changelog_url'] ?? null,
+        ];
 
         return [
-            'bridge' => config('blastr_desktop.bridge'),
+            'bridge' => $bridge,
             'addon'  => [
-                'latest_version' => $addonVersion,
+                'latest_version' => $this->addons->version(),
                 // URL points at the auth-protected download endpoint;
                 // bridge sends Bearer token + gets the bytes streamed.
                 // Null when no zip is published yet — bridge skips
                 // install attempt rather than 404-ing.
                 'download_url'   => $addonReady ? URL::route('api.desktop.addon.download') : null,
-                'sha256'         => $addonSha,
+                'sha256'         => $this->addons->sha256(),
             ],
         ];
     }

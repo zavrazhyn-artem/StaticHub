@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->prefix('desktop')->group(function () {
     Route::get('/sync', [DesktopController::class, 'sync'])->name('api.desktop.sync');
     Route::patch('/settings', [DesktopController::class, 'updateSettings'])->name('api.desktop.settings.update');
     Route::get('/addon', [DesktopController::class, 'downloadAddon'])->name('api.desktop.addon.download');
+    Route::get('/bridge', [DesktopController::class, 'downloadBridge'])->name('api.desktop.bridge.download');
     Route::post('/loot-history', [LootHistoryController::class, 'store'])->name('api.desktop.loot-history');
 });
 

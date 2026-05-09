@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\Desktop;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Desktop\AddonReleaseService;
+use App\Services\Desktop\BridgeReleaseService;
 use App\Services\Desktop\DesktopSyncService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,7 @@ final class DesktopController extends Controller
     public function __construct(
         private readonly DesktopSyncService $svc,
         private readonly AddonReleaseService $addons,
+        private readonly BridgeReleaseService $bridges,
     ) {}
 
     public function sync(Request $request): JsonResponse
@@ -53,6 +55,7 @@ final class DesktopController extends Controller
             'pre_raid_sync_offset_minutes' => ['sometimes', 'integer', 'min:1', 'max:120'],
             'auto_update_enabled'          => ['sometimes', 'boolean'],
             'auto_update_addons_enabled'   => ['sometimes', 'boolean'],
+            'notifications_enabled'        => ['sometimes', 'boolean'],
         ]);
 
         // Merge into existing settings so partial PATCH keeps untouched
@@ -85,5 +88,20 @@ final class DesktopController extends Controller
             abort(404, 'Addon release file is not yet published');
         }
         return $this->addons->streamResponse();
+    }
+
+    /**
+     * Stream the current bridge .exe to an authenticated client.
+     * Same contract as downloadAddon — auth-gated, sha256-verified
+     * on the client side. Updater fetches via this endpoint and
+     * swaps the running binary via the rename-pattern (see
+     * internal/updater).
+     */
+    public function downloadBridge(Request $request): BinaryFileResponse
+    {
+        if (! $this->bridges->exists()) {
+            abort(404, 'Bridge release file is not yet published');
+        }
+        return $this->bridges->streamResponse();
     }
 }
