@@ -3,8 +3,8 @@
 This is the data contract between the **BlastR Desktop bridge** and the
 **`BlastR_RCLootCouncil`** in-game addon. Both sides serialize/deserialize
 the files described below; if you change a field, change it in three
-places: the spec, the bridge codec (`internal/lua/`), and the addon
-modules under `external/addon/`.
+places: the spec, the bridge codec (`external/desktop/internal/lua/`),
+and the addon modules under `external/desktop/internal/wow/addonfiles/`.
 
 The format is a strict subset of WoW SavedVariables:
 
