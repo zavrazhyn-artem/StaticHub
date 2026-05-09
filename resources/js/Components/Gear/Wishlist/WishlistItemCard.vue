@@ -14,7 +14,13 @@ const emit = defineEmits(['open-claimants']);
 const claimantCount = computed(() => Number(props.item.claimant_count ?? 0));
 const bisCount = computed(() => Number(props.item.bis_count ?? 0));
 
-const isBis = computed(() => props.item.status === 'b');
+// Green highlight = the item is on this character/spec's BiS gear list.
+// Distinct from `status === 'b'` (which is raidbots' "BiS-tier upgrade"
+// flag from the simulator) — the user's BiS-list membership is what
+// matters for loot-council priority calls.
+const isBis = computed(() =>
+    Array.isArray(props.item.listed_in)
+    && props.item.listed_in.some(e => typeof e === 'object' && e?.type === 'bis'));
 const isDowngrade = computed(() => Number(props.item.value) < 0);
 const isOutdated = computed(() => props.item.status === 'o');
 
@@ -134,6 +140,17 @@ const percentClass = computed(() => {
             >
                 <span class="material-symbols-outlined text-[12px]">checklist</span>
                 <span>{{ item.listed_in.map(e => typeof e === 'string' ? e : (e.name + (e.tier ? ` ${e.tier}` : ''))).join(' · ') }}</span>
+            </div>
+            <!-- Which Droptimizer configs contributed to the weighted
+                 percent above. Two-letter abbrev keeps the corner tight;
+                 full names are in the title attribute. -->
+            <div
+                v-if="item.matched_configs?.length"
+                class="text-[9px] font-headline font-bold uppercase tracking-widest text-cyan-300/70 flex items-center gap-1"
+                :title="__('Weighted across: :names', { names: item.matched_configs.join(', ') })"
+            >
+                <span class="material-symbols-outlined text-[12px]">tune</span>
+                <span>{{ item.matched_configs.map(n => n.slice(0, 2)).join('/') }}</span>
             </div>
         </div>
     </button>

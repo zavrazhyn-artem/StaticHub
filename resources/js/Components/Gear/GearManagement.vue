@@ -14,6 +14,7 @@ const { __ } = useTranslation();
 const props = defineProps({
     staticName: { type: String, required: true },
     wishlistPayload: { type: Array, default: () => [] },
+    wishlistConfigs: { type: Array, default: () => [] },
     gearContext: { type: Array, default: () => [] },
     enchantableSlots: { type: Array, default: () => [] },
     storeUrl: { type: String, required: true },
@@ -125,10 +126,39 @@ const tabs = [
     { id: 'vault', icon: 'inventory_2', label: 'Vault Optimizer', disabled: true },
 ];
 
-const submitImport = () => {
+// AJAX submit so we can keep the modal open and surface the full
+// multi-line WishlistImportException message inline. A regular form POST
+// would reload and chop the message into a 3.5s toast.
+const importError = ref('');
+
+const submitImport = async (e) => {
+    e?.preventDefault();
     if (!urlInput.value.trim()) return;
     submitting.value = true;
-    importForm.value?.submit();
+    importError.value = '';
+    try {
+        const form = new FormData();
+        form.append('url', urlInput.value.trim());
+        const resp = await fetch(props.storeUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': props.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: form,
+        });
+        if (resp.ok) {
+            window.location.reload();
+            return;
+        }
+        const data = await resp.json().catch(() => ({}));
+        importError.value = data.message || `HTTP ${resp.status}`;
+    } catch (err) {
+        importError.value = String(err?.message || err);
+    } finally {
+        submitting.value = false;
+    }
 };
 
 const showToast = (message, isError = false) => {
@@ -170,7 +200,7 @@ onMounted(() => {
             <button
                 v-if="activeTab === 'wishlist'"
                 type="button"
-                @click="showImportModal = true"
+                @click="urlInput = ''; importError = ''; showImportModal = true"
                 class="px-5 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-100 font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-cyan-500/20 transition"
             >
                 <span class="material-symbols-outlined text-base">add_link</span>
@@ -280,9 +310,10 @@ onMounted(() => {
         v-model:spec-id="selectedSpecId"
         :payload="wishlistPayload"
         :characters="gearContext"
+        :configs="wishlistConfigs"
         :csrf-token="csrfToken"
         :destroy-url-template="destroyUrlTemplate"
-        @open-import="urlInput = ''; showImportModal = true"
+        @open-import="urlInput = ''; importError = ''; showImportModal = true"
     />
 
     <LootHistoryPanel
@@ -339,6 +370,13 @@ onMounted(() => {
                         ? __('Run an Upgrade Report on questionablyepic.com/live and paste the URL here. The character must be linked to your account first.')
                         : __('Run a Droptimizer on raidbots.com, paste the URL here. The character must be linked to your account first.') }}
                 </p>
+            </div>
+
+            <!-- Inline error block — keeps the full multi-line import
+                 exception readable. Pre-wrap preserves the per-config
+                 breakdown the matcher emits when no allowed config fits. -->
+            <div v-if="importError" class="px-4 py-3 rounded-lg bg-error/10 border border-error/40 text-error text-xs font-mono whitespace-pre-wrap max-h-72 overflow-y-auto">
+                {{ importError }}
             </div>
 
             <div class="flex justify-end gap-2 pt-2">

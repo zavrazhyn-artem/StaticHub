@@ -10,12 +10,19 @@ use App\Http\Requests\Gear\ImportWishlistRequest;
 use App\Jobs\Wishlist\ImportWishlistJob;
 use App\Models\StaticGroup;
 use App\Models\Wishlist;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
-    public function store(StaticGroup $static, ImportWishlistRequest $request): RedirectResponse
+    /**
+     * AJAX-aware: fetch() POSTs with `Accept: application/json` and gets
+     * back JSON 422 with the full multi-line WishlistImportException
+     * message so the frontend can render it inline in the import modal.
+     * Classic form posts still redirect-back with a flash message.
+     */
+    public function store(StaticGroup $static, ImportWishlistRequest $request): RedirectResponse|JsonResponse
     {
         $url    = (string) $request->validated('url');
         $userId = (int) Auth::id();
@@ -23,9 +30,15 @@ class WishlistController extends Controller
         try {
             ImportWishlistJob::dispatchSync($userId, $url);
         } catch (WishlistImportException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
             return back()->withErrors(['url' => $e->getMessage()])->withInput();
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Wishlist imported.']);
+        }
         return back()->with('success', 'Wishlist imported.');
     }
 

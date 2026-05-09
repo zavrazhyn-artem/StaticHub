@@ -27,6 +27,7 @@ final class WishlistService
     public function __construct(
         private readonly RaidbotsImportService $raidbots,
         private readonly QELiveImportService $qeLive,
+        private readonly WishlistConfigService $configService,
     ) {}
 
     /**
@@ -58,6 +59,34 @@ final class WishlistService
         $this->upsertItemMetadata($itemsByRaid);
         $this->dispatchMetadataResolveJobs(array_keys($itemsByRaid));
 
+        // Match the import against the static's allowed Droptimizer
+        // configs. We resolve "the static" as the first one this
+        // character belongs to — single-static is the common case; for
+        // a multi-static character the first (lowest-id) match keeps
+        // behaviour deterministic. If the character belongs to a static
+        // and no allowed config matches, hard-reject the import — that
+        // is the whole point of the per-static gate. Characters with no
+        // static (e.g. mid-onboarding) are exempt and get matched_config = null.
+        $staticId = $character->statics()->orderBy('statics.id')->value('statics.id');
+        $matchedConfig = null;
+        if ($staticId) {
+            $matchedConfig = $this->configService->matchForImport((int) $staticId, $dto);
+            if ($matchedConfig === null) {
+                // Build a per-config breakdown so the player knows which
+                // exact field(s) of which config row(s) the report missed.
+                $report  = $this->configService->extractReportSummary($dto);
+                $configs = $this->configService->listForStatic((int) $staticId);
+                $reasons = [];
+                foreach ($configs as $c) {
+                    $reasons[$c->display_name] = $this->configService->matchFailureReasons($c, $report);
+                }
+                throw WishlistImportException::noMatchingConfig(
+                    $this->configService->summariseReport($dto),
+                    $reasons,
+                );
+            }
+        }
+
         $wishlists = collect();
         foreach ($dto['simulations'] as $sim) {
             $wishlistItems = $this->buildWishlistItemRows($sim['items']);
@@ -73,6 +102,7 @@ final class WishlistService
                 null, // raw_payload kept off in Phase 0 — column reserved for future debug flag
                 $dto['generated_at'],
                 $wishlistItems,
+                $matchedConfig?->id,
             );
 
             $wishlists->push($wishlist);
@@ -168,6 +198,14 @@ final class WishlistService
             ->pluck('spec_id', 'character_id')
             ->all();
 
+        // Pre-load "is this item in the character's BiS gear list for
+        // this spec" — keyed by "{char}:{spec}:{item}". The wishlist item's
+        // own status='b' means "raidbots flagged it as a BiS-tier upgrade",
+        // which is NOT what the loot-council cares about: they want to know
+        // whose curated BiS list this item appears on. Mirrors the green-
+        // highlight fix on the cards.
+        $bisListLookup = $this->buildBisListMembershipLookup($charIds);
+
         // For alt characters, resolve "whose alt" — find the user's main
         // character in the same static. Lets the modal render
         // "Alt of Zavrikk" instead of a bare "Alt" badge.
@@ -214,7 +252,7 @@ final class WishlistService
                     'spec_name'      => $w->specialization?->name,
                     'is_main_spec'   => isset($mainSpecByChar[$w->character_id])
                         && (int) $mainSpecByChar[$w->character_id] === (int) $w->spec_id,
-                    'is_bis'         => $i->status === WishlistItem::STATUS_BIS,
+                    'is_bis'         => isset($bisListLookup["{$w->character_id}:{$w->spec_id}:{$i->item_id}"]),
                     'value'          => (int) $i->value,
                     'percent'        => (float) $i->percent,
                 ];
@@ -326,6 +364,7 @@ final class WishlistService
                 $lookup[$key][$row->item_id] ??= [];
                 $lookup[$key][$row->item_id][] = [
                     'name' => $row->name,
+                    'type' => $row->type,
                     'tier' => $row->type === 'current'
                         ? $this->trackLabelForRow($row)
                         : null,
@@ -476,6 +515,7 @@ final class WishlistService
             ->raidsOnly()
             ->when(! empty($excluded), fn ($q) => $q->whereNotIn('raid_slug', $excluded))
             ->withDisplayRelations()
+            ->with('matchedConfig:id,display_name,weight')
             ->orderBy('character_id')
             ->orderBy('raid_slug')
             ->orderBy('difficulty')
@@ -502,6 +542,22 @@ final class WishlistService
         // exact tuple, so claimants for one tuple don't bleed into another.
         $claimantsByItem = $this->buildClaimantsLookup($wishlists, $staticId);
 
+        // Per-character main spec for THIS static. Drives the "Mains
+        // only" filter — a character without any is_main spec in this
+        // static is treated as alt and hidden by default; for those that
+        // do have a main spec, only that spec's wishlist counts as main.
+        $charIds = $wishlists->pluck('character_id')->unique()->all();
+        $mainSpecByCharId = $this->buildMainSpecLookup($staticId, $charIds);
+        // character_static.role is the authoritative main/alt flag for
+        // this static — needed alongside main_spec so "Mains only" can
+        // hide alt characters even when they happen to have a main_spec
+        // assigned.
+        $rolesByCharId = empty($charIds) ? [] : DB::table('character_static')
+            ->where('static_id', $staticId)
+            ->whereIn('character_id', $charIds)
+            ->pluck('role', 'character_id')
+            ->all();
+
         $grouped = [];
         foreach ($wishlists as $w) {
             $charKey = $w->character_id;
@@ -513,6 +569,8 @@ final class WishlistService
                     'playable_class' => $w->character->playable_class,
                     'avatar_url'     => $w->character->avatar_url,
                     'is_own'         => $userId !== null && $w->character->user_id === $userId,
+                    'main_spec_id'   => $mainSpecByCharId[$w->character_id] ?? null,
+                    'static_role'    => $rolesByCharId[$w->character_id] ?? null,
                 ],
                 'wishlists' => [],
             ];
@@ -527,6 +585,9 @@ final class WishlistService
                 'source_url'      => $w->source_url,
                 'generated_at'    => $w->generated_at?->toIso8601String(),
                 'imported_at'     => $w->imported_at->toIso8601String(),
+                'matched_config'  => $w->matchedConfig
+                    ? ['id' => $w->matchedConfig->id, 'name' => $w->matchedConfig->display_name, 'weight' => (float) $w->matchedConfig->weight]
+                    : null,
                 'items'           => $w->items->map(function (WishlistItem $i) use ($w, $listedIn, $bossByItemId, $claimantsByItem) {
                     $key = $w->character_id . ':' . $w->spec_id;
                     $catalog = $bossByItemId[$i->item_id] ?? null;
@@ -554,5 +615,49 @@ final class WishlistService
         }
 
         return array_values($grouped);
+    }
+
+    /**
+     * Set of "{character_id}:{spec_id}:{item_id}" keys for items present
+     * in the character's BiS gear list for that spec. The lookup loads
+     * once per payload build so the per-item claimant loop stays O(1).
+     *
+     * @param array<int,int> $characterIds
+     * @return array<string,true>
+     */
+    private function buildBisListMembershipLookup(array $characterIds): array
+    {
+        if (empty($characterIds)) return [];
+        $rows = DB::table('gear_lists')
+            ->join('gear_list_items', 'gear_lists.id', '=', 'gear_list_items.list_id')
+            ->whereIn('gear_lists.character_id', $characterIds)
+            ->where('gear_lists.type', 'bis')
+            ->select('gear_lists.character_id', 'gear_lists.spec_id', 'gear_list_items.item_id')
+            ->get();
+        $out = [];
+        foreach ($rows as $r) {
+            $out["{$r->character_id}:{$r->spec_id}:{$r->item_id}"] = true;
+        }
+        return $out;
+    }
+
+    /**
+     * Map character_id => main spec_id within the given static. Pulled
+     * from character_static_specs.is_main, which is the same source the
+     * roster uses for "this is the spec we're tracking for this person".
+     *
+     * @param array<int,int> $characterIds
+     * @return array<int,int>
+     */
+    private function buildMainSpecLookup(int $staticId, array $characterIds): array
+    {
+        if (empty($characterIds)) return [];
+        return \DB::table('character_static_specs')
+            ->where('static_id', $staticId)
+            ->where('is_main', true)
+            ->whereIn('character_id', $characterIds)
+            ->pluck('spec_id', 'character_id')
+            ->map(fn ($v) => (int) $v)
+            ->all();
     }
 }

@@ -8,6 +8,10 @@ const { __ } = useTranslation();
 const props = defineProps({
     show: { type: Boolean, default: false },
     item: { type: Object, default: null },
+    // When true, claimants get the same role/main-spec gate as the
+    // outer panel — alts and off-spec entries hide so the modal mirrors
+    // what's in the items grid behind it.
+    mainsOnly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['close']);
@@ -27,8 +31,13 @@ const classColor = (cls) => CLASS_COLORS[cls] ?? '#9ca3af';
 
 // Sort: BiS first, then main spec ahead of off-spec, then by upgrade value
 // desc — most-deserving claimants land at the top so a loot caller can scan.
+// When mainsOnly is on we apply the same role+main-spec gate as the outer
+// panel so the modal mirrors the items grid (no alts/off-specs leaking).
 const sortedClaimants = computed(() => {
-    const list = [...(props.item?.claimants ?? [])];
+    let list = [...(props.item?.claimants ?? [])];
+    if (props.mainsOnly) {
+        list = list.filter(c => c.role === 'main' && c.is_main_spec);
+    }
     return list.sort((a, b) => {
         if (a.is_bis !== b.is_bis) return a.is_bis ? -1 : 1;
         if (a.is_main_spec !== b.is_main_spec) return a.is_main_spec ? -1 : 1;

@@ -9,6 +9,7 @@
     <gear-management
         static-name="{{ $static->name }}"
         :wishlist-payload='@json($wishlistPayload)'
+        :wishlist-configs='@json($wishlistConfigs)'
         :gear-context='@json($gearContext)'
         :enchantable-slots='@json($enchantableSlots)'
         store-url="{{ route('statics.gear.wishlists.store') }}"

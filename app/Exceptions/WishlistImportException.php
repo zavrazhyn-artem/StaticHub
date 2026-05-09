@@ -42,4 +42,21 @@ class WishlistImportException extends Exception
     {
         return new self("Specialization '{$spec} {$class}' is not in the database.");
     }
+
+    /**
+     * @param array<string, list<string>> $perConfigReasons  configName ⇒ reasons it didn't match
+     */
+    public static function noMatchingConfig(string $reportSummary, array $perConfigReasons): self
+    {
+        $body = "This Droptimizer report doesn't match any allowed configuration for your static.\n"
+              . "Report: {$reportSummary}\n";
+
+        foreach ($perConfigReasons as $name => $reasons) {
+            $body .= "\n• {$name}: " . (empty($reasons) ? 'matched (unexpected)' : implode('; ', $reasons));
+        }
+
+        $body .= "\n\nRe-run the sim with the right settings, or ask your raid lead to add a matching configuration.";
+
+        return new self($body);
+    }
 }
