@@ -23,8 +23,6 @@ x-app-defaults: &app-defaults
   restart: unless-stopped
   env_file: .env
   depends_on:
-    mysql:
-      condition: service_healthy
     redis:
       condition: service_healthy
   networks:
@@ -99,36 +97,6 @@ services:
     command: ["php", "artisan", "schedule:work"]
 
   # ---------------------------------------------------------------------------
-  # MySQL 8.4 – port 3306 exposed for TablePlus / DBeaver
-  # ---------------------------------------------------------------------------
-  mysql:
-    image: mysql:8.4
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE:      "${DB_DATABASE}"
-      MYSQL_USER:          "${DB_USERNAME}"
-      MYSQL_PASSWORD:      "${DB_PASSWORD}"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --innodb-buffer-pool-size=256M
-      - --sort-buffer-size=4M
-      - --skip-log-bin
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - app_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # ---------------------------------------------------------------------------
   # Redis 7 – port 6379 exposed for RedisInsight / redis-cli on host
   # ---------------------------------------------------------------------------
   redis:
@@ -157,7 +125,6 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
   redis_data:
   # Build artefacts – seeded from the image, isolated from the bind mount
   vendor:
