@@ -14,64 +14,82 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 /**
- * Orchestrates the unified character sync pipeline.
+ * Orchestrates per-static character sync. Each SyncType is evaluated
+ * independently against its own interval — Bnet at SYNC_INTERVAL_*_BNET,
+ * Rio at SYNC_INTERVAL_*_RIO, etc. — so they fire on independent cadences
+ * (e.g. bnet=60min, rio=480min) without one tying the other.
  *
- * For every static group that is due for a sync, the orchestrator dispatches
- * two independent jobs per character:
- *   - FetchBnetRawDataJob  → 'bnet' queue  (Blizzard API routes)
- *   - FetchRioRawDataJob   → 'rio'  queue  (Raider.io API route)
+ * Per type:
+ *   - BNET → FetchBnetRawDataJob on 'bnet' queue. Self-contained: fetch +
+ *            accumulate + compile + JSON_MERGE_PATCH onto characters.
+ *   - RIO  → FetchRioRawDataJob on 'rio' queue. Self-contained: fetch +
+ *            compile rio slice + JSON_MERGE_PATCH onto character_weekly_data.
+ *   - WCL  → no fetch job exists; we just bump wcl_last_synced_at on its
+ *            interval so the dashboard "last synced" widget remains coherent.
+ *            (Raid log analysis is on-demand, not periodic.)
  *
- * Each fetch job dispatches CompileCharacterDataJob on the 'compile' queue
- * upon completion. Because bnet and rio run in parallel on separate queues
- * they never block each other. CompileCharacterDataJob is idempotent — running
- * it twice (once after bnet, once after rio) is safe and ensures the roster
- * table always reflects the latest available data.
- *
- * Scheduling is driven by the BNET interval (longest cadence) as the unified
- * trigger. All three legacy timestamp columns are stamped after dispatch.
+ * Only characters that belong to at least one static are synced — orchestrator
+ * iterates `$static->characters`, which already filters via the pivot.
  */
 class UnifiedSyncOrchestratorService
 {
     /**
-     * Find statics due for sync and dispatch fetch jobs for each character.
+     * Run one tick of the orchestrator. Called every minute by SyncAllStaticsCommand.
      *
      * @return string[] Human-readable status lines for the console.
      */
     public function execute(): array
     {
-        $staticsDue = $this->fetchStaticsDueForSync(SyncType::BNET);
+        $messages = [];
 
-        if ($staticsDue->isEmpty()) {
+        $messages = array_merge($messages, $this->dispatchTypeSync(SyncType::BNET));
+        $messages = array_merge($messages, $this->dispatchTypeSync(SyncType::RIO));
+        $messages = array_merge($messages, $this->bumpWclTimestamps());
+
+        if ($messages === []) {
             return ['No statics are currently due for sync.'];
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Dispatch the fetch job for one sync type across every static that's
+     * past its per-type interval. Each static gets its own timestamp bumped
+     * only for THIS type, so other types stay on their own clocks.
+     *
+     * @return string[]
+     */
+    private function dispatchTypeSync(SyncType $syncType): array
+    {
+        $statics = $this->fetchStaticsDueForSync($syncType);
+
+        if ($statics->isEmpty()) {
+            return [];
         }
 
         $messages = [];
 
-        foreach ($staticsDue as $static) {
-            $characters = $static->characters;
+        foreach ($statics as $static) {
             $dispatched = 0;
 
-            // Spread dispatches across a 50s window so 20 statics × 30 chars
-            // don't all hit Redis/APIs in the same second. Paired with
-            // ShouldBeUnique + RateLimited middleware on the fetch jobs.
-            foreach ($characters as $character) {
-                $jitter = random_int(0, 50);
-                FetchBnetRawDataJob::dispatch($character)
-                    ->delay(now()->addSeconds($jitter));
-                FetchRioRawDataJob::dispatch($character)
-                    ->delay(now()->addSeconds(random_int(0, 50)));
+            foreach ($static->characters as $character) {
+                $this->dispatchFetchJob($syncType, $character);
                 $dispatched++;
             }
 
-            $this->markStaticAsSynced($static->id, SyncType::BNET);
-            $this->markStaticAsSynced($static->id, SyncType::RIO);
-            $this->markStaticAsSynced($static->id, SyncType::WCL);
+            $this->markStaticAsSynced($static->id, $syncType);
 
-            RecalculateStaticProgressionJob::dispatch($static->id)
-                ->delay(now()->addMinutes(5));
+            // Recalculate static-level raid progression after Bnet sync only —
+            // Rio doesn't change raid kill state and WCL is no-op here.
+            if ($syncType === SyncType::BNET) {
+                RecalculateStaticProgressionJob::dispatch($static->id)
+                    ->delay(now()->addMinutes(5));
+            }
 
             $messages[] = sprintf(
-                'Dispatched bnet+rio sync for %d character(s) in static: %s (ID: %d)',
+                'Dispatched %s sync for %d character(s) in static: %s (ID: %d)',
+                $syncType->value,
                 $dispatched,
                 $static->name,
                 $static->id,
@@ -82,47 +100,84 @@ class UnifiedSyncOrchestratorService
     }
 
     /**
-     * Fetch static groups that are due for a specific sync type.
+     * WCL has no real fetch job — just stamp wcl_last_synced_at on its
+     * cadence so the "Last synced" UI widget stays sane and users see the
+     * service rotating through its expected interval.
      *
-     * @param SyncType $syncType The sync type enum.
+     * @return string[]
+     */
+    private function bumpWclTimestamps(): array
+    {
+        $statics = $this->fetchStaticsDueForSync(SyncType::WCL);
+
+        if ($statics->isEmpty()) {
+            return [];
+        }
+
+        $messages = [];
+
+        foreach ($statics as $static) {
+            $this->markStaticAsSynced($static->id, SyncType::WCL);
+            $messages[] = sprintf(
+                'Marked WCL synced for static: %s (ID: %d) [no-op fetch]',
+                $static->name,
+                $static->id,
+            );
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Dispatch one character's fetch job for the given sync type, with a small
+     * jitter so 20 statics × 30 chars don't all hit the API in the same second.
+     * `ShouldBeUnique` on the jobs collapses duplicate dispatches within 180s.
+     */
+    private function dispatchFetchJob(SyncType $syncType, $character): void
+    {
+        $delay = now()->addSeconds(random_int(0, 50));
+
+        match ($syncType) {
+            SyncType::BNET => FetchBnetRawDataJob::dispatch($character)->delay($delay),
+            SyncType::RIO  => FetchRioRawDataJob::dispatch($character)->delay($delay),
+            SyncType::WCL  => null,
+        };
+    }
+
+    /**
+     * Find statics due for a sync type — `<type>_last_synced_at` either NULL
+     * or older than the tier's per-type interval.
+     *
      * @return Collection<int, StaticGroup>
      */
     public function fetchStaticsDueForSync(SyncType $syncType): Collection
     {
-        $syncTypeValue = $syncType->value;
-        $syncColumn = "{$syncTypeValue}_last_synced_at";
+        $syncColumn = "{$syncType->value}_last_synced_at";
 
-        return StaticGroup::withoutGlobalScopes()->with('characters')->get()->filter(function (StaticGroup $static) use ($syncType, $syncColumn) {
-            $tier = $static->plan_tier ?? 'free';
-            $interval = SyncIntervalHelper::getIntervalInMinutes($tier, $syncType);
-            $lastSyncAt = $static->$syncColumn;
+        return StaticGroup::withoutGlobalScopes()
+            ->with('characters')
+            ->get()
+            ->filter(function (StaticGroup $static) use ($syncType, $syncColumn) {
+                $tier = $static->plan_tier ?? 'free';
+                $interval = SyncIntervalHelper::getIntervalInMinutes($tier, $syncType);
+                $lastSyncAt = $static->$syncColumn;
 
-            if ($lastSyncAt === null) {
-                return true;
-            }
+                if ($lastSyncAt === null) {
+                    return true;
+                }
 
-            $lastSyncAt = $lastSyncAt instanceof Carbon ? $lastSyncAt : Carbon::parse($lastSyncAt);
+                $lastSyncAt = $lastSyncAt instanceof Carbon ? $lastSyncAt : Carbon::parse($lastSyncAt);
 
-            return $lastSyncAt->isBefore(now()->subMinutes($interval));
-        });
+                return $lastSyncAt->isBefore(now()->subMinutes($interval));
+            });
     }
 
-    /**
-     * Update the last sync timestamp for a specific sync type of a static group.
-     *
-     * @param int $staticId The ID of the static group.
-     * @param SyncType $syncType The sync type enum.
-     * @return void
-     */
     public function markStaticAsSynced(int $staticId, SyncType $syncType): void
     {
-        $syncTypeValue = $syncType->value;
-        $syncColumn = "{$syncTypeValue}_last_synced_at";
+        $syncColumn = "{$syncType->value}_last_synced_at";
 
         StaticGroup::withoutGlobalScopes()
             ->where('id', $staticId)
-            ->update([
-                $syncColumn => now(),
-            ]);
+            ->update([$syncColumn => now()]);
     }
 }

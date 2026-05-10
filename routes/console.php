@@ -5,6 +5,7 @@ use App\Console\Commands\GenerateEventsCommand;
 use App\Console\Commands\ProcessUserActivityLogsCommand;
 use App\Console\Commands\PurgeOldLogsCommand;
 use App\Console\Commands\PurgeUserActivityLogsCommand;
+use App\Console\Commands\RefreshAllCharactersCommand;
 use App\Console\Commands\SyncAllStaticsCommand;
 use App\Models\StaticGroup;
 use App\Jobs\SyncStaticGroupJob;
@@ -20,6 +21,10 @@ Artisan::command('inspire', function () {
 Schedule::command(FetchAuctionsCommand::class)->hourly()->withoutOverlapping(30)->onOneServer();
 Schedule::command(ProcessDiscordAutomations::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
 Schedule::command(SyncAllStaticsCommand::class)->everyMinute()->withoutOverlapping(10)->onOneServer();
+// Daily lightweight ilvl/spec refresh for every char — keeps My Characters page
+// current for chars that aren't in any static (and so aren't covered by the
+// orchestrator's per-static cadence).
+Schedule::command(RefreshAllCharactersCommand::class)->dailyAt('04:00')->onOneServer();
 Schedule::command(GenerateEventsCommand::class)->daily()->at('00:00')->onOneServer();
 
 // Weekly reset — snapshot character_weekly_data and clear it
@@ -40,4 +45,5 @@ Schedule::command(PurgeUserActivityLogsCommand::class)->daily()->at('05:15')->on
 
 // Delete raid payload files older than 24h (locks chat activation for those reports).
 Schedule::command('ai:cleanup-payloads')->dailyAt('03:30')->onOneServer();
+
 
