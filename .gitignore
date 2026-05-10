@@ -24,6 +24,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
+keys
+
 storage/core-master
 storage/wowaudit-summary.csv
 
