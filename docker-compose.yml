@@ -1,106 +1,87 @@
+# =============================================================================
+# Local dev — same image as production, FrankenPHP serves everything.
+#
+# No nginx, no php-fpm, no separate mysql/redis (we use DO Managed via SSH
+# tunnel for both). Source code is bind-mounted over the image so edits are
+# live; opcache.validate_timestamps is on in dev so PHP picks them up.
+#
+# Three services, one image:
+#   app       → FrankenPHP web server (Octane workers)
+#   worker    → supervisord managing per-queue queue:work processes
+#   scheduler → php artisan schedule:work
+#
+# First-time setup:
+#   docker compose build
+#   docker compose up -d
+#   docker compose exec app php artisan migrate --seed
+# =============================================================================
+
 x-app-defaults: &app-defaults
+  image: blastr-app:dev
   build:
     context: .
-    dockerfile: docker/dev/Dockerfile
+    dockerfile: docker/app/Dockerfile
+    target: app
   restart: unless-stopped
   env_file: .env
-  depends_on:
-    mysql:
-      condition: service_healthy
-    redis:
-      condition: service_healthy
   networks:
     - app_network
   volumes:
+    # Live source — edits land instantly inside the container.
     - .:/var/www/html
-    - ./docker/production/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
+    # Protect named-volume content from the bind mount above. Docker seeds
+    # these from the image on first start, so `composer install` / `npm run
+    # build` results survive between container restarts.
+    - vendor:/var/www/html/vendor
+    - node_build:/var/www/html/public/build
+    # Dev PHP overrides: opcache.validate_timestamps=1, display_errors=On.
+    - ./docker/app/php-dev.ini:/usr/local/etc/php/conf.d/99-dev.ini:ro
 
 services:
-  nginx:
-    container_name: blastr_nginx
-    image: nginx:1.27-alpine
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-80}:80"
-    depends_on:
-      - app
-    networks:
-      - app_network
-    volumes:
-      - ./docker/dev/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - .:/var/www/html:ro
 
+  # ---------------------------------------------------------------------------
+  # App — FrankenPHP HTTP server with Laravel Octane workers.
+  # Same image as production; only the volume mounts + dev php.ini differ.
+  # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
     container_name: blastr_app
     ports:
-      - "5173:5173"
+      - "${APP_PORT:-80}:80"
+      - "443:443"
+      - "5173:5173"   # Vite dev server (npm run dev) when running HMR
     healthcheck:
-      test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost/up || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 30s
 
+  # ---------------------------------------------------------------------------
+  # Worker — supervisord managing per-queue queue:work processes.
+  # ---------------------------------------------------------------------------
   worker:
     <<: *app-defaults
     container_name: blastr_worker
-    command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
+    command: ["worker"]
+    healthcheck:
+      test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
+  # ---------------------------------------------------------------------------
+  # Scheduler — fires Laravel scheduled tasks at the right minute.
+  # ---------------------------------------------------------------------------
   scheduler:
     <<: *app-defaults
     container_name: blastr_scheduler
-    command: ["php", "artisan", "schedule:work"]
+    command: ["scheduler"]
 
-  mysql:
-    container_name: blastr_mysql
-    image: mysql:8.4
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE:      "${DB_DATABASE}"
-      MYSQL_USER:          "${DB_USERNAME}"
-      MYSQL_PASSWORD:      "${DB_PASSWORD}"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --innodb-buffer-pool-size=256M
-      - --sort-buffer-size=4M
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - app_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  redis:
-    container_name: blastr_redis
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
-      --requirepass "${REDIS_PASSWORD}"
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # ---------------------------------------------------------------------------
+  # Cloudflared tunnel — exposes local.blastr.pro through CF to this app.
+  # ---------------------------------------------------------------------------
   cloudflared:
     container_name: blastr_cloudflared
     image: cloudflare/cloudflared:latest
@@ -111,12 +92,12 @@ services:
     networks:
       - app_network
     depends_on:
-      - nginx
+      - app
 
 networks:
   app_network:
     driver: bridge
 
 volumes:
-  mysql_data:
-  redis_data:
+  vendor:
+  node_build:

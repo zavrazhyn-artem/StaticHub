@@ -1,103 +1,70 @@
-# Local Docker Compose – mirrors production topology as closely as possible.
+# =============================================================================
+# Production Docker Compose — currently runs on the legacy droplet until k8s
+# migration. After cutover to DOKS this file is retained only for emergency
+# manual deploy / rollback.
 #
-# Key differences vs docker-compose.prod.yml (intentional):
-#   • app/worker/scheduler are built from source (same Dockerfile, same target)
-#   • Source code is bind-mounted → changes are live without a rebuild
-#   • vendor/ and public/build/ are named volumes, seeded from the image on
-#     first `docker compose up` – they are NOT bind-mounted, so they stay in
-#     sync with what was built into the image (run `docker compose build` after
-#     composer/npm changes).
-#   • A docker/local/php.ini override enables display_errors and opcache
-#     timestamp validation so PHP picks up file changes immediately.
-#   • nginx uses the plain nginx image + bind-mounted config and ./public,
-#     so frontend changes (after `npm run build`) are visible without rebuilding.
-#   • MySQL and Redis expose ports for local tooling (TablePlus, RedisInsight).
+# Single image, three CMDs:
+#   app       → FrankenPHP (replaces nginx + php-fpm). Serves HTTP/HTTPS.
+#   worker    → supervisord with per-queue queue:work processes.
+#   scheduler → php artisan schedule:work.
 #
-# First-time setup:
-#   docker compose build
-#   docker compose up -d
-#   docker compose exec app php artisan migrate --seed
+# No mysql/redis services — both moved to DO Managed (Phase 1 of infra plan).
+# =============================================================================
 
 x-app-defaults: &app-defaults
   image: blastr-app:latest
+  build:
+    context: .
+    dockerfile: docker/app/Dockerfile
+    target: app
   restart: unless-stopped
   env_file: .env
   networks:
     - app_network
-  volumes:
-    # Live source – changes are reflected immediately (PHP files, routes, etc.)
-    - .:/var/www/html
-    # Protect build artefacts from being wiped by the bind mount above.
-    # Docker seeds these named volumes from the image on first start.
-    - vendor:/var/www/html/vendor
-    - node_build:/var/www/html/public/build
-    # Local PHP overrides (display_errors, opcache timestamps)
-    - ./docker/local/php.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
 
 services:
 
   # ---------------------------------------------------------------------------
-  # Nginx – uses plain image + bind-mounted config and public dir.
-  # Run `npm run build` on the host to update Vite assets without a rebuild.
-  # ---------------------------------------------------------------------------
-  nginx:
-    image: nginx:1.27-alpine
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-80}:80"
-      - "443:443"
-    depends_on:
-      - app
-    networks:
-      - app_network
-    volumes:
-      - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./public:/var/www/html/public:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - node_build:/var/www/html/public/build:ro
-
-  # ---------------------------------------------------------------------------
-  # App – PHP-FPM (same Dockerfile target as production)
+  # App — FrankenPHP serving Laravel via Octane workers. Replaces the old
+  # nginx + php-fpm pair with a single resident process.
   # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
-    build:
-      context: .
-      dockerfile: docker/production/Dockerfile
-      target: production
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # TLS cert from the existing Cloudflare Origin wildcard. FrankenPHP
+      # picks these up via Caddy auto-https for direct HTTPS termination
+      # if Cloudflare proxy is bypassed.
+      - ./nginx/ssl:/etc/frankenphp/ssl:ro
     healthcheck:
-      test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost/up || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 30s
 
   # ---------------------------------------------------------------------------
-  # Worker – Supervisor manages default + discord + ai queues (same conf as prod)
+  # Worker — supervisord with per-queue queue:work supervised processes.
   # ---------------------------------------------------------------------------
   worker:
     <<: *app-defaults
-    command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/worker.conf"]
-    user: root
+    command: ["worker"]
     healthcheck:
       test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 30s
 
   # ---------------------------------------------------------------------------
-  # Scheduler – php artisan schedule:work (same as production)
+  # Scheduler — Laravel scheduled tasks tick.
   # ---------------------------------------------------------------------------
   scheduler:
     <<: *app-defaults
-    command: ["php", "artisan", "schedule:work"]
+    command: ["scheduler"]
 
 networks:
   app_network:
     driver: bridge
-
-volumes:
-  # Build artefacts – seeded from the image, isolated from the bind mount
-  vendor:
-  node_build:
