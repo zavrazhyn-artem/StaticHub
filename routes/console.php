@@ -3,6 +3,7 @@
 use App\Console\Commands\FetchAuctionsCommand;
 use App\Console\Commands\GenerateEventsCommand;
 use App\Console\Commands\ProcessUserActivityLogsCommand;
+use App\Console\Commands\PruneAuctionHistoryCommand;
 use App\Console\Commands\PurgeOldLogsCommand;
 use App\Console\Commands\PurgeUserActivityLogsCommand;
 use App\Console\Commands\RefreshAllCharactersCommand;
@@ -46,4 +47,8 @@ Schedule::command(PurgeUserActivityLogsCommand::class)->daily()->at('05:15')->on
 // Delete raid payload files older than 24h (locks chat activation for those reports).
 Schedule::command('ai:cleanup-payloads')->dailyAt('03:30')->onOneServer();
 
+// Prune price_snapshots — keep last 7 days of auction history. Only the
+// latest snapshot per item is read by ConsumableService; older rows are
+// dead weight. The table is on track for 12M+ rows otherwise.
+Schedule::command(PruneAuctionHistoryCommand::class)->dailyAt('03:45')->onOneServer();
 
