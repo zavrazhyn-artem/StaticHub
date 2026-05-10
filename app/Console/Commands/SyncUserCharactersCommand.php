@@ -41,14 +41,24 @@ class SyncUserCharactersCommand extends Command
             return self::SUCCESS;
         }
 
+        $explicitChar = $this->option('character') !== null;
+        $dispatched = 0;
+
         foreach ($characters as $character) {
             $syncService->syncProfileAndSpec($character);
-            FetchBnetRawDataJob::dispatch($character);
-            FetchRioRawDataJob::dispatch($character);
-            $this->line("Dispatched sync for {$character->name} (ID: {$character->id})");
+
+            // Heavy raw-data only when char is in some static (or admin explicitly targets one).
+            if ($explicitChar || $character->statics()->exists()) {
+                FetchBnetRawDataJob::dispatch($character);
+                FetchRioRawDataJob::dispatch($character);
+                $this->line("Dispatched sync for {$character->name} (ID: {$character->id})");
+                $dispatched++;
+            } else {
+                $this->line("Skipped {$character->name} (ID: {$character->id}) — not in any static");
+            }
         }
 
-        $this->info("Dispatched jobs for {$characters->count()} character(s).");
+        $this->info("Dispatched raw-data jobs for {$dispatched} of {$characters->count()} character(s).");
 
         return self::SUCCESS;
     }

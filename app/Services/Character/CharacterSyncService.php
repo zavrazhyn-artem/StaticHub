@@ -18,9 +18,8 @@ use App\Services\StaticGroup\RosterService;
 class CharacterSyncService
 {
     public function __construct(
-        private readonly BlizzardCharacterApiService  $blizzardApiService,
-        private readonly RosterService       $rosterService,
-        private readonly RawDataSyncService  $rawDataSyncService,
+        private readonly BlizzardCharacterApiService $blizzardApiService,
+        private readonly RosterService               $rosterService,
     ) {}
 
     /**
@@ -277,19 +276,21 @@ class CharacterSyncService
 
     /**
      * Dispatches the full sync job for the character (ilvl, compiled data, etc.).
+     *
+     * Lightweight ilvl/spec sync runs for every character (powers the character
+     * listing page). Heavy raw-data fetch only runs when the character is in
+     * at least one static — chars never used in raid have nowhere to render
+     * the bnet/rio JSON, so we skip the API + DB write.
+     * RosterService::dispatchSyncForAttachedCharacters seeds raw data later
+     * when the char is first attached to a static.
      */
     private function dispatchSyncJob(Character $character): void
     {
         SyncCharacterItemLevelJob::dispatch($character);
-        FetchBnetRawDataJob::dispatch($character);
-        FetchRioRawDataJob::dispatch($character);
-    }
 
-    /**
-     * Delegate raw data sync to RawDataSyncService.
-     */
-    public function syncRawData(Character $character, string $service = 'all'): void
-    {
-        $this->rawDataSyncService->syncRawData($character, $service);
+        if ($character->statics()->exists()) {
+            FetchBnetRawDataJob::dispatch($character);
+            FetchRioRawDataJob::dispatch($character);
+        }
     }
 }
