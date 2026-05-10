@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs\Character;
 
-use App\Services\Character\CharacterSyncService;
 use App\Models\Character;
+use App\Services\Character\BnetSyncService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Fetches raw Blizzard API data for a single character and stores it in
- * services_raw_data. On completion dispatches CompileCharacterDataJob.
+ * Self-contained Blizzard sync for one character: fetch every endpoint we
+ * need, update the accumulator columns on `characters`, then atomically
+ * merge the compiled bnet slice into character_data / character_weekly_data
+ * via JSON_MERGE_PATCH. No services_raw_data, no follow-up Compile job.
  *
  * Runs on the dedicated 'bnet' queue so Blizzard API calls never block
  * Raider.io fetches and vice versa.
@@ -49,7 +51,7 @@ class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
         return [new RateLimited('bnet-api')];
     }
 
-    public function handle(CharacterSyncService $syncService): void
+    public function handle(BnetSyncService $syncService): void
     {
         Log::info('FetchBnetRawDataJob: starting Blizzard data fetch.', [
             'character_id'   => $this->character->id,
@@ -57,7 +59,7 @@ class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
         ]);
 
         try {
-            $syncService->syncRawData($this->character, 'bnet');
+            $syncService->syncCharacter($this->character);
         } catch (Throwable $e) {
             Log::error('FetchBnetRawDataJob: fatal exception.', [
                 'character_id' => $this->character->id,
@@ -67,10 +69,7 @@ class FetchBnetRawDataJob implements ShouldQueue, ShouldBeUnique
             throw $e;
         }
 
-        CompileCharacterDataJob::dispatch($this->character)
-            ->onQueue(config('sync.queues.compile', 'compile'));
-
-        Log::info('FetchBnetRawDataJob: fetch complete, CompileCharacterDataJob dispatched.', [
+        Log::info('FetchBnetRawDataJob: sync complete.', [
             'character_id' => $this->character->id,
         ]);
     }

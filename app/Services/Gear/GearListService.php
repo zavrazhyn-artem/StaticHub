@@ -48,12 +48,18 @@ final class GearListService
             ->exists();
 
         if (! $hasCurrent) {
-            // Try to populate from cached bnet equipment first — this only
-            // succeeds when the character's currently-active spec in-game
-            // matches the requested spec (Blizzard returns equipment for the
-            // active spec only). Falls through to the empty placeholder
-            // below for alt specs.
-            $this->equippedSync->syncForCharacter($character);
+            // Try to populate from the accumulator first — bnet_equipment_by_spec
+            // captures gear from each spec the character has played since onboarding.
+            // The lookup key is the spec NAME (matches what BnetSyncService writes).
+            $specName = $character->specsInStatic(0)->firstWhere('id', $specId)?->name
+                ?? \App\Models\Specialization::find($specId)?->name;
+
+            $cachedEquipment = $character->bnet_equipment_by_spec[$specName] ?? null;
+            $equippedItems = is_array($cachedEquipment) ? ($cachedEquipment['equipped_items'] ?? []) : [];
+
+            if (!empty($equippedItems)) {
+                $this->equippedSync->syncForCharacter($character, $equippedItems);
+            }
 
             $hasCurrent = GearList::query()
                 ->forContext($characterId, $specId)

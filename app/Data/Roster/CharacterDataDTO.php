@@ -58,5 +58,8 @@ final readonly class CharacterDataDTO
         public ?array  $equipment_by_spec,
         public ?array  $ilvl_by_spec,
         public ?array  $gear_audit_by_spec,
+        // Raid progression (per-instance kill matrix). Keyed by instance name → boss name → diff label → bool.
+        // Replaces direct reads of $character->serviceRawData->bnet_raid in StaticProgressionService.
+        public ?array  $raid_progression = null,
     ) {}
 }

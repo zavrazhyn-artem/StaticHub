@@ -35,9 +35,7 @@ class StaticProgressionService
     {
         $characters = $static->characters()
             ->wherePivot('role', 'main')
-            ->with(['serviceRawData' => function ($q) {
-                $q->select('id', 'character_id', 'bnet_raid');
-            }])->get();
+            ->get(['characters.id', 'characters.character_data']);
 
         $rosterSize = $characters->count();
 
@@ -110,15 +108,9 @@ class StaticProgressionService
         $counters = [];
 
         foreach ($characters as $character) {
-            $raidData = $character->serviceRawData?->bnet_raid ?? [];
+            $charProgression = $character->character_data['raid_progression'] ?? null;
 
-            if ($raidData === []) {
-                continue;
-            }
-
-            $charProgression = $this->instanceDataService->resolveRaids($raidData);
-
-            if ($charProgression === null) {
+            if (!is_array($charProgression) || $charProgression === []) {
                 continue;
             }
 

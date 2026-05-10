@@ -41,7 +41,7 @@ final class SimcExportService
 
     public function export(GearList $list): string
     {
-        $list->loadMissing(['character.realm', 'character.serviceRawData', 'specialization', 'items.item']);
+        $list->loadMissing(['character.realm', 'specialization', 'items.item']);
 
         // No leading comment — QE Live's parser uses the first non-blank line
         // as the player name regardless of the `#` marker, which would turn
@@ -73,17 +73,12 @@ final class SimcExportService
     {
         $character = $list->character;
         $spec      = $list->specialization;
-        $raw       = $character?->serviceRawData;
-        $profile   = (array) ($raw?->bnet_profile ?? []);
 
         $classKey  = strtolower(str_replace([' ', "'"], ['', ''], (string) ($character?->playable_class ?? '')));
         $specKey   = strtolower(str_replace(' ', '_', (string) ($spec?->name ?? '')));
-        $raceLabel = $profile['race']['name']['en_US']
-            ?? (is_array($profile['race']['name'] ?? null) ? array_values($profile['race']['name'])[0] : null)
-            ?? $character?->playable_race
-            ?? '';
-        $raceKey   = strtolower(str_replace([' ', "'"], ['_', ''], (string) $raceLabel));
-        $level     = (int) ($profile['level'] ?? $character?->level ?? 0);
+        $raceLabel = (string) ($character?->playable_race ?? '');
+        $raceKey   = strtolower(str_replace([' ', "'"], ['_', ''], $raceLabel));
+        $level     = (int) ($character?->level ?? 0);
         $region    = strtolower((string) ($character?->realm?->region ?? ''));
         // SimC convention: server slugs use underscores ("tarren_mill"), not
         // dashes. The in-game /simc paste matches this; mismatched dashes

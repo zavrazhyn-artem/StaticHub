@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Roster;
 
-use App\Models\ServiceRawData;
-
 /**
  * Handles gear audit concerns: enchants, sockets, upgrades, sparks,
  * embellishments, tier pieces, and equipment compilation.
@@ -325,7 +323,7 @@ final class GearAuditService
     // EQUIPMENT — compiled item list
     // =========================================================================
 
-    public function resolveEquipment(array $equippedItems, array $rioItems = [], ?ServiceRawData $rawData = null): ?array
+    public function resolveEquipment(array $equippedItems): ?array
     {
         if ($equippedItems === []) {
             return null;

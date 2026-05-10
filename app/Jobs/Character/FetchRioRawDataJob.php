@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs\Character;
 
-use App\Services\Character\CharacterSyncService;
 use App\Models\Character;
+use App\Services\Character\RioSyncService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -14,12 +14,13 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Fetches raw Raider.io API data for a single character and stores it in
- * services_raw_data.
+ * Self-contained Raider.io sync for one character: fetch the rio profile and
+ * atomically merge the rio-derivable fields (weekly_runs_count, vault_weekly_runs)
+ * into character_weekly_data via JSON_MERGE_PATCH. No services_raw_data,
+ * no follow-up Compile job.
  *
  * Runs on the dedicated 'rio' queue so Raider.io API calls never block
- * Blizzard fetches and vice versa. CompileCharacterDataJob is dispatched
- * only by FetchBnetRawDataJob to avoid double-queuing the compile job.
+ * Blizzard fetches and vice versa.
  */
 class FetchRioRawDataJob implements ShouldQueue, ShouldBeUnique
 {
@@ -50,7 +51,7 @@ class FetchRioRawDataJob implements ShouldQueue, ShouldBeUnique
         return [new RateLimited('rio-api')];
     }
 
-    public function handle(CharacterSyncService $syncService): void
+    public function handle(RioSyncService $syncService): void
     {
         Log::info('FetchRioRawDataJob: starting Raider.io data fetch.', [
             'character_id'   => $this->character->id,
@@ -58,7 +59,7 @@ class FetchRioRawDataJob implements ShouldQueue, ShouldBeUnique
         ]);
 
         try {
-            $syncService->syncRawData($this->character, 'rio');
+            $syncService->syncCharacter($this->character);
         } catch (Throwable $e) {
             Log::error('FetchRioRawDataJob: fatal exception.', [
                 'character_id' => $this->character->id,
@@ -68,7 +69,7 @@ class FetchRioRawDataJob implements ShouldQueue, ShouldBeUnique
             throw $e;
         }
 
-        Log::info('FetchRioRawDataJob: fetch complete.', [
+        Log::info('FetchRioRawDataJob: sync complete.', [
             'character_id' => $this->character->id,
         ]);
     }

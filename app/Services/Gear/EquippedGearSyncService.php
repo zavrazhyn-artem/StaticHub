@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reads bnet_equipment from services_raw_data and writes it to a GearList of
- * type=current for the character's active spec. Idempotent — replaces the
- * singleton row + items in one transaction.
+ * Writes a GearList of type=current for the character's active spec from a
+ * Blizzard equipment payload (the `equipped_items` array). Idempotent —
+ * replaces the singleton row + items in one transaction.
  *
  * Note: Blizzard returns equipment for the ACTIVE spec only at sync time.
  * Switching specs in-game and re-syncing is the only way to get a current
@@ -47,17 +47,16 @@ final class EquippedGearSyncService
         'RANGED'    => 'ranged',
     ];
 
-    public function syncForCharacter(Character $character): ?GearList
+    /**
+     * @param  array<int, array<string, mixed>>  $equippedItems  Blizzard `equipped_items` array.
+     */
+    public function syncForCharacter(Character $character, array $equippedItems): ?GearList
     {
-        $rawData = $character->serviceRawData()->first();
-        if (! $rawData) {
+        if (empty($equippedItems)) {
             return null;
         }
 
-        $equipment = $rawData->bnet_equipment['equipped_items'] ?? null;
-        if (! is_array($equipment) || empty($equipment)) {
-            return null;
-        }
+        $equipment = $equippedItems;
 
         $specId = $this->resolveActiveSpecId($character);
         if (! $specId) {

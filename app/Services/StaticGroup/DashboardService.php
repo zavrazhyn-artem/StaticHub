@@ -129,28 +129,22 @@ class DashboardService
             return null;
         }
 
-        $main->loadMissing('serviceRawData');
-        $raw = $main->serviceRawData;
+        $compiled = $main->character_data ?? [];
+        $weekly   = $main->character_weekly_data ?? [];
 
-        $bnetProfile = $raw?->bnet_profile ?? [];
-        $bnetMplus   = $raw?->bnet_mplus   ?? [];
-        $rio         = $raw?->rio_profile  ?? [];
+        // ilvl from compiled (BnetImportJob sets character_data.equipped_ilvl from bnet_profile).
+        $ilvl = isset($compiled['equipped_ilvl'])
+            ? (int) $compiled['equipped_ilvl']
+            : ($main->equipped_item_level ?? $main->item_level ?? 0);
 
-        // ilvl: same source as the roster — bnet_profile.equipped_item_level
-        $ilvl = isset($bnetProfile['equipped_item_level'])
-            ? (int) $bnetProfile['equipped_item_level']
-            : ($main->item_level ?? $main->equipped_item_level ?? 0);
+        // M+ score from compiled (BnetImportJob sets character_data.mythic_rating).
+        $score = isset($compiled['mythic_rating']) ? (float) $compiled['mythic_rating'] : null;
 
-        // M+ score: same as roster — bnet_mplus.current_mythic_rating.rating
-        $score = $this->instanceDataService->resolveMythicRating($bnetMplus);
-
-        // Best key — highest weekly-key level (same source as VaultDataService)
-        $bestKey = (int) collect($rio['mythic_plus_weekly_highest_level_runs'] ?? [])
-            ->max('mythic_level');
+        // Best key — max level across the weekly key list compiled by RioImportJob.
+        $bestKey = (int) collect($weekly['vault_weekly_runs'] ?? [])->max('mythic_level');
 
         // Vault: read from cached character_weekly_data (built by RosterCompilerService).
         // Slots unlocked: 3 raid (boss kills 2/4/6) + 3 dungeon (runs 1/4/8) + 3 world (runs 1/4/8) = 9 total.
-        $weekly         = $main->character_weekly_data ?? [];
         $raidUnlocked   = count(array_filter($weekly['vault_raid_slots'] ?? [], fn ($s) => $s !== null));
         $dungeonUnlocked = $this->countVaultSlotsFromRuns(count($weekly['vault_weekly_runs'] ?? []));
         $worldUnlocked  = $this->countVaultSlotsFromRuns(count($weekly['vault_world_runs'] ?? []));

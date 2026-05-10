@@ -143,7 +143,7 @@ final class GearViewService
     public function activeList(int $listId): ?array
     {
         $list = GearList::query()
-            ->with(['items.item', 'specialization', 'character.serviceRawData'])
+            ->with(['items.item', 'specialization'])
             ->find($listId);
 
         if (! $list) {

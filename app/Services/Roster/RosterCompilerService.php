@@ -7,16 +7,21 @@ namespace App\Services\Roster;
 use App\Data\Roster\CharacterDataDTO;
 use App\Data\Roster\CharacterWeeklyDataDTO;
 use App\Models\Character;
-use App\Models\ServiceRawData;
 use App\Services\StaticGroup\RosterService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Orchestrates compilation of a ServiceRawData record into two DTOs:
- *   - CharacterDataDTO      → characters.character_data   (persistent)
- *   - CharacterWeeklyDataDTO → characters.character_weekly_data (resets weekly)
+ * Compiles fetched API payloads into the two JSON columns on characters:
+ *   - character_data        (persistent profile/gear/progression facts)
+ *   - character_weekly_data (resets at weekly reset)
  *
- * No network calls — all data comes from previously fetched JSON.
+ * Two entry points, one per import job, both atomic via JSON_MERGE_PATCH so
+ * Bnet and Rio compiles can race each other safely:
+ *   - compileAndPersistBnet(Character, array $bnet)
+ *   - compileAndPersistRio(Character, array $rio)
+ *
+ * No network calls — all data comes from the caller's just-fetched payloads.
  */
 final class RosterCompilerService
 {
@@ -33,72 +38,40 @@ final class RosterCompilerService
     // Public API
     // -------------------------------------------------------------------------
 
-    public function compileAndPersist(Character $character): void
+    /**
+     * Compile bnet-derivable fields and atomically merge into characters table.
+     *
+     * `$bnet` is a normalized array of just-fetched Bnet payloads:
+     *   ['bnet_profile' => [...], 'bnet_equipment' => [...], 'bnet_media' => [...],
+     *    'bnet_mplus' => [...], 'bnet_raid' => [...], 'bnet_achievement_statistics' => [...],
+     *    'bnet_completed_quests' => [...], 'bnet_pvp_summary' => [...], 'bnet_reputations' => [...],
+     *    'bnet_titles' => [...], 'bnet_mounts' => [...], 'bnet_pets' => [...]]
+     *
+     * Accumulators (`bnet_equipment_by_spec`, `vault_weekly_snapshot`) are read
+     * from the Character model and updated by the caller before invoking this method.
+     */
+    public function compileAndPersistBnet(Character $character, array $bnet): void
     {
-        $rawData = $character->serviceRawData()->first();
-
-        if (!$rawData) {
-            Log::warning('No raw data for character', ['id' => $character->id]);
-            return;
-        }
-
         $region = strtolower((string) ($character->realm?->region ?? 'eu'));
         $this->setRegion($region);
 
-        [$charData, $weeklyData] = $this->compile($rawData);
+        $profile   = $bnet['bnet_profile']   ?? [];
+        $equipment = $bnet['bnet_equipment'] ?? [];
+        $media     = $bnet['bnet_media']     ?? [];
+        $mplus     = $bnet['bnet_mplus']     ?? [];
+        $achStats  = $bnet['bnet_achievement_statistics'] ?? [];
+        $quests    = $bnet['bnet_completed_quests'] ?? [];
+        $pvpSum    = $bnet['bnet_pvp_summary'] ?? [];
+        $reps      = $bnet['bnet_reputations'] ?? [];
+        $titles    = $bnet['bnet_titles'] ?? [];
+        $mounts    = $bnet['bnet_mounts'] ?? [];
+        $pets      = $bnet['bnet_pets'] ?? [];
+        $raidData  = $bnet['bnet_raid'] ?? [];
 
-        $charArray   = json_decode(json_encode($charData), true);
-        $weeklyArray = json_decode(json_encode($weeklyData), true);
-
-        // Extract active_spec from raw bnet profile
-        $bnetProfile = $rawData->bnet_profile ?? [];
-        $activeSpec = is_array($bnetProfile['active_spec'] ?? null)
-            ? ($bnetProfile['active_spec']['name'] ?? null)
-            : ($bnetProfile['active_spec'] ?? null);
-        if ($activeSpec === null) {
-            $activeSpec = is_array($bnetProfile['active_specialization'] ?? null)
-                ? ($bnetProfile['active_specialization']['name'] ?? null)
-                : ($bnetProfile['active_specialization'] ?? null);
-        }
-
-        $character->update([
-            'character_data'        => $charArray,
-            'character_weekly_data' => $weeklyArray,
-            'active_spec'           => $activeSpec ?? $character->active_spec,
-        ]);
-
-        $character->refresh();
-
-        // Auto-set main spec for each static
-        $staticIds = $character->statics()->pluck('statics.id');
-        foreach ($staticIds as $staticId) {
-            $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
-        }
-    }
-
-    /**
-     * @return array{CharacterDataDTO, CharacterWeeklyDataDTO}
-     */
-    public function compile(ServiceRawData $rawData): array
-    {
-        $profile   = $rawData->bnet_profile   ?? [];
-        $equipment = $rawData->bnet_equipment ?? [];
-        $media     = $rawData->bnet_media     ?? [];
-        $mplus     = $rawData->bnet_mplus     ?? [];
-        $rio       = $rawData->rio_profile    ?? [];
-        $achStats  = $rawData->bnet_achievement_statistics ?? [];
-        $snapshot  = $rawData->vault_weekly_snapshot ?? [];
-        $quests    = $rawData->bnet_completed_quests ?? [];
-        $pvpSum    = $rawData->bnet_pvp_summary ?? [];
-        $reps      = $rawData->bnet_reputations ?? [];
-        $titles    = $rawData->bnet_titles ?? [];
-        $mounts    = $rawData->bnet_mounts ?? [];
-        $pets      = $rawData->bnet_pets ?? [];
-
-        $equipmentBySpec = $rawData->bnet_equipment_by_spec ?? [];
+        $equipmentBySpec = $character->bnet_equipment_by_spec ?? [];
+        $snapshot        = $character->vault_weekly_snapshot ?? [];
 
         $equippedItems = $equipment['equipped_items'] ?? [];
-        $rioItems      = $rio['gear']['items'] ?? [];
 
         $completedQuestIds = $this->progression->buildCompletedQuestSet($quests);
         $achStatsIndex     = $this->progression->indexAchievementStatistics($achStats);
@@ -108,64 +81,158 @@ final class RosterCompilerService
 
         $weekRegularMythic = $this->vaultData->resolveWeekRegularMythicDungeons($achStatsIndex);
 
-        // Compile gear per spec
-        [$compiledEquipmentBySpec, $ilvlBySpec, $gearAuditBySpec] = $this->compilePerSpecGear(
-            $equipmentBySpec
-        );
+        [$compiledEquipmentBySpec, $ilvlBySpec, $gearAuditBySpec] = $this->compilePerSpecGear($equipmentBySpec);
 
-        $charData = new CharacterDataDTO(
-            avatar_url:             $this->resolveAvatarUrl($media),
-            class:                  $this->resolveClass($profile),
-            class_id:               $this->resolveClassId($profile),
-            spec_id:                $this->resolveSpecId($profile),
-            combat_role:            $this->resolveRole($profile),
-            equipped_ilvl:          $this->resolveEquippedIlvl($profile),
-            highest_ilvl_ever:      null,
-            mythic_rating:          $this->instanceData->resolveMythicRating($mplus),
-            season_heroic_dungeons: $this->instanceData->resolveSeasonHeroicDungeons($achStatsIndex),
-            missing_enchants_slots:     $this->gearAudit->resolveMissingEnchants($equippedItems),
-            low_quality_enchants_slots: $this->gearAudit->resolveLowQualityEnchants($equippedItems),
-            empty_sockets_count:        $this->gearAudit->resolveEmptySockets($equippedItems),
-            upgrades_missing:       $this->gearAudit->resolveTotalUpgradesMissing($equippedItems),
-            sparks_equipped:        $this->gearAudit->resolveSparksEquipped($equippedItems),
-            tier_pieces:            $this->gearAudit->resolveTierPieces($equippedItems),
-            tier_ilvls:             $this->gearAudit->resolveTierIlvls($equippedItems),
-            equipment:              $this->gearAudit->resolveEquipment($equippedItems, $rioItems, $rawData),
-            season_delves:          $this->progression->resolveSeasonDelves($achStatsIndex),
-            coffer_keys:            $this->progression->resolveCofferKeys($achStatsIndex),
-            cutting_edge:           $this->progression->resolveCuttingEdge($achStats),
-            ahead_of_the_curve:     $this->progression->resolveAheadOfTheCurve($achStats),
-            achievement_points:     (int) ($profile['achievement_points'] ?? 0),
-            crests:                 $this->progression->resolveCrests($achStatsIndex),
-            mounts_count:           count($mounts['mounts'] ?? []),
-            unique_pets:            $this->collection->resolveUniquePets($pets),
-            lvl_25_pets:            $this->collection->resolveLvl25Pets($pets),
-            titles_count:           count($titles['titles'] ?? []),
-            honor_level:            (int) ($pvpSum['honor_level'] ?? 0),
-            honorable_kills:        (int) ($pvpSum['honorable_kills'] ?? 0),
-            pvp_brackets:           $this->collection->resolvePvpBrackets($pvpSum),
-            renown:                 $this->collection->resolveRenown($reps),
-            embellished_items:      $this->gearAudit->resolveEmbellishedItems($equippedItems),
-            spark_gear:             $this->gearAudit->resolveSparkGear($equippedItems),
-            equipment_by_spec:      $compiledEquipmentBySpec ?: null,
-            ilvl_by_spec:           $ilvlBySpec ?: null,
-            gear_audit_by_spec:     $gearAuditBySpec ?: null,
-        );
+        $charPatch = [
+            'avatar_url'             => $this->resolveAvatarUrl($media),
+            'class'                  => $this->resolveClass($profile),
+            'class_id'               => $this->resolveClassId($profile),
+            'spec_id'                => $this->resolveSpecId($profile),
+            'combat_role'            => $this->resolveRole($profile),
+            'equipped_ilvl'          => $this->resolveEquippedIlvl($profile),
+            'mythic_rating'          => $this->instanceData->resolveMythicRating($mplus),
+            'season_heroic_dungeons' => $this->instanceData->resolveSeasonHeroicDungeons($achStatsIndex),
+            'missing_enchants_slots'     => $this->gearAudit->resolveMissingEnchants($equippedItems),
+            'low_quality_enchants_slots' => $this->gearAudit->resolveLowQualityEnchants($equippedItems),
+            'empty_sockets_count'        => $this->gearAudit->resolveEmptySockets($equippedItems),
+            'upgrades_missing'       => $this->gearAudit->resolveTotalUpgradesMissing($equippedItems),
+            'sparks_equipped'        => $this->gearAudit->resolveSparksEquipped($equippedItems),
+            'tier_pieces'            => $this->gearAudit->resolveTierPieces($equippedItems),
+            'tier_ilvls'             => $this->gearAudit->resolveTierIlvls($equippedItems),
+            'equipment'              => $this->gearAudit->resolveEquipment($equippedItems),
+            'season_delves'          => $this->progression->resolveSeasonDelves($achStatsIndex),
+            'coffer_keys'            => $this->progression->resolveCofferKeys($achStatsIndex),
+            'cutting_edge'           => $this->progression->resolveCuttingEdge($achStats),
+            'ahead_of_the_curve'     => $this->progression->resolveAheadOfTheCurve($achStats),
+            'achievement_points'     => (int) ($profile['achievement_points'] ?? 0),
+            'crests'                 => $this->progression->resolveCrests($achStatsIndex),
+            'mounts_count'           => count($mounts['mounts'] ?? []),
+            'unique_pets'            => $this->collection->resolveUniquePets($pets),
+            'lvl_25_pets'            => $this->collection->resolveLvl25Pets($pets),
+            'titles_count'           => count($titles['titles'] ?? []),
+            'honor_level'            => (int) ($pvpSum['honor_level'] ?? 0),
+            'honorable_kills'        => (int) ($pvpSum['honorable_kills'] ?? 0),
+            'pvp_brackets'           => $this->collection->resolvePvpBrackets($pvpSum),
+            'renown'                 => $this->collection->resolveRenown($reps),
+            'embellished_items'      => $this->gearAudit->resolveEmbellishedItems($equippedItems),
+            'spark_gear'             => $this->gearAudit->resolveSparkGear($equippedItems),
+            'equipment_by_spec'      => $compiledEquipmentBySpec ?: null,
+            'ilvl_by_spec'           => $ilvlBySpec ?: null,
+            'gear_audit_by_spec'     => $gearAuditBySpec ?: null,
+            'raid_progression'       => $this->instanceData->resolveRaids($raidData),
+        ];
 
-        $weeklyData = new CharacterWeeklyDataDTO(
-            weekly_runs_count:   $this->instanceData->resolveWeeklyRunsCount($mplus, $rio),
-            week_regular_mythic: $weekRegularMythic,
-            raids:               $this->instanceData->resolveWeeklyRaidKills($achStatsIndex),
-            vault_weekly_runs:   $this->vaultData->resolveVaultWeeklyRuns($rio, $weekRegularMythic),
-            vault_world_runs:    $this->vaultData->resolveVaultWorldRuns($achStats, $snapshot, $weeklyQuests, $preyWeekly),
-            vault_raid_slots:    $this->vaultData->resolveVaultRaidSlots($achStatsIndex),
-            prey_weekly:         $preyWeekly,
-            weekly_quests:       $weeklyQuests,
-            weekly_event_done:   $this->progression->resolveWeeklyEventDone($completedQuestIds),
-            week_delves:         $this->progression->resolveWeekDelves($achStats, $snapshot),
-        );
+        $weeklyPatch = [
+            'weekly_runs_count'   => $this->instanceData->resolveWeeklyRunsCount($mplus),
+            'week_regular_mythic' => $weekRegularMythic,
+            'raids'               => $this->instanceData->resolveWeeklyRaidKills($achStatsIndex),
+            'vault_world_runs'    => $this->vaultData->resolveVaultWorldRuns($achStats, $snapshot, $weeklyQuests, $preyWeekly),
+            'vault_raid_slots'    => $this->vaultData->resolveVaultRaidSlots($achStatsIndex),
+            'prey_weekly'         => $preyWeekly,
+            'weekly_quests'       => $weeklyQuests,
+            'weekly_event_done'   => $this->progression->resolveWeeklyEventDone($completedQuestIds),
+            'week_delves'         => $this->progression->resolveWeekDelves($achStats, $snapshot),
+        ];
 
-        return [$charData, $weeklyData];
+        // Resolve active_spec from raw bnet profile — kept on the characters row
+        // (alongside character_data.spec_id) so the My Characters page list can
+        // show spec without unpacking the JSON blob on every render.
+        $activeSpec = is_array($profile['active_spec'] ?? null)
+            ? ($profile['active_spec']['name'] ?? null)
+            : ($profile['active_spec'] ?? null);
+        if ($activeSpec === null) {
+            $activeSpec = is_array($profile['active_specialization'] ?? null)
+                ? ($profile['active_specialization']['name'] ?? null)
+                : ($profile['active_specialization'] ?? null);
+        }
+
+        // equipped_item_level column drives the My Characters page ilvl badge.
+        // Mirror character_data.equipped_ilvl into the column so we don't keep
+        // two stale-rate sources of truth.
+        $equippedIlvl = $profile['equipped_item_level'] ?? null;
+
+        $this->mergePatchCharacter($character->id, $charPatch, $weeklyPatch, $activeSpec, $equippedIlvl);
+
+        $character->refresh();
+
+        $staticIds = $character->statics()->pluck('statics.id');
+        foreach ($staticIds as $staticId) {
+            $this->rosterService->autoSetMainSpecIfMissing($character, (int) $staticId);
+        }
+    }
+
+    /**
+     * Compile rio-derivable fields (just 2 weekly fields) and atomically merge.
+     *
+     * Reads `week_regular_mythic` from the existing `character_weekly_data`
+     * (set by the most recent BnetImportJob) so vault math has the bnet baseline
+     * even when this job runs first or after a delay.
+     */
+    public function compileAndPersistRio(Character $character, array $rio): void
+    {
+        $region = strtolower((string) ($character->realm?->region ?? 'eu'));
+        $this->setRegion($region);
+
+        $weeklyExisting    = $character->character_weekly_data ?? [];
+        $weekRegularMythic = (int) ($weeklyExisting['week_regular_mythic'] ?? 0);
+
+        $weeklyPatch = [
+            'weekly_runs_count' => $this->instanceData->resolveWeeklyRunsCount([], $rio),
+            'vault_weekly_runs' => $this->vaultData->resolveVaultWeeklyRuns($rio, $weekRegularMythic),
+        ];
+
+        $this->mergePatchCharacter($character->id, [], $weeklyPatch, null, null);
+
+        $character->refresh();
+    }
+
+    /**
+     * Atomic JSON_MERGE_PATCH for character_data and character_weekly_data,
+     * plus optional active_spec / equipped_item_level column updates — all in
+     * a single UPDATE so concurrent bnet+rio fetches can never lose each
+     * other's writes.
+     *
+     * `$charPatch` and `$weeklyPatch` are plain assoc arrays of fields to merge.
+     * Empty arrays are skipped (no-op for that JSON column).
+     */
+    private function mergePatchCharacter(
+        int $characterId,
+        array $charPatch,
+        array $weeklyPatch,
+        ?string $activeSpec,
+        ?float $equippedIlvl,
+    ): void {
+        $sets = [];
+        $params = [];
+
+        if ($charPatch !== []) {
+            $sets[] = "character_data = JSON_MERGE_PATCH(COALESCE(character_data, '{}'), CAST(? AS JSON))";
+            $params[] = json_encode($charPatch, JSON_UNESCAPED_UNICODE);
+        }
+
+        if ($weeklyPatch !== []) {
+            $sets[] = "character_weekly_data = JSON_MERGE_PATCH(COALESCE(character_weekly_data, '{}'), CAST(? AS JSON))";
+            $params[] = json_encode($weeklyPatch, JSON_UNESCAPED_UNICODE);
+        }
+
+        if ($activeSpec !== null) {
+            $sets[] = "active_spec = ?";
+            $params[] = $activeSpec;
+        }
+
+        if ($equippedIlvl !== null) {
+            $sets[] = "equipped_item_level = ?";
+            $params[] = (int) $equippedIlvl;
+        }
+
+        if ($sets === []) {
+            return;
+        }
+
+        $sets[] = "updated_at = NOW()";
+        $params[] = $characterId;
+
+        DB::update("UPDATE characters SET " . implode(', ', $sets) . " WHERE id = ?", $params);
     }
 
     // =========================================================================

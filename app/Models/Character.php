@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +27,8 @@ use Illuminate\Support\Facades\DB;
  * @property float|null $mythic_rating
  * @property array|null $character_data
  * @property array|null $character_weekly_data
+ * @property array|null $bnet_equipment_by_spec
+ * @property array|null $vault_weekly_snapshot
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -102,11 +103,15 @@ class Character extends Model
         'mythic_rating',
         'character_data',
         'character_weekly_data',
+        'bnet_equipment_by_spec',
+        'vault_weekly_snapshot',
     ];
 
     protected $casts = [
         'character_data' => 'array',
         'character_weekly_data' => 'array',
+        'bnet_equipment_by_spec' => 'array',
+        'vault_weekly_snapshot' => 'array',
         'mythic_rating' => 'float',
     ];
 
@@ -158,11 +163,6 @@ class Character extends Model
     public function personalTacticalReports(): HasMany
     {
         return $this->hasMany(PersonalTacticalReport::class);
-    }
-
-    public function serviceRawData(): HasOne
-    {
-        return $this->hasOne(ServiceRawData::class);
     }
 
     public function weeklySnapshots(): HasMany
