@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, watch } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import GlassModal from '@/Components/UI/GlassModal.vue';
@@ -156,7 +157,7 @@ const sourceLabel = (item) => {
     return item.source_label || item.source_slug;
 };
 
-const iconUrl = (item) => item.icon || '/images/icons/inv_misc_questionmark.jpg';
+const iconUrl = (item) => item.icon || cdn('images/icons/inv_misc_questionmark.jpg');
 
 // Forward class+spec to wowhead so hybrid stat lines ("+93 Agility or
 // Intellect") resolve to the spec's actual mainstat in the tooltip and

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>BlastR - Blast Your Raid</title>
-        <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
 
         <!-- All fonts bundled via app.css -->
 
@@ -32,7 +32,7 @@
         @endphp
         <div class="fixed top-6 right-6 z-50 group">
             <button class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white">
-                <img src="/images/flags/{{ $localeMap[$currentLocale]['country'] ?? 'GB' }}.svg" alt="{{ $currentLocale }}" class="w-5 h-auto rounded-sm">
+                <img src="{{ asset('images/flags/' . ($localeMap[$currentLocale]['country'] ?? 'GB') . '.svg') }}" alt="{{ $currentLocale }}" class="w-5 h-auto rounded-sm">
                 <span class="material-symbols-outlined text-sm">expand_more</span>
             </button>
             <div class="absolute right-0 mt-2 w-36 py-1 bg-surface-container-highest border border-white/10 shadow-2xl rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
@@ -41,7 +41,7 @@
                     @foreach($availableLocales as $locale)
                         @php $info = $localeMap[$locale]; @endphp
                         <button name="locale" value="{{ $locale }}" class="flex items-center gap-3 w-full px-4 py-2 text-start text-3xs font-semibold uppercase tracking-wider text-gray-400 hover:text-cyan-400 hover:bg-white/5 transition-colors {{ $currentLocale === $locale ? 'text-cyan-400 bg-white/5' : '' }}">
-                            <img src="/images/flags/{{ $info['country'] }}.svg" alt="{{ $info['country'] }}" class="w-5 h-auto rounded-sm">
+                            <img src="{{ asset('images/flags/' . $info['country'] . '.svg') }}" alt="{{ $info['country'] }}" class="w-5 h-auto rounded-sm">
                             {{ $info['label'] }}
                         </button>
                     @endforeach

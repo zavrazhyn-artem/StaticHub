@@ -161,7 +161,13 @@ class BossPlannerService
         $raidInstances = config('wow_season.current_raid_instances', []);
         $plans = $this->getPlansForStatic($staticId);
 
-        $encounterMaps = config('wow_season.encounter_maps', []);
+        $encounterMaps = array_map(
+            fn (array $maps) => array_map(
+                fn (array $m) => array_merge($m, ['url' => asset(ltrim((string) ($m['url'] ?? ''), '/'))]),
+                $maps
+            ),
+            config('wow_season.encounter_maps', [])
+        );
         $encounterBosses = config('wow_season.encounter_bosses', []);
         $season = (string) (config('wow_season.current_season') ?: 'midnight-s1');
 
@@ -301,7 +307,7 @@ class BossPlannerService
                 $name = $i === 0 ? $bossName : ($bossName . ' · #' . ($i + 1));
             }
             $out[] = [
-                'url' => "/images/raidplan/portraits/{$id}.png",
+                'url' => asset("images/raidplan/portraits/{$id}.png"),
                 'name' => $name,
             ];
         }

@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { startCustomDrag } from '@/composables/useCustomDrag';
@@ -19,14 +20,14 @@ const props = defineProps({
 const emit = defineEmits(['select-tool', 'select-icon', 'undo', 'redo']);
 
 const markerTypes = [
-    { id: 'skull', img: '/images/raidplan/raid-markers/skull.png' },
-    { id: 'cross', img: '/images/raidplan/raid-markers/cross.png' },
-    { id: 'square', img: '/images/raidplan/raid-markers/square.png' },
-    { id: 'moon', img: '/images/raidplan/raid-markers/moon.png' },
-    { id: 'triangle', img: '/images/raidplan/raid-markers/triangle.png' },
-    { id: 'diamond', img: '/images/raidplan/raid-markers/diamond.png' },
-    { id: 'circle_m', img: '/images/raidplan/raid-markers/circle.png' },
-    { id: 'star', img: '/images/raidplan/raid-markers/star.png' },
+    { id: 'skull', img: cdn('images/raidplan/raid-markers/skull.png') },
+    { id: 'cross', img: cdn('images/raidplan/raid-markers/cross.png') },
+    { id: 'square', img: cdn('images/raidplan/raid-markers/square.png') },
+    { id: 'moon', img: cdn('images/raidplan/raid-markers/moon.png') },
+    { id: 'triangle', img: cdn('images/raidplan/raid-markers/triangle.png') },
+    { id: 'diamond', img: cdn('images/raidplan/raid-markers/diamond.png') },
+    { id: 'circle_m', img: cdn('images/raidplan/raid-markers/circle.png') },
+    { id: 'star', img: cdn('images/raidplan/raid-markers/star.png') },
 ];
 
 const classIcons = computed(() => [
@@ -182,24 +183,24 @@ const panelDefs = computed(() => ({
     ]},
     abilities: { title: __('Abilities'), sections: [
         { id: 'class_abilities', label: __('Class Abilities'), items: [
-            { id: 'warlock-gateway', type: 'ability', img: '/images/raidplan/stickers/gateway-fs8.png', label: '', displayName: __('Demonic Gateway') },
+            { id: 'warlock-gateway', type: 'ability', img: cdn('images/raidplan/stickers/gateway-fs8.png'), label: '', displayName: __('Demonic Gateway') },
         ]},
         { id: 'boss', label: __('Boss Abilities'), items: props.abilities.map(a => {
             // Backend now sends { icon, name } objects; strings remain
             // supported as a backward-compat fallback.
             const icon = typeof a === 'string' ? a : a.icon;
             const name = typeof a === 'string' ? a : a.name;
-            return { id: icon, type: 'ability', img: `/images/raidplan/icons/${icon}.png`, label: '', displayName: name };
+            return { id: icon, type: 'ability', img: cdn(`images/raidplan/icons/${icon}.png`), label: '', displayName: name };
         }) },
     ]},
     icons: { title: __('Icons'), sections: [
         { id: 'roles', label: __('Roles'), items: [
-            { id: 'role-tank', type: 'class', img: '/images/raidplan/role/tank.svg', label: '', displayName: __('Tank') },
-            { id: 'role-healer', type: 'class', img: '/images/raidplan/role/healer.svg', label: '', displayName: __('Healer') },
-            { id: 'role-mdps', type: 'class', img: '/images/raidplan/role/mdps.svg', label: '', displayName: __('Melee DPS') },
-            { id: 'role-rdps', type: 'class', img: '/images/raidplan/role/rdps.svg', label: '', displayName: __('Ranged DPS') },
+            { id: 'role-tank', type: 'class', img: cdn('images/raidplan/role/tank.svg'), label: '', displayName: __('Tank') },
+            { id: 'role-healer', type: 'class', img: cdn('images/raidplan/role/healer.svg'), label: '', displayName: __('Healer') },
+            { id: 'role-mdps', type: 'class', img: cdn('images/raidplan/role/mdps.svg'), label: '', displayName: __('Melee DPS') },
+            { id: 'role-rdps', type: 'class', img: cdn('images/raidplan/role/rdps.svg'), label: '', displayName: __('Ranged DPS') },
         ]},
-        { id: 'class', label: __('Classes'), items: classIcons.value.map(c => ({ ...c, type: 'class', img: `/images/raidplan/class/${c.id}.png`, label: '' })) },
+        { id: 'class', label: __('Classes'), items: classIcons.value.map(c => ({ ...c, type: 'class', img: cdn(`images/raidplan/class/${c.id}.png`), label: '' })) },
         ...(props.bossPortraits.length ? [{ id: 'portraits', label: __('Boss Portraits'), items: props.bossPortraits.map((p, i) => {
             const url = typeof p === 'string' ? p : p.url;
             const name = typeof p === 'string' ? '' : p.name;
@@ -281,7 +282,7 @@ const addCustomEmoji = () => {
 const classSlug = (cls) => (cls || '').toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
 
 const panelButtons = computed(() => [
-    { id: 'markers', icon: null, img: '/images/raidplan/raid-markers/skull.png', label: __('Markers'), color: 'orange' },
+    { id: 'markers', icon: null, img: cdn('images/raidplan/raid-markers/skull.png'), label: __('Markers'), color: 'orange' },
     { id: 'shapes', icon: 'shapes', label: __('Shapes'), color: 'blue' },
     { id: 'abilities', icon: 'auto_fix_high', label: __('Abilities'), color: 'purple', needAbilities: true },
     { id: 'icons', icon: 'palette', label: __('Icons'), color: 'cyan' },

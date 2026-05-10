@@ -10,7 +10,7 @@ class DiscordWebhookBuilder
 {
     private static function spacerImageUrl(): string
     {
-        return config('app.url') . '/images/spacer.png';
+        return asset('images/spacer.png');
     }
     /**
      * Build the payload for a sync report.

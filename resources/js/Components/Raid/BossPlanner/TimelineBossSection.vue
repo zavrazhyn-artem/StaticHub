@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 const props = defineProps({
     abilities: { type: Array, required: true },
     phases: { type: Array, default: () => [] },
@@ -37,7 +38,7 @@ const sectionHeight = () =>
     TOP_PADDING + props.abilities.length * ROW_HEIGHT.value + BOTTOM_PADDING;
 
 const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec) % 60).padStart(2, '0')}`;
-const iconUrl = (filename) => `/images/cooldowns/${filename}`;
+const iconUrl = (filename) => cdn(`images/cooldowns/${filename}`);
 
 // Priority drives the icon ring: high = thicker, low = thinner.
 const strokeWidthFor = (priority, isFocused) => {

@@ -77,7 +77,7 @@ const layoutData = computed(() => {
         >
             <div class="px-4 py-2 border-b border-white/5 flex items-center justify-between" :class="roles[roleKey].bg">
                 <div class="flex items-center gap-2">
-                    <img :src="'/images/roles/' + roles[roleKey].icon" class="w-4 h-4 opacity-80" :alt="roles[roleKey].label">
+                    <img :src="$cdn('images/roles/' + roles[roleKey].icon)" class="w-4 h-4 opacity-80" :alt="roles[roleKey].label">
                     <span class="font-headline text-xs font-black uppercase tracking-widest" :class="roles[roleKey].color">{{ roles[roleKey].label }}</span>
                 </div>
 

@@ -284,7 +284,7 @@ const previousBossName = computed(() => {
             >
                 <div v-if="group.chars.length > 0" class="bg-surface-container/60 border border-white/5 rounded-xl overflow-hidden">
                     <div class="px-3 py-1.5 border-b border-white/5 flex items-center gap-2 bg-white/[0.02]">
-                        <img :src="'/images/roles/' + group.icon" class="w-3.5 h-3.5 opacity-80" :alt="group.label">
+                        <img :src="$cdn('images/roles/' + group.icon)" class="w-3.5 h-3.5 opacity-80" :alt="group.label">
                         <span class="text-4xs font-bold uppercase tracking-wider" :class="group.color">{{ group.label }}</span>
                         <span class="text-4xs font-semibold text-on-surface-variant ml-auto">{{ group.chars.length }}</span>
                     </div>

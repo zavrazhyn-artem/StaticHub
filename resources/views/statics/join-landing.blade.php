@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ __('Join Team') }} — {{ $staticName }} | BlastR</title>
-        <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
 
         <!-- All fonts bundled via app.css -->
 
@@ -20,7 +20,7 @@
         <div class="relative z-10 text-center max-w-lg w-full space-y-8">
             {{-- Logo --}}
             <div class="mb-2 flex items-center justify-center gap-4 drop-shadow-[0_0_40px_rgba(58,223,250,0.3)]">
-                <img src="/images/logo.svg" alt="BlastR Logo" class="w-16 h-16 object-contain" />
+                <img src="{{ asset('images/logo.svg') }}" alt="BlastR Logo" class="w-16 h-16 object-contain" />
                 <div class="text-4xl font-black uppercase tracking-tighter italic leading-none pr-2">
                     <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R</span>
                 </div>

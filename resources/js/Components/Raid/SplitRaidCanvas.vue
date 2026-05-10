@@ -419,7 +419,7 @@ const removeSplit = (n) => {
                     <div v-for="role in ['tank', 'heal', 'mdps', 'rdps']" :key="role">
                         <div v-if="splitGroups[splitNum]?.[role]?.length > 0" class="mb-1">
                             <div class="flex items-center gap-1 px-1 mb-0.5">
-                                <img :src="'/images/roles/' + roleIcons[role]" class="w-3 h-3 opacity-50">
+                                <img :src="$cdn('images/roles/' + roleIcons[role])" class="w-3 h-3 opacity-50">
                                 <span class="text-5xs font-bold uppercase tracking-wider" :class="roleColors[role]">{{ splitGroups[splitNum][role].length }}</span>
                             </div>
                             <div class="space-y-0.5">

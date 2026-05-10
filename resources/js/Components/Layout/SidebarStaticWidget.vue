@@ -42,7 +42,7 @@
                     class="shrink-0 flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-2xl bg-white/[0.04] hover:bg-white/[0.10] transition active:scale-95"
                 >
                     <img
-                        :src="`/images/rsvp/rsvp_${attended.status}.svg`"
+                        :src="$cdn(`images/rsvp/rsvp_${attended.status}.svg`)"
                         :alt="attended.status"
                         class="w-5 h-5"
                     >

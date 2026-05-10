@@ -150,7 +150,7 @@ async function sendMessage() {
             <div class="p-6 border-b border-white/5 flex items-center justify-between bg-surface-container-high">
                 <div class="flex items-center gap-3">
                     <div class="relative">
-                        <img src="/images/logo.svg" alt="B" class="h-6 w-6 drop-shadow-[0_0_8px_rgba(79,211,247,0.5)]">
+                        <img :src="$cdn('images/logo.svg')" alt="B" class="h-6 w-6 drop-shadow-[0_0_8px_rgba(79,211,247,0.5)]">
                         <div class="absolute -top-1 -right-1 w-2 h-2 bg-success-neon rounded-full shadow-[0_0_5px_rgba(57,255,20,0.8)] animate-pulse"></div>
                     </div>
                     <h2 class="text-white font-headline text-xs font-black uppercase tracking-[0.2em]">BlastR AI Analyst</h2>
@@ -182,7 +182,7 @@ async function sendMessage() {
                     <div v-if="msg.role === 'ai'" class="flex flex-col items-start gap-2">
                         <div class="flex items-start gap-3 w-full">
                             <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-surface-container-highest border border-primary/20 flex items-center justify-center shadow-[0_0_10px_rgba(79,211,247,0.1)]">
-                                <img src="/images/logo.svg" alt="B" class="h-4 w-4">
+                                <img :src="$cdn('images/logo.svg')" alt="B" class="h-4 w-4">
                             </div>
                             <div class="bg-surface-container-high border border-white/5 rounded-2xl rounded-tl-none p-4 max-w-[85%]">
                                 <AiChatBlocks v-if="msg.blocks" :blocks="msg.blocks" />
@@ -196,7 +196,7 @@ async function sendMessage() {
                 <div v-if="isLoading" class="flex flex-col items-start gap-2 animate-pulse">
                     <div class="flex items-start gap-3 w-full">
                         <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-surface-container-highest border border-primary/20 flex items-center justify-center">
-                            <img src="/images/logo.svg" alt="B" class="h-4 w-4 opacity-50">
+                            <img :src="$cdn('images/logo.svg')" alt="B" class="h-4 w-4 opacity-50">
                         </div>
                         <div class="bg-surface-container-high border border-white/5 rounded-2xl rounded-tl-none p-4 w-32">
                             <div class="flex gap-1">

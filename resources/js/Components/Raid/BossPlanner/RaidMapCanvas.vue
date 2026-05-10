@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
@@ -366,10 +367,10 @@ const classColors = {
     'Priest': '#FFFFFF', 'Rogue': '#FFF468', 'Shaman': '#0070DD', 'Warlock': '#8788EE', 'Warrior': '#C69B6D',
 };
 const markerImages = {
-    skull: '/images/raidplan/raid-markers/skull.png', cross: '/images/raidplan/raid-markers/cross.png',
-    square: '/images/raidplan/raid-markers/square.png', moon: '/images/raidplan/raid-markers/moon.png',
-    triangle: '/images/raidplan/raid-markers/triangle.png', diamond: '/images/raidplan/raid-markers/diamond.png',
-    circle_m: '/images/raidplan/raid-markers/circle.png', star: '/images/raidplan/raid-markers/star.png',
+    skull: cdn('images/raidplan/raid-markers/skull.png'), cross: cdn('images/raidplan/raid-markers/cross.png'),
+    square: cdn('images/raidplan/raid-markers/square.png'), moon: cdn('images/raidplan/raid-markers/moon.png'),
+    triangle: cdn('images/raidplan/raid-markers/triangle.png'), diamond: cdn('images/raidplan/raid-markers/diamond.png'),
+    circle_m: cdn('images/raidplan/raid-markers/circle.png'), star: cdn('images/raidplan/raid-markers/star.png'),
 };
 const roleAbbr = { tank: 'T', heal: 'H', mdps: 'M', rdps: 'R' };
 const getPlayerGroup = (p) => p.group ? (props.groups[p.group] || null) : null;
@@ -979,9 +980,9 @@ const onCustomDrop = (e) => {
 
     if (payload.type === 'ability-icon' && payload.spell_id) {
         let src;
-        if (payload.icon_filename) src = `/images/cooldowns/${payload.icon_filename}`;
+        if (payload.icon_filename) src = cdn(`images/cooldowns/${payload.icon_filename}`);
         else if (payload.icon) src = `https://wow.zamimg.com/images/wow/icons/large/${payload.icon}.jpg`;
-        else src = '/images/raidplan/raid-markers/skull.png';
+        else src = cdn('images/raidplan/raid-markers/skull.png');
         emit('update', {
             markers: [...markers.value, {
                 type: 'icon', src, isAbility: true,

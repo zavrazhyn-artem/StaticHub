@@ -24,7 +24,7 @@
         <div :class="['flex items-center h-[68px] shrink-0 relative', effectivelyCollapsed ? 'justify-center px-0 gap-0' : 'gap-3 px-4']">
             <a :href="dashboardUrl" class="shrink-0 grid place-items-center w-[34px] h-[34px]">
                 <img
-                    src="/images/logo.svg"
+                    :src="$cdn('images/logo.svg')"
                     alt="BlastR Logo"
                     class="w-[34px] h-[34px] drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]"
                 />

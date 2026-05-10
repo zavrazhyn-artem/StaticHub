@@ -13,7 +13,7 @@ class DiscordMessageBuilder
 {
     private static function spacerImageUrl(): string
     {
-        return config('app.url') . '/images/spacer.png';
+        return asset('images/spacer.png');
     }
 
     /**
@@ -174,13 +174,13 @@ class DiscordMessageBuilder
                 . $descriptionText
                 . "***Combat Roster***" . $analysisText . "\n{$divider}",
             'color'     => 0x00A3FF,
-            'thumbnail' => ['url' => config('app.url') . '/images/logo.svg'],
-            'image'     => ['url' => config('app.url') . '/images/spacer-365.png'],
+            'thumbnail' => ['url' => asset('images/logo.svg')],
+            'image'     => ['url' => asset('images/spacer-365.png')],
             'fields'    => $fields,
             'timestamp' => now()->toIso8601String(),
             'footer'    => [
                 'text'     => 'BlastR Tactical HUD',
-                'icon_url' => config('app.url') . '/images/logo.svg',
+                'icon_url' => asset('images/logo.svg'),
             ],
         ];
 

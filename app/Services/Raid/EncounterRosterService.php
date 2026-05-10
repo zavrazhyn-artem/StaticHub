@@ -182,7 +182,7 @@ class EncounterRosterService
                 $slug = \Illuminate\Support\Str::slug($bossName);
                 $bossData = $encounterBosses[$slug] ?? [];
                 $portraits = array_map(
-                    fn (int $id) => "/images/raidplan/portraits/{$id}.png",
+                    fn (int $id) => asset("images/raidplan/portraits/{$id}.png"),
                     $bossData['portraits'] ?? []
                 );
 

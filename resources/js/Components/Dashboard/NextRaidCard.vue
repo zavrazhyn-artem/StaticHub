@@ -33,7 +33,7 @@
                             <span class="text-[9px] text-on-surface-variant uppercase tracking-wider">{{ statusLabel }}</span>
                         </div>
                         <img
-                            :src="`/images/rsvp/rsvp_${attended.status}.svg`"
+                            :src="$cdn(`images/rsvp/rsvp_${attended.status}.svg`)"
                             :alt="attended.status"
                             class="w-5 h-5 ml-1"
                         >
@@ -93,6 +93,7 @@
 </template>
 
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useTranslation } from '@/composables/useTranslation'
 import { useRsvpModal } from '@/composables/useRsvpModal.js'
@@ -147,10 +148,10 @@ const statusCounts = computed(() => {
 })
 
 const statusBadges = computed(() => [
-    { key: 'go',    icon: '/images/rsvp/rsvp_present.svg',   title: __('Confirmed'),  value: statusCounts.value.go    },
-    { key: 'qm',    icon: '/images/rsvp/rsvp_tentative.svg', title: __('Tentative'),  value: statusCounts.value.qm    },
-    { key: 'no',    icon: '/images/rsvp/rsvp_absent.svg',    title: __('Absent'),     value: statusCounts.value.no    },
-    { key: 'bench', icon: '/images/rsvp/rsvp_bench.svg',     title: __('Bench'),      value: statusCounts.value.bench },
+    { key: 'go',    icon: cdn('images/rsvp/rsvp_present.svg'),   title: __('Confirmed'),  value: statusCounts.value.go    },
+    { key: 'qm',    icon: cdn('images/rsvp/rsvp_tentative.svg'), title: __('Tentative'),  value: statusCounts.value.qm    },
+    { key: 'no',    icon: cdn('images/rsvp/rsvp_absent.svg'),    title: __('Absent'),     value: statusCounts.value.no    },
+    { key: 'bench', icon: cdn('images/rsvp/rsvp_bench.svg'),     title: __('Bench'),      value: statusCounts.value.bench },
 ])
 
 const totalHave = computed(() => counts.value.tank + counts.value.heal + counts.value.dps)

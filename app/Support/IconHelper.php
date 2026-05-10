@@ -66,7 +66,7 @@ class IconHelper
     public static function classUrlAbsolute(?string $className): string
     {
         $slug = self::classSlug($className);
-        return config('app.url') . "/images/classes/{$slug}.svg";
+        return asset("images/classes/{$slug}.svg");
     }
 
     public static function roleUrl(?string $role): ?string
@@ -78,6 +78,6 @@ class IconHelper
     public static function roleUrlAbsolute(?string $role): ?string
     {
         $slug = self::roleSlug($role);
-        return $slug ? config('app.url') . "/images/roles/{$slug}.svg" : null;
+        return $slug ? asset("images/roles/{$slug}.svg") : null;
     }
 }

@@ -8,7 +8,7 @@
     <meta name="gridinsoft-key" content="3nb7xludk7tjbqh2nuc0g466h5zwzzilqiwftrf42jj2df7znies5sc6qnsthh6z" />
 
     <title>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
 
     <!-- All fonts (Inter/Space Grotesk/Orbitron/Material Symbols) bundled via app.css -->
 

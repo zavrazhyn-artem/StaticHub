@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, watch, onMounted, getCurrentInstance, provide } from 'vue';
 import axios from 'axios';
 import TabGear from './TabGear.vue';
@@ -244,7 +245,7 @@ const roleIconSrc = (role) => {
         HEALER: 'heal', heal:  'heal', healer: 'heal',
         DPS: 'melee',  dps:   'melee', mdps:   'melee', rdps: 'range',
     };
-    return `/images/roles/${role ? (map[role] ?? 'help') : 'help'}.svg`;
+    return cdn(`images/roles/${role ? (map[role] ?? 'help') : 'help'}.svg`);
 };
 
 const normalizeRoleKey = (role) => {

@@ -135,7 +135,7 @@ const getAttendance = (charId) => {
             <!-- Role header -->
             <div class="flex items-center justify-between px-3 py-1.5 border-b border-white/5">
                 <div class="flex items-center gap-1.5">
-                    <img :src="'/images/roles/' + roles[roleKey].icon" class="w-3.5 h-3.5 opacity-70">
+                    <img :src="$cdn('images/roles/' + roles[roleKey].icon)" class="w-3.5 h-3.5 opacity-70">
                     <span class="text-4xs font-bold uppercase tracking-wider" :class="roles[roleKey].color">
                         {{ roles[roleKey].label }}
                     </span>

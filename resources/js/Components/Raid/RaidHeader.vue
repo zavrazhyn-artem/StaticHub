@@ -75,7 +75,7 @@ const { formatDate, formatTime } = useTimeFormatter();
                 <!-- Role counts chip -->
                 <div class="bg-surface-container-high border border-white/10 rounded-xl px-4 h-10 glassmorphism backdrop-blur-md shadow-2xl flex items-center gap-4">
                     <div v-for="s in raidStatus" :key="s.label" class="flex items-center gap-1.5">
-                        <img :src="'/images/roles/' + s.label" class="w-4 h-4 opacity-90" :alt="s.label">
+                        <img :src="$cdn('images/roles/' + s.label)" class="w-4 h-4 opacity-90" :alt="s.label">
                         <span class="text-2xs font-semibold tracking-tight leading-none" :class="s.color">
                             {{ s.count }}/{{ s.limit }}
                         </span>

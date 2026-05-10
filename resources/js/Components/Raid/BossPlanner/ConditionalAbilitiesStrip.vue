@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { computed } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
@@ -7,7 +8,7 @@ const props = defineProps({
     abilities: { type: Array, default: () => [] },
 });
 
-const iconUrl = (a) => a.icon_filename ? `/images/cooldowns/${a.icon_filename}` : null;
+const iconUrl = (a) => a.icon_filename ? cdn(`images/cooldowns/${a.icon_filename}`) : null;
 
 const PRIORITY_RING = {
     high: 'ring-2 ring-red-500/70',

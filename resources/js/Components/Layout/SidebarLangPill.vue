@@ -5,7 +5,7 @@
             @click="open = !open"
             class="flex items-center gap-1 px-2 py-1 rounded-2xl bg-white/[0.04] border border-white/[0.06] text-on-surface-variant text-[11px] font-bold hover:bg-white/[0.08] transition"
         >
-            <img :src="`/images/flags/${currentCountry}.svg`" :alt="currentCountry" class="w-4 h-auto rounded-sm">
+            <img :src="$cdn(`images/flags/${currentCountry}.svg`)" :alt="currentCountry" class="w-4 h-auto rounded-sm">
             <span>{{ current.toUpperCase() }}</span>
             <span class="material-symbols-outlined text-sm">arrow_drop_down</span>
         </button>
@@ -27,7 +27,7 @@
                         locale.code === current ? 'text-primary bg-primary/5' : 'text-on-surface',
                     ]"
                 >
-                    <img :src="`/images/flags/${locale.country}.svg`" :alt="locale.country" class="w-4 h-auto rounded-sm">
+                    <img :src="$cdn(`images/flags/${locale.country}.svg`)" :alt="locale.country" class="w-4 h-auto rounded-sm">
                     {{ locale.label }}
                 </button>
             </form>

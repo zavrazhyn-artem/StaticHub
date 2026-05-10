@@ -10,14 +10,14 @@ use Illuminate\Support\Str;
 
 class FeedbackUploadService
 {
-    public const DISK = 'public';
+    public const DISK = 's3';
     public const MAX_BYTES = 5 * 1024 * 1024;
     public const MAX_PER_ITEM = 5;
     public const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     public const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     /**
-     * Store an uploaded image under storage/app/public/feedback/YYYY/MM/.
+     * Store an uploaded image at feedback/YYYY/MM/{uuid}.{ext} on the configured disk.
      * Returns the relative path (to be saved in DB). Caller is responsible
      * for validating mime/size before calling — throws on malformed input.
      */
@@ -31,7 +31,7 @@ class FeedbackUploadService
         $filename = Str::uuid()->toString() . '.' . $ext;
         $dir = 'feedback/' . now()->format('Y/m');
 
-        $path = $file->storeAs($dir, $filename, self::DISK);
+        $path = $file->storeAs($dir, $filename, ['disk' => self::DISK, 'visibility' => 'public']);
 
         return $path;
     }

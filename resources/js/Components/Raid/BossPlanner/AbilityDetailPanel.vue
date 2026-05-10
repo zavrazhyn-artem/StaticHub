@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useDodgePanel } from '@/composables/useDodgePanel';
 import { useTranslation } from '@/composables/useTranslation';
@@ -44,7 +45,7 @@ useDodgePanel({
 });
 
 const iconUrl = computed(() => props.ability.icon_filename
-    ? `/images/cooldowns/${props.ability.icon_filename}`
+    ? cdn(`images/cooldowns/${props.ability.icon_filename}`)
     : null);
 
 const wowheadUrl = computed(() => props.ability.spell_id

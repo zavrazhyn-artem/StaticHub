@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
-        <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
 
         <!-- All fonts bundled via app.css -->
 
@@ -17,7 +17,7 @@
         <div class="w-full sm:max-w-md mt-6 px-8 py-10 bg-surface-container-low border border-white/5 shadow-2xl overflow-hidden rounded-xl backdrop-blur-md">
             <div class="flex justify-center mb-8">
                 <a href="/" class="flex items-center gap-3">
-                    <img src="/images/logo.svg" alt="BlastR Logo" class="h-10 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]" />
+                    <img src="{{ asset('images/logo.svg') }}" alt="BlastR Logo" class="h-10 w-auto drop-shadow-[0_0_8px_rgba(58,223,250,0.5)]" />
                     <div class="text-3xl font-black uppercase tracking-tighter italic leading-none">
                         <span class="text-white">Blast</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">R<span class="text-sm opacity-70 ml-0.5">r<span class="text-xs opacity-50 ml-0.5">r</span></span></span>
                     </div>

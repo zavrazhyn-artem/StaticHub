@@ -98,6 +98,7 @@ class AiRequestLogger
             'gemini-2.5-pro'                => ['input' => 1.25, 'output' => 10.00, 'cache_read' => 0.31],
             'gemini-3-flash'                => ['input' => 0.50, 'output' => 3.00,  'cache_read' => 0.05],
             'gemini-3-flash-preview'        => ['input' => 0.50, 'output' => 3.00,  'cache_read' => 0.05],
+            'gemini-3.1-flash-lite'         => ['input' => 0.25, 'output' => 1.50,  'cache_read' => 0.025],
             'gemini-3.1-flash-lite-preview' => ['input' => 0.25, 'output' => 1.50,  'cache_read' => 0.025],
             'gemini-3-pro'                  => ['input' => 2.00, 'output' => 12.00, 'cache_read' => 0.20],
         ];

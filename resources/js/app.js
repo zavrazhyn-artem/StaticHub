@@ -50,6 +50,9 @@ app.config.globalProperties.__ = (key, replace = {}) => {
     return translation;
 };
 
+const cdnBase = (import.meta.env.VITE_CDN_URL || '').replace(/\/+$/, '');
+app.config.globalProperties.$cdn = (path) => `${cdnBase}/${String(path).replace(/^\/+/, '')}`;
+
 // Shared UI primitives — eager
 app.component('alert-banner', AlertBanner);
 app.component('layout-shell', LayoutShell);

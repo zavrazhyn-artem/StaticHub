@@ -1,4 +1,5 @@
 <script setup>
+import { cdn } from '@/composables/useCdn';
 import { ref, computed, watch, nextTick } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 const { __ } = useTranslation();
@@ -944,7 +945,7 @@ const handleCanvasPlacement = (point) => {
         const char = props.roster.find(c => c.id === sel.characterId);
         const existing = [...(currentStep.value.markers || [])];
         existing.push({
-            type: 'icon', src: sel.img || `/images/raidplan/class/${(char?.playable_class || '').toLowerCase().replace(/\s+/g, '')}.png`,
+            type: 'icon', src: sel.img || cdn(`images/raidplan/class/${(char?.playable_class || '').toLowerCase().replace(/\s+/g, '')}.png`),
             x: point.x, y: point.y, label: label || sel.label,
             playerData: { id: sel.characterId, name: sel.label, className: sel.className, role: sel.role },
             showDirection: sd, scale: 1, rotation: 0,
@@ -1033,7 +1034,7 @@ const handlePlaceFormation = ({ groupId, formation }) => {
         if (!char) return;
         existingMarkers.push({
             type: 'icon',
-            src: char.avatar_url || `/images/raidplan/class/${(char.playable_class || '').toLowerCase().replace(/\s+/g, '')}.png`,
+            src: char.avatar_url || cdn(`images/raidplan/class/${(char.playable_class || '').toLowerCase().replace(/\s+/g, '')}.png`),
             x: positions[i].x, y: positions[i].y,
             label: char.name,
             playerData: { id: charId, name: char.name, className: char.playable_class, role: char.assigned_role },
@@ -1622,7 +1623,7 @@ const toggleBoss = (slug) => { expandedBoss.value = expandedBoss.value === slug 
                             <span v-else-if="editElement.type === 'emoji'" class="text-2xl">{{ editElement.emoji }}</span>
                             <img v-else-if="editElement.src" :src="editElement.src" class="w-7 h-7 rounded object-cover">
                             <img v-else-if="editElement.type && !['icon','group-token'].includes(editElement.type)"
-                                :src="'/images/raidplan/raid-markers/' + (editElement.type || 'skull') + '.png'" class="w-7 h-7">
+                                :src="$cdn('images/raidplan/raid-markers/' + (editElement.type || 'skull') + '.png')" class="w-7 h-7">
                             <span v-else-if="editElement.groupLabel" class="text-xs font-black" :style="{ color: editElement.color }">{{ editElement.groupLabel }}</span>
                             <span v-else class="material-symbols-outlined text-lg text-on-surface-variant/30">edit</span>
                         </div>

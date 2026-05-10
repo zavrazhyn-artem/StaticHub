@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Blastr Admin</title>
-    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
 
     <!-- All fonts bundled via app.css -->
 
