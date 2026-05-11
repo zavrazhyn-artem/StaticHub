@@ -1,8 +1,10 @@
 *.log
 .DS_Store
+# Any .env.* variant — production, staging, prod-bound files for kubeseal.
+# .env.example IS committed (template); the exception below re-includes it.
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
 .phpactor.json
 .phpunit.result.cache
 /.fleet
