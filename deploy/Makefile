@@ -18,7 +18,7 @@ COMPONENT   ?= web
 # `make help` lists all targets with their first-line comment.
 .PHONY: help
 help:
-	@awk '/^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$NF }' $(MAKEFILE_LIST) | column -t -s ':'
+	@awk 'BEGIN { FS=":.*##" } /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 # -----------------------------------------------------------------------------
 # Image build + push
