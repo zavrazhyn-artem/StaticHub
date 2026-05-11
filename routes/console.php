@@ -22,8 +22,8 @@ Artisan::command('inspire', function () {
 Schedule::command(FetchAuctionsCommand::class)->hourly()->withoutOverlapping(30)->onOneServer();
 Schedule::command(ProcessDiscordAutomations::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
 // Scheduler tick just queues the orchestrator on `default`; the actual
-// statics scan + bnet/rio dispatch runs on a worker pod. Manual admin runs
-// of `statics:sync` are still available via SyncAllStaticsCommand.
+//// statics scan + bnet/rio dispatch runs on a worker pod. Manual admin runs
+//// of `statics:sync` are still available via SyncAllStaticsCommand.
 Schedule::job(new DispatchSyncOrchestratorJob)->everyMinute()->onOneServer();
 // Daily lightweight ilvl/spec refresh for every char — keeps My Characters page
 // current for chars that aren't in any static (and so aren't covered by the

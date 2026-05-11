@@ -6,7 +6,10 @@ image:
   repository: registry.digitalocean.com/blastr/app
   tag: ""               # set by `helm upgrade --set image.tag=v1.2.3`. Empty defaults to Chart.appVersion.
   pullPolicy: IfNotPresent
-  pullSecretName: blastr-registry-creds  # created by `doctl registry kubernetes-manifest`
+  # DOKS docr-integration auto-syncs `registry-blastr` Secret into every
+  # namespace and rotates the token every 12h. We use it directly — no
+  # manual copy/rename needed.
+  pullSecretName: registry-blastr
 
 # Domains served by Ingress. Both terminate TLS at ingress using the
 # Cloudflare Origin wildcard cert mounted via tls-cert Secret.
@@ -56,11 +59,14 @@ scheduler:
   replicas: 1
   resources:
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 100m
+      memory: 384Mi
     limits:
-      cpu: 200m
-      memory: 256Mi
+      # Scheduler boots full Laravel app (config:cache + schedule:work) so it
+      # carries opcache (256M) + JIT buffer (128M) + Laravel runtime (~150M).
+      # 256Mi was OOMKilled within 2 min; 768Mi gives comfortable headroom.
+      cpu: 500m
+      memory: 768Mi
 
 # ---------------------------------------------------------------------------
 # worker-default — pool=core
@@ -70,11 +76,13 @@ workerDefault:
   replicas: 1
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      # 3 queue:work processes (default + compile + discord) at ~80-150Mi each.
+      # Request reflects steady-state; limit allows headroom for spikes.
+      cpu: 150m
+      memory: 256Mi
     limits:
-      cpu: 1000m
-      memory: 1024Mi
+      cpu: 750m
+      memory: 768Mi
 
 # ---------------------------------------------------------------------------
 # worker-sync — pool=sync
@@ -84,11 +92,14 @@ workerSync:
   replicas: 1
   resources:
     requests:
-      cpu: 500m
-      memory: 1024Mi
+      # 7 queue:work processes (bnet×4 + rio×2 + wcl×1) at ~80-150Mi each.
+      # 700MB at full load — request must fit a 2GB node (1.3GB allocatable
+      # after DOKS overhead). Limit is the hard ceiling.
+      cpu: 300m
+      memory: 512Mi
     limits:
       cpu: 1500m
-      memory: 2048Mi
+      memory: 1300Mi
   hpa:
     enabled: true
     minReplicas: 1
@@ -103,11 +114,13 @@ workerSync:
 workerAi:
   resources:
     requests:
-      cpu: 250m
-      memory: 1024Mi
+      # Single ai queue:work, but Gemini responses can hit 30-50MB JSON in
+      # memory at once. Request modest, limit generous for peaks.
+      cpu: 200m
+      memory: 384Mi
     limits:
       cpu: 1000m
-      memory: 2048Mi
+      memory: 1500Mi
   keda:
     minReplicas: 0
     maxReplicas: 2

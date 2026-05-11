@@ -29,8 +29,10 @@ spec:
         spec:
           restartPolicy: Never
           {{- include "blastr.imagePullSecrets" $ | nindent 10 }}
-          nodeSelector:
-            pool: {{ $.Values.nodePools.core }}
+          # No nodeSelector — CronJobs are short-lived bursts (1-10 min) that
+          # only need DB/Redis access via VPC. Any pool will do. Pinning to
+          # core caused FailedScheduling when scheduler+worker-default filled
+          # the core node's memory budget.
           containers:
             - name: cron
               image: {{ include "blastr.image" $ }}

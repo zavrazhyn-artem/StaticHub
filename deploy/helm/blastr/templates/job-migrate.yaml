@@ -23,13 +23,22 @@ spec:
     spec:
       restartPolicy: Never
       {{- include "blastr.imagePullSecrets" . | nindent 6 }}
-      nodeSelector:
-        pool: {{ .Values.nodePools.core }}
+      # NO nodeSelector — migrate is short-lived, just needs DB access (any
+      # node in the cluster reaches Managed MySQL via VPC). Pinning to core
+      # makes the hook fight scheduler + worker-default for memory.
       containers:
         - name: migrate
           image: {{ include "blastr.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["migrate"]
-          {{- include "blastr.envFrom" . | nindent 10 }}
+          # Migrate runs as a pre-install/pre-upgrade Helm hook, BEFORE regular
+          # resources (ConfigMap) get applied. We can't envFrom: configMapRef
+          # here — pod would loop in CreateContainerConfigError waiting for a
+          # ConfigMap that doesn't exist yet. The Secret has everything migrate
+          # actually needs (APP_KEY + DB_*); APP_ENV/APP_DEBUG fall back to
+          # config/*.php defaults baked into the image.
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secret.name }}
           resources:
             {{- toYaml .Values.migrate.resources | nindent 12 }}

@@ -27,6 +27,7 @@ Homestead.yaml
 Thumbs.db
 
 keys
+cf-certs
 
 storage/core-master
 storage/wowaudit-summary.csv
