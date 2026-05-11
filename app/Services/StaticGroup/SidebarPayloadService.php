@@ -47,7 +47,12 @@ class SidebarPayloadService
             return $payload;
         }
 
-        $role = $this->getUserRoleInStatic($user, $static) ?? Role::Member;
+        // Ghost mode short-circuits to Leader so the impersonated static
+        // renders with full RL UI (Invite button, Settings tabs, treasury
+        // controls, etc.) — matches the policy `before()` god-mode bypass.
+        $role = app(\App\Services\Ghost\GhostModeService::class)->isActive()
+            ? Role::Leader
+            : ($this->getUserRoleInStatic($user, $static) ?? Role::Member);
         $mainCharacter = $user->getMainCharacterForStatic($static->id);
 
         $payload['sidebar'] = [

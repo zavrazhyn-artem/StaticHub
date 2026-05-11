@@ -160,7 +160,7 @@
                     <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
                     Invite Codes
                 </a>
-                @if(app(\App\Services\Ghost\GhostModeService::class)->canActivate())
+                @if(session('admin_authenticated') === true && config('ghost.user_id'))
                     <a href="{{ route('admin.statics.index') }}"
                        class="admin-nav-link {{ request()->routeIs('admin.statics.*') ? 'active' : '' }}">
                         <span class="material-symbols-outlined" style="font-size: 20px;">groups</span>

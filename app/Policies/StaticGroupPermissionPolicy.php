@@ -25,28 +25,13 @@ class StaticGroupPermissionPolicy
     use HandlesAuthorization, ResolvesStaticRole;
 
     /**
-     * Ghost mode: allow a small whitelist of read abilities on safe HTTP
-     * methods (GET/HEAD/OPTIONS) so settings tabs, full report view, and
-     * manager-gated UI render correctly when peeking. Every other ability
-     * is denied — writes (PATCH/POST/DELETE) always fall through to false.
+     * Ghost mode: full RL/admin rights on the impersonated static — every
+     * ability passes regardless of method or actual membership role. Lets
+     * an admin triage and modify a static end-to-end without joining it.
      */
     public function before(User $user, string $ability): ?bool
     {
-        if (! app(\App\Services\Ghost\GhostModeService::class)->isActive()) {
-            return null;
-        }
-
-        $readOnlyAbilities = [
-            'manage',
-            'canAccessSettings',
-            'canViewGlobalReport',
-        ];
-
-        if (in_array($ability, $readOnlyAbilities, true) && request()->isMethodSafe()) {
-            return true;
-        }
-
-        return false;
+        return app(\App\Services\Ghost\GhostModeService::class)->isActive() ? true : null;
     }
 
     // -------------------------------------------------------------------------

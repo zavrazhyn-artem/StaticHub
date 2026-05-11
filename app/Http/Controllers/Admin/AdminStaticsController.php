@@ -20,7 +20,9 @@ class AdminStaticsController extends Controller
 
     public function index(Request $request): View
     {
-        abort_unless($this->ghost->canActivate(), 403, 'Ghost mode not available for this user.');
+        // admin_auth middleware already verified this is an admin session;
+        // no need to require a Bnet-authenticated GhostModeService::canActivate().
+        abort_unless((int) config('ghost.user_id') > 0, 403, 'Ghost mode requires GHOST_USER_ID to be configured.');
 
         $search = trim((string) $request->query('q', ''));
         $sort = (string) $request->query('sort', 'name');
