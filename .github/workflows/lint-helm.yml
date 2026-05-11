@@ -1,0 +1,36 @@
+# Run helm lint + template on every PR that touches deploy/helm/.
+# Catches chart-level syntax issues before they hit prod.
+
+name: Lint Helm chart
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/helm/**'
+      - '.github/workflows/lint-helm.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/helm/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.0
+
+      - name: helm lint
+        run: helm lint ./deploy/helm/blastr
+
+      - name: helm template (verify renders)
+        run: helm template ./deploy/helm/blastr > /tmp/rendered.yaml
+
+      - name: Show rendered resource summary
+        run: |
+          echo "Rendered kinds:"
+          grep -E '^kind:' /tmp/rendered.yaml | sort | uniq -c

@@ -19,7 +19,9 @@ spec:
   triggers:
     - type: redis
       metadata:
-        addressFromEnv: REDIS_HOST_PORT
+        hostFromEnv: REDIS_HOST
+        portFromEnv: REDIS_PORT
         passwordFromEnv: REDIS_PASSWORD
         listName: queues:ai
         listLength: "{{ .Values.workerAi.keda.aiQueueLength }}"
+        enableTLS: "true"

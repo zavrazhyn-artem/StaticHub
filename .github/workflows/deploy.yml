@@ -1,0 +1,128 @@
+# =============================================================================
+# Deploy to DOKS — fires on tag push (vX.Y.Z) and on manual dispatch.
+#
+# Flow:
+#   1. Build multi-stage Docker image (composer + node + frankenphp).
+#   2. Push to DO Container Registry under registry.digitalocean.com/blastr/app:<tag>.
+#   3. helm upgrade --install with image.tag=<tag>.
+#      - pre-upgrade hook (job-migrate.yaml) runs `php artisan migrate --force`.
+#        If migrate fails, helm aborts and old pods stay alive.
+#      - rolling update with maxSurge=1 maxUnavailable=0 → zero downtime.
+#   4. Wait for new pods Ready, then succeed.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   DIGITALOCEAN_ACCESS_TOKEN  — DO API token, Read+Write scope
+#   DOKS_CLUSTER_NAME          — "blastr-prod" (or override via env below)
+# =============================================================================
+
+name: Deploy to DOKS
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to deploy (e.g. v0.1.5). Required for manual runs.'
+        required: true
+        type: string
+
+env:
+  REGISTRY: registry.digitalocean.com
+  IMAGE_NAME: blastr/app
+  CLUSTER_NAME: blastr-prod
+  HELM_NAMESPACE: blastr
+  HELM_RELEASE: blastr
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # 20 min hard cap so a stuck build doesn't burn the free tier.
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Resolve image tag
+        id: tag
+        run: |
+          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
+            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            # Strip refs/tags/ prefix → just the vX.Y.Z part.
+            echo "value=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Login to DO Container Registry
+        run: doctl registry login --expiry-seconds 1800
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/app/Dockerfile
+          target: app
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # Layer cache lives in the registry itself — survives runner restarts
+          # without needing a separate cache backend.
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+      - name: Fetch kubeconfig
+        run: doctl kubernetes cluster kubeconfig save "$CLUSTER_NAME"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.0
+
+      - name: Verify cluster reachable
+        run: |
+          kubectl get nodes
+          kubectl get pods -n "$HELM_NAMESPACE" -l app.kubernetes.io/component=web --no-headers | wc -l
+
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install "$HELM_RELEASE" ./deploy/helm/blastr \
+            --namespace "$HELM_NAMESPACE" \
+            --set image.tag="${{ steps.tag.outputs.value }}" \
+            --atomic \
+            --timeout 10m \
+            --history-max 10
+
+      - name: Post-deploy smoke check
+        run: |
+          # Pods all Ready (Deployments + StatefulSets).
+          kubectl rollout status -n "$HELM_NAMESPACE" deployment/blastr-web --timeout=5m
+          kubectl rollout status -n "$HELM_NAMESPACE" deployment/blastr-scheduler --timeout=2m
+          kubectl rollout status -n "$HELM_NAMESPACE" deployment/blastr-worker-default --timeout=2m
+          kubectl rollout status -n "$HELM_NAMESPACE" deployment/blastr-worker-sync --timeout=2m
+
+          # Liveness probe should return 200.
+          kubectl run smoke-test --rm -i --restart=Never --quiet \
+            --image=curlimages/curl:8.10.1 \
+            --namespace="$HELM_NAMESPACE" \
+            --command -- curl -fsS http://blastr-web/up
+
+      - name: Show recent web logs on failure
+        if: failure()
+        run: |
+          kubectl logs -n "$HELM_NAMESPACE" -l app.kubernetes.io/component=web --tail=100 || true
+          kubectl describe pods -n "$HELM_NAMESPACE" -l app.kubernetes.io/component=web || true
+          kubectl get events -n "$HELM_NAMESPACE" --sort-by='.lastTimestamp' --field-selector type=Warning || true

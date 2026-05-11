@@ -20,8 +20,10 @@ spec:
   triggers:
     - type: redis
       metadata:
-        addressFromEnv: REDIS_HOST_PORT     # built at runtime from REDIS_HOST + REDIS_PORT, see secret
+        hostFromEnv: REDIS_HOST
+        portFromEnv: REDIS_PORT
         passwordFromEnv: REDIS_PASSWORD
         listName: queues:bnet               # Laravel Redis queue list key
         listLength: "{{ .Values.workerSync.hpa.bnetQueueLength }}"
+        enableTLS: "true"                   # DO Managed Valkey requires TLS
 {{- end -}}

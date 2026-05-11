@@ -1,0 +1,8 @@
+# Sealed secrets are committed (they're encrypted). Unsealed Secret manifests
+# from `kubectl create secret --dry-run` MUST NEVER be committed.
+helm/blastr/sealed/*.unsealed.yaml
+helm/blastr/sealed/*.tmp
+
+# Local artifacts from `helm template` / debug runs
+*.rendered.yaml
+*.tmp.yaml
