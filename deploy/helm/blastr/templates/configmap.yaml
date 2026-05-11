@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "blastr.fullname" . }}-env
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  # Octane worker count is injected separately so the web deployment can
+  # tune it without changing the shared ConfigMap.
+  OCTANE_WORKERS: {{ .Values.web.octaneWorkers | quote }}

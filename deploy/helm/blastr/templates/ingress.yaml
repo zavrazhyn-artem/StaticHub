@@ -1,0 +1,43 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "blastr.fullname" . }}
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+  annotations:
+    # Cloudflare sits in front; we accept its origin cert and rely on its
+    # X-Forwarded-For / X-Real-IP for the actual visitor address.
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hosts.main }}
+        - {{ .Values.ingress.hosts.admin }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  rules:
+    - host: {{ .Values.ingress.hosts.main }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "blastr.fullname" . }}-web
+                port:
+                  number: 80
+    - host: {{ .Values.ingress.hosts.admin }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "blastr.fullname" . }}-web
+                port:
+                  number: 80
+{{- end -}}

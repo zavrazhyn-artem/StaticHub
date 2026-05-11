@@ -1,0 +1,24 @@
+{{- /*
+TLS Secret for the Ingress — Cloudflare Origin wildcard cert (*.blastr.pro,
+valid until 2041). Same workflow as blastr-env: real cert sealed out-of-band
+via kubeseal and applied to the cluster ahead of `helm install`.
+
+Generate the sealed Secret locally:
+  kubectl create secret tls {{ .Values.ingress.tls.secretName }} \
+    --cert=path/to/cloudflare-origin.fullchain.pem \
+    --key=path/to/cloudflare-origin.privkey.pem \
+    --dry-run=client -o yaml \
+    | kubeseal --format yaml > deploy/helm/blastr/sealed/blastr-tls.sealed.yaml
+*/}}
+{{- if .Values.ingress.tls.renderPlaceholder -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.ingress.tls.secretName }}
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+stringData:
+  tls.crt: "placeholder-CF-origin-fullchain"
+  tls.key: "placeholder-CF-origin-privkey"
+{{- end -}}

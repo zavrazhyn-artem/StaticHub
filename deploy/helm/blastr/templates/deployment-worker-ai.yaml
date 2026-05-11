@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "blastr.fullname" . }}-worker-ai
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker-ai
+spec:
+  # replicas governed by KEDA ScaledObject (see keda-scaledobject-ai.yaml).
+  # Start at 0; KEDA pegs to queue depth.
+  replicas: 0
+  strategy:
+    # Recreate so we never have two AI pods on a long-running Gemini call.
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "blastr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker-ai
+  template:
+    metadata:
+      labels:
+        {{- include "blastr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker-ai
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- include "blastr.imagePullSecrets" . | nindent 6 }}
+      nodeSelector:
+        pool: {{ .Values.nodePools.ai }}
+      containers:
+        - name: worker
+          image: {{ include "blastr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["worker-ai"]
+          {{- include "blastr.envFrom" . | nindent 10 }}
+          resources:
+            {{- toYaml .Values.workerAi.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "supervisorctl -c /etc/supervisor/conf.d/ai.conf status | grep -v STOPPED | grep -q RUNNING"
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 5
+      # 1h grace period — supervisord's stopwaitsecs=3600 on queue-ai lets
+      # the in-flight Gemini call finish before the worker is killed.
+      terminationGracePeriodSeconds: {{ .Values.workerAi.terminationGracePeriodSeconds }}

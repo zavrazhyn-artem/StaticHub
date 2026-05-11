@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Unique name per revision so successive upgrades don't collide.
+  name: {{ include "blastr.fullname" . }}-migrate-{{ .Release.Revision }}
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    # Run BEFORE the upgrade rolls out new pods. If migrate fails, Helm
+    # aborts the upgrade — old pods stay live, no half-broken deploy.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: {{ .Values.migrate.backoffLimit }}
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        {{- include "blastr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      {{- include "blastr.imagePullSecrets" . | nindent 6 }}
+      nodeSelector:
+        pool: {{ .Values.nodePools.core }}
+      containers:
+        - name: migrate
+          image: {{ include "blastr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["migrate"]
+          {{- include "blastr.envFrom" . | nindent 10 }}
+          resources:
+            {{- toYaml .Values.migrate.resources | nindent 12 }}

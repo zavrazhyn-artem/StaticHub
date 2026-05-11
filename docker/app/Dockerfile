@@ -98,8 +98,12 @@ COPY docker/app/php.ini /usr/local/etc/php/conf.d/99-app.ini
 # FrankenPHP server config — Caddy syntax, worker-mode Octane.
 COPY docker/app/Caddyfile /etc/frankenphp/Caddyfile
 
-# Supervisord config for the worker container (CMD overrides for web/scheduler).
-COPY docker/app/worker.supervisord.conf /etc/supervisor/conf.d/worker.conf
+# Supervisord configs — one per worker pool. entrypoint.sh dispatches the
+# right file based on the CMD argument (worker-default / worker-sync /
+# worker-ai). Web + scheduler don't use supervisord.
+COPY docker/app/supervisord-default.conf /etc/supervisor/conf.d/default.conf
+COPY docker/app/supervisord-sync.conf    /etc/supervisor/conf.d/sync.conf
+COPY docker/app/supervisord-ai.conf      /etc/supervisor/conf.d/ai.conf
 
 WORKDIR $APP_ROOT
 

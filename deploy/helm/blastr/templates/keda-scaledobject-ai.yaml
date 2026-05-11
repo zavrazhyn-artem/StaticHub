@@ -1,0 +1,25 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "blastr.fullname" . }}-worker-ai
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "blastr.fullname" . }}-worker-ai
+  minReplicaCount: {{ .Values.workerAi.keda.minReplicas }}
+  maxReplicaCount: {{ .Values.workerAi.keda.maxReplicas }}
+  pollingInterval: {{ .Values.workerAi.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.workerAi.keda.cooldownPeriod }}
+  # KEDA's "scale to zero from idle" needs no fallback — Gemini calls cost
+  # real money so leaving the pod up costs more than the 60s scale-up delay.
+  triggers:
+    - type: redis
+      metadata:
+        addressFromEnv: REDIS_HOST_PORT
+        passwordFromEnv: REDIS_PASSWORD
+        listName: queues:ai
+        listLength: "{{ .Values.workerAi.keda.aiQueueLength }}"

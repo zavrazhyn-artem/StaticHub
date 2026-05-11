@@ -1,0 +1,16 @@
+apiVersion: v2
+name: blastr
+description: BlastR — Laravel + Vue WoW raid management app on DOKS
+type: application
+# Chart version is for the deployment templates themselves; image tag in
+# values.yaml is what tracks the actual app build.
+version: 0.1.0
+# Bump as we evolve the app — purely informational, not tied to deploys.
+appVersion: "0.1.0"
+icon: https://blastr.pro/favicon.ico
+home: https://blastr.pro
+sources:
+  - https://github.com/zavrik/StaticHub
+maintainers:
+  - name: Artem Zavrazhyn
+    email: arty.zavrik@gmail.com

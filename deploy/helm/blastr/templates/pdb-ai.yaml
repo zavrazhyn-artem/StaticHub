@@ -1,0 +1,16 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "blastr.fullname" . }}-worker-ai
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker-ai
+spec:
+  # maxUnavailable: 0 means k8s will never voluntarily evict an AI pod
+  # during node drain / cluster upgrade. Drain waits until the pod
+  # terminates on its own (or hits the 1h terminationGracePeriodSeconds).
+  maxUnavailable: {{ .Values.workerAi.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "blastr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker-ai

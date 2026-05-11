@@ -82,7 +82,7 @@ services:
     container_name: blastr_worker
     command: ["worker"]
     healthcheck:
-      test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
+      test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/default.conf status | grep -v STOPPED | grep -q RUNNING"]
       interval: 30s
       timeout: 10s
       retries: 3

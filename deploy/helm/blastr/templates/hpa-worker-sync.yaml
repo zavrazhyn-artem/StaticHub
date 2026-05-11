@@ -1,0 +1,27 @@
+{{- if .Values.workerSync.hpa.enabled -}}
+# HPA driven by KEDA Redis scaler on bnet queue depth. KEDA installs the
+# CRD; the HPA appears once the ScaledObject is reconciled.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "blastr.fullname" . }}-worker-sync
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker-sync
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "blastr.fullname" . }}-worker-sync
+  minReplicaCount: {{ .Values.workerSync.hpa.minReplicas }}
+  maxReplicaCount: {{ .Values.workerSync.hpa.maxReplicas }}
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+    - type: redis
+      metadata:
+        addressFromEnv: REDIS_HOST_PORT     # built at runtime from REDIS_HOST + REDIS_PORT, see secret
+        passwordFromEnv: REDIS_PASSWORD
+        listName: queues:bnet               # Laravel Redis queue list key
+        listLength: "{{ .Values.workerSync.hpa.bnetQueueLength }}"
+{{- end -}}

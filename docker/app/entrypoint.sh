@@ -2,12 +2,15 @@
 # =============================================================================
 # Unified entrypoint — dispatches to the right command based on $1.
 #
-#   web        → FrankenPHP server (Octane worker mode). Default.
-#   worker     → supervisord managing per-queue queue:work processes.
-#   scheduler  → php artisan schedule:work (one tick per minute).
-#   migrate    → php artisan migrate --force (one-shot, used by k8s Job).
-#   shell      → drop into /bin/bash for debugging.
-#   custom cmd → exec arbitrary command (php artisan ..., /bin/sh ..., etc.)
+#   web              → FrankenPHP server (Octane worker mode). Default.
+#   scheduler        → php artisan schedule:work (one tick per minute).
+#   worker-default   → supervisord: default + compile + discord (pool=core).
+#   worker-sync      → supervisord: bnet + rio + wcl (pool=sync).
+#   worker-ai        → supervisord: ai (pool=ai, KEDA-scaled).
+#   worker           → legacy alias for worker-default (local-dev compatibility).
+#   migrate          → php artisan migrate --force (one-shot, used by k8s Job).
+#   shell            → drop into /bin/bash for debugging.
+#   custom cmd       → exec arbitrary command (php artisan ..., /bin/sh ..., etc.)
 # =============================================================================
 set -e
 
@@ -39,12 +42,22 @@ case "${1:-web}" in
         # serve command is just `frankenphp run` which reads /etc/frankenphp/Caddyfile.
         exec frankenphp run --config /etc/frankenphp/Caddyfile
         ;;
-    worker)
+    worker|worker-default)
         prepare_runtime
-        # Same supervisord config as the old php-fpm worker container. Each
-        # [program:queue-*] manages one or more `queue:work` processes with
-        # ShouldBeUnique + RateLimited middleware enforcing per-API quotas.
-        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/worker.conf
+        # pool=core: default + compile + discord queues. Always-on, latency-
+        # sensitive light jobs. `worker` alias for legacy local-dev compose.
+        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/default.conf
+        ;;
+    worker-sync)
+        prepare_runtime
+        # pool=sync: bnet (4 procs) + rio (2 procs) + wcl (1 proc). External
+        # API hammering with ShouldBeUnique + RateLimited middleware.
+        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/sync.conf
+        ;;
+    worker-ai)
+        prepare_runtime
+        # pool=ai: Gemini analysis. KEDA-scaled, 1h grace period, PDB pinned.
+        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/ai.conf
         ;;
     scheduler)
         prepare_runtime

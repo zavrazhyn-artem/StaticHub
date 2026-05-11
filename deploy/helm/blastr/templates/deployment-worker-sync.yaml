@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "blastr.fullname" . }}-worker-sync
+  labels:
+    {{- include "blastr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker-sync
+spec:
+  replicas: {{ .Values.workerSync.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "blastr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker-sync
+  template:
+    metadata:
+      labels:
+        {{- include "blastr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker-sync
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- include "blastr.imagePullSecrets" . | nindent 6 }}
+      nodeSelector:
+        pool: {{ .Values.nodePools.sync }}
+      containers:
+        - name: worker
+          image: {{ include "blastr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["worker-sync"]
+          {{- include "blastr.envFrom" . | nindent 10 }}
+          resources:
+            {{- toYaml .Values.workerSync.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "supervisorctl -c /etc/supervisor/conf.d/sync.conf status | grep -v STOPPED | grep -q RUNNING"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 180

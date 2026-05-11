@@ -1,0 +1,291 @@
+# =============================================================================
+# BlastR — production defaults. Override per environment via -f values.staging.yaml.
+# =============================================================================
+
+image:
+  repository: registry.digitalocean.com/blastr/app
+  tag: ""               # set by `helm upgrade --set image.tag=v1.2.3`. Empty defaults to Chart.appVersion.
+  pullPolicy: IfNotPresent
+  pullSecretName: blastr-registry-creds  # created by `doctl registry kubernetes-manifest`
+
+# Domains served by Ingress. Both terminate TLS at ingress using the
+# Cloudflare Origin wildcard cert mounted via tls-cert Secret.
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    main: blastr.pro
+    admin: admin.blastr.pro
+  tls:
+    secretName: blastr-tls   # references sealed Secret with CF wildcard cert (fullchain.pem + privkey.pem)
+
+# Node-pool affinity. Each pool has a label `pool: <name>` set by doctl
+# when the pool was created. nodeSelector pins pods to the right pool.
+nodePools:
+  web:        web
+  core:       core
+  sync:       sync
+  ai:         ai
+
+# ---------------------------------------------------------------------------
+# Web — FrankenPHP Octane workers behind Ingress
+# ---------------------------------------------------------------------------
+web:
+  replicas: 1
+  octaneWorkers: 4         # number of FrankenPHP workers per pod
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1500m
+      memory: 1024Mi
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  pdb:
+    minAvailable: 1
+
+# ---------------------------------------------------------------------------
+# Scheduler — fires every-minute tasks (Discord automations, orchestrator
+# dispatch job, activity log flush). Daily/weekly tasks are k8s CronJobs.
+# ---------------------------------------------------------------------------
+scheduler:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# ---------------------------------------------------------------------------
+# worker-default — pool=core
+# default + compile + discord queues (light, latency-sensitive, always-on)
+# ---------------------------------------------------------------------------
+workerDefault:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+
+# ---------------------------------------------------------------------------
+# worker-sync — pool=sync
+# bnet (4) + rio (2) + wcl (1) queues. Hot but bursty. HPA on Redis queue depth.
+# ---------------------------------------------------------------------------
+workerSync:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+    limits:
+      cpu: 1500m
+      memory: 2048Mi
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    # KEDA Redis scaler: queue depth thresholds. Scale up when bnet has many pending jobs.
+    bnetQueueLength: 50
+
+# ---------------------------------------------------------------------------
+# worker-ai — pool=ai
+# Single ai queue. KEDA scales 0-2 on queue depth. Long-running Gemini calls.
+# ---------------------------------------------------------------------------
+workerAi:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1024Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+  keda:
+    minReplicas: 0
+    maxReplicas: 2
+    aiQueueLength: 1
+    pollingInterval: 30
+    cooldownPeriod: 600
+  # 1h grace period during pod termination — protect in-flight Gemini calls.
+  terminationGracePeriodSeconds: 3600
+  pdb:
+    # Never voluntarily evict an AI pod (node drain waits until it finishes).
+    maxUnavailable: 0
+
+# ---------------------------------------------------------------------------
+# Migrate Job — pre-upgrade Helm hook
+# ---------------------------------------------------------------------------
+migrate:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  backoffLimit: 2
+
+# ---------------------------------------------------------------------------
+# CronJobs (daily/weekly tasks). The default scheduler pod only fires the
+# every-minute jobs (Discord automations, orchestrator dispatch, activity
+# log flush) — everything else here runs as a native k8s CronJob.
+# ---------------------------------------------------------------------------
+cronjobs:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobs:
+    - name: fetch-auctions
+      schedule: "0 * * * *"
+      command: ["app:fetch-auctions"]
+    - name: refresh-all-characters
+      schedule: "0 4 * * *"
+      command: ["characters:refresh-all"]
+    - name: generate-events
+      schedule: "0 0 * * *"
+      command: ["app:generate-events"]
+    - name: weekly-reset-eu
+      schedule: "1 4 * * 3"
+      command: ["weekly:reset", "eu"]
+    - name: weekly-reset-us
+      schedule: "1 15 * * 2"
+      command: ["weekly:reset", "us"]
+    - name: weekly-reset-kr
+      schedule: "1 2 * * 3"
+      command: ["weekly:reset", "kr"]
+    - name: weekly-reset-tw
+      schedule: "1 2 * * 3"
+      command: ["weekly:reset", "tw"]
+    - name: purge-old-logs
+      schedule: "0 5 * * *"
+      command: ["logs:purge"]
+    - name: purge-user-activity
+      schedule: "15 5 * * *"
+      command: ["user-activity:purge"]
+    - name: ai-cleanup-payloads
+      schedule: "30 3 * * *"
+      command: ["ai:cleanup-payloads"]
+    - name: prune-auction-history
+      schedule: "45 3 * * *"
+      command: ["auctions:prune"]
+
+# ---------------------------------------------------------------------------
+# Non-sensitive env (populated into ConfigMap). Sensitive keys live in the
+# blastr-env sealed Secret — see templates/secret.yaml for the schema.
+# ---------------------------------------------------------------------------
+config:
+  APP_NAME: "BlastR"
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: https://blastr.pro
+  APP_LOCALE: en
+  APP_FALLBACK_LOCALE: en
+  APP_FAKER_LOCALE: en_US
+  APP_MAINTENANCE_DRIVER: file
+  BCRYPT_ROUNDS: "12"
+
+  LOG_CHANNEL: stack
+  LOG_STACK: "stderr,sentry_logs"
+  LOG_DEPRECATIONS_CHANNEL: "null"
+  LOG_LEVEL: info
+
+  DB_CONNECTION: mysql
+  # DB_HOST/PORT/DATABASE/USERNAME provided per-environment (managed MySQL
+  # host belongs in the Secret for url-encoding-safety, but you can mirror
+  # the non-secret bits here if you prefer).
+
+  BROADCAST_CONNECTION: log
+  CACHE_STORE: redis
+  QUEUE_CONNECTION: redis
+
+  REDIS_CLIENT: phpredis
+  REDIS_QUEUE_RETRY_AFTER: "1500"
+
+  SESSION_DRIVER: database
+  SESSION_LIFETIME: "120"
+  SESSION_ENCRYPT: "false"
+  SESSION_PATH: /
+  SESSION_DOMAIN: .blastr.pro
+  SESSION_SECURE_COOKIE: "true"
+
+  FILESYSTEM_DISK: s3
+  RAID_PAYLOAD_DISK: s3
+
+  AWS_DEFAULT_REGION: fra1
+  AWS_BUCKET: blastr-storage
+  AWS_ENDPOINT: https://fra1.digitaloceanspaces.com
+  AWS_URL: https://cdn.blastr.pro
+  AWS_USE_PATH_STYLE_ENDPOINT: "false"
+
+  MAIL_MAILER: smtp
+  MAIL_FROM_ADDRESS: "noreply@blastr.pro"
+  MAIL_FROM_NAME: BlastR
+  MAIL_SCHEME: "tls"
+
+  ADMIN_SUBDOMAIN: admin
+
+  BATTLE_NET_REDIRECT_URI: https://blastr.pro/auth/battlenet/callback
+
+  DISCORD_REDIRECT_URI: https://blastr.pro/auth/discord/callback
+
+  GEMINI_PRO_MODEL: gemini-3.1-flash-lite
+  GEMINI_THINKING_LEVEL: high
+
+  SENTRY_ENABLE_LOGS: "true"
+  SENTRY_SEND_DEFAULT_PII: "false"
+  SENTRY_TRACES_SAMPLE_RATE: "0.1"
+
+  OCTANE_SERVER: frankenphp
+  # OCTANE_WORKERS interpolated at runtime from web.octaneWorkers.
+
+# Sensitive keys — referenced by `envFrom: secretRef` in every Deployment.
+# Created out-of-band via `kubeseal` and applied as a SealedSecret.
+# Do NOT put values here; this is just the documented contract.
+secret:
+  name: blastr-env
+  keys:
+    - APP_KEY
+    - DB_HOST
+    - DB_PORT
+    - DB_DATABASE
+    - DB_USERNAME
+    - DB_PASSWORD
+    - REDIS_HOST
+    - REDIS_PORT
+    - REDIS_PASSWORD
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - BATTLE_NET_CLIENT_ID
+    - BATTLE_NET_CLIENT_SECRET
+    - DISCORD_PUBLIC_KEY
+    - DISCORD_BOT_TOKEN
+    - DISCORD_CLIENT_ID
+    - DISCORD_CLIENT_SECRET
+    - DISCORD_WEBHOOK_URL
+    - WCL_CLIENT_ID
+    - WCL_CLIENT_SECRET
+    - GEMINI_API_KEY
+    - MAIL_USERNAME
+    - MAIL_PASSWORD
+    - MAIL_HOST
+    - MAIL_PORT
+    - ADMIN_ACCESS_KEY
+    - ADMIN_DOMAIN
+    - GHOST_USER_ID
+    - SENTRY_LARAVEL_DSN
+    - VITE_SENTRY_DSN

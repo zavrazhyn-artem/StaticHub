@@ -1,0 +1,53 @@
+{{- range .Values.cronjobs.jobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "blastr.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "blastr.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: cronjob
+    cron-task: {{ .name }}
+spec:
+  schedule: {{ .schedule | quote }}
+  # All scheduled commands have ->onOneServer() locks via cache, so even if
+  # we ever migrated to concurrencyPolicy: Allow a duplicate wouldn't double-
+  # fire. Keep Forbid for k8s-native safety.
+  concurrencyPolicy: {{ $.Values.cronjobs.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ $.Values.cronjobs.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $.Values.cronjobs.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 600
+      template:
+        metadata:
+          labels:
+            {{- include "blastr.selectorLabels" $ | nindent 12 }}
+            app.kubernetes.io/component: cronjob
+            cron-task: {{ .name }}
+        spec:
+          restartPolicy: Never
+          {{- include "blastr.imagePullSecrets" $ | nindent 10 }}
+          nodeSelector:
+            pool: {{ $.Values.nodePools.core }}
+          containers:
+            - name: cron
+              image: {{ include "blastr.image" $ }}
+              imagePullPolicy: {{ $.Values.image.pullPolicy }}
+              # Bypass entrypoint dispatch — go straight to artisan with
+              # the per-cronjob command list. This skips prepare_runtime
+              # (config:cache rebuild) which is fine for short-lived jobs.
+              command: ["php", "artisan"]
+              args:
+                {{- range .command }}
+                - {{ . | quote }}
+                {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ include "blastr.fullname" $ }}-env
+                - secretRef:
+                    name: {{ $.Values.secret.name }}
+              resources:
+                {{- toYaml $.Values.cronjobs.resources | nindent 16 }}
+{{- end }}
