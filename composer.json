@@ -28,7 +28,6 @@
         "sentry/sentry-laravel": "^4.24",
         "socialiteproviders/battlenet": "^4.1",
         "socialiteproviders/discord": "^4.2",
-        "spatie/laravel-backup": "^10.2",
         "spatie/laravel-data": "^4.20",
         "symfony/yaml": "^8.0"
     },

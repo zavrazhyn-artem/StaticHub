@@ -1,20 +1,29 @@
 # =============================================================================
-# Local dev — same image as production, FrankenPHP serves everything.
+# Local dev compose — FrankenPHP serves PHP (no nginx + php-fpm split anymore).
+# Same image as production (docker/app/Dockerfile, target: app), only volume
+# mounts and the php-dev.ini override (validate_timestamps=1) differ from prod.
 #
-# No nginx, no php-fpm, no separate mysql/redis (we use DO Managed via SSH
-# tunnel for both). Source code is bind-mounted over the image so edits are
-# live; opcache.validate_timestamps is on in dev so PHP picks them up.
+# Local mysql + redis run alongside the app — production has the same containers
+# decommissioned in favour of DO Managed MySQL + Valkey, but local development
+# stays self-contained so you can hack offline without an SSH tunnel.
 #
-# Three services, one image:
-#   app       → FrankenPHP web server (Octane workers)
+# Five services, three identical images:
+#   app       → FrankenPHP web server (Octane workers, ports 80/443)
 #   worker    → supervisord managing per-queue queue:work processes
 #   scheduler → php artisan schedule:work
+#   mysql     → MySQL 8.4 (matches prod managed version semantics)
+#   redis     → Redis 7 (Valkey is wire-compatible — same client code)
 #
 # First-time setup:
 #   docker compose build
 #   docker compose up -d
 #   docker compose exec app php artisan migrate --seed
 # =============================================================================
+
+# Lock the project name so docker-compose-managed volumes are predictable
+# regardless of what the cwd folder is called. All named volumes get the
+# `blastr_` prefix.
+name: blastr
 
 x-app-defaults: &app-defaults
   image: blastr-app:dev
@@ -24,6 +33,11 @@ x-app-defaults: &app-defaults
     target: app
   restart: unless-stopped
   env_file: .env
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
   networks:
     - app_network
   volumes:
@@ -36,12 +50,15 @@ x-app-defaults: &app-defaults
     - node_build:/var/www/html/public/build
     # Dev PHP overrides: opcache.validate_timestamps=1, display_errors=On.
     - ./docker/app/php-dev.ini:/usr/local/etc/php/conf.d/99-dev.ini:ro
+    # Dev FrankenPHP config — adds inotify-based worker auto-reload on PHP
+    # file changes. Prod image bakes the no-watch Caddyfile; this mount
+    # only applies in local docker-compose.
+    - ./docker/app/Caddyfile.dev:/etc/frankenphp/Caddyfile:ro
 
 services:
 
   # ---------------------------------------------------------------------------
   # App — FrankenPHP HTTP server with Laravel Octane workers.
-  # Same image as production; only the volume mounts + dev php.ini differ.
   # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
@@ -80,6 +97,61 @@ services:
     command: ["scheduler"]
 
   # ---------------------------------------------------------------------------
+  # MySQL — local dev DB. Production uses DO Managed MySQL via SSH tunnel.
+  # ---------------------------------------------------------------------------
+  mysql:
+    container_name: blastr_mysql
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE:      "${DB_DATABASE}"
+      MYSQL_USER:          "${DB_USERNAME}"
+      MYSQL_PASSWORD:      "${DB_PASSWORD}"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+      - --sort-buffer-size=4M
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Redis — local dev cache/queue. Production uses DO Managed Valkey via VPC.
+  # ---------------------------------------------------------------------------
+  redis:
+    container_name: blastr_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass "${REDIS_PASSWORD}"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
   # Cloudflared tunnel — exposes local.blastr.pro through CF to this app.
   # ---------------------------------------------------------------------------
   cloudflared:
@@ -101,3 +173,10 @@ networks:
 volumes:
   vendor:
   node_build:
+  # mysql_data was created out-of-band by `docker volume create blastr_mysql_data`
+  # during the migration from the old `statichub_*` prefix. Marking it external
+  # tells compose "use the existing volume, don't try to create/manage it".
+  mysql_data:
+    external: true
+    name: blastr_mysql_data
+  redis_data:

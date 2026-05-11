@@ -66,4 +66,12 @@ return [
         'pro_model' => env('GEMINI_PRO_MODEL', 'gemini-3.1-flash-lite'),
         'thinking_level' => env('GEMINI_THINKING_LEVEL', 'high'),
     ],
+
+    'raid_payloads' => [
+        // Disk used by RaidPayloadStorage. Default 's3' (DO Spaces) is the
+        // production-safe choice — required for multi-pod k8s where 'local'
+        // storage is pod-ephemeral. Override with RAID_PAYLOAD_DISK=local in
+        // local .env if you want payloads in storage/app/private/raid_payloads/.
+        'disk' => env('RAID_PAYLOAD_DISK', 's3'),
+    ],
 ];

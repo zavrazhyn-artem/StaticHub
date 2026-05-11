@@ -27,11 +27,10 @@
 
     encode zstd br gzip
 
-    # k8s liveness/readiness — short-circuit before PHP for cheap probes.
+    # k8s liveness — short-circuit before PHP, answers as long as Caddy is up.
+    # /healthz (readiness) deliberately falls through to PHP so it can verify
+    # DB + Redis reachability — see bootstrap/app.php.
     handle /up {
-        respond "OK" 200
-    }
-    handle /healthz {
         respond "OK" 200
     }
 

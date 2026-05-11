@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Analysis;
 
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 class RaidPayloadStorage
 {
-    private const DIR = 'raid_payloads';
-    private const DISK = 'local';
+    public const DIR = 'raid_payloads';
 
     public function store(int $reportId, string $content): void
     {
@@ -18,17 +18,18 @@ class RaidPayloadStorage
             throw new \RuntimeException("Failed to gzip payload for report {$reportId}");
         }
 
-        Storage::disk(self::DISK)->put($this->path($reportId), $compressed);
+        $this->disk()->put($this->path($reportId), $compressed);
     }
 
     public function read(int $reportId): ?string
     {
         $path = $this->path($reportId);
-        if (!Storage::disk(self::DISK)->exists($path)) {
+        $disk = $this->disk();
+        if (!$disk->exists($path)) {
             return null;
         }
 
-        $compressed = Storage::disk(self::DISK)->get($path);
+        $compressed = $disk->get($path);
         if ($compressed === null) {
             return null;
         }
@@ -39,20 +40,31 @@ class RaidPayloadStorage
 
     public function exists(int $reportId): bool
     {
-        return Storage::disk(self::DISK)->exists($this->path($reportId));
+        return $this->disk()->exists($this->path($reportId));
     }
 
     public function delete(int $reportId): bool
     {
         $path = $this->path($reportId);
-        if (!Storage::disk(self::DISK)->exists($path)) {
+        $disk = $this->disk();
+        if (!$disk->exists($path)) {
             return false;
         }
-        return Storage::disk(self::DISK)->delete($path);
+        return $disk->delete($path);
     }
 
     public function path(int $reportId): string
     {
         return self::DIR . '/' . $reportId . '.json.gz';
+    }
+
+    public function disk(): Filesystem
+    {
+        return Storage::disk($this->diskName());
+    }
+
+    public function diskName(): string
+    {
+        return config('services.raid_payloads.disk', 's3');
     }
 }

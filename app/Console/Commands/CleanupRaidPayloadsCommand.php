@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\TacticalReport;
+use App\Services\Analysis\RaidPayloadStorage;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class CleanupRaidPayloadsCommand extends Command
 {
@@ -16,14 +16,14 @@ class CleanupRaidPayloadsCommand extends Command
 
     protected $description = 'Delete raid payload files older than the cutoff (default 24h) so chat activation expires.';
 
-    public function handle(): int
+    public function handle(RaidPayloadStorage $storage): int
     {
         $hours = (int) $this->option('hours');
         $dryRun = (bool) $this->option('dry-run');
         $cutoff = now()->subHours($hours)->getTimestamp();
 
-        $disk = Storage::disk('local');
-        $files = $disk->files('raid_payloads');
+        $disk = $storage->disk();
+        $files = $disk->files(RaidPayloadStorage::DIR);
 
         $deleted = 0;
         $kept = 0;
@@ -48,7 +48,7 @@ class CleanupRaidPayloadsCommand extends Command
 
             // Lock the chat — file is gone, can't recreate cache.
             // Match by report id parsed from filename.
-            if (preg_match('#raid_payloads/(\d+)\.json\.gz$#', $path, $m)) {
+            if (preg_match('#' . preg_quote(RaidPayloadStorage::DIR, '#') . '/(\d+)\.json\.gz$#', $path, $m)) {
                 if (!$dryRun) {
                     TacticalReport::where('id', (int) $m[1])
                         ->whereNull('chat_activated_at')

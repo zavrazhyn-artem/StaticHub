@@ -5,7 +5,10 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\JsonResponse;
 
 use App\Http\Middleware\HasStatic;
 use App\Http\Middleware\EnsureUserHasStatic;
@@ -27,6 +30,28 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::domain($adminDomain)
                 ->middleware('web')
                 ->group(base_path('routes/admin.php'));
+
+            // k8s readiness probe: verifies DB + Redis are reachable. Pod is
+            // pulled from Service rotation on 503 until the next probe passes.
+            // /up (built-in via health: option) remains the liveness probe —
+            // it answers as long as PHP itself is alive, regardless of deps.
+            Route::get('/healthz', function () {
+                $checks = ['db' => false, 'redis' => false];
+                try {
+                    DB::connection()->getPdo();
+                    $checks['db'] = true;
+                } catch (\Throwable $e) {
+                    $checks['db'] = $e->getMessage();
+                }
+                try {
+                    Cache::store('redis')->put('_healthz', 1, 1);
+                    $checks['redis'] = true;
+                } catch (\Throwable $e) {
+                    $checks['redis'] = $e->getMessage();
+                }
+                $ok = $checks['db'] === true && $checks['redis'] === true;
+                return new JsonResponse(['ok' => $ok, 'checks' => $checks], $ok ? 200 : 503);
+            });
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

@@ -28,7 +28,7 @@ echo "📦 3. Збираємо імейджі..."
 # Створюємо BuildKit builder з обмеженим паралелізмом (якщо ще не існує)
 if ! docker buildx inspect blastr-builder >/dev/null 2>&1; then
   docker buildx create --name blastr-builder \
-    --config docker/production/buildkitd.toml \
+    --config docker/app/buildkitd.toml \
     --use
 else
   docker buildx use blastr-builder

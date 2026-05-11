@@ -18,16 +18,29 @@ FROM composer:2.8 AS composer-deps
 WORKDIR /app
 
 # Lock-file first so the dep install layer caches across source-only changes.
+# --ignore-platform-reqs because the composer:2.8 base lacks ext-pcntl (only
+# needed at runtime, not during dependency resolution). The runtime image
+# has all required extensions installed.
 COPY composer.json composer.lock ./
 RUN composer install \
         --no-dev \
         --no-scripts \
         --no-interaction \
         --prefer-dist \
-        --no-autoloader
+        --no-autoloader \
+        --ignore-platform-reqs
 
 # Then full source for autoload optimization.
 COPY . .
+
+# Clear stale Laravel package + config caches from the host before regen.
+# Without this, bootstrap/cache/packages.php carries dev-only service
+# providers (e.g. laravel/pail) baked in locally, then Octane fails at
+# boot because those packages aren't in vendor/ in the --no-dev image.
+# The fresh `package:discover` (run by the post-autoload-dump composer
+# script) regenerates packages.php from the actual installed vendor tree.
+RUN rm -f bootstrap/cache/*.php
+
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
 # -----------------------------------------------------------------------------
@@ -103,6 +116,12 @@ RUN mkdir -p \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+# Bake route + view caches at image build — these are env-independent so
+# safe to freeze. config:cache is NOT baked here (it would freeze build-time
+# env values); it runs at entrypoint for prod-like environments where the
+# pod's env from k8s Secret is the source of truth. Saves ~300ms cold start.
+RUN php artisan route:cache && php artisan view:cache
 
 COPY --chmod=755 docker/app/entrypoint.sh /usr/local/bin/entrypoint.sh
 
