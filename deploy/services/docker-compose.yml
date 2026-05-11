@@ -12,6 +12,17 @@
 
 name: blastr-services
 
+# Cap container stdout/stderr on the droplet's root disk. Without this,
+# json-file (Docker default) writes unbounded to /var/lib/docker/containers/
+# and a chatty container can fill the 25GB root SSD in days. Postgres and
+# Loki data already live on separate Block Storage volumes; this protects
+# the OS disk from being killed by app logs.
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   # ---------------------------------------------------------------------------
@@ -22,6 +33,7 @@ services:
     image: caddy:2.8-alpine
     container_name: blastr_obs_caddy
     restart: unless-stopped
+    logging: *default-logging
     ports:
       - "443:443"
       - "80:80"
@@ -44,6 +56,7 @@ services:
     image: postgres:16-alpine
     container_name: blastr_obs_postgres
     restart: unless-stopped
+    logging: *default-logging
     environment:
       POSTGRES_DB: glitchtip
       POSTGRES_USER: glitchtip
@@ -63,6 +76,7 @@ services:
     image: redis:7-alpine
     container_name: blastr_obs_redis
     restart: unless-stopped
+    logging: *default-logging
     networks:
       - obs_network
     healthcheck:
@@ -75,6 +89,7 @@ services:
     image: glitchtip/glitchtip:v4.2
     container_name: blastr_obs_glitchtip_web
     restart: unless-stopped
+    logging: *default-logging
     environment:
       DATABASE_URL: postgres://glitchtip:${POSTGRES_PASSWORD}@glitchtip-postgres:5432/glitchtip
       REDIS_URL: redis://glitchtip-redis:6379/0
@@ -98,6 +113,7 @@ services:
     image: glitchtip/glitchtip:v4.2
     container_name: blastr_obs_glitchtip_worker
     restart: unless-stopped
+    logging: *default-logging
     command: ./bin/run-celery-with-beat.sh
     environment:
       DATABASE_URL: postgres://glitchtip:${POSTGRES_PASSWORD}@glitchtip-postgres:5432/glitchtip
@@ -121,6 +137,7 @@ services:
     image: grafana/loki:3.2.1
     container_name: blastr_obs_loki
     restart: unless-stopped
+    logging: *default-logging
     ports:
       # Exposed on VPC interface only — Promtail in DOKS connects via private IP.
       - "${VPC_INTERFACE_IP}:3100:3100"
@@ -138,6 +155,7 @@ services:
     image: grafana/grafana:11.3.0
     container_name: blastr_obs_grafana
     restart: unless-stopped
+    logging: *default-logging
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
