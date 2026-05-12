@@ -65,7 +65,7 @@ scheduler:
       # Scheduler boots full Laravel app (config:cache + schedule:work) so it
       # carries opcache (256M) + JIT buffer (128M) + Laravel runtime (~150M).
       # 256Mi was OOMKilled within 2 min; 768Mi gives comfortable headroom.
-      cpu: 500m
+      cpu: 1000m
       memory: 768Mi
 
 # ---------------------------------------------------------------------------

@@ -58,7 +58,11 @@ data:
     clients:
       # Route via Caddy HTTPS — direct VPC routing not available between
       # this k8s cluster and the service droplet (different VPC).
+      # CF-Access headers authenticate this machine client past CF Zero Trust.
       - url: https://obs.blastr.pro/loki/api/v1/push
+        headers:
+          CF-Access-Client-Id: "${CF_ACCESS_CLIENT_ID}"
+          CF-Access-Client-Secret: "${CF_ACCESS_CLIENT_SECRET}"
 
     scrape_configs:
       # Use static file glob instead of kubernetes_sd_configs.
@@ -73,17 +77,28 @@ data:
               __path__: /var/log/pods/blastr_*/*/*.log
         pipeline_stages:
           - cri: {}
-        relabel_configs:
-          # Extract pod name and component from the file path.
+          # Extract pod name and container from the per-file `filename` label.
+          # relabel_configs can't do this — filename is added by Promtail
+          # after target discovery; pipeline_stages run per log entry.
           # Path format: /var/log/pods/<ns>_<pod-name>_<uid>/<container>/<n>.log
-          - source_labels: [__path__]
-            regex: '/var/log/pods/[^_]+_([^_]+)_[^/]+/([^/]+)/.*'
-            replacement: '$1'
-            target_label: pod
-          - source_labels: [__path__]
-            regex: '/var/log/pods/[^_]+_[^_]+_[^/]+/([^/]+)/.*'
-            replacement: '$1'
-            target_label: component
+          - regex:
+              source: filename
+              expression: '/var/log/pods/[^_]+_(?P<pod>[^_]+)_[^/]+/(?P<container>[^/]+)/.*'
+          - labels:
+              pod:
+              container:
+          # Extract app name from pod: blastr-web-abc123-xyz → web
+          - regex:
+              source: pod
+              expression: 'blastr-(?P<app>.+)-[a-z0-9]{6,12}-[a-z0-9]{4,6}'
+          - labels:
+              app:
+          # Extract Laravel log level (ERROR/WARNING/INFO/DEBUG) as a label.
+          # Laravel format: "[timestamp] env.LEVEL: message"
+          - regex:
+              expression: '.*\.(?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL|ALERT|EMERGENCY):'
+          - labels:
+              level:
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -108,6 +123,18 @@ spec:
           image: grafana/promtail:3.2.1
           args:
             - -config.file=/etc/promtail/promtail.yaml
+            - -config.expand-env=true
+          env:
+            - name: CF_ACCESS_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: promtail-cf-access
+                  key: client-id
+            - name: CF_ACCESS_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: promtail-cf-access
+                  key: client-secret
           volumeMounts:
             - name: config
               mountPath: /etc/promtail

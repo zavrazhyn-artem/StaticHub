@@ -201,6 +201,21 @@
                     Grafana / Logs
                     <span class="material-symbols-outlined" style="font-size: 14px; margin-left: auto;">open_in_new</span>
                 </a>
+                <a href="https://k8s.blastr.pro" target="_blank" class="admin-nav-link">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">dns</span>
+                    Kubernetes
+                    <span class="material-symbols-outlined" style="font-size: 14px; margin-left: auto;">open_in_new</span>
+                </a>
+                <a href="https://db.blastr.pro" target="_blank" class="admin-nav-link">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">database</span>
+                    Adminer (MySQL)
+                    <span class="material-symbols-outlined" style="font-size: 14px; margin-left: auto;">open_in_new</span>
+                </a>
+                <a href="https://redis.blastr.pro" target="_blank" class="admin-nav-link">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">memory</span>
+                    RedisInsight
+                    <span class="material-symbols-outlined" style="font-size: 14px; margin-left: auto;">open_in_new</span>
+                </a>
             </nav>
 
             <div style="margin-top: auto; padding-top: 2rem;">
