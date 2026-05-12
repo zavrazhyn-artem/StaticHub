@@ -30,8 +30,10 @@ class AdminDashboardController extends Controller
         ];
 
         $toolLinks = [
-            ['name' => 'Laravel Horizon', 'url' => '/horizon', 'description' => 'Queue monitoring dashboard'],
-            ['name' => 'Log Viewer', 'url' => '/log-viewer', 'description' => 'Application log browser'],
+            ['name' => 'Laravel Pulse', 'url' => '/pulse', 'description' => 'Real-time performance metrics', 'icon' => 'monitor_heart'],
+            ['name' => 'Laravel Horizon', 'url' => '/horizon', 'description' => 'Queue monitoring dashboard', 'icon' => 'queue'],
+            ['name' => 'GlitchTip', 'url' => 'https://obs.blastr.pro', 'description' => 'Error tracking & alerts', 'icon' => 'bug_report'],
+            ['name' => 'Grafana / Logs', 'url' => 'https://obs.blastr.pro/grafana/', 'description' => 'Pod logs via Loki', 'icon' => 'area_chart'],
         ];
 
         return view('admin.dashboard', compact('metrics', 'toolLinks'));

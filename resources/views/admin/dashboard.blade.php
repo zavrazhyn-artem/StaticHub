@@ -54,12 +54,7 @@
             <a href="{{ $tool['url'] }}" target="_blank"
                class="admin-card" style="padding: 1.25rem; text-decoration: none; display: flex; align-items: center; gap: 1rem; transition: border-color 0.15s;"
                onmouseover="this.style.borderColor='rgba(239,68,68,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">
-                <span class="material-symbols-outlined admin-primary" style="font-size: 28px;">
-                    @if(str_contains($tool['name'], 'Pulse'))monitor_heart
-                    @elseif(str_contains($tool['name'], 'Horizon'))queue
-                    @else description
-                    @endif
-                </span>
+                <span class="material-symbols-outlined admin-primary" style="font-size: 28px;">{{ $tool['icon'] ?? 'open_in_new' }}</span>
                 <div>
                     <div style="font-weight: 600; color: #e0e0e0;">{{ $tool['name'] }}</div>
                     <div style="font-size: 0.8rem; color: #888;">{{ $tool['description'] }}</div>

@@ -263,6 +263,8 @@ config:
   SENTRY_SEND_DEFAULT_PII: "false"
   SENTRY_TRACES_SAMPLE_RATE: "0.1"
 
+  PULSE_ENABLED: "true"
+
   OCTANE_SERVER: frankenphp
   # OCTANE_WORKERS interpolated at runtime from web.octaneWorkers.
 
