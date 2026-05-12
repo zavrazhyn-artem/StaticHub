@@ -1,6 +1,6 @@
 # =============================================================================
 # Caddy config for the service droplet — terminates TLS for obs.blastr.pro
-# and reverse-proxies to GlitchTip + Grafana.
+# and reverse-proxies to GlitchTip + Grafana + admin tools.
 #
 # TLS cert: Cloudflare Origin wildcard *.blastr.pro mounted from
 # /etc/ssl/cloudflare/ on the host (same cert reused across k8s + service).
@@ -14,6 +14,21 @@
 # HTTP → HTTPS redirect (CF proxy also handles this, belt-and-suspenders).
 :80 {
     redir https://{host}{uri} permanent
+}
+
+k8s.blastr.pro:443 {
+    tls /etc/ssl/cloudflare/cloudflare-origin.fullchain.pem /etc/ssl/cloudflare/cloudflare-origin.privkey.pem
+    reverse_proxy headlamp:4466
+}
+
+db.blastr.pro:443 {
+    tls /etc/ssl/cloudflare/cloudflare-origin.fullchain.pem /etc/ssl/cloudflare/cloudflare-origin.privkey.pem
+    reverse_proxy adminer:8080
+}
+
+redis.blastr.pro:443 {
+    tls /etc/ssl/cloudflare/cloudflare-origin.fullchain.pem /etc/ssl/cloudflare/cloudflare-origin.privkey.pem
+    reverse_proxy redisinsight:5540
 }
 
 obs.blastr.pro:443 {

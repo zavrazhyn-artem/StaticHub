@@ -264,6 +264,13 @@ config:
   SENTRY_TRACES_SAMPLE_RATE: "0.1"
 
   PULSE_ENABLED: "true"
+  # Array driver avoids PHP serialize/unserialize of Collection/stdClass objects
+  # through Redis, which fails in FrankenPHP worker mode (incomplete object error).
+  # Each dashboard poll re-queries the DB — acceptable at this traffic level.
+  PULSE_CACHE_DRIVER: array
+  # Redis ingest buffers pulse records in Redis streams and flushes to DB in
+  # batch, avoiding per-request DB writes in Octane long-running workers.
+  PULSE_INGEST_DRIVER: redis
 
   OCTANE_SERVER: frankenphp
   # OCTANE_WORKERS interpolated at runtime from web.octaneWorkers.

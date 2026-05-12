@@ -123,7 +123,6 @@ final class RosterCompilerService
         ];
 
         $weeklyPatch = [
-            'weekly_runs_count'   => $this->instanceData->resolveWeeklyRunsCount($mplus),
             'week_regular_mythic' => $weekRegularMythic,
             'raids'               => $this->instanceData->resolveWeeklyRaidKills($achStatsIndex),
             'vault_world_runs'    => $this->vaultData->resolveVaultWorldRuns($achStats, $snapshot, $weeklyQuests, $preyWeekly),
@@ -177,7 +176,7 @@ final class RosterCompilerService
         $weekRegularMythic = (int) ($weeklyExisting['week_regular_mythic'] ?? 0);
 
         $weeklyPatch = [
-            'weekly_runs_count' => $this->instanceData->resolveWeeklyRunsCount([], $rio),
+            'weekly_runs_count' => $this->instanceData->resolveWeeklyRunsCount($rio),
             'vault_weekly_runs' => $this->vaultData->resolveVaultWeeklyRuns($rio, $weekRegularMythic),
         ];
 

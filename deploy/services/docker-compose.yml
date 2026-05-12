@@ -172,6 +172,45 @@ services:
     networks:
       - obs_network
 
+  # ---------------------------------------------------------------------------
+  # Headlamp — Kubernetes web UI. Connects to DOKS via kubeconfig.
+  # Accessible at k8s.blastr.pro (CF Access protected).
+  # ---------------------------------------------------------------------------
+  headlamp:
+    image: ghcr.io/headlamp-k8s/headlamp:latest
+    container_name: blastr_obs_headlamp
+    restart: unless-stopped
+    logging: *default-logging
+    command: ["-plugins-dir=/headlamp/plugins", "-kubeconfig=/tmp/kubeconfig"]
+    volumes:
+      - ./kubeconfig:/tmp/kubeconfig:ro
+    networks:
+      - obs_network
+
+  # ---------------------------------------------------------------------------
+  # Adminer — lightweight web UI for DO Managed MySQL.
+  # Accessible at db.blastr.pro (CF Access protected).
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:latest
+    container_name: blastr_obs_adminer
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - obs_network
+
+  # ---------------------------------------------------------------------------
+  # RedisInsight — web UI for DO Managed Valkey.
+  # Accessible at redis.blastr.pro (CF Access protected).
+  # ---------------------------------------------------------------------------
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: blastr_obs_redisinsight
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - obs_network
+
 networks:
   obs_network:
     driver: bridge

@@ -50,12 +50,9 @@ final class InstanceDataService
         return $rating !== null ? (float) $rating : null;
     }
 
-    public function resolveWeeklyRunsCount(array $mplus, array $rio = [], int $minLevel = 10): int
+    public function resolveWeeklyRunsCount(array $rio = [], int $minLevel = 10): int
     {
-        $runs = $rio['mythic_plus_weekly_highest_level_runs']
-            ?? $mplus['weekly_best_runs']
-            ?? $mplus['current_period_best_runs']
-            ?? [];
+        $runs = $rio['mythic_plus_weekly_highest_level_runs'] ?? [];
 
         if (!is_array($runs)) {
             return 0;
