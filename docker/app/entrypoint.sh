@@ -27,9 +27,14 @@ prepare_runtime() {
     case "${APP_ENV:-production}" in
         local|development|testing)
             php artisan config:clear >/dev/null 2>&1 || true
+            php artisan route:clear >/dev/null 2>&1 || true
             ;;
         *)
             php artisan config:cache >/dev/null
+            # Route:cache must run AFTER config:cache so Route::domain() resolves
+            # APP_URL and ADMIN_SUBDOMAIN from the actual pod env (k8s Secret),
+            # not the build-time defaults (admin.localhost).
+            php artisan route:cache >/dev/null
             ;;
     esac
 }

@@ -121,11 +121,10 @@ RUN mkdir -p \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Bake route + view caches at image build — these are env-independent so
-# safe to freeze. config:cache is NOT baked here (it would freeze build-time
-# env values); it runs at entrypoint for prod-like environments where the
-# pod's env from k8s Secret is the source of truth. Saves ~300ms cold start.
-RUN php artisan route:cache && php artisan view:cache
+# Bake view cache at image build — env-independent, safe to freeze.
+# route:cache runs at entrypoint (after config:cache) because Route::domain()
+# for the admin subdomain depends on APP_URL / ADMIN_SUBDOMAIN from the pod env.
+RUN php artisan view:cache
 
 COPY --chmod=755 docker/app/entrypoint.sh /usr/local/bin/entrypoint.sh
 
