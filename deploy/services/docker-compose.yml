@@ -62,8 +62,9 @@ services:
       POSTGRES_USER: glitchtip
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # DO Block Storage volume mounted at /mnt/glitchtip-pg on host.
-      - /mnt/glitchtip-pg:/var/lib/postgresql/data
+      # DO Block Storage volume mounted at /mnt/glitchtip_pg on host.
+      # Note: DO auto-mounts with underscores (not hyphens).
+      - /mnt/glitchtip_pg:/var/lib/postgresql/data
     networks:
       - obs_network
     healthcheck:
@@ -143,7 +144,7 @@ services:
       - "${VPC_INTERFACE_IP}:3100:3100"
     volumes:
       - ./loki-config.yml:/etc/loki/local-config.yaml:ro
-      - /mnt/loki:/loki
+      - /mnt/loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - obs_network
