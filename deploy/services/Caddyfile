@@ -19,11 +19,17 @@
 obs.blastr.pro:443 {
     tls /etc/ssl/cloudflare/cloudflare-origin.fullchain.pem /etc/ssl/cloudflare/cloudflare-origin.privkey.pem
 
-    # GlitchTip at root.
     handle /grafana/* {
         reverse_proxy grafana:3000
     }
 
+    # Loki push endpoint — used by Promtail DaemonSet in DOKS.
+    # Pods reach this via HTTPS since direct VPC routing is not available.
+    handle /loki/* {
+        reverse_proxy loki:3100
+    }
+
+    # GlitchTip at root.
     handle {
         reverse_proxy glitchtip-web:8000
     }

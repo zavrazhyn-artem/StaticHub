@@ -56,34 +56,34 @@ data:
       filename: /run/promtail/positions.yaml
 
     clients:
-      # Replace 10.114.0.2 with the service droplet's private
-      # VPC IP (10.x.x.x). Loki listens only on that interface.
-      - url: http://10.114.0.2:3100/loki/api/v1/push
+      # Route via Caddy HTTPS — direct VPC routing not available between
+      # this k8s cluster and the service droplet (different VPC).
+      - url: https://obs.blastr.pro/loki/api/v1/push
 
     scrape_configs:
-      - job_name: kubernetes-pods
-        kubernetes_sd_configs:
-          - role: pod
+      # Use static file glob instead of kubernetes_sd_configs.
+      # kubernetes_sd in Promtail 3.2 fails to discover targets on DOKS despite
+      # correct RBAC (confirmed: API returns 42+ pods but SD shows 0/0).
+      # File glob is simpler and reliable: directly tail CRI log files by namespace.
+      - job_name: blastr-pods
+        static_configs:
+          - targets: [localhost]
+            labels:
+              namespace: blastr
+              __path__: /var/log/pods/blastr_*/*/*.log
         pipeline_stages:
           - cri: {}
         relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_node_name]
-            target_label: node
-          - source_labels: [__meta_kubernetes_namespace]
-            target_label: namespace
-          - source_labels: [__meta_kubernetes_pod_name]
+          # Extract pod name and component from the file path.
+          # Path format: /var/log/pods/<ns>_<pod-name>_<uid>/<container>/<n>.log
+          - source_labels: [__path__]
+            regex: '/var/log/pods/[^_]+_([^_]+)_[^/]+/([^/]+)/.*'
+            replacement: '$1'
             target_label: pod
-          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+          - source_labels: [__path__]
+            regex: '/var/log/pods/[^_]+_[^_]+_[^/]+/([^/]+)/.*'
+            replacement: '$1'
             target_label: component
-          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
-            target_label: app
-          - source_labels: [__meta_kubernetes_pod_container_name]
-            target_label: container
-          - action: replace
-            replacement: /var/log/pods/*$1/*.log
-            separator: /
-            source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
-            target_label: __path__
 ---
 apiVersion: apps/v1
 kind: DaemonSet
