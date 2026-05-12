@@ -14,6 +14,7 @@ use App\Models\CharacterWeeklySnapshot;
 use App\Models\Specialization;
 use App\Models\StaticGroup;
 use App\Models\User;
+use App\Services\Cache\StaticCacheService;
 use App\Services\Loot\LootHistoryBackfillService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -21,11 +22,26 @@ use Illuminate\Support\Facades\Auth;
 
 class RosterService
 {
+    public function __construct(
+        protected StaticCacheService $cache,
+    ) {}
+
     /**
      * Build the full roster index payload for a static group.
      * Always returns live (current week) data. Historical snapshots are loaded via API.
      */
     public function buildRosterIndexPayload(StaticGroup $static): array
+    {
+        $userId = (int) (Auth::id() ?? 0);
+        return $this->cache->rememberForStatic(
+            $static->id,
+            "roster:index:{$static->id}:user:{$userId}",
+            600,
+            fn () => $this->computeRosterIndexPayload($static)
+        );
+    }
+
+    private function computeRosterIndexPayload(StaticGroup $static): array
     {
         $members = $static->members()
             ->with([
@@ -323,6 +339,8 @@ class RosterService
         // and only recipient_name to identify them. One-shot here keeps
         // history consistent without a periodic sweep.
         app(LootHistoryBackfillService::class)->backfillForCharacter($character, $staticId);
+
+        $this->cache->flushStatic($staticId);
     }
 
     /**
@@ -394,6 +412,8 @@ class RosterService
         ]);
 
         $static->update(['owner_id' => $newOwner->id]);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
@@ -408,6 +428,8 @@ class RosterService
         }
 
         $static->members()->detach($user->id);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
@@ -428,6 +450,8 @@ class RosterService
         $static->members()->updateExistingPivot($user->id, [
             'access_role' => $accessRole,
         ]);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
@@ -438,6 +462,8 @@ class RosterService
         $static->members()->updateExistingPivot($user->id, [
             'roster_status' => $rosterStatus,
         ]);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
@@ -469,6 +495,8 @@ class RosterService
         }
 
         $this->dispatchSyncForAttachedCharacters($mainCharId, $raidingCharIds);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**

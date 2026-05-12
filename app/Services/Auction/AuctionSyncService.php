@@ -14,6 +14,7 @@ class AuctionSyncService
 {
     public function __construct(
         private readonly BlizzardGameDataApiService $blizzardApiService,
+        private readonly RecipePriceUpdateService $recipePriceUpdateService,
     ) {
     }
 
@@ -32,7 +33,10 @@ class AuctionSyncService
             throw new RuntimeException('No auctions found for tracked items.');
         }
 
-        return $this->bulkInsertPriceSnapshots($minPrices);
+        $insertedCount = $this->bulkInsertPriceSnapshots($minPrices);
+        $this->recipePriceUpdateService->refreshAfterSync($minPrices, now());
+
+        return $insertedCount;
     }
 
     /**

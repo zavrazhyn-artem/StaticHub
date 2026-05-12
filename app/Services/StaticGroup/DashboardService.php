@@ -11,6 +11,7 @@ use App\Helpers\SyncIntervalHelper;
 use App\Models\StaticGroup;
 use App\Models\Event;
 use App\Helpers\CurrencyHelper;
+use App\Services\Cache\StaticCacheService;
 
 class DashboardService
 {
@@ -22,6 +23,7 @@ class DashboardService
         protected SidebarPayloadService                         $sidebarPayloadService,
         protected \App\Services\Raid\EventPayloadService        $eventPayloadService,
         protected \App\Services\Roster\InstanceDataService      $instanceDataService,
+        protected StaticCacheService                            $cache,
     ) {}
 
     /**
@@ -300,6 +302,17 @@ class DashboardService
      * @return array
      */
     public function buildDashboardViewPayload(StaticGroup $static): array
+    {
+        $userId = (int) (auth()->id() ?? 0);
+        return $this->cache->rememberForStatic(
+            $static->id,
+            "dashboard:view:{$static->id}:user:{$userId}",
+            300,
+            fn () => $this->computeDashboardViewPayload($static)
+        );
+    }
+
+    private function computeDashboardViewPayload(StaticGroup $static): array
     {
         $data = $this->getDashboardData($static);
 

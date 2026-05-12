@@ -36,7 +36,12 @@ use Illuminate\Support\Carbon;
  */
 class Item extends Model
 {
-    protected $fillable = ['id', 'name', 'icon', 'quality', 'slot', 'source_slug', 'source_type', 'encounter_slug'];
+    protected $fillable = ['id', 'name', 'icon', 'quality', 'slot', 'source_slug', 'source_type', 'encounter_slug', 'last_price', 'last_price_at'];
+
+    protected $casts = [
+        'last_price' => 'integer',
+        'last_price_at' => 'datetime',
+    ];
 
     public function priceSnapshots(): HasMany
     {

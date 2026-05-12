@@ -8,6 +8,7 @@ use App\Helpers\CurrencyHelper;
 use App\Helpers\WclParserHelper;
 use App\Models\StaticGroup;
 use App\Services\Analysis\WclService;
+use App\Services\Cache\StaticCacheService;
 use App\Services\Discord\DiscordMessageService;
 use App\Services\Discord\DiscordWebhookService;
 use App\Services\Raid\RaidScheduleService;
@@ -21,6 +22,7 @@ class StaticSettingsService
         protected DiscordWebhookService $discordWebhookService,
         protected WclService            $wclService,
         protected DiscordCacheService   $discordCacheService,
+        protected StaticCacheService    $cache,
     ) {}
 
     public function buildScheduleSettingsPayload(StaticGroup $static): array
@@ -101,6 +103,8 @@ class StaticSettingsService
             'wcl_region'   => $guildInfo['region_slug'],
         ]);
 
+        $this->cache->flushStatic((int) $static->id);
+
         return ['success' => true, 'guild' => $guildInfo, 'error' => null];
     }
 
@@ -118,6 +122,8 @@ class StaticSettingsService
             'wcl_region'          => null,
             'automation_settings' => $automation,
         ]);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
@@ -285,6 +291,8 @@ class StaticSettingsService
         }
 
         $static->update($data);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**

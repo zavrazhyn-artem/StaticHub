@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace App\Services\StaticGroup;
 
-use App\Models\PriceSnapshot;
+use App\Models\Item;
 use App\Models\Recipe;
 use App\Models\StaticGroup;
+use App\Services\Cache\StaticCacheService;
 use Illuminate\Support\Collection;
 
 class ConsumableService
 {
+    private const REFERENCE_ITEM_POTION = 241308;
+    private const REFERENCE_ITEM_FLASK = 241320;
+
+    public function __construct(
+        private readonly StaticCacheService $cache,
+    ) {}
+
     /**
      * Orchestrator for building raid consumables data.
      */
@@ -18,16 +26,12 @@ class ConsumableService
     {
         $recipes = $this->fetchTargetRecipes();
 
-        // Collect all item IDs we need prices for (ingredients + reference items)
-        $ingredientItemIds = $recipes->flatMap(fn (Recipe $recipe) => $recipe->ingredients->pluck('item_id'));
-        $referenceItemIds = collect([241308, 241320]);
-        $allItemIds = $ingredientItemIds->merge($referenceItemIds)->unique()->values()->all();
+        $referencePriceMap = Item::query()->cachedPricesFor([
+            self::REFERENCE_ITEM_POTION,
+            self::REFERENCE_ITEM_FLASK,
+        ]);
 
-        // Single batch query for all prices
-        $priceMap = PriceSnapshot::query()->latestPricesForItems($allItemIds);
-
-        $recipes->each(function (Recipe $recipe) use ($static, $priceMap) {
-            $recipe->crafting_cost = $this->calculateRecipeCost($recipe, $priceMap);
+        $recipes->each(function (Recipe $recipe) use ($static) {
             $this->applyDisplayMetadata($recipe);
 
             $recipe->quantity = $static
@@ -36,8 +40,8 @@ class ConsumableService
         });
 
         $referencePrices = [
-            'individualPotionPrice' => $priceMap->get(241308, 0),
-            'individualFlaskPrice' => $priceMap->get(241320, 0),
+            'individualPotionPrice' => (int) $referencePriceMap->get(self::REFERENCE_ITEM_POTION, 0),
+            'individualFlaskPrice' => (int) $referencePriceMap->get(self::REFERENCE_ITEM_FLASK, 0),
         ];
         $economics = $this->calculateEconomics($recipes, $static);
 
@@ -56,10 +60,12 @@ class ConsumableService
                 'quantities' => $quantities,
             ]
         ]);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**
-     * Task: Fetch the target recipes with relations.
+     * Task: Fetch the target recipes with relations. crafting_cost is read from the column directly.
      */
     private function fetchTargetRecipes(): Collection
     {
@@ -71,21 +77,8 @@ class ConsumableService
 
         return Recipe::query()
             ->withNames($raidRecipeNames)
-            ->with(['outputItem', 'ingredients.item'])
+            ->with(['outputItem'])
             ->get();
-    }
-
-    /**
-     * Task: Calculate crafting cost for a recipe using pre-fetched prices.
-     */
-    private function calculateRecipeCost(Recipe $recipe, Collection $priceMap): float
-    {
-        $totalCost = 0;
-        foreach ($recipe->ingredients as $ingredient) {
-            $totalCost += ($priceMap->get($ingredient->item_id, 0)) * $ingredient->quantity;
-        }
-
-        return (float) ($totalCost / ($recipe->yield_quantity ?: 1));
     }
 
     /**
@@ -119,19 +112,23 @@ class ConsumableService
     }
 
     /**
-     * Task: Calculate grand totals and economic metrics.
+     * Task: Calculate grand totals and economic metrics from cached crafting_cost.
      */
     private function calculateEconomics(Collection $recipes, ?StaticGroup $static): array
     {
         $raidDays = ($static && $static->raid_days) ? count($static->raid_days) : 3;
 
         $grandTotalWeeklyCost = $recipes->sum(function (Recipe $recipe) use ($raidDays) {
-            return (int) ($recipe->crafting_cost * ($recipe->quantity ?? $recipe->default_quantity) * $raidDays);
+            $cost = (int) ($recipe->crafting_cost ?? 0);
+            $quantity = (int) ($recipe->quantity ?? $recipe->default_quantity);
+            return $cost * $quantity * $raidDays;
         });
 
         $activeMemberCount = $static ? $static->members()->count() : 0;
         $totalMemberSlots = 20;
-        $guildTaxPerRaider = (int) ceil($grandTotalWeeklyCost / $totalMemberSlots);
+        $guildTaxPerRaider = $totalMemberSlots > 0
+            ? (int) ceil($grandTotalWeeklyCost / $totalMemberSlots)
+            : 0;
 
         return [
             'grand_total_weekly_cost' => $grandTotalWeeklyCost,

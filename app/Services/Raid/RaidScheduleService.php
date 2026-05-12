@@ -6,11 +6,16 @@ namespace App\Services\Raid;
 
 use App\Models\Event;
 use App\Models\StaticGroup;
+use App\Services\Cache\StaticCacheService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 class RaidScheduleService
 {
+    public function __construct(
+        protected StaticCacheService $cache,
+    ) {}
+
     /**
      * Orchestrate the generation of upcoming raid events for a static.
      *
@@ -38,6 +43,7 @@ class RaidScheduleService
         if (empty($raidDays) || empty($static->raid_start_time)) {
             // No schedule configured — every remaining autogen event is stale.
             $this->reconcileStale($existing);
+            $this->cache->flushStatic((int) $static->id);
             return;
         }
 
@@ -71,6 +77,8 @@ class RaidScheduleService
         // Any autogen event left unclaimed by an expected slot is stale (day removed,
         // or a leftover duplicate from the old buggy schedule generation).
         $this->reconcileStale($existing);
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     /**

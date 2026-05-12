@@ -10,10 +10,15 @@ use App\Models\Character;
 use App\Models\RaidAttendance;
 use App\Models\Specialization;
 use App\Models\User;
+use App\Services\Cache\StaticCacheService;
 use Illuminate\Support\Collection;
 
 class RaidAttendanceService
 {
+    public function __construct(
+        protected StaticCacheService $cache,
+    ) {}
+
     /**
      * Swap the character on an existing RSVP, or create a tentative one.
      */
@@ -26,6 +31,8 @@ class RaidAttendanceService
         } else {
             RaidAttendance::query()->createForEvent($eventId, $newCharacterId, 'tentative');
         }
+
+        $this->flushForEvent($eventId);
     }
 
     /**
@@ -37,6 +44,7 @@ class RaidAttendanceService
 
         if ($attendance) {
             $attendance->update(['spec_id' => $specId]);
+            $this->flushForEvent($eventId);
         }
     }
 
@@ -45,7 +53,7 @@ class RaidAttendanceService
      */
     public function updateAttendance(Event $event, Character $character, string $status, ?string $comment = null, ?int $specId = null): RaidAttendance
     {
-        return RaidAttendance::updateOrCreate([
+        $attendance = RaidAttendance::updateOrCreate([
             'event_id' => $event->id,
             'character_id' => $character->id,
         ], [
@@ -53,6 +61,18 @@ class RaidAttendanceService
             'comment' => $comment,
             'spec_id' => $specId,
         ]);
+
+        $this->cache->flushStatic((int) $event->static_id);
+
+        return $attendance;
+    }
+
+    private function flushForEvent(int $eventId): void
+    {
+        $staticId = (int) Event::query()->whereKey($eventId)->value('static_id');
+        if ($staticId > 0) {
+            $this->cache->flushStatic($staticId);
+        }
     }
 
     /**

@@ -123,8 +123,12 @@ return [
     | storage. By default, no PHP classes will be unserialized from your
     | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
+    | Set to true because we cache Service payloads that contain Eloquent
+    | models (StaticGroup, User, Carbon dates, …). Valkey is private to
+    | the VPC and we control every write; no external party can plant
+    | malicious serialized data, so the gadget-chain risk does not apply.
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => true,
 
 ];

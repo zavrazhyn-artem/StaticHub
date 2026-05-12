@@ -16,6 +16,8 @@ use Illuminate\Support\Carbon;
  * @property string $profession
  * @property int|null $output_item_id
  * @property int $yield_quantity
+ * @property int|null $crafting_cost
+ * @property Carbon|null $crafting_cost_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -24,7 +26,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $display_color
  * @property string|null $wow_zamimg_url
  * @property int|null $quantity
- * @property float|int|null $crafting_cost
  * @property int|null $default_quantity
  *
  * Relationships:
@@ -47,7 +48,13 @@ use Illuminate\Support\Carbon;
  */
 class Recipe extends Model
 {
-    protected $fillable = ['name', 'profession', 'output_item_id', 'yield_quantity'];
+    protected $fillable = ['name', 'profession', 'output_item_id', 'yield_quantity', 'crafting_cost', 'crafting_cost_at'];
+
+    protected $casts = [
+        'yield_quantity' => 'integer',
+        'crafting_cost' => 'integer',
+        'crafting_cost_at' => 'datetime',
+    ];
 
     public function outputItem(): BelongsTo
     {

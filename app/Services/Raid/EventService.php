@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\StaticGroup;
 use App\Models\User;
 use App\Models\Character;
+use App\Services\Cache\StaticCacheService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +18,7 @@ class EventService
     public function __construct(
         protected RaidAttendanceService $attendanceService,
         protected CalendarService       $calendarService,
+        protected StaticCacheService    $cache,
     ) {}
 
     /**
@@ -101,7 +103,7 @@ class EventService
             $endTime->addDay();
         }
 
-        return Event::create([
+        $event = Event::create([
             'static_id' => $data['static_id'],
             'start_time' => $startTime,
             'end_time' => $endTime,
@@ -109,6 +111,10 @@ class EventService
             'difficulty' => $data['difficulty'] ?? 'mythic',
             'description' => $data['description'] ?? null,
         ]);
+
+        $this->cache->flushStatic((int) $data['static_id']);
+
+        return $event;
     }
 
     /**
@@ -146,6 +152,8 @@ class EventService
         $event->update([
             'selected_encounters' => count($current) === count($allSlugs) ? null : $current,
         ]);
+
+        $this->cache->flushStatic((int) $event->static_id);
     }
 
     /**
@@ -160,6 +168,8 @@ class EventService
         } else {
             $event->update(['selected_encounters' => array_values($slugs)]);
         }
+
+        $this->cache->flushStatic((int) $event->static_id);
     }
 
     /**
@@ -185,9 +195,14 @@ class EventService
      */
     public function buildSchedulePayload(int $year, int $month, StaticGroup $static): array
     {
-        $calendarData = $this->calendarService->buildMonthGrid($year, $month, $static->id);
+        $cached = $this->cache->rememberForStatic(
+            $static->id,
+            "schedule:{$static->id}:{$year}:{$month}",
+            600,
+            fn () => $this->calendarService->buildMonthGrid($year, $month, $static->id)
+        );
 
-        return array_merge($calendarData, [
+        return array_merge($cached, [
             'static' => $static,
         ]);
     }
@@ -224,6 +239,8 @@ class EventService
 
         $event->update($updateData);
 
+        $this->cache->flushStatic((int) $event->static_id);
+
         return $event;
     }
 
@@ -236,6 +253,10 @@ class EventService
             throw new \Exception(__('Event already started. Changes are not allowed.'));
         }
 
+        $staticId = (int) $event->static_id;
+
         $event->delete();
+
+        $this->cache->flushStatic($staticId);
     }
 }

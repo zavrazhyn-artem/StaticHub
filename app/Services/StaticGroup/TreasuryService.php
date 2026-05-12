@@ -9,6 +9,7 @@ use App\Helpers\WeeklyResetHelper;
 use App\Models\Character;
 use App\Models\StaticGroup;
 use App\Models\Transaction;
+use App\Services\Cache\StaticCacheService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -19,6 +20,7 @@ class TreasuryService
 {
     public function __construct(
         private readonly ConsumableService $consumableService,
+        private readonly StaticCacheService $cache,
     ) {}
 
     // =========================================================================
@@ -26,6 +28,20 @@ class TreasuryService
     // =========================================================================
 
     public function buildTreasuryIndexPayload(StaticGroup $static, ?array $consumablesData = null): array
+    {
+        if ($consumablesData !== null) {
+            return $this->computeTreasuryIndexPayload($static, $consumablesData);
+        }
+
+        return $this->cache->rememberForStatic(
+            $static->id,
+            "treasury:index:{$static->id}",
+            300,
+            fn () => $this->computeTreasuryIndexPayload($static)
+        );
+    }
+
+    private function computeTreasuryIndexPayload(StaticGroup $static, ?array $consumablesData = null): array
     {
         // Eager-load members with their main character for the member select
         $static->load(['members' => fn ($q) => $q->with([
@@ -168,6 +184,8 @@ class TreasuryService
         // Auto-cover tax if not yet covered
         $this->tryCoverTax($static, $userId);
 
+        $this->cache->flushStatic((int) $static->id);
+
         return $transaction;
     }
 
@@ -183,7 +201,7 @@ class TreasuryService
         $region    = strtolower($static->region ?? 'eu');
         $periodKey = WeeklyResetHelper::periodKey($region);
 
-        return DB::transaction(function () use ($static, $userId, $amount, $description, $periodKey) {
+        $transaction = DB::transaction(function () use ($static, $userId, $amount, $description, $periodKey) {
             // Conditional UPDATE makes the check race-safe: if two withdrawals
             // arrive at once, only one can succeed while reserves stay non-negative.
             $affected = DB::table('statics')
@@ -200,7 +218,7 @@ class TreasuryService
                 ]);
             }
 
-            $transaction = Transaction::create([
+            $row = Transaction::create([
                 'static_id'  => $static->id,
                 'user_id'    => $userId,
                 'amount'     => $amount,
@@ -212,8 +230,12 @@ class TreasuryService
 
             $static->treasury_balance = (int) ($static->treasury_balance ?? 0) - $amount;
 
-            return $transaction;
+            return $row;
         });
+
+        $this->cache->flushStatic((int) $static->id);
+
+        return $transaction;
     }
 
     /**
@@ -304,11 +326,15 @@ class TreasuryService
                 $static->treasury_balance = (int) ($static->treasury_balance ?? 0) + $collected;
             }
         });
+
+        $this->cache->flushStatic((int) $static->id);
     }
 
     public function updateTransactionComment(Transaction $transaction, ?string $description): void
     {
         $transaction->update(['description' => $description]);
+
+        $this->cache->flushStatic((int) $transaction->static_id);
     }
 
     public function fetchRecentTransactions(StaticGroup $static, int $limit = 10): Collection
