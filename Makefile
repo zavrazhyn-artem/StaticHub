@@ -16,7 +16,7 @@ APP_NAME    ?= app
 APP_VERSION ?= latest
 
 # Production
-COMPOSE_FILE  = docker-compose.prod.yml
+COMPOSE_FILE  = docker-compose.yml
 COMPOSE       = docker compose -f $(COMPOSE_FILE)
 APP_CONTAINER = app
 

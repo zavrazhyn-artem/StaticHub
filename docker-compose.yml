@@ -42,11 +42,16 @@ x-app-defaults: &app-defaults
     - app_network
   volumes:
     # Live source — edits land instantly inside the container.
+    # vendor/ is intentionally part of the bind mount: keeping it as a
+    # named volume drifts from composer.json/composer.lock on the host
+    # (image is built with --no-dev, so dev-only deps like laravel/pail
+    # never make it into the volume) and produces recurring
+    # "PailServiceProvider not found" Octane boot failures. With the
+    # bind-mount, a host-side `composer install` is what the container
+    # sees on next boot.
     - .:/var/www/html
-    # Protect named-volume content from the bind mount above. Docker seeds
-    # these from the image on first start, so `composer install` / `npm run
-    # build` results survive between container restarts.
-    - vendor:/var/www/html/vendor
+    # public/build still uses a named volume so Vite output survives
+    # container restarts without round-tripping through the host.
     - node_build:/var/www/html/public/build
     # Dev PHP overrides: opcache.validate_timestamps=1, display_errors=On.
     - ./docker/app/php-dev.ini:/usr/local/etc/php/conf.d/99-dev.ini:ro
@@ -171,7 +176,6 @@ networks:
     driver: bridge
 
 volumes:
-  vendor:
   node_build:
   # mysql_data was created out-of-band by `docker volume create blastr_mysql_data`
   # during the migration from the old `statichub_*` prefix. Marking it external
