@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Wishlist;
 
 use App\Builders\WishlistBuilder;
+use App\Enums\StaticGroup\Role;
 use App\Exceptions\WishlistImportException;
 use App\Jobs\Item\SyncSingleItemMetadataJob;
 use App\Models\Character;
@@ -67,9 +68,17 @@ final class WishlistService
         // and no allowed config matches, hard-reject the import — that
         // is the whole point of the per-static gate. Characters with no
         // static (e.g. mid-onboarding) are exempt and get matched_config = null.
+        //
+        // QE Live skips this gate entirely: the "allowed configurations"
+        // describe Raidbots-only Droptimizer parameters (fightStyle,
+        // numEnemies, fightLength, upgradeEquipped, …) that have no
+        // analogue in QE Live's HPS-based upgrade report. Forcing the
+        // gate on QE imports always fails on "Upgrade All Equipped
+        // required" since that flag literally doesn't exist in the QE
+        // payload.
         $staticId = $character->statics()->orderBy('statics.id')->value('statics.id');
         $matchedConfig = null;
-        if ($staticId) {
+        if ($staticId && $source === Wishlist::SOURCE_RAIDBOTS) {
             $matchedConfig = $this->configService->matchForImport((int) $staticId, $dto);
             if ($matchedConfig === null) {
                 // Build a per-config breakdown so the player knows which
@@ -502,15 +511,22 @@ final class WishlistService
     /**
      * Build the payload for the gear-management Vue page for a given static.
      * Returns wishlists grouped by character and raid for easy rendering.
+     *
+     * Access scope:
+     * - leader/officer: see every character's wishlist
+     * - member: see only own characters' wishlists. Claimants for those
+     *   items still expose the full static pool — that's the whole point
+     *   of "who else wants this drop" for a regular player.
      */
-    public function buildGearViewPayload(int $staticId, ?int $userId = null): array
+    public function buildGearViewPayload(int $staticId, ?int $userId = null, Role $accessRole = Role::Member): array
     {
         $excluded = (array) config('wow_season.wishlist_excluded_raid_slugs', []);
 
-        // raidsOnly() is the product rule — wishlist excludes M+/Catalyst/etc
-        // even if older imports populated those buckets. Defensive on top of
-        // the import-time filters so legacy DB rows don't surface.
-        $wishlists = Wishlist::query()
+        // Full pool — drives the claimants lookup so members still see
+        // every competitor on items they personally wished for. raidsOnly()
+        // is the product rule (wishlist UI is raid-only, defensive against
+        // legacy non-raid rows).
+        $allWishlists = Wishlist::query()
             ->forStatic($staticId)
             ->raidsOnly()
             ->when(! empty($excluded), fn ($q) => $q->whereNotIn('raid_slug', $excluded))
@@ -521,14 +537,21 @@ final class WishlistService
             ->orderBy('difficulty')
             ->get();
 
+        // What the viewer is allowed to render. Members are hard-scoped
+        // to their own characters at this layer; the full pool stays
+        // available for claimant resolution.
+        $visibleWishlists = $accessRole === Role::Member && $userId !== null
+            ? $allWishlists->filter(fn ($w) => $w->character?->user_id === $userId)->values()
+            : $allWishlists;
+
         // Pre-load "listed in" lookup: for each (char_id, spec_id) build a map
         // item_id => array of gear list names. Avoids N+1 queries in the loop.
-        $listedIn = $this->buildListedInLookup($wishlists);
+        $listedIn = $this->buildListedInLookup($visibleWishlists);
 
         // Pre-load boss + encounter metadata for every referenced item id —
         // wishlist UI groups by boss, and each item card shows the boss name
         // alongside the source raid. Single query, keyed for O(1) lookup.
-        $itemIds = $wishlists->flatMap(fn ($w) => $w->items->pluck('item_id'))->unique()->values()->all();
+        $itemIds = $visibleWishlists->flatMap(fn ($w) => $w->items->pluck('item_id'))->unique()->values()->all();
         $bossByItemId = empty($itemIds)
             ? []
             : \App\Models\SeasonItem::query()
@@ -540,13 +563,14 @@ final class WishlistService
         // {character, role, spec, is_bis, value} entries without N+1 queries.
         // Keyed by (raid_slug, difficulty, item_id) — each card is for that
         // exact tuple, so claimants for one tuple don't bleed into another.
-        $claimantsByItem = $this->buildClaimantsLookup($wishlists, $staticId);
+        // Built from the FULL pool so a member sees every competitor.
+        $claimantsByItem = $this->buildClaimantsLookup($allWishlists, $staticId);
 
         // Per-character main spec for THIS static. Drives the "Mains
         // only" filter — a character without any is_main spec in this
         // static is treated as alt and hidden by default; for those that
         // do have a main spec, only that spec's wishlist counts as main.
-        $charIds = $wishlists->pluck('character_id')->unique()->all();
+        $charIds = $visibleWishlists->pluck('character_id')->unique()->all();
         $mainSpecByCharId = $this->buildMainSpecLookup($staticId, $charIds);
         // character_static.role is the authoritative main/alt flag for
         // this static — needed alongside main_spec so "Mains only" can
@@ -557,9 +581,22 @@ final class WishlistService
             ->whereIn('character_id', $charIds)
             ->pluck('role', 'character_id')
             ->all();
+        // Owner display name per user — drives the per-player chip strip.
+        // Members never see the strip (they only have themselves), but the
+        // lookup is cheap so we always build it.
+        $ownerUserIds = $visibleWishlists
+            ->map(fn ($w) => $w->character?->user_id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $userNameById = empty($ownerUserIds) ? [] : DB::table('users')
+            ->whereIn('id', $ownerUserIds)
+            ->pluck('name', 'id')
+            ->all();
 
         $grouped = [];
-        foreach ($wishlists as $w) {
+        foreach ($visibleWishlists as $w) {
             $charKey = $w->character_id;
             $grouped[$charKey] ??= [
                 'character' => [
@@ -571,6 +608,15 @@ final class WishlistService
                     'is_own'         => $userId !== null && $w->character->user_id === $userId,
                     'main_spec_id'   => $mainSpecByCharId[$w->character_id] ?? null,
                     'static_role'    => $rolesByCharId[$w->character_id] ?? null,
+                    // Owner — drives the per-player chip strip on the
+                    // wishlist tab. Characters belonging to the same user
+                    // collapse to a single chip; the chip face is the
+                    // user's main character in this static (or any of
+                    // their characters as fallback).
+                    'owner'          => [
+                        'user_id'   => $w->character->user_id,
+                        'user_name' => $userNameById[$w->character->user_id] ?? null,
+                    ],
                 ],
                 'wishlists' => [],
             ];

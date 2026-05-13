@@ -119,7 +119,6 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::patch('/gear/lists/{list}', [GearListController::class, 'update'])->name('statics.gear.lists.update');
     Route::delete('/gear/lists/{list}', [GearListController::class, 'destroy'])->name('statics.gear.lists.destroy');
     Route::get('/gear/lists/{list}/picker', [GearListController::class, 'pickerOptions'])->name('statics.gear.lists.picker');
-    Route::get('/gear/lists/{list}/export-simc', [GearListController::class, 'exportSimc'])->name('statics.gear.lists.export-simc');
     Route::patch('/gear/lists/{list}/slot', [GearListController::class, 'setSlot'])->name('statics.gear.lists.set-slot');
     Route::post('/gear/lists/{list}/simc', [GearListController::class, 'importSimc'])->name('statics.gear.lists.import-simc');
     Route::post('/gear/bis', [GearListController::class, 'importBis'])->name('statics.gear.lists.import-bis');

@@ -15,7 +15,6 @@ use App\Models\GearList;
 use App\Models\StaticGroup;
 use App\Services\Gear\GearListService;
 use App\Services\Gear\GearViewService;
-use App\Services\Gear\SimcExportService;
 use App\Services\Gear\SlotItemPickerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -28,22 +27,7 @@ class GearListController extends Controller
         private readonly GearListService $service,
         private readonly GearViewService $viewService,
         private readonly SlotItemPickerService $picker,
-        private readonly SimcExportService $simcExport,
     ) {}
-
-    /**
-     * Returns a Raidbots-ready SimulationCraft string for the list. Owner check
-     * mirrors the picker endpoint — only the user who owns the underlying
-     * character can pull the export.
-     */
-    public function exportSimc(StaticGroup $static, GearList $list, Request $request): JsonResponse
-    {
-        if ($list->character?->user_id !== $request->user()?->id) {
-            return response()->json(['error' => 'Forbidden'], 403);
-        }
-
-        return response()->json(['simc' => $this->simcExport->export($list)]);
-    }
 
     /**
      * Returns the season-catalog items eligible for the (list, slot) pair —

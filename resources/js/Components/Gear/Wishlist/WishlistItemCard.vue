@@ -80,12 +80,16 @@ const percentClass = computed(() => {
 </script>
 
 <template>
-    <button
-        type="button"
-        @click="emit('open-claimants', item)"
+    <!-- Anchor (not button) so Wowhead's tooltips.js latches onto it via the
+         wowhead.com href — it's flaky on non-<a> elements. Native click goes
+         to wowhead.com (which we cancel) so the only side effect is opening
+         the claimants modal. No `title` attribute on purpose — the native
+         browser tooltip would race and win over the Wowhead popup. -->
+    <a
+        :href="wowheadHref"
         :data-wowhead="wowheadDataAttr"
-        :class="['group relative flex items-center gap-3 px-3 py-2.5 rounded-lg border transition w-full text-left cursor-pointer hover:brightness-110', cardClass]"
-        :title="`${valueLabel} — ${claimantCount} ${claimantCount === 1 ? __('claimant') : __('claimants')}`"
+        @click.prevent="emit('open-claimants', item)"
+        :class="['group relative flex items-center gap-3 px-3 py-2.5 rounded-lg border transition w-full text-left cursor-pointer hover:brightness-110 no-underline', cardClass]"
     >
         <div class="shrink-0">
             <img
@@ -122,7 +126,6 @@ const percentClass = computed(() => {
             <div
                 v-if="claimantCount > 0"
                 class="flex items-center gap-1.5 text-[10px] font-headline font-bold uppercase tracking-widest"
-                :title="`${claimantCount} ${claimantCount === 1 ? __('claimant') : __('claimants')}, ${bisCount} ${__('BiS')}`"
             >
                 <span class="flex items-center gap-0.5 text-on-surface-variant">
                     <span class="material-symbols-outlined text-[12px]">groups</span>
@@ -153,5 +156,5 @@ const percentClass = computed(() => {
                 <span>{{ item.matched_configs.map(n => n.slice(0, 2)).join('/') }}</span>
             </div>
         </div>
-    </button>
+    </a>
 </template>

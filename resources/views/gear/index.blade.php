@@ -10,6 +10,7 @@
         static-name="{{ $static->name }}"
         :wishlist-payload='@json($wishlistPayload)'
         :wishlist-configs='@json($wishlistConfigs)'
+        :allow-player-picker="{{ $allowPlayerPicker ? 'true' : 'false' }}"
         :gear-context='@json($gearContext)'
         :enchantable-slots='@json($enchantableSlots)'
         store-url="{{ route('statics.gear.wishlists.store') }}"
@@ -19,7 +20,6 @@
         :gear-list-rename-url-template="'{{ url('/gear/lists') }}/__ID__'"
         :gear-list-set-slot-url-template="'{{ url('/gear/lists') }}/__ID__/slot'"
         :gear-list-picker-url-template="'{{ url('/gear/lists') }}/__ID__/picker'"
-        :gear-list-export-simc-url-template="'{{ url('/gear/lists') }}/__ID__/export-simc'"
         :gear-list-import-simc-url-template="'{{ url('/gear/lists') }}/__ID__/simc'"
         gear-bis-import-url="{{ route('statics.gear.lists.import-bis') }}"
         list-summaries-url="{{ route('statics.gear.lists.summaries') }}"

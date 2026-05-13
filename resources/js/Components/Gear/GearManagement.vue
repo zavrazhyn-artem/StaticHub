@@ -24,7 +24,6 @@ const props = defineProps({
     gearListRenameUrlTemplate: { type: String, required: true },
     gearListSetSlotUrlTemplate: { type: String, required: true },
     gearListPickerUrlTemplate: { type: String, required: true },
-    gearListExportSimcUrlTemplate: { type: String, required: true },
     gearListImportSimcUrlTemplate: { type: String, required: true },
     gearBisImportUrl: { type: String, required: true },
     listSummariesUrl: { type: String, required: true },
@@ -35,6 +34,10 @@ const props = defineProps({
     csrfToken: { type: String, required: true },
     flashSuccess: { type: String, default: '' },
     flashError: { type: String, default: '' },
+    // Officers/leaders get a per-player chip strip on the wishlist tab so
+    // they can drill into a specific raider's items. Members are scoped
+    // server-side to their own wishlists, so the picker is hidden for them.
+    allowPlayerPicker: { type: Boolean, default: false },
 });
 
 const showImportModal = ref(false);
@@ -299,7 +302,6 @@ onMounted(() => {
         :gear-list-destroy-url-template="gearListDestroyUrlTemplate"
         :gear-list-set-slot-url-template="gearListSetSlotUrlTemplate"
         :gear-list-picker-url-template="gearListPickerUrlTemplate"
-        :gear-list-export-simc-url-template="gearListExportSimcUrlTemplate"
         :gear-list-import-simc-url-template="gearListImportSimcUrlTemplate"
         :gear-bis-import-url="gearBisImportUrl"
     />
@@ -313,6 +315,7 @@ onMounted(() => {
         :configs="wishlistConfigs"
         :csrf-token="csrfToken"
         :destroy-url-template="destroyUrlTemplate"
+        :allow-player-picker="allowPlayerPicker"
         @open-import="urlInput = ''; importError = ''; showImportModal = true"
     />
 

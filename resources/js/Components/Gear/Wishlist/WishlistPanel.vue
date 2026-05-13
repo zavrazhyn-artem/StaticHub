@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUpdated, onBeforeUnmount } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import EmptyState from '@/Components/UI/EmptyState.vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
@@ -27,6 +27,10 @@ const props = defineProps({
     specId: { type: [Number, String, null], default: null },
     csrfToken: { type: String, required: true },
     destroyUrlTemplate: { type: String, required: true },
+    // Officers/leaders only — gates the per-player chip strip. Members
+    // are already server-side scoped to their own wishlists, so a picker
+    // would be a degenerate "one chip" UI.
+    allowPlayerPicker: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['open-import', 'update:characterId', 'update:specId']);
@@ -92,18 +96,21 @@ watch(groupBy, () => { filterValue.value = null; });
 // import one rather than silently showing some other spec's data.
 const effectiveSpecId = computed(() => props.specId ?? null);
 
-// Merge the wishlist payload with the full character roster so the empty
-// state for a character without wishlists still resolves correctly.
+// Merge the wishlist payload with the viewer's own roster.
+// Payload is authoritative for visibility — for officers/leaders it spans
+// every player in the static; for members it's already server-scoped to
+// their own characters. props.characters (gearContext) is the viewer's
+// OWN roster only, used to add empty-state stubs for the viewer's chars
+// that haven't imported wishlists yet. The old implementation overwrote
+// payload with gearContext, which silently dropped every other player's
+// character from the grid (and from the player chip strip).
 const characters = computed(() => {
     const byId = new Map();
     props.payload.forEach(entry => byId.set(entry.character.id, entry));
 
-    if (!props.characters.length) return Array.from(byId.values());
-
-    return props.characters.map(ch => {
-        const existing = byId.get(ch.id);
-        if (existing) return existing;
-        return {
+    props.characters.forEach(ch => {
+        if (byId.has(ch.id)) return;
+        byId.set(ch.id, {
             character: {
                 id: ch.id,
                 name: ch.name,
@@ -113,8 +120,9 @@ const characters = computed(() => {
                 is_own: ch.is_own,
             },
             wishlists: [],
-        };
+        });
     });
+    return Array.from(byId.values());
 });
 
 const currentCharacter = computed(() =>
@@ -197,14 +205,127 @@ const configChecklist = (c) => {
     return items;
 };
 
+// Per-player chip strip — one chip per user_id, even when that user has
+// several characters (main + alts) in this static. Face = the user's main
+// character in the static; if none, fall back to whichever character we
+// have. Alt count drives the "+N" badge. Selection is character-level
+// (selectedCharIds) so the kebab popover can drill into specific alts
+// independently of the user-level toggle. Ephemeral across page loads —
+// lock-in across statics rarely matches RL intent.
+const selectedCharIds = ref(new Set());
+const openKebabUserId = ref(null);
+
+const players = computed(() => {
+    const byUser = new Map();
+    characters.value.forEach(entry => {
+        const owner = entry.character.owner;
+        if (!owner?.user_id) return;
+        const bucket = byUser.get(owner.user_id) ?? {
+            user_id: owner.user_id,
+            user_name: owner.user_name,
+            characters: [],
+            mainCharacter: null,
+        };
+        bucket.characters.push(entry.character);
+        if (entry.character.static_role === 'main' && !bucket.mainCharacter) {
+            bucket.mainCharacter = entry.character;
+        }
+        byUser.set(owner.user_id, bucket);
+    });
+    // Normalise the chip "face": prefer the static's main character,
+    // otherwise the first character we have for that user.
+    return Array.from(byUser.values())
+        .map(b => {
+            const face = b.mainCharacter ?? b.characters[0];
+            return {
+                ...b,
+                face,
+                alts_count: Math.max(0, b.characters.length - 1),
+            };
+        })
+        .sort((a, b) => (a.face?.name ?? '').localeCompare(b.face?.name ?? ''));
+});
+
+// Tri-state per chip: 'none' (no chars selected), 'full' (all chars
+// selected), 'partial' (subset). Drives the chip's visual state — only
+// 'full' and 'partial' get the bright outline. 'partial' adds a tiny
+// indicator so the RL knows the user has narrowed selection further.
+const userSelectionState = (player) => {
+    if (!player.characters.length) return 'none';
+    const sel = player.characters.filter(c => selectedCharIds.value.has(c.id)).length;
+    if (sel === 0) return 'none';
+    if (sel === player.characters.length) return 'full';
+    return 'partial';
+};
+
+// Main click on chip body — toggles just the player's MAIN character
+// (the chip face). Alts stay out of selection unless the RL explicitly
+// picks them via the kebab menu — that's the intended "main is the
+// default story; alts are the side quest" semantic.
+const toggleUser = (player) => {
+    if (!player.face) return;
+    toggleChar(player.face.id);
+};
+
+const toggleChar = (charId) => {
+    const next = new Set(selectedCharIds.value);
+    if (next.has(charId)) next.delete(charId); else next.add(charId);
+    selectedCharIds.value = next;
+};
+
+const clearPlayers = () => { selectedCharIds.value = new Set(); };
+
+// Auto-disable "Mains only" the moment an alt is explicitly selected —
+// otherwise the alt char would be filtered out anyway and the user's
+// click would silently do nothing. Only fires when an alt becomes
+// selected (not on deselect) so re-enabling Mains-only manually still
+// works as expected.
+watch(selectedCharIds, (set) => {
+    if (!mainsOnly.value) return;
+    for (const charId of set) {
+        for (const p of players.value) {
+            const c = p.characters.find(c => c.id === charId);
+            if (c && c.static_role === 'alt') {
+                mainsOnly.value = false;
+                return;
+            }
+        }
+    }
+});
+
+// Close any open kebab popover when clicking outside chip strip. Single
+// global listener — there's only ever one popover open at a time.
+const onDocumentClick = (e) => {
+    if (openKebabUserId.value === null) return;
+    const popover = document.querySelector('[data-kebab-popover]');
+    const trigger = document.querySelector('[data-kebab-trigger="' + openKebabUserId.value + '"]');
+    if (popover?.contains(e.target) || trigger?.contains(e.target)) return;
+    openKebabUserId.value = null;
+};
+onMounted(() => document.addEventListener('click', onDocumentClick));
+onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
+
+// Wowhead tooltip rescan — tooltips.js binds hover listeners on initial
+// load; new cards rendered by Vue (filter changes, group toggles, player
+// picks) need an explicit refresh so the popup appears. Same pattern as
+// the Roster gear tab uses.
+const refreshTooltips = () => {
+    if (window.whTooltips?.refreshLinks) window.whTooltips.refreshLinks();
+};
+onMounted(refreshTooltips);
+onUpdated(refreshTooltips);
+
 // Static-wide aggregation: walk every member's wishlists and apply the
-// active filters (difficulty + mains-only). The previous per-character
-// scope was wrong — the loot-council needs to see the whole pool to
-// decide who gets what drop, not just the currently-focused player.
+// active filters (difficulty + mains-only + selected characters). The
+// previous per-character scope was wrong — the loot-council needs to
+// see the whole pool to decide who gets what drop, not just the
+// currently-focused player.
 const allWishlists = computed(() => {
     const out = [];
+    const charFilter = selectedCharIds.value;
     characters.value.forEach(entry => {
         const ch = entry.character;
+        if (charFilter.size > 0 && !charFilter.has(ch.id)) return;
         if (mainsOnly.value) {
             // Two-step gate: the character must be a main in this static
             // (character_static.role='main') AND the wishlist's spec_id
@@ -448,6 +569,134 @@ const deleteWishlist = (wishlistId) => {
     </div>
 
     <div v-else class="space-y-5">
+        <!-- Per-player chip strip (officers/leaders only). One chip per
+             user — main click toggles every character of that user.
+             Users with alts get a ⋮ kebab next to the +N badge that
+             opens a popover for picking specific characters (e.g. just
+             the user's alt warrior). Members never see this row: their
+             payload is already server-scoped to themselves. -->
+        <div
+            v-if="allowPlayerPicker && hasAnyWishlist && players.length > 0"
+            class="bg-surface-container-low border border-white/5 rounded-xl p-4"
+        >
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">{{ __('Players') }}</span>
+                <span class="text-[10px] text-on-surface-variant/60">({{ selectedCharIds.size > 0 ? selectedCharIds.size : characters.length }}/{{ characters.length }})</span>
+                <button
+                    v-if="selectedCharIds.size > 0"
+                    type="button"
+                    @click="clearPlayers"
+                    class="ml-auto text-[10px] text-on-surface-variant hover:text-white font-headline font-bold uppercase tracking-widest transition"
+                >
+                    {{ __('All players') }}
+                </button>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+                <div
+                    v-for="p in players"
+                    :key="p.user_id"
+                    class="relative"
+                >
+                    <div
+                        :class="[
+                            'inline-flex items-center gap-2 pl-1 py-1 rounded-full border transition',
+                            p.alts_count > 0 ? 'pr-1' : 'pr-2.5',
+                            userSelectionState(p) === 'full'
+                                ? 'border-cyan-400/60 bg-cyan-500/15 text-white'
+                                : userSelectionState(p) === 'partial'
+                                    ? 'border-cyan-400/40 bg-cyan-500/5 text-white'
+                                    : selectedCharIds.size === 0
+                                        ? 'border-cyan-400/50 bg-cyan-500/10 text-white'
+                                        : 'border-white/10 bg-surface-container text-on-surface-variant/70 hover:text-white hover:border-white/30',
+                        ]"
+                    >
+                        <button
+                            type="button"
+                            @click="toggleUser(p)"
+                            class="inline-flex items-center gap-2 pr-1"
+                            :title="p.user_name ? `${p.face?.name ?? ''} — ${p.user_name}` : (p.face?.name ?? '')"
+                        >
+                            <img
+                                v-if="p.face?.avatar_url"
+                                :src="p.face.avatar_url"
+                                :alt="p.face.name"
+                                class="w-6 h-6 rounded-full ring-1 ring-white/10 object-cover"
+                            />
+                            <span
+                                v-else
+                                class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-on-surface-variant"
+                            >
+                                {{ (p.face?.name ?? '?').charAt(0) }}
+                            </span>
+                            <span class="text-xs font-headline font-bold tracking-wider">{{ p.face?.name ?? p.user_name ?? '—' }}</span>
+                            <span
+                                v-if="p.alts_count > 0"
+                                class="px-1.5 py-px rounded-full bg-white/10 text-[9px] font-bold text-on-surface-variant/80"
+                            >
+                                +{{ p.alts_count }}
+                            </span>
+                            <!-- Partial-selection dot: tiny visual cue
+                                 that the user has a narrowed sub-pick
+                                 inside this chip (e.g. only the alt
+                                 selected, not the main). -->
+                            <span
+                                v-if="userSelectionState(p) === 'partial'"
+                                class="w-1.5 h-1.5 rounded-full bg-cyan-300"
+                            ></span>
+                        </button>
+                        <button
+                            v-if="p.alts_count > 0"
+                            type="button"
+                            :data-kebab-trigger="p.user_id"
+                            @click.stop="openKebabUserId = openKebabUserId === p.user_id ? null : p.user_id"
+                            :class="[
+                                'w-6 h-6 rounded-full flex items-center justify-center transition',
+                                openKebabUserId === p.user_id
+                                    ? 'bg-white/15 text-white'
+                                    : 'text-on-surface-variant/60 hover:bg-white/10 hover:text-white',
+                            ]"
+                            :title="__('Pick specific characters')"
+                        >
+                            <span class="material-symbols-outlined text-base">more_vert</span>
+                        </button>
+                    </div>
+
+                    <!-- Kebab popover — alt-only picker. The main is already
+                         toggled via the chip body click, so listing it
+                         here would just be a duplicate control. Width
+                         auto-fits the longest character name. -->
+                    <div
+                        v-if="openKebabUserId === p.user_id"
+                        data-kebab-popover
+                        class="absolute z-50 top-full mt-1 left-0 w-max bg-surface-container-high border border-white/10 rounded-xl shadow-2xl p-2 space-y-0.5"
+                    >
+                        <label
+                            v-for="c in p.characters.filter(c => c.static_role !== 'main')"
+                            :key="c.id"
+                            class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer transition whitespace-nowrap"
+                        >
+                            <input
+                                type="checkbox"
+                                :checked="selectedCharIds.has(c.id)"
+                                @change="toggleChar(c.id)"
+                                class="w-3.5 h-3.5 rounded border-white/20 bg-surface-container-highest text-cyan-400 focus:ring-cyan-400/40 cursor-pointer"
+                            />
+                            <img
+                                v-if="c.avatar_url"
+                                :src="c.avatar_url"
+                                :alt="c.name"
+                                class="w-5 h-5 rounded-full ring-1 ring-white/10 object-cover"
+                            />
+                            <span class="text-xs font-headline font-bold tracking-wider text-white">{{ c.name }}</span>
+                            <span class="ml-3 px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-widest border border-amber-400/30 bg-amber-500/10 text-amber-200">
+                                {{ __('alt') }}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filter bar (character is picked at the top level) -->
         <div v-if="hasAnyWishlist" class="bg-surface-container-low border border-white/5 rounded-xl p-4 flex flex-wrap items-center gap-4">
             <!-- Difficulty pills -->

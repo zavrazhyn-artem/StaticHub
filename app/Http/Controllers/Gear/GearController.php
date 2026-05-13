@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Gear;
 
+use App\Enums\StaticGroup\Role;
 use App\Http\Controllers\Controller;
 use App\Models\StaticGroup;
 use App\Services\Gear\GearViewService;
@@ -26,12 +27,19 @@ class GearController extends Controller
         // Whitelist enforced at the route layer; default to the gear tab.
         $initialTab = in_array($tab, ['wishlist', 'loot-history'], true) ? $tab : 'gear';
 
+        // Static owner is always Leader regardless of pivot value; otherwise
+        // fall back to the membership's access_role. No membership = Member
+        // (the controller already requires auth; a non-member shouldn't
+        // reach this view, but we hard-default to least-privileged anyway).
+        $accessRole = $this->resolveAccessRole($static, $userId);
+
         return view('gear.index', [
             'static'            => $static,
-            'wishlistPayload'   => $this->wishlists->buildGearViewPayload($static->id, $userId),
+            'wishlistPayload'   => $this->wishlists->buildGearViewPayload($static->id, $userId, $accessRole),
             'gearContext'       => $this->gearView->buildContextPayload($static->id, $userId),
             'enchantableSlots'  => $this->gearView->enchantableSlots(),
             'initialTab'        => $initialTab,
+            'allowPlayerPicker' => $accessRole->isManager(),
             // Allowed Droptimizer configs surfaced for: the matched-config
             // chips on imported wishlists, and the "Run on Raidbots"
             // chooser modal that lists every config as a checklist the
@@ -58,5 +66,18 @@ class GearController extends Controller
                     'require_upgrade_all_same' => (bool) $c->require_upgrade_all_same,
                 ])->values(),
         ]);
+    }
+
+    private function resolveAccessRole(StaticGroup $static, int $userId): Role
+    {
+        if ((int) $static->owner_id === $userId) {
+            return Role::Leader;
+        }
+        $pivotRole = (string) ($static->users()
+            ->where('users.id', $userId)
+            ->first()
+            ?->pivot
+            ?->access_role ?? 'member');
+        return Role::tryFrom($pivotRole) ?? Role::Member;
     }
 }
