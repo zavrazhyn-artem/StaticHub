@@ -73,7 +73,7 @@ class GearController extends Controller
         if ((int) $static->owner_id === $userId) {
             return Role::Leader;
         }
-        $pivotRole = (string) ($static->users()
+        $pivotRole = (string) ($static->members()
             ->where('users.id', $userId)
             ->first()
             ?->pivot

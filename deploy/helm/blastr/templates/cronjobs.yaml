@@ -51,5 +51,5 @@ spec:
                 - secretRef:
                     name: {{ $.Values.secret.name }}
               resources:
-                {{- toYaml $.Values.cronjobs.resources | nindent 16 }}
+                {{- toYaml (.resources | default $.Values.cronjobs.resources) | nindent 16 }}
 {{- end }}

@@ -1,9 +1,7 @@
 <?php
 
-use App\Console\Commands\FetchAuctionsCommand;
 use App\Console\Commands\GenerateEventsCommand;
 use App\Console\Commands\ProcessUserActivityLogsCommand;
-use App\Console\Commands\PruneAuctionHistoryCommand;
 use App\Console\Commands\PurgeOldLogsCommand;
 use App\Console\Commands\PurgeUserActivityLogsCommand;
 use App\Console\Commands\RefreshAllCharactersCommand;
@@ -19,7 +17,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(FetchAuctionsCommand::class)->hourly()->withoutOverlapping(30)->onOneServer();
 Schedule::command(ProcessDiscordAutomations::class)->everyMinute()->withoutOverlapping(5)->onOneServer();
 // Scheduler tick just queues the orchestrator on `default`; the actual
 //// statics scan + bnet/rio dispatch runs on a worker pod. Manual admin runs
@@ -48,9 +45,4 @@ Schedule::command(PurgeUserActivityLogsCommand::class)->daily()->at('05:15')->on
 
 // Delete raid payload files older than 24h (locks chat activation for those reports).
 Schedule::command('ai:cleanup-payloads')->dailyAt('03:30')->onOneServer();
-
-// Prune price_snapshots — keep last 7 days of auction history. Only the
-// latest snapshot per item is read by ConsumableService; older rows are
-// dead weight. The table is on track for 12M+ rows otherwise.
-Schedule::command(PruneAuctionHistoryCommand::class)->dailyAt('03:45')->onOneServer();
 

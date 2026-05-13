@@ -166,6 +166,16 @@ cronjobs:
     - name: fetch-auctions
       schedule: "0 * * * *"
       command: ["app:fetch-auctions"]
+      # Auction commodities parse holds the full JSON payload + working set
+      # in memory. Bump well above the shared default so the pod doesn't OOM
+      # under future API growth.
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 1500m
+          memory: 2048Mi
     - name: refresh-all-characters
       schedule: "0 4 * * *"
       command: ["characters:refresh-all"]
@@ -196,6 +206,13 @@ cronjobs:
     - name: prune-auction-history
       schedule: "45 3 * * *"
       command: ["auctions:prune"]
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 1500m
+          memory: 2048Mi
 
 # ---------------------------------------------------------------------------
 # Non-sensitive env (populated into ConfigMap). Sensitive keys live in the
