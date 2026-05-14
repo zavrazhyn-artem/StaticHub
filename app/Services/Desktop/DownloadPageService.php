@@ -37,6 +37,7 @@ final class DownloadPageService
 
     public function __construct(
         private readonly InstallerReleaseService $installer,
+        private readonly BridgeReleaseService    $bridges,
     ) {}
 
     /**
@@ -44,20 +45,19 @@ final class DownloadPageService
      */
     public function buildPayload(User $user): array
     {
-        $bridge = config('blastr_desktop.bridge');
-        $installerReady = $this->installer->exists();
+        $bridgeConfig    = config('blastr_desktop.bridge');
+        $installerReady  = $this->installer->exists();
 
-        // When a published installer file exists, link straight at
-        // the public download endpoint and surface the actual file
-        // version + checksum from disk. Falls back to env-driven
-        // bridge config (mostly null today) so the page never
-        // 500s on a fresh deploy without a published installer.
+        // Version and sha256 come from the bridge binary — that's the
+        // file bridge-deploy.sh keeps up-to-date on every release.
+        // Installer (download URL + size) is separate and changes less
+        // often (only when we ship a brand-new NSIS installer).
         $manifest = [
-            'latest_version' => $this->installer->version() ?? ($bridge['latest_version'] ?? null),
-            'download_url'   => $installerReady ? URL::route('desktop.installer') : ($bridge['download_url'] ?? null),
-            'sha256'         => $this->installer->sha256() ?? ($bridge['sha256'] ?? null),
+            'latest_version' => $this->bridges->version() ?? ($bridgeConfig['latest_version'] ?? null),
+            'download_url'   => $installerReady ? URL::route('desktop.installer') : ($bridgeConfig['download_url'] ?? null),
+            'sha256'         => $this->bridges->sha256() ?? ($bridgeConfig['sha256'] ?? null),
             'size_bytes'     => $this->installer->size(),
-            'changelog_url'  => $bridge['changelog_url'] ?? null,
+            'changelog_url'  => $bridgeConfig['changelog_url'] ?? null,
         ];
 
         return [

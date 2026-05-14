@@ -77,13 +77,18 @@ if $PUSH_BRIDGE; then
   VERSION=$(cat "$BRIDGE_VER_FILE" 2>/dev/null || echo "unknown")
   echo
   echo "==> Uploading bridge.exe v${VERSION}"
+
+  # Upload binary first — version file is written only after a
+  # successful copy so the manifest never points at the wrong binary.
   kubectl cp "$BRIDGE_BIN" "${NAMESPACE}/${POD}:${REMOTE_DIR}/bridge.exe" -c "$CONTAINER"
 
+  # Version written atomically after binary is in place.
   kubectl exec -n "$NAMESPACE" "$POD" -c "$CONTAINER" -- \
     sh -c "echo -n '${VERSION}' > ${REMOTE_DIR}/bridge-version.txt"
 
-  kubectl exec -n "$NAMESPACE" "$POD" -c "$CONTAINER" -- \
-    php artisan cache:forget desktop:bridge:sha256 2>/dev/null || true
+  # SHA256 cache is keyed by file mtime — no manual flush needed.
+  # kubectl cp updates the mtime so BridgeReleaseService generates a
+  # fresh key and recomputes the hash on the very next request.
 
   echo "    Done ✓"
 fi
@@ -106,8 +111,7 @@ if $PUSH_ADDON; then
   kubectl exec -n "$NAMESPACE" "$POD" -c "$CONTAINER" -- \
     sh -c "echo -n '${ADDON_VERSION}' > ${REMOTE_DIR}/addon-version.txt"
 
-  kubectl exec -n "$NAMESPACE" "$POD" -c "$CONTAINER" -- \
-    php artisan cache:forget desktop:addon:sha256 2>/dev/null || true
+  # SHA256 cache auto-invalidates via mtime — no flush needed.
 
   echo "    Done ✓"
 fi
