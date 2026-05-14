@@ -21,6 +21,8 @@ set -e
 prepare_runtime() {
     rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 
+    rm -f public/hot
+
     # Rebuild config cache from THIS pod's env (k8s Secret values) for prod-
     # like environments. Dev/local skips so .env edits land without restart.
     # route:cache + view:cache are already baked into the image at build time.

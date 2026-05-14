@@ -25,6 +25,9 @@ storage/core-master
 *.swp
 *.swo
 
+# Vite dev server marker — must never reach the production image
+public/hot
+
 # Docker itself
 docker-compose.yml
 docker-compose.prod.yml
