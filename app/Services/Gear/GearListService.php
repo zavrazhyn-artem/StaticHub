@@ -371,6 +371,11 @@ final class GearListService
         return $list->fresh('items');
     }
 
+    public function updateTalentCode(GearList $list, ?string $code): void
+    {
+        $list->update(['talent_loadout_code' => $code]);
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------

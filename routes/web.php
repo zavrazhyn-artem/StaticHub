@@ -122,6 +122,7 @@ Route::middleware(['auth', 'verified', 'ensure_has_static', 'resolve_current_sta
     Route::patch('/gear/lists/{list}/slot', [GearListController::class, 'setSlot'])->name('statics.gear.lists.set-slot');
     Route::post('/gear/lists/{list}/simc', [GearListController::class, 'importSimc'])->name('statics.gear.lists.import-simc');
     Route::post('/gear/bis', [GearListController::class, 'importBis'])->name('statics.gear.lists.import-bis');
+    Route::patch('/gear/lists/{list}/talent', [GearListController::class, 'updateTalent'])->name('statics.gear.lists.update-talent');
 
     // Loot history (RC awards captured by the BlastR addon → bridge → here)
     // Lives as a tab inside the Gear page; this is the JSON endpoint the

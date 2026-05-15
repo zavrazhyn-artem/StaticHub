@@ -224,6 +224,7 @@ watch(() => props.activeTab, () => nextTick(measureThead));
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[100px]" style="color: #767577;">{{ __('Tier Pieces') }}</th>
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[140px]" style="color: #767577;">M+ {{ __('Runs') }}</th>
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[90px]" style="color: #767577;">{{ __('Rating') }}</th>
+                        <th class="p-1 text-center border-l border-white/[0.06] min-w-[80px]" style="color: #767577;">{{ __('Talents') }}</th>
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[120px]" style="color: #767577;">{{ __('Audit') }}</th>
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[130px]" style="color: #767577;">{{ __('Access Role') }}</th>
                         <th class="p-1 text-center border-l border-white/[0.06] min-w-[130px]" style="color: #767577;">{{ __('Roster Status') }}</th>
@@ -303,6 +304,7 @@ watch(() => props.activeTab, () => nextTick(measureThead));
                             </span>
                         </th>
                         <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[90px]">{{ __('Rating') }}</th>
+                        <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[80px]"></th>
                         <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[120px]">{{ __('Issues') }}</th>
                         <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[130px]">{{ __('Role') }}</th>
                         <th class="px-2 py-1 text-center border-l border-white/[0.06] min-w-[130px]">{{ __('Status') }}</th>

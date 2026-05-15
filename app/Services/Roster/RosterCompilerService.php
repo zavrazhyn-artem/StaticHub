@@ -67,6 +67,7 @@ final class RosterCompilerService
         $mounts    = $bnet['bnet_mounts'] ?? [];
         $pets      = $bnet['bnet_pets'] ?? [];
         $raidData  = $bnet['bnet_raid'] ?? [];
+        $specData  = $bnet['bnet_specialization'] ?? [];
 
         $equipmentBySpec = $character->bnet_equipment_by_spec ?? [];
         $snapshot        = $character->vault_weekly_snapshot ?? [];
@@ -120,6 +121,7 @@ final class RosterCompilerService
             'ilvl_by_spec'           => $ilvlBySpec ?: null,
             'gear_audit_by_spec'     => $gearAuditBySpec ?: null,
             'raid_progression'       => $this->instanceData->resolveRaids($raidData),
+            'talent_loadout_code'    => $this->resolveTalentLoadoutCode($specData),
         ];
 
         $weeklyPatch = [
@@ -312,6 +314,22 @@ final class RosterCompilerService
         }
 
         return $this->deriveRoleFromSpecName($specName);
+    }
+
+    private function resolveTalentLoadoutCode(array $specData): ?string
+    {
+        foreach ($specData['character_specialization_groups'] ?? [] as $group) {
+            if (!($group['is_active'] ?? false)) {
+                continue;
+            }
+            foreach ($group['loadouts'] ?? [] as $loadout) {
+                if ($loadout['is_active'] ?? false) {
+                    $code = $loadout['talent_loadout_code'] ?? null;
+                    return ($code !== null && $code !== '') ? (string) $code : null;
+                }
+            }
+        }
+        return null;
     }
 
     /**

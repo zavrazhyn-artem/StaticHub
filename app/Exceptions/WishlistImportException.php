@@ -38,6 +38,14 @@ class WishlistImportException extends Exception
         return new self("Character '{$name}-{$realm}' is not linked to your account. You can only import wishlists for your own characters.");
     }
 
+    public static function characterMismatch(string $reportName, string $reportRealm, string $selectedName, string $selectedRealm): self
+    {
+        return new self(
+            "This report is for {$reportName}-{$reportRealm}, but you selected {$selectedName}-{$selectedRealm}. " .
+            "Please select the correct character or use the right report URL."
+        );
+    }
+
     public static function specNotFound(string $class, string $spec): self
     {
         return new self("Specialization '{$spec} {$class}' is not in the database.");

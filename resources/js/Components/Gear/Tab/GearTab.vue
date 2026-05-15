@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import EmptyState from '@/Components/UI/EmptyState.vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
+import TalentCalculator from '@/Components/UI/TalentCalculator.vue';
 import GearGrid from './GearGrid.vue';
 import SlotItemPicker from './SlotItemPicker.vue';
 
@@ -21,6 +22,7 @@ const props = defineProps({
     gearListSetSlotUrlTemplate: { type: String, required: true },
     gearListPickerUrlTemplate: { type: String, required: true },
     gearListImportSimcUrlTemplate: { type: String, required: true },
+    gearListUpdateTalentUrlTemplate: { type: String, default: null },
     gearBisImportUrl: { type: String, required: true },
 });
 
@@ -93,9 +95,24 @@ watch(activeListId, () => fetchActiveList());
 const showNewListModal = ref(false);
 const showImportBisModal = ref(false);
 const showImportSimcModal = ref(false);
+const showTalentModal = ref(false);
 const newListName = ref('');
 const bisUrl = ref('');
 const simcText = ref('');
+
+const talentUpdateUrl = computed(() => {
+    if (!props.gearListUpdateTalentUrlTemplate || !activeListId.value) return null;
+    return props.gearListUpdateTalentUrlTemplate.replace('__ID__', activeListId.value);
+});
+
+const activeTalentCode = computed(() => activeList.value?.talent_loadout_code ?? null);
+const activeTalentReadonly = computed(() => activeList.value?.type === 'current');
+
+const onTalentSaved = (newCode) => {
+    if (activeList.value) {
+        activeList.value = { ...activeList.value, talent_loadout_code: newCode };
+    }
+};
 
 const customCount = computed(() => listSummaries.value.filter(l => l.type === 'custom').length);
 
@@ -345,6 +362,16 @@ const typeColor = (type) => ({
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
+                            <!-- Talent Build button — always visible when list has a talent code or is editable -->
+                            <button
+                                v-if="activeTalentCode || (isOwnContext && activeList.editable)"
+                                type="button"
+                                @click="showTalentModal = true"
+                                class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-400/40 text-purple-100 font-headline text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-purple-500/20 transition"
+                            >
+                                <span class="material-symbols-outlined text-base">account_tree</span>
+                                {{ __('Talent Build') }}
+                            </button>
                             <button
                                 v-if="isOwnContext && activeList.editable"
                                 type="button"
@@ -476,4 +503,31 @@ const typeColor = (type) => ({
         @close="closePicker"
         @picked="onPicked"
     />
+
+    <!-- Talent Build modal -->
+    <GlassModal :show="showTalentModal" @close="showTalentModal = false" max-width="max-w-5xl">
+        <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-300 text-base">account_tree</span>
+                {{ activeList?.name }} — {{ __('Talent Build') }}
+                <span v-if="activeTalentReadonly"
+                      class="text-[10px] font-normal normal-case tracking-normal text-on-surface-variant border border-white/10 rounded px-1.5 py-0.5">
+                    read-only
+                </span>
+            </h3>
+            <button type="button" @click="showTalentModal = false" class="text-on-surface-variant hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </header>
+        <div class="p-4 overflow-auto max-h-[80vh]">
+            <TalentCalculator
+                v-if="showTalentModal"
+                :talent-code="activeTalentCode ?? ''"
+                :readonly="activeTalentReadonly"
+                :update-url="!activeTalentReadonly ? talentUpdateUrl : null"
+                :csrf-token="csrfToken"
+                @saved="onTalentSaved"
+            />
+        </div>
+    </GlassModal>
 </template>

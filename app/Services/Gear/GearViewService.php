@@ -143,7 +143,7 @@ final class GearViewService
     public function activeList(int $listId): ?array
     {
         $list = GearList::query()
-            ->with(['items.item', 'specialization'])
+            ->with(['items.item', 'specialization', 'character'])
             ->find($listId);
 
         if (! $list) {
@@ -187,6 +187,9 @@ final class GearViewService
             // Custom AND BiS lists can be edited slot-by-slot via the picker.
             // Current is read-only — bnet sync owns it.
             'editable'    => in_array($list->type, [GearList::TYPE_CUSTOM, GearList::TYPE_BIS], true),
+            'talent_loadout_code' => $list->type === GearList::TYPE_CURRENT
+                ? ($list->character?->character_data['talent_loadout_code'] ?? null)
+                : $list->talent_loadout_code,
             'slots'       => $slots,
             'stats'       => $this->resolveStats($list),
         ];

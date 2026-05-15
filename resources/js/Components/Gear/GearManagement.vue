@@ -25,6 +25,7 @@ const props = defineProps({
     gearListSetSlotUrlTemplate: { type: String, required: true },
     gearListPickerUrlTemplate: { type: String, required: true },
     gearListImportSimcUrlTemplate: { type: String, required: true },
+    gearListUpdateTalentUrlTemplate: { type: String, default: null },
     gearBisImportUrl: { type: String, required: true },
     listSummariesUrl: { type: String, required: true },
     activeListUrlTemplate: { type: String, required: true },
@@ -142,6 +143,7 @@ const submitImport = async (e) => {
     try {
         const form = new FormData();
         form.append('url', urlInput.value.trim());
+        form.append('character_id', String(selectedCharacterId.value ?? ''));
         const resp = await fetch(props.storeUrl, {
             method: 'POST',
             headers: {
@@ -303,6 +305,7 @@ onMounted(() => {
         :gear-list-set-slot-url-template="gearListSetSlotUrlTemplate"
         :gear-list-picker-url-template="gearListPickerUrlTemplate"
         :gear-list-import-simc-url-template="gearListImportSimcUrlTemplate"
+        :gear-list-update-talent-url-template="gearListUpdateTalentUrlTemplate"
         :gear-bis-import-url="gearBisImportUrl"
     />
 

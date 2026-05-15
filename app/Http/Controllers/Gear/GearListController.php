@@ -178,6 +178,23 @@ class GearListController extends Controller
         return back()->withErrors(['slot' => $message]);
     }
 
+    public function updateTalent(StaticGroup $static, GearList $list, Request $request): JsonResponse
+    {
+        if ($list->character?->user_id !== $request->user()?->id) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        if ($list->type === GearList::TYPE_CURRENT) {
+            return response()->json(['error' => 'Cannot set talent on current list'], 422);
+        }
+
+        $code = $request->input('talent_loadout_code');
+
+        $this->service->updateTalentCode($list, is_string($code) && $code !== '' ? $code : null);
+
+        return response()->json(['success' => true]);
+    }
+
     public function importBis(StaticGroup $static, ImportBisRequest $request): RedirectResponse
     {
         try {

@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string $source
  * @property string|null $source_url
  * @property Carbon|null $imported_at
+ * @property string|null $talent_loadout_code
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Character $character
@@ -48,6 +49,7 @@ class GearList extends Model
         'source',
         'source_url',
         'imported_at',
+        'talent_loadout_code',
     ];
 
     protected $casts = [

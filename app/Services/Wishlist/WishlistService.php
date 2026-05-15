@@ -38,7 +38,7 @@ final class WishlistService
      *
      * @return Collection<int, Wishlist>
      */
-    public function importFromUrl(User $user, string $url): Collection
+    public function importFromUrl(User $user, string $url, int $characterId): Collection
     {
         [$dto, $source] = match (true) {
             $this->raidbots->isOwnUrl($url) => [$this->raidbots->importFromUrl($url), Wishlist::SOURCE_RAIDBOTS],
@@ -46,11 +46,7 @@ final class WishlistService
             default => throw WishlistImportException::unsupportedSource($url),
         };
 
-        $character = $this->resolveCharacter(
-            $dto['character']['name'],
-            $dto['character']['realm'],
-            $user
-        );
+        $character = $this->resolveCharacter($characterId, $user, $dto['character']);
         $spec = $this->resolveSpec(
             $dto['character']['class_slug'],
             $dto['character']['spec_slug']
@@ -126,16 +122,39 @@ final class WishlistService
      * proper bnet sync first. Also enforce ownership so a user can't import
      * a wishlist for someone else's character.
      */
-    private function resolveCharacter(string $name, string $realm, User $user): Character
+    /**
+     * Load the character the user explicitly selected, verify ownership, then
+     * confirm the report actually belongs to the same character. This prevents
+     * silently assigning a report to the wrong character when a player has two
+     * characters with the same name on different realms.
+     *
+     * @param array{name:string, realm:string} $reportChar
+     */
+    private function resolveCharacter(int $characterId, User $user, array $reportChar): Character
     {
-        $character = Character::query()->findByNameAndRealm($name, $realm);
+        $character = Character::query()->with('realm')->find($characterId);
 
-        if (! $character) {
-            throw WishlistImportException::characterNotFound($name, $realm);
+        if (! $character || $character->user_id !== $user->id) {
+            throw WishlistImportException::characterNotOwned(
+                $reportChar['name'],
+                $reportChar['realm'],
+            );
         }
 
-        if ($character->user_id !== $user->id) {
-            throw WishlistImportException::characterNotOwned($name, $realm);
+        $realmSlug = strtolower(str_replace(' ', '-', $reportChar['realm']));
+        $charSlug  = strtolower($character->realm?->slug ?? '');
+
+        $nameMatches  = strtolower($character->name) === strtolower($reportChar['name']);
+        $realmMatches = $charSlug === $realmSlug
+            || strtolower($character->realm?->name ?? '') === strtolower($reportChar['realm']);
+
+        if (! $nameMatches || ! $realmMatches) {
+            throw WishlistImportException::characterMismatch(
+                $reportChar['name'],
+                $reportChar['realm'],
+                $character->name,
+                $character->realm?->slug ?? '',
+            );
         }
 
         return $character;

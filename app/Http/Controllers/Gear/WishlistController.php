@@ -24,11 +24,12 @@ class WishlistController extends Controller
      */
     public function store(StaticGroup $static, ImportWishlistRequest $request): RedirectResponse|JsonResponse
     {
-        $url    = (string) $request->validated('url');
-        $userId = (int) Auth::id();
+        $url         = (string) $request->validated('url');
+        $characterId = (int) $request->validated('character_id');
+        $userId      = (int) Auth::id();
 
         try {
-            ImportWishlistJob::dispatchSync($userId, $url);
+            ImportWishlistJob::dispatchSync($userId, $url, $characterId);
         } catch (WishlistImportException $e) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => $e->getMessage()], 422);

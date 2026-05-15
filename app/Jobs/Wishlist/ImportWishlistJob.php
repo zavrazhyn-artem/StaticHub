@@ -26,11 +26,12 @@ class ImportWishlistJob implements ShouldQueue
     public function __construct(
         public readonly int $userId,
         public readonly string $url,
+        public readonly int $characterId,
     ) {}
 
     public function handle(WishlistService $service): void
     {
         $user = User::query()->findOrFail($this->userId);
-        $service->importFromUrl($user, $this->url);
+        $service->importFromUrl($user, $this->url, $this->characterId);
     }
 }

@@ -53,6 +53,7 @@ class BlizzardCharacterApiService
             'bnet_titles'                 => '/titles',
             'bnet_mounts'                 => '/collections/mounts',
             'bnet_pets'                   => '/collections/pets',
+            'bnet_specialization'         => '/specializations',
         ];
 
         $toFetch = array_diff_key($endpoints, array_flip($skip));

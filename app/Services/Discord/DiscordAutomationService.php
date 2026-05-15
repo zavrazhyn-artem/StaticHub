@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Discord;
 
-use App\Jobs\Analysis\FetchPostRaidLogsJob;
+use App\Jobs\Analysis\DispatchPostRaidFetchJob;
 use App\Models\Event;
 use App\Services\Raid\RaidScheduleService;
 
@@ -70,7 +70,7 @@ class DiscordAutomationService
                 $delayMinutes = (int) ($automation['auto_fetch_delay_minutes']
                     ?? config('tactical_logs.auto_fetch_delay_minutes', 30));
 
-                FetchPostRaidLogsJob::dispatch($raid->id)->delay(now()->addMinutes($delayMinutes));
+                DispatchPostRaidFetchJob::dispatch($raid->id)->delay(now()->addMinutes($delayMinutes));
                 $results[] = "Scheduled WCL log fetch in {$delayMinutes}min: Event ID {$raid->id}";
             }
 
