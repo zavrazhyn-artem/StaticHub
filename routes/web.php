@@ -24,6 +24,7 @@ use App\Http\Controllers\Settings\StaticSettingsController;
 use App\Http\Controllers\Gear\GearController;
 use App\Http\Controllers\Gear\GearListController;
 use App\Http\Controllers\Gear\WishlistController;
+use App\Http\Controllers\IcyVeinsAssetProxyController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
 use App\Http\Controllers\Auth\BattleNetController;
@@ -36,6 +37,10 @@ use App\Http\Controllers\FeedbackUploadController;
 use App\Http\Controllers\FeedbackVoteController;
 use App\Services\Backup\BackupHealthService;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/proxy/icy-veins/{path}', [IcyVeinsAssetProxyController::class, 'show'])
+    ->where('path', '[a-zA-Z0-9_\-./]+')
+    ->name('proxy.icy-veins');
 
 Route::get('/', function () {
     return view('welcome');

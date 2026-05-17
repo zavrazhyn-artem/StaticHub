@@ -122,6 +122,7 @@ final class RosterCompilerService
             'gear_audit_by_spec'     => $gearAuditBySpec ?: null,
             'raid_progression'       => $this->instanceData->resolveRaids($raidData),
             'talent_loadout_code'    => $this->resolveTalentLoadoutCode($specData),
+            'talent_loadout_codes_by_spec' => $this->resolveTalentLoadoutCodesBySpec($specData),
         ];
 
         $weeklyPatch = [
@@ -318,18 +319,43 @@ final class RosterCompilerService
 
     private function resolveTalentLoadoutCode(array $specData): ?string
     {
-        foreach ($specData['character_specialization_groups'] ?? [] as $group) {
-            if (!($group['is_active'] ?? false)) {
+        $activeSpecId = $specData['active_specialization']['id'] ?? null;
+        if ($activeSpecId === null) {
+            return null;
+        }
+
+        $bySpec = $this->resolveTalentLoadoutCodesBySpec($specData);
+        return $bySpec[(int) $activeSpecId] ?? null;
+    }
+
+    /**
+     * Map of [spec_id => active loadout code] across all specs the character has set up.
+     * Each spec's "active" loadout = the one with `is_active: true` in its loadouts[].
+     *
+     * @return array<int, string>
+     */
+    private function resolveTalentLoadoutCodesBySpec(array $specData): array
+    {
+        $bySpec = [];
+        foreach ($specData['specializations'] ?? [] as $spec) {
+            $specId = $spec['specialization']['id'] ?? null;
+            if ($specId === null) {
                 continue;
             }
-            foreach ($group['loadouts'] ?? [] as $loadout) {
-                if ($loadout['is_active'] ?? false) {
-                    $code = $loadout['talent_loadout_code'] ?? null;
-                    return ($code !== null && $code !== '') ? (string) $code : null;
+
+            foreach ($spec['loadouts'] ?? [] as $loadout) {
+                if (($loadout['is_active'] ?? false) !== true) {
+                    continue;
                 }
+                $code = $loadout['talent_loadout_code'] ?? null;
+                if ($code !== null && $code !== '') {
+                    $bySpec[(int) $specId] = (string) $code;
+                }
+                break;
             }
         }
-        return null;
+
+        return $bySpec;
     }
 
     /**

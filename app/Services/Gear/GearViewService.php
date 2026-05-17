@@ -188,7 +188,9 @@ final class GearViewService
             // Current is read-only — bnet sync owns it.
             'editable'    => in_array($list->type, [GearList::TYPE_CUSTOM, GearList::TYPE_BIS], true),
             'talent_loadout_code' => $list->type === GearList::TYPE_CURRENT
-                ? ($list->character?->character_data['talent_loadout_code'] ?? null)
+                ? ($list->character?->character_data['talent_loadout_codes_by_spec'][$list->spec_id]
+                    ?? $list->character?->character_data['talent_loadout_code']
+                    ?? null)
                 : $list->talent_loadout_code,
             'slots'       => $slots,
             'stats'       => $this->resolveStats($list),

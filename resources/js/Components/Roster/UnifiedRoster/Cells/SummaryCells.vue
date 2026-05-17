@@ -145,7 +145,7 @@ const hasTalents = computed(() => !!props.char?.talent_loadout_code);
 
     <!-- Talent modal (Teleport keeps it outside the table DOM) -->
     <Teleport to="body">
-        <GlassModal :show="talentModalOpen" @close="talentModalOpen = false" max-width="max-w-5xl">
+        <GlassModal :show="talentModalOpen" @close="talentModalOpen = false" max-width="max-w-7xl">
             <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
                 <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                     <span class="material-symbols-outlined text-cyan-300 text-base">account_tree</span>

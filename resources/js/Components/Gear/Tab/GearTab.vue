@@ -505,7 +505,7 @@ const typeColor = (type) => ({
     />
 
     <!-- Talent Build modal -->
-    <GlassModal :show="showTalentModal" @close="showTalentModal = false" max-width="max-w-5xl">
+    <GlassModal :show="showTalentModal" @close="showTalentModal = false" max-width="max-w-7xl">
         <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                 <span class="material-symbols-outlined text-purple-300 text-base">account_tree</span>
@@ -523,6 +523,7 @@ const typeColor = (type) => ({
             <TalentCalculator
                 v-if="showTalentModal"
                 :talent-code="activeTalentCode ?? ''"
+                :spec-id="activeList?.spec_id"
                 :readonly="activeTalentReadonly"
                 :update-url="!activeTalentReadonly ? talentUpdateUrl : null"
                 :csrf-token="csrfToken"
