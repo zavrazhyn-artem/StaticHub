@@ -1,0 +1,2849 @@
+[
+  {
+    "id": 248855,
+    "name": "Gateway Mastery",
+    "icon": "spell_warlock_demonicportal_green",
+    "specIds": [
+      265,
+      266,
+      267
+    ],
+    "description": "Increases the range of your Demonic Gateway by 20 yards, and reduces the cast time by 30%. Reduces the time between how often players can take your Demonic Gateway by -30 seconds.",
+    "requiredLevel": 49
+  },
+  {
+    "id": 212371,
+    "name": "Rot and Decay",
+    "icon": "spell_warlock_soulburn_haunt",
+    "specIds": [
+      265
+    ],
+    "description": "Shadow Bolt damage increases the duration of your Corruption and Agony on the target by 2 seconds.<br /><br />Drain Life and Drain Soul damage increases the duration of your Corruption and Agony on the target by 1 second.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 212295,
+    "name": "Nether Ward",
+    "icon": "spell_fire_felfireward",
+    "specIds": [
+      265,
+      267,
+      266
+    ],
+    "description": "Surrounds the caster with a shield that lasts 3 seconds, reflecting all harmful spells cast on you.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 221711,
+    "name": "Essence Drain",
+    "icon": "warlock_spelldrain",
+    "specIds": [
+      265
+    ],
+    "description": "Whenever you heal yourself with Drain Life, the enemy target deals 9% reduced damage to you for 10 seconds. Stacks up to 4 times.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236077,
+    "name": "Disarm",
+    "icon": "ability_warrior_disarm",
+    "specIds": [
+      73,
+      72,
+      71
+    ],
+    "description": "Disarm the enemy's weapons and shield for 5 seconds. Disarmed creatures deal significantly reduced damage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 235941,
+    "name": "Master and Commander",
+    "icon": "ability_warrior_rallyingcry",
+    "specIds": [
+      71
+    ],
+    "description": "Cooldown of Rallying Cry reduced by 120 seconds.",
+    "requiredLevel": 46
+  },
+  {
+    "id": 236308,
+    "name": "Storm of Destruction",
+    "icon": "ability_warrior_bladestorm",
+    "specIds": [
+      71
+    ],
+    "description": "Bladestorm, Ravager, and Demolish now snare all targets you hit by 60% for 6 seconds and decrease their healing taken by 50% for 10 seconds.",
+    "requiredLevel": 38
+  },
+  {
+    "id": 1219165,
+    "name": "Sharpen Blade",
+    "icon": "spell_warrior_sharpenblade",
+    "specIds": [
+      71
+    ],
+    "description": "Colossus Smash causes your next Mortal Strike to deal 15% increased damage and reduce healing taken by 50% for 4 seconds.",
+    "requiredLevel": 39
+  },
+  {
+    "id": 236273,
+    "name": "Duel",
+    "icon": "achievement_legionpvptier3",
+    "specIds": [
+      71
+    ],
+    "description": "You challenge the target to a duel. While challenged, all damage you and the target deal to all targets other than each other is reduced by 50%. Lasts 12 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 288855,
+    "name": "Life and Death",
+    "icon": "spell_deathvortex",
+    "specIds": [
+      252
+    ],
+    "description": "When the target afflicted with your Dread Plague is healed, you are also healed for 10% of the amount.<br /><br />Additionally, Dread Plague deals 200% of its remaining damage to the target when dispelled.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 77606,
+    "name": "Dark Simulacrum",
+    "icon": "spell_holy_consumemagic",
+    "specIds": [
+      252,
+      250,
+      251
+    ],
+    "description": "Places a dark ward on an enemy player that persists for 12 seconds, triggering when the enemy next spends mana on a spell, and allowing the Death Knight to unleash an exact duplicate of that spell.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236144,
+    "name": "Master Shapeshifter",
+    "icon": "ability_druid_mastershapeshifter",
+    "specIds": [
+      104
+    ],
+    "description": "Your abilities are amplified based on your current shapeshift form, granting an additional effect.<br /><br /><b style=\"color:white;\">Caster Form</b><br />Rejuvenation heals for 30% more and causes you to instantly generate 25 Rage after entering Bear Form.<br /><br /><b style=\"color:white;\">Moonkin Form</b><br />Wrath, Starfire, and Starsurge deal 30% additional damage and cause you to instantly generate 25 Rage after entering Bear Form.<br /><br /><b style=\"color:white;\">Cat Form</b><br />Rip, Ferocious Bite, and Maim deal 60% additional damage and cause you to instantly generate 50 Rage after entering Bear Form when cast with 5 combo points.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 236180,
+    "name": "Den Mother",
+    "icon": "ability_druid_denmother",
+    "specIds": [
+      104
+    ],
+    "description": "You bolster nearby allies within 15 yards, increasing their maximum health by 15%.<br /><br />The duration of all stun effects on you is reduced by 15%.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 201664,
+    "name": "Demoralizing Roar",
+    "icon": "ability_druid_challangingroar",
+    "specIds": [
+      104
+    ],
+    "description": "Demoralizes all enemies within 10 yards, reducing the damage they do by 20% for 8 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233673,
+    "name": "Disentanglement",
+    "icon": "inv_misc_herb_talandrasrose",
+    "specIds": [
+      105
+    ],
+    "description": "Efflorescence removes all snare effects from friendly targets when it heals and its Mana cost is reduced by 40%.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 407581,
+    "name": "Icy Feet",
+    "icon": "ability_mage_icyfeet",
+    "specIds": [
+      64
+    ],
+    "description": "When your Frost Nova or Water Elemental's Freeze is dispelled or removed, become immune to snares for 3 seconds. <br /><br />This effect can only occur once every 10 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 353584,
+    "name": "Eminence",
+    "icon": "monk_ability_transcendence",
+    "specIds": [
+      270
+    ],
+    "description": "Transcendence: Transfer can now be cast if you are stunned. Cooldown reduced by 15 seconds if you are not.",
+    "requiredLevel": 32
+  },
+  {
+    "id": 201372,
+    "name": "Ride the Wind",
+    "icon": "ability_monk_ridethewind",
+    "specIds": [
+      269
+    ],
+    "description": "Flying Serpent Kick clears all snares from you when used and forms a path of wind in its wake, causing all allies who stand in it to have 30% increased movement speed and to be immune to movement slowing effects.",
+    "requiredLevel": 21
+  },
+  {
+    "id": 556606,
+    "name": "Luminescence",
+    "icon": "spell_holy_fanaticism",
+    "specIds": [
+      70,
+      66,
+      65
+    ],
+    "description": "Lightbearer's healing transfer is increased by up to 150% based on your current health. Lower health heals allies for more.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 199452,
+    "name": "Ultimate Sacrifice",
+    "icon": "spell_holy_sealofsacrifice",
+    "specIds": [
+      65
+    ],
+    "description": "Your Blessing of Sacrifice now transfers 100% of all damage to you into a damage over time effect, but lasts 6 seconds and no longer cancels when you are below 20% health.",
+    "requiredLevel": 41
+  },
+  {
+    "id": 210378,
+    "name": "Darkest before the Dawn",
+    "icon": "spell_paladin_lightofdawn",
+    "specIds": [
+      65
+    ],
+    "description": "Every 5 second the healing done by your next Light of Dawn is increased by 20%. Stacks up to 5 times.",
+    "requiredLevel": 34
+  },
+  {
+    "id": 199456,
+    "name": "Spreading the Word",
+    "icon": "inv_misc_book_17",
+    "specIds": [
+      65
+    ],
+    "description": "Your allies affected by your Aura gain an effect after you cast Blessing of Protection or Blessing of Freedom.<br /><br />Blessing of Protection<br />Physical damage reduced by 30% for 6 seconds.<br /><br />Blessing of Freedom<br />Cleared of all movement impairing effects.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 216868,
+    "name": "Hallowed Ground",
+    "icon": "spell_holy_innerfire",
+    "specIds": [
+      66
+    ],
+    "description": "Your Consecration clears and suppresses all snare effects on allies within its area of effect.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199542,
+    "name": "Steed of Glory",
+    "icon": "spell_holy_crusaderaura",
+    "specIds": [
+      66
+    ],
+    "description": "Your Divine Steed lasts for an additional 2 seconds.<br /><br />While active you become immune to movement impairing effects, and you knock back enemies that you move through.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 216853,
+    "name": "Sacred Duty",
+    "icon": "spell_holy_sealofprotection",
+    "specIds": [
+      66
+    ],
+    "description": "Reduces the cooldown of your Blessing of Protection and Blessing of Sacrifice by 33%.",
+    "requiredLevel": 32
+  },
+  {
+    "id": 228049,
+    "name": "Guardian of the Forgotten Queen",
+    "icon": "spell_holy_heroism",
+    "specIds": [
+      66
+    ],
+    "description": "Empowers the friendly target with the spirit of the forgotten queen, causing the target to be immune to all damage for 10 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 216855,
+    "name": "Guarded by the Light",
+    "icon": "ability_paladin_gaurdedbythelight",
+    "specIds": [
+      66
+    ],
+    "description": "Your Flash of Light reduces all damage the target receives by 10% for 6 seconds. Stacks up to 2 times.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 196439,
+    "name": "Purification",
+    "icon": "spell_holy_dispelmagic",
+    "specIds": [
+      256
+    ],
+    "description": "Purify now has a maximum of 2 charges.<br /><br />Removing harmful effects with Purify grants your target an absorption shield equal to 5% of their maximum health. Lasts 8 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1246968,
+    "name": "Psychic Shroud",
+    "icon": "ability_priest_surgeofdarkness",
+    "specIds": [
+      257,
+      258,
+      256
+    ],
+    "description": "When your Psychic Scream affects 1 or more players, the next crowd control effect against you is prevented. Lasts 6 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199259,
+    "name": "Driven to Madness",
+    "icon": "ability_warlock_improvedsoulleech",
+    "specIds": [
+      258
+    ],
+    "description": "While Voidform is not active, being attacked will reduce the cooldown of Voidform by 3 seconds.",
+    "requiredLevel": 23
+  },
+  {
+    "id": 357481,
+    "name": "Sanctified Ground",
+    "icon": "spell_holy_impholyconcentration",
+    "specIds": [
+      257
+    ],
+    "description": "Holy Word: Sanctify blesses the ground with divine light, causing all allies who stand within to be immune to all silence and interrupt effects. Lasts for 5 seconds.",
+    "requiredLevel": 41
+  },
+  {
+    "id": 214205,
+    "name": "Trinity",
+    "icon": "spell_priest_burningwill",
+    "specIds": [
+      256
+    ],
+    "description": "Atonement duration increased by 10 seconds.<br /><br />Smite, Penance, Mind Blast, and Void Blast have 10% reduced cast time when you have Atonement on 3 or more allies.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 197535,
+    "name": "Strength of Soul",
+    "icon": "spell_holy_blessingofprotection",
+    "specIds": [
+      256
+    ],
+    "description": "Your Power Word: Shield reduces all Physical damage taken by 15% while the shield persists.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 289666,
+    "name": "Greater Heal",
+    "icon": "spell_holy_heal",
+    "specIds": [
+      257
+    ],
+    "description": "An exceptional spell that heals an ally for 40% of their maximum health, ignoring healing reduction effects. ",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199445,
+    "name": "Mind Trauma",
+    "icon": "spell_shadow_mindflay",
+    "specIds": [
+      258
+    ],
+    "description": "Siphon haste from enemies, stealing 2% haste per stack of Mind Trauma, stacking up to 9 times. Fully channeled Mind Flays grant 1 stack of Mind Trauma and fully channeled Void Torrents grant 3 stacks of Mind Trauma. Lasts 15 seconds.<br /><br />You can only gain 3 stacks of Mind Trauma from a single enemy.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236499,
+    "name": "Ultimate Radiance",
+    "icon": "spell_priest_power_word",
+    "specIds": [
+      256
+    ],
+    "description": "Evangelism cooldown is reduced by 45 seconds and Power Word: Radiance healing is increased by 15%.",
+    "requiredLevel": 23
+  },
+  {
+    "id": 355897,
+    "name": "Inner Light",
+    "icon": "spell_holy_divinespirit",
+    "specIds": [
+      256
+    ],
+    "description": "Inner Light: Healing spells cost 10% less mana.<br /><br />Inner Shadow: Spell damage and Atonement healing increased by 10%.<br /><br />Activate to swap from one effect to the other, incurring a 6 seconds cooldown.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 215982,
+    "name": "Spirit of the Redeemer",
+    "icon": "inv_enchant_essenceeternallarge",
+    "specIds": [
+      257
+    ],
+    "description": "Your Spirit of Redemption is now an active ability with a 2 minute cooldown, but the duration is reduced by 9 seconds and you will no longer enter Spirit of Redemption upon dying.",
+    "requiredLevel": 29
+  },
+  {
+    "id": 1218211,
+    "name": "Dark Archangel",
+    "icon": "ability_priest_darkarchangel",
+    "specIds": [
+      256
+    ],
+    "description": "Casting Evangelism increases your damage, and the damage of all allies with your Atonement by 10% for 12 seconds.",
+    "requiredLevel": 45
+  },
+  {
+    "id": 197000,
+    "name": "Maneuverability",
+    "icon": "ability_rogue_sprint_blue",
+    "specIds": [
+      260,
+      261,
+      259
+    ],
+    "description": "Sprint has 50% reduced cooldown and 50% reduced duration.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 354406,
+    "name": "Control is King",
+    "icon": "ability_rogue_kidneyshot",
+    "specIds": [
+      260,
+      261,
+      259
+    ],
+    "description": "Cheap Shot grants Slice and Dice for 15 second and Kidney Shot restores 10 Energy per combo point spent.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 354425,
+    "name": "Drink Up Me Hearties",
+    "icon": "inv_drink_33_bloodredale",
+    "specIds": [
+      260
+    ],
+    "description": "Crimson Vial restores 5% additional maximum health and grants 60% of its healing to allies within 15 yds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 354895,
+    "name": "Creeping Venom",
+    "icon": "ability_rogue_creepingvenom",
+    "specIds": [
+      259
+    ],
+    "description": "Your Envenom applies Creeping Venom, reducing the target's movement speed by 5% for 4 seconds.  Creeping Venom is reapplied when the target moves. Max 18 stacks.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 207777,
+    "name": "Dismantle",
+    "icon": "ability_rogue_dismantle",
+    "specIds": [
+      260,
+      259,
+      261
+    ],
+    "description": "Disarm the enemy, preventing the use of any weapons or shield for 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 354825,
+    "name": "Thief's Bargain",
+    "icon": "inv_letter_17",
+    "specIds": [
+      261
+    ],
+    "description": "The cooldowns of Shadow Blades, Vanish, and Feint are reduced by 20%, but using one reduces your damage by 10% for 6 seconds.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 198145,
+    "name": "System Shock",
+    "icon": "ability_rogue_systemshock",
+    "specIds": [
+      259
+    ],
+    "description": "Casting Envenom with at least 5 combo points on a target afflicted by your Garrote, Rupture, and lethal poison deals 3136 Nature damage, and reduces their movement speed by 90% for 2 seconds.",
+    "requiredLevel": 22
+  },
+  {
+    "id": 356520,
+    "name": "Necrotic Wounds",
+    "icon": "ability_racial_aberration",
+    "specIds": [
+      252
+    ],
+    "description": "Putrefy applies a Necrotic Wound to the enemy when it deals damage, absorbing 8% of all healing received for 15 seconds.<br /><br />Max 3 stacks. Adding a stack does not refresh the duration.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 210128,
+    "name": "Zombify",
+    "icon": "ability_deathknight_reanimation",
+    "specIds": [
+      252
+    ],
+    "description": "Reanimates a nearby corpse, summoning a zombie for 20 seconds that slowly moves towards your target. <br /><br />If your zombie reaches its target, it explodes after 3 seconds. The explosion stuns all enemies within 8 yards for 3 seconds and deals 10% of their health in Shadow damage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 200586,
+    "name": "Fel Fissure",
+    "icon": "spell_fire_felhellfire",
+    "specIds": [
+      267
+    ],
+    "description": "Chaos Bolt creates a 5 yd wide eruption of Felfire under the target, reducing movement speed by 50% and reducing all healing received by 25% on all enemies within the fissure. Lasts 6 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 212459,
+    "name": "Call Fel Lord",
+    "icon": "achievement_boss_hellfire_fellord",
+    "specIds": [
+      266
+    ],
+    "description": "Summon a fel lord to guard the location for 15 seconds. Any enemy that comes within 6 yards will suffer 26400 Physical damage, and players struck will be stunned for 1 second.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 461917,
+    "name": "Bane of Havoc",
+    "icon": "warlock_pvp_banehavoc",
+    "specIds": [
+      267
+    ],
+    "description": "Curses the ground with a demonic bane, causing all of your single target spells to also strike targets marked with the bane for  60% of the damage dealt. Lasts 10 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 213871,
+    "name": "Bodyguard",
+    "icon": "ability_warrior_shieldguard",
+    "specIds": [
+      73
+    ],
+    "description": "Protect an ally, causing 40% of all Physical damage they take to be transfered to you. When the target takes Physical damage, your Shield Slam cooldown has a 30% chance to be reset. Bodyguard is cancelled if the target is further than 20 yards from you. Lasts 60 seconds.<br /><br />Only one target can be Bodyguarded at a time.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199023,
+    "name": "Morale Killer",
+    "icon": "ability_warrior_warcry",
+    "specIds": [
+      73
+    ],
+    "description": "Reduces the cooldown of Demoralizing Shout by 15 sec, and Demoralizing Shout now reduces the damage enemies deal to all targets, not just you.",
+    "requiredLevel": 27
+  },
+  {
+    "id": 198912,
+    "name": "Shield Bash",
+    "icon": "ability_warrior_shieldbash",
+    "specIds": [
+      73
+    ],
+    "description": "When Shield Slam is used on targets that are casting, it reduces their damage done by 15% for 8 seconds and the cooldown is instantly reset.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199045,
+    "name": "Thunderstruck",
+    "icon": "warrior_talent_icon_bloodandthunder",
+    "specIds": [
+      73
+    ],
+    "description": "After casting Avatar, Shockwave, or Stormbolt, your next Thunder Clap roots all targets it damages for 4 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 411764,
+    "name": "Enduring Rage",
+    "icon": "ability_warrior_rampage",
+    "specIds": [
+      72
+    ],
+    "description": "You have a chance to become Enraged while you are suffering movement impairing effects.<br /><br />Suffering loss of control effects have a chance to grant you Recklessness for 5 second.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199261,
+    "name": "Death Wish",
+    "icon": "spell_shadow_deathpact",
+    "specIds": [
+      72
+    ],
+    "description": "Increases your damage taken and done by 10% for 15 seconds at the cost of 10% of your health. Stacks up to 5 times.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233754,
+    "name": "Celestial Guardian",
+    "icon": "ability_druid_protectorofthepack",
+    "specIds": [
+      102
+    ],
+    "description": "Bear Form reduces magic damage taken from spells by 10% and you may now cast Moonfire while in Bear Form.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 200567,
+    "name": "Crescent Burn",
+    "icon": "spell_nature_starfall",
+    "specIds": [
+      102
+    ],
+    "description": "Using Moonfire on a target already afflicted by Moonfire's damage over time effect deals 35% additional direct damage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233750,
+    "name": "Moon and Stars",
+    "icon": "ability_druid_fortifiedbark",
+    "specIds": [
+      102
+    ],
+    "description": "Entering an Eclipse summons a beam of light at your location granting you 50% reduction in silence and interrupts for 6 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 209740,
+    "name": "Moonkin Aura",
+    "icon": "ability_druid_improvedmoonkinform",
+    "specIds": [
+      102
+    ],
+    "description": "Starsurge grants 2% spell critical strike chance to 8 allies within 40 yards for 18 seconds, stacking up to 3 times.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 228431,
+    "name": "Charging Bash",
+    "icon": "inv_bone_skull_04",
+    "specIds": [
+      104
+    ],
+    "description": "Increases the range of your Skull Bash by 10 yards.",
+    "requiredLevel": 27
+  },
+  {
+    "id": 202226,
+    "name": "Entangling Claws",
+    "icon": "spell_nature_stranglevines",
+    "specIds": [
+      104
+    ],
+    "description": "Entangling Roots is now an instant cast spell with a 6 second cooldown but with a 10 yard range. It can also be cast while in shapeshift forms.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 202246,
+    "name": "Overrun",
+    "icon": "ability_druid_overrun",
+    "specIds": [
+      104
+    ],
+    "description": "Charge to an enemy, stunning them for 3 seconds and knocking back their allies within 15 yards.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 329042,
+    "name": "Emerald Slumber",
+    "icon": "inv_legion_faction_dreamweavers",
+    "specIds": [
+      104
+    ],
+    "description": "Embrace the Emerald Dream, causing you to enter a deep slumber for 8 seconds. While sleeping, all other cooldowns recover 400% faster, and allies within 40 yds are healed for 6000 every 1 second.<br /><br />Direct damage taken may awaken you.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 1217017,
+    "name": "Thorns",
+    "icon": "spell_nature_thorns",
+    "specIds": [
+      103,
+      105,
+      102
+    ],
+    "description": "Casting Barkskin sprouts thorns on its target for 12 seconds. When victim to melee attacks, thorns deals 13679 Nature damage back to the attacker.<br /><br />Attackers also have their movement speed reduced by 50% for 4 seconds.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 213200,
+    "name": "Freedom of the Herd",
+    "icon": "spell_druid_stampedingroar_cat",
+    "specIds": [
+      103
+    ],
+    "description": "Your Stampeding Roar clears all roots and snares from yourself and allies.",
+    "requiredLevel": 43
+  },
+  {
+    "id": 202727,
+    "name": "Rot and Wither",
+    "icon": "ability_deathknight_roilingblood",
+    "specIds": [
+      250,
+      251,
+      252
+    ],
+    "description": "Your Death and Decay rots enemies each time it deals damage, absorbing healing equal to 100% of damage dealt.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 47476,
+    "name": "Strangulate",
+    "icon": "spell_shadow_soulleech_3",
+    "specIds": [
+      250,
+      251,
+      252
+    ],
+    "description": "Shadowy tendrils constrict an enemy's throat, silencing them for 4 seconds.",
+    "requiredLevel": 45
+  },
+  {
+    "id": 236012,
+    "name": "Malorne's Swiftness",
+    "icon": "inv_stagform",
+    "specIds": [
+      103
+    ],
+    "description": "Your Travel Form movement speed while within a Battleground or Arena is increased by 20% and you always move at 100% movement speed while in Travel Form.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233412,
+    "name": "Last Dance",
+    "icon": "inv_sword_07",
+    "specIds": [
+      250
+    ],
+    "description": "Reduces the cooldown of Dancing Rune Weapon by 50% and its duration by 25%.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 203173,
+    "name": "Death Chain",
+    "icon": "ability_deathknight_deathchain",
+    "specIds": [
+      250
+    ],
+    "description": "Chains 3 enemies together, dealing 2948 Shadow damage and causing 20% of all damage taken to also be received by the others in the chain. Lasts for 10 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236020,
+    "name": "Ferocious Wound",
+    "icon": "ability_druid_ferociousbite",
+    "specIds": [
+      103
+    ],
+    "description": "Attacking with a 5 combo point Ferocious Bite reduces the target's maximum health by up to 3% for 30 seconds, stacking up to 2 times. Ferocious Wound can only be active on one target at once.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 203224,
+    "name": "Fresh Wound",
+    "icon": "ability_druid_disembowel",
+    "specIds": [
+      103
+    ],
+    "description": "Rake has a 100% increased critical strike chance if used on a target that doesn’t already have Rake active.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 203242,
+    "name": "Wicked Claws",
+    "icon": "artifactability_feraldruid_openwounds",
+    "specIds": [
+      103
+    ],
+    "description": "Infected Wounds can now stack up to 2 times, and reduces 8% of all healing received by the target per stack.<br /><br />Infected Wounds can now also be applied from Rip.",
+    "requiredLevel": 37
+  },
+  {
+    "id": 198148,
+    "name": "Concentrated Coolness",
+    "icon": "spell_frost_frozenorb",
+    "specIds": [
+      64
+    ],
+    "description": "Frozen Orb's damage is increased by 10% and is now castable at a location with a 40 yard range but no longer moves. ",
+    "requiredLevel": 40
+  },
+  {
+    "id": 415945,
+    "name": "Improved Mass Invisibility",
+    "icon": "ability_mage_massinvisibility",
+    "specIds": [
+      62,
+      63,
+      64
+    ],
+    "description": "The cooldown of Mass Invisibility is reduced by 0 minute and can affect allies in combat.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199324,
+    "name": "Divine Vision",
+    "icon": "spell_holy_mindvision",
+    "specIds": [
+      65
+    ],
+    "description": "Increases the range of your Aura by 30 yards and reduces the cooldown of Aura Mastery by 30 seconds.",
+    "requiredLevel": 39
+  },
+  {
+    "id": 199330,
+    "name": "Cleanse the Weak",
+    "icon": "spell_holy_purify",
+    "specIds": [
+      65
+    ],
+    "description": "When you Cleanse an ally, 1 ally within 40 yds is dispelled of the same effects, but the cooldown of Cleanse is increased by 4 seconds.<br /><br />Healing allies with your Flash of Light or Holy Light will cleanse all Diseases and Poisons from the target.",
+    "requiredLevel": 27
+  },
+  {
+    "id": 203280,
+    "name": "World in Flames",
+    "icon": "ability_mage_worldinflames",
+    "specIds": [
+      63
+    ],
+    "description": "Empower Flamestrike, dealing up to 50% more damage based on enemies' distance to the center of Flamestrike.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 203286,
+    "name": "Greater Pyroblast",
+    "icon": "ability_mage_greaterpyroblast",
+    "specIds": [
+      63
+    ],
+    "description": "Hurls an immense fiery boulder that deals up to 30% of the target's total health in Fire damage.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 202746,
+    "name": "Survival Tactics",
+    "icon": "ability_rogue_feigndeath",
+    "specIds": [
+      254,
+      253,
+      255
+    ],
+    "description": "Feign Death reduces damage taken by 90% for 2 seconds.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 356719,
+    "name": "Chimaeral Sting",
+    "icon": "ability_hunter_snaketrap",
+    "specIds": [
+      254,
+      253,
+      255
+    ],
+    "description": "Stings the target, dealing 15000 Nature damage and initiating a series of venoms. Each lasts 3 seconds and applies the next effect after the previous one ends.<br /><br />Scorpid Venom:<br />-90% reduced movement speed.<br /><br />Spider Venom:<br />Silenced.<br /><br />Viper Venom:<br />-20% reduced damage and healing.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 248443,
+    "name": "Ranger's Finesse",
+    "icon": "ability_hunter_runningshot",
+    "specIds": [
+      254
+    ],
+    "description": "Casting Aimed Shot provides you with Ranger's Finesse. After gaining 3 stacks of Ranger's Finesse, increase your next Volley's radius and duration by 50%.<br /><br />Consuming Ranger's Finesse reduces the remaining cooldown of Aspect of the Turtle by 20 second.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1217102,
+    "name": "Sniper's Advantage",
+    "icon": "hunter_pvp_snipershot",
+    "specIds": [
+      254
+    ],
+    "description": "Trueshot and Volley increase the range of all shots by 30% for their duration.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 203235,
+    "name": "Hunting Pack",
+    "icon": "ability_hunter_huntingparty",
+    "specIds": [
+      255,
+      254,
+      253
+    ],
+    "description": "Aspect of the Cheetah has 50% reduced cooldown and grants its effects to allies within 15 yds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 212640,
+    "name": "Mending Bandage",
+    "icon": "inv_firstaid_bandage2",
+    "specIds": [
+      255
+    ],
+    "description": "Instantly clears all bleeds, poisons, and diseases from the target, and heals for 18% damage over 6 seconds.<br /><br />Being attacked will stop you from using Mending Bandage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 407028,
+    "name": "Sticky Tar Bomb",
+    "icon": "ability_hunter_stickytarbombtrap",
+    "specIds": [
+      255
+    ],
+    "description": "Throw a Sticky Tar Bomb that coats your target's weapons with tar, disarming them for 4 seconds. <br /><br />After 4 seconds, Sticky Tar Bomb explodes onto nearby enemies. Other enemies that are hit by the explosion are affected by Sticky Tar Bomb but this effect cannot spread further.",
+    "requiredLevel": 21
+  },
+  {
+    "id": 212638,
+    "name": "Tracker's Net",
+    "icon": "hunter_pvp_trackersnet",
+    "specIds": [
+      255
+    ],
+    "description": "Hurl a net at your enemy, rooting them for 6 seconds. While within the net, the target's chance to hit is reduced by 80%. Any damage will break the net.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 202107,
+    "name": "Microbrew",
+    "icon": "ability_monk_fortifyingale_new",
+    "specIds": [
+      268
+    ],
+    "description": "Reduces the cooldown of Fortifying Brew by 50%.",
+    "requiredLevel": 28
+  },
+  {
+    "id": 410346,
+    "name": "Hot Trub",
+    "icon": "spell_brew_dark",
+    "specIds": [
+      268
+    ],
+    "description": "Purifying Brew deals 20% of cleared damage split among nearby enemies. After clearing 100% of your maximum health in Stagger damage, your next Breath of Fire incapacitates targets for 4 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 202162,
+    "name": "Avert Harm",
+    "icon": "ability_monk_leeroftheox",
+    "specIds": [
+      268
+    ],
+    "description": "Guard the 4 closest players within 15 yards for 15 seconds, allowing you to Stagger 20% of damage they take.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 354540,
+    "name": "Nimble Brew",
+    "icon": "spell_monk_nimblebrew",
+    "specIds": [
+      268
+    ],
+    "description": "Douse allies in the targeted area with Nimble Brew, preventing the next full loss of control effect within 8 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 202335,
+    "name": "Double Barrel",
+    "icon": "archaeology_5_0_emptykegofbrewfatherxinwoyin",
+    "specIds": [
+      268
+    ],
+    "description": "Your next Keg Smash deals 50% additional damage, and stuns all targets it hits for 3 seconds.",
+    "requiredLevel": 21
+  },
+  {
+    "id": 202370,
+    "name": "Mighty Ox Kick",
+    "icon": "ability_monk_mightyoxkick",
+    "specIds": [
+      268
+    ],
+    "description": "You perform a Mighty Ox Kick, hurling your enemy a distance behind you.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 353502,
+    "name": "Counteract Magic",
+    "icon": "ability_monk_counteractmagic",
+    "specIds": [
+      270
+    ],
+    "description": "Removing hostile magic effects from a target increases the healing they receive from you by 10% for 10 seconds, stacking up to 3 times.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 1243418,
+    "name": "Healing Spheres",
+    "icon": "ability_monk_healthsphere",
+    "specIds": [
+      270
+    ],
+    "description": "Your healing has a chance to coalesces a Healing Sphere out of the mists at your target's location after 1.5 seconds. If allies walk through it, they consume the sphere, healing themselves for 54000 and dispelling all harmful periodic magic effects.<br /><br />Maximum of 3 Healing Spheres can be active by the Monk at any given time.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 203340,
+    "name": "Diamond Ice",
+    "icon": "ability_mage_coldasice",
+    "specIds": [
+      255,
+      254,
+      253
+    ],
+    "description": "Victims of Freezing Trap can no longer be damaged or healed.  Freezing Trap is now undispellable, but has a 4 seconds duration.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 247543,
+    "name": "Entangling Bark",
+    "icon": "spell_druid_ironbark",
+    "specIds": [
+      105
+    ],
+    "description": "Ironbark now also grants the target Nature's Grasp, rooting the first 3 melee attackers for 6 seconds.",
+    "requiredLevel": 23
+  },
+  {
+    "id": 356976,
+    "name": "The Beast Within",
+    "icon": "ability_hunter_beastwithin",
+    "specIds": [
+      253
+    ],
+    "description": "Bestial Wrath now provides immunity to Fear and Horror effects for you and your pets for 8 seconds. Nearby allied pets are also inspired, increasing their attack speed by 10%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233755,
+    "name": "Deep Roots",
+    "icon": "inv_misc_herb_sansamroot",
+    "specIds": [
+      105
+    ],
+    "description": "Increases the amount of damage required to cancel your Entangling Roots by 75%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 204080,
+    "name": "Deathchill",
+    "icon": "spell_frost_frostarmor",
+    "specIds": [
+      251
+    ],
+    "description": "Your Remorseless Winter and Chains of Ice apply Deathchill, rooting the target in place for 4 seconds.<br /><br /><b style=\"color:white;\">Remorseless Winter</b> <br />All targets within 8 yards are afflicted with Deathchill when Remorseless Winter is cast.<br /><br /><b style=\"color:white;\">Chains of Ice</b><br />When you Chains of Ice a target already afflicted by your Chains of Ice they will be afflicted by Deathchill.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 233396,
+    "name": "Delirium",
+    "icon": "spell_festergutgas",
+    "specIds": [
+      251
+    ],
+    "description": "Howling Blast applies Delirium, reducing the cooldown recovery rate of movement enhancing abilities by 50% for 12 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 204331,
+    "name": "Counterstrike Totem",
+    "icon": "spell_nature_wrathofair_totem",
+    "specIds": [
+      264,
+      263,
+      262
+    ],
+    "description": "Summons a totem at your feet for 15 seconds.<br /><br />Whenever enemies within 20 yards of the totem deal direct damage, the totem will deal 100% of the damage dealt back to attacker. ",
+    "requiredLevel": 0
+  },
+  {
+    "id": 206642,
+    "name": "Electrocute",
+    "icon": "spell_nature_purge",
+    "specIds": [
+      264,
+      263,
+      262
+    ],
+    "description": "When you successfully Purge a beneficial effect, the enemy suffers 68040 Nature damage over 3 seconds.",
+    "requiredLevel": 39
+  },
+  {
+    "id": 204336,
+    "name": "Grounding Totem",
+    "icon": "spell_nature_groundingtotem",
+    "specIds": [
+      264,
+      262,
+      263
+    ],
+    "description": "Summons a totem at your feet that will redirect all harmful spells cast within 30 yards on a nearby party or raid member to itself. Will not redirect area of effect spells. Lasts 3 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 193876,
+    "name": "Shamanism",
+    "icon": "trade_archaeology_ancientorcshamanheaddress",
+    "specIds": [
+      263
+    ],
+    "description": "Your Bloodlust/Heroism spell now has a 60 second cooldown, but increases Haste by 20%, and only affects you and your friendly target when cast for 10 seconds.<br /><br />In addition, Bloodlust/Heroism is no longer affected by Sated/Exhaustion.",
+    "requiredLevel": 48
+  },
+  {
+    "id": 355580,
+    "name": "Static Field Totem",
+    "icon": "spell_shaman_stormtotem",
+    "specIds": [
+      262,
+      263,
+      264
+    ],
+    "description": "Summons a totem with 4% of your health at the target location for 6 seconds that forms a circuit of electricity that enemies cannot pass through.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 210256,
+    "name": "Blessing of Sanctuary",
+    "icon": "spell_holy_greaterblessingofsanctuary",
+    "specIds": [
+      70
+    ],
+    "description": "Instantly removes all stun, silence, fear and horror effects from the friendly target and reduces the duration of future such effects by 60% for 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 355614,
+    "name": "Ultimate Retribution",
+    "icon": "spell_holy_crusade",
+    "specIds": [
+      70
+    ],
+    "description": "Mark an enemy player for retribution after they kill an ally within your active Aura. If the marked enemy is slain within 12 seconds, cast Redemption on the fallen ally.",
+    "requiredLevel": 38
+  },
+  {
+    "id": 211522,
+    "name": "Psyfiend",
+    "icon": "spell_priest_psyfiend",
+    "specIds": [
+      258
+    ],
+    "description": "Summons a Psyfiend with 24000 health for 12 seconds beside you to attack the target at range with Psyflay.<br /><br />Psyflay<br />Deals up to 1% of the target's total health in Shadow damage every 1 second. Also slows their movement speed by 50% and reduces healing received by 50%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205147,
+    "name": "Eerie Fermentation",
+    "icon": "inv_misc_food_cooked_jadewitchbrew",
+    "specIds": [
+      268
+    ],
+    "description": "You gain up to 30% movement speed  and 15% magical damage reduction based on your current level of Stagger.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205625,
+    "name": "Cleansed by Flame",
+    "icon": "spell_fire_felimmolation",
+    "specIds": [
+      577,
+      581,
+      1480
+    ],
+    "description": "Immolation Aura dispels a magical effect on you when cast.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205604,
+    "name": "Reverse Magic",
+    "icon": "ability_demonhunter_reversemagic",
+    "specIds": [
+      577,
+      581,
+      1480
+    ],
+    "description": "Removes all harmful magical effects from yourself and all nearby allies within 10 yards, and sends them back to their original caster if possible.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 206803,
+    "name": "Rain from Above",
+    "icon": "ability_demonhunter_rain_from_above",
+    "specIds": [
+      577
+    ],
+    "description": "You fly into the air out of harm's way. While floating, you gain access to Fel Lance allowing you to deal damage to enemies below. ",
+    "requiredLevel": 30
+  },
+  {
+    "id": 205596,
+    "name": "Detainment",
+    "icon": "inv_misc_steelweaponchain",
+    "specIds": [
+      577,
+      581,
+      1480
+    ],
+    "description": "Imprison's PvP duration is increased by 1 sec, and targets become immune to damage and healing while imprisoned.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 354489,
+    "name": "Glimpse",
+    "icon": "ability_demonhunter_vengefulretreat2",
+    "specIds": [
+      577,
+      581,
+      1480
+    ],
+    "description": "Vengeful Retreat provides immunity to loss of control effects, and reduces damage taken by 35% until you land.",
+    "requiredLevel": 42
+  },
+  {
+    "id": 205626,
+    "name": "Everlasting Hunt",
+    "icon": "ability_demonhunter_spectank",
+    "specIds": [
+      581
+    ],
+    "description": "Dealing damage increases your movement speed by 15% for 3 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205627,
+    "name": "Jagged Spikes",
+    "icon": "ability_demonhunter_demonspikes",
+    "specIds": [
+      581
+    ],
+    "description": "While Demon Spikes is active, melee attacks against you cause Physical damage equal to 30% of the damage taken back to the attacker.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205630,
+    "name": "Illidan's Grasp",
+    "icon": "ability_demonhunter_illidansgrasp",
+    "specIds": [
+      581
+    ],
+    "description": "You strangle the target with demonic magic, stunning them in place and dealing 112000 Shadow damage over 5 seconds while the target is grasped. Can move while channeling.<br /><br />Use Illidan's Grasp again to toss the target to a location within 20 yards.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205673,
+    "name": "Savage Momentum",
+    "icon": "ability_mount_jungletiger",
+    "specIds": [
+      103
+    ],
+    "description": "Interrupting a spell with Skull Bash reduces the remaining cooldown of Tiger's Fury, Survival Instincts, and Dash by 10 second.",
+    "requiredLevel": 27
+  },
+  {
+    "id": 410544,
+    "name": "Dying Stars",
+    "icon": "artifactability_balancedruid_moonandstars",
+    "specIds": [
+      102
+    ],
+    "description": "Enemies that dispel your Moonfire or Sunfire suffer 25% additional damage from their effects for 12 seconds. If already vulnerable, 50% of the remaining duration is applied to the dispeller.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 208652,
+    "name": "Dire Beast: Hawk",
+    "icon": "spell_hunter_aspectoftheironhawk",
+    "specIds": [
+      253
+    ],
+    "description": "Summons a hawk to circle the target area, attacking all targets within 10 yards over the next 10 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 354124,
+    "name": "Hemotoxin",
+    "icon": "inv_misc_herb_bloodcup",
+    "specIds": [
+      259
+    ],
+    "description": "Shiv also reduces the target's healing received by 30% for 8 seconds.",
+    "requiredLevel": 58
+  },
+  {
+    "id": 206572,
+    "name": "Dragon Charge",
+    "icon": "spell_warrior_dragoncharge",
+    "specIds": [
+      73,
+      72,
+      71
+    ],
+    "description": "Run at high speed at a distance in front of you. All enemies in your path will take 7000 Physical damage and be knocked back.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 213915,
+    "name": "Rebound",
+    "icon": "ability_warrior_shieldbreak",
+    "specIds": [
+      73,
+      71,
+      72
+    ],
+    "description": "Spell Reflection reflects the next 2 incoming spells cast on you and reflected spells deal 100% extra damage to the attacker.<br /><br />Spell Reflection's cooldown is increased by 10 seconds.",
+    "requiredLevel": 47
+  },
+  {
+    "id": 233755,
+    "name": "Deep Roots",
+    "icon": "inv_misc_herb_sansamroot",
+    "specIds": [
+      102
+    ],
+    "description": "Increases the amount of damage required to cancel your Entangling Roots by 75%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 209749,
+    "name": "Faerie Swarm",
+    "icon": "spell_druid_swarm",
+    "specIds": [
+      102
+    ],
+    "description": "Swarms the target with Faeries, disarming the enemy, preventing the use of any weapons or shield and reducing movement speed by 30% for 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 200931,
+    "name": "High Winds",
+    "icon": "ability_druid_cyclone",
+    "specIds": [
+      105,
+      102,
+      103
+    ],
+    "description": "Increases the range of Cyclone, Typhoon, and Entangling Roots by 5 yds.",
+    "requiredLevel": 48
+  },
+  {
+    "id": 207018,
+    "name": "Murderous Intent",
+    "icon": "spell_nature_shamanrage",
+    "specIds": [
+      250
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 207017,
+    "name": "Alpha Challenge",
+    "icon": "ability_physical_taunt",
+    "specIds": [
+      104
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 207025,
+    "name": "Admonishment",
+    "icon": "ability_monk_provoke",
+    "specIds": [
+      268
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 207028,
+    "name": "Inquisition",
+    "icon": "spell_holy_unyieldingfaith",
+    "specIds": [
+      66
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205800,
+    "name": "Oppressor",
+    "icon": "spell_nature_reincarnation",
+    "specIds": [
+      73
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 198675,
+    "name": "Dagger in the Dark",
+    "icon": "ability_rogue_surpriseattack2",
+    "specIds": [
+      261,
+      260,
+      259
+    ],
+    "description": "Each second while Stealth is active, nearby enemies within 12 yards take an additional 2% damage from you for 10 seconds. Stacks up to 6 times.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 209752,
+    "name": "Boarding Party",
+    "icon": "ships_ability_boardingpartyalliance",
+    "specIds": [
+      260
+    ],
+    "description": "Between the Eyes increases the movement speed of all friendly players within 15 yards by 30% for 6 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 197899,
+    "name": "Silhouette",
+    "icon": "ability_rogue_shadowstep",
+    "specIds": [
+      261
+    ],
+    "description": "Shadowstep's cooldown is reduced by 66% when cast on a friendly target.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 210341,
+    "name": "Warrior of Light",
+    "icon": "ability_paladin_empoweredsealsrighteous",
+    "specIds": [
+      66
+    ],
+    "description": "Increases the damage done by your Shield of the Righteous by 30%, but reduces armor granted by 30%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 215652,
+    "name": "Shield of Virtue",
+    "icon": "inv_shield_60",
+    "specIds": [
+      66
+    ],
+    "description": "When activated, your next Avenger's Shield will interrupt and silence all enemies within 8 yds of the target.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 357419,
+    "name": "Cover of Darkness",
+    "icon": "ability_demonhunter_darkness",
+    "specIds": [
+      577,
+      581,
+      1480
+    ],
+    "description": "The radius of Darkness is increased by 4 yds, and its duration by 2 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 221622,
+    "name": "Thick as Thieves",
+    "icon": "ability_rogue_tricksofthetrade",
+    "specIds": [
+      260,
+      259,
+      261
+    ],
+    "description": "Tricks of the Trade now increases the friendly target's damage by 15% for 6 seconds.",
+    "requiredLevel": 48
+  },
+  {
+    "id": 359053,
+    "name": "Smoke Bomb",
+    "icon": "ability_rogue_smoke",
+    "specIds": [
+      261
+    ],
+    "description": "Creates a cloud of thick smoke in an 8 yard radius around the Rogue for 5 seconds. Enemies are unable to target into or out of the smoke cloud. ",
+    "requiredLevel": 25
+  },
+  {
+    "id": 248518,
+    "name": "Interlope",
+    "icon": "ability_hunter_misdirection",
+    "specIds": [
+      253
+    ],
+    "description": "Misdirection now causes the next 3 hostile spells cast on your target within 10 seconds to be redirected to your pet, but its cooldown is increased by 15 seconds.<br /><br />Your pet must be within 20 yards of the target for spells to be redirected.<br />",
+    "requiredLevel": 30
+  },
+  {
+    "id": 203624,
+    "name": "Early Spring",
+    "icon": "ability_druid_flourish",
+    "specIds": [
+      105
+    ],
+    "description": "Wild Growth is now instant cast, and when you heal 6 allies with Wild Growth you gain Full Bloom. This effect has a 30 seconds cooldown.<br /><br /><b style=\"color:white;\">Full Bloom</b><br />Your next Wild Growth applies Lifebloom to all targets at 100% effectiveness. Lasts for 30 seconds.",
+    "requiredLevel": 34
+  },
+  {
+    "id": 213480,
+    "name": "Unending Hatred",
+    "icon": "ability_demonhunter_brandofthehunt",
+    "specIds": [
+      577
+    ],
+    "description": "Taking damage causes you to gain Fury based on the damage dealt.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 207029,
+    "name": "Tormentor",
+    "icon": "ability_demonhunter_torment",
+    "specIds": [
+      581
+    ],
+    "description": "You focus the assault on this target, increasing their damage taken by 3% for 6 seconds. Each unique player that attacks the target increases the damage taken by an additional 3%, stacking up to 5 times.<br /><br />Your melee attacks refresh the duration of Focused Assault.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236147,
+    "name": "Malorne's Swiftness",
+    "icon": "inv_stagform",
+    "specIds": [
+      104,
+      105,
+      102
+    ],
+    "description": "Your Travel Form movement speed while within a Battleground or Arena is increased by 20% and you always move at 100% movement speed while in Travel Form.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 408853,
+    "name": "Absolute Faith",
+    "icon": "priest_spell_leapoffaith_b",
+    "specIds": [
+      257,
+      256,
+      258
+    ],
+    "description": "Leap of Faith also pulls the spirit of the 3 furthest allies within 40 yards and shields you and the affected allies for 92814.",
+    "requiredLevel": 49
+  },
+  {
+    "id": 468430,
+    "name": "Zen Focus Tea",
+    "icon": "inv_misc_pearlmilktea",
+    "specIds": [
+      270
+    ],
+    "description": "Thunder Focus Tea provides immunity to Silence and Interrupt effects for 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 211489,
+    "name": "Sigil Mastery",
+    "icon": "ability_fomor_boss_rune_green",
+    "specIds": [
+      581
+    ],
+    "description": "Reduces the cooldown of your Sigils by an additional 25%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 232876,
+    "name": "Niuzao's Essence",
+    "icon": "inv_misc_beer_06",
+    "specIds": [
+      268
+    ],
+    "description": "Drinking a Purifying Brew, Celestial Brew, Fortifying Brew, or casting Roll will dispel all snares affecting you.",
+    "requiredLevel": 23
+  },
+  {
+    "id": 233759,
+    "name": "Grapple Weapon",
+    "icon": "ability_warrior_disarm",
+    "specIds": [
+      269
+    ],
+    "description": "You fire off a rope spear, grappling the target's weapons and shield, returning them to you for 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 236019,
+    "name": "Strength of the Wild",
+    "icon": "ability_druid_protectorofthepack",
+    "specIds": [
+      103
+    ],
+    "description": "You become further adept in Caster Form and Bear Form.<br /><br /><b style=\"color:white;\">Caster Form</b><br />When using Regrowth on an ally the initial heal will have a 30% increased critical chance and the cast time of Regrowth will be reduced by 50% for 6 seconds.<br /><br /><b style=\"color:white;\">Bear Form</b><br />Maximum health while in Bear Form increased by 15% and you gain 5 Rage when attacked in Bear Form.<br /><br />You also learn:<br /><br />Strength of the Wild<br />Maul the target for 8% of the target's maximum health in Physical damage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 356517,
+    "name": "Star Burst",
+    "icon": "ability_druid_cresentburn",
+    "specIds": [
+      102
+    ],
+    "description": "Starfall calls down collapsing stars that last 15 seconds. Enemies that come into contact with a star cause it to burst, knocking nearby enemies upwards and dealing 25380 Astral damage. Generates 15 Astral Power.<br /><br />The Druid and their allies may pick up stars, causing them to orbit around you.",
+    "requiredLevel": 34
+  },
+  {
+    "id": 198020,
+    "name": "Turn the Tables",
+    "icon": "ability_rogue_waylay",
+    "specIds": [
+      260
+    ],
+    "description": "After coming out of a stun, you deal 10% increased damage for 12 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 205629,
+    "name": "Demonic Trample",
+    "icon": "inv_misc_monsterclaw_01",
+    "specIds": [
+      581
+    ],
+    "description": "Transform to demon form, moving at 175% increased speed for 3 seconds, knocking down all enemies in your path and dealing 1600 Physical damage.<br /><br />During Demonic Trample you are unaffected by snares but cannot cast spells or use your normal attacks. Shares charges with Infernal Strike.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 199719,
+    "name": "Shroud of Winter",
+    "icon": "ability_deathknight_shroudofwinter",
+    "specIds": [
+      251
+    ],
+    "description": "Enemies within 8 yards of you become shrouded in winter, reducing the range of their spells and abilities by 30%.",
+    "requiredLevel": 50
+  },
+  {
+    "id": 199720,
+    "name": "Decomposing Aura",
+    "icon": "ability_deathknight_necroticaura",
+    "specIds": [
+      250
+    ],
+    "description": "All enemies within 8 yards slowly decay, losing up to 3% of their max health every 2 seconds. Max 5 stacks. Lasts 6 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 269513,
+    "name": "Death from Above",
+    "icon": "spell_rogue_deathfromabove",
+    "specIds": [
+      261,
+      259,
+      260
+    ],
+    "description": "Finishing move that empowers your weapons with energy to perform a deadly attack.<br /><br />You leap into the air and Eviscerate your target on the way back down, with such force that it has a 15% stronger effect.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 212182,
+    "name": "Smoke Bomb",
+    "icon": "ability_rogue_smoke",
+    "specIds": [
+      259
+    ],
+    "description": "Creates a cloud of thick smoke in an 8 yard radius around the Rogue for 5 seconds. Enemies are unable to target into or out of the smoke cloud. ",
+    "requiredLevel": 25
+  },
+  {
+    "id": 212182,
+    "name": "Smoke Bomb",
+    "icon": "ability_rogue_smoke",
+    "specIds": [
+      260
+    ],
+    "description": "Creates a cloud of thick smoke in an 8 yard radius around the Rogue for 5 seconds. Enemies are unable to target into or out of the smoke cloud. ",
+    "requiredLevel": 25
+  },
+  {
+    "id": 460697,
+    "name": "Totem of Wrath",
+    "icon": "shaman_pvp_skyfurytotem",
+    "specIds": [
+      263,
+      262,
+      264
+    ],
+    "description": "Sundering summons a totem at your feet for 15 seconds that increases the critical effect of damage and healing spells of all nearby allies within 40 yards by 15% for 15 seconds.<br />",
+    "requiredLevel": 50
+  },
+  {
+    "id": 235941,
+    "name": "Master and Commander",
+    "icon": "ability_warrior_rallyingcry",
+    "specIds": [
+      72
+    ],
+    "description": "Cooldown of Rallying Cry reduced by 120 seconds.",
+    "requiredLevel": 46
+  },
+  {
+    "id": 198100,
+    "name": "Kleptomania",
+    "icon": "spell_arcane_arcane02",
+    "specIds": [
+      62
+    ],
+    "description": "Unleash a flurry of disruptive magic onto your target, stealing a beneficial magic effect every 0.5 second for 4 seconds.<br /><br />Castable while moving, but movement speed is reduced by 40% while channeling.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 213480,
+    "name": "Unending Hatred",
+    "icon": "ability_demonhunter_brandofthehunt",
+    "specIds": [
+      581
+    ],
+    "description": "Taking damage causes you to gain Fury based on the damage dealt.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 209730,
+    "name": "Protector of the Grove",
+    "icon": "spell_nature_naturesblessing",
+    "specIds": [
+      102
+    ],
+    "description": "When using Regrowth on an ally the initial heal will always have a critical effect and the cast time of Regrowth will be reduced by 50% for 6 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 352998,
+    "name": "Slaughterhouse",
+    "icon": "ability_warrior_deepcuts",
+    "specIds": [
+      72
+    ],
+    "description": "Rampage and Odyn's Fury damage reduce healing the target receives by 3% for 12 seconds, stacking up to 12 times.",
+    "requiredLevel": 36
+  },
+  {
+    "id": 357633,
+    "name": "Wind Waker",
+    "icon": "monk_stance_whitetiger",
+    "specIds": [
+      269
+    ],
+    "description": "Your movement enhancing abilities increases Windwalking on allies by 10%, stacking 2 additional times. Movement impairing effects are removed at 3 stacks.",
+    "requiredLevel": 20
+  },
+  {
+    "id": 345829,
+    "name": "Predestination",
+    "icon": "ability_monk_touchofdeath",
+    "specIds": [
+      269
+    ],
+    "description": "Killing a player with Touch of Death reduces the remaining cooldown of Touch of Karma by 60 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 287681,
+    "name": "Turbo Fists",
+    "icon": "monk_ability_fistoffury",
+    "specIds": [
+      269
+    ],
+    "description": "Fists of Fury now reduces all targets movement speed by 90%, and you Parry all attacks while channelling Fists of Fury.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1281529,
+    "name": "Stitchmaster",
+    "icon": "spell_shadow_corpseexplode",
+    "specIds": [
+      252
+    ],
+    "description": "When a Lesser Ghoul dies, you gather the remains to heal for 2% of its maximum health.<br /><br />Death Strike sacrifices all Lesser Ghouls under your command.",
+    "requiredLevel": 29
+  },
+  {
+    "id": 213200,
+    "name": "Freedom of the Herd",
+    "icon": "spell_druid_stampedingroar_cat",
+    "specIds": [
+      104
+    ],
+    "description": "Your Stampeding Roar clears all roots and snares from yourself and allies.",
+    "requiredLevel": 43
+  },
+  {
+    "id": 202626,
+    "name": "Leader of the Pack",
+    "icon": "spell_holy_blessingofstamina",
+    "specIds": [
+      103
+    ],
+    "description": "While in Cat Form, you increase the movement speed of raid members within 20 yards by 10%.<br /><br />Leader of the Pack also causes allies to heal themselves for 3% of their maximum health when they critically hit with a direct attack. The healing effect cannot occur more than once every 8 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 290250,
+    "name": "Rain Dance",
+    "icon": "inv_misc_volatilewater",
+    "specIds": [
+      264
+    ],
+    "description": "Healing Rain is now instant, 50% more effective, and costs 60% less mana. ",
+    "requiredLevel": 21
+  },
+  {
+    "id": 329033,
+    "name": "Demolition",
+    "icon": "ability_warrior_shatteringthrow",
+    "specIds": [
+      71,
+      72,
+      73
+    ],
+    "description": "Reduces the cooldown of your Shattering Throw or Wrecking Throw by 50% and increases its damage to absorb shields by an additional 250%.",
+    "requiredLevel": 41
+  },
+  {
+    "id": 426352,
+    "name": "Jinx",
+    "icon": "ability_warlock_jinx",
+    "specIds": [
+      265
+    ],
+    "description": "Casting a curse now applies Corruption and Agony to your target, but curses now costs 1 Soul Shard.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 353082,
+    "name": "Ring of Fire",
+    "icon": "ability_mage_scorchedearth",
+    "specIds": [
+      63,
+      64,
+      62
+    ],
+    "description": "Summons a Ring of Fire for 8 seconds at the target location. Enemies entering the ring are disoriented and burn for 3% of their total health over 3 seconds.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 352278,
+    "name": "Ice Wall",
+    "icon": "ability_mage_icewall",
+    "specIds": [
+      64,
+      62,
+      63
+    ],
+    "description": "Conjures an Ice Wall 30 yards long that obstructs line of sight. The wall has 30% of your maximum health and lasts up to 15 seconds.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 353294,
+    "name": "Shadow Rift",
+    "icon": "ability_warlock_voidzone",
+    "specIds": [
+      265,
+      267,
+      266
+    ],
+    "description": "Conjure a Shadow Rift at the target location lasting 2 seconds. Enemy players within the rift when it expires are teleported to your Demonic Circle.<br /><br />Must be within 40 yds of your Demonic Circle to cast.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 353313,
+    "name": "Peaceweaver",
+    "icon": "spell_monk_revival",
+    "specIds": [
+      270
+    ],
+    "description": "Revival's cooldown is reduced by 16%, and provides immunity to magical damage and harmful effects for 2 seconds.",
+    "requiredLevel": 49
+  },
+  {
+    "id": 353128,
+    "name": "Arcanosphere",
+    "icon": "ability_mage_arcanosphere",
+    "specIds": [
+      62
+    ],
+    "description": "Builds a sphere of Arcane energy, gaining power over 4 seconds. Upon release, the sphere passes through any barriers, knocking enemies back and dealing up to 352800 Arcane damage.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 353361,
+    "name": "Dematerialize",
+    "icon": "ability_monk_dematerialize",
+    "specIds": [
+      270
+    ],
+    "description": "Demateralize into mist while stunned, reducing damage taken by 30%. Each second you remain stunned reduces this bonus by 10%.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 353753,
+    "name": "Bonds of Fel",
+    "icon": "ability_felarakkoa_feldetonation_green",
+    "specIds": [
+      267,
+      266,
+      265
+    ],
+    "description": "Encircle enemy players with Bonds of Fel. If any affected player leaves the 8 yd radius they explode, dealing 87360 Fire damage split amongst all nearby enemies.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 354541,
+    "name": "Owlkin Adept",
+    "icon": "ability_druid_owlkinfrenzy",
+    "specIds": [
+      102
+    ],
+    "description": "Owlkin Frenzy can stack up to 2 times and reduces the cast time of your next Cyclone or Entangling Roots by 10%.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 354654,
+    "name": "Grove Protection",
+    "icon": "ability_druid_protectionofthegrove",
+    "specIds": [
+      104
+    ],
+    "description": "Summon a grove to protect allies in the area for 10 seconds, reducing damage taken by 50% from enemies outside the grove.",
+    "requiredLevel": 55
+  },
+  {
+    "id": 354661,
+    "name": "Distracting Mirage",
+    "icon": "ability_rogue_distract",
+    "specIds": [
+      261
+    ],
+    "description": "Distract slows affected enemies by 60% and creates a Mirage that follows an enemy for 8 seconds. Reactivate Distract to teleport to your Mirage's location. ",
+    "requiredLevel": 48
+  },
+  {
+    "id": 355995,
+    "name": "Blood Moon",
+    "icon": "spell_misc_zandalari_council_soulswap",
+    "specIds": [
+      577
+    ],
+    "description": "Consume Magic now affects all enemies within 8 yards of the target and generates a Lesser Soul Fragment. Each effect consumed has a 5% chance to upgrade to a Greater Soul.",
+    "requiredLevel": 42
+  },
+  {
+    "id": 355995,
+    "name": "Blood Moon",
+    "icon": "spell_misc_zandalari_council_soulswap",
+    "specIds": [
+      581
+    ],
+    "description": "Consume Magic now affects all enemies within 8 yards of the target and generates a Lesser Soul Fragment. Each effect consumed has a 5% chance to upgrade to a Greater Soul.",
+    "requiredLevel": 42
+  },
+  {
+    "id": 356470,
+    "name": "Bitter Chill",
+    "icon": "inv_shoulder_130",
+    "specIds": [
+      251
+    ],
+    "description": "Chains of Ice reduces the target's Haste by 8%. Frost Strike refreshes the duration of Chains of Ice.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 356512,
+    "name": "Doomburst",
+    "icon": "spell_shadow_painspike",
+    "specIds": [
+      252
+    ],
+    "description": "Sudden Doom also causes your next Death Coil to deal the damage of your plagues an additional time at 25% effectiveness and reduce the target's movement speed by 45% for 3 seconds.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 462375,
+    "name": "Master of the Elements",
+    "icon": "spell_nature_elementalabsorption",
+    "specIds": [
+      264
+    ],
+    "description": "Casting Lava Burst increases the healing of your next Healing Wave by 30%, stacking up to 2 times.<br /><br />Healing Wave applies Flame Shock to a nearby enemy when empowered by Master of the Elements.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 357018,
+    "name": "Consecutive Concussion",
+    "icon": "spell_frost_stun",
+    "specIds": [
+      254
+    ],
+    "description": "Concussive Shot slows movement by an additional 10%. Using Steady Shot 3 times on a concussed enemy stuns them for 4 seconds.",
+    "requiredLevel": 20
+  },
+  {
+    "id": 356707,
+    "name": "Wild Kingdom",
+    "icon": "ability_druid_kingofthejungle",
+    "specIds": [
+      253
+    ],
+    "description": "Call in help from one of your dismissed Cunning pets for 10 seconds. Your current pet is dismissed to rest and heal 30% of maximum health.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 356707,
+    "name": "Wild Kingdom",
+    "icon": "ability_druid_kingofthejungle",
+    "specIds": [
+      255
+    ],
+    "description": "Call in help from one of your dismissed Cunning pets for 10 seconds. Your current pet is dismissed to rest and heal 30% of maximum health.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 356962,
+    "name": "Kindred Beasts",
+    "icon": "ability_hunter_invigeration",
+    "specIds": [
+      253
+    ],
+    "description": "Command Pet's unique ability cooldown reduced by 50%, and gains additional effects.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 357711,
+    "name": "Cascading Horrors",
+    "icon": "inv_datacrystal02",
+    "specIds": [
+      258
+    ],
+    "description": "Void Eruption sends out slow-moving bolts of Shadow energy at random locations every 0.5 sec for 3 seconds, dealing 9156 Shadow damage to all targets within 8 yds, and causing them to flee in Horror for 2 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 357495,
+    "name": "Perpetual Paralysis",
+    "icon": "ability_monk_paralysis",
+    "specIds": [
+      269
+    ],
+    "description": "Paralysis range reduced by -5 yards, but spreads to 2 new enemies when removed.",
+    "requiredLevel": 22
+  },
+  {
+    "id": 408543,
+    "name": "Seismic Slam",
+    "icon": "ability_evoker_seismicslam",
+    "specIds": [
+      1473
+    ],
+    "description": "Landslide causes enemies who are mid-air to be slammed to the ground, stunning them for 4 second and Landslide's cooldown is reduced by 15 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 383005,
+    "name": "Chrono Loop",
+    "icon": "ability_evoker_rewind2",
+    "specIds": [
+      1468,
+      1467,
+      1473
+    ],
+    "description": "Trap the enemy in a time loop for 5 seconds. Afterwards, they are returned to their previous location and health. Cannot reduce an enemy's health below 20%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 378444,
+    "name": "Obsidian Mettle",
+    "icon": "inv_misc_scales_basilliskorange",
+    "specIds": [
+      1468,
+      1467,
+      1473
+    ],
+    "description": "While Obsidian Scales is active you gain immunity to interrupt, silence, and pushback effects.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 378438,
+    "name": "Scouring Flame",
+    "icon": "spell_fire_selfdestruct",
+    "specIds": [
+      1468,
+      1467,
+      1473
+    ],
+    "description": "Fire Breath burns away 2 beneficial Magic effects from all targets.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 378441,
+    "name": "Time Stop",
+    "icon": "inv_10_enchanting2_magicswirl_bronze",
+    "specIds": [
+      1468,
+      1467,
+      1473
+    ],
+    "description": "Freeze an ally's timestream for 5 seconds. While frozen in time they are invulnerable, cannot act, and auras do not progress.<br /><br />You may reactivate Time Stop to end this effect early.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 370388,
+    "name": "Swoop Up",
+    "icon": "ability_evoker_aerialmastery",
+    "specIds": [
+      1468,
+      1467,
+      1473
+    ],
+    "description": "Grab an enemy and fly with them to the target location.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1241352,
+    "name": "Nullifying Shroud",
+    "icon": "spell_arcane_prismaticcloak",
+    "specIds": [
+      1467,
+      1468,
+      1473
+    ],
+    "description": "Verdant Embrace wreathes you in arcane energy, preventing the next full loss of control effect against you. Lasts 4 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 378437,
+    "name": "Unburdened Flight",
+    "icon": "ability_skyreach_lens_flare",
+    "specIds": [
+      1467,
+      1468,
+      1473
+    ],
+    "description": "Hover makes you immune to movement speed reduction effects.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 196439,
+    "name": "Purification",
+    "icon": "spell_holy_dispelmagic",
+    "specIds": [
+      257
+    ],
+    "description": "Purify now has a maximum of 2 charges.<br /><br />Removing harmful effects with Purify grants your target an absorption shield equal to 5% of their maximum health. Lasts 8 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 390428,
+    "name": "Glass Cannon",
+    "icon": "spell_frostfire_orb",
+    "specIds": [
+      63
+    ],
+    "description": "Increases damage of Fireball, Scorch, and Ignite by 20% but decreases your maximum health by 30%.<br />",
+    "requiredLevel": 20
+  },
+  {
+    "id": 390612,
+    "name": "Frost Bomb",
+    "icon": "spell_mage_frostbomb",
+    "specIds": [
+      64
+    ],
+    "description": "Places a Frost Bomb on the target. After 5 seconds, the bomb explodes, dealing 111720 Frost damage to the target and 55883 Frost damage to all other enemies within 10 yards. All affected targets are slowed by 50% for 8 seconds. <br /><br />If Frost Bomb is dispelled before it explodes, gain a charge of Brain Freeze.",
+    "requiredLevel": 20
+  },
+  {
+    "id": 389794,
+    "name": "Snowdrift",
+    "icon": "spell_fire_blueflamestrike",
+    "specIds": [
+      64
+    ],
+    "description": "Summon a strong Blizzard that surrounds you for 6 seconds that slows enemies by 70% and deals 2400 Frost damage every 1 second. <br /><br />Enemies that are caught in Snowdrift for 2 seconds consecutively become Frozen in ice, stunned for 4 seconds.",
+    "requiredLevel": 20
+  },
+  {
+    "id": 206803,
+    "name": "Rain from Above",
+    "icon": "ability_demonhunter_rain_from_above",
+    "specIds": [
+      581
+    ],
+    "description": "You fly into the air out of harm's way. While floating, you gain access to Fel Lance allowing you to deal damage to enemies below. ",
+    "requiredLevel": 30
+  },
+  {
+    "id": 211489,
+    "name": "Sigil Mastery",
+    "icon": "ability_fomor_boss_rune_green",
+    "specIds": [
+      577
+    ],
+    "description": "Reduces the cooldown of your Sigils by an additional 25%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 248518,
+    "name": "Interlope",
+    "icon": "ability_hunter_misdirection",
+    "specIds": [
+      255
+    ],
+    "description": "Misdirection now causes the next 3 hostile spells cast on your target within 10 seconds to be redirected to your pet, but its cooldown is increased by 15 seconds.<br /><br />Your pet must be within 20 yards of the target for spells to be redirected.<br />",
+    "requiredLevel": 30
+  },
+  {
+    "id": 216868,
+    "name": "Hallowed Ground",
+    "icon": "spell_holy_innerfire",
+    "specIds": [
+      70
+    ],
+    "description": "Your Consecration clears and suppresses all snare effects on allies within its area of effect.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 202370,
+    "name": "Mighty Ox Kick",
+    "icon": "ability_monk_mightyoxkick",
+    "specIds": [
+      270
+    ],
+    "description": "You perform a Mighty Ox Kick, hurling your enemy a distance behind you.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 353361,
+    "name": "Dematerialize",
+    "icon": "ability_monk_dematerialize",
+    "specIds": [
+      268
+    ],
+    "description": "Demateralize into mist while stunned, reducing damage taken by 30%. Each second you remain stunned reduces this bonus by 10%.",
+    "requiredLevel": 35
+  },
+  {
+    "id": 384689,
+    "name": "Divide and Conquer",
+    "icon": "ability_evoker_divideandconquer",
+    "specIds": [
+      1467,
+      1473,
+      1468
+    ],
+    "description": "Deep Breath forms curtains of fire, preventing line of sight to enemies outside its walls and burning enemies who walk through them for 57600 Fire damage. Lasts 6 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 408557,
+    "name": "Phase Shift",
+    "icon": "spell_priest_spectralguise",
+    "specIds": [
+      258,
+      257,
+      256
+    ],
+    "description": "Step into the shadows when you cast Fade, avoiding all attacks and spells for 1 second.<br /><br />Interrupt effects are not affected by Phase Shift.",
+    "requiredLevel": 45
+  },
+  {
+    "id": 199456,
+    "name": "Spreading the Word",
+    "icon": "inv_misc_book_17",
+    "specIds": [
+      70
+    ],
+    "description": "Your allies affected by your Aura gain an effect after you cast Blessing of Protection or Blessing of Freedom.<br /><br />Blessing of Protection<br />Physical damage reduced by 30% for 6 seconds.<br /><br />Blessing of Freedom<br />Cleared of all movement impairing effects.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 204018,
+    "name": "Blessing of Spellwarding",
+    "icon": "spell_holy_blessingofprotection",
+    "specIds": [
+      70
+    ],
+    "description": "Blesses a party or raid member, granting immunity to magical damage and harmful effects for 10 seconds.<br /><br />Cannot be used on a target with Forbearance. Causes Forbearance for 30 seconds.<br /><br />Shares a cooldown with Blessing of Protection.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 409293,
+    "name": "Burrow",
+    "icon": "pvp_burrow",
+    "specIds": [
+      262,
+      263,
+      264
+    ],
+    "description": "Burrow beneath the ground, becoming unattackable, removing movement impairing effects, and increasing your movement speed by 50% for 5 seconds.<br /><br />When the effect ends, enemies within 6 yards are knocked in the air and take 87120 Physical damage.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 409835,
+    "name": "Impish Instincts",
+    "icon": "spell_shadow_demoniccircleteleport",
+    "specIds": [
+      266,
+      265,
+      267
+    ],
+    "description": "Taking direct Physical damage reduces the cooldown of Demonic Circle by 3 seconds.<br /><br />Cannot occur more than once every 5 sec.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 410248,
+    "name": "Master Shepherd",
+    "icon": "spell_nature_doublepolymorph2",
+    "specIds": [
+      64,
+      63,
+      62
+    ],
+    "description": "While an enemy player is affected by your Polymorph or Mass Polymorph, your movement speed is increased by 25% and your Versatility is increased by 12%. <br /><br />Additionally, Polymorph and Mass Polymorph no longer heal enemies.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 410126,
+    "name": "Searing Glare",
+    "icon": "pvp_searingglare",
+    "specIds": [
+      66,
+      65,
+      70
+    ],
+    "description": "Call upon the light to blind enemy players in a 25 yd cone, causing enemies to miss their spells and attacks for 4 seconds.",
+    "requiredLevel": 50
+  },
+  {
+    "id": 410301,
+    "name": "Bloodforged Armor",
+    "icon": "spell_deathknight_bladedarmor",
+    "specIds": [
+      252,
+      251,
+      250
+    ],
+    "description": "Death Strike reduces all Physical damage taken by 25% for 4 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 410320,
+    "name": "Spellwarden",
+    "icon": "spell_shadow_antimagicshell",
+    "specIds": [
+      252,
+      251,
+      250
+    ],
+    "description": "Anti-Magic Shell is now usable on allies and its cooldown is reduced by 10 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 410939,
+    "name": "Ethereal Blink",
+    "icon": "spell_nature_massteleport",
+    "specIds": [
+      64,
+      62,
+      63
+    ],
+    "description": "Blink and Shimmer apply Slow at 100% effectiveness to all enemies you Blink through. For each enemy you Blink through, the cooldown of Blink and Shimmer are reduced by 1 sec, up to 5 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1243554,
+    "name": "Zen Spheres",
+    "icon": "ability_monk_sphereharmonydiscord",
+    "specIds": [
+      270
+    ],
+    "description": "Soothing Mist, Crackling Jade Lightning, and Rising Sun Kick form a sphere of Hope or Despair above their targets. Only one of each sphere can be active at a time.<br /><br />Sphere of Hope: Increases your healing done to the target by 10%.<br />Sphere of Despair: Target deals 3% less damage and takes 10% increased damage from all sources.<br />",
+    "requiredLevel": 35
+  },
+  {
+    "id": 411266,
+    "name": "Master Shapeshifter",
+    "icon": "ability_druid_mastershapeshifter",
+    "specIds": [
+      102
+    ],
+    "description": "Your abilities are amplified based on your current shapeshift form, granting an additional effect.<br /><br /><b style=\"color:white;\">Caster Form</b><br />Rejuvenation heals for 30% more and generates 8 Astral Power.<br /><br /><b style=\"color:white;\">Bear Form</b><br />Ironfur grants 30% additional armor and generates 12 Astral Power.<br /><br /><b style=\"color:white;\">Cat Form</b><br />Rip, Ferocious Bite, and Maim deal 60% additional damage and generate 60 Astral Power when cast with 5 combo points.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 410598,
+    "name": "Soul Rip",
+    "icon": "pvp_soulrip",
+    "specIds": [
+      266,
+      267,
+      265
+    ],
+    "description": "Fracture the soul of up to 3 target players within 20 yds into the shadows, reducing their damage done by 25% and healing received by 25% for 8 seconds. Souls are fractured up to 20 yds from the player's location.<br /><br />Players can retrieve their souls to remove this effect.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 414937,
+    "name": "Born in Flame",
+    "icon": "ability_evoker_livingflame",
+    "specIds": [
+      1473
+    ],
+    "description": "Casting Ebon Might grants 2 charges of Burnout, reducing the cast time of Living Flame by 100%.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 415651,
+    "name": "Dreamwalker's Embrace",
+    "icon": "inv_cosmicvoid_beam",
+    "specIds": [
+      1473,
+      1468,
+      1467
+    ],
+    "description": "Verdant Embrace tethers you to an ally, increasing movement speed by 40% and slowing and siphoning 15000 life from enemies who come in contact with the tether.<br /><br />The tether lasts up to 10 seconds or until you move more than 30 yards away from your ally.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 2812,
+    "name": "Denounce",
+    "icon": "spell_holy_purifyingpower",
+    "specIds": [
+      65
+    ],
+    "description": "Casts down the enemy with a bolt of Holy Light, causing 91555 Holy damage and preventing the target from causing critical effects for the next 8 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 424654,
+    "name": "Safeguard",
+    "icon": "ability_warrior_safeguard",
+    "specIds": [
+      72,
+      71,
+      73
+    ],
+    "description": "Intervene now has 2 charges and reduces the ally's damage taken by 20% for 5 seconds.<br /><br />Intervene's cooldown is increased by 10 seconds.",
+    "requiredLevel": 39
+  },
+  {
+    "id": 236308,
+    "name": "Storm of Destruction",
+    "icon": "ability_warrior_bladestorm",
+    "specIds": [
+      73
+    ],
+    "description": "Bladestorm, Ravager, and Demolish now snare all targets you hit by 60% for 6 seconds and decrease their healing taken by 50% for 10 seconds.",
+    "requiredLevel": 38
+  },
+  {
+    "id": 426438,
+    "name": "Improved Mass Dispel",
+    "icon": "spell_arcane_massdispel",
+    "specIds": [
+      257,
+      256,
+      258
+    ],
+    "description": "Reduces the cooldown of Mass Dispel by 60 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 375901,
+    "name": "Mindgames",
+    "icon": "inv_ability_priest_mindgames",
+    "specIds": [
+      258
+    ],
+    "description": "Assault an enemy's mind, dealing 36000 Shadow damage and briefly reversing their perception of reality.<br /><br />For 7 seconds, the next 138600 damage they deal will heal their target, and the next 138600 healing they deal will damage their target.",
+    "requiredLevel": 44
+  },
+  {
+    "id": 375901,
+    "name": "Mindgames",
+    "icon": "inv_ability_priest_mindgames",
+    "specIds": [
+      256
+    ],
+    "description": "Assault an enemy's mind, dealing 36000 Shadow damage and briefly reversing their perception of reality.<br /><br />For 7 seconds, the next 138600 damage they deal will heal their target, and the next 138600 healing they deal will damage their target.",
+    "requiredLevel": 44
+  },
+  {
+    "id": 455945,
+    "name": "Absolute Serenity",
+    "icon": "ability_monk_serenity",
+    "specIds": [
+      269
+    ],
+    "description": "Celestial Conduit now prevents all crowd control for its duration.",
+    "requiredLevel": 71
+  },
+  {
+    "id": 455945,
+    "name": "Absolute Serenity",
+    "icon": "ability_monk_serenity",
+    "specIds": [
+      270
+    ],
+    "description": "Celestial Conduit now prevents all crowd control for its duration.",
+    "requiredLevel": 71
+  },
+  {
+    "id": 460276,
+    "name": "Rising Dragon Sweep",
+    "icon": "inv_misc_head_dragon_red",
+    "specIds": [
+      269
+    ],
+    "description": "Whirling Dragon Punch knocks enemies up into the air and causes them to fall slowly until they reach the ground.",
+    "requiredLevel": 50
+  },
+  {
+    "id": 377801,
+    "name": "Tireless Pursuit",
+    "icon": "spell_druid_tirelesspursuit",
+    "specIds": [
+      102,
+      103,
+      104,
+      105
+    ],
+    "description": "For 3 seconds after leaving Cat Form or Travel Form, you retain up to 25% movement speed.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 193876,
+    "name": "Shamanism",
+    "icon": "trade_archaeology_ancientorcshamanheaddress",
+    "specIds": [
+      262
+    ],
+    "description": "Your Bloodlust/Heroism spell now has a 60 second cooldown, but increases Haste by 20%, and only affects you and your friendly target when cast for 10 seconds.<br /><br />In addition, Bloodlust/Heroism is no longer affected by Sated/Exhaustion.",
+    "requiredLevel": 48
+  },
+  {
+    "id": 235711,
+    "name": "Chrono Shift",
+    "icon": "ability_monk_deadlyreach",
+    "specIds": [
+      62
+    ],
+    "description": "Arcane Barrage slows enemies by 50% and increases your movement speed by 10% for 5 seconds.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 386951,
+    "name": "Soul Swap",
+    "icon": "ability_warlock_soulswap",
+    "specIds": [
+      265
+    ],
+    "description": "Copies your damage over time effects and Haunt from the target, preserving their duration.<br /><br />Your next use of Soul Swap within 10 seconds will exhale a copy damage of the effects onto a new target.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 415244,
+    "name": "Divine Plea",
+    "icon": "inv_glove_plate_raidpaladinmythic_q_01",
+    "specIds": [
+      65
+    ],
+    "description": "After casting Aura Mastery, you restore 750000 Mana over 30 seconds, but your healing and damage is decreased by 30%.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 468454,
+    "name": "Bear the Burden",
+    "icon": "ability_paladin_selflesshealer",
+    "specIds": [
+      66
+    ],
+    "description": "Word of Glory's mana cost is reduced by 100% and now reduces the cooldown of Blessing of Freedom by 4 seconds when cast, but its healing is reduced by 50% when cast on allies.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 469895,
+    "name": "Spellbreaker",
+    "icon": "ability_priest_reflectiveshield",
+    "specIds": [
+      65,
+      70,
+      66
+    ],
+    "description": "Eye for an Eye can now also trigger at 100% effectiveness from direct Magic damage.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 1246126,
+    "name": "Call of Ohn'ahra",
+    "icon": "spell_nature_ravenform",
+    "specIds": [
+      105
+    ],
+    "description": "Nature's Swiftness now also affects Cyclone, but its cooldown is increased by 10 seconds.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 936051,
+    "name": "Shining Revelation",
+    "icon": "spell_holy_holyguidance",
+    "specIds": [
+      70,
+      65,
+      66
+    ],
+    "description": "The light reveals all enemies in stealth or invisible to you while under the effects of Divine Shield. This effect lingers for 20 second after Divine Shield fades.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 1217092,
+    "name": "Storm Conduit",
+    "icon": "spell_lightning_lightningbolt01",
+    "specIds": [
+      262
+    ],
+    "description": "Casting Lightning Bolt or Chain Lightning reduces the cooldown of Astral Shift, Gust of Wind, Wind Shear, and Nature Totems by 1 second.<br /><br />Interrupt duration reduced by 65% on Lightning Bolt and Chain Lightning casts.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 1217474,
+    "name": "Forest Guardian",
+    "icon": "ability_druid_ripandtear",
+    "specIds": [
+      105
+    ],
+    "description": "Wrath, Starfire, Cyclone, and Combo-Point generating abilities extend the duration of your active heal over time effects by 1 second on up to 3 allies.<br /><br />Starsurge and Combo-Point spending abilities increase the rate of your heal over time spells by 20% for 4 seconds.<br /><br />",
+    "requiredLevel": 45
+  },
+  {
+    "id": 205630,
+    "name": "Illidan's Grasp",
+    "icon": "ability_demonhunter_illidansgrasp",
+    "specIds": [
+      577
+    ],
+    "description": "You strangle the target with demonic magic, stunning them in place and dealing 112000 Shadow damage over 5 seconds while the target is grasped. Can move while channeling.<br /><br />Use Illidan's Grasp again to toss the target to a location within 20 yards.",
+    "requiredLevel": 23
+  },
+  {
+    "id": 204018,
+    "name": "Blessing of Spellwarding",
+    "icon": "spell_holy_blessingofprotection",
+    "specIds": [
+      65
+    ],
+    "description": "Blesses a party or raid member, granting immunity to magical damage and harmful effects for 10 seconds.<br /><br />Cannot be used on a target with Forbearance. Causes Forbearance for 30 seconds.<br /><br />Shares a cooldown with Blessing of Protection.",
+    "requiredLevel": 25
+  },
+  {
+    "id": 1218603,
+    "name": "Death's Cold Embrace",
+    "icon": "ability_deathknight_icygrip",
+    "specIds": [
+      251
+    ],
+    "description": "Pillar of Frost grants you Remorseless Winter and increases its damage by 400% and its radius by 150%, but your movement speed is heavily reduced for its duration.<br /><br />Pillar of Frost's cooldown is increased by 15 seconds.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 1218692,
+    "name": "Bloodstones",
+    "icon": "warlock_bloodstone",
+    "specIds": [
+      266,
+      265,
+      267
+    ],
+    "description": "Your Healthstones are replaced with Bloodstones which increase their user's haste by 20% for 12 seconds instead of healing.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 1219122,
+    "name": "Preemptive Maneuver",
+    "icon": "ability_rogue_feint",
+    "specIds": [
+      259,
+      261,
+      260
+    ],
+    "description": "Feint decreases your damage taken by an additional 40% while stunned and its energy cost is reduced by 30%.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 1219162,
+    "name": "Aspect of the Fox",
+    "icon": "ability_hunter_aspectofthefox",
+    "specIds": [
+      254
+    ],
+    "description": "Aimed Shot may be cast while moving during Aspect of the Cheetah and Aspect of the Cheetah's delayed effect is increased by 4 seconds.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 1227751,
+    "name": "Berserker Roar",
+    "icon": "spell_nature_ancestralguardian",
+    "specIds": [
+      71,
+      72,
+      73
+    ],
+    "description": "Berserker Shout also reduces the duration of the next crowd control effect within 10 seconds by 50% on group members within 12 yds.<br />",
+    "requiredLevel": 45
+  },
+  {
+    "id": 1217092,
+    "name": "Storm Conduit",
+    "icon": "spell_lightning_lightningbolt01",
+    "specIds": [
+      264
+    ],
+    "description": "Casting Lightning Bolt or Chain Lightning reduces the cooldown of Astral Shift, Gust of Wind, Wind Shear, and Nature Totems by 1 second.<br /><br />Interrupt duration reduced by 65% on Lightning Bolt and Chain Lightning casts.",
+    "requiredLevel": 30
+  },
+  {
+    "id": 1220739,
+    "name": "Overpowered Barrier",
+    "icon": "ability_racial_magicalresistance",
+    "specIds": [
+      63,
+      62,
+      64
+    ],
+    "description": "Your barriers absorb 100% more damage and have an additional effect, but last 4 seconds.<br /><br />Prismatic Barrier<br />If the barrier is fully absorbed, your next Blink or Shimmer within 15 seconds grants Invisibility and immunity to damage for 3 seconds. The damage reduction is lost if Invisibility ends.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 377509,
+    "name": "Dream Projection",
+    "icon": "inv_achievement_raidemeralddream_dreamweaver",
+    "specIds": [
+      1468
+    ],
+    "description": "Summon a flying projection of yourself that heals allies you pass through for 24000. Detonating your projection dispels all nearby allies of Magical effects, and heals for 108000 over 20 seconds.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1233429,
+    "name": "Price of Progress",
+    "icon": "ability_deathwing_bloodcorruption_death",
+    "specIds": [
+      250
+    ],
+    "description": "You sacrifice 1% of your health every 1 seconds and in exchange you cannot be slowed below 90% of normal speed, and you are immune to forced movement effects and knockbacks. Lasts 1 second.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1234791,
+    "name": "Power Through Adversity",
+    "icon": "ability_hunter_harass",
+    "specIds": [
+      73
+    ],
+    "description": "Second Wind reduces damage taken by 10% to 40%, with larger attacks being reduced by more.<br /><br />While Shield Wall is active, healing reductions do not apply to you.",
+    "requiredLevel": 50
+  },
+  {
+    "id": 1235091,
+    "name": "Lay In Wait",
+    "icon": "ability_demonhunter_eyeofleotheras",
+    "specIds": [
+      581
+    ],
+    "description": "Sigil of Misery has 2 charges and now lays in wait for up to 90 seconds at your selected location until an enemy approaches.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 370960,
+    "name": "Emerald Communion",
+    "icon": "ability_evoker_green_01",
+    "specIds": [
+      1468
+    ],
+    "description": "Commune with the Emerald Dream, restoring 20% health and 2% mana every 1 second for 5 seconds. Overhealing is transferred to an injured ally within 40 yds.<br /><br />Castable while stunned, disoriented, incapacitated, or silenced.",
+    "requiredLevel": 0
+  },
+  {
+    "id": 1246131,
+    "name": "Call of Al'Akir",
+    "icon": "spell_nature_ravenform",
+    "specIds": [
+      264
+    ],
+    "description": "Nature's Swiftness now also affects Hex, but its cooldown is increased by 30 seconds.",
+    "requiredLevel": 60
+  },
+  {
+    "id": 305483,
+    "name": "Lightning Lasso",
+    "icon": "shaman_pvp_lightninglasso",
+    "specIds": [
+      263,
+      264,
+      262
+    ],
+    "description": "Grips the target in lightning, stunning and dealing 462000 Nature damage over 5 seconds while the target is lassoed. Can move while channeling.",
+    "requiredLevel": 40
+  },
+  {
+    "id": 1261409,
+    "name": "Inevitable End",
+    "icon": "inv_112_raidtrinkets_blobofswirlingvoid_purple",
+    "specIds": [
+      1480
+    ],
+    "description": "Collapsing Star can no longer be interrupted and its cast time is reduced by 25%.",
+    "requiredLevel": 15
+  },
+  {
+    "id": 1261414,
+    "name": "Armor of Souls",
+    "icon": "sha_spell_warlock_demonsoul_nightborne",
+    "specIds": [
+      1480
+    ],
+    "description": "Your Armor is increased by 50%. Taking damage has a 12% chance to generate a Soul Fragment.",
+    "requiredLevel": 20
+  },
+  {
+    "id": 1261423,
+    "name": "Surrender to the Void",
+    "icon": "inv_knife_1h_artifactcthun_d_02",
+    "specIds": [
+      1480
+    ],
+    "description": "Void Metamorphosis requires 50 additional souls.<br /><br />While in Void Metamorphosis, your damage is increased by 10% and effects that grant you Fury grant 100% additional Fury.",
+    "requiredLevel": 70
+  },
+  {
+    "id": 1261697,
+    "name": "Beckon",
+    "icon": "ability_creature_disease_05",
+    "specIds": [
+      1480
+    ],
+    "description": "Reap reduces the cast time of your next Consume by 100% and causes it to generate 1 additional Soul Fragment.",
+    "requiredLevel": 10
+  }
+]
