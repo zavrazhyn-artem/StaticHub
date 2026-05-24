@@ -441,6 +441,11 @@ const apexHref = computed(() => props.apexNode
     align-items: center;
     gap: 10px;
     color: #e5e7eb;
+    background: linear-gradient(180deg, rgba(10, 15, 20, 0.85) 0%, rgba(5, 8, 12, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 /* Header band — title + spent counter */
@@ -450,10 +455,10 @@ const apexHref = computed(() => props.apexNode
     justify-content: space-between;
     gap: 14px;
     width: 100%;
-    padding: 8px 14px;
-    background: rgba(20, 40, 62, 0.7);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 4px;
+    padding: 10px 16px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
     font-family: var(--font-headline, inherit);
 }
 .tree-title {
@@ -580,14 +585,15 @@ const apexHref = computed(() => props.apexNode
 .apex-node.active .apex-name { color: #f5c842; }
 .tree-grid-wrapper {
     position: relative;
+    margin-top: 8px;
 }
 .tree-connections {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
-.line-active   { stroke: #f5c842; stroke-width: 3; opacity: 0.9; }
-.line-inactive { stroke: #6b7280; stroke-width: 2; opacity: 0.35; }
+.line-active   { stroke: #f5c842; stroke-width: 3.5; opacity: 1; filter: drop-shadow(0 0 4px rgba(245,200,66,0.6)); }
+.line-inactive { stroke: #4b5563; stroke-width: 2.5; opacity: 0.4; }
 
 .talent-node {
     position: absolute;
@@ -596,18 +602,20 @@ const apexHref = computed(() => props.apexNode
     justify-content: center;
     background: #0a0a0d;
     border: 2px solid #4b5563;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-    filter: grayscale(1) brightness(0.65);
-    transition: filter 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.5);
+    filter: grayscale(1) brightness(0.5);
+    transition: filter 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     text-decoration: none;
 }
 .talent-node:hover {
-    transform: scale(1.12);
-    z-index: 2;
+    transform: scale(1.15);
+    z-index: 10;
+    filter: grayscale(0) brightness(1.1);
+    box-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 0 2px rgba(0,0,0,0.8);
 }
 
-.shape-square  { border-radius: 4px; }
+.shape-square  { border-radius: 6px; }
 .shape-round   { border-radius: 50%; }
 
 /* Choice nodes — square icon clipped to octagon, with an SVG frame drawn over
@@ -676,16 +684,20 @@ const apexHref = computed(() => props.apexNode
    - invested/maxed/granted: GOLD border */
 .talent-node.unselected  { /* default greyed */ }
 .talent-node.reachable   {
-    filter: grayscale(0.3) brightness(0.85);
+    filter: grayscale(0) brightness(0.9);
     border-color: #74D146;
-    box-shadow: 0 0 6px rgba(116,209,70,0.45);
+    box-shadow: 0 0 10px rgba(116,209,70,0.6), 0 0 0 2px rgba(0,0,0,0.8);
 }
 .talent-node.unreachable {
-    filter: grayscale(1) brightness(0.35);
+    filter: grayscale(1) brightness(0.3);
     cursor: not-allowed;
-    border-color: #2a2a30;
+    border-color: #1f1f22;
 }
 .talent-node.granted,
 .talent-node.invested,
-.talent-node.maxed       { border-color: #f5c842; filter: none; box-shadow: 0 0 8px rgba(245,200,66,0.55); }
+.talent-node.maxed       {
+    border-color: #f5c842;
+    filter: grayscale(0) brightness(1.05);
+    box-shadow: 0 0 14px rgba(245,200,66,0.7), 0 0 0 2px rgba(0,0,0,0.8);
+}
 </style>

@@ -3,16 +3,20 @@ import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { decodeTalentCode, buildAllNodeIds, encodeTalentCode } from '@/lib/talents/decoder.js';
 import { loadSpecBundle, iconUrl } from '@/lib/talents/data.js';
 import TalentTreeColumn from '@/lib/talents/TalentTreeColumn.vue';
+import GlassModal from '@/Components/UI/GlassModal.vue';
 
 const props = defineProps({
+    show:       { type: Boolean, default: false },
+    title:      { type: String, default: 'Talent Build' },
+    subtitle:   { type: String, default: null },
     talentCode: { type: String, default: '' },
-    specId:     { type: Number, default: null },     // optional: load empty tree for this spec when talentCode is blank
+    specId:     { type: Number, default: null },
     readonly:   { type: Boolean, default: true },
     updateUrl:  { type: String, default: null },
     csrfToken:  { type: String, default: null },
 });
 
-const emit = defineEmits(['saved']);
+const emit = defineEmits(['saved', 'close']);
 
 const loading   = ref(true);
 const error     = ref(null);
@@ -187,10 +191,27 @@ const heroTitle    = computed(() => activeHero.value?.name ?? 'Hero Talents');
 </script>
 
 <template>
-    <div class="talent-calculator-wrapper">
-        <div v-if="loading" class="py-12 text-center text-on-surface-variant text-sm">
-            <span class="animate-pulse">Loading talent build…</span>
-        </div>
+    <GlassModal :show="show" @close="emit('close')" max-width="max-w-[85rem]">
+        <header class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/40">
+            <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-300 text-base">account_tree</span>
+                {{ title }}
+                <span v-if="subtitle" class="text-on-surface-variant font-normal normal-case tracking-normal text-xs ml-1">
+                    {{ subtitle }}
+                </span>
+                <span v-if="readonly" class="text-[10px] font-normal normal-case tracking-normal text-on-surface-variant border border-white/10 rounded px-1.5 py-0.5 ml-2">
+                    read-only
+                </span>
+            </h3>
+            <button type="button" @click="emit('close')" class="text-on-surface-variant hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </header>
+
+        <div class="p-6 overflow-auto max-h-[85vh] custom-scroll">
+            <div v-if="loading" class="py-12 text-center text-on-surface-variant text-sm">
+                <span class="animate-pulse">Loading talent build…</span>
+            </div>
 
         <div v-else-if="error" class="py-6 text-center text-error text-sm">
             {{ error }}
@@ -238,55 +259,87 @@ const heroTitle    = computed(() => activeHero.value?.name ?? 'Hero Talents');
             />
         </div>
 
-        <!-- Editable: live talent code + actions -->
-        <div v-if="!readonly && !loading" class="mt-4 p-4 rounded-lg bg-surface-container border border-white/10">
-            <div class="flex items-center justify-between gap-3 mb-2">
-                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-                    Talent code
-                    <span class="font-normal normal-case tracking-normal text-on-surface-variant/70 ml-2">
-                        Left-click talents to add a rank · right-click to remove
-                    </span>
-                </label>
-                <span v-if="dirty" class="text-xs text-amber-400 font-bold uppercase tracking-widest">Unsaved</span>
-            </div>
-            <textarea
-                v-model="draftCode"
-                rows="3"
-                placeholder="Paste a Blizzard talent code here, or click talents above to build one…"
-                class="w-full p-2 text-xs font-mono rounded-md bg-black/30
-                       border border-white/10 text-white resize-y break-all"
-            />
-            <div class="mt-3 flex items-center gap-2">
-                <button type="button"
-                    :disabled="saving || !draftCode.trim() || !dirty"
-                    @click="saveBuild"
-                    class="px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest
-                           bg-cyan-500/20 border border-cyan-400/40 text-cyan-100
-                           hover:bg-cyan-500/30 transition-colors
-                           disabled:opacity-30 disabled:cursor-not-allowed">
-                    <span v-if="saving">Saving…</span>
-                    <span v-else>Save Build</span>
-                </button>
-                <button type="button"
-                    @click="copyDraftCode"
-                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest
-                           bg-white/5 border border-white/10 text-on-surface-variant
-                           hover:bg-white/10 hover:text-white transition-colors">
-                    Copy Code
-                </button>
-                <button type="button"
-                    @click="loadFromCode(props.talentCode)"
-                    :disabled="!dirty"
-                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest
-                           bg-white/5 border border-white/10 text-on-surface-variant
-                           hover:bg-white/10 hover:text-white transition-colors
-                           disabled:opacity-30 disabled:cursor-not-allowed">
-                    Reset
-                </button>
-                <span v-if="error" class="text-error text-xs">{{ error }}</span>
+            <!-- Actions Footer -->
+            <div v-if="!loading && bundle" class="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+
+                <!-- Readonly Mode -->
+                <div v-if="readonly" class="w-full flex items-center gap-2">
+                    <input
+                        type="text"
+                        :value="draftCode"
+                        readonly
+                        class="flex-1 px-3 py-2 text-xs font-mono rounded-md bg-black/40 border border-white/10 text-on-surface-variant focus:outline-none"
+                        placeholder="No talent code"
+                    />
+                    <button type="button"
+                        @click="copyDraftCode"
+                        :disabled="!draftCode"
+                        class="px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest
+                               bg-white/5 border border-white/10 text-white
+                               hover:bg-white/10 transition-colors flex items-center gap-2
+                               disabled:opacity-30 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                        Copy
+                    </button>
+                </div>
+
+                <!-- Editable Mode -->
+                <div v-else class="w-full flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-normal text-on-surface-variant/70">
+                            Left-click talents to add a rank · Right-click to remove
+                        </span>
+                        <span v-if="dirty" class="text-[10px] text-amber-400 font-bold uppercase tracking-widest bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                            Unsaved Changes
+                        </span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <input
+                            type="text"
+                            v-model="draftCode"
+                            class="flex-1 w-full px-3 py-2 text-xs font-mono rounded-md bg-black/40 border border-white/10 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
+                            placeholder="Paste a Blizzard talent code here..."
+                        />
+                        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                            <button type="button"
+                                @click="copyDraftCode"
+                                :disabled="!draftCode.trim()"
+                                class="flex-1 sm:flex-none px-3 py-2 rounded-md text-xs font-bold uppercase tracking-widest
+                                       bg-white/5 border border-white/10 text-on-surface-variant
+                                       hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-1.5
+                                       disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Copy current build string">
+                                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                Export
+                            </button>
+                            <button type="button"
+                                @click="loadFromCode(props.talentCode)"
+                                :disabled="!dirty"
+                                class="flex-1 sm:flex-none px-3 py-2 rounded-md text-xs font-bold uppercase tracking-widest
+                                       bg-white/5 border border-white/10 text-on-surface-variant
+                                       hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-1.5
+                                       disabled:opacity-30 disabled:cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[16px]">undo</span>
+                                Reset
+                            </button>
+                            <button type="button"
+                                :disabled="saving || !draftCode.trim() || !dirty"
+                                @click="saveBuild"
+                                class="flex-1 sm:flex-none px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest
+                                       bg-cyan-500/20 border border-cyan-400/40 text-cyan-100
+                                       hover:bg-cyan-500/30 transition-colors flex items-center justify-center gap-1.5
+                                       disabled:opacity-30 disabled:cursor-not-allowed">
+                                <span v-if="saving" class="material-symbols-outlined text-[16px] animate-spin">sync</span>
+                                <span v-else class="material-symbols-outlined text-[16px]">save</span>
+                                {{ saving ? 'Saving…' : 'Save' }}
+                            </button>
+                        </div>
+                    </div>
+                    <span v-if="error" class="text-error text-xs">{{ error }}</span>
+                </div>
             </div>
         </div>
-    </div>
+    </GlassModal>
 </template>
 
 <style scoped>

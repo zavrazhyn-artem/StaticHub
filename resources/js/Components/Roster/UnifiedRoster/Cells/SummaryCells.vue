@@ -1,7 +1,7 @@
 <script setup>
 import { inject, computed, ref } from 'vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
-import TalentCalculator from '@/Components/UI/TalentCalculator.vue';
+import TalentCalculatorModal from '@/Components/UI/TalentCalculatorModal.vue';
 
 const rowHeights = inject('rowHeights');
 const ilvlTiers  = inject('ilvlTiers', []);
@@ -144,28 +144,12 @@ const hasTalents = computed(() => !!props.char?.talent_loadout_code);
     </td>
 
     <!-- Talent modal (Teleport keeps it outside the table DOM) -->
-    <Teleport to="body">
-        <GlassModal :show="talentModalOpen" @close="talentModalOpen = false" max-width="max-w-7xl">
-            <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <span class="material-symbols-outlined text-cyan-300 text-base">account_tree</span>
-                    {{ char?.name }} — Talent Build
-                    <span v-if="char?.main_spec?.name"
-                          class="text-on-surface-variant font-normal normal-case tracking-normal text-xs">
-                        ({{ char.main_spec.name }})
-                    </span>
-                </h3>
-                <button type="button" @click="talentModalOpen = false" class="text-on-surface-variant hover:text-white">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </header>
-            <div class="p-4 overflow-auto max-h-[80vh]">
-                <TalentCalculator
-                    v-if="talentModalOpen"
-                    :talent-code="char?.talent_loadout_code ?? ''"
-                    :readonly="true"
-                />
-            </div>
-        </GlassModal>
-    </Teleport>
+    <TalentCalculatorModal
+        :show="talentModalOpen"
+        :talent-code="char?.talent_loadout_code ?? ''"
+        :readonly="true"
+        :title="`${char?.name || 'Character'} — Talent Build`"
+        :subtitle="char?.main_spec?.name ? `(${char.main_spec.name})` : null"
+        @close="talentModalOpen = false"
+    />
 </template>
