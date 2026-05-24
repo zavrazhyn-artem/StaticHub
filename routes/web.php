@@ -26,6 +26,7 @@ use App\Http\Controllers\Gear\GearListController;
 use App\Http\Controllers\Gear\WishlistController;
 use App\Http\Controllers\Treasury\TreasuryController;
 use App\Http\Controllers\Api\DiscordGuildController;
+use App\Http\Controllers\Auth\AiTesterAuthController;
 use App\Http\Controllers\Auth\BattleNetController;
 use App\Http\Controllers\Auth\OAuthDeviceApprovalController;
 use App\Http\Controllers\Desktop\DownloadController;
@@ -248,6 +249,14 @@ Route::get('/plan/{token}', [BossPlannerController::class, 'shared'])->name('pla
 // Battle.net OAuth
 Route::get('/auth/battlenet/redirect', [BattleNetController::class, 'redirect'])->name('battlenet.redirect');
 Route::get('/auth/battlenet/callback', [BattleNetController::class, 'callback'])->name('battlenet.callback');
+
+// AI Tester gate — local-only automated-testing login bypass. Registered
+// ONLY when AI_ACCESS is set and we're not in production; the controller
+// re-checks both as defense in depth. See config/ai_access.php.
+if (filled(config('ai_access.key')) && ! app()->isProduction()) {
+    Route::get('/auth/ai-tester', [AiTesterAuthController::class, 'login'])
+        ->name('ai-tester.login');
+}
 
 // OAuth Device Authorization Grant (browser side). The bridge sends users
 // here with ?user_code=ABCD-EFGH; show() bounces guests through Bnet
