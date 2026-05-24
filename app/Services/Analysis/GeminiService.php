@@ -1222,9 +1222,17 @@ class GeminiService
         return 'unknown';
     }
 
+    /**
+     * True only for the local AI-tester flow (session flag set by the gate at
+     * /auth/ai-tester). The `! isProduction()` clause is belt-and-suspenders:
+     * even if the flag ever leaked into a production session, real Gemini calls
+     * must still run so paying users get real reports, never a stub. session()
+     * is intentional here — this flag is request-scoped; in queued jobs it
+     * resolves to null, so async report generation is never stubbed.
+     */
     private function aiTesterActive(): bool
     {
-        return session()->get('ai_tester') === true;
+        return ! app()->isProduction() && session()->get('ai_tester') === true;
     }
 
     private function aiTesterStubText(): string

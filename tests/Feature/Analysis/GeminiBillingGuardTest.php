@@ -35,6 +35,8 @@ class GeminiBillingGuardTest extends TestCase
 
         $this->assertNotNull($svc->createCachedContext('ctx', 'gemini-2.5-flash'));
 
+        $this->assertTrue($svc->deleteCachedContext('cachedContents/ai-tester-stub'));
+
         Http::assertNothingSent();
     }
 
