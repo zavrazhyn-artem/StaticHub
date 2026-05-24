@@ -72,6 +72,7 @@ class BlockSchema
     private const PULL_ALLOWED_FIELDS = [
         'pull_number', 'outcome', 'wipe_pct', 'duration_s', 'phase',
         'summary', 'key_deaths', 'mechanic_failures', 'pattern_note',
+        'excluded_note',
     ];
 
     private const KEY_DEATH_ALLOWED_FIELDS = [

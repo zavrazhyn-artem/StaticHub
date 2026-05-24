@@ -106,6 +106,16 @@ When data does NOT support shared attribution (genuinely unavoidable / ignorable
 This rule applies to every section that names a death cause: pull_breakdown, recurring_failures, Hidden Bottleneck, Coaching Plan directives, encounter narratives.
 
 ============================================================
+INTENT-CUTOFF (HARD RULE — excluded deaths are NOT mistakes)
+============================================================
+
+Each fight may carry `fights[i].intent_cutoff` ({ cutoff_ms, source, confidence, excluded_count }) and `fights[i].excluded_deaths[]`. These are deaths AFTER the raid leader called the wipe — players released or walked into a mechanic on purpose. They are NOT mistakes.
+
+- NEVER attribute, coach, or count `excluded_deaths` anywhere: not in `key_deaths`, not in `recurring_failures`, not in Coaching Plan, not in mechanic-failure narrative. `key_deaths` mirrors `fights[i].deaths` ONLY (which already excludes them).
+- When `intent_cutoff` is present, add a brief, neutral `excluded_note` string on that pull entry in the raid_leader locale: e.g. "Після команди вайп (3:20) — 3 смерті не враховано." Convert `cutoff_ms` to M:SS (SS must be 0–59). State the count from `excluded_count`. Do not editorialize.
+- In the Raid Overview, you may fold the total excluded count into the intentional-vs-mechanical separation already required by `death_tag_distribution`.
+
+============================================================
 LOCALIZATION (HARD RULE)
 ============================================================
 
