@@ -1,7 +1,5 @@
 <script setup>
-import { inject, computed, ref } from 'vue';
-import GlassModal from '@/Components/UI/GlassModal.vue';
-import TalentCalculator from '@/Components/UI/TalentCalculator.vue';
+import { inject, computed } from 'vue';
 
 const rowHeights = inject('rowHeights');
 const ilvlTiers  = inject('ilvlTiers', []);
@@ -46,6 +44,7 @@ const ilvlColor = computed(() => {
 });
 
 const runs = computed(() => props.char?.weekly_runs_count ?? 0);
+
 const runsColor = computed(() => {
     if (runs.value >= 8) return '#39FF14';
     if (runs.value >= 4) return '#fcf266';
@@ -62,10 +61,6 @@ const ratingColor = computed(() => {
     if (r >= 1000) return '#4ADE80';
     return '#9ca3af';
 });
-
-// ── Talent modal ──────────────────────────────────────────────────────────────
-const talentModalOpen = ref(false);
-const hasTalents = computed(() => !!props.char?.talent_loadout_code);
 </script>
 
 <template>
@@ -116,56 +111,4 @@ const hasTalents = computed(() => !!props.char?.talent_loadout_code);
         :style="{ color: ratingColor }">
         {{ char?.mythic_rating != null ? Math.round(char.mythic_rating) : '—' }}
     </td>
-
-    <!-- Talents button -->
-    <td :class="[rh, isAlt ? 'px-1 py-0.5' : 'p-2', 'text-center border-l border-white/[0.06]']">
-        <button
-            v-if="hasTalents"
-            @click="talentModalOpen = true"
-            class="inline-flex items-center justify-center rounded-md transition-all hover:opacity-80"
-            :class="isAlt ? 'w-5 h-5' : 'w-7 h-7'"
-            style="background: rgba(120,220,255,0.08); border: 1px solid rgba(120,220,255,0.25);"
-            title="View talent build"
-        >
-            <span class="material-symbols-outlined text-cyan-300 leading-none"
-                  :class="isAlt ? 'text-[10px]' : 'text-sm'">
-                account_tree
-            </span>
-        </button>
-        <span v-else
-              class="inline-flex items-center justify-center opacity-20"
-              :class="isAlt ? 'w-5 h-5' : 'w-7 h-7'"
-              title="No talent data — sync character to populate">
-            <span class="material-symbols-outlined text-on-surface-variant leading-none"
-                  :class="isAlt ? 'text-[10px]' : 'text-sm'">
-                account_tree
-            </span>
-        </span>
-    </td>
-
-    <!-- Talent modal (Teleport keeps it outside the table DOM) -->
-    <Teleport to="body">
-        <GlassModal :show="talentModalOpen" @close="talentModalOpen = false" max-width="max-w-5xl">
-            <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <span class="material-symbols-outlined text-cyan-300 text-base">account_tree</span>
-                    {{ char?.name }} — Talent Build
-                    <span v-if="char?.main_spec?.name"
-                          class="text-on-surface-variant font-normal normal-case tracking-normal text-xs">
-                        ({{ char.main_spec.name }})
-                    </span>
-                </h3>
-                <button type="button" @click="talentModalOpen = false" class="text-on-surface-variant hover:text-white">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </header>
-            <div class="p-4 overflow-auto max-h-[80vh]">
-                <TalentCalculator
-                    v-if="talentModalOpen"
-                    :talent-code="char?.talent_loadout_code ?? ''"
-                    :readonly="true"
-                />
-            </div>
-        </GlassModal>
-    </Teleport>
 </template>

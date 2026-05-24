@@ -21,7 +21,6 @@
         :gear-list-set-slot-url-template="'{{ url('/gear/lists') }}/__ID__/slot'"
         :gear-list-picker-url-template="'{{ url('/gear/lists') }}/__ID__/picker'"
         :gear-list-import-simc-url-template="'{{ url('/gear/lists') }}/__ID__/simc'"
-        :gear-list-update-talent-url-template="'{{ url('/gear/lists') }}/__ID__/talent'"
         gear-bis-import-url="{{ route('statics.gear.lists.import-bis') }}"
         list-summaries-url="{{ route('statics.gear.lists.summaries') }}"
         :active-list-url-template="'{{ url('/gear/lists') }}/__ID__/payload'"

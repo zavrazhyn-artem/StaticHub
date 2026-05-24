@@ -25,7 +25,6 @@ const props = defineProps({
     gearListSetSlotUrlTemplate: { type: String, required: true },
     gearListPickerUrlTemplate: { type: String, required: true },
     gearListImportSimcUrlTemplate: { type: String, required: true },
-    gearListUpdateTalentUrlTemplate: { type: String, default: null },
     gearBisImportUrl: { type: String, required: true },
     listSummariesUrl: { type: String, required: true },
     activeListUrlTemplate: { type: String, required: true },
@@ -305,7 +304,6 @@ onMounted(() => {
         :gear-list-set-slot-url-template="gearListSetSlotUrlTemplate"
         :gear-list-picker-url-template="gearListPickerUrlTemplate"
         :gear-list-import-simc-url-template="gearListImportSimcUrlTemplate"
-        :gear-list-update-talent-url-template="gearListUpdateTalentUrlTemplate"
         :gear-bis-import-url="gearBisImportUrl"
     />
 
