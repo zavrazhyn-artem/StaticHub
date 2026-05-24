@@ -46,4 +46,16 @@ class AiTesterAuthServiceTest extends TestCase
         StaticGroup::factory()->create(['owner_id' => $owner->id]);
         $this->assertEquals($owner->id, $this->service()->resolveUser(null)?->id);
     }
+
+    public function test_empty_string_identity_falls_back_to_first_static_owner(): void
+    {
+        $owner = User::factory()->create();
+        StaticGroup::factory()->create(['owner_id' => $owner->id]);
+        $this->assertEquals($owner->id, $this->service()->resolveUser('')?->id);
+    }
+
+    public function test_returns_null_when_no_identity_and_no_static_exists(): void
+    {
+        $this->assertNull($this->service()->resolveUser(null));
+    }
 }

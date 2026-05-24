@@ -51,6 +51,7 @@ use Illuminate\Support\Carbon;
  * @property-read int|null $transactions_count
  * @method static StaticGroupBuilder<static>|StaticGroup findByInviteToken(string $token)
  * @method static StaticGroupBuilder<static>|StaticGroup firstForUser(int $userId)
+ * @method static StaticGroupBuilder<static>|StaticGroup firstWithOwner()
  * @method static StaticGroupBuilder<static>|StaticGroup newModelQuery()
  * @method static StaticGroupBuilder<static>|StaticGroup newQuery()
  * @method static StaticGroupBuilder<static>|StaticGroup whereAutomationSettings($value)

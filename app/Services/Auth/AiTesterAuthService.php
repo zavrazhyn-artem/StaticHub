@@ -36,7 +36,9 @@ class AiTesterAuthService
             return StaticGroup::query()->firstWithOwner()?->owner;
         }
 
-        if (ctype_digit($as)) {
+        // Cap at 18 digits so an oversized numeric string can't overflow the
+        // int cast; longer strings fall through to the battletag lookup.
+        if (ctype_digit($as) && strlen($as) <= 18) {
             return User::query()->findById((int) $as);
         }
 
