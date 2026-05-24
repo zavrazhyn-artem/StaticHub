@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Builders\StaticGroupBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -81,6 +82,8 @@ use Illuminate\Support\Carbon;
  */
 class StaticGroup extends Model
 {
+    use HasFactory;
+
     protected $table = 'statics';
 
     protected $fillable = [

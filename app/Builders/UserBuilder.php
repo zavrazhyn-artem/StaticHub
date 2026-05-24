@@ -64,4 +64,14 @@ class UserBuilder extends Builder
             $bnetData
         );
     }
+
+    public function findById(int $id): ?\App\Models\User
+    {
+        return $this->where('id', $id)->first();
+    }
+
+    public function findByBattletag(string $battletag): ?\App\Models\User
+    {
+        return $this->where('battletag', $battletag)->first();
+    }
 }

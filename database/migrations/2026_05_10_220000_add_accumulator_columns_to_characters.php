@@ -36,7 +36,8 @@ return new class extends Migration {
 
         // Backfill from services_raw_data if it still exists. Skip silently when the
         // table is already gone (fresh installs / future re-runs after the drop).
-        if (Schema::hasTable('services_raw_data')) {
+        // SQLite does not support multi-table UPDATE syntax — skip on sqlite (tests).
+        if (Schema::hasTable('services_raw_data') && DB::getDriverName() !== 'sqlite') {
             DB::statement("
                 UPDATE characters c
                 INNER JOIN services_raw_data s ON s.character_id = c.id

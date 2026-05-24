@@ -9,8 +9,10 @@ return new class extends Migration {
     public function up(): void
     {
         // Schema::change() requires doctrine/dbal which isn't installed.
-        // Raw ALTER works for MySQL.
-        DB::statement('ALTER TABLE statics MODIFY ai_death_cutoff TINYINT UNSIGNED NOT NULL DEFAULT 3');
+        // Raw ALTER works for MySQL; SQLite does not support MODIFY — skip on sqlite (tests).
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE statics MODIFY ai_death_cutoff TINYINT UNSIGNED NOT NULL DEFAULT 3');
+        }
 
         // Migrate existing values: anything >5 clamps to 5, 0/null stays default 3.
         DB::table('statics')->where('ai_death_cutoff', '>', 5)->update(['ai_death_cutoff' => 5]);
@@ -19,6 +21,8 @@ return new class extends Migration {
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE statics MODIFY ai_death_cutoff TINYINT UNSIGNED NOT NULL DEFAULT 5');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE statics MODIFY ai_death_cutoff TINYINT UNSIGNED NOT NULL DEFAULT 5');
+        }
     }
 };

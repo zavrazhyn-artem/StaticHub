@@ -45,4 +45,9 @@ class StaticGroupBuilder extends Builder
     {
         return $this->whereNotNull('raid_days')->whereNotNull('raid_start_time');
     }
+
+    public function firstWithOwner(): ?StaticGroup
+    {
+        return $this->withoutGlobalScope('member')->with('owner')->first();
+    }
 }
