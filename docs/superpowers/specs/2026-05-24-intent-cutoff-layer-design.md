@@ -14,8 +14,9 @@ Two rounds of user feedback on the Gemini raid-analysis reports surfaced four ro
 
 ### What already exists (and why it fails)
 
-- **`WipeDetector`** (`app/Services/Analysis/WipeDetector.php`) tags deaths `wipe_called` / `tank_loss_cascade` / `mechanic_oneshot` / `normal`. It detects a **tight cluster of ≥5 deaths within 3s** (`CLUSTER_WINDOW_MS = 3000`). The Darkwell case fails structurally: post-wipe deaths *trickle* over 10–20s, so no 3s cluster forms and nothing is tagged. It also only flags individual deaths — it never establishes a **cutoff time**, and it does **not** truncate rotation/uptime/damage-taken.
-- **`AiDeathSuppressor`** filters deaths carrying suppression flags — but it depends on `WipeDetector` having tagged them, so it inherits the same blind spot.
+- **`WipeDetector`** (`app/Services/Analysis/WipeDetector.php`) tags deaths `wipe_called` / `tank_loss_cascade` / `mechanic_oneshot` / `normal`. It detects a **tight cluster of ≥5 deaths within 3s** (`CLUSTER_WINDOW_MS = 3000`). The Darkwell case fails structurally: post-wipe deaths *trickle* over 10–20s, so no 3s cluster forms and nothing is tagged. It also only flags individual deaths — it never establishes a **cutoff time**.
+- **`AiDeathSuppressor`** (`suppress($preprocessed, $cutoff)`, runs *after* `analyze()`, AI-payload only) does a crude token-saving trim: keep the first-N (N=1–5) deaths chronologically per pull and drop pulls under 20s. It is **not** intent-aware — it keeps the first N regardless of whether a wipe was called, and trims the tail by count, not by a cutoff time.
+- **The actual bug:** `DeathAttributionBuilder` computes an `attribution` for **every** death in `encounters[].fights[].deaths[]`, and the prompt mirrors them all 1:1 into `key_deaths` (gemini_main_report.txt line 332). The existing `death_tag_distribution` separation only feeds **one** Raid-Overview paragraph (line 319) — it never removes wipe-call deaths from the per-pull attribution or `key_deaths`. So intentional deaths still get coached as mistakes.
 
 ### Decisions locked during brainstorming
 
@@ -39,6 +40,8 @@ Two rounds of user feedback on the Gemini raid-analysis reports surfaced four ro
 - RC2 (mechanic grounding), RC3 (hallucination/obsolete advice), RC4 (explanation quality). Tracked separately.
 - Individual mid-fight intentional deaths (e.g. a single player suiciding to reset a debuff). The dominant case is the *mass* wipe-call → one cutoff timestamp per pull. Individual intentional deaths are out of scope.
 - The player movement-map / spatial initiative (next design session; builds on this layer).
+
+**Build sequencing.** Phase 1a (death partition + excluded bucket + transparency + prompt rule — pure in-memory, shippable, this plan) → Phase 1b (metric-tail truncation via truncated WCL re-fetch — own plan) → Phase 2 (addon marker + alignment + review/override UI — own plan).
 
 ---
 
@@ -87,18 +90,13 @@ manual_override  >  addon_marker  >  anchor+cascade  >  cascade_only  >  none
 
 ## 5. Consumption — Truncating the Whole Tail
 
-In `TacticalDataAnalyzer`, at the start of per-pull processing:
+**Death partition (Phase 1a) — pure in-memory, no extra WCL call.** Deaths are already fully fetched. `WipeDetector::tag()` runs in `TacticalDataAnalyzer::analyze()` (line 63) on the *grouped* `$logData['deaths'][boss][try_N]` **before** the encounter loop (line 71) and before `applyDeathAttribution()` (line 137). So we insert one step right after tagging:
 
-1. **Resolve** `cutoff_ms` for the pull via `IntentCutoffResolver`.
-2. **Deaths** after `cutoff_ms` → moved to `excluded_deaths[]` with reason `post_intent_cutoff`. They are **not** passed to `DeathAttributionBuilder`, mechanic-failure counts, or recurring-failure aggregation.
-3. **Table metrics** (casts/CPM, buff/debuff uptime, damage-taken) for cutoff pulls are recomputed over the truncated window.
+- `applyIntentCutoff(&$logData, $anchorNames)` — for each **wiped** fight, resolve `cutoff_ms`, then **move** post-cutoff deaths out of `$logData['deaths'][boss][try_N]` into `$logData['excluded_deaths'][boss][try_N]`, and record `$logData['intent_cutoffs'][fight_id] = {cutoff_ms, source, confidence, excluded_count}`.
+- Because every downstream consumer (`analyzeEncounter`, `FightBreakdownBuilder`, mechanic-failures, `InsightsBuilder`, `DeathAttributionBuilder`, `buildDeathTagDistribution`) reads the partitioned `$logData['deaths']`, **none of them needs to change** — they automatically see only the kept deaths.
+- The excluded bucket + cutoff metadata are surfaced into each fight (`fights[].excluded_deaths`, `fights[].intent_cutoff`) via `FightBreakdownBuilder` so the AI/UI can render the transparent section.
 
-**WCL truncation mechanism.** `WclQueryBuilder::buildTablesQuery()` currently batches all fights via `fightIDs` with no time bound. WCL's `table()` accepts an `endTime` (absolute report-relative ms). So:
-
-- **Two-pass fetch** in `WclService`:
-  - Pass 1: fetch `fights` metadata + `Deaths` for all fights → resolve cutoffs.
-  - Pass 2: fetch heavy tables. Non-cutoff fights stay in the existing batched query. Each cutoff pull gets an **individual** truncated query with `endTime = fightStartTime + cutoff_ms`.
-- Extra WCL calls are bounded by the number of cutoff pulls (only wiped pulls with a resolved cutoff). Acceptable cost.
+**Metric-tail truncation (Phase 1b — separate plan).** Truncating rotation/CPM, buff/debuff uptime and damage-taken needs the truncated WCL table data. Confirmed against the WCL v2 schema: the `table` field **does** accept `startTime`/`endTime` (Float, report-relative ms; the two must differ) alongside `fightIDs` — the existing `getPerFightCastsSummary()` alias-batching pattern is the template. For cutoff pulls we re-fetch their tables with `endTime = fightStart + cutoff_ms` and recompute per-player metrics. This touches `WclService` fetch orchestration + `RotationAnalyzer` recompute, so it is carved into its own plan after Phase 1a's death partition ships and is validated. (WCL's native `wipeCutoff: Int` arg was considered and rejected — it truncates at the Nth death regardless of *intent*, which is exactly the conflation we are removing.)
 
 ---
 
