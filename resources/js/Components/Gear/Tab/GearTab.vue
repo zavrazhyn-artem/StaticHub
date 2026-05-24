@@ -361,6 +361,7 @@ const typeColor = (type) => ({
                         :slots="activeList.slots"
                         :stats="activeList.stats"
                         :stats-placeholder="activeList.type === 'current' ? __('Sync your character to populate stats.') : __('Pick items via the slot picker to see set totals.')"
+                        :readiness="activeList.readiness"
                         :enchantable-slots="enchantableSlots"
                         :audit="activeList.type === 'current'"
                         :editable="isOwnContext && activeList.editable"
