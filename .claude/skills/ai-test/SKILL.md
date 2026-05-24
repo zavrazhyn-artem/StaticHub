@@ -32,6 +32,8 @@ Skip POST/PATCH/DELETE for the read-only sweep; exercise those in the interactiv
 
 ## Per-page health sweep
 
+First create the run's screenshot dir (browser_take_screenshot does NOT auto-create it and errors ENOENT otherwise): `mkdir -p docs/ai-testing/screenshots/<run>/`. Filenames passed to the tool resolve relative to the repo root.
+
 For each URL: navigate, then collect via MCP Playwright —
 - HTTP status (no 4xx/5xx),
 - `browser_console_messages` (flag errors/warnings),
