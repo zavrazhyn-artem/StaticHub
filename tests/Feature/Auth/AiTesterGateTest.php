@@ -75,4 +75,33 @@ class AiTesterGateTest extends TestCase
         $this->get('/auth/ai-tester?key='.self::KEY)->assertNotFound();
         $this->assertGuest();
     }
+
+    public function test_rejects_protocol_relative_and_backslash_redirects(): void
+    {
+        $user = User::factory()->create();
+
+        $this->get('/auth/ai-tester?key='.self::KEY.'&as='.$user->id.'&redirect=//evil.com')
+            ->assertRedirect(route('dashboard'));
+
+        $this->get('/auth/ai-tester?key='.self::KEY.'&as='.$user->id.'&redirect='.urlencode('/\\evil.com'))
+            ->assertRedirect(route('dashboard'));
+    }
+
+    public function test_accepts_key_via_header(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withHeaders(['X-AI-Access' => self::KEY])
+            ->get('/auth/ai-tester?as='.$user->id)
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_404_when_user_not_found(): void
+    {
+        $this->get('/auth/ai-tester?key='.self::KEY.'&as='.urlencode('Ghost#9999'))
+            ->assertNotFound();
+        $this->assertGuest();
+    }
 }

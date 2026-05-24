@@ -34,7 +34,12 @@ class AiTesterAuthController extends Controller
         $request->session()->put('ai_tester', true);
 
         $redirect = $request->query('redirect');
-        if (is_string($redirect) && str_starts_with($redirect, '/')) {
+        if (
+            is_string($redirect)
+            && str_starts_with($redirect, '/')
+            && ! str_starts_with($redirect, '//')
+            && ! str_starts_with($redirect, '/\\')
+        ) {
             return redirect($redirect);
         }
 
