@@ -52,6 +52,10 @@ class GeminiService
      */
     public function deleteCachedContext(string $cacheId): bool
     {
+        if ($this->aiTesterActive()) {
+            return true;
+        }
+
         $url = 'https://generativelanguage.googleapis.com/v1beta/' . $cacheId;
         try {
             $response = Http::timeout(15)->delete($url . '?key=' . $this->apiKey);
@@ -100,6 +104,10 @@ class GeminiService
      */
     public function createCachedContext(string $contextContent, string $model, int $ttlSeconds = 10800): ?array
     {
+        if ($this->aiTesterActive()) {
+            return ['cache_id' => 'cachedContents/ai-tester-stub', 'expires_at' => now()->addSeconds($ttlSeconds)->toIso8601String()];
+        }
+
         $payload = [
             'model' => "models/{$model}",
             'contents' => [
@@ -193,6 +201,10 @@ class GeminiService
      */
     public function executeWithCache(string $cacheId, string $promptText, string $modelUrl, int $timeout = 300, bool $jsonMode = false, int $maxOutputTokens = 65536): string
     {
+        if ($this->aiTesterActive()) {
+            return $this->aiTesterStubText();
+        }
+
         $payload = [
             'cachedContent' => $cacheId,
             'contents' => [
@@ -268,6 +280,10 @@ class GeminiService
      */
     public function executeRequest(string $promptText, int $timeout = 120, int $retries = 3, bool $jsonMode = false): string
     {
+        if ($this->aiTesterActive()) {
+            return $this->aiTesterStubText();
+        }
+
         $payload = [
             'contents' => [
                 [
@@ -328,6 +344,10 @@ class GeminiService
      */
     public function executeApiRequest(array $payload): string
     {
+        if ($this->aiTesterActive()) {
+            return $this->aiTesterStubText();
+        }
+
         $startTime = microtime(true);
         $response = Http::post($this->baseUrl . '?key=' . $this->apiKey, $payload);
 
@@ -485,6 +505,10 @@ class GeminiService
      */
     public function generateMainReportBlocks(string $contextContent, string $tone = 'neutral', ?string $cacheId = null, ?string $raidLeaderLocale = null): array
     {
+        if ($this->aiTesterActive()) {
+            return ['title' => '[AI TESTER STUB] Raid Analysis', 'main' => [['type' => 'paragraph', 'text' => 'Stubbed — no paid Gemini call.']]];
+        }
+
         $instructions = $this->loadPromptWithTone('gemini_main_report.txt', $tone);
         $url = $this->buildModelUrl($this->proModel);
 
@@ -665,6 +689,14 @@ class GeminiService
      */
     public function generatePlayerReportBlocks(string $contextContent, array $playerNames, int $concurrency = 1, string $tone = 'neutral', ?string $cacheId = null, ?callable $onPlayerComplete = null, array $playerLocales = []): array
     {
+        if ($this->aiTesterActive()) {
+            $stub = [];
+            foreach ($playerNames as $name) {
+                $stub[$name] = ['status' => 'ok', 'blocks' => [['type' => 'paragraph', 'text' => '[AI TESTER STUB]']]];
+            }
+            return $stub;
+        }
+
         $instructions = $this->loadPromptWithTone('gemini_player_report.txt', $tone);
         $url = $this->buildModelUrl($this->proModel);
         $results = [];
@@ -1015,6 +1047,10 @@ class GeminiService
      */
     public function executeRequestWithModel(string $promptText, string $modelUrl, int $timeout = 120, int $maxRetries = 3, bool $jsonMode = false, int $maxOutputTokens = 32768): string
     {
+        if ($this->aiTesterActive()) {
+            return $this->aiTesterStubText();
+        }
+
         $payload = [
             'contents' => [
                 [
@@ -1184,5 +1220,15 @@ class GeminiService
         }
 
         return 'unknown';
+    }
+
+    private function aiTesterActive(): bool
+    {
+        return session()->get('ai_tester') === true;
+    }
+
+    private function aiTesterStubText(): string
+    {
+        return '{"blocks":[{"type":"paragraph","text":"[AI TESTER STUB] No paid Gemini call was made."}]}';
     }
 }
