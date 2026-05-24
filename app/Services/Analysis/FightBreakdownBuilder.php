@@ -16,7 +16,9 @@ namespace App\Services\Analysis;
  *   duration_s           int
  *   boss_hp_end_pct      float
  *   last_phase           ?string
- *   deaths               array    each tagged by WipeDetector
+ *   deaths               array    kept deaths (pre intent-cutoff), each tagged by WipeDetector
+ *   excluded_deaths      array    deaths after the wipe-call cutoff — NOT mistakes
+ *   intent_cutoff        ?array   {cutoff_ms, source, confidence, excluded_count} | null
  *   wipe_called_count    int      diagnostic counter
  *   tank_loss_count      int      diagnostic counter
  *   rotation_per_player  map      playerName => list of {ability, eff_pct, …}
@@ -35,12 +37,16 @@ class FightBreakdownBuilder
      * @param array  $deathsByTry        Boss's deaths grouped by try_N (already tagged by WipeDetector)
      * @param array  $perFightCasts      fight_id => playerName => abilityName => count
      * @param array  $perPlayerData      Whole-raid per-player data (used for class+spec lookup)
+     * @param array  $excludedByTry      try_N => deaths excluded after intent cutoff (keyed same as $deathsByTry)
+     * @param array  $intentCutoffs      fight_id => {cutoff_ms, source, confidence, excluded_count}
      */
     public function build(
         array $tries,
         array $deathsByTry,
         array $perFightCasts,
-        array $perPlayerData
+        array $perPlayerData,
+        array $excludedByTry = [],
+        array $intentCutoffs = []
     ): array {
         $out = [];
         foreach (array_values($tries) as $idx => $t) {
@@ -67,6 +73,8 @@ class FightBreakdownBuilder
                 'last_phase'          => $t['last_phase'] ?? null,
                 'difficulty'          => $t['difficulty'] ?? null,
                 'deaths'              => $deaths,
+                'excluded_deaths'     => $excludedByTry[$tryKey] ?? [],
+                'intent_cutoff'       => ($fightId !== null ? ($intentCutoffs[$fightId] ?? null) : null),
                 'wipe_called_count'   => $wipeCalled,
                 'tank_loss_count'     => $tankLoss,
                 'rotation_per_player' => $rotation,

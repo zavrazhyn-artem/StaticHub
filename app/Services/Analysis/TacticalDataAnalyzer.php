@@ -365,7 +365,9 @@ class TacticalDataAnalyzer
             $logData['deaths'][$bossName] ?? [],
             $logData['per_fight_casts'] ?? [],
             // perPlayerData isn't built yet at this point — pass players for class+spec lookup
-            $this->playerSpecLookup($playerNames, $logData)
+            $this->playerSpecLookup($playerNames, $logData),
+            $logData['excluded_deaths'][$bossName] ?? [],
+            $logData['intent_cutoffs'] ?? []
         );
 
         // Aggregate death-tag counts so the AI can separate /wipe-call deaths
