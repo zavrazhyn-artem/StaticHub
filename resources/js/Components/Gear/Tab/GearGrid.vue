@@ -1,6 +1,8 @@
 <script setup>
+import { ref } from 'vue';
 import GearSlotCard from './GearSlotCard.vue';
 import CharacterStatsPanel from './CharacterStatsPanel.vue';
+import GearReadinessBar from './GearReadinessBar.vue';
 
 const props = defineProps({
     slots: { type: Object, required: true },
@@ -9,6 +11,7 @@ const props = defineProps({
     enchantableSlots: { type: Array, default: () => [] },
     audit: { type: Boolean, default: false },
     editable: { type: Boolean, default: false },
+    readiness: { type: [Object, null], default: null },
     // Forwarded to GearSlotCard so wowhead tooltips resolve hybrid stats
     // and tier-set bonuses against the character's actual class+spec.
     classId: { type: [Number, null], default: null },
@@ -20,70 +23,90 @@ const emit = defineEmits(['edit', 'clear']);
 const LEFT_COL = ['head', 'neck', 'shoulder', 'back', 'chest', null, null, 'wrist'];
 const RIGHT_COL = ['hands', 'waist', 'legs', 'feet', 'finger_1', 'finger_2', 'trinket_1', 'trinket_2'];
 const BOTTOM_ROW = ['main_hand', 'off_hand'];
+
+const gridRoot = ref(null);
+
+function focusSlot(slot) {
+    const root = gridRoot.value;
+    if (!root) return;
+    const el = root.querySelector(`[data-slot="${slot}"]`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('ring-2', 'ring-primary', 'rounded-lg');
+    setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'rounded-lg'), 1600);
+}
 </script>
 
 <template>
-    <!-- Side cards comfortably fit item names; center stats stays compact at
-         its original size, with extra gap-x acting as breathing room. -->
-    <div class="grid gap-x-24 gap-y-3 justify-center" style="grid-template-columns: minmax(220px, 260px) minmax(220px, 280px) minmax(220px, 260px);">
-        <!-- Left column -->
-        <div class="space-y-1.5 pt-1">
-            <template v-for="(slot, idx) in LEFT_COL" :key="`L${idx}`">
-                <GearSlotCard
-                    v-if="slot"
-                    :slot="slot"
-                    :item="slots[slot]"
-                    :enchantable-slots="enchantableSlots"
-                    :audit="audit"
-                    :editable="editable"
-                    :class-id="classId"
-                    :spec-id="specId"
-                    @edit="emit('edit', slot)"
-                    @clear="emit('clear', slot)"
-                />
-                <div v-else class="h-[40px]"></div>
-            </template>
-        </div>
+    <div ref="gridRoot">
+        <GearReadinessBar
+            v-if="audit && readiness"
+            :readiness="readiness"
+            @focus-slot="focusSlot"
+        />
 
-        <!-- Center: stats panel -->
-        <div class="pt-1">
-            <CharacterStatsPanel :stats="stats" :placeholder-text="statsPlaceholder || undefined" />
-        </div>
+        <!-- Side cards comfortably fit item names; center stays compact. -->
+        <div class="grid gap-x-24 gap-y-3 justify-center" style="grid-template-columns: minmax(220px, 260px) minmax(220px, 280px) minmax(220px, 260px);">
+            <!-- Left column -->
+            <div class="space-y-1.5 pt-1">
+                <template v-for="(slot, idx) in LEFT_COL" :key="`L${idx}`">
+                    <div v-if="slot" :data-slot="slot">
+                        <GearSlotCard
+                            :slot="slot"
+                            :item="slots[slot]"
+                            :enchantable-slots="enchantableSlots"
+                            :audit="audit"
+                            :editable="editable"
+                            :class-id="classId"
+                            :spec-id="specId"
+                            @edit="emit('edit', slot)"
+                            @clear="emit('clear', slot)"
+                        />
+                    </div>
+                    <div v-else class="h-[40px]"></div>
+                </template>
+            </div>
 
-        <!-- Right column -->
-        <div class="space-y-1.5 pt-1">
-            <GearSlotCard
-                v-for="slot in RIGHT_COL"
-                :key="slot"
-                :slot="slot"
-                :item="slots[slot]"
-                :enchantable-slots="enchantableSlots"
-                :audit="audit"
-                :editable="editable"
-                :class-id="classId"
-                :spec-id="specId"
-                mirror
-                @edit="emit('edit', slot)"
-                @clear="emit('clear', slot)"
-            />
-        </div>
+            <!-- Center: stats panel -->
+            <div class="pt-1">
+                <CharacterStatsPanel :stats="stats" :placeholder-text="statsPlaceholder || undefined" />
+            </div>
 
-        <!-- Bottom row: weapons centered under the model. -->
-        <div class="col-span-3 flex justify-center mt-2">
-            <div class="grid grid-cols-2 gap-3 w-full max-w-md">
-                <GearSlotCard
-                    v-for="slot in BOTTOM_ROW"
-                    :key="slot"
-                    :slot="slot"
-                    :item="slots[slot]"
-                    :enchantable-slots="enchantableSlots"
-                    :audit="audit"
-                    :editable="editable"
-                    :class-id="classId"
-                    :spec-id="specId"
-                    @edit="emit('edit', slot)"
-                    @clear="emit('clear', slot)"
-                />
+            <!-- Right column -->
+            <div class="space-y-1.5 pt-1">
+                <div v-for="slot in RIGHT_COL" :key="slot" :data-slot="slot">
+                    <GearSlotCard
+                        :slot="slot"
+                        :item="slots[slot]"
+                        :enchantable-slots="enchantableSlots"
+                        :audit="audit"
+                        :editable="editable"
+                        :class-id="classId"
+                        :spec-id="specId"
+                        mirror
+                        @edit="emit('edit', slot)"
+                        @clear="emit('clear', slot)"
+                    />
+                </div>
+            </div>
+
+            <!-- Bottom row: weapons centered under the model. -->
+            <div class="col-span-3 flex justify-center mt-2">
+                <div class="grid grid-cols-2 gap-3 w-full max-w-md">
+                    <div v-for="slot in BOTTOM_ROW" :key="slot" :data-slot="slot">
+                        <GearSlotCard
+                            :slot="slot"
+                            :item="slots[slot]"
+                            :enchantable-slots="enchantableSlots"
+                            :audit="audit"
+                            :editable="editable"
+                            :class-id="classId"
+                            :spec-id="specId"
+                            @edit="emit('edit', slot)"
+                            @clear="emit('clear', slot)"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
