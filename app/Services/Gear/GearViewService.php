@@ -8,6 +8,7 @@ use App\Models\Character;
 use App\Models\GearList;
 use App\Models\GearListItem;
 use App\Models\Specialization;
+use App\Services\Roster\GearAuditService;
 
 
 
@@ -61,6 +62,7 @@ final class GearViewService
 
     public function __construct(
         private readonly CharacterStatsExtractor $statsExtractor,
+        private readonly GearAuditService $gearAudit,
     ) {}
 
     /**
@@ -192,6 +194,89 @@ final class GearViewService
                 : $list->talent_loadout_code,
             'slots'       => $slots,
             'stats'       => $this->resolveStats($list),
+            'readiness'   => $list->type === GearList::TYPE_CURRENT
+                ? $this->buildReadinessSummary($list->character, $list->specialization?->name)
+                : null,
+        ];
+    }
+
+    /**
+     * Compact "raid readiness" summary for the current-equipment view.
+     * Returns null when the spec has no synced equipment.
+     */
+    public function buildReadinessSummary(?Character $char, ?string $specName): ?array
+    {
+        if ($char === null || $specName === null) {
+            return null;
+        }
+
+        $equipped = $char->bnet_equipment_by_spec[$specName]['equipped_items'] ?? [];
+        if (! is_array($equipped) || $equipped === []) {
+            return null;
+        }
+
+        return $this->readinessFromEquipped($equipped, (int) ($char->equipped_item_level ?? 0));
+    }
+
+    private function readinessFromEquipped(array $equipped, int $ilvl): array
+    {
+        $equipment = $this->gearAudit->resolveEquipment($equipped) ?? [];
+
+        $nameBySlot = [];
+        foreach ($equipment as $e) {
+            $nameBySlot[$e['slot']] = $e['name'];
+        }
+
+        $toChip = static fn (string $slotType): array => [
+            'slot' => strtolower($slotType),
+            'name' => $nameBySlot[$slotType] ?? strtolower($slotType),
+        ];
+
+        $missing = array_map($toChip, $this->gearAudit->resolveMissingEnchants($equipped));
+        $lowQ    = array_map($toChip, $this->gearAudit->resolveLowQualityEnchants($equipped));
+        $sockets = $this->gearAudit->resolveEmptySockets($equipped);
+
+        $tier      = $this->gearAudit->resolveTierPieces($equipped);
+        $tierTotal = count($tier);
+        $tierHave  = count(array_filter($tier, static fn ($t) => $t !== '-'));
+
+        $weakest = null;
+        if ($equipment !== []) {
+            $ilvls = array_map(static fn ($e) => $e['ilvl'], $equipment);
+            sort($ilvls);
+            $n = count($ilvls);
+            $median = $n % 2
+                ? $ilvls[intdiv($n, 2)]
+                : (int) (($ilvls[$n / 2 - 1] + $ilvls[$n / 2]) / 2);
+
+            $low = null;
+            foreach ($equipment as $e) {
+                if ($low === null || $e['ilvl'] < $low['ilvl']) {
+                    $low = $e;
+                }
+            }
+            $delta = $low['ilvl'] - $median;
+            if ($delta <= -13) {
+                $weakest = [
+                    'slot'  => strtolower($low['slot']),
+                    'name'  => $low['name'],
+                    'ilvl'  => $low['ilvl'],
+                    'delta' => $delta,
+                ];
+            }
+        }
+
+        $problems = count($missing) + count($lowQ) + ($sockets > 0 ? 1 : 0) + ($weakest !== null ? 1 : 0);
+
+        return [
+            'ilvl'                 => $ilvl,
+            'tier_have'            => $tierHave,
+            'tier_total'           => $tierTotal,
+            'problems'             => $problems,
+            'missing_enchants'     => array_values($missing),
+            'low_quality_enchants' => array_values($lowQ),
+            'empty_sockets'        => $sockets,
+            'weakest'              => $weakest,
         ];
     }
 
