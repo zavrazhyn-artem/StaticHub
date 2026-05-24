@@ -42,6 +42,8 @@ For each URL: navigate, then collect via MCP Playwright —
 - `browser_take_screenshot` into `docs/ai-testing/screenshots/<run>/`,
 - your own read of the page: empty states where data should exist, broken layout, untranslated strings.
 
+**Keep the user in the loop visually:** from time to time during the run (every few pages, and immediately on anything notable/broken) push the screenshot to the user with `SendUserFile` (status: `proactive`), batched in parallel with your other tool calls — don't save them all up for the end.
+
 ## Interactive flows (full interaction allowed)
 
 Exercise key journeys end-to-end: create/edit/delete an event, RSVP, edit roster access-role, a treasury transaction, trigger a character re-sync (verify it completes inline since local queue is sync), open the AI-report UI (confirm the [AI TESTER STUB] content renders — NO paid call). Discord side effects are fine (personal channel).
