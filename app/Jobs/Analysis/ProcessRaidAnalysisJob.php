@@ -76,6 +76,11 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
             $static->load('characters.user', 'members');
             $rosterNames = $static->characters->pluck('name')->toArray();
 
+            $anchorIds = $static->intentAnchorCharacterIds();
+            $anchorNames = $anchorIds
+                ? $static->characters->whereIn('id', $anchorIds)->pluck('name')->values()->all()
+                : [];
+
             // Stage 1: WCL fetch (with roster filter)
             $logData = $wclService->getLogSummary($this->report->wcl_report_id, $rosterNames);
             $difficulties = $logData['difficulties'] ?? null;
@@ -87,7 +92,8 @@ class ProcessRaidAnalysisJob implements ShouldQueue, ShouldBeUnique
                 $logData,
                 $localization,
                 $rosterNames,
-                $this->report->wcl_report_id
+                $this->report->wcl_report_id,
+                $anchorNames
             );
 
             // Wave 3: persist per-encounter snapshots (always, regardless of subscription)

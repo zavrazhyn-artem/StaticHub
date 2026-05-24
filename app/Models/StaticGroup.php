@@ -250,6 +250,20 @@ class StaticGroup extends Model
     }
 
     /**
+     * Character IDs whose death marks the wipe-call cutoff for intent filtering.
+     * Stored in automation_settings; empty array when unconfigured.
+     *
+     * @return list<int>
+     */
+    public function intentAnchorCharacterIds(): array
+    {
+        return array_values(array_map(
+            'intval',
+            $this->automation_settings['intent_anchor_character_ids'] ?? []
+        ));
+    }
+
+    /**
      * Get the quantity for a specific consumable, optionally from static-specific settings.
      */
     public function getConsumableQuantity(string $recipeName, int $defaultQuantity): int
