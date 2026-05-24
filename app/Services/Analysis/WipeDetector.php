@@ -40,6 +40,12 @@ class WipeDetector
     private const ONESHOT_DOMINANCE = 0.80;
     private const TANK_LOSS_LOOKBACK_MS = 10000;
 
+    // Loosened "terminal abandon" detector — for post-wipe-call trickle deaths
+    // that the 3s cluster logic misses. Tuned later against real guild logs.
+    private const TERMINAL_GAP_MS = 5000;        // max gap between consecutive deaths in the run
+    private const TERMINAL_MIN_RUN = 3;          // min deaths to call it an abandon
+    private const TERMINAL_END_WINDOW_MS = 8000; // run's last death must land within this of fight end
+
     /**
      * Tag every death in the grouped deaths structure produced by
      * WclReportParserHelper::parseDeaths().
@@ -60,6 +66,55 @@ class WipeDetector
             unset($deaths);
         }
         unset($byTry);
+    }
+
+    /**
+     * Detect a post-wipe-call "everyone trickled into a mechanic" abandon run.
+     * Unlike the 3s cluster used for tagging, this allows wider gaps and anchors
+     * to the END of the fight. Returns the time_ms_relative of the run START, or
+     * null when no abandon pattern is present.
+     *
+     * @param array<int,array> $deaths   deaths in one fight (each may carry time_ms_relative)
+     * @param float|null       $bossPct  boss health % at end of pull; null skips the threshold check
+     * @param int              $fightDurationMs total fight duration in ms (0 skips the end-window check)
+     * @return int|null  time_ms_relative of the abandon-run start, or null when no pattern is present
+     */
+    public function detectTerminalAbandon(array $deaths, ?float $bossPct, int $fightDurationMs): ?int
+    {
+        // Boss nearly dead → legit progression wipe, never an intentional abandon.
+        if ($bossPct !== null && $bossPct <= self::BOSS_HP_THRESHOLD_PCT) {
+            return null;
+        }
+
+        $times = [];
+        foreach ($deaths as $d) {
+            $t = $d['time_ms_relative'] ?? null;
+            if ($t !== null) $times[] = (int) $t;
+        }
+        if (count($times) < self::TERMINAL_MIN_RUN) {
+            return null;
+        }
+        sort($times);
+
+        $last = $times[count($times) - 1];
+        // The run must reach (near) the end of the fight.
+        if ($fightDurationMs > 0 && ($fightDurationMs - $last) > self::TERMINAL_END_WINDOW_MS) {
+            return null;
+        }
+
+        // Walk backward from the last death while consecutive gaps stay tight.
+        $runStart = $last;
+        $runSize = 1;
+        for ($i = count($times) - 2; $i >= 0; $i--) {
+            if (($times[$i + 1] - $times[$i]) <= self::TERMINAL_GAP_MS) {
+                $runStart = $times[$i];
+                $runSize++;
+            } else {
+                break;
+            }
+        }
+
+        return $runSize >= self::TERMINAL_MIN_RUN ? $runStart : null;
     }
 
     /**
