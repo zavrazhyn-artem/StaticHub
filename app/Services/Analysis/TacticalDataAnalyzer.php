@@ -372,7 +372,10 @@ class TacticalDataAnalyzer
 
         // Aggregate death-tag counts so the AI can separate /wipe-call deaths
         // from real mechanical kills in the narrative.
-        $deathTagDistribution = $this->buildDeathTagDistribution($logData['deaths'][$bossName] ?? []);
+        $deathTagDistribution = $this->buildDeathTagDistribution(
+            $logData['deaths'][$bossName] ?? [],
+            $logData['excluded_deaths'][$bossName] ?? []
+        );
 
         // Slim debuff-stacks payload — surfaces real max-stack and swap-timing
         // numbers to the AI so it stops hallucinating "you reached 12 stacks"
@@ -449,9 +452,10 @@ class TacticalDataAnalyzer
      * 9 were /wipe-calls — 5 real mechanical wipes". Includes a 'real_failures'
      * convenience total for the narrative.
      *
-     * @param array $deathsByTry  $logData['deaths'][bossName] — array keyed by try number
+     * @param array $deathsByTry     $logData['deaths'][bossName] — array keyed by try number
+     * @param array $excludedByTry   $logData['excluded_deaths'][bossName] — deaths after intent cutoff
      */
-    private function buildDeathTagDistribution(array $deathsByTry): array
+    private function buildDeathTagDistribution(array $deathsByTry, array $excludedByTry = []): array
     {
         $counts = [
             'normal' => 0,
@@ -472,11 +476,17 @@ class TacticalDataAnalyzer
         $total = array_sum($counts);
         $real = $counts['normal'] + $counts['mechanic_oneshot'];
 
+        $intentExcluded = 0;
+        foreach ($excludedByTry as $deaths) {
+            $intentExcluded += is_array($deaths) ? count($deaths) : 0;
+        }
+
         return [
-            'total_deaths'   => $total,
-            'real_failures'  => $real,  // deaths AI should treat as coachable
-            'suppressed'     => $counts['tank_loss_cascade'] + $counts['wipe_called'],
-            'by_tag'         => $counts,
+            'total_deaths'    => $total,
+            'real_failures'   => $real,  // deaths AI should treat as coachable
+            'suppressed'      => $counts['tank_loss_cascade'] + $counts['wipe_called'],
+            'by_tag'          => $counts,
+            'intent_excluded' => $intentExcluded,
         ];
     }
 
