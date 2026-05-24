@@ -240,9 +240,16 @@ final class GearViewService
         $tierTotal = count($tier);
         $tierHave  = count(array_filter($tier, static fn ($t) => $t !== '-'));
 
+        // Weakest/median consider real gear slots only — exclude cosmetic
+        // shirt/tabard (ilvl 1) which would otherwise dominate as "weakest".
+        $gearItems = array_values(array_filter(
+            $equipment,
+            static fn ($e) => in_array(strtolower($e['slot']), self::ALL_SLOTS, true)
+        ));
+
         $weakest = null;
-        if ($equipment !== []) {
-            $ilvls = array_map(static fn ($e) => $e['ilvl'], $equipment);
+        if ($gearItems !== []) {
+            $ilvls = array_map(static fn ($e) => $e['ilvl'], $gearItems);
             sort($ilvls);
             $n = count($ilvls);
             $median = $n % 2
@@ -250,7 +257,7 @@ final class GearViewService
                 : (int) (($ilvls[$n / 2 - 1] + $ilvls[$n / 2]) / 2);
 
             $low = null;
-            foreach ($equipment as $e) {
+            foreach ($gearItems as $e) {
                 if ($low === null || $e['ilvl'] < $low['ilvl']) {
                     $low = $e;
                 }

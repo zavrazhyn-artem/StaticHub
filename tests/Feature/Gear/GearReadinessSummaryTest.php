@@ -82,4 +82,19 @@ class GearReadinessSummaryTest extends TestCase
         $this->assertNull(app(GearViewService::class)->buildReadinessSummary($char, 'Elemental'));
         $this->assertNull(app(GearViewService::class)->buildReadinessSummary($char, null));
     }
+
+    public function test_excludes_cosmetic_slots_from_weakest(): void
+    {
+        // Cosmetic TABARD/SHIRT sit at ilvl 1 and must never be the "weakest gear slot".
+        $char = $this->character();
+        $equipped = $char->bnet_equipment_by_spec['Elemental']['equipped_items'];
+        $equipped[] = $this->item('TABARD', 1, ['name' => 'Some Tabard']);
+        $equipped[] = $this->item('SHIRT', 1, ['name' => 'Some Shirt']);
+        $char->bnet_equipment_by_spec = ['Elemental' => ['equipped_items' => $equipped]];
+
+        $r = app(GearViewService::class)->buildReadinessSummary($char, 'Elemental');
+
+        $this->assertSame('wrist', $r['weakest']['slot']);
+        $this->assertSame(250, $r['weakest']['ilvl']);
+    }
 }
