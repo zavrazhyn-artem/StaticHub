@@ -32,6 +32,7 @@ class TacticalDataAnalyzer
         private readonly FightBreakdownBuilder $fightBreakdownBuilder,
         private readonly DeathStateAssembler $deathStateAssembler,
         private readonly DeathAttributionBuilder $deathAttributionBuilder,
+        private readonly IntentCutoffResolver $intentCutoffResolver,
     ) {}
 
     /**
@@ -41,7 +42,7 @@ class TacticalDataAnalyzer
      * @param array  $localization  Raid leader + participant locales
      * @param array  $rosterNames   Optional roster filter (empty array = all players in log)
      */
-    public function analyze(array $logData, array $localization = [], array $rosterNames = [], ?string $reportId = null): array
+    public function analyze(array $logData, array $localization = [], array $rosterNames = [], ?string $reportId = null, array $anchorNames = []): array
     {
         $bossNames = array_keys($logData['phase_summary'] ?? []);
 
@@ -65,6 +66,19 @@ class TacticalDataAnalyzer
                 $logData['phase_summary'] ?? [],
                 $tankNames
             );
+
+            // Intent-cutoff: move post-wipe-call deaths out of the grouped death
+            // structure BEFORE encounters/insights/attribution read it, so they
+            // are never counted as mistakes. Excluded deaths + cutoff metadata
+            // travel alongside for the transparent "after wipe call" section.
+            $partition = $this->intentCutoffResolver->partition(
+                $logData['deaths'],
+                $logData['phase_summary'] ?? [],
+                $anchorNames
+            );
+            $logData['deaths']          = $partition['deaths'];
+            $logData['excluded_deaths'] = $partition['excluded_deaths'];
+            $logData['intent_cutoffs']  = $partition['intent_cutoffs'];
         }
 
         $encounters = [];
