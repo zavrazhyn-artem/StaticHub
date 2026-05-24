@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import EmptyState from '@/Components/UI/EmptyState.vue';
 import GlassModal from '@/Components/UI/GlassModal.vue';
-import TalentCalculator from '@/Components/UI/TalentCalculator.vue';
+import TalentCalculatorModal from '@/Components/UI/TalentCalculatorModal.vue';
 import GearGrid from './GearGrid.vue';
 import SlotItemPicker from './SlotItemPicker.vue';
 
@@ -505,30 +505,15 @@ const typeColor = (type) => ({
     />
 
     <!-- Talent Build modal -->
-    <GlassModal :show="showTalentModal" @close="showTalentModal = false" max-width="max-w-7xl">
-        <header class="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <h3 class="font-headline text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-purple-300 text-base">account_tree</span>
-                {{ activeList?.name }} — {{ __('Talent Build') }}
-                <span v-if="activeTalentReadonly"
-                      class="text-[10px] font-normal normal-case tracking-normal text-on-surface-variant border border-white/10 rounded px-1.5 py-0.5">
-                    read-only
-                </span>
-            </h3>
-            <button type="button" @click="showTalentModal = false" class="text-on-surface-variant hover:text-white">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </header>
-        <div class="p-4 overflow-auto max-h-[80vh]">
-            <TalentCalculator
-                v-if="showTalentModal"
-                :talent-code="activeTalentCode ?? ''"
-                :spec-id="activeList?.spec_id"
-                :readonly="activeTalentReadonly"
-                :update-url="!activeTalentReadonly ? talentUpdateUrl : null"
-                :csrf-token="csrfToken"
-                @saved="onTalentSaved"
-            />
-        </div>
-    </GlassModal>
+    <TalentCalculatorModal
+        :show="showTalentModal"
+        :talent-code="activeTalentCode ?? ''"
+        :spec-id="activeList?.spec_id"
+        :readonly="activeTalentReadonly"
+        :update-url="!activeTalentReadonly ? talentUpdateUrl : null"
+        :csrf-token="csrfToken"
+        :title="`${activeList?.name || ''} — ${__('Talent Build')}`"
+        @saved="onTalentSaved"
+        @close="showTalentModal = false"
+    />
 </template>
