@@ -75,6 +75,11 @@ class MechanicMetricsNormalizer
     /**
      * Token-based match of a debuff name to a mechanic (name + aliases),
      * mirroring the existing nameContainsAnyToken logic in TacticalDataAnalyzer.
+     *
+     * @param string        $debuffName   debuff name from the log data
+     * @param string        $mechanicName authored mechanic name (tokenized)
+     * @param array<string> $aliases      optional extra mechanic aliases
+     * @return bool                       true if any token is a substring of the debuff name
      */
     public static function debuffMatchesMechanic(string $debuffName, string $mechanicName, array $aliases = []): bool
     {
