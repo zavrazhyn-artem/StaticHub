@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Analysis;
 
+use App\Helpers\StatsHelper;
+
 /**
  * Single source of truth for WHAT we measure per mechanic type. The same
  * methods run during the top-kill harvest (refresh:mechanic-baselines) and
@@ -69,6 +71,41 @@ class MechanicMetricsNormalizer
             ],
             'death_stacks' => $deathStacks,
             'by_player'    => $byPlayer,
+        ];
+    }
+
+    /**
+     * Aggregate per-log tank-swap vectors into a baseline YAML entry.
+     *
+     * @param array<int,array> $vectors  output of tankSwap() per top-kill log
+     * @return array{type: string, sample: int, lethal_stacks: int|null, metrics: array}
+     */
+    public function aggregateTankSwap(array $vectors): array
+    {
+        $swapAt = [];
+        $gaps = [];
+        $held = [];
+        $deathStacks = [];
+
+        foreach ($vectors as $v) {
+            $obs = $v['observations'] ?? [];
+            $swapAt = array_merge($swapAt, $obs['swap_at_stacks'] ?? []);
+            $gaps = array_merge($gaps, $obs['swap_gap_ms'] ?? []);
+            $held = array_merge($held, $obs['max_stacks_held'] ?? []);
+            $deathStacks = array_merge($deathStacks, $v['death_stacks'] ?? []);
+        }
+
+        $metrics = array_filter([
+            'swap_at_stacks'  => StatsHelper::summarize($swapAt),
+            'swap_gap_ms'     => StatsHelper::summarize($gaps),
+            'max_stacks_held' => StatsHelper::summarize($held),
+        ]);
+
+        return [
+            'type'          => 'tank_swap',
+            'sample'        => count($vectors),
+            'lethal_stacks' => empty($deathStacks) ? null : (int) min($deathStacks),
+            'metrics'       => $metrics,
         ];
     }
 
