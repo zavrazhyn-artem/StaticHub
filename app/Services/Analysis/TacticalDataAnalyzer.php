@@ -532,20 +532,41 @@ class TacticalDataAnalyzer
     }
 
     /**
+     * Resolve the boss-timeline file coordinates (season, slug, difficulty dir)
+     * shared by the timeline + mechanic-baseline loaders. Returns null when the
+     * tactics payload has no source file to derive a slug from.
+     *
+     * @return array{season: string, slug: string, difficulty: string}|null
+     */
+    private function resolveTimelineLocation(array $tactics, string $difficulty): ?array
+    {
+        $sourceFile = $tactics['source_file'] ?? '';
+        if (!$sourceFile) {
+            return null;
+        }
+        $slug = preg_replace('/\.md$/i', '', $sourceFile);
+        if (!$slug) {
+            return null;
+        }
+        return [
+            'season'     => (string) config('wow_season.current_season', 'midnight-s1'),
+            'slug'       => $slug,
+            'difficulty' => mb_strtolower($difficulty),
+        ];
+    }
+
+    /**
      * Resolve the boss-timeline slug from the loaded tactics file (its source
      * filename matches the timeline slug — e.g. `vorasius.md` → `vorasius`)
      * and return the slim AI payload, or null if no timeline YAML exists.
      */
     private function loadBossTimelineForEncounter(array $tactics, string $difficulty): ?array
     {
-        $sourceFile = $tactics['source_file'] ?? '';
-        if (!$sourceFile) return null;
-
-        $slug = preg_replace('/\.md$/i', '', $sourceFile);
-        if (!$slug) return null;
-
-        $season = (string) config('wow_season.current_season', 'midnight-s1');
-        return $this->bossTimelineLoader->load($season, $slug, mb_strtolower($difficulty));
+        $loc = $this->resolveTimelineLocation($tactics, $difficulty);
+        if ($loc === null) {
+            return null;
+        }
+        return $this->bossTimelineLoader->load($loc['season'], $loc['slug'], $loc['difficulty']);
     }
 
     /**
@@ -555,14 +576,11 @@ class TacticalDataAnalyzer
      */
     private function loadMechanicBaselineForEncounter(array $tactics, string $difficulty): ?array
     {
-        $sourceFile = $tactics['source_file'] ?? '';
-        if (!$sourceFile) return null;
-
-        $slug = preg_replace('/\.md$/i', '', $sourceFile);
-        if (!$slug) return null;
-
-        $season = (string) config('wow_season.current_season', 'midnight-s1');
-        return $this->mechanicBaselineLoader->load($season, $slug, mb_strtolower($difficulty));
+        $loc = $this->resolveTimelineLocation($tactics, $difficulty);
+        if ($loc === null) {
+            return null;
+        }
+        return $this->mechanicBaselineLoader->load($loc['season'], $loc['slug'], $loc['difficulty']);
     }
 
     private function loadTacticsForBoss(string $bossName, array $logData): array
