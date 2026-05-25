@@ -33,6 +33,8 @@ class TacticalDataAnalyzer
         private readonly DeathStateAssembler $deathStateAssembler,
         private readonly DeathAttributionBuilder $deathAttributionBuilder,
         private readonly IntentCutoffResolver $intentCutoffResolver,
+        private readonly MechanicMetricsNormalizer $mechanicMetrics,
+        private readonly MechanicBaselineLoader $mechanicBaselineLoader,
     ) {}
 
     /**
@@ -315,6 +317,11 @@ class TacticalDataAnalyzer
             $this->interruptsByAbility[$intr['enemy_ability'] ?? ''] = $intr['interrupted_by'] ?? [];
         }
 
+        // Top-kill empirical baseline for this boss/difficulty (same YAML file as
+        // the boss timeline). Null/empty when not harvested yet → detection runs
+        // informational-only and flags nobody.
+        $mechanicBaseline = $this->loadMechanicBaselineForEncounter($tactics, $difficulty) ?? [];
+
         $mechanicFailures = $this->detectMechanicFailures(
             $tactics,
             $deaths,
@@ -327,7 +334,8 @@ class TacticalDataAnalyzer
             $logData['enemy_buff_uptimes'] ?? [],
             // Use per-boss adds (precise). Empty array if this boss has no adds — better
             // than falling back to global top-N which would mix in other bosses' NPCs.
-            $bossAdds
+            $bossAdds,
+            $mechanicBaseline
         );
 
         $interruptAnalysis = $this->buildInterruptAnalysis(
@@ -540,6 +548,23 @@ class TacticalDataAnalyzer
         return $this->bossTimelineLoader->load($season, $slug, mb_strtolower($difficulty));
     }
 
+    /**
+     * Load the empirical mechanic-baseline block for this encounter from the
+     * same boss-timeline YAML the timeline comes from. Mirrors the slug/season/
+     * difficulty resolution used by loadBossTimelineForEncounter().
+     */
+    private function loadMechanicBaselineForEncounter(array $tactics, string $difficulty): ?array
+    {
+        $sourceFile = $tactics['source_file'] ?? '';
+        if (!$sourceFile) return null;
+
+        $slug = preg_replace('/\.md$/i', '', $sourceFile);
+        if (!$slug) return null;
+
+        $season = (string) config('wow_season.current_season', 'midnight-s1');
+        return $this->mechanicBaselineLoader->load($season, $slug, mb_strtolower($difficulty));
+    }
+
     private function loadTacticsForBoss(string $bossName, array $logData): array
     {
         // Strip the " (Heroic|Mythic|Normal)" suffix that buildPhaseSummary
@@ -571,7 +596,7 @@ class TacticalDataAnalyzer
 
     // ─── MECHANIC FAILURE DETECTION ─────────────────────────────────────────
 
-    private function detectMechanicFailures(array $tactics, array $deaths, array $majorDamageTaken, array $debuffStacks, array $orbStaggering, array $shieldedCasts, string $difficulty, array $targetedDamage = [], array $enemyBuffUptimes = [], array $addsDamage = []): array
+    private function detectMechanicFailures(array $tactics, array $deaths, array $majorDamageTaken, array $debuffStacks, array $orbStaggering, array $shieldedCasts, string $difficulty, array $targetedDamage = [], array $enemyBuffUptimes = [], array $addsDamage = [], array $mechanicBaseline = []): array
     {
         $failures = [];
 
@@ -636,7 +661,7 @@ class TacticalDataAnalyzer
             }
 
             // Type-specific evidence (tank_swap, absorb_shield, shield_interrupt, orb_management, etc.)
-            $this->applyTypeSpecificEvidence($entry, $mechanic, $debuffStacks, $orbStaggering, $shieldedCasts, $enemyBuffUptimes, $addsDamage);
+            $this->applyTypeSpecificEvidence($entry, $mechanic, $debuffStacks, $orbStaggering, $shieldedCasts, $enemyBuffUptimes, $addsDamage, $mechanicBaseline);
 
             // Only include mechanics with some evidence
             if (!empty($entry['evidence'])) {
@@ -781,7 +806,7 @@ class TacticalDataAnalyzer
         return false;
     }
 
-    private function applyTypeSpecificEvidence(array &$entry, array $mechanic, array $debuffStacks, array $orbStaggering, array $shieldedCasts, array $enemyBuffUptimes = [], array $addsDamage = []): void
+    private function applyTypeSpecificEvidence(array &$entry, array $mechanic, array $debuffStacks, array $orbStaggering, array $shieldedCasts, array $enemyBuffUptimes = [], array $addsDamage = [], array $mechanicBaseline = []): void
     {
         $type = $mechanic['type'] ?? '';
         $mechName = $mechanic['name'] ?? '';
@@ -790,28 +815,38 @@ class TacticalDataAnalyzer
 
         switch ($type) {
             case 'tank_swap':
+                $baseEntry = $mechanicBaseline['mechanics'][$mechName] ?? null;
                 foreach ($debuffStacks as $debuffName => $data) {
-                    if (!$this->nameContainsAnyToken($debuffName, $tokens)) continue;
-                    $threshold = $mechanic['stack_swap_threshold'] ?? 7;
-                    $criticalDeath = $mechanic['critical_death_stacks'] ?? 10;
-
-                    foreach ($data['max_stacks_per_player'] ?? [] as $p => $max) {
-                        if ($max > $threshold) {
-                            $entry['players'][$p] = ($entry['players'][$p] ?? 0) + 1;
-                        }
+                    if (!MechanicMetricsNormalizer::debuffMatchesMechanic($debuffName, $mechName, $mechanic['aliases'] ?? [])) {
+                        continue;
                     }
+
+                    $vector = $this->mechanicMetrics->tankSwap($data);
+
+                    // No baseline yet → informational only, flag nobody.
+                    if (!$baseEntry || empty($baseEntry['metrics']['swap_at_stacks'])) {
+                        $held = $vector['observations']['max_stacks_held'] ?? [];
+                        if (!empty($held)) {
+                            $entry['notes'][] = 'Max stacks reached: ' . max($held)
+                                . ' (no top-kill baseline harvested yet — not counted as a failure).';
+                        }
+                        continue;
+                    }
+
+                    $eval = $this->mechanicMetrics->evaluateTankSwap($vector, $baseEntry);
+                    if ($eval['note']) {
+                        $entry['evidence'][] = 'tank_swap_baseline';
+                        $entry['notes'][] = $eval['note'];
+                    }
+                    foreach ($eval['flagged'] as $player => $reason) {
+                        $entry['players'][$player] = ($entry['players'][$player] ?? 0) + 1;
+                        $entry['notes'][] = "{$player}: {$reason}";
+                    }
+
+                    // Keep the legitimate late-swap aggregate note.
                     if (($data['swap_timing']['late_swaps'] ?? 0) > 0) {
-                        $entry['evidence'][] = 'late_swaps';
-                        $entry['notes'][] = "Late swaps: {$data['swap_timing']['late_swaps']}/{$data['swap_timing']['total_swaps']} (avg gap {$data['swap_timing']['avg_gap_ms']}ms, max {$data['swap_timing']['max_gap_ms']}ms)";
-                    }
-
-                    foreach ($data['stacks_at_death_per_player'] ?? [] as $p => $deaths) {
-                        foreach ($deaths as $d) {
-                            if ($d['max_stacks'] >= $criticalDeath) {
-                                $entry['evidence'][] = 'death_with_high_stacks';
-                                $entry['notes'][] = "{$p} died on try fight={$d['fight_id']} with max_stacks={$d['max_stacks']} (killing_blow={$d['killing_blow']})";
-                            }
-                        }
+                        $st = $data['swap_timing'];
+                        $entry['notes'][] = "Late swaps: {$st['late_swaps']}/{$st['total_swaps']} (avg gap {$st['avg_gap_ms']}ms, max {$st['max_gap_ms']}ms)";
                     }
                 }
                 break;
