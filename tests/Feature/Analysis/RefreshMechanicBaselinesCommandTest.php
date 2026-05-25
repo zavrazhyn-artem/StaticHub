@@ -31,6 +31,11 @@ class RefreshMechanicBaselinesCommandTest extends TestCase
     protected function tearDown(): void
     {
         @unlink($this->dir . '/test-boss.yml');
+        $cacheDir = storage_path('app/mechanic-baseline-cache/test-boss');
+        if (is_dir($cacheDir)) {
+            array_map('unlink', glob("{$cacheDir}/*") ?: []);
+            @rmdir($cacheDir);
+        }
         parent::tearDown();
     }
 
