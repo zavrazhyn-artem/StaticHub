@@ -1075,6 +1075,7 @@ class WclReportParserHelper
      *   'max_gap_ms' => int,
      *   'late_swaps' => int (count of swaps with gap > 3000ms),
      *   'total_swaps' => int,
+     *   'swaps' => [ ['outgoing_player' => string, 'stacks_at_swap' => int, 'gap_ms' => int], ... ],
      * ]
      */
     private static function calculateSwapTiming(array $events, array $actorMap): array
@@ -1088,26 +1089,43 @@ class WclReportParserHelper
         }
 
         $gaps = [];
+        $swaps = []; // [{outgoing_player, stacks_at_swap, gap_ms}]
 
         foreach ($byFight as $fightId => $fightEvents) {
             usort($fightEvents, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
 
-            $lastRemoval = null; // ['target' => id, 'time' => ts]
+            $currentStacks = []; // [targetID => running stack]
+            $lastRemoval = null; // ['target' => id, 'time' => ts, 'stacks' => int]
             foreach ($fightEvents as $event) {
                 $type = $event['type'] ?? '';
                 $targetId = $event['targetID'] ?? null;
                 $ts = $event['timestamp'] ?? 0;
 
-                if ($type === 'removedebuff') {
-                    $lastRemoval = ['target' => $targetId, 'time' => $ts];
-                } elseif ($type === 'applydebuff' && $lastRemoval !== null) {
-                    if ($targetId !== $lastRemoval['target']) {
-                        $gap = $ts - $lastRemoval['time'];
-                        if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
-                            $gaps[] = $gap;
-                        }
-                        $lastRemoval = null;
+                if ($type === 'applydebuff') {
+                    $currentStacks[$targetId] = 1;
+                } elseif ($type === 'applydebuffstack') {
+                    $currentStacks[$targetId] = $event['stack'] ?? 1;
+                } elseif ($type === 'removedebuff') {
+                    $lastRemoval = [
+                        'target' => $targetId,
+                        'time'   => $ts,
+                        'stacks' => (int) ($currentStacks[$targetId] ?? 0),
+                    ];
+                    $currentStacks[$targetId] = 0;
+                    continue;
+                }
+
+                if ($type === 'applydebuff' && $lastRemoval !== null && $targetId !== $lastRemoval['target']) {
+                    $gap = $ts - $lastRemoval['time'];
+                    if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
+                        $gaps[] = $gap;
+                        $swaps[] = [
+                            'outgoing_player' => $actorMap[$lastRemoval['target']] ?? 'Unknown',
+                            'stacks_at_swap'  => $lastRemoval['stacks'],
+                            'gap_ms'          => $gap,
+                        ];
                     }
+                    $lastRemoval = null;
                 }
             }
         }
@@ -1119,6 +1137,7 @@ class WclReportParserHelper
                 'max_gap_ms' => null,
                 'late_swaps' => 0,
                 'total_swaps' => 0,
+                'swaps' => [],
             ];
         }
 
@@ -1128,6 +1147,7 @@ class WclReportParserHelper
             'max_gap_ms'  => max($gaps),
             'late_swaps'  => count(array_filter($gaps, fn($g) => $g > 3000)),
             'total_swaps' => count($gaps),
+            'swaps'       => $swaps,
         ];
     }
 
