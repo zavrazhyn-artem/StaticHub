@@ -1115,16 +1115,20 @@ class WclReportParserHelper
                     continue;
                 }
 
-                if ($type === 'applydebuff' && $lastRemoval !== null && $targetId !== $lastRemoval['target']) {
-                    $gap = $ts - $lastRemoval['time'];
-                    if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
-                        $gaps[] = $gap;
-                        $swaps[] = [
-                            'outgoing_player' => $actorMap[$lastRemoval['target']] ?? 'Unknown',
-                            'stacks_at_swap'  => $lastRemoval['stacks'],
-                            'gap_ms'          => $gap,
-                        ];
+                if ($type === 'applydebuff' && $lastRemoval !== null) {
+                    if ($targetId !== $lastRemoval['target']) {
+                        $gap = $ts - $lastRemoval['time'];
+                        if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
+                            $gaps[] = $gap;
+                            $swaps[] = [
+                                'outgoing_player' => $actorMap[$lastRemoval['target']] ?? 'Unknown',
+                                'stacks_at_swap'  => $lastRemoval['stacks'],
+                                'gap_ms'          => $gap,
+                            ];
+                        }
                     }
+                    // Clear in BOTH cases: a real swap was recorded above, or the same
+                    // tank re-took the debuff (so the prior removal is no longer a pending swap).
                     $lastRemoval = null;
                 }
             }
