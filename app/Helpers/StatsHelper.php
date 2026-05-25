@@ -13,6 +13,8 @@ class StatsHelper
      * Linear-interpolated percentile. p in [0,100].
      *
      * @param array<int|float> $values
+     * @param float            $p       percentile to compute, in [0,100]
+     * @return float
      */
     public static function percentile(array $values, float $p): float
     {
