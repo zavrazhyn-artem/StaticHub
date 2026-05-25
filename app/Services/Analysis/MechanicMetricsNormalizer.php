@@ -110,6 +110,48 @@ class MechanicMetricsNormalizer
     }
 
     /**
+     * Flag rule for tank swaps. A player is flagged ONLY when they swap later
+     * than p95 of top kills, or die at/above the learned lethal stack count.
+     * Reaching a high max stack on its own is NOT a failure.
+     *
+     * @param array $liveVector    output of tankSwap() for this raid (needs by_player)
+     * @param array $baselineEntry empirical entry (aggregateTankSwap output)
+     * @return array{flagged: array<string,string>, note: string|null}
+     */
+    public function evaluateTankSwap(array $liveVector, array $baselineEntry): array
+    {
+        $p95 = $baselineEntry['metrics']['swap_at_stacks']['p95'] ?? null;
+        $median = $baselineEntry['metrics']['swap_at_stacks']['median'] ?? null;
+        $lethal = $baselineEntry['lethal_stacks'] ?? null;
+
+        if ($p95 === null) {
+            return ['flagged' => [], 'note' => null];
+        }
+
+        $flagged = [];
+        foreach ($liveVector['by_player'] ?? [] as $player => $pdata) {
+            $swaps = $pdata['swap_at_stacks'] ?? [];
+            if (!empty($swaps)) {
+                $worst = max($swaps);
+                if ($worst > $p95) {
+                    $flagged[$player] = sprintf(
+                        'swapped at %d stacks — top kills swap by %d (p95 %d)',
+                        $worst, (int) round($median), (int) round($p95)
+                    );
+                }
+            }
+            $deaths = $pdata['death_stacks'] ?? [];
+            if ($lethal !== null && !empty($deaths) && max($deaths) >= $lethal) {
+                $flagged[$player] = sprintf('died at %d stacks (top-kill lethal point %d)', max($deaths), $lethal);
+            }
+        }
+
+        $note = sprintf('Top kills swap by %d stacks (p95 %d).', (int) round($median), (int) round($p95));
+
+        return ['flagged' => $flagged, 'note' => $note];
+    }
+
+    /**
      * Token-based match of a debuff name to a mechanic (name + aliases),
      * mirroring the existing nameContainsAnyToken logic in TacticalDataAnalyzer.
      *
