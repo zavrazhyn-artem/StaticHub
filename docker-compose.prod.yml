@@ -1,43 +1,38 @@
 # =============================================================================
-# Production Docker Compose — currently runs on the legacy droplet until k8s
-# migration. After cutover to DOKS this file is retained only for emergency
-# manual deploy / rollback.
+# Production Docker Compose — single droplet.
 #
-# Single image, three CMDs:
-#   app       → FrankenPHP (replaces nginx + php-fpm). Serves HTTP/HTTPS.
-#   worker    → supervisord with per-queue queue:work processes.
-#   scheduler → php artisan schedule:work.
+# Services:
+#   app          → FrankenPHP web (port 80, HTTP — CF Proxy handles TLS)
+#   worker       → supervisord: default + compile + discord queues
+#   worker-sync  → supervisord: bnet + rio + wcl queues
+#   worker-ai    → supervisord: ai queue
+#   scheduler    → php artisan schedule:work
+#   redis        → Redis 7 (queues + cache, replaces DO Managed Valkey)
 #
-# No mysql/redis services — both moved to DO Managed (Phase 1 of infra plan).
+# MySQL stays on DO Managed MySQL (VPC private endpoint).
+# Droplet must be in VPC default-fra1 (FRA1) for DB access.
 # =============================================================================
 
+name: blastr
+
 x-app-defaults: &app-defaults
-  image: blastr-app:latest
-  build:
-    context: .
-    dockerfile: docker/app/Dockerfile
-    target: app
+  image: registry.digitalocean.com/blastr/app:v0.1.12
   restart: unless-stopped
-  env_file: .env
+  env_file: /var/www/html/.env
+  depends_on:
+    redis:
+      condition: service_healthy
   networks:
     - app_network
 
 services:
 
-  # ---------------------------------------------------------------------------
-  # App — FrankenPHP serving Laravel via Octane workers. Replaces the old
-  # nginx + php-fpm pair with a single resident process.
-  # ---------------------------------------------------------------------------
   app:
     <<: *app-defaults
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      # TLS cert from the existing Cloudflare Origin wildcard. FrankenPHP
-      # picks these up via Caddy auto-https for direct HTTPS termination
-      # if Cloudflare proxy is bypassed.
-      - ./nginx/ssl:/etc/frankenphp/ssl:ro
+      - /var/www/html/storage:/var/www/html/storage
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/up || exit 1"]
       interval: 30s
@@ -45,26 +40,44 @@ services:
       retries: 3
       start_period: 30s
 
-  # ---------------------------------------------------------------------------
-  # Worker — supervisord with per-queue queue:work supervised processes.
-  # ---------------------------------------------------------------------------
   worker:
     <<: *app-defaults
     command: ["worker"]
-    healthcheck:
-      test: ["CMD-SHELL", "supervisorctl -c /etc/supervisor/conf.d/worker.conf status | grep -v STOPPED | grep -q RUNNING"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
-  # ---------------------------------------------------------------------------
-  # Scheduler — Laravel scheduled tasks tick.
-  # ---------------------------------------------------------------------------
+  worker-sync:
+    <<: *app-defaults
+    command: ["worker-sync"]
+
+  worker-ai:
+    <<: *app-defaults
+    command: ["worker-ai"]
+
   scheduler:
     <<: *app-defaults
     command: ["scheduler"]
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass "${REDIS_PASSWORD}"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  redis_data:
