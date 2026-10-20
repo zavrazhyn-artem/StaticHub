@@ -1,0 +1,105 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - link "BlastR Logo" [ref=e5] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - img "BlastR Logo" [ref=e6]
+      - link "BLAST R RAID HUB" [ref=e7] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - generic [ref=e8]:
+          - generic [ref=e9]: BLAST
+          - generic [ref=e10]: R
+        - generic [ref=e11]: RAID HUB
+      - generic [ref=e12]:
+        - button "UA UK arrow_drop_down" [ref=e14] [cursor=pointer]:
+          - img "UA" [ref=e15]
+          - generic [ref=e16]: UK
+          - generic [ref=e17]: arrow_drop_down
+        - button "Згорнути меню" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: keyboard_double_arrow_left
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e25]: Статік
+          - button "person_add Запросити" [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: person_add
+            - generic [ref=e28]: Запросити
+        - generic "Onyx" [ref=e29]
+        - generic [ref=e30]: Міфічна 5/9
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: Наступний рейд
+            - generic [ref=e34]: 1д 03г 35х
+          - button "Записатись" [ref=e35] [cursor=pointer]
+      - generic:
+        - generic: 5/9
+        - generic:
+          - generic: 1д
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - link "space_dashboard Панель керування" [ref=e39] [cursor=pointer]:
+          - /url: https://local.blastr.pro/dashboard
+          - generic [ref=e40]: space_dashboard
+          - generic [ref=e41]: Панель керування
+        - link "groups Склад" [ref=e42] [cursor=pointer]:
+          - /url: https://local.blastr.pro/roster
+          - generic [ref=e43]: groups
+          - generic [ref=e44]: Склад
+        - link "event Розклад" [ref=e45] [cursor=pointer]:
+          - /url: https://local.blastr.pro/schedule
+          - generic [ref=e46]: event
+          - generic [ref=e47]: Розклад
+        - link "sports_esports Планувальник босів" [ref=e48] [cursor=pointer]:
+          - /url: https://local.blastr.pro/boss-planner
+          - generic [ref=e49]: sports_esports
+          - generic [ref=e50]: Планувальник босів
+        - link "savings Скарбниця" [ref=e51] [cursor=pointer]:
+          - /url: https://local.blastr.pro/treasury
+          - generic [ref=e52]: savings
+          - generic [ref=e53]: Скарбниця
+        - link "analytics Аналітика" [ref=e54] [cursor=pointer]:
+          - /url: https://local.blastr.pro/logs
+          - generic [ref=e55]: analytics
+          - generic [ref=e56]: Аналітика
+        - link "shield Спорядження" [ref=e57] [cursor=pointer]:
+          - /url: https://local.blastr.pro/gear
+          - generic [ref=e58]: shield
+          - generic [ref=e59]: Спорядження
+      - generic [ref=e60]:
+        - link "shield_person Мої персонажі" [ref=e61] [cursor=pointer]:
+          - /url: https://local.blastr.pro/characters
+          - generic [ref=e62]: shield_person
+          - generic [ref=e63]: Мої персонажі
+        - link "settings Налаштування" [ref=e64] [cursor=pointer]:
+          - /url: https://local.blastr.pro/settings/profile
+          - generic [ref=e65]: settings
+          - generic [ref=e66]: Налаштування
+        - link "download Завантажити додаток" [ref=e67] [cursor=pointer]:
+          - /url: https://local.blastr.pro/desktop
+          - generic [ref=e68]: download
+          - generic [ref=e69]: Завантажити додаток
+    - generic [ref=e71]:
+      - img "Zavrikk" [ref=e73]
+      - generic [ref=e75]:
+        - generic [ref=e77]: Zavrikk
+        - generic [ref=e78]: Druid
+      - button "Вийти" [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: logout
+    - generic [ref=e83]:
+      - link "Приєднатись до Discord" [ref=e84] [cursor=pointer]:
+        - /url: https://discord.gg/rHcj6M5SEv
+        - generic [ref=e85]: forum
+        - generic [ref=e86]: Discord
+      - link "Підтримати на Patreon" [ref=e87] [cursor=pointer]:
+        - /url: https://www.patreon.com/
+        - generic [ref=e88]: volunteer_activism
+        - generic [ref=e89]: Patreon
+      - link "Залишити фідбек" [ref=e90] [cursor=pointer]:
+        - /url: https://local.blastr.pro/feedback
+        - generic [ref=e91]: feedback
+        - generic [ref=e92]: Фідбек
+      - link "Допомога" [ref=e93] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e94]: help
+        - generic [ref=e95]: Допомога
+  - main [ref=e96]

@@ -152,16 +152,29 @@ class MechanicMetricsNormalizer
     }
 
     /**
-     * Token-based match of a debuff name to a mechanic (name + aliases),
-     * mirroring the existing nameContainsAnyToken logic in TacticalDataAnalyzer.
+     * Match a log's debuff entry to an authored mechanic. Prefers exact
+     * ability-id match (entry.guid in mechanic.ability_ids) — most reliable
+     * because authored names can be invented and don't always equal in-game
+     * debuff strings (e.g. tactics list "Vaelwing" but WCL has no such
+     * debuff). Falls back to a token match on the debuff name + aliases.
      *
-     * @param string        $debuffName   debuff name from the log data
-     * @param string        $mechanicName authored mechanic name (tokenized)
-     * @param array<string> $aliases      optional extra mechanic aliases
-     * @return bool                       true if any token is a substring of the debuff name
+     * @param string         $debuffName   debuff display name from the log
+     * @param int|null       $debuffGuid   entry.guid from debuff_stacks (= ability id)
+     * @param string         $mechanicName authored mechanic name (tokenized)
+     * @param array<int>     $abilityIds   authored mechanic ability_ids
+     * @param array<string>  $aliases      optional extra mechanic aliases
      */
-    public static function debuffMatchesMechanic(string $debuffName, string $mechanicName, array $aliases = []): bool
-    {
+    public static function debuffMatchesMechanic(
+        string $debuffName,
+        ?int $debuffGuid,
+        string $mechanicName,
+        array $abilityIds = [],
+        array $aliases = [],
+    ): bool {
+        if ($debuffGuid !== null && in_array($debuffGuid, array_map('intval', $abilityIds), true)) {
+            return true;
+        }
+
         $tokens = self::tokens($mechanicName);
         foreach ($aliases as $alias) {
             $tokens = array_merge($tokens, self::tokens((string) $alias));

@@ -26,10 +26,15 @@ class WclService
     {
         $startTime = microtime(true);
 
-        $response = Http::withToken($this->getAccessToken())->post($this->baseUrl, [
-            'query' => $query,
-            'variables' => $variables,
-        ]);
+        // 120s — heavy table queries (deaths + damageTaken + casts + … in one
+        // call) regularly take 30-90s on Mythic kill logs; default 30s cURL
+        // timeout was hitting on full-log harvests.
+        $response = Http::withToken($this->getAccessToken())
+            ->timeout(120)
+            ->post($this->baseUrl, [
+                'query' => $query,
+                'variables' => $variables,
+            ]);
 
         $this->apiLogger->logApiCall('wcl', $this->baseUrl, 'POST', $response, $startTime);
 

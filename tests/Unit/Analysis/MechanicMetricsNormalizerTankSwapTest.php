@@ -48,11 +48,18 @@ class MechanicMetricsNormalizerTankSwapTest extends TestCase
         $this->assertSame([17], $v['by_player']['TankB']['death_stacks']);
     }
 
-    public function test_debuff_matcher_token_based(): void
+    public function test_debuff_matcher_prefers_guid_then_falls_back_to_tokens(): void
     {
-        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Vaelwing', 'Vaelwing', []));
-        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Vaelwing Stacks', 'Vaelwing', []));
-        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Rakfang Mark', 'Something', ['Rakfang']));
-        $this->assertFalse(MechanicMetricsNormalizer::debuffMatchesMechanic('Nullzone', 'Vaelwing', []));
+        // guid match — wins even if name is totally different
+        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Aspect of the End', 1265131, 'Vaelwing', [1265131], []));
+
+        // no guid → token fallback (mechanic name token)
+        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Vaelwing Stacks', null, 'Vaelwing', [], []));
+
+        // no guid → token fallback (alias token)
+        $this->assertTrue(MechanicMetricsNormalizer::debuffMatchesMechanic('Rakfang Mark', null, 'Something', [], ['Rakfang']));
+
+        // unrelated debuff with non-matching guid + no token match → false
+        $this->assertFalse(MechanicMetricsNormalizer::debuffMatchesMechanic('Nullzone', 9999, 'Vaelwing', [1265131], []));
     }
 }

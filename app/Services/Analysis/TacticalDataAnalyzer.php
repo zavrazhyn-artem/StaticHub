@@ -34,7 +34,6 @@ class TacticalDataAnalyzer
         private readonly DeathAttributionBuilder $deathAttributionBuilder,
         private readonly IntentCutoffResolver $intentCutoffResolver,
         private readonly MechanicMetricsNormalizer $mechanicMetrics,
-        private readonly MechanicBaselineLoader $mechanicBaselineLoader,
     ) {}
 
     /**
@@ -317,10 +316,11 @@ class TacticalDataAnalyzer
             $this->interruptsByAbility[$intr['enemy_ability'] ?? ''] = $intr['interrupted_by'] ?? [];
         }
 
-        // Top-kill empirical baseline for this boss/difficulty (same YAML file as
-        // the boss timeline). Null/empty when not harvested yet → detection runs
-        // informational-only and flags nobody.
-        $mechanicBaseline = $this->loadMechanicBaselineForEncounter($tactics, $difficulty) ?? [];
+        // Top-kill empirical baseline lives in the same tactics .md frontmatter
+        // as the mechanics list — refresh:mechanic-baselines writes the
+        // `empirical:` block in-place. Null/empty → detection runs informational
+        // only and flags nobody.
+        $mechanicBaseline = is_array($tactics['empirical'] ?? null) ? $tactics['empirical'] : [];
 
         $mechanicFailures = $this->detectMechanicFailures(
             $tactics,
@@ -532,13 +532,11 @@ class TacticalDataAnalyzer
     }
 
     /**
-     * Resolve the boss-timeline file coordinates (season, slug, difficulty dir)
-     * shared by the timeline + mechanic-baseline loaders. Returns null when the
-     * tactics payload has no source file to derive a slug from.
-     *
-     * @return array{season: string, slug: string, difficulty: string}|null
+     * Resolve the boss-timeline slug from the loaded tactics file (its source
+     * filename matches the timeline slug — e.g. `vorasius.md` → `vorasius`)
+     * and return the slim AI payload, or null if no timeline YAML exists.
      */
-    private function resolveTimelineLocation(array $tactics, string $difficulty): ?array
+    private function loadBossTimelineForEncounter(array $tactics, string $difficulty): ?array
     {
         $sourceFile = $tactics['source_file'] ?? '';
         if (!$sourceFile) {
@@ -548,39 +546,11 @@ class TacticalDataAnalyzer
         if (!$slug) {
             return null;
         }
-        return [
-            'season'     => (string) config('wow_season.current_season', 'midnight-s1'),
-            'slug'       => $slug,
-            'difficulty' => mb_strtolower($difficulty),
-        ];
-    }
-
-    /**
-     * Resolve the boss-timeline slug from the loaded tactics file (its source
-     * filename matches the timeline slug — e.g. `vorasius.md` → `vorasius`)
-     * and return the slim AI payload, or null if no timeline YAML exists.
-     */
-    private function loadBossTimelineForEncounter(array $tactics, string $difficulty): ?array
-    {
-        $loc = $this->resolveTimelineLocation($tactics, $difficulty);
-        if ($loc === null) {
-            return null;
-        }
-        return $this->bossTimelineLoader->load($loc['season'], $loc['slug'], $loc['difficulty']);
-    }
-
-    /**
-     * Load the empirical mechanic-baseline block for this encounter from the
-     * same boss-timeline YAML the timeline comes from. Mirrors the slug/season/
-     * difficulty resolution used by loadBossTimelineForEncounter().
-     */
-    private function loadMechanicBaselineForEncounter(array $tactics, string $difficulty): ?array
-    {
-        $loc = $this->resolveTimelineLocation($tactics, $difficulty);
-        if ($loc === null) {
-            return null;
-        }
-        return $this->mechanicBaselineLoader->load($loc['season'], $loc['slug'], $loc['difficulty']);
+        return $this->bossTimelineLoader->load(
+            (string) config('wow_season.current_season', 'midnight-s1'),
+            $slug,
+            mb_strtolower($difficulty),
+        );
     }
 
     private function loadTacticsForBoss(string $bossName, array $logData): array
@@ -834,8 +804,11 @@ class TacticalDataAnalyzer
         switch ($type) {
             case 'tank_swap':
                 $baseEntry = $mechanicBaseline['mechanics'][$mechName] ?? null;
+                $mechAbilityIds = $mechanic['ability_ids'] ?? [];
+                $mechAliases = $mechanic['aliases'] ?? [];
                 foreach ($debuffStacks as $debuffName => $data) {
-                    if (!MechanicMetricsNormalizer::debuffMatchesMechanic($debuffName, $mechName, $mechanic['aliases'] ?? [])) {
+                    $debuffGuid = isset($data['guid']) ? (int) $data['guid'] : null;
+                    if (!MechanicMetricsNormalizer::debuffMatchesMechanic($debuffName, $debuffGuid, $mechName, $mechAbilityIds, $mechAliases)) {
                         continue;
                     }
 

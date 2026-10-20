@@ -59,13 +59,10 @@ scheduler:
   replicas: 1
   resources:
     requests:
-      cpu: 100m
-      memory: 384Mi
+      cpu: 50m
+      memory: 128Mi
     limits:
-      # Scheduler boots full Laravel app (config:cache + schedule:work) so it
-      # carries opcache (256M) + JIT buffer (128M) + Laravel runtime (~150M).
-      # 256Mi was OOMKilled within 2 min; 768Mi gives comfortable headroom.
-      cpu: 1000m
+      cpu: 500m
       memory: 768Mi
 
 # ---------------------------------------------------------------------------
@@ -92,11 +89,12 @@ workerSync:
   replicas: 1
   resources:
     requests:
-      # 7 queue:work processes (bnet×4 + rio×2 + wcl×1) at ~80-150Mi each.
-      # 700MB at full load — request must fit a 2GB node (1.3GB allocatable
-      # after DOKS overhead). Limit is the hard ceiling.
+      # Actual steady-state: ~925Mi, spikes to ~1030Mi. Request at 750Mi ensures
+      # k8s won't co-schedule two sync pods on the same 2GB node (689Mi system +
+      # 750Mi + 750Mi = 2189Mi > 1464Mi allocatable), so cluster autoscaler
+      # provisions a dedicated node for each replica.
       cpu: 300m
-      memory: 512Mi
+      memory: 750Mi
     limits:
       cpu: 1500m
       memory: 1300Mi

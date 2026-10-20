@@ -1067,7 +1067,16 @@ class WclReportParserHelper
 
     /**
      * Calculate tank swap gaps from debuff events.
-     * A "swap" = removedebuff on tank A immediately followed by applydebuff on tank B within a fight.
+     *
+     * A "swap" = `applydebuff` on tank B when the most recent stack event on
+     * tank A (apply / applystack / refresh) belonged to a different player.
+     *
+     * We do NOT key off `removedebuff` because long-duration tank debuffs
+     * (Destabilizing Strikes, 60s+) only emit `removedebuff` at natural
+     * expiry, which happens *after* the new tank has already taken aggro —
+     * so the swap event precedes the old tank's removal. Instead we track
+     * the last stack-up on any target and emit a swap when the next
+     * `applydebuff` lands on a different target.
      *
      * Returns: [
      *   'avg_gap_ms' => int,
@@ -1095,41 +1104,48 @@ class WclReportParserHelper
             usort($fightEvents, fn($a, $b) => ($a['timestamp'] ?? 0) <=> ($b['timestamp'] ?? 0));
 
             $currentStacks = []; // [targetID => running stack]
-            $lastRemoval = null; // ['target' => id, 'time' => ts, 'stacks' => int]
+            $lastStackUp = null; // ['target' => id, 'time' => ts, 'stacks' => int]
             foreach ($fightEvents as $event) {
                 $type = $event['type'] ?? '';
                 $targetId = $event['targetID'] ?? null;
                 $ts = $event['timestamp'] ?? 0;
 
                 if ($type === 'applydebuff') {
-                    $currentStacks[$targetId] = 1;
-                } elseif ($type === 'applydebuffstack') {
-                    $currentStacks[$targetId] = $event['stack'] ?? 1;
-                } elseif ($type === 'removedebuff') {
-                    $lastRemoval = [
-                        'target' => $targetId,
-                        'time'   => $ts,
-                        'stacks' => (int) ($currentStacks[$targetId] ?? 0),
-                    ];
-                    $currentStacks[$targetId] = 0;
-                    continue;
-                }
-
-                if ($type === 'applydebuff' && $lastRemoval !== null) {
-                    if ($targetId !== $lastRemoval['target']) {
-                        $gap = $ts - $lastRemoval['time'];
-                        if ($gap >= 0 && $gap < 30000) { // sanity cap at 30s
+                    // Swap detection BEFORE we update state: did a different
+                    // target just hold the debuff? `lastStackUp` may sit on
+                    // tank A with N stacks even though A's `removedebuff`
+                    // hasn't fired yet — natural expiry trails the taunt.
+                    if ($lastStackUp !== null && $lastStackUp['target'] !== $targetId) {
+                        $gap = $ts - $lastStackUp['time'];
+                        if ($gap >= 0) {
                             $gaps[] = $gap;
                             $swaps[] = [
-                                'outgoing_player' => $actorMap[$lastRemoval['target']] ?? 'Unknown',
-                                'stacks_at_swap'  => $lastRemoval['stacks'],
+                                'outgoing_player' => $actorMap[$lastStackUp['target']] ?? 'Unknown',
+                                'stacks_at_swap'  => $lastStackUp['stacks'],
                                 'gap_ms'          => $gap,
                             ];
                         }
                     }
-                    // Clear in BOTH cases: a real swap was recorded above, or the same
-                    // tank re-took the debuff (so the prior removal is no longer a pending swap).
-                    $lastRemoval = null;
+                    $currentStacks[$targetId] = 1;
+                    $lastStackUp = ['target' => $targetId, 'time' => $ts, 'stacks' => 1];
+                } elseif ($type === 'applydebuffstack') {
+                    $stack = (int) ($event['stack'] ?? 1);
+                    $currentStacks[$targetId] = $stack;
+                    $lastStackUp = ['target' => $targetId, 'time' => $ts, 'stacks' => $stack];
+                } elseif ($type === 'refreshdebuff') {
+                    // Refresh doesn't change stack count but proves the
+                    // debuff is still on this target — update timestamp so
+                    // the swap-gap reflects the true handoff moment.
+                    $lastStackUp = [
+                        'target' => $targetId,
+                        'time'   => $ts,
+                        'stacks' => (int) ($currentStacks[$targetId] ?? 0),
+                    ];
+                } elseif ($type === 'removedebuff') {
+                    // Natural expiry on the outgoing tank — by this point
+                    // the swap (if any) was already emitted at the new
+                    // tank's applydebuff above.
+                    $currentStacks[$targetId] = 0;
                 }
             }
         }

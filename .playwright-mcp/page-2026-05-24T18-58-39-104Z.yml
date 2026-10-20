@@ -1,0 +1,306 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - link "BlastR Logo" [ref=e5] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - img "BlastR Logo" [ref=e6]
+      - link "BLAST R RAID HUB" [ref=e7] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - generic [ref=e8]:
+          - generic [ref=e9]: BLAST
+          - generic [ref=e10]: R
+        - generic [ref=e11]: RAID HUB
+      - generic [ref=e12]:
+        - button "UA UK arrow_drop_down" [ref=e14] [cursor=pointer]:
+          - img "UA" [ref=e15]
+          - generic [ref=e16]: UK
+          - generic [ref=e17]: arrow_drop_down
+        - button "Згорнути меню" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: keyboard_double_arrow_left
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e25]: Статік
+          - button "person_add Запросити" [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: person_add
+            - generic [ref=e28]: Запросити
+        - generic "Onyx" [ref=e29]
+        - generic [ref=e30]: Міфічна 5/9
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: Наступний рейд
+            - generic [ref=e34]: 22:01:20
+          - button "Записатись" [ref=e35] [cursor=pointer]
+      - generic:
+        - generic: 5/9
+        - generic:
+          - generic: 22г
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - link "space_dashboard Панель керування" [ref=e39] [cursor=pointer]:
+          - /url: https://local.blastr.pro/dashboard
+          - generic [ref=e40]: space_dashboard
+          - generic [ref=e41]: Панель керування
+        - link "groups Склад" [ref=e42] [cursor=pointer]:
+          - /url: https://local.blastr.pro/roster
+          - generic [ref=e43]: groups
+          - generic [ref=e44]: Склад
+        - link "event Розклад" [ref=e45] [cursor=pointer]:
+          - /url: https://local.blastr.pro/schedule
+          - generic [ref=e46]: event
+          - generic [ref=e47]: Розклад
+        - link "sports_esports Планувальник босів" [ref=e48] [cursor=pointer]:
+          - /url: https://local.blastr.pro/boss-planner
+          - generic [ref=e49]: sports_esports
+          - generic [ref=e50]: Планувальник босів
+        - link "savings Скарбниця" [ref=e51] [cursor=pointer]:
+          - /url: https://local.blastr.pro/treasury
+          - generic [ref=e52]: savings
+          - generic [ref=e53]: Скарбниця
+        - link "analytics Аналітика" [ref=e54] [cursor=pointer]:
+          - /url: https://local.blastr.pro/logs
+          - generic [ref=e55]: analytics
+          - generic [ref=e56]: Аналітика
+        - link "shield Спорядження" [ref=e57] [cursor=pointer]:
+          - /url: https://local.blastr.pro/gear
+          - generic [ref=e58]: shield
+          - generic [ref=e59]: Спорядження
+      - generic [ref=e60]:
+        - link "shield_person Мої персонажі" [ref=e61] [cursor=pointer]:
+          - /url: https://local.blastr.pro/characters
+          - generic [ref=e62]: shield_person
+          - generic [ref=e63]: Мої персонажі
+        - link "settings Налаштування" [ref=e64] [cursor=pointer]:
+          - /url: https://local.blastr.pro/settings/profile
+          - generic [ref=e65]: settings
+          - generic [ref=e66]: Налаштування
+        - link "download Завантажити додаток" [ref=e67] [cursor=pointer]:
+          - /url: https://local.blastr.pro/desktop
+          - generic [ref=e68]: download
+          - generic [ref=e69]: Завантажити додаток
+    - generic [ref=e71]:
+      - img "Zavrikk" [ref=e73]
+      - generic [ref=e75]:
+        - generic [ref=e77]: Zavrikk
+        - generic [ref=e78]: Druid
+      - button "Вийти" [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: logout
+    - generic [ref=e83]:
+      - link "Приєднатись до Discord" [ref=e84] [cursor=pointer]:
+        - /url: https://discord.gg/rHcj6M5SEv
+        - generic [ref=e85]: forum
+        - generic [ref=e86]: Discord
+      - link "Підтримати на Patreon" [ref=e87] [cursor=pointer]:
+        - /url: https://www.patreon.com/
+        - generic [ref=e88]: volunteer_activism
+        - generic [ref=e89]: Patreon
+      - link "Залишити фідбек" [ref=e90] [cursor=pointer]:
+        - /url: https://local.blastr.pro/feedback
+        - generic [ref=e91]: feedback
+        - generic [ref=e92]: Фідбек
+      - link "Допомога" [ref=e93] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e94]: help
+        - generic [ref=e95]: Допомога
+  - main [ref=e96]:
+    - generic [ref=e97]:
+      - generic [ref=e100]:
+        - text: Onyx
+        - heading "shield Менеджмент екіпіровки" [level=1] [ref=e101]:
+          - generic [ref=e102]: shield
+          - text: Менеджмент екіпіровки
+      - generic [ref=e103]:
+        - navigation [ref=e104]:
+          - button "checkroom Спорядження" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: checkroom
+            - text: Спорядження
+          - button "list_alt Список бажань" [ref=e107] [cursor=pointer]:
+            - generic [ref=e108]: list_alt
+            - text: Список бажань
+          - button "history Історія лута" [ref=e109] [cursor=pointer]:
+            - generic [ref=e110]: history
+            - text: Історія лута
+          - button "inventory_2 Оптимізатор сховища (скоро)" [disabled] [ref=e111]:
+            - generic [ref=e112]: inventory_2
+            - text: Оптимізатор сховища
+            - generic [ref=e113]: (скоро)
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]: Персонаж
+            - generic [ref=e119] [cursor=pointer]:
+              - img "Raghaar" [ref=e120]
+              - generic [ref=e122]: Raghaar
+              - generic [ref=e123]: expand_more
+          - generic [ref=e124]:
+            - generic [ref=e125]: Спец
+            - button "Elemental star" [ref=e126] [cursor=pointer]:
+              - img "Elemental" [ref=e127]
+              - generic "Основний спек" [ref=e128]:
+                - generic [ref=e129]: star
+      - generic [ref=e130]:
+        - generic [ref=e131]:
+          - button "star Імпортувати BiS" [ref=e132] [cursor=pointer]:
+            - generic [ref=e133]: star
+            - text: Імпортувати BiS
+          - button "add Новий список (0/10)" [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]: add
+            - text: Новий список (0/10)
+        - generic [ref=e136]:
+          - complementary [ref=e137]:
+            - button "sync Current Equipment auto · 16 елементів" [ref=e138] [cursor=pointer]:
+              - generic [ref=e139]: sync
+              - generic [ref=e140]:
+                - generic [ref=e141]: Current Equipment
+                - generic [ref=e142]:
+                  - generic [ref=e143]: auto
+                  - generic [ref=e144]: ·
+                  - generic [ref=e145]: 16 елементів
+            - button "star Best in Slot manual · 0 елементів" [ref=e146] [cursor=pointer]:
+              - generic [ref=e147]: star
+              - generic [ref=e148]:
+                - generic [ref=e149]: Best in Slot
+                - generic [ref=e150]:
+                  - generic [ref=e151]: manual
+                  - generic [ref=e152]: ·
+                  - generic [ref=e153]: 0 елементів
+          - generic [ref=e155]:
+            - generic [ref=e157]:
+              - heading "sync Current Equipment" [level=3] [ref=e158]:
+                - generic [ref=e159]: sync
+                - text: Current Equipment
+              - generic [ref=e160]: "Синхронізовано: 5/24/2026, 6:52:23 PM"
+            - generic [ref=e161]:
+              - generic [ref=e162]:
+                - generic [ref=e163]:
+                  - generic [ref=e164]:
+                    - generic [ref=e165]: warning
+                    - generic [ref=e166]: 1 проблеми
+                  - generic [ref=e167]: ilvl 278
+                  - generic [ref=e168]: Тір 4/5
+                - 'button "south Найслабший: Lithiel''s Linked Leggings 250 (-26)" [active] [ref=e170] [cursor=pointer]':
+                  - generic [ref=e171]: south
+                  - generic [ref=e172]: "Найслабший:"
+                  - generic [ref=e173]: Lithiel's Linked Leggings 250 (-26)
+              - generic [ref=e174]:
+                - generic [ref=e175]:
+                  - link "272 Locus of the Primal Core чари" [ref=e178] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=249979?ilvl=272&ench=8017&gems=240892&bonus=13338:12801:13440:6652:13534:13575&cl=7&spec=262
+                    - generic [ref=e180]: "272"
+                    - generic [ref=e181]:
+                      - generic [ref=e182]: Locus of the Primal Core
+                      - generic [ref=e184]: чари
+                  - link "276 Barbed Ymirheim Choker" [ref=e187] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=50228?ilvl=276&gems=240967&bonus=13440:6652:13668:12699:12798&cl=7&spec=262
+                    - generic [ref=e189]: "276"
+                    - generic [ref=e191]: Barbed Ymirheim Choker
+                  - link "289 Tempests of the Primal Core чари" [ref=e194] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=249977?ilvl=289&ench=8001&bonus=6652:13440:13340:13574:12806&cl=7&spec=262
+                    - generic [ref=e196]: "289"
+                    - generic [ref=e197]:
+                      - generic [ref=e198]: Tempests of the Primal Core
+                      - generic [ref=e200]: чари
+                  - link "276 Draconic Nullcape" [ref=e203] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=249370?ilvl=276&bonus=6652:13577:13334:12798&cl=7&spec=262
+                    - generic [ref=e205]: "276"
+                    - generic [ref=e207]: Draconic Nullcape
+                  - link "289 Embrace of the Primal Core чари" [ref=e210] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=249982?ilvl=289&ench=7987&bonus=41:13440:13336:13575:12806&cl=7&spec=262
+                    - generic [ref=e212]: "289"
+                    - generic [ref=e213]:
+                      - generic [ref=e214]: Embrace of the Primal Core
+                      - generic [ref=e216]: чари
+                  - link "272 Amberfrond Bracers" [ref=e221] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251079?ilvl=272&bonus=12801:13440:6652:12667:13577:12699&cl=7&spec=262
+                    - generic [ref=e223]: "272"
+                    - generic [ref=e225]: Amberfrond Bracers
+                - complementary [ref=e227]:
+                  - generic [ref=e228]:
+                    - heading "Iтем-левел" [level=4] [ref=e229]
+                    - generic [ref=e230]: "280"
+                  - generic [ref=e231]:
+                    - heading "Атрибути" [level=4] [ref=e232]
+                    - list [ref=e233]:
+                      - listitem [ref=e234]:
+                        - generic [ref=e235]: Витривалість
+                        - generic [ref=e236]: 13,622
+                      - listitem [ref=e237]:
+                        - generic [ref=e238]: Сила
+                        - generic [ref=e239]: "0"
+                      - listitem [ref=e240]:
+                        - generic [ref=e241]: Спритність
+                        - generic [ref=e242]: "0"
+                      - listitem [ref=e243]:
+                        - generic [ref=e244]: Інтелект
+                        - generic [ref=e245]: 1,147
+                  - generic [ref=e246]:
+                    - heading "Покращення" [level=4] [ref=e247]
+                    - list [ref=e248]:
+                      - listitem [ref=e249]:
+                        - generic [ref=e250]: Крит
+                        - generic [ref=e251]: "650"
+                      - listitem [ref=e252]:
+                        - generic [ref=e253]: Швидкість
+                        - generic [ref=e254]: "603"
+                      - listitem [ref=e255]:
+                        - generic [ref=e256]: Майстерність
+                        - generic [ref=e257]: "629"
+                      - listitem [ref=e258]:
+                        - generic [ref=e259]: Універсальність
+                        - generic [ref=e260]: "75"
+                - generic [ref=e261]:
+                  - link "272 Earthgrips of the Primal Core" [ref=e264] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=249980?ilvl=272&bonus=6652:12801:13440:13337:13574:3157&cl=7&spec=262
+                    - generic [ref=e266]: "272"
+                    - generic [ref=e268]: Earthgrips of the Primal Core
+                  - link "276 Azure Belt of Competition" [ref=e271] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=193722?ilvl=276&bonus=13440:6652:12667:13577:12699:12798&cl=7&spec=262
+                    - generic [ref=e273]: "276"
+                    - generic [ref=e275]: Azure Belt of Competition
+                  - link "250 Lithiel's Linked Leggings чари" [ref=e278] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251141?ilvl=250&ench=7935&bonus=13439:6652:12699:13577:12782&cl=7&spec=262
+                    - generic [ref=e280]: "250"
+                    - generic [ref=e281]:
+                      - generic [ref=e282]: Lithiel's Linked Leggings
+                      - generic [ref=e284]: чари
+                  - link "276 Whipcoil Sabatons чари" [ref=e287] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251084?ilvl=276&ench=7963&bonus=13440:6652:13577:12699:12802&cl=7&spec=262
+                    - generic [ref=e289]: "276"
+                    - generic [ref=e290]:
+                      - generic [ref=e291]: Whipcoil Sabatons
+                      - generic [ref=e293]: чари
+                  - link "276 Occlusion of Void чари" [ref=e296] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251217?ilvl=276&ench=7967&gems=240898&bonus=13440:6652:13668:12699:12798&cl=7&spec=262
+                    - generic [ref=e298]: "276"
+                    - generic [ref=e299]:
+                      - generic [ref=e300]: Occlusion of Void
+                      - generic [ref=e302]: чари
+                  - link "276 Bifurcation Band чари" [ref=e305] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251115?ilvl=276&ench=7967&gems=240908&bonus=13440:6652:13668:12699:12798&cl=7&spec=262
+                    - generic [ref=e307]: "276"
+                    - generic [ref=e308]:
+                      - generic [ref=e309]: Bifurcation Band
+                      - generic [ref=e311]: чари
+                  - link "298 Emberwing Feather" [ref=e314] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=250144?ilvl=298&bonus=13440:6652:12699:13654&cl=7&spec=262
+                    - generic [ref=e316]: "298"
+                    - generic [ref=e318]: Emberwing Feather
+                  - link "298 Heart of Wind" [ref=e321] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=250256?ilvl=298&bonus=13440:6652:12699:13654&cl=7&spec=262
+                    - generic [ref=e323]: "298"
+                    - generic [ref=e325]: Heart of Wind
+                - generic [ref=e327]:
+                  - link "298 Excavating Cudgel чари" [ref=e330] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=251083?ilvl=298&ench=8041&bonus=13440:6652:12701:13654&cl=7&spec=262
+                    - generic [ref=e332]: "298"
+                    - generic [ref=e333]:
+                      - generic [ref=e334]: Excavating Cudgel
+                      - generic [ref=e336]: чари
+                  - link "259 ! Viryx's Indomitable Bulwark без чарів" [ref=e339] [cursor=pointer]:
+                    - /url: https://www.wowhead.com/item=258049?ilvl=259&bonus=6652:12699:11215:12789&cl=7&spec=262
+                    - generic [ref=e340]:
+                      - generic [ref=e341]: "259"
+                      - generic "Відсутні чари" [ref=e342]:
+                        - generic [ref=e343]: "!"
+                    - generic [ref=e344]:
+                      - generic [ref=e345]: Viryx's Indomitable Bulwark
+                      - generic [ref=e347]: без чарів

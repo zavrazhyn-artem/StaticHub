@@ -1,0 +1,272 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - link "BlastR Logo" [ref=e5] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - img "BlastR Logo" [ref=e6]
+      - link "BLAST R RAID HUB" [ref=e7] [cursor=pointer]:
+        - /url: https://local.blastr.pro/dashboard
+        - generic [ref=e8]:
+          - generic [ref=e9]: BLAST
+          - generic [ref=e10]: R
+        - generic [ref=e11]: RAID HUB
+      - generic [ref=e12]:
+        - button "UA UK arrow_drop_down" [ref=e14] [cursor=pointer]:
+          - img "UA" [ref=e15]
+          - generic [ref=e16]: UK
+          - generic [ref=e17]: arrow_drop_down
+        - button "Згорнути меню" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: keyboard_double_arrow_left
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e25]: Статік
+          - button "person_add Запросити" [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: person_add
+            - generic [ref=e28]: Запросити
+        - generic "Onyx" [ref=e29]
+        - generic [ref=e30]: Міфічна 5/9
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: Наступний рейд
+            - generic [ref=e34]: 1д 03г 15х
+          - button "Записатись" [ref=e35] [cursor=pointer]
+      - generic:
+        - generic: 5/9
+        - generic:
+          - generic: 1д
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - link "space_dashboard Панель керування" [ref=e39] [cursor=pointer]:
+          - /url: https://local.blastr.pro/dashboard
+          - generic [ref=e40]: space_dashboard
+          - generic [ref=e41]: Панель керування
+        - link "groups Склад" [ref=e42] [cursor=pointer]:
+          - /url: https://local.blastr.pro/roster
+          - generic [ref=e43]: groups
+          - generic [ref=e44]: Склад
+        - link "event Розклад" [ref=e45] [cursor=pointer]:
+          - /url: https://local.blastr.pro/schedule
+          - generic [ref=e46]: event
+          - generic [ref=e47]: Розклад
+        - link "sports_esports Планувальник босів" [ref=e48] [cursor=pointer]:
+          - /url: https://local.blastr.pro/boss-planner
+          - generic [ref=e49]: sports_esports
+          - generic [ref=e50]: Планувальник босів
+        - link "savings Скарбниця" [ref=e51] [cursor=pointer]:
+          - /url: https://local.blastr.pro/treasury
+          - generic [ref=e52]: savings
+          - generic [ref=e53]: Скарбниця
+        - link "analytics Аналітика" [ref=e54] [cursor=pointer]:
+          - /url: https://local.blastr.pro/logs
+          - generic [ref=e55]: analytics
+          - generic [ref=e56]: Аналітика
+        - link "shield Спорядження" [ref=e57] [cursor=pointer]:
+          - /url: https://local.blastr.pro/gear
+          - generic [ref=e58]: shield
+          - generic [ref=e59]: Спорядження
+      - generic [ref=e60]:
+        - link "shield_person Мої персонажі" [ref=e61] [cursor=pointer]:
+          - /url: https://local.blastr.pro/characters
+          - generic [ref=e62]: shield_person
+          - generic [ref=e63]: Мої персонажі
+        - link "settings Налаштування" [ref=e64] [cursor=pointer]:
+          - /url: https://local.blastr.pro/settings/profile
+          - generic [ref=e65]: settings
+          - generic [ref=e66]: Налаштування
+        - link "download Завантажити додаток" [ref=e67] [cursor=pointer]:
+          - /url: https://local.blastr.pro/desktop
+          - generic [ref=e68]: download
+          - generic [ref=e69]: Завантажити додаток
+    - generic [ref=e71]:
+      - img "Zavrikk" [ref=e73]
+      - generic [ref=e75]:
+        - generic [ref=e77]: Zavrikk
+        - generic [ref=e78]: Druid
+      - button "Вийти" [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: logout
+    - generic [ref=e83]:
+      - link "Приєднатись до Discord" [ref=e84] [cursor=pointer]:
+        - /url: https://discord.gg/rHcj6M5SEv
+        - generic [ref=e85]: forum
+        - generic [ref=e86]: Discord
+      - link "Підтримати на Patreon" [ref=e87] [cursor=pointer]:
+        - /url: https://www.patreon.com/
+        - generic [ref=e88]: volunteer_activism
+        - generic [ref=e89]: Patreon
+      - link "Залишити фідбек" [ref=e90] [cursor=pointer]:
+        - /url: https://local.blastr.pro/feedback
+        - generic [ref=e91]: feedback
+        - generic [ref=e92]: Фідбек
+      - link "Допомога" [ref=e93] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e94]: help
+        - generic [ref=e95]: Допомога
+  - main [ref=e96]:
+    - generic [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: Панель командного пункту
+          - generic [ref=e102]:
+            - heading "Onyx" [level=1] [ref=e104]
+            - generic [ref=e105]: · Міфічна 5/9
+        - generic [ref=e106]:
+          - generic "Blizzard · Остання синхронізація 11х" [ref=e107]:
+            - img [ref=e109]
+            - generic [ref=e112]:
+              - generic [ref=e113]: Blizzard
+              - generic [ref=e114]: 3х 4с
+          - generic "Raider.io · Остання синхронізація 11х" [ref=e115]:
+            - img [ref=e117]
+            - generic [ref=e120]:
+              - generic [ref=e121]: Raider.io
+              - generic [ref=e122]: 3х 18с
+          - generic "Warcraft Logs · Остання синхронізація 11х" [ref=e123]:
+            - img [ref=e125]
+            - generic [ref=e128]:
+              - generic [ref=e129]: Warcraft Logs
+              - generic [ref=e130]: 3х 18с
+      - generic [ref=e131]:
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - generic [ref=e135]: Наступний рейд
+            - generic [ref=e136]: 1д 03г 15х
+            - generic [ref=e137]: понеділок, тра 25 · 20:00
+            - generic [ref=e138]:
+              - button "Записатись" [ref=e139] [cursor=pointer]
+              - link "Деталі події" [ref=e140] [cursor=pointer]:
+                - /url: https://local.blastr.pro/schedule/event/11
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - generic [ref=e143]: Склад
+              - generic [ref=e144]: 0 / 20
+            - generic [ref=e145]:
+              - generic [ref=e147]:
+                - generic [ref=e148]: Танки
+                - generic [ref=e149]: 0 / 2
+              - generic [ref=e152]:
+                - generic [ref=e153]: Хіли
+                - generic [ref=e154]: 0 / 5
+              - generic [ref=e157]:
+                - generic [ref=e158]: ДД
+                - generic [ref=e159]: 0 / 13
+            - generic [ref=e161]:
+              - generic "Підтверджено" [ref=e162]:
+                - img "Підтверджено" [ref=e163]
+                - generic [ref=e164]: "0"
+              - generic "Можливо" [ref=e165]:
+                - img "Можливо" [ref=e166]
+                - generic [ref=e167]: "0"
+              - generic "Відсутній" [ref=e168]:
+                - img "Відсутній" [ref=e169]
+                - generic [ref=e170]: "0"
+              - generic "Бенч" [ref=e171]:
+                - img "Бенч" [ref=e172]
+                - generic [ref=e173]: "0"
+        - generic [ref=e175]:
+          - generic [ref=e176]:
+            - img "Zavrikk" [ref=e177]
+            - generic [ref=e178]:
+              - generic [ref=e179]: Ви · Zavrikk
+              - generic [ref=e180]: Guardian Druid
+          - generic [ref=e181]:
+            - generic [ref=e182]:
+              - generic [ref=e183]: Iтем-левел
+              - generic [ref=e184]: "289"
+            - generic [ref=e185]:
+              - generic [ref=e186]: M+ Рейтинг
+              - generic [ref=e187]: "3203"
+            - generic [ref=e188]:
+              - generic [ref=e189]: Сейф
+              - generic [ref=e190]: 5 / 9
+            - generic [ref=e191]:
+              - generic [ref=e192]: Найкращий ключ
+              - generic [ref=e193]: "+16"
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - generic [ref=e196]: Рейд-прогресія
+          - generic [ref=e197]:
+            - generic [ref=e198]: 9/9 N
+            - generic [ref=e199]: 9/9 H
+            - generic [ref=e200]: 5/9 M
+        - generic [ref=e201]:
+          - generic [ref=e202]: The Voidspire
+          - generic [ref=e203]: The Dreamrift
+          - generic [ref=e204]: March on Quel'Danas
+          - generic [ref=e205]:
+            - generic "Imperator Averzian" [ref=e206]
+            - generic [ref=e208]: M
+          - generic [ref=e209]:
+            - generic "Vorasius" [ref=e210]
+            - generic [ref=e212]: M
+          - generic [ref=e213]:
+            - generic "Fallen-King Salhadaar" [ref=e214]
+            - generic [ref=e216]: M
+          - generic [ref=e217]:
+            - generic "Vaelgor & Ezzorak" [ref=e218]
+            - generic [ref=e220]: M
+          - generic [ref=e221]:
+            - generic "Lightblinded Vanguard" [ref=e223]
+            - generic [ref=e225]: H
+          - generic [ref=e226]:
+            - generic "Crown of the Cosmos" [ref=e227]
+            - generic [ref=e229]: H
+          - generic [ref=e230]:
+            - generic "Chimaerus the Undreamt God" [ref=e231]
+            - generic [ref=e233]: M
+          - generic [ref=e234]:
+            - generic "Belo'ren, Child of Al'ar" [ref=e235]
+            - generic [ref=e237]: H
+          - generic [ref=e238]:
+            - generic "Midnight Falls" [ref=e239]
+            - generic [ref=e241]: H
+      - generic [ref=e242]:
+        - generic [ref=e243]:
+          - generic [ref=e245]: Логістика · Скарбниця
+          - generic [ref=e246]:
+            - link "savings Банк гільдії 8 000 G Без змін цього тижня пн вт ср чт пт сб нд" [ref=e247] [cursor=pointer]:
+              - /url: https://local.blastr.pro/treasury
+              - generic [ref=e248]:
+                - generic [ref=e249]: savings
+                - generic [ref=e250]: Банк гільдії
+              - generic [ref=e251]: 8 000 G
+              - generic [ref=e252]: Без змін цього тижня
+              - img [ref=e253]
+              - generic [ref=e255]:
+                - generic [ref=e256]: пн
+                - generic [ref=e257]: вт
+                - generic [ref=e258]: ср
+                - generic [ref=e259]: чт
+                - generic [ref=e260]: пт
+                - generic [ref=e261]: сб
+                - generic [ref=e262]: нд
+            - generic [ref=e263]:
+              - link "payments Внесок 1/20" [ref=e264] [cursor=pointer]:
+                - /url: https://local.blastr.pro/treasury
+                - generic [ref=e265]: payments
+                - generic [ref=e266]: Внесок
+                - generic [ref=e269]: 1/20
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - img "Voidlight Potion Cauldron" [ref=e272]
+                  - generic "Voidlight Potion Cauldron" [ref=e273]: КОТЛИ
+                  - generic [ref=e274]: "3"
+                  - generic [ref=e275]: /тижд
+                - generic [ref=e276]:
+                  - img "Cauldron of Sin'dorei Flasks" [ref=e277]
+                  - generic "Cauldron of Sin'dorei Flasks" [ref=e278]: ФЛАКОНИ
+                  - generic [ref=e279]: "3"
+                  - generic [ref=e280]: /тижд
+                - generic [ref=e281]:
+                  - img "Hearty Harandar Celebration" [ref=e282]
+                  - generic "Hearty Harandar Celebration" [ref=e283]: ЇЖА
+                  - generic [ref=e284]: "9"
+                  - generic [ref=e285]: /тижд
+        - generic [ref=e287]:
+          - generic [ref=e289]:
+            - generic [ref=e290]: psychology
+            - text: Останній ШІ звіт
+          - generic [ref=e291]:
+            - generic [ref=e292]: psychology
+            - generic [ref=e293]: Ще немає ШІ звітів
+            - generic [ref=e294]: Додай WCL-лог для початку аналізу
